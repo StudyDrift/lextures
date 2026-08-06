@@ -41,13 +41,13 @@ function AnswerPreview({ preview, t }: { preview: QuizAnswerPreview; t: TFunctio
     case 'choices':
       if (preview.labels.length === 0) {
         return (
-          <p className="text-xs italic text-slate-500 dark:text-neutral-400">
+          <p className="text-xs italic text-fg-muted">
             {t('gradingAgent.canvas.inspector.quizResponses.noChoices')}
           </p>
         )
       }
       return (
-        <ol className="mt-1.5 list-decimal space-y-1 ps-4 text-sm text-slate-700 dark:text-neutral-200">
+        <ol className="mt-1.5 list-decimal space-y-1 ps-4 text-sm text-fg-default">
           {preview.labels.map((label, choiceIndex) => (
             <li key={choiceIndex} className="break-words">
               <MathPlainText text={label} />
@@ -58,22 +58,22 @@ function AnswerPreview({ preview, t }: { preview: QuizAnswerPreview; t: TFunctio
     case 'matching':
       if (preview.pairs.length === 0) {
         return (
-          <p className="text-xs italic text-slate-500 dark:text-neutral-400">
+          <p className="text-xs italic text-fg-muted">
             {t('gradingAgent.canvas.inspector.quizResponses.noMatchingPairs')}
           </p>
         )
       }
       return (
-        <ul className="mt-1.5 space-y-1.5 text-sm text-slate-700 dark:text-neutral-200">
+        <ul className="mt-1.5 space-y-1.5 text-sm text-fg-default">
           {preview.pairs.map((pair, pairIndex) => (
             <li
               key={pairIndex}
-              className="rounded-lg border border-slate-200 bg-slate-50/80 px-2.5 py-2 dark:border-neutral-700 dark:bg-neutral-950/60"
+              className="rounded-lg border border-border-default bg-slate-50/80 px-2.5 py-2 dark:border-border-default/60"
             >
-              <span className="font-medium text-slate-600 dark:text-neutral-300">
+              <span className="font-medium text-fg-muted">
                 <MathPlainText text={pair.left || '—'} />
               </span>
-              <span className="mx-1.5 text-slate-400 dark:text-neutral-500" aria-hidden>
+              <span className="mx-1.5 text-fg-subtle" aria-hidden>
                 →
               </span>
               <span>
@@ -86,13 +86,13 @@ function AnswerPreview({ preview, t }: { preview: QuizAnswerPreview; t: TFunctio
     case 'ordering':
       if (preview.items.length === 0) {
         return (
-          <p className="text-xs italic text-slate-500 dark:text-neutral-400">
+          <p className="text-xs italic text-fg-muted">
             {t('gradingAgent.canvas.inspector.quizResponses.noOrderingItems')}
           </p>
         )
       }
       return (
-        <ol className="mt-1.5 list-decimal space-y-1 ps-4 text-sm text-slate-700 dark:text-neutral-200">
+        <ol className="mt-1.5 list-decimal space-y-1 ps-4 text-sm text-fg-default">
           {preview.items.map((item, itemIndex) => (
             <li key={itemIndex} className="break-words">
               <MathPlainText text={item} />
@@ -102,13 +102,13 @@ function AnswerPreview({ preview, t }: { preview: QuizAnswerPreview; t: TFunctio
       )
     case 'code':
       return (
-        <p className="text-sm text-slate-600 dark:text-neutral-300">
+        <p className="text-sm text-fg-muted">
           {t('gradingAgent.canvas.inspector.quizResponses.codeLanguage', { language: preview.language })}
         </p>
       )
     case 'media':
       return (
-        <p className="text-sm text-slate-600 dark:text-neutral-300">
+        <p className="text-sm text-fg-muted">
           {preview.mediaKind === 'file'
             ? t('gradingAgent.canvas.inspector.quizResponses.fileUpload')
             : preview.mediaKind === 'audio'
@@ -118,25 +118,25 @@ function AnswerPreview({ preview, t }: { preview: QuizAnswerPreview; t: TFunctio
       )
     case 'hotspot':
       return (
-        <p className="text-sm text-slate-600 dark:text-neutral-300">
+        <p className="text-sm text-fg-muted">
           {t('gradingAgent.canvas.inspector.quizResponses.hotspot')}
         </p>
       )
     case 'numeric':
       return (
-        <p className="text-sm text-slate-600 dark:text-neutral-300">
+        <p className="text-sm text-fg-muted">
           {t('gradingAgent.canvas.inspector.quizResponses.numeric')}
         </p>
       )
     case 'formula':
       return (
-        <p className="text-sm text-slate-600 dark:text-neutral-300">
+        <p className="text-sm text-fg-muted">
           {t('gradingAgent.canvas.inspector.quizResponses.formula')}
         </p>
       )
     case 'open':
       return (
-        <p className="text-sm text-slate-600 dark:text-neutral-300">
+        <p className="text-sm text-fg-muted">
           {t('gradingAgent.canvas.inspector.quizResponses.openResponse')}
         </p>
       )
@@ -159,13 +159,13 @@ function SlotPreviewCard({
     preview?.kind === 'choices' || preview?.kind === 'matching' || preview?.kind === 'ordering'
 
   return (
-    <article className="rounded-lg border border-slate-200 bg-white p-3 dark:border-neutral-700 dark:bg-neutral-950">
+    <article className="rounded-lg border border-border-default bg-surface-raised p-3 dark:border-border-default dark:bg-surface-base">
       <div className="flex flex-wrap items-center gap-2">
-        <h4 className="text-sm font-semibold text-slate-800 dark:text-neutral-100">{slot.label}</h4>
-        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-600 dark:bg-neutral-800 dark:text-neutral-300">
+        <h4 className="text-sm font-semibold text-fg-default">{slot.label}</h4>
+        <span className="rounded-full bg-surface-sunken px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-fg-muted dark:bg-surface-overlay dark:text-fg-muted">
           {questionTypeLabel(slot.questionType, t)}
         </span>
-        <span className="text-[10px] font-medium text-slate-500 dark:text-neutral-400">
+        <span className="text-[10px] font-medium text-fg-muted">
           {t('gradingAgent.canvas.inspector.quizResponses.points', { points: slot.maxPoints })}
         </span>
         {slot.isPoolSlot ? (
@@ -193,11 +193,11 @@ function SlotPreviewCard({
 
       {question ? (
         <>
-          <p className="mt-2 text-sm font-medium text-slate-800 dark:text-neutral-100">
+          <p className="mt-2 text-sm font-medium text-fg-default">
             <MathPlainText text={question.prompt?.trim() || '—'} />
           </p>
           <div className="mt-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+            <p className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
               {showAnswers
                 ? t('gradingAgent.canvas.inspector.quizResponses.answersHeading')
                 : t('gradingAgent.canvas.inspector.quizResponses.responseHeading')}
@@ -206,7 +206,7 @@ function SlotPreviewCard({
           </div>
         </>
       ) : (
-        <p className="mt-2 text-sm text-slate-500 dark:text-neutral-400">
+        <p className="mt-2 text-sm text-fg-muted">
           {t('gradingAgent.canvas.inspector.quizResponses.missingQuestion')}
         </p>
       )}
@@ -219,7 +219,7 @@ export function QuizResponsesInspector({ slots, questions }: QuizResponsesInspec
 
   if (slots.length === 0) {
     return (
-      <p className="text-sm text-slate-500 dark:text-neutral-400">
+      <p className="text-sm text-fg-muted">
         {t('gradingAgent.canvas.inspector.quizResponses.empty')}
       </p>
     )

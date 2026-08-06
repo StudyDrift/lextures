@@ -57,11 +57,6 @@ func (d Deps) adminRbacUser(w http.ResponseWriter, r *http.Request) (uuid.UUID, 
 
 func (d Deps) handleAdminIRTCalibrate() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -103,11 +98,6 @@ type putOriginalityConfigBody struct {
 
 func (d Deps) handleAdminPutOriginality() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPut {
-			w.Header().Set("Allow", http.MethodPut)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -156,11 +146,6 @@ func pctF(p *int, def int) float64 {
 
 func (d Deps) handleAdminDSARExport() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -210,11 +195,6 @@ func (d Deps) handleAdminDSARExport() http.HandlerFunc {
 
 func (d Deps) handleAdminRevokeUserSessions() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodDelete {
-			w.Header().Set("Allow", http.MethodDelete)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -239,11 +219,6 @@ func (d Deps) handleAdminRevokeUserSessions() http.HandlerFunc {
 
 func (d Deps) handleAdminSAMLGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -291,11 +266,6 @@ type putSAMLBody struct {
 
 func (d Deps) handleAdminSAMLPut() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPut {
-			w.Header().Set("Allow", http.MethodPut)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -353,11 +323,6 @@ func (d Deps) handleAdminSAMLPut() http.HandlerFunc {
 
 func (d Deps) handleAdminOIDCProvidersGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -404,11 +369,6 @@ type putOIDCProviderBody struct {
 
 func (d Deps) handleAdminOIDCProviderPut() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPut {
-			w.Header().Set("Allow", http.MethodPut)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}

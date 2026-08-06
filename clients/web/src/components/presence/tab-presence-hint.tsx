@@ -44,7 +44,7 @@ export function TabPresenceHint({ channelKey }: { channelKey: string }) {
   if (others <= 0) return null
 
   return (
-    <p className="text-xs text-slate-500 dark:text-neutral-400" role="status">
+    <p className="text-xs text-fg-muted" role="status">
       This course is open in {others} other tab{others === 1 ? '' : 's'} in this browser.
     </p>
   )

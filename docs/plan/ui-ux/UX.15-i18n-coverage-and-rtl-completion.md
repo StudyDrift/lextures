@@ -280,7 +280,7 @@ but:
 
 ## 13. Dependencies & Sequencing
 
-- **Must ship after** — [UX.2](UX.2-core-component-library-and-adoption-ratchet.md)
+- **Must ship after** — [UX.2](../../completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md)
   (components take strings as props, so translating a component translates every
   call site).
 - **Should ship before or with** — [UX.7](UX.7-navigation-information-architecture.md).
@@ -399,7 +399,7 @@ but:
 - External: [WCAG 2.2 SC 3.1.1 / 3.1.2](https://www.w3.org/TR/WCAG22/),
   [Unicode CLDR Plural Rules](https://cldr.unicode.org/index/cldr-spec/plural-rules),
   [MDN — Intl](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl)
-- Related plans: [UX.2](UX.2-core-component-library-and-adoption-ratchet.md),
+- Related plans: [UX.2](../../completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md),
   [UX.7](UX.7-navigation-information-architecture.md),
   [UX.14](UX.14-responsive-and-small-viewport-experience.md),
   `../../completed/11-i18n-l10n/`, `../ai-providers/` (AP.* for translation drafts)

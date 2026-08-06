@@ -27,14 +27,14 @@ export function RegionEditorCard({
 
   return (
     <div
-      className="space-y-2 rounded border border-slate-200 p-3 dark:border-neutral-700"
+      className="space-y-2 rounded border border-border-default p-3 dark:border-border-default"
       data-testid={`diagram-editor-region-${region.id}`}
     >
       <div className="grid gap-2 sm:grid-cols-2">
         <label className="block space-y-1 text-xs">
           <span>{t('contentTools.tools.diagram_hotspot.editor.regionLabel')}</span>
           <input
-            className="w-full rounded border px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+            className="w-full rounded border px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
             disabled={disabled}
             value={region.label}
             onChange={(e) => onChange({ ...region, label: e.target.value })}
@@ -43,7 +43,7 @@ export function RegionEditorCard({
         <label className="block space-y-1 text-xs">
           <span>{t('contentTools.tools.diagram_hotspot.editor.shape')}</span>
           <select
-            className="w-full rounded border px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+            className="w-full rounded border px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
             disabled={disabled}
             value={region.shape.kind}
             onChange={(e) => {
@@ -61,7 +61,7 @@ export function RegionEditorCard({
         <span>{t('contentTools.tools.diagram_hotspot.editor.regionDescription')}</span>
         <textarea
           data-testid={`diagram-editor-desc-${region.id}`}
-          className="w-full rounded border px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+          className="w-full rounded border px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
           rows={2}
           disabled={disabled}
           value={region.description}
@@ -69,7 +69,7 @@ export function RegionEditorCard({
         />
       </label>
       {warn === 'same_as_label' || warn === 'too_short' ? (
-        <p className="text-xs text-amber-700 dark:text-amber-300">
+        <p className="text-xs text-warning-fg">
           {t('contentTools.tools.diagram_hotspot.editor.descriptionQualityWarning')}
         </p>
       ) : null}
@@ -83,7 +83,7 @@ export function RegionEditorCard({
                 step="0.01"
                 min={0}
                 max={1}
-                className="w-full rounded border px-1 py-1 dark:border-neutral-600 dark:bg-neutral-950"
+                className="w-full rounded border px-1 py-1 dark:border-border-default dark:bg-surface-base"
                 disabled={disabled}
                 value={region.shape.kind === 'rect' ? region.shape[k] : 0}
                 onChange={(e) => {
@@ -108,7 +108,7 @@ export function RegionEditorCard({
                 step="0.01"
                 min={0}
                 max={1}
-                className="w-full rounded border px-1 py-1 dark:border-neutral-600 dark:bg-neutral-950"
+                className="w-full rounded border px-1 py-1 dark:border-border-default dark:bg-surface-base"
                 disabled={disabled}
                 value={region.shape.kind === 'circle' ? region.shape[k] : 0}
                 onChange={(e) => {
@@ -127,7 +127,7 @@ export function RegionEditorCard({
         <label className="block space-y-1 text-xs">
           <span>{t('contentTools.tools.diagram_hotspot.editor.polygonPoints')}</span>
           <textarea
-            className="w-full rounded border px-2 py-1.5 font-mono text-xs dark:border-neutral-600 dark:bg-neutral-950"
+            className="w-full rounded border px-2 py-1.5 font-mono text-xs dark:border-border-default dark:bg-surface-base"
             rows={3}
             disabled={disabled}
             value={region.shape.points.map((p) => p.join(',')).join('\n')}
@@ -145,7 +145,7 @@ export function RegionEditorCard({
       <label className="block space-y-1 text-xs">
         <span>{t('contentTools.tools.diagram_hotspot.editor.feedback')}</span>
         <input
-          className="w-full rounded border px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+          className="w-full rounded border px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
           disabled={disabled}
           value={feedback}
           onChange={(e) => onFeedbackChange(e.target.value)}

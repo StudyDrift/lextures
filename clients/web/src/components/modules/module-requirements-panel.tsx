@@ -154,10 +154,10 @@ export function ModuleRequirementsPanel({
         void save()
       }}
     >
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-fg-muted">
         Choose how students complete this module and any modules they must finish first.
       </p>
-      {loading ? <p className="text-xs text-slate-500">Loading requirements…</p> : null}
+      {loading ? <p className="text-xs text-fg-muted">Loading requirements…</p> : null}
       {err ? (
         <p className="text-sm text-rose-700" role="alert">
           {err}
@@ -169,12 +169,12 @@ export function ModuleRequirementsPanel({
         </p>
       ) : null}
       <label className="block">
-        <span className="text-xs font-medium text-slate-600">Completion mode</span>
+        <span className="text-xs font-medium text-fg-muted">Completion mode</span>
         <select
           value={mode}
           onChange={(e) => setMode(e.target.value as ModuleCompletionMode)}
           disabled={loading}
-          className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60"
+          className="mt-1 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {MODES.map((m) => (
             <option key={m.value} value={m.value}>
@@ -185,8 +185,8 @@ export function ModuleRequirementsPanel({
       </label>
       {otherModules.length > 0 ? (
         <fieldset disabled={loading}>
-          <legend className="text-xs font-medium text-slate-600">Prerequisites</legend>
-          <ul className="mt-1.5 max-h-36 space-y-1.5 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-2">
+          <legend className="text-xs font-medium text-fg-muted">Prerequisites</legend>
+          <ul className="mt-1.5 max-h-36 space-y-1.5 overflow-y-auto rounded-xl border border-border-default bg-slate-50/70 px-3 py-2">
             {otherModules.map((m) => (
               <li key={m.id}>
                 <label className="inline-flex items-center gap-2">
@@ -198,16 +198,16 @@ export function ModuleRequirementsPanel({
                         e.target.checked ? [...prev, m.id] : prev.filter((id) => id !== m.id),
                       )
                     }}
-                    className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    className="h-4 w-4 rounded border-border-strong text-accent-fg focus:ring-indigo-500"
                   />
-                  <span className="text-sm text-slate-700">{m.title}</span>
+                  <span className="text-sm text-fg-muted">{m.title}</span>
                 </label>
               </li>
             ))}
           </ul>
         </fieldset>
       ) : (
-        <p className="text-xs text-slate-500">No other modules available as prerequisites.</p>
+        <p className="text-xs text-fg-muted">No other modules available as prerequisites.</p>
       )}
       <ScheduleDatetimeField
         id="module-requirements-unlock-at"
@@ -220,7 +220,7 @@ export function ModuleRequirementsPanel({
         scheduleMode={scheduleMode}
         relativeAnchorAt={relativeScheduleAnchorAt}
         defaultTime="00:00"
-        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60"
+        className="w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60"
       />
       {/* Enables Enter-to-submit; footer Save calls registerSubmit instead. */}
       <button type="submit" className="sr-only" tabIndex={-1}>

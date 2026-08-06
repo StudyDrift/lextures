@@ -21,10 +21,6 @@ import (
 
 func (d Deps) handleContentToolsDataSheets() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			jobsMethodNotAllowed(w, http.MethodGet)
-			return
-		}
 		if d.JWTSigner == nil {
 			apierr.WriteJSON(w, http.StatusUnauthorized, apierr.CodeUnauthorized, "Sign in required.")
 			return
@@ -96,10 +92,6 @@ func (d Deps) handleContentToolsDataSheets() http.HandlerFunc {
 
 func (d Deps) handleContentToolsConformance() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			jobsMethodNotAllowed(w, http.MethodGet)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -110,10 +102,6 @@ func (d Deps) handleContentToolsConformance() http.HandlerFunc {
 
 func (d Deps) handleContentToolsAIConsent() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			jobsMethodNotAllowed(w, http.MethodPost)
-			return
-		}
 		courseCode, viewer, courseID, ok := d.requireContentToolsCourse(w, r)
 		if !ok {
 			return
@@ -153,10 +141,6 @@ func (d Deps) handleContentToolsAIConsent() http.HandlerFunc {
 
 func (d Deps) handleContentToolsAIConsentGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			jobsMethodNotAllowed(w, http.MethodGet)
-			return
-		}
 		_, viewer, courseID, ok := d.requireContentToolsCourse(w, r)
 		if !ok {
 			return
@@ -194,10 +178,6 @@ func (d Deps) handleContentToolsAIConsentGet() http.HandlerFunc {
 
 func (d Deps) handleContentToolsReport() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			jobsMethodNotAllowed(w, http.MethodPost)
-			return
-		}
 		_, viewer, courseID, ok := d.requireContentToolsCourse(w, r)
 		if !ok {
 			return
@@ -251,10 +231,6 @@ func (d Deps) handleContentToolsReport() http.HandlerFunc {
 
 func (d Deps) handleContentToolsModerate() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			jobsMethodNotAllowed(w, http.MethodPost)
-			return
-		}
 		courseCode, viewer, courseID, ok := d.requireContentToolsCourse(w, r)
 		if !ok {
 			return
@@ -338,10 +314,6 @@ func (d Deps) handleContentToolsModerate() http.HandlerFunc {
 
 func (d Deps) handleContentToolsModerationList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			jobsMethodNotAllowed(w, http.MethodGet)
-			return
-		}
 		courseCode, viewer, courseID, ok := d.requireContentToolsCourse(w, r)
 		if !ok {
 			return
@@ -404,10 +376,6 @@ func (d Deps) handleContentToolsFilterFlags() http.HandlerFunc {
 
 func (d Deps) handleAdminContentToolsKill() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			jobsMethodNotAllowed(w, http.MethodPost)
-			return
-		}
 		actor, ok := d.adminRbacUser(w, r)
 		if !ok {
 			return

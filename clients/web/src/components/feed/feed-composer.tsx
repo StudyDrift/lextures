@@ -291,7 +291,7 @@ export function FeedComposer({
   )
 
   const fmtBtn =
-    'rounded p-1.5 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 disabled:pointer-events-none disabled:opacity-35 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100'
+    'rounded p-1.5 text-fg-muted transition-colors hover:bg-surface-sunken hover:text-fg-default disabled:pointer-events-none disabled:opacity-35 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 dark:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-fg-default'
 
   const fmtSep = 'mx-0.5 h-5 w-px shrink-0 bg-slate-200 dark:bg-neutral-600'
 
@@ -343,7 +343,7 @@ export function FeedComposer({
     <div className="relative min-w-0 flex-1">
       {picker && rows.length > 0 && (
         <ul
-          className="absolute bottom-full start-0 z-20 mb-2 max-h-52 w-full max-w-md overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 text-sm shadow-lg dark:border-neutral-700 dark:bg-neutral-900"
+          className="absolute bottom-full start-0 z-20 mb-2 max-h-52 w-full max-w-md overflow-y-auto rounded-lg border border-border-default bg-surface-raised py-1 text-sm shadow-lg dark:border-border-default dark:bg-surface-raised"
           role="listbox"
           aria-label="Mention suggestions"
           onMouseDown={(ev) => ev.preventDefault()}
@@ -357,15 +357,13 @@ export function FeedComposer({
                     type="button"
                     role="option"
                     aria-selected={active}
-                    className={`flex w-full px-3 py-2 text-start ${
-                      active ? 'bg-indigo-50 dark:bg-indigo-950/50' : ''
-                    }`}
+                    className={`flex w-full px-3 py-2 text-start ${ active ? 'bg-accent-surface' : '' }`}
                     onClick={() => insertMention('everyone')}
                   >
                     <span className="font-medium text-amber-900 dark:text-amber-100">
                       @everyone
                     </span>
-                    <span className="ms-2 text-xs text-slate-500 dark:text-neutral-400">
+                    <span className="ms-2 text-xs text-fg-muted">
                       Notify the class
                     </span>
                   </button>
@@ -379,13 +377,11 @@ export function FeedComposer({
                   type="button"
                   role="option"
                   aria-selected={active}
-                  className={`flex w-full flex-col px-3 py-2 text-start ${
-                    active ? 'bg-indigo-50 dark:bg-indigo-950/50' : ''
-                  }`}
+                  className={`flex w-full flex-col px-3 py-2 text-start ${ active ? 'bg-accent-surface' : '' }`}
                   onClick={() => insertMention(lab)}
                 >
-                  <span className="font-medium text-slate-900 dark:text-neutral-100">@{lab}</span>
-                  <span className="text-xs text-slate-500 dark:text-neutral-400">
+                  <span className="font-medium text-fg-default">@{lab}</span>
+                  <span className="text-xs text-fg-muted">
                     {row.person.email}
                   </span>
                 </button>
@@ -395,11 +391,11 @@ export function FeedComposer({
         </ul>
       )}
 
-      <div className="overflow-hidden rounded-lg border border-slate-300 bg-white shadow-sm transition-[box-shadow,border-color] focus-within:border-indigo-400/90 focus-within:shadow-[0_0_0_1px_rgba(99,102,241,0.25)] dark:border-neutral-600 dark:bg-neutral-900 dark:focus-within:border-indigo-500/70 dark:focus-within:shadow-[0_0_0_1px_rgba(129,140,248,0.2)]">
+      <div className="overflow-hidden rounded-lg border border-border-strong bg-surface-raised shadow-sm transition-[box-shadow,border-color] focus-within:border-indigo-400/90 focus-within:shadow-[0_0_0_1px_rgba(99,102,241,0.25)] dark:border-border-default dark:bg-surface-raised dark:focus-within:border-indigo-500/70 dark:focus-within:shadow-[0_0_0_1px_rgba(129,140,248,0.2)]">
         {formatBarVisible && (
           <div
             ref={toolbarRef}
-            className="flex flex-wrap items-center gap-0.5 border-b border-slate-200 px-2 py-1.5 dark:border-neutral-700"
+            className="flex flex-wrap items-center gap-0.5 border-b border-border-default px-2 py-1.5 dark:border-border-default"
             role="toolbar"
             aria-label="Formatting"
             onKeyDown={handleToolbarKeyDown}
@@ -508,11 +504,11 @@ export function FeedComposer({
           }}
           rows={1}
           placeholder={placeholder}
-          className="max-h-64 min-h-[5.25rem] w-full resize-y border-0 bg-transparent px-3 py-3 text-[0.9375rem] leading-relaxed text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0 disabled:opacity-60 dark:text-neutral-100 dark:placeholder:text-neutral-500"
+          className="max-h-64 min-h-[5.25rem] w-full resize-y border-0 bg-transparent px-3 py-3 text-[0.9375rem] leading-relaxed text-fg-default placeholder:text-fg-subtle focus:outline-none focus:ring-0 disabled:opacity-60 dark:text-fg-default dark:placeholder:text-neutral-500"
           maxLength={8000}
         />
 
-        <div className="flex items-center gap-2 border-t border-slate-100 px-2 py-1.5 dark:border-neutral-800">
+        <div className="flex items-center gap-2 border-t border-border-subtle px-2 py-1.5 dark:border-border-subtle">
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-0.5">
             <input
               ref={fileRef}
@@ -531,7 +527,7 @@ export function FeedComposer({
               type="button"
               disabled={blocked}
               onClick={() => fileRef.current?.click()}
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition-colors hover:bg-slate-100 disabled:opacity-40 dark:border-neutral-600 dark:text-neutral-300 dark:hover:bg-neutral-800"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border-default text-fg-muted transition-colors hover:bg-surface-sunken disabled:opacity-40 dark:border-border-default dark:text-fg-muted dark:hover:bg-surface-overlay"
               title="Attach image"
               aria-label="Attach image"
             >
@@ -539,7 +535,7 @@ export function FeedComposer({
             </button>
             <button
               type="button"
-              className={`rounded p-1.5 text-xs font-semibold tabular-nums text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100 ${formatBarVisible ? 'bg-slate-100 text-slate-800 dark:bg-neutral-800 dark:text-neutral-100' : ''}`}
+              className={`rounded p-1.5 text-xs font-semibold tabular-nums text-fg-muted transition-colors hover:bg-surface-sunken hover:text-fg-default dark:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-fg-default ${formatBarVisible ? 'bg-surface-sunken text-fg-default dark:bg-surface-overlay dark:text-fg-default' : ''}`}
               onClick={() => setFormatBarVisible((v) => !v)}
               title={formatBarVisible ? 'Hide formatting' : 'Show formatting'}
               aria-label={formatBarVisible ? 'Hide formatting toolbar' : 'Show formatting toolbar'}
@@ -597,7 +593,7 @@ export function FeedComposer({
               <SquareSlash className="h-4 w-4" strokeWidth={2} />
             </button>
             {imageBusy && (
-              <span className="ms-1 text-xs text-slate-500 dark:text-neutral-400">Uploading…</span>
+              <span className="ms-1 text-xs text-fg-muted">Uploading…</span>
             )}
             {imageErr && (
               <span className="ms-1 text-xs text-rose-600 dark:text-rose-400">{imageErr}</span>
@@ -609,7 +605,7 @@ export function FeedComposer({
               type="button"
               disabled={sendDisabled}
               onClick={() => onSubmit()}
-              className="rounded-md p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-indigo-600 disabled:pointer-events-none disabled:opacity-35 dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-indigo-400"
+              className="rounded-md p-2 text-fg-subtle transition-colors hover:bg-surface-sunken hover:text-accent-fg disabled:pointer-events-none disabled:opacity-35 dark:hover:bg-surface-overlay dark:hover:text-indigo-400"
               aria-label="Send"
             >
               <Send className="h-5 w-5" strokeWidth={2} />

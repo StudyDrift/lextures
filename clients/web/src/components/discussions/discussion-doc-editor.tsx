@@ -5,7 +5,7 @@ import StarterKit from '@tiptap/starter-kit'
 import { useEffect } from 'react'
 
 const editorClass =
-  'prose prose-slate dark:prose-invert max-w-none min-h-[120px] rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900'
+  'prose prose-slate dark:prose-invert max-w-none min-h-[120px] rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-raised'
 
 export function DiscussionReadonlyBody({ docJson }: { docJson: unknown }) {
   const editor = useEditor({

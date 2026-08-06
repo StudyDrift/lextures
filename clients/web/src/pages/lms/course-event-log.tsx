@@ -39,7 +39,7 @@ export default function CourseEventLogPage() {
   if (!xapiEmissionEnabled) {
     return (
       <LmsPage title="Event log" description="xAPI / Caliper learning events for this course.">
-        <p className="mt-6 text-sm text-slate-600 dark:text-neutral-400">
+        <p className="mt-6 text-sm text-fg-muted">
           xAPI emission is not enabled for this platform.
         </p>
       </LmsPage>
@@ -51,16 +51,16 @@ export default function CourseEventLogPage() {
       title="Event log"
       description="xAPI and Caliper statements recorded for the last 7 days."
     >
-      {loading && <p className="mt-6 text-sm text-slate-500">Loading…</p>}
+      {loading && <p className="mt-6 text-sm text-fg-muted">Loading…</p>}
       {error && (
         <p className="mt-6 text-sm text-rose-700 dark:text-rose-300" role="alert">
           {error}
         </p>
       )}
       {!loading && !error && (
-        <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
+        <div className="mt-6 overflow-x-auto rounded-2xl border border-border-default bg-surface-raised shadow-sm dark:border-border-subtle dark:bg-surface-base">
           <table className="min-w-full text-start text-sm">
-            <thead className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-600 dark:border-neutral-700 dark:bg-neutral-800/80 dark:text-neutral-300">
+            <thead className="border-b border-border-default bg-surface-base text-xs font-semibold uppercase tracking-wide text-fg-muted dark:border-border-default/80 dark:text-fg-muted">
               <tr>
                 <th className="px-4 py-3">Timestamp</th>
                 <th className="px-4 py-3">Verb</th>
@@ -71,7 +71,7 @@ export default function CourseEventLogPage() {
             <tbody className="divide-y divide-slate-100 dark:divide-neutral-800">
               {events.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-4 py-6 text-slate-500">
+                  <td colSpan={4} className="px-4 py-6 text-fg-muted">
                     No events in the last 7 days.
                   </td>
                 </tr>
@@ -82,16 +82,16 @@ export default function CourseEventLogPage() {
                     className="cursor-pointer hover:bg-slate-50/80 dark:hover:bg-neutral-800/80"
                     onClick={() => setSelected(ev)}
                   >
-                    <td className="px-4 py-3 tabular-nums text-slate-600 dark:text-neutral-400">
+                    <td className="px-4 py-3 tabular-nums text-fg-muted">
                       {formatDateTime(ev.storedAt)}
                     </td>
-                    <td className="px-4 py-3 font-medium text-slate-900 dark:text-neutral-100">
+                    <td className="px-4 py-3 font-medium text-fg-default">
                       {verbLabel(ev.verb)}
                     </td>
-                    <td className="px-4 py-3 text-slate-700 dark:text-neutral-300">
+                    <td className="px-4 py-3 text-fg-muted">
                       {ev.objectTitle ?? ev.objectId}
                     </td>
-                    <td className="px-4 py-3 text-slate-500">—</td>
+                    <td className="px-4 py-3 text-fg-muted">—</td>
                   </tr>
                 ))
               )}
@@ -109,16 +109,16 @@ export default function CourseEventLogPage() {
           onClick={() => setSelected(null)}
         >
           <div
-            className="max-h-[80vh] w-full max-w-2xl overflow-auto rounded-2xl bg-white p-4 shadow-xl dark:bg-neutral-900"
+            className="max-h-[80vh] w-full max-w-2xl overflow-auto rounded-2xl bg-surface-raised p-4 shadow-xl dark:bg-surface-raised"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Statement JSON</h3>
-            <pre className="mt-3 whitespace-pre-wrap break-all text-xs text-slate-700 dark:text-neutral-300">
+            <h3 className="text-sm font-semibold text-fg-default">Statement JSON</h3>
+            <pre className="mt-3 whitespace-pre-wrap break-all text-xs text-fg-muted">
               {JSON.stringify(selected.fullJson, null, 2)}
             </pre>
             <button
               type="button"
-              className="mt-4 rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold dark:border-neutral-600"
+              className="mt-4 rounded-lg border border-border-default px-3 py-2 text-sm font-semibold dark:border-border-default"
               onClick={() => setSelected(null)}
             >
               Close

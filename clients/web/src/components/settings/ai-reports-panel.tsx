@@ -29,9 +29,9 @@ function formatRange(from: string, to: string): string {
 
 function SummaryCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-neutral-700 dark:bg-neutral-900">
-      <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">{label}</p>
-      <p className="mt-1 text-xl font-semibold tabular-nums text-slate-900 dark:text-neutral-100">{value}</p>
+    <div className="rounded-xl border border-border-default bg-surface-raised px-4 py-3 dark:border-border-default dark:bg-surface-raised">
+      <p className="text-xs font-medium uppercase tracking-wide text-fg-muted">{label}</p>
+      <p className="mt-1 text-xl font-semibold tabular-nums text-fg-default">{value}</p>
     </div>
   )
 }
@@ -90,8 +90,8 @@ export function AiReportsPanel() {
 
   return (
     <div>
-      <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Reports</h2>
-      <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+      <h2 className="text-base font-semibold text-fg-default">Reports</h2>
+      <p className="mt-1 text-sm text-fg-muted">
         Platform-wide AI spend and usage across configured providers. Costs may include estimates when
         a provider omits billing metadata.
       </p>
@@ -102,11 +102,7 @@ export function AiReportsPanel() {
             key={p.id}
             type="button"
             onClick={() => setPreset(p.id)}
-            className={`rounded-xl border px-3 py-2 text-sm font-semibold shadow-sm transition-[background-color,color,border-color] ${
-              preset === p.id
-                ? 'border-indigo-300 bg-indigo-50 text-indigo-900 dark:border-indigo-500/50 dark:bg-indigo-950/60 dark:text-indigo-100'
-                : 'border-slate-200 bg-white text-slate-700 hover:border-indigo-200 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200'
-            }`}
+            className={`rounded-xl border px-3 py-2 text-sm font-semibold shadow-sm transition-[background-color,color,border-color] ${ preset === p.id ? 'border-indigo-300 bg-indigo-50 text-indigo-900 dark:border-indigo-500/50 dark:bg-indigo-950/60 dark:text-indigo-100' : 'border-border-default bg-surface-raised text-fg-muted hover:border-indigo-200 dark:border-border-default dark:bg-surface-raised dark:text-fg-default' }`}
           >
             {p.label}
           </button>
@@ -114,12 +110,12 @@ export function AiReportsPanel() {
       </div>
 
       {report && (
-        <p className="mt-3 text-xs text-slate-500 dark:text-neutral-400">
+        <p className="mt-3 text-xs text-fg-muted">
           Window: {formatRange(report.range.from, report.range.to)}
         </p>
       )}
 
-      {loading && <p className="mt-6 text-sm text-slate-500">Loading…</p>}
+      {loading && <p className="mt-6 text-sm text-fg-muted">Loading…</p>}
       {error && (
         <p className="mt-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-100">
           {error}
@@ -130,16 +126,16 @@ export function AiReportsPanel() {
         <div className="mt-8 space-y-10">
           <section aria-labelledby="ai-cost-heading">
             <div className="flex flex-wrap items-end justify-between gap-3">
-              <h3 id="ai-cost-heading" className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+              <h3 id="ai-cost-heading" className="text-sm font-semibold text-fg-default">
                 AI cost
               </h3>
               <div className="flex flex-wrap gap-2">
-                <label className="text-sm text-slate-600 dark:text-neutral-300">
+                <label className="text-sm text-fg-muted">
                   <span className="sr-only">Filter by provider</span>
                   <select
                     value={provider}
                     onChange={(e) => setProvider(e.target.value)}
-                    className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+                    className="rounded-lg border border-border-default bg-surface-raised px-2.5 py-1.5 text-sm dark:border-border-default dark:bg-surface-overlay"
                   >
                     <option value="">All providers</option>
                     {providerOptions.map((p) => (
@@ -149,12 +145,12 @@ export function AiReportsPanel() {
                     ))}
                   </select>
                 </label>
-                <label className="text-sm text-slate-600 dark:text-neutral-300">
+                <label className="text-sm text-fg-muted">
                   <span className="sr-only">Filter by feature</span>
                   <select
                     value={feature}
                     onChange={(e) => setFeature(e.target.value)}
-                    className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+                    className="rounded-lg border border-border-default bg-surface-raised px-2.5 py-1.5 text-sm dark:border-border-default dark:bg-surface-overlay"
                   >
                     <option value="">All features</option>
                     {featureOptions.map((f) => (
@@ -174,9 +170,9 @@ export function AiReportsPanel() {
             </div>
 
             {(report.cost.byProvider?.length ?? 0) > 0 && (
-              <div className="mt-5 overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-700">
+              <div className="mt-5 overflow-x-auto rounded-xl border border-border-default">
                 <table className="min-w-full text-start text-sm">
-                  <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-neutral-800/80 dark:text-neutral-400">
+                  <thead className="bg-surface-base text-xs uppercase tracking-wide text-fg-muted/80 dark:text-fg-muted">
                     <tr>
                       <th className="px-4 py-2.5 font-semibold">Provider</th>
                       <th className="px-4 py-2.5 font-semibold">Cost</th>
@@ -187,7 +183,7 @@ export function AiReportsPanel() {
                   <tbody className="divide-y divide-slate-100 dark:divide-neutral-800">
                     {report.cost.byProvider.map((row) => (
                       <tr key={row.provider}>
-                        <td className="px-4 py-2.5 text-slate-800 dark:text-neutral-200">
+                        <td className="px-4 py-2.5 text-fg-default">
                           {providerLabel(row.provider)}
                         </td>
                         <td className="px-4 py-2.5 tabular-nums">{formatUsd(row.costUsd)}</td>
@@ -201,9 +197,9 @@ export function AiReportsPanel() {
             )}
 
             {report.cost.byDay.length > 0 && (
-              <div className="mt-5 overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-700">
+              <div className="mt-5 overflow-x-auto rounded-xl border border-border-default">
                 <table className="min-w-full text-start text-sm">
-                  <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-neutral-800/80 dark:text-neutral-400">
+                  <thead className="bg-surface-base text-xs uppercase tracking-wide text-fg-muted/80 dark:text-fg-muted">
                     <tr>
                       <th className="px-4 py-2.5 font-semibold">Day (UTC)</th>
                       <th className="px-4 py-2.5 font-semibold">Cost</th>
@@ -214,7 +210,7 @@ export function AiReportsPanel() {
                   <tbody className="divide-y divide-slate-100 dark:divide-neutral-800">
                     {report.cost.byDay.map((row) => (
                       <tr key={row.day}>
-                        <td className="px-4 py-2.5 text-slate-800 dark:text-neutral-200">{row.day}</td>
+                        <td className="px-4 py-2.5 text-fg-default">{row.day}</td>
                         <td className="px-4 py-2.5 tabular-nums">{formatUsd(row.costUsd)}</td>
                         <td className="px-4 py-2.5 tabular-nums">{formatNumber(row.calls)}</td>
                         <td className="px-4 py-2.5 tabular-nums">{formatNumber(row.tokens)}</td>
@@ -226,9 +222,9 @@ export function AiReportsPanel() {
             )}
 
             {report.cost.byFeature.length > 0 && (
-              <div className="mt-5 overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-700">
+              <div className="mt-5 overflow-x-auto rounded-xl border border-border-default">
                 <table className="min-w-full text-start text-sm">
-                  <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-neutral-800/80 dark:text-neutral-400">
+                  <thead className="bg-surface-base text-xs uppercase tracking-wide text-fg-muted/80 dark:text-fg-muted">
                     <tr>
                       <th className="px-4 py-2.5 font-semibold">Feature</th>
                       <th className="px-4 py-2.5 font-semibold">Cost</th>
@@ -239,7 +235,7 @@ export function AiReportsPanel() {
                   <tbody className="divide-y divide-slate-100 dark:divide-neutral-800">
                     {report.cost.byFeature.map((row) => (
                       <tr key={row.feature}>
-                        <td className="px-4 py-2.5 text-slate-800 dark:text-neutral-200">
+                        <td className="px-4 py-2.5 text-fg-default">
                           {aiFeatureLabel(row.feature)}
                         </td>
                         <td className="px-4 py-2.5 tabular-nums">{formatUsd(row.costUsd)}</td>
@@ -254,46 +250,46 @@ export function AiReportsPanel() {
 
             <section
               aria-labelledby="ace-ai-cost-heading"
-              className="mt-6 rounded-xl border border-slate-200 px-4 py-3 dark:border-neutral-700"
+              className="mt-6 rounded-xl border border-border-default px-4 py-3 dark:border-border-default"
               data-testid="ace-ai-reports-slice"
             >
               <h4
                 id="ace-ai-cost-heading"
-                className="text-sm font-semibold text-slate-900 dark:text-neutral-100"
+                className="text-sm font-semibold text-fg-default"
               >
                 Adaptive Content Engine
               </h4>
-              <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+              <p className="mt-1 text-xs text-fg-muted">
                 Cost slice for feature <code>adaptive_content</code> (AC.9). Filter the reports above
                 by this feature for course/user drill-down.
               </p>
               {aceCost ? (
                 <dl className="mt-3 grid gap-2 sm:grid-cols-3">
                   <div>
-                    <dt className="text-xs uppercase text-slate-500">Cost</dt>
+                    <dt className="text-xs uppercase text-fg-muted">Cost</dt>
                     <dd className="text-sm font-semibold tabular-nums">{formatUsd(aceCost.costUsd)}</dd>
                   </div>
                   <div>
-                    <dt className="text-xs uppercase text-slate-500">Calls</dt>
+                    <dt className="text-xs uppercase text-fg-muted">Calls</dt>
                     <dd className="text-sm font-semibold tabular-nums">
                       {formatNumber(aceCost.calls)}
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-xs uppercase text-slate-500">Tokens</dt>
+                    <dt className="text-xs uppercase text-fg-muted">Tokens</dt>
                     <dd className="text-sm font-semibold tabular-nums">
                       {formatNumber(aceCost.tokens)}
                     </dd>
                   </div>
                 </dl>
               ) : (
-                <p className="mt-2 text-sm text-slate-500 dark:text-neutral-400">
+                <p className="mt-2 text-sm text-fg-muted">
                   No Adaptive Content usage in this window.
                 </p>
               )}
               <button
                 type="button"
-                className="mt-3 text-sm font-medium text-indigo-700 underline dark:text-indigo-300"
+                className="mt-3 text-sm font-medium text-accent-fg underline dark:text-indigo-300"
                 onClick={() => setFeature('adaptive_content')}
               >
                 Filter reports to Adaptive content
@@ -301,7 +297,7 @@ export function AiReportsPanel() {
             </section>
 
             {report.cost.summary.totalCalls === 0 && (
-              <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">
+              <p className="mt-4 text-sm text-fg-muted">
                 No AI usage recorded in this window.
               </p>
             )}
@@ -309,25 +305,25 @@ export function AiReportsPanel() {
 
           <section aria-labelledby="ai-by-user-heading">
             <div className="flex flex-wrap items-end justify-between gap-3">
-              <h3 id="ai-by-user-heading" className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+              <h3 id="ai-by-user-heading" className="text-sm font-semibold text-fg-default">
                 AI usage by user
               </h3>
-              <label className="flex min-w-[12rem] flex-1 flex-col text-sm text-slate-600 dark:text-neutral-300 sm:max-w-xs">
+              <label className="flex min-w-[12rem] flex-1 flex-col text-sm text-fg-muted sm:max-w-xs">
                 <span className="mb-1 text-xs font-medium">Search user</span>
                 <input
                   type="search"
                   value={userQuery}
                   onChange={(e) => setUserQuery(e.target.value)}
                   placeholder="Email or name"
-                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+                  className="rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
                 />
               </label>
             </div>
 
             {report.byUser.length > 0 ? (
-              <div className="mt-4 overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-700">
+              <div className="mt-4 overflow-x-auto rounded-xl border border-border-default">
                 <table className="min-w-full text-start text-sm">
-                  <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-neutral-800/80 dark:text-neutral-400">
+                  <thead className="bg-surface-base text-xs uppercase tracking-wide text-fg-muted/80 dark:text-fg-muted">
                     <tr>
                       <th className="px-4 py-2.5 font-semibold">User</th>
                       <th className="px-4 py-2.5 font-semibold">Calls</th>
@@ -339,8 +335,8 @@ export function AiReportsPanel() {
                     {report.byUser.map((row) => (
                       <tr key={row.userId}>
                         <td className="px-4 py-2.5">
-                          <div className="font-medium text-slate-900 dark:text-neutral-100">{row.displayName}</div>
-                          <div className="text-xs text-slate-500 dark:text-neutral-400">{row.email}</div>
+                          <div className="font-medium text-fg-default">{row.displayName}</div>
+                          <div className="text-xs text-fg-muted">{row.email}</div>
                         </td>
                         <td className="px-4 py-2.5 tabular-nums">{formatNumber(row.calls)}</td>
                         <td className="px-4 py-2.5 tabular-nums">{formatNumber(row.totalTokens)}</td>
@@ -351,31 +347,31 @@ export function AiReportsPanel() {
                 </table>
               </div>
             ) : (
-              <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">No user usage in this window.</p>
+              <p className="mt-4 text-sm text-fg-muted">No user usage in this window.</p>
             )}
           </section>
 
           <section aria-labelledby="ai-by-course-heading">
             <div className="flex flex-wrap items-end justify-between gap-3">
-              <h3 id="ai-by-course-heading" className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+              <h3 id="ai-by-course-heading" className="text-sm font-semibold text-fg-default">
                 AI usage by course
               </h3>
-              <label className="flex min-w-[12rem] flex-1 flex-col text-sm text-slate-600 dark:text-neutral-300 sm:max-w-xs">
+              <label className="flex min-w-[12rem] flex-1 flex-col text-sm text-fg-muted sm:max-w-xs">
                 <span className="mb-1 text-xs font-medium">Search course</span>
                 <input
                   type="search"
                   value={courseCode}
                   onChange={(e) => setCourseCode(e.target.value)}
                   placeholder="Course code or title"
-                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+                  className="rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
                 />
               </label>
             </div>
 
             {report.byCourse.length > 0 ? (
-              <div className="mt-4 overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-700">
+              <div className="mt-4 overflow-x-auto rounded-xl border border-border-default">
                 <table className="min-w-full text-start text-sm">
-                  <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-neutral-800/80 dark:text-neutral-400">
+                  <thead className="bg-surface-base text-xs uppercase tracking-wide text-fg-muted/80 dark:text-fg-muted">
                     <tr>
                       <th className="px-4 py-2.5 font-semibold">Course</th>
                       <th className="px-4 py-2.5 font-semibold">Calls</th>
@@ -387,8 +383,8 @@ export function AiReportsPanel() {
                     {report.byCourse.map((row) => (
                       <tr key={row.courseId}>
                         <td className="px-4 py-2.5">
-                          <div className="font-medium text-slate-900 dark:text-neutral-100">{row.title}</div>
-                          <div className="text-xs text-slate-500 dark:text-neutral-400">{row.courseCode}</div>
+                          <div className="font-medium text-fg-default">{row.title}</div>
+                          <div className="text-xs text-fg-muted">{row.courseCode}</div>
                         </td>
                         <td className="px-4 py-2.5 tabular-nums">{formatNumber(row.calls)}</td>
                         <td className="px-4 py-2.5 tabular-nums">{formatNumber(row.totalTokens)}</td>
@@ -399,7 +395,7 @@ export function AiReportsPanel() {
                 </table>
               </div>
             ) : (
-              <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">No course usage in this window.</p>
+              <p className="mt-4 text-sm text-fg-muted">No course usage in this window.</p>
             )}
           </section>
         </div>

@@ -93,7 +93,7 @@ export function GamificationDashboardCard() {
             <button
               type="button"
               disabled={freezing}
-              className="mt-3 rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-semibold text-amber-900 hover:bg-amber-50 disabled:opacity-60 dark:border-amber-700 dark:bg-neutral-900 dark:text-amber-100"
+              className="mt-3 rounded-lg border border-amber-300 bg-surface-raised px-3 py-1.5 text-xs font-semibold text-amber-900 hover:bg-amber-50 disabled:opacity-60 dark:border-amber-700 dark:bg-surface-raised dark:text-amber-100"
               onClick={() => {
                 setFreezing(true)
                 void spendStreakFreeze()
@@ -110,7 +110,7 @@ export function GamificationDashboardCard() {
       <div className="rounded-2xl border border-orange-100 bg-gradient-to-br from-orange-50/90 to-white p-5 shadow-sm dark:border-orange-900/40 dark:from-orange-950/30 dark:to-neutral-900">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Your progress</p>
+            <p className="text-sm font-semibold text-fg-default">Your progress</p>
             {profile.currentStreak > 0 ? (
               <p
                 className="mt-1 inline-flex items-center gap-1 text-sm font-medium text-orange-700 dark:text-orange-200"
@@ -120,13 +120,13 @@ export function GamificationDashboardCard() {
                 <span className="lex-num">{profile.currentStreak.toLocaleString()}</span>-day streak
               </p>
             ) : empty ? (
-              <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">
+              <p className="mt-1 text-xs text-fg-muted">
                 Start your journey — earn your first 5 XP.
               </p>
             ) : (
-              <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">Complete a module to start your streak</p>
+              <p className="mt-1 text-xs text-fg-muted">Complete a module to start your streak</p>
             )}
-            <p className="mt-2 text-xs text-slate-600 dark:text-neutral-400">
+            <p className="mt-2 text-xs text-fg-muted">
               Level <span className="lex-num">{profile.level}</span> ·{' '}
               <span className="lex-num">{xpCount.formatted}</span> XP
             </p>
@@ -146,7 +146,7 @@ export function GamificationDashboardCard() {
             className="h-2 overflow-hidden rounded-full bg-orange-200/80 dark:bg-orange-900/50 lx-delight-progress"
             fillClassName="h-full rounded-full bg-orange-600 dark:bg-orange-500"
           />
-          <p className="mt-2 text-xs text-slate-700 dark:text-neutral-300">
+          <p className="mt-2 text-xs text-fg-muted">
             <span className="lex-num">{profile.xpToNextLevel.toLocaleString()}</span> XP to level{' '}
             <span className="lex-num">{profile.level + 1}</span>
           </p>
@@ -154,7 +154,7 @@ export function GamificationDashboardCard() {
 
         {profile.recentBadges.length > 0 ? (
           <div className="mt-4 border-t border-orange-100 pt-4 dark:border-orange-900/40">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+            <p className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
               Recent badges
             </p>
             <ul className="mt-2 flex gap-2 overflow-x-auto pb-1">
@@ -167,7 +167,7 @@ export function GamificationDashboardCard() {
                     gamificationEnabled={ffGamification}
                     onComplete={() => setBadgeDelight(false)}
                   >
-                    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-orange-200 bg-white px-3 py-1 text-xs font-medium text-orange-900 dark:border-orange-800 dark:bg-neutral-900 dark:text-orange-100">
+                    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-orange-200 bg-surface-raised px-3 py-1 text-xs font-medium text-orange-900 dark:border-orange-800 dark:bg-surface-raised dark:text-orange-100">
                       <Award className="h-3.5 w-3.5" aria-hidden />
                       <span>{badgeLabel(b.badgeType)}</span>
                     </span>
@@ -177,7 +177,7 @@ export function GamificationDashboardCard() {
             </ul>
           </div>
         ) : (
-          <p className="mt-4 flex items-center gap-1.5 text-xs text-slate-500 dark:text-neutral-400">
+          <p className="mt-4 flex items-center gap-1.5 text-xs text-fg-muted">
             <Sparkles className="h-3.5 w-3.5" aria-hidden />
             Earn badges for streaks, XP milestones, and course completions.
           </p>

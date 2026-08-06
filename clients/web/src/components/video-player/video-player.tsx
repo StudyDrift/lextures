@@ -259,7 +259,7 @@ export function VideoPlayer({
         role="alert"
         aria-label="video.failed"
       >
-        <p className="text-sm font-medium text-red-700">
+        <p className="text-sm font-medium text-danger-fg">
           Video processing failed — contact support
         </p>
         {fallbackSrc && (

@@ -28,7 +28,7 @@ export function CalibrationMatrix({ cells }: CalibrationMatrixProps) {
 
   return (
     <div data-testid="predict-reveal-calibration" className="space-y-2">
-      <h3 className="text-sm font-medium text-slate-800 dark:text-neutral-100">
+      <h3 className="text-sm font-medium text-fg-default">
         {t('contentTools.tools.predict_reveal.calibration.title')}
       </h3>
       {summary ? (
@@ -45,19 +45,19 @@ export function CalibrationMatrix({ cells }: CalibrationMatrixProps) {
             <tr>
               <th
                 scope="col"
-                className="border border-slate-200 px-2 py-1 text-start dark:border-neutral-700"
+                className="border border-border-default px-2 py-1 text-start dark:border-border-default"
               >
                 {t('contentTools.analytics.facets.confidenceBucket')}
               </th>
               <th
                 scope="col"
-                className="border border-slate-200 px-2 py-1 text-start dark:border-neutral-700"
+                className="border border-border-default px-2 py-1 text-start dark:border-border-default"
               >
                 {t('contentTools.tools.predict_reveal.calibration.correct')}
               </th>
               <th
                 scope="col"
-                className="border border-slate-200 px-2 py-1 text-start dark:border-neutral-700"
+                className="border border-border-default px-2 py-1 text-start dark:border-border-default"
               >
                 {t('contentTools.tools.predict_reveal.calibration.incorrect')}
               </th>
@@ -71,17 +71,15 @@ export function CalibrationMatrix({ cells }: CalibrationMatrixProps) {
                 <tr key={b}>
                   <th
                     scope="row"
-                    className="border border-slate-200 px-2 py-1 text-start dark:border-neutral-700"
+                    className="border border-border-default px-2 py-1 text-start dark:border-border-default"
                   >
                     {b}
                   </th>
-                  <td className="border border-slate-200 px-2 py-1 dark:border-neutral-700">
+                  <td className="border border-border-default px-2 py-1 dark:border-border-default">
                     {correct?.count ?? 0}
                   </td>
                   <td
-                    className={`border border-slate-200 px-2 py-1 dark:border-neutral-700 ${
-                      wrong?.highlight ? 'bg-amber-100 font-semibold dark:bg-amber-950/50' : ''
-                    }`}
+                    className={`border border-border-default px-2 py-1 dark:border-border-default ${ wrong?.highlight ? 'bg-amber-100 font-semibold dark:bg-amber-950/50' : '' }`}
                     data-highlight={wrong?.highlight ? 'true' : undefined}
                   >
                     {wrong?.count ?? 0}

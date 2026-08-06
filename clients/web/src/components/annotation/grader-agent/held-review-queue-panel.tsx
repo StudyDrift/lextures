@@ -212,11 +212,11 @@ export function HeldReviewQueuePanel({
     {InputDialogHost}
     {ConfirmDialogHost}
     <section
-      className="rounded-xl border border-slate-300 bg-slate-50/70 p-4 dark:border-neutral-600 dark:bg-neutral-900/40"
+      className="rounded-xl border border-border-strong bg-slate-50/70 p-4 dark:border-border-default/40"
       aria-label={t('gradingAgent.review.queue.title')}
     >
       <div className="flex items-center justify-between gap-3">
-        <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+        <h3 className="text-sm font-semibold text-fg-default">
           {t('gradingAgent.review.queue.title')}
         </h3>
         <span
@@ -228,8 +228,8 @@ export function HeldReviewQueuePanel({
       </div>
 
       {suggestModeEnabled ? (
-        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-white p-2 dark:border-neutral-700 dark:bg-neutral-950">
-          <label className="flex items-center gap-2 text-xs font-medium text-slate-700 dark:text-neutral-300">
+        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-border-default bg-surface-raised p-2 dark:border-border-default dark:bg-surface-base">
+          <label className="flex items-center gap-2 text-xs font-medium text-fg-muted">
             <input
               type="checkbox"
               className="size-4"
@@ -239,7 +239,7 @@ export function HeldReviewQueuePanel({
             />
             {t('gradingAgent.review.bulk.selectAll')}
           </label>
-          <label className="flex items-center gap-1 text-xs text-slate-600 dark:text-neutral-400">
+          <label className="flex items-center gap-1 text-xs text-fg-muted">
             <span>{t('gradingAgent.review.bulk.thresholdLabel')}</span>
             <input
               type="number"
@@ -247,7 +247,7 @@ export function HeldReviewQueuePanel({
               max={100}
               value={confidenceThreshold}
               onChange={(e) => setConfidenceThreshold(e.target.value)}
-              className="w-14 rounded-md border border-slate-200 px-1.5 py-0.5 text-xs dark:border-neutral-700 dark:bg-neutral-900"
+              className="w-14 rounded-md border border-border-default px-1.5 py-0.5 text-xs dark:border-border-default dark:bg-surface-raised"
               aria-label={t('gradingAgent.review.bulk.thresholdLabel')}
             />
             <span>%</span>
@@ -256,7 +256,7 @@ export function HeldReviewQueuePanel({
             type="button"
             disabled={bulkBusy}
             onClick={() => void approveAboveThreshold()}
-            className="rounded-md border border-slate-200 px-2 py-1 text-xs font-medium dark:border-neutral-700"
+            className="rounded-md border border-border-default px-2 py-1 text-xs font-medium dark:border-border-default"
           >
             {t('gradingAgent.review.bulk.approveThreshold')}
           </button>
@@ -297,7 +297,7 @@ export function HeldReviewQueuePanel({
           return (
             <li
               key={item.id}
-              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+              className="rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
               aria-selected={suggestModeEnabled ? isSelected : undefined}
             >
               <div className="flex items-start gap-2">
@@ -311,52 +311,52 @@ export function HeldReviewQueuePanel({
                   />
                 ) : null}
                 <div className="min-w-0 flex-1">
-                  <p className="font-medium text-slate-900 dark:text-neutral-50">{label}</p>
-                  <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-400">
+                  <p className="font-medium text-fg-default">{label}</p>
+                  <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-fg-muted">
                     {t('gradingAgent.review.queue.badge')}
                   </p>
                   {item.suggestedPoints != null ? (
-                    <p className="mt-1 text-slate-700 dark:text-neutral-300">
+                    <p className="mt-1 text-fg-muted">
                       {t('gradingAgent.review.queue.suggestedScore', { score: item.suggestedPoints })}
                     </p>
                   ) : null}
                   {item.confidence != null ? (
-                    <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+                    <p className="mt-1 text-xs text-fg-muted">
                       {t('gradingAgent.review.queue.confidence', {
                         value: Math.round(item.confidence * 100),
                       })}
                     </p>
                   ) : null}
                   {item.heldReason ? (
-                    <p className="mt-1 text-slate-600 dark:text-neutral-400">{item.heldReason}</p>
+                    <p className="mt-1 text-fg-muted">{item.heldReason}</p>
                   ) : null}
                   {isEditing ? (
                     <div className="mt-2 space-y-2">
                       <label className="block">
-                        <span className="text-xs font-medium text-slate-600 dark:text-neutral-400">
+                        <span className="text-xs font-medium text-fg-muted">
                           {t('gradingAgent.review.queue.editScore')}
                         </span>
                         <input
                           type="number"
                           value={editScore}
                           onChange={(e) => setEditScore(e.target.value)}
-                          className="mt-1 w-full rounded-md border border-slate-200 px-2 py-1 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                          className="mt-1 w-full rounded-md border border-border-default px-2 py-1 text-sm dark:border-border-default dark:bg-surface-raised"
                         />
                       </label>
                       <label className="block">
-                        <span className="text-xs font-medium text-slate-600 dark:text-neutral-400">
+                        <span className="text-xs font-medium text-fg-muted">
                           {t('gradingAgent.review.queue.editComment')}
                         </span>
                         <textarea
                           value={editComment}
                           onChange={(e) => setEditComment(e.target.value)}
                           rows={2}
-                          className="mt-1 w-full rounded-md border border-slate-200 px-2 py-1 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                          className="mt-1 w-full rounded-md border border-border-default px-2 py-1 text-sm dark:border-border-default dark:bg-surface-raised"
                         />
                       </label>
                     </div>
                   ) : item.comment ? (
-                    <p className="mt-1 text-slate-600 dark:text-neutral-400">{item.comment}</p>
+                    <p className="mt-1 text-fg-muted">{item.comment}</p>
                   ) : null}
                   <div className="mt-2 flex flex-wrap gap-2">
                     {onOpenSubmission ? (
@@ -364,7 +364,7 @@ export function HeldReviewQueuePanel({
                         type="button"
                         disabled={isBusy}
                         onClick={() => onOpenSubmission(item.submissionId)}
-                        className="rounded-md border border-slate-200 px-2.5 py-1 text-xs font-medium dark:border-neutral-700"
+                        className="rounded-md border border-border-default px-2.5 py-1 text-xs font-medium dark:border-border-default"
                       >
                         {t('gradingAgent.review.flagged.openSubmission')}
                       </button>
@@ -383,7 +383,7 @@ export function HeldReviewQueuePanel({
                           type="button"
                           disabled={isBusy}
                           onClick={() => setEditingId(null)}
-                          className="rounded-md border border-slate-200 px-2.5 py-1 text-xs font-medium dark:border-neutral-700"
+                          className="rounded-md border border-border-default px-2.5 py-1 text-xs font-medium dark:border-border-default"
                         >
                           {t('gradingAgent.review.queue.cancel')}
                         </button>
@@ -402,7 +402,7 @@ export function HeldReviewQueuePanel({
                           type="button"
                           disabled={isBusy}
                           onClick={() => beginEdit(item)}
-                          className="rounded-md border border-slate-200 px-2.5 py-1 text-xs font-medium dark:border-neutral-700"
+                          className="rounded-md border border-border-default px-2.5 py-1 text-xs font-medium dark:border-border-default"
                         >
                           {t('gradingAgent.review.queue.editApprove')}
                         </button>

@@ -115,24 +115,24 @@ export function CalendarSubscriptionsPanel() {
     token && personalUrl ? withToken(personalUrl, token) : personalUrl?.replace('?token=<token>', '') ?? null
 
   return (
-    <section className="mt-8 rounded-xl border border-slate-200 bg-white p-5 dark:border-neutral-700 dark:bg-neutral-900">
+    <section className="mt-8 rounded-xl border border-border-default bg-surface-raised p-5 dark:border-border-default dark:bg-surface-raised">
       <div className="flex items-start gap-3">
-        <Calendar className="mt-0.5 h-5 w-5 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
+        <Calendar className="mt-0.5 h-5 w-5 shrink-0 text-fg-muted" aria-hidden />
         <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Calendar subscriptions</h3>
-          <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+          <h3 className="text-sm font-semibold text-fg-default">Calendar subscriptions</h3>
+          <p className="mt-1 text-sm text-fg-muted">
             Subscribe to assignment and quiz deadlines in Google Calendar, Apple Calendar, or Outlook using a private
             feed URL.
           </p>
 
           {loading ? (
-            <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">Loading…</p>
+            <p className="mt-4 text-sm text-fg-muted">Loading…</p>
           ) : error ? (
-            <p className="mt-4 text-sm text-red-600 dark:text-red-400">{error}</p>
+            <p className="mt-4 text-sm text-danger-fg">{error}</p>
           ) : (
             <div className="mt-4 space-y-4">
               <div>
-                <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                <p className="text-xs font-medium uppercase tracking-wide text-fg-muted">
                   Personal feed (all courses)
                 </p>
                 {resolvedPersonal ? (
@@ -140,29 +140,29 @@ export function CalendarSubscriptionsPanel() {
                     <input
                       readOnly
                       value={resolvedPersonal}
-                      className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 font-mono text-xs text-slate-800 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                      className="min-w-0 flex-1 rounded-lg border border-border-default bg-surface-base px-3 py-2 font-mono text-xs text-fg-default dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
                       aria-label="Personal calendar feed URL"
                     />
                     <button
                       type="button"
                       onClick={() => void copyText('Feed URL', resolvedPersonal)}
-                      className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                      className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-border-default px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
                     >
                       <Copy className="h-4 w-4" aria-hidden />
                       Copy
                     </button>
                   </div>
                 ) : hasActiveToken ? (
-                  <p className="mt-2 text-sm text-slate-600 dark:text-neutral-300">
+                  <p className="mt-2 text-sm text-fg-muted">
                     You have an active subscription URL. Regenerate to view and copy the link.
                   </p>
                 ) : (
-                  <p className="mt-2 text-sm text-slate-600 dark:text-neutral-300">
+                  <p className="mt-2 text-sm text-fg-muted">
                     Generate a URL to subscribe in your calendar app.
                   </p>
                 )}
                 {expiresAt ? (
-                  <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+                  <p className="mt-1 text-xs text-fg-muted">
                     Expires {formatDateTime(expiresAt)}
                   </p>
                 ) : null}
@@ -170,7 +170,7 @@ export function CalendarSubscriptionsPanel() {
 
               {token && courseFeeds.length > 0 ? (
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                  <p className="text-xs font-medium uppercase tracking-wide text-fg-muted">
                     Per-course feeds
                   </p>
                   <ul className="mt-2 divide-y divide-slate-100 dark:divide-neutral-800">
@@ -179,13 +179,13 @@ export function CalendarSubscriptionsPanel() {
                       return (
                         <li key={c.courseId} className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">
                           <div className="min-w-0">
-                            <p className="truncate text-sm font-medium text-slate-900 dark:text-neutral-100">{c.title}</p>
-                            <p className="truncate font-mono text-xs text-slate-500 dark:text-neutral-400">{url}</p>
+                            <p className="truncate text-sm font-medium text-fg-default">{c.title}</p>
+                            <p className="truncate font-mono text-xs text-fg-muted">{url}</p>
                           </div>
                           <button
                             type="button"
                             onClick={() => void copyText(`${c.title} feed`, url)}
-                            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-border-default px-3 py-1.5 text-sm text-fg-muted hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
                           >
                             <Copy className="h-4 w-4" aria-hidden />
                             Copy
@@ -201,11 +201,11 @@ export function CalendarSubscriptionsPanel() {
                 Anyone with your feed URL can see assignment titles and due dates. Do not share it publicly.
               </div>
 
-              <details className="rounded-lg border border-slate-200 p-3 dark:border-neutral-700">
-                <summary className="cursor-pointer text-sm font-medium text-slate-800 dark:text-neutral-200">
+              <details className="rounded-lg border border-border-default p-3 dark:border-border-default">
+                <summary className="cursor-pointer text-sm font-medium text-fg-default">
                   How to subscribe
                 </summary>
-                <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm text-slate-600 dark:text-neutral-300">
+                <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm text-fg-muted">
                   <li>
                     <strong>Google Calendar:</strong> Settings → Add calendar → From URL → paste your feed URL.
                   </li>
@@ -222,7 +222,7 @@ export function CalendarSubscriptionsPanel() {
                 type="button"
                 onClick={requestRegenerate}
                 disabled={regenerating}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-white"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-surface-raised"
               >
                 <RefreshCw className="h-4 w-4" aria-hidden />
                 {token || hasActiveToken ? 'Regenerate URL' : 'Generate URL'}

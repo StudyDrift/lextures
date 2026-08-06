@@ -89,11 +89,6 @@ func requestLocale(r *http.Request) string {
 // handleListBoardTemplates is GET /api/v1/board-templates.
 func (d Deps) handleListBoardTemplates() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		viewer, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -150,11 +145,6 @@ func (d Deps) handleSaveBoardAsTemplate() http.HandlerFunc {
 		IncludePosts bool     `json:"includePosts"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -237,11 +227,6 @@ func (d Deps) handleSaveBoardAsTemplate() http.HandlerFunc {
 // handleGetBoardCopyJob is GET .../board-copy-jobs/{job_id}.
 func (d Deps) handleGetBoardCopyJob() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, _, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return

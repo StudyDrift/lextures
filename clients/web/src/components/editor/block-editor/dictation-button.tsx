@@ -83,9 +83,7 @@ export function DictationButton({
         onMouseDown={preventBlur}
         onClick={() => void toggle()}
         onKeyDown={onKeyDown}
-        className={`relative flex h-7 w-7 shrink-0 items-center justify-center rounded text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:text-neutral-300 dark:hover:bg-neutral-700 ${
-          isListening ? 'text-red-600 dark:text-red-400' : ''
-        }`}
+        className={`relative flex h-7 w-7 shrink-0 items-center justify-center rounded text-fg-muted hover:bg-surface-sunken disabled:cursor-not-allowed disabled:opacity-40 dark:text-fg-muted dark:hover:bg-neutral-700 ${ isListening ? 'text-danger-fg' : '' }`}
       >
         {isListening ? (
           <>

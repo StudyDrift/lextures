@@ -64,14 +64,14 @@ export function CollabDocsList({ courseCode, docs, canManage, onDocsChanged }: P
     {ConfirmDialogHost}
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-slate-900 dark:text-neutral-100">
+        <h2 className="text-xl font-semibold text-fg-default">
           Collaborative Documents
         </h2>
         {canManage && !creating && (
           <button
             type="button"
             onClick={() => setCreating(true)}
-            className="flex items-center gap-1.5 rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+            className="flex items-center gap-1.5 rounded-md bg-accent-solid px-3 py-2 text-sm font-medium text-white hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
           >
             <Plus className="h-4 w-4" aria-hidden="true" />
             New document
@@ -86,7 +86,7 @@ export function CollabDocsList({ courseCode, docs, canManage, onDocsChanged }: P
         >
           <div className="space-y-3">
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300" htmlFor="doc-title">
+              <label className="block text-sm font-medium text-fg-muted" htmlFor="doc-title">
                 Document title
               </label>
               <input
@@ -95,16 +95,16 @@ export function CollabDocsList({ courseCode, docs, canManage, onDocsChanged }: P
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
                 placeholder="My collaborative document"
-                className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                className="mt-1 w-full rounded-md border border-border-strong px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
                 autoFocus
               />
             </div>
             <div>
-              <span className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+              <span className="block text-sm font-medium text-fg-muted">
                 Document type
               </span>
               <div className="mt-1 flex gap-4">
-                <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-neutral-300">
+                <label className="flex items-center gap-2 text-sm text-fg-muted">
                   <input
                     type="radio"
                     name="doc-type"
@@ -114,7 +114,7 @@ export function CollabDocsList({ courseCode, docs, canManage, onDocsChanged }: P
                   />
                   Rich text
                 </label>
-                <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-neutral-300">
+                <label className="flex items-center gap-2 text-sm text-fg-muted">
                   <input
                     type="radio"
                     name="doc-type"
@@ -131,14 +131,14 @@ export function CollabDocsList({ courseCode, docs, canManage, onDocsChanged }: P
             <button
               type="submit"
               disabled={submitting || !newTitle.trim()}
-              className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+              className="rounded-md bg-accent-solid px-4 py-2 text-sm font-medium text-white hover:bg-accent disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
             >
               {submitting ? 'Creating…' : 'Create'}
             </button>
             <button
               type="button"
               onClick={() => { setCreating(false); setNewTitle('') }}
-              className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-300 dark:hover:bg-neutral-800"
+              className="rounded-md border border-border-strong px-4 py-2 text-sm font-medium text-fg-muted hover:bg-surface-base dark:border-border-default dark:text-fg-muted dark:hover:bg-surface-overlay"
             >
               Cancel
             </button>
@@ -147,13 +147,13 @@ export function CollabDocsList({ courseCode, docs, canManage, onDocsChanged }: P
       )}
 
       {docs.length === 0 && !creating && (
-        <div className="rounded-lg border border-dashed border-slate-300 p-8 text-center dark:border-neutral-600">
-          <FileText className="mx-auto h-8 w-8 text-slate-400 dark:text-neutral-500" />
-          <p className="mt-2 text-sm text-slate-500 dark:text-neutral-400">
+        <div className="rounded-lg border border-dashed border-border-strong p-8 text-center dark:border-border-default">
+          <FileText className="mx-auto h-8 w-8 text-fg-subtle" />
+          <p className="mt-2 text-sm text-fg-muted">
             No collaborative documents yet.
           </p>
           {canManage && (
-            <p className="text-sm text-slate-400 dark:text-neutral-500">
+            <p className="text-sm text-fg-subtle">
               Click <strong>New document</strong> to create one.
             </p>
           )}
@@ -164,7 +164,7 @@ export function CollabDocsList({ courseCode, docs, canManage, onDocsChanged }: P
         {docs.map((doc) => (
           <li
             key={doc.id}
-            className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-800/50 dark:hover:bg-neutral-700/50"
+            className="flex items-center justify-between rounded-lg border border-border-default bg-surface-raised px-4 py-3 shadow-sm hover:bg-surface-base dark:border-border-default/50 dark:hover:bg-neutral-700/50"
           >
             <Link
               to={`${base}/${doc.id}`}
@@ -176,10 +176,10 @@ export function CollabDocsList({ courseCode, docs, canManage, onDocsChanged }: P
                 <FileText className="h-5 w-5 shrink-0 text-indigo-500" aria-hidden="true" />
               )}
               <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-slate-900 dark:text-neutral-100">
+                <p className="truncate text-sm font-medium text-fg-default">
                   {doc.title}
                 </p>
-                <p className="text-xs text-slate-400 dark:text-neutral-500">
+                <p className="text-xs text-fg-subtle">
                   {doc.docType === 'whiteboard' ? 'Whiteboard' : 'Rich text'} ·{' '}
                   {formatDate(doc.updatedAt, { dateStyle: 'medium' })}
                 </p>
@@ -190,7 +190,7 @@ export function CollabDocsList({ courseCode, docs, canManage, onDocsChanged }: P
                 type="button"
                 onClick={() => { void handleDelete(doc.id) }}
                 aria-label={`Delete "${doc.title}"`}
-                className="ms-4 rounded p-1 text-slate-400 hover:text-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 dark:text-neutral-500 dark:hover:text-red-400"
+                className="ms-4 rounded p-1 text-fg-subtle hover:text-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 dark:hover:text-red-400"
               >
                 <Trash2 className="h-4 w-4" aria-hidden="true" />
               </button>

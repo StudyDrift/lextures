@@ -46,7 +46,7 @@ export default function Title1ReportPage() {
   if (featuresLoading) {
     return (
       <main className="mx-auto max-w-4xl p-6">
-        <h1 className="text-xl font-bold text-slate-900 dark:text-neutral-100">Title I report</h1>
+        <h1 className="text-xl font-bold text-fg-default">Title I report</h1>
         <p className="mt-6 text-sm" role="status">
           Loading…
         </p>
@@ -57,7 +57,7 @@ export default function Title1ReportPage() {
   if (!ffDemographics) {
     return (
       <main className="mx-auto max-w-3xl p-6">
-        <p className="text-sm text-slate-600 dark:text-neutral-400">
+        <p className="text-sm text-fg-muted">
           Student demographics are not enabled on this platform. Enable{' '}
           <strong>Student demographics</strong> in Settings → Global platform.
         </p>
@@ -68,7 +68,7 @@ export default function Title1ReportPage() {
   if (!schoolId) {
     return (
       <main className="mx-auto max-w-3xl p-6">
-        <p className="text-sm text-slate-600 dark:text-neutral-400">
+        <p className="text-sm text-fg-muted">
           Add a <code className="text-xs">?schoolId=</code> query parameter with the school org unit id.
         </p>
       </main>
@@ -77,10 +77,10 @@ export default function Title1ReportPage() {
 
   return (
     <main className="mx-auto max-w-4xl p-6">
-      <h1 id={titleId} className="text-xl font-bold text-slate-900 dark:text-neutral-100">
+      <h1 id={titleId} className="text-xl font-bold text-fg-default">
         Title I aggregate report
       </h1>
-      <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
+      <p className="mt-2 text-sm text-fg-muted">
         Aggregate demographic breakdown for school {schoolId}. No individual students are identified.
       </p>
 
@@ -97,15 +97,15 @@ export default function Title1ReportPage() {
 
       {report && !loading && !error ? (
         <section className="mt-6 space-y-6" aria-labelledby={titleId}>
-          <div className="rounded-lg border border-slate-200 bg-white p-4 dark:border-neutral-600 dark:bg-neutral-900">
-            <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+          <div className="rounded-lg border border-border-default bg-surface-raised p-4 dark:border-border-default dark:bg-surface-raised">
+            <h2 className="text-sm font-semibold text-fg-default">
               Economic disadvantage
             </h2>
-            <p className="mt-2 text-2xl font-bold text-slate-900 dark:text-neutral-100">
+            <p className="mt-2 text-2xl font-bold text-fg-default">
               {report.economicDisadvantagePct}% ({report.economicDisadvantaged}/{report.totalStudents}{' '}
               students)
             </p>
-            <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+            <p className="mt-1 text-xs text-fg-muted">
               Free lunch: {report.freeLunchCount} · Reduced lunch: {report.reducedLunchCount}
             </p>
           </div>
@@ -113,7 +113,7 @@ export default function Title1ReportPage() {
           <table className="w-full border-collapse text-sm" aria-labelledby={titleId}>
             <caption className="sr-only">School demographic counts</caption>
             <thead>
-              <tr className="border-b border-slate-200 text-left dark:border-neutral-600">
+              <tr className="border-b border-border-default text-left dark:border-border-default">
                 <th scope="col" className="py-2 pe-4">
                   Category
                 </th>
@@ -123,24 +123,24 @@ export default function Title1ReportPage() {
               </tr>
             </thead>
             <tbody>
-              <tr className="border-b border-slate-100 dark:border-neutral-700">
+              <tr className="border-b border-border-subtle dark:border-border-default">
                 <td className="py-2 pe-4">English language learners</td>
                 <td className="py-2">{report.ellCount}</td>
               </tr>
-              <tr className="border-b border-slate-100 dark:border-neutral-700">
+              <tr className="border-b border-border-subtle dark:border-border-default">
                 <td className="py-2 pe-4">Students with disabilities (flag only)</td>
                 <td className="py-2">{report.disabilityCount}</td>
               </tr>
-              <tr className="border-b border-slate-100 dark:border-neutral-700">
+              <tr className="border-b border-border-subtle dark:border-border-default">
                 <td className="py-2 pe-4">Homeless</td>
                 <td className="py-2">{report.homelessCount}</td>
               </tr>
-              <tr className="border-b border-slate-100 dark:border-neutral-700">
+              <tr className="border-b border-border-subtle dark:border-border-default">
                 <td className="py-2 pe-4">Migrant</td>
                 <td className="py-2">{report.migrantCount}</td>
               </tr>
               {Object.entries(report.raceBreakdown).map(([code, count]) => (
-                <tr key={code} className="border-b border-slate-100 dark:border-neutral-700">
+                <tr key={code} className="border-b border-border-subtle dark:border-border-default">
                   <td className="py-2 pe-4">Race/ethnicity: {raceEthnicityLabel(code)}</td>
                   <td className="py-2">{count}</td>
                 </tr>
@@ -152,13 +152,13 @@ export default function Title1ReportPage() {
 
       {performance && !loading && !error ? (
         <section className="mt-8" aria-labelledby={perfId}>
-          <h2 id={perfId} className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+          <h2 id={perfId} className="text-sm font-semibold text-fg-default">
             Quiz pass rate by ELL status
           </h2>
           <table className="mt-3 w-full border-collapse text-sm" aria-labelledby={perfId}>
             <caption className="sr-only">Disaggregated quiz pass rates</caption>
             <thead>
-              <tr className="border-b border-slate-200 text-left dark:border-neutral-600">
+              <tr className="border-b border-border-default text-left dark:border-border-default">
                 <th scope="col" className="py-2 pe-4">
                   Subgroup
                 </th>
@@ -172,12 +172,12 @@ export default function Title1ReportPage() {
             </thead>
             <tbody>
               {performance.subgroups.map((row) => (
-                <tr key={row.label} className="border-b border-slate-100 dark:border-neutral-700">
+                <tr key={row.label} className="border-b border-border-subtle dark:border-border-default">
                   <td className="py-2 pe-4">{row.label}</td>
                   <td className="py-2 pe-4">{row.count}</td>
                   <td className="py-2">
                     {row.suppressed ? (
-                      <span className="text-slate-500 dark:text-neutral-400">
+                      <span className="text-fg-muted">
                         Data suppressed (n&lt;10)
                       </span>
                     ) : (

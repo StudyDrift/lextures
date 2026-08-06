@@ -102,30 +102,30 @@ export function TranscriptAnalyticsPanel({ enabled, onOpenQueue }: Props) {
     <section aria-labelledby={titleId} className="mt-6 space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 id={titleId} className="text-lg font-semibold text-slate-900 dark:text-neutral-50">
+          <h2 id={titleId} className="text-lg font-semibold text-fg-default">
             {t('transcripts.analytics.title')}
           </h2>
-          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+          <p className="mt-1 text-sm text-fg-muted">
             {t('transcripts.analytics.subtitle')}
           </p>
         </div>
         <div className="flex flex-wrap items-end gap-2">
           <label className="text-sm">
-            <span className="block text-slate-600 dark:text-neutral-400">{t('transcripts.analytics.from')}</span>
+            <span className="block text-fg-muted">{t('transcripts.analytics.from')}</span>
             <input
               type="date"
               value={range.from}
               onChange={(e) => setRange((r) => ({ ...r, from: e.target.value }))}
-              className="mt-1 rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+              className="mt-1 rounded-md border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised"
             />
           </label>
           <label className="text-sm">
-            <span className="block text-slate-600 dark:text-neutral-400">{t('transcripts.analytics.to')}</span>
+            <span className="block text-fg-muted">{t('transcripts.analytics.to')}</span>
             <input
               type="date"
               value={range.to}
               onChange={(e) => setRange((r) => ({ ...r, to: e.target.value }))}
-              className="mt-1 rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+              className="mt-1 rounded-md border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised"
             />
           </label>
           {data?.panels.export !== false ? (
@@ -143,7 +143,7 @@ export function TranscriptAnalyticsPanel({ enabled, onOpenQueue }: Props) {
                   )
                   .finally(() => setExporting(false))
               }}
-              className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-700 dark:hover:bg-neutral-900"
+              className="rounded-md border border-border-strong px-3 py-1.5 text-sm font-medium hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:hover:bg-surface-raised"
             >
               {t('transcripts.analytics.exportCsv')}
             </button>
@@ -158,7 +158,7 @@ export function TranscriptAnalyticsPanel({ enabled, onOpenQueue }: Props) {
       ) : null}
 
       {loading ? (
-        <p className="flex items-center gap-2 text-sm text-slate-500" role="status">
+        <p className="flex items-center gap-2 text-sm text-fg-muted" role="status">
           <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
           {t('common.loading')}
         </p>
@@ -175,15 +175,11 @@ export function TranscriptAnalyticsPanel({ enabled, onOpenQueue }: Props) {
 
       {health ? (
         <div
-          className={`rounded-lg border p-4 ${
-            health.anyAlert
-              ? 'border-amber-300 bg-amber-50 dark:border-amber-800 dark:bg-amber-950'
-              : 'border-slate-200 dark:border-neutral-800'
-          }`}
+          className={`rounded-lg border p-4 ${ health.anyAlert ? 'border-amber-300 bg-amber-50 dark:border-amber-800 dark:bg-amber-950' : 'border-border-default dark:border-border-subtle' }`}
           role="region"
           aria-label={t('transcripts.analytics.healthTitle')}
         >
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-50">
+          <h3 className="text-sm font-semibold text-fg-default">
             {t('transcripts.analytics.healthTitle')}
             {health.anyAlert ? (
               <span className="ml-2 text-amber-800 dark:text-amber-200">
@@ -193,7 +189,7 @@ export function TranscriptAnalyticsPanel({ enabled, onOpenQueue }: Props) {
           </h3>
           <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div>
-              <dt className="text-xs text-slate-500">{t('transcripts.analytics.backlog')}</dt>
+              <dt className="text-xs text-fg-muted">{t('transcripts.analytics.backlog')}</dt>
               <dd className="text-lg font-semibold">
                 <button
                   type="button"
@@ -205,15 +201,15 @@ export function TranscriptAnalyticsPanel({ enabled, onOpenQueue }: Props) {
               </dd>
             </div>
             <div>
-              <dt className="text-xs text-slate-500">{t('transcripts.analytics.oldestPending')}</dt>
+              <dt className="text-xs text-fg-muted">{t('transcripts.analytics.oldestPending')}</dt>
               <dd className="text-lg font-semibold">{formatHours(health.oldestPendingAgeHours)}</dd>
             </div>
             <div>
-              <dt className="text-xs text-slate-500">{t('transcripts.analytics.failureRate')}</dt>
+              <dt className="text-xs text-fg-muted">{t('transcripts.analytics.failureRate')}</dt>
               <dd className="text-lg font-semibold">{formatPct(health.deliveryFailureRate)}</dd>
             </div>
             <div>
-              <dt className="text-xs text-slate-500">{t('transcripts.analytics.deadLetters')}</dt>
+              <dt className="text-xs text-fg-muted">{t('transcripts.analytics.deadLetters')}</dt>
               <dd className="text-lg font-semibold">{health.deadLetterCount}</dd>
             </div>
           </dl>
@@ -222,7 +218,7 @@ export function TranscriptAnalyticsPanel({ enabled, onOpenQueue }: Props) {
 
       {data && !loading ? (
         data.orders === 0 ? (
-          <p className="text-sm text-slate-600 dark:text-neutral-400">{t('transcripts.analytics.empty')}</p>
+          <p className="text-sm text-fg-muted">{t('transcripts.analytics.empty')}</p>
         ) : (
           <div className="space-y-6">
             <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -251,9 +247,9 @@ export function TranscriptAnalyticsPanel({ enabled, onOpenQueue }: Props) {
                   },
                 ] as const
               ).map((kpi) => (
-                <div key={kpi.key} className="rounded-md bg-slate-50 p-3 dark:bg-neutral-800">
-                  <dt className="text-xs text-slate-500 dark:text-neutral-400">{kpi.label}</dt>
-                  <dd className="text-xl font-semibold text-slate-900 dark:text-neutral-100">
+                <div key={kpi.key} className="rounded-md bg-surface-base p-3 dark:bg-surface-overlay">
+                  <dt className="text-xs text-fg-muted">{kpi.label}</dt>
+                  <dd className="text-xl font-semibold text-fg-default">
                     {kpi.metric ? (
                       <button
                         type="button"
@@ -274,19 +270,19 @@ export function TranscriptAnalyticsPanel({ enabled, onOpenQueue }: Props) {
             </dl>
 
             <div className="grid gap-3 sm:grid-cols-3">
-              <p className="text-sm text-slate-600 dark:text-neutral-400">
+              <p className="text-sm text-fg-muted">
                 {t('transcripts.analytics.holdRate')}:{' '}
                 <button type="button" className="font-medium underline-offset-2 hover:underline" onClick={() => void openDrill('on_hold')}>
                   {formatPct(data.holdRate)}
                 </button>
               </p>
-              <p className="text-sm text-slate-600 dark:text-neutral-400">
+              <p className="text-sm text-fg-muted">
                 {t('transcripts.analytics.rejectionRate')}:{' '}
                 <button type="button" className="font-medium underline-offset-2 hover:underline" onClick={() => void openDrill('rejected')}>
                   {formatPct(data.rejectionRate)}
                 </button>
               </p>
-              <p className="text-sm text-slate-600 dark:text-neutral-400">
+              <p className="text-sm text-fg-muted">
                 {t('transcripts.analytics.refundRate')}:{' '}
                 {data.panels.finance ? (
                   <button type="button" className="font-medium underline-offset-2 hover:underline" onClick={() => void openDrill('refunded')}>
@@ -298,7 +294,7 @@ export function TranscriptAnalyticsPanel({ enabled, onOpenQueue }: Props) {
               </p>
             </div>
 
-            <p className="text-sm text-slate-600 dark:text-neutral-400">
+            <p className="text-sm text-fg-muted">
               {t('transcripts.analytics.turnaroundPercentiles', {
                 p50: formatHours(data.turnaround.p50Hours),
                 p90: formatHours(data.turnaround.p90Hours),
@@ -309,7 +305,7 @@ export function TranscriptAnalyticsPanel({ enabled, onOpenQueue }: Props) {
 
             {data.daily.length > 0 ? (
               <section aria-labelledby={`${titleId}-volume`}>
-                <h3 id={`${titleId}-volume`} className="text-sm font-medium text-slate-800 dark:text-neutral-200">
+                <h3 id={`${titleId}-volume`} className="text-sm font-medium text-fg-default">
                   {t('transcripts.analytics.volume')}
                 </h3>
                 <div
@@ -326,7 +322,7 @@ export function TranscriptAnalyticsPanel({ enabled, onOpenQueue }: Props) {
                     />
                   ))}
                 </div>
-                <table className="mt-3 w-full text-left text-xs text-slate-600 dark:text-neutral-400">
+                <table className="mt-3 w-full text-left text-xs text-fg-muted">
                   <caption className="sr-only">{t('transcripts.analytics.volumeTableCaption')}</caption>
                   <thead>
                     <tr>
@@ -340,7 +336,7 @@ export function TranscriptAnalyticsPanel({ enabled, onOpenQueue }: Props) {
                   </thead>
                   <tbody>
                     {data.daily.map((d) => (
-                      <tr key={d.day} className="border-t border-slate-100 dark:border-neutral-800">
+                      <tr key={d.day} className="border-t border-border-subtle">
                         <td className="py-1">{new Date(d.day).toLocaleDateString()}</td>
                         <td>{d.orders}</td>
                         <td>{d.delivered}</td>
@@ -356,7 +352,7 @@ export function TranscriptAnalyticsPanel({ enabled, onOpenQueue }: Props) {
 
             <div className="grid gap-6 lg:grid-cols-2">
               <section aria-labelledby={`${titleId}-methods`}>
-                <h3 id={`${titleId}-methods`} className="text-sm font-medium text-slate-800 dark:text-neutral-200">
+                <h3 id={`${titleId}-methods`} className="text-sm font-medium text-fg-default">
                   {t('transcripts.analytics.methodMix')}
                 </h3>
                 <ul className="mt-2 space-y-2" aria-label={t('transcripts.analytics.methodMix')}>
@@ -366,7 +362,7 @@ export function TranscriptAnalyticsPanel({ enabled, onOpenQueue }: Props) {
                         <span>{m.method}</span>
                         <span className="font-medium">{m.count}</span>
                       </div>
-                      <div className="mt-1 h-2 rounded bg-slate-100 dark:bg-neutral-800" aria-hidden>
+                      <div className="mt-1 h-2 rounded bg-surface-sunken" aria-hidden>
                         <div
                           className="h-2 rounded bg-emerald-600 dark:bg-emerald-400"
                           style={{ width: `${(m.count / maxMethod) * 100}%` }}
@@ -395,20 +391,20 @@ export function TranscriptAnalyticsPanel({ enabled, onOpenQueue }: Props) {
               </section>
 
               <section aria-labelledby={`${titleId}-dest`}>
-                <h3 id={`${titleId}-dest`} className="text-sm font-medium text-slate-800 dark:text-neutral-200">
+                <h3 id={`${titleId}-dest`} className="text-sm font-medium text-fg-default">
                   {t('transcripts.analytics.topDestinations')}
                 </h3>
                 <table className="mt-2 w-full text-left text-sm">
                   <caption className="sr-only">{t('transcripts.analytics.topDestinations')}</caption>
                   <thead>
-                    <tr className="text-xs text-slate-500">
+                    <tr className="text-xs text-fg-muted">
                       <th scope="col">{t('transcripts.analytics.destination')}</th>
                       <th scope="col">{t('transcripts.analytics.count')}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {data.topDestinations.map((d) => (
-                      <tr key={`${d.recipientId ?? d.recipientName}`} className="border-t border-slate-100 dark:border-neutral-800">
+                      <tr key={`${d.recipientId ?? d.recipientName}`} className="border-t border-border-subtle">
                         <td className="py-1.5">{d.recipientName}</td>
                         <td>{d.count}</td>
                       </tr>
@@ -419,35 +415,35 @@ export function TranscriptAnalyticsPanel({ enabled, onOpenQueue }: Props) {
             </div>
 
             {drillMetric ? (
-              <section aria-labelledby={`${titleId}-drill`} className="rounded-lg border border-slate-200 p-4 dark:border-neutral-800">
+              <section aria-labelledby={`${titleId}-drill`} className="rounded-lg border border-border-default p-4 dark:border-border-subtle">
                 <div className="flex items-center justify-between gap-2">
                   <h3 id={`${titleId}-drill`} className="text-sm font-semibold">
                     {t('transcripts.analytics.drillTitle', { metric: drillMetric })}
                   </h3>
                   <button
                     type="button"
-                    className="text-xs text-slate-500 hover:underline"
+                    className="text-xs text-fg-muted hover:underline"
                     onClick={() => setDrillMetric(null)}
                   >
                     {t('dialogs.close')}
                   </button>
                 </div>
                 {drillOrders.length === 0 ? (
-                  <p className="mt-2 text-sm text-slate-500">{t('transcripts.analytics.drillEmpty')}</p>
+                  <p className="mt-2 text-sm text-fg-muted">{t('transcripts.analytics.drillEmpty')}</p>
                 ) : (
                   <ul className="mt-2 divide-y divide-slate-100 dark:divide-neutral-800">
                     {drillOrders.map((o) => (
                       <li key={o.id}>
                         <button
                           type="button"
-                          className="flex w-full items-center justify-between gap-2 py-2 text-left text-sm hover:bg-slate-50 dark:hover:bg-neutral-900"
+                          className="flex w-full items-center justify-between gap-2 py-2 text-left text-sm hover:bg-surface-base dark:hover:bg-surface-raised"
                           onClick={() => onOpenQueue?.(o.id)}
                         >
                           <span>
                             {o.userEmail || o.id}
-                            <span className="ml-2 text-xs text-slate-500">{o.status}</span>
+                            <span className="ml-2 text-xs text-fg-muted">{o.status}</span>
                           </span>
-                          <span className="text-xs text-slate-400">
+                          <span className="text-xs text-fg-subtle">
                             {new Date(o.submittedAt ?? o.createdAt).toLocaleString()}
                           </span>
                         </button>

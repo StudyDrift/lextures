@@ -37,11 +37,6 @@ func (d Deps) handleCoppaStatus() http.HandlerFunc {
 		AIFeaturesEnabled bool   `json:"aiFeaturesEnabled"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.coppaEnabled(w) {
 			return
 		}
@@ -78,11 +73,6 @@ func (d Deps) handleCoppaConsentToken() http.HandlerFunc {
 		StudentID string `json:"studentId"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.coppaEnabled(w) {
 			return
 		}
@@ -141,11 +131,6 @@ func (d Deps) handleCoppaParentDashboard() http.HandlerFunc {
 		AIFeaturesEnabled  bool    `json:"aiFeaturesEnabled"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.coppaEnabled(w) {
 			return
 		}
@@ -197,11 +182,6 @@ func (d Deps) handleCoppaParentDashboard() http.HandlerFunc {
 // Parent role: revoke a consent record.
 func (d Deps) handleCoppaConsentRevoke() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodDelete {
-			w.Header().Set("Allow", http.MethodDelete)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.coppaEnabled(w) {
 			return
 		}
@@ -237,11 +217,6 @@ func (d Deps) handleCoppaAIOptIn() http.HandlerFunc {
 		Enabled   bool   `json:"enabled"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.coppaEnabled(w) {
 			return
 		}
@@ -280,11 +255,6 @@ func (d Deps) handleCoppaAIOptIn() http.HandlerFunc {
 // Org admin: CSV bulk district consent import.
 func (d Deps) handleCoppaBulkImport() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.coppaEnabled(w) {
 			return
 		}
@@ -371,11 +341,6 @@ func (d Deps) handleCoppaInitiateConsent() http.HandlerFunc {
 		ConsentID string `json:"consentId"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.coppaEnabled(w) {
 			return
 		}

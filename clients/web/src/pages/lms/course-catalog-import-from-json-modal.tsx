@@ -234,7 +234,7 @@ function CourseCatalogImportFromJsonModalInner({
       }}
     >
       <div
-        className="flex max-h-[min(92vh,720px)] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-900"
+        className="flex max-h-[min(92vh,720px)] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-raised"
         onDragOver={(e) => {
           // Prevent the browser from navigating away if the file is dropped outside the drop zone.
           e.preventDefault()
@@ -243,12 +243,12 @@ function CourseCatalogImportFromJsonModalInner({
           e.preventDefault()
         }}
       >
-        <div className="flex items-start justify-between gap-3 border-b border-slate-200 px-5 py-4 dark:border-neutral-700">
+        <div className="flex items-start justify-between gap-3 border-b border-border-default px-5 py-4 dark:border-border-default">
           <div>
-            <h2 id={titleId} className="text-lg font-semibold text-slate-900 dark:text-neutral-100">
+            <h2 id={titleId} className="text-lg font-semibold text-fg-default">
               {heading}
             </h2>
-            <p id={statusId} className="mt-0.5 text-sm text-slate-500 dark:text-neutral-400">
+            <p id={statusId} className="mt-0.5 text-sm text-fg-muted">
               {subheading}
             </p>
           </div>
@@ -256,7 +256,7 @@ function CourseCatalogImportFromJsonModalInner({
             type="button"
             onClick={onClose}
             disabled={busy}
-            className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-800"
+            className="rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken disabled:opacity-50 dark:text-fg-muted dark:hover:bg-surface-overlay"
             aria-label="Close"
           >
             <X className="h-5 w-5" aria-hidden />
@@ -269,10 +269,10 @@ function CourseCatalogImportFromJsonModalInner({
               <div className="inline-flex origin-center scale-[0.45]">
                 <BookLoader />
               </div>
-              <p className="text-sm font-medium text-slate-800 dark:text-neutral-200">
+              <p className="text-sm font-medium text-fg-default">
                 Importing {pending?.fileName ?? 'JSON export'}…
               </p>
-              <p className="max-w-xs text-sm text-slate-500 dark:text-neutral-400">
+              <p className="max-w-xs text-sm text-fg-muted">
                 We will close this window when the course is ready.
               </p>
             </div>
@@ -281,8 +281,8 @@ function CourseCatalogImportFromJsonModalInner({
           {step === 'success' && createdCourse ? (
             <div className="flex flex-col items-center justify-center gap-3 py-10 text-center" aria-live="polite">
               <CheckCircle2 className="h-12 w-12 text-emerald-600 dark:text-emerald-400" aria-hidden />
-              <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">{createdCourse.title}</p>
-              <p className="text-sm text-slate-500 dark:text-neutral-400">
+              <p className="text-sm font-semibold text-fg-default">{createdCourse.title}</p>
+              <p className="text-sm text-fg-muted">
                 Added to your catalog as <code className="text-xs">{createdCourse.courseCode}</code>.
               </p>
             </div>
@@ -313,32 +313,24 @@ function CourseCatalogImportFromJsonModalInner({
                   onDragOver={onDropZoneDragOver}
                   onDragLeave={onDropZoneDragLeave}
                   onDrop={onDropZoneDrop}
-                  className={`flex flex-col items-center gap-4 rounded-xl border-2 border-dashed px-4 py-10 text-center transition-[background-color,color,border-color] ${
-                    dragOver
-                      ? 'border-indigo-400 bg-indigo-50/80 dark:border-indigo-500 dark:bg-indigo-950/30'
-                      : 'border-slate-300 bg-slate-50/80 dark:border-neutral-600 dark:bg-neutral-800/40'
-                  }`}
+                  className={`flex flex-col items-center gap-4 rounded-xl border-2 border-dashed px-4 py-10 text-center transition-[background-color,color,border-color] ${ dragOver ? 'border-indigo-400 bg-indigo-50/80 dark:border-indigo-500 dark:bg-indigo-950/30' : 'border-border-strong bg-slate-50/80 dark:border-border-default/40' }`}
                 >
                   <FileJson
-                    className={`h-10 w-10 ${
-                      dragOver
-                        ? 'text-indigo-500 dark:text-indigo-400'
-                        : 'text-slate-400 dark:text-neutral-500'
-                    }`}
+                    className={`h-10 w-10 ${ dragOver ? 'text-indigo-500 dark:text-indigo-400' : 'text-fg-subtle' }`}
                     aria-hidden
                   />
                   <div>
-                    <p className="text-sm font-medium text-slate-800 dark:text-neutral-200">
+                    <p className="text-sm font-medium text-fg-default">
                       {dragOver ? 'Drop JSON file here' : 'Drop a course export JSON file here'}
                     </p>
-                    <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+                    <p className="mt-1 text-xs text-fg-muted">
                       Or choose a file below. Same format as Download JSON export in course settings.
                     </p>
                   </div>
                   <button
                     type="button"
                     onClick={() => fileRef.current?.click()}
-                    className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700"
+                    className="inline-flex items-center gap-2 rounded-xl border border-border-strong bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700"
                   >
                     <Upload className="h-4 w-4" aria-hidden />
                     Choose JSON file…
@@ -348,13 +340,13 @@ function CourseCatalogImportFromJsonModalInner({
 
               {step === 'review' && pending ? (
                 <div className="space-y-4">
-                  <div className="flex items-start justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-neutral-600 dark:bg-neutral-800/60">
+                  <div className="flex items-start justify-between gap-3 rounded-xl border border-border-default bg-surface-base px-3 py-2.5 dark:border-border-default/60">
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-slate-900 dark:text-neutral-100">
+                      <p className="truncate text-sm font-medium text-fg-default">
                         {pending.fileName}
                       </p>
                       {pending.stats.sourceCourseCode ? (
-                        <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
+                        <p className="mt-0.5 text-xs text-fg-muted">
                           Source code:{' '}
                           <code className="text-xs">{pending.stats.sourceCourseCode}</code>
                           {' '}
@@ -365,7 +357,7 @@ function CourseCatalogImportFromJsonModalInner({
                     <button
                       type="button"
                       onClick={clearFile}
-                      className="shrink-0 text-xs font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
+                      className="shrink-0 text-xs font-semibold text-accent-fg hover:text-indigo-500 dark:text-indigo-400"
                     >
                       Change file
                     </button>
@@ -374,7 +366,7 @@ function CourseCatalogImportFromJsonModalInner({
                   <div>
                     <label
                       htmlFor={nameId}
-                      className="block text-sm font-medium text-slate-800 dark:text-neutral-200"
+                      className="block text-sm font-medium text-fg-default"
                     >
                       New course name
                     </label>
@@ -384,7 +376,7 @@ function CourseCatalogImportFromJsonModalInner({
                       value={newTitle}
                       onChange={(e) => setNewTitle(e.target.value)}
                       placeholder="e.g. Intro to Biology — Spring 2027"
-                      className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+                      className="mt-1.5 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm text-fg-default shadow-sm outline-none placeholder:text-fg-subtle focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 dark:border-border-default dark:bg-surface-base dark:text-fg-default"
                     />
                   </div>
 
@@ -392,7 +384,7 @@ function CourseCatalogImportFromJsonModalInner({
                     <div>
                       <p
                         id={statsListId}
-                        className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400"
+                        className="text-xs font-semibold uppercase tracking-wide text-fg-muted"
                       >
                         In this file
                       </p>
@@ -403,12 +395,12 @@ function CourseCatalogImportFromJsonModalInner({
                         {pendingStatLines.map((line) => (
                           <li
                             key={line.key}
-                            className="flex items-baseline justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 dark:border-neutral-600 dark:bg-neutral-800/60"
+                            className="flex items-baseline justify-between gap-2 rounded-lg border border-border-default bg-surface-base px-2.5 py-1.5 dark:border-border-default/60"
                           >
-                            <span className="text-xs text-slate-600 dark:text-neutral-300">
+                            <span className="text-xs text-fg-muted">
                               {line.label}
                             </span>
-                            <span className="text-sm font-semibold tabular-nums text-slate-900 dark:text-neutral-100">
+                            <span className="text-sm font-semibold tabular-nums text-fg-default">
                               {line.count}
                             </span>
                           </li>
@@ -416,7 +408,7 @@ function CourseCatalogImportFromJsonModalInner({
                       </ul>
                     </div>
                   ) : (
-                    <p className="text-sm text-slate-500 dark:text-neutral-400">
+                    <p className="text-sm text-fg-muted">
                       This file has no modules, bodies, syllabus sections, grading groups, or
                       enrollments counted for preview. You can still import if the server accepts the
                       format.
@@ -424,7 +416,7 @@ function CourseCatalogImportFromJsonModalInner({
                   )}
 
                   {pending.stats.hasCourseSettings ? (
-                    <p className="text-xs text-slate-500 dark:text-neutral-500">
+                    <p className="text-xs text-fg-subtle">
                       Course settings from the file (schedule, feature flags, appearance) will be
                       applied after the new course is created.
                     </p>
@@ -436,11 +428,11 @@ function CourseCatalogImportFromJsonModalInner({
         </div>
 
         {step === 'review' ? (
-          <div className="flex flex-wrap justify-end gap-2 border-t border-slate-200 px-5 py-4 dark:border-neutral-700">
+          <div className="flex flex-wrap justify-end gap-2 border-t border-border-default px-5 py-4 dark:border-border-default">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+              className="rounded-xl px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay"
             >
               Cancel
             </button>
@@ -448,7 +440,7 @@ function CourseCatalogImportFromJsonModalInner({
               type="button"
               onClick={() => void onSubmit()}
               disabled={!pending || !newTitle.trim()}
-              className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <FileJson className="h-4 w-4 shrink-0" aria-hidden />
               Create course

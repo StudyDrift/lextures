@@ -86,12 +86,12 @@ export function CourseSyllabusAcceptanceOverlay({ courseCode }: { courseCode: st
       aria-modal="true"
       aria-labelledby="syllabus-accept-title"
     >
-      <div className="flex max-h-[min(90vh,720px)] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-neutral-900">
-        <div className="border-b border-slate-200 px-6 py-4 dark:border-neutral-700">
-          <h2 id="syllabus-accept-title" className="text-lg font-semibold text-slate-900 dark:text-neutral-100">
+      <div className="flex max-h-[min(90vh,720px)] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-surface-raised shadow-xl dark:bg-surface-raised">
+        <div className="border-b border-border-default px-6 py-4 dark:border-border-default">
+          <h2 id="syllabus-accept-title" className="text-lg font-semibold text-fg-default">
             Review course syllabus
           </h2>
-          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+          <p className="mt-1 text-sm text-fg-muted">
             Your instructor requires you to acknowledge the syllabus before you continue in this course.
           </p>
         </div>
@@ -99,7 +99,7 @@ export function CourseSyllabusAcceptanceOverlay({ courseCode }: { courseCode: st
           {syllabusSections && syllabusSections.length > 0 ? (
             <SyllabusMarkdownView sections={syllabusSections} theme={mdTheme} courseCode={courseCode} />
           ) : (
-            <p className="text-sm text-slate-600 dark:text-neutral-400">
+            <p className="text-sm text-fg-muted">
               No syllabus text has been published yet. You can still confirm that you agree to follow course
               policies as they appear here when your instructor adds them.
             </p>
@@ -110,12 +110,12 @@ export function CourseSyllabusAcceptanceOverlay({ courseCode }: { courseCode: st
             {acceptError}
           </p>
         )}
-        <div className="border-t border-slate-200 px-6 py-4 dark:border-neutral-700">
+        <div className="border-t border-border-default px-6 py-4 dark:border-border-default">
           <button
             type="button"
             onClick={() => void handleAcceptSyllabus()}
             disabled={accepting}
-            className="w-full rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+            className="w-full rounded-xl bg-accent-solid px-4 py-3 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
           >
             {accepting ? 'Saving…' : 'I have read and accept the syllabus'}
           </button>

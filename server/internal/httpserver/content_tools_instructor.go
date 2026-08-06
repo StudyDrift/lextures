@@ -68,10 +68,6 @@ func (d Deps) requireContentToolsGradeRead(w http.ResponseWriter, r *http.Reques
 
 func (d Deps) handleContentToolsRosterList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, viewer, courseID, ok := d.requireContentToolsGradeRead(w, r)
 		if !ok {
 			return
@@ -152,10 +148,6 @@ func (d Deps) handleContentToolsRosterList() http.HandlerFunc {
 
 func (d Deps) handleContentToolsStateDetail() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, viewer, courseID, ok := d.requireContentToolsGradeRead(w, r)
 		if !ok {
 			return
@@ -225,10 +217,6 @@ func (d Deps) handleContentToolsStateDetail() http.HandlerFunc {
 
 func (d Deps) handleContentToolsRosterExport() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, viewer, courseID, ok := d.requireContentToolsGradeRead(w, r)
 		if !ok {
 			return

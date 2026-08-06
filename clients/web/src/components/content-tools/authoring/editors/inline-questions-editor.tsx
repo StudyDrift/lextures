@@ -67,7 +67,7 @@ export function InlineQuestionsEditor({
       <section className={sectionClass} aria-labelledby={`${baseId}-settings`}>
         <h4
           id={`${baseId}-settings`}
-          className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400"
+          className="text-xs font-semibold uppercase tracking-wide text-fg-muted"
         >
           {t('contentTools.tools.inline_questions.editor.settings')}
         </h4>
@@ -166,24 +166,24 @@ export function InlineQuestionsEditor({
           </label>
         </div>
 
-        <div className="flex flex-col gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:flex-wrap sm:gap-x-6 sm:gap-y-3 dark:border-neutral-700">
-          <label className="flex min-h-10 cursor-pointer items-center gap-2.5 text-sm text-slate-700 dark:text-neutral-200">
+        <div className="flex flex-col gap-3 border-t border-border-default pt-4 sm:flex-row sm:flex-wrap sm:gap-x-6 sm:gap-y-3 dark:border-border-default">
+          <label className="flex min-h-10 cursor-pointer items-center gap-2.5 text-sm text-fg-default">
             <input
               type="checkbox"
               disabled={disabled}
               checked={value.sequential === true}
               onChange={(e) => patch({ sequential: e.target.checked })}
-              className="size-4 rounded border-slate-300 text-slate-800 focus:ring-slate-400 dark:border-neutral-500"
+              className="size-4 rounded border-border-strong text-fg-default focus:ring-slate-400 dark:border-neutral-500"
             />
             <span>{t('contentTools.tools.inline_questions.editor.sequential')}</span>
           </label>
-          <label className="flex min-h-10 cursor-pointer items-center gap-2.5 text-sm text-slate-700 dark:text-neutral-200">
+          <label className="flex min-h-10 cursor-pointer items-center gap-2.5 text-sm text-fg-default">
             <input
               type="checkbox"
               disabled={disabled}
               checked={value.shuffleOptions === true}
               onChange={(e) => patch({ shuffleOptions: e.target.checked })}
-              className="size-4 rounded border-slate-300 text-slate-800 focus:ring-slate-400 dark:border-neutral-500"
+              className="size-4 rounded border-border-strong text-fg-default focus:ring-slate-400 dark:border-neutral-500"
             />
             <span>{t('contentTools.tools.inline_questions.editor.shuffle')}</span>
           </label>
@@ -203,7 +203,7 @@ export function InlineQuestionsEditor({
       </section>
 
       <div className="space-y-4">
-        <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+        <h4 className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
           {t('contentTools.tools.inline_questions.editor.questions')}
         </h4>
 
@@ -225,7 +225,7 @@ export function InlineQuestionsEditor({
         type="button"
         disabled={disabled || questions.length >= 3}
         onClick={addQuestion}
-        className="w-full rounded-md border border-dashed border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:border-slate-400 hover:bg-slate-50 disabled:opacity-40 dark:border-neutral-600 dark:text-neutral-200 dark:hover:border-neutral-500 dark:hover:bg-neutral-900"
+        className="w-full rounded-md border border-dashed border-border-strong px-4 py-2.5 text-sm font-medium text-fg-muted hover:border-slate-400 hover:bg-surface-base disabled:opacity-40 dark:border-border-default dark:text-fg-default dark:hover:border-neutral-500 dark:hover:bg-surface-raised"
       >
         {t('contentTools.tools.inline_questions.editor.addQuestion')}
       </button>

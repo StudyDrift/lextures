@@ -30,12 +30,12 @@ export function SimplifyDiffDialog({
       aria-modal="true"
       aria-labelledby="simplify-diff-title"
     >
-      <div className="max-h-[90vh] w-full max-w-3xl overflow-auto rounded-xl bg-white p-6 shadow-xl dark:bg-neutral-900">
-        <h2 id="simplify-diff-title" className="text-lg font-semibold text-slate-900 dark:text-neutral-100">
+      <div className="max-h-[90vh] w-full max-w-3xl overflow-auto rounded-xl bg-surface-raised p-6 shadow-xl dark:bg-surface-raised">
+        <h2 id="simplify-diff-title" className="text-lg font-semibold text-fg-default">
           Simplify to Grade {targetFkgl}
         </h2>
         {computedFkgl != null && (
-          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+          <p className="mt-1 text-sm text-fg-muted">
             Computed reading level: Grade {computedFkgl.toFixed(1)}
           </p>
         )}
@@ -46,14 +46,14 @@ export function SimplifyDiffDialog({
         )}
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Original</h3>
-            <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap rounded border border-slate-200 bg-slate-50 p-3 text-sm dark:border-neutral-700 dark:bg-neutral-800">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-fg-muted">Original</h3>
+            <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap rounded border border-border-default bg-surface-base p-3 text-sm dark:border-border-default dark:bg-surface-overlay">
               {original}
             </pre>
           </div>
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Simplified</h3>
-            <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap rounded border border-slate-200 bg-slate-50 p-3 text-sm dark:border-neutral-700 dark:bg-neutral-800">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-fg-muted">Simplified</h3>
+            <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap rounded border border-border-default bg-surface-base p-3 text-sm dark:border-border-default dark:bg-surface-overlay">
               {loading ? 'Generating…' : simplified}
             </pre>
           </div>
@@ -61,7 +61,7 @@ export function SimplifyDiffDialog({
         <div className="mt-6 flex justify-end gap-2">
           <button
             type="button"
-            className="rounded-lg border border-slate-300 px-4 py-2 text-sm dark:border-neutral-600"
+            className="rounded-lg border border-border-strong px-4 py-2 text-sm dark:border-border-default"
             onClick={onClose}
           >
             Cancel

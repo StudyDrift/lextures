@@ -170,9 +170,9 @@ export function CourseSectionsSettingsSection({ courseCode }: Props) {
 
   return (
     <div data-focus-anchor="course.sections.list" className="space-y-8">
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
-        <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Sections</h2>
-        <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+      <section className="rounded-2xl border border-border-default bg-surface-raised p-5 shadow-sm dark:border-border-subtle dark:bg-surface-base">
+        <h2 className="text-sm font-semibold text-fg-default">Sections</h2>
+        <p className="mt-1 text-sm text-fg-muted">
           No sections yet? Add sections to split your course roster. Each section can have its own
           instructor and optional due-date overrides on assignments.
         </p>
@@ -182,10 +182,10 @@ export function CourseSectionsSettingsSection({ courseCode }: Props) {
           </p>
         )}
         {sections === null && !loadError && (
-          <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">Loading…</p>
+          <p className="mt-4 text-sm text-fg-muted">Loading…</p>
         )}
         {sections && sections.length === 0 && !loadError && (
-          <p className="mt-4 text-sm text-slate-600 dark:text-neutral-300">
+          <p className="mt-4 text-sm text-fg-muted">
             No sections yet. Create one below.
           </p>
         )}
@@ -194,11 +194,11 @@ export function CourseSectionsSettingsSection({ courseCode }: Props) {
             {sections.map((s) => (
               <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 py-3">
                 <div>
-                  <p className="font-medium text-slate-900 dark:text-neutral-100">
+                  <p className="font-medium text-fg-default">
                     {s.sectionCode}
-                    {s.name ? <span className="text-slate-500"> — {s.name}</span> : null}
+                    {s.name ? <span className="text-fg-muted"> — {s.name}</span> : null}
                   </p>
-                  <p className="text-xs text-slate-500 dark:text-neutral-400">
+                  <p className="text-xs text-fg-muted">
                     Status: {s.status}
                   </p>
                 </div>
@@ -216,54 +216,54 @@ export function CourseSectionsSettingsSection({ courseCode }: Props) {
             ))}
           </ul>
         )}
-        <form onSubmit={onCreate} className="mt-6 space-y-3 rounded-xl border border-slate-100 p-4 dark:border-neutral-800">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+        <form onSubmit={onCreate} className="mt-6 space-y-3 rounded-xl border border-border-subtle p-4 dark:border-border-subtle">
+          <p className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
             Add section
           </p>
           <label className="block text-sm">
-            <span className="text-slate-700 dark:text-neutral-300">Section code</span>
+            <span className="text-fg-muted">Section code</span>
             <input
               value={newCode}
               onChange={(e) => setNewCode(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+              className="mt-1 w-full rounded-lg border border-border-default px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised"
               placeholder="001"
               required
             />
           </label>
           <label className="block text-sm">
-            <span className="text-slate-700 dark:text-neutral-300">Name (optional)</span>
+            <span className="text-fg-muted">Name (optional)</span>
             <input
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+              className="mt-1 w-full rounded-lg border border-border-default px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised"
               placeholder="Morning lab"
             />
           </label>
           <button
             type="submit"
             disabled={busy}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
+            className="rounded-lg bg-accent-solid px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
           >
             Create section
           </button>
         </form>
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
-        <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+      <section className="rounded-2xl border border-border-default bg-surface-raised p-5 shadow-sm dark:border-border-subtle dark:bg-surface-base">
+        <h2 className="text-sm font-semibold text-fg-default">
           Section due date override
         </h2>
-        <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+        <p className="mt-1 text-sm text-fg-muted">
           Pick a section and assignment, then set a due date that applies only to students in that
           section (overrides the course-level due date for learners in that section).
         </p>
         <form onSubmit={onSaveOverride} className="mt-4 space-y-3">
           <label className="block text-sm">
-            <span className="text-slate-700 dark:text-neutral-300">Section</span>
+            <span className="text-fg-muted">Section</span>
             <select
               value={overrideSectionId}
               onChange={(e) => setOverrideSectionId(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+              className="mt-1 w-full rounded-lg border border-border-default px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised"
             >
               <option value="">Select…</option>
               {(sections ?? []).filter((s) => s.status === 'active').map((s) => (
@@ -275,11 +275,11 @@ export function CourseSectionsSettingsSection({ courseCode }: Props) {
             </select>
           </label>
           <label className="block text-sm">
-            <span className="text-slate-700 dark:text-neutral-300">Assignment</span>
+            <span className="text-fg-muted">Assignment</span>
             <select
               value={overrideItemId}
               onChange={(e) => setOverrideItemId(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+              className="mt-1 w-full rounded-lg border border-border-default px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised"
             >
               <option value="">Select…</option>
               {assignments.map((a) => (
@@ -300,13 +300,13 @@ export function CourseSectionsSettingsSection({ courseCode }: Props) {
               scheduleMode={scheduleMode}
               relativeAnchorAt={relativeScheduleAnchorAt}
               defaultTime="23:59"
-              className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+              className="mt-1 w-full rounded-lg border border-border-default px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised"
             />
           </div>
           <button
             type="submit"
             disabled={busy || !overrideSectionId || !overrideItemId}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
+            className="rounded-lg bg-accent-solid px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
           >
             Save override
           </button>

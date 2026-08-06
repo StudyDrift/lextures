@@ -31,11 +31,11 @@ export function InlineQuestionsQuestionCard({
 
   return (
     <div
-      className="space-y-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-950"
+      className="space-y-4 rounded-lg border border-border-default bg-surface-raised p-4 shadow-sm dark:border-border-default dark:bg-surface-base"
       data-editor-question={q.id}
     >
       <div className="flex items-center justify-between gap-3">
-        <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+        <p className="text-sm font-semibold text-fg-default">
           {t('contentTools.tools.inline_questions.editor.questionN', { n: idx + 1 })}
         </p>
         <button
@@ -104,7 +104,7 @@ export function InlineQuestionsQuestionCard({
             {(q.options ?? []).map((opt, oi) => (
               <li
                 key={opt.id}
-                className="space-y-2 rounded-md border border-slate-200 bg-slate-50/80 p-3 dark:border-neutral-700 dark:bg-neutral-900/50"
+                className="space-y-2 rounded-md border border-border-default bg-slate-50/80 p-3 dark:border-border-default/50"
               >
                 <div className="flex items-start gap-3">
                   <label className="mt-2.5 flex shrink-0 items-center gap-1.5">
@@ -124,7 +124,7 @@ export function InlineQuestionsQuestionCard({
                         }
                         onChange({ ...q, options })
                       }}
-                      className="size-4 border-slate-300 text-slate-800 focus:ring-slate-400 dark:border-neutral-500"
+                      className="size-4 border-border-strong text-fg-default focus:ring-slate-400 dark:border-neutral-500"
                     />
                     <span className="sr-only">
                       {t('contentTools.tools.inline_questions.editor.correctOption')}
@@ -188,7 +188,7 @@ export function InlineQuestionsQuestionCard({
                   options: [...(q.options ?? []), { id: newId('opt'), text: '', correct: false }],
                 })
               }
-              className="text-sm font-medium text-slate-700 underline decoration-slate-300 underline-offset-2 hover:text-slate-900 dark:text-neutral-300 dark:hover:text-neutral-100"
+              className="text-sm font-medium text-fg-muted underline decoration-slate-300 underline-offset-2 hover:text-fg-default dark:text-fg-muted dark:hover:text-fg-default"
             >
               {t('contentTools.tools.inline_questions.editor.addOption')}
             </button>

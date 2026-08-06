@@ -62,16 +62,16 @@ function ModuleLtiLinkModalInner({
         if (e.target === e.currentTarget && !saving) onClose()
       }}
     >
-      <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-neutral-600 dark:bg-neutral-800">
-        <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-neutral-600">
-          <h3 id={titleId} className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+      <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-overlay">
+        <div className="flex items-center justify-between border-b border-border-default px-4 py-3 dark:border-border-default">
+          <h3 id={titleId} className="text-sm font-semibold text-fg-default">
             Add LTI tool link
           </h3>
           <button
             type="button"
             onClick={() => onClose()}
             disabled={saving}
-            className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-100"
+            className="rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken hover:text-fg-default disabled:cursor-not-allowed disabled:opacity-50 dark:text-fg-muted dark:hover:bg-neutral-700 dark:hover:text-fg-default"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
@@ -92,7 +92,7 @@ function ModuleLtiLinkModalInner({
             })
           }}
         >
-          <label htmlFor={titleFieldId} className="text-xs font-medium text-slate-600 dark:text-neutral-300">
+          <label htmlFor={titleFieldId} className="text-xs font-medium text-fg-muted">
             Title
           </label>
           <input
@@ -103,9 +103,9 @@ function ModuleLtiLinkModalInner({
             placeholder="e.g. Publisher homework"
             autoFocus
             disabled={saving}
-            className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 placeholder:text-slate-400 focus:border-indigo-400 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-500"
+            className="mt-1 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm text-fg-default outline-none ring-indigo-500/20 placeholder:text-fg-subtle focus:border-indigo-400 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:placeholder:text-neutral-500"
           />
-          <label htmlFor={toolFieldId} className="mt-4 block text-xs font-medium text-slate-600 dark:text-neutral-300">
+          <label htmlFor={toolFieldId} className="mt-4 block text-xs font-medium text-fg-muted">
             External tool
           </label>
           <select
@@ -113,7 +113,7 @@ function ModuleLtiLinkModalInner({
             value={externalToolId}
             onChange={(e) => setExternalToolId(e.target.value)}
             disabled={saving || toolsLoading || tools.length === 0}
-            className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-indigo-400 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+            className="mt-1 w-full rounded-xl border border-border-default bg-surface-raised px-2 py-1.5 text-sm text-fg-default outline-none focus:border-indigo-400 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60 dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
           >
             <option value="">{toolsLoading ? 'Loading…' : 'Select a registered tool'}</option>
             {tools.map((t) => (
@@ -122,10 +122,10 @@ function ModuleLtiLinkModalInner({
               </option>
             ))}
           </select>
-          <p className="mt-2 text-xs text-slate-500 dark:text-neutral-400">
+          <p className="mt-2 text-xs text-fg-muted">
             Tools are registered under Settings → LTI tools (administrators).
           </p>
-          <label htmlFor={rlFieldId} className="mt-4 block text-xs font-medium text-slate-600 dark:text-neutral-300">
+          <label htmlFor={rlFieldId} className="mt-4 block text-xs font-medium text-fg-muted">
             Resource link id (optional)
           </label>
           <input
@@ -134,9 +134,9 @@ function ModuleLtiLinkModalInner({
             value={resourceLinkId}
             onChange={(e) => setResourceLinkId(e.target.value)}
             disabled={saving}
-            className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-indigo-400 focus:ring-2 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+            className="mt-1 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm text-fg-default outline-none focus:border-indigo-400 focus:ring-2 disabled:opacity-60 dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
           />
-          <label htmlFor={liFieldId} className="mt-4 block text-xs font-medium text-slate-600 dark:text-neutral-300">
+          <label htmlFor={liFieldId} className="mt-4 block text-xs font-medium text-fg-muted">
             AGS line item URL (optional, for grade passback)
           </label>
           <input
@@ -147,7 +147,7 @@ function ModuleLtiLinkModalInner({
             onChange={(e) => setLineItemUrl(e.target.value)}
             disabled={saving}
             placeholder="https://…"
-            className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-indigo-400 focus:ring-2 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+            className="mt-1 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm text-fg-default outline-none focus:border-indigo-400 focus:ring-2 disabled:opacity-60 dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
           />
           {errorMessage ? (
             <p className="mt-3 text-sm text-rose-600 dark:text-rose-400" role="alert">
@@ -159,14 +159,14 @@ function ModuleLtiLinkModalInner({
               type="button"
               onClick={() => onClose()}
               disabled={saving}
-              className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50 dark:text-neutral-200 dark:hover:bg-neutral-700"
+              className="rounded-xl px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-sunken disabled:opacity-50 dark:text-fg-default dark:hover:bg-neutral-700"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving || toolsLoading || !title.trim() || !externalToolId.trim()}
-              className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+              className="rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
             >
               {saving ? 'Saving…' : 'Add'}
             </button>

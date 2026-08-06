@@ -18,11 +18,6 @@ import (
 // handleListMeetings is GET /api/v1/courses/{course_code}/meetings.
 func (d Deps) handleListMeetings() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode := chi.URLParam(r, "course_code")
 		userID, ok := d.meUserID(w, r)
 		if !ok {
@@ -63,11 +58,6 @@ func (d Deps) handleListMeetings() http.HandlerFunc {
 // handleGetMeetingJoin is GET /api/v1/meetings/{meeting_id}/join.
 func (d Deps) handleGetMeetingJoin() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		midStr := chi.URLParam(r, "meeting_id")
 		mid, err := uuid.Parse(midStr)
 		if err != nil {
@@ -134,11 +124,6 @@ func (d Deps) handleGetMeetingJoin() http.HandlerFunc {
 // handleGetMeetingAttendance is GET /api/v1/meetings/{meeting_id}/attendance.
 func (d Deps) handleGetMeetingAttendance() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		midStr := chi.URLParam(r, "meeting_id")
 		mid, err := uuid.Parse(midStr)
 		if err != nil {
@@ -184,11 +169,6 @@ func (d Deps) handleGetMeetingAttendance() http.HandlerFunc {
 // handleGetMeetingIcal is GET /api/v1/meetings/{meeting_id}/ical — RFC 5545 VCALENDAR download.
 func (d Deps) handleGetMeetingIcal() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		midStr := chi.URLParam(r, "meeting_id")
 		mid, err := uuid.Parse(midStr)
 		if err != nil {

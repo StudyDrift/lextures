@@ -58,12 +58,12 @@ export function OrderList({
               setDragItemId(null)
             }}
           >
-            <span className="w-6 text-xs tabular-nums text-slate-500">{index + 1}</span>
+            <span className="w-6 text-xs tabular-nums text-fg-muted">{index + 1}</span>
             <div className="min-w-0 flex-1">{renderChip(item, { inList: true })}</div>
             <div className="flex flex-col gap-0.5">
               <button
                 type="button"
-                className="rounded border border-slate-300 px-1.5 text-xs dark:border-neutral-600"
+                className="rounded border border-border-strong px-1.5 text-xs dark:border-border-default"
                 aria-label={t('contentTools.tools.sort_sequence.moveUp')}
                 disabled={readOnly || lockedItemIds.includes(id) || index === 0}
                 onClick={() => {
@@ -75,7 +75,7 @@ export function OrderList({
               </button>
               <button
                 type="button"
-                className="rounded border border-slate-300 px-1.5 text-xs dark:border-neutral-600"
+                className="rounded border border-border-strong px-1.5 text-xs dark:border-border-default"
                 aria-label={t('contentTools.tools.sort_sequence.moveDown')}
                 disabled={readOnly || lockedItemIds.includes(id) || index >= placement.length - 1}
                 onClick={() => onMove(id, index + 1)}
@@ -87,9 +87,7 @@ export function OrderList({
         )
       })}
       <li
-        className={`min-h-10 rounded border border-dashed border-slate-300 p-2 text-xs text-slate-500 dark:border-neutral-600 ${
-          target?.kind === 'position' && target.index === placement.length ? 'ring-2 ring-sky-500' : ''
-        }`}
+        className={`min-h-10 rounded border border-dashed border-border-strong p-2 text-xs text-fg-muted dark:border-border-default ${ target?.kind === 'position' && target.index === placement.length ? 'ring-2 ring-sky-500' : '' }`}
         onDragOver={(e) => {
           if (dragItemId) e.preventDefault()
         }}

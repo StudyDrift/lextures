@@ -111,7 +111,7 @@ function ImageViewer({ filePath, filename }: ImageViewerProps) {
         <button
           type="button"
           onClick={handleDownload}
-          className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+          className="rounded-xl border border-border-default bg-surface-raised px-4 py-2 text-sm font-semibold text-fg-default shadow-sm hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
         >
           Download instead
         </button>
@@ -131,25 +131,25 @@ function ImageViewer({ filePath, filename }: ImageViewerProps) {
     <div className="flex h-full flex-col overflow-hidden">
       {/* Image toolbar */}
       <div
-        className="flex shrink-0 items-center gap-1 border-b border-slate-200 bg-white px-2 py-1.5 dark:border-neutral-700 dark:bg-neutral-900"
+        className="flex shrink-0 items-center gap-1 border-b border-border-default bg-surface-raised px-2 py-1.5 dark:border-border-default dark:bg-surface-raised"
         role="toolbar"
         aria-label="Image viewer controls"
       >
         <button
           type="button"
           onClick={() => setZoom((z) => Math.max(0.1, Math.round((z - 0.15) * 100) / 100))}
-          className="rounded-lg p-1.5 text-slate-600 hover:bg-slate-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
+          className="rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay"
           aria-label="Zoom out"
         >
           <ZoomOut className="h-4 w-4" />
         </button>
-        <span className="min-w-[3rem] text-center text-xs text-slate-500 dark:text-neutral-500" aria-live="polite">
+        <span className="min-w-[3rem] text-center text-xs text-fg-subtle" aria-live="polite">
           {Math.round(zoom * 100)}%
         </span>
         <button
           type="button"
           onClick={() => setZoom((z) => Math.min(5, Math.round((z + 0.15) * 100) / 100))}
-          className="rounded-lg p-1.5 text-slate-600 hover:bg-slate-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
+          className="rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay"
           aria-label="Zoom in"
         >
           <ZoomIn className="h-4 w-4" />
@@ -157,7 +157,7 @@ function ImageViewer({ filePath, filename }: ImageViewerProps) {
         <button
           type="button"
           onClick={reset}
-          className="rounded-lg p-1.5 text-slate-600 hover:bg-slate-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
+          className="rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay"
           aria-label="Reset zoom and pan"
         >
           <RotateCcw className="h-4 w-4" />
@@ -166,7 +166,7 @@ function ImageViewer({ filePath, filename }: ImageViewerProps) {
         <button
           type="button"
           onClick={handleDownload}
-          className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
+          className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-fg-muted hover:bg-surface-sunken hover:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-fg-muted"
           aria-label={`Download ${filename}`}
         >
           <Download className="h-3.5 w-3.5" />
@@ -176,7 +176,7 @@ function ImageViewer({ filePath, filename }: ImageViewerProps) {
 
       {/* Pan/zoom area */}
       <div
-        className="flex-1 overflow-hidden bg-neutral-900 dark:bg-neutral-950"
+        className="flex-1 overflow-hidden bg-surface-raised dark:bg-surface-base"
         onWheel={handleWheel}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
@@ -322,11 +322,11 @@ function AudioViewer({ filePath, filename }: { filePath: string; filename: strin
   }
 
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-6 bg-neutral-50 p-8 dark:bg-neutral-950">
+    <div className="flex h-full flex-col items-center justify-center gap-6 bg-neutral-50 p-8 dark:bg-surface-base">
       <div className="rounded-2xl bg-indigo-100 p-8 dark:bg-indigo-950">
-        <Music className="h-12 w-12 text-indigo-600 dark:text-indigo-400" aria-hidden />
+        <Music className="h-12 w-12 text-accent-fg" aria-hidden />
       </div>
-      <p className="text-sm font-medium text-slate-700 dark:text-neutral-300">{filename}</p>
+      <p className="text-sm font-medium text-fg-muted">{filename}</p>
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <audio controls src={src} className="w-full max-w-md" aria-label={filename} />
     </div>
@@ -456,14 +456,14 @@ export function FilePreview({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="relative z-10 flex w-full flex-col overflow-hidden rounded-none bg-white shadow-2xl dark:bg-neutral-900 md:rounded-xl"
+        className="relative z-10 flex w-full flex-col overflow-hidden rounded-none bg-surface-raised shadow-2xl dark:bg-surface-raised md:rounded-xl"
         style={{ width: 'min(95vw, 1440px)', height: 'min(95vh, 1080px)', maxHeight: '100dvh' }}
       >
         {/* Dialog header */}
-        <div className="flex shrink-0 items-center gap-2 border-b border-slate-200 bg-white px-4 py-3 dark:border-neutral-700 dark:bg-neutral-900">
+        <div className="flex shrink-0 items-center gap-2 border-b border-border-default bg-surface-raised px-4 py-3 dark:border-border-default dark:bg-surface-raised">
           <h2
             id={titleId}
-            className="flex-1 truncate text-sm font-semibold text-slate-800 dark:text-neutral-100"
+            className="flex-1 truncate text-sm font-semibold text-fg-default"
             title={title}
           >
             {title}
@@ -472,7 +472,7 @@ export function FilePreview({
             ref={closeRef}
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+            className="rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken hover:text-fg-muted dark:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-fg-default"
             aria-label="Close preview"
           >
             <X className="h-5 w-5" />

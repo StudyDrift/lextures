@@ -84,7 +84,7 @@ export default function CourseCalendarPage() {
         </p>
       )}
       {!error && items === null && (
-        <p className="mt-8 text-sm text-slate-500 dark:text-neutral-400">Loading…</p>
+        <p className="mt-8 text-sm text-fg-muted">Loading…</p>
       )}
       {!error && items !== null && (
         <CourseCalendar

@@ -110,7 +110,7 @@ export default function SisIntegrationPage() {
   if (featuresLoading) {
     return (
       <main className="mx-auto max-w-4xl p-6">
-        <h1 className="text-xl font-bold text-slate-900 dark:text-neutral-100">
+        <h1 className="text-xl font-bold text-fg-default">
           Student Information System
         </h1>
         <p className="mt-6 text-sm" role="status">
@@ -123,7 +123,7 @@ export default function SisIntegrationPage() {
   if (!ffSisIntegration) {
     return (
       <main className="mx-auto max-w-4xl p-6">
-        <p className="text-sm text-slate-600 dark:text-neutral-400">
+        <p className="text-sm text-fg-muted">
           SIS integration is not enabled on this platform. Enable{' '}
           <strong>SIS integration</strong> in Settings → Global platform.
         </p>
@@ -134,7 +134,7 @@ export default function SisIntegrationPage() {
   if (!orgId) {
     return (
       <main className="mx-auto max-w-4xl p-6">
-        <p className="text-sm text-slate-600 dark:text-neutral-400">
+        <p className="text-sm text-fg-muted">
           Add an <code className="text-xs">?orgId=</code> query parameter with your institution
           organization id.
         </p>
@@ -144,10 +144,10 @@ export default function SisIntegrationPage() {
 
   return (
     <main className="mx-auto max-w-4xl p-6">
-      <h1 id={titleId} className="text-xl font-bold text-slate-900 dark:text-neutral-100">
+      <h1 id={titleId} className="text-xl font-bold text-fg-default">
         Student Information System
       </h1>
-      <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
+      <p className="mt-2 text-sm text-fg-muted">
         Connect Banner, Workday Student, Colleague, or other higher-ed SIS platforms for nightly
         roster sync and grade passback.
       </p>
@@ -168,18 +168,18 @@ export default function SisIntegrationPage() {
         </p>
       ) : null}
 
-      <section className="mt-8 rounded-lg border border-slate-200 p-4 dark:border-neutral-700">
-        <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+      <section className="mt-8 rounded-lg border border-border-default p-4 dark:border-border-default">
+        <h2 className="text-sm font-semibold text-fg-default">
           Add SIS connection
         </h2>
         <form className="mt-4 grid gap-4 sm:grid-cols-2" onSubmit={(e) => void handleCreate(e)}>
           <div className="sm:col-span-2">
-            <label htmlFor={vendorId} className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+            <label htmlFor={vendorId} className="block text-sm font-medium text-fg-muted">
               Adapter type
             </label>
             <select
               id={vendorId}
-              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+              className="mt-1 w-full rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-raised"
               value={vendor}
               onChange={(e) => setVendor(e.target.value as SISVendor)}
             >
@@ -191,38 +191,38 @@ export default function SisIntegrationPage() {
             </select>
           </div>
           <div className="sm:col-span-2">
-            <label htmlFor="sis-base-url" className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+            <label htmlFor="sis-base-url" className="block text-sm font-medium text-fg-muted">
               Endpoint URL
             </label>
             <input
               id="sis-base-url"
               type="url"
               required
-              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+              className="mt-1 w-full rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-raised"
               value={baseUrl}
               onChange={(e) => setBaseUrl(e.target.value)}
             />
           </div>
           <div>
-            <label htmlFor="sis-client-id" className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+            <label htmlFor="sis-client-id" className="block text-sm font-medium text-fg-muted">
               Client ID secret ref
             </label>
             <input
               id="sis-client-id"
               required
-              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+              className="mt-1 w-full rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-raised"
               value={clientIdRef}
               onChange={(e) => setClientIdRef(e.target.value)}
             />
           </div>
           <div>
-            <label htmlFor="sis-client-secret" className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+            <label htmlFor="sis-client-secret" className="block text-sm font-medium text-fg-muted">
               Client secret ref
             </label>
             <input
               id="sis-client-secret"
               required
-              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+              className="mt-1 w-full rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-raised"
               value={clientSecretRef}
               onChange={(e) => setClientSecretRef(e.target.value)}
             />
@@ -240,11 +240,11 @@ export default function SisIntegrationPage() {
       </section>
 
       <section className="mt-8" aria-labelledby="sis-connections-heading">
-        <h2 id="sis-connections-heading" className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+        <h2 id="sis-connections-heading" className="text-sm font-semibold text-fg-default">
           Configured connections
         </h2>
         {connections.length === 0 && !loading ? (
-          <p className="mt-3 text-sm text-slate-600 dark:text-neutral-400">
+          <p className="mt-3 text-sm text-fg-muted">
             No higher-ed SIS connections yet. Add Banner, Workday, or Colleague above.
           </p>
         ) : (
@@ -252,14 +252,14 @@ export default function SisIntegrationPage() {
             {connections.map((conn) => (
               <li
                 key={conn.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 p-4 dark:border-neutral-700"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border-default p-4 dark:border-border-default"
               >
                 <div>
-                  <p className="font-medium text-slate-900 dark:text-neutral-100">
+                  <p className="font-medium text-fg-default">
                     {vendorLabel(conn.vendor)}
                   </p>
-                  <p className="text-xs text-slate-500 dark:text-neutral-400">{conn.baseUrl}</p>
-                  <p className="text-xs text-slate-500 dark:text-neutral-400">
+                  <p className="text-xs text-fg-muted">{conn.baseUrl}</p>
+                  <p className="text-xs text-fg-muted">
                     Schedule: {conn.syncSchedule}
                     {conn.lastSyncAt ? ` · Last sync ${conn.lastSyncAt}` : ''}
                   </p>
@@ -269,7 +269,7 @@ export default function SisIntegrationPage() {
                     type="button"
                     disabled={busyId != null}
                     onClick={() => void handleTest(conn)}
-                    className="rounded-md border border-slate-300 px-3 py-1.5 text-sm dark:border-neutral-600"
+                    className="rounded-md border border-border-strong px-3 py-1.5 text-sm dark:border-border-default"
                   >
                     {busyId === `test-${conn.id}` ? 'Testing…' : 'Test'}
                   </button>
@@ -289,16 +289,16 @@ export default function SisIntegrationPage() {
       </section>
 
       <section className="mt-8" aria-labelledby="sis-logs-heading">
-        <h2 id="sis-logs-heading" className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+        <h2 id="sis-logs-heading" className="text-sm font-semibold text-fg-default">
           Sync history
         </h2>
         {logs.length === 0 && !loading ? (
-          <p className="mt-3 text-sm text-slate-600 dark:text-neutral-400">No sync runs yet.</p>
+          <p className="mt-3 text-sm text-fg-muted">No sync runs yet.</p>
         ) : (
           <div className="mt-3 overflow-x-auto">
             <table className="min-w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-neutral-700">
+                <tr className="border-b border-border-default">
                   <th className="py-2 pr-4 font-medium">Started</th>
                   <th className="py-2 pr-4 font-medium">Status</th>
                   <th className="py-2 font-medium">Connection</th>
@@ -306,7 +306,7 @@ export default function SisIntegrationPage() {
               </thead>
               <tbody>
                 {logs.slice(0, 10).map((log) => (
-                  <tr key={log.id} className="border-b border-slate-100 dark:border-neutral-800">
+                  <tr key={log.id} className="border-b border-border-subtle">
                     <td className="py-2 pr-4">{log.startedAt}</td>
                     <td className="py-2 pr-4">{log.status}</td>
                     <td className="py-2 font-mono text-xs">{log.connectionId.slice(0, 8)}…</td>

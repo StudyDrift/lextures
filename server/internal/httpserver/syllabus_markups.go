@@ -37,15 +37,6 @@ func encodeSyllabusMarkup(m syllabusmarkups.Markup) map[string]any {
 // handleListSyllabusMarkups is GET /api/v1/courses/{course_code}/syllabus/markups
 func (d Deps) handleListSyllabusMarkups() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, uid, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -82,15 +73,6 @@ func (d Deps) handleCreateSyllabusMarkup() http.HandlerFunc {
 		CommentText    *string `json:"commentText"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, uid, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -132,15 +114,6 @@ func (d Deps) handleCreateSyllabusMarkup() http.HandlerFunc {
 // handleDeleteSyllabusMarkup is DELETE /api/v1/courses/{course_code}/syllabus/markups/{markup_id}
 func (d Deps) handleDeleteSyllabusMarkup() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodDelete {
-			w.Header().Set("Allow", http.MethodDelete+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, uid, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return

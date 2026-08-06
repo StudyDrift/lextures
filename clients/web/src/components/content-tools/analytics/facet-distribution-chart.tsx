@@ -15,16 +15,16 @@ export function FacetDistributionChart({ facetKey, label, values }: FacetDistrib
 
   return (
     <div
-      className="space-y-2 rounded-xl border border-slate-100 bg-slate-50/60 p-3 dark:border-neutral-800 dark:bg-neutral-900/50"
+      className="space-y-2 rounded-xl border border-border-subtle bg-slate-50/60 p-3 dark:border-border-subtle/50"
       data-testid={`facet-chart-${facetKey}`}
     >
       <div className="flex items-center justify-between gap-2">
-        <h4 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+        <h4 className="text-sm font-semibold text-fg-default">
           {t(label, { defaultValue: label })}
         </h4>
         <button
           type="button"
-          className="rounded-md px-2 py-1 text-xs font-medium text-indigo-700 hover:bg-indigo-50 dark:text-indigo-300 dark:hover:bg-indigo-950/40"
+          className="rounded-md px-2 py-1 text-xs font-medium text-accent-fg hover:bg-indigo-50 dark:text-indigo-300 dark:hover:bg-indigo-950/40"
           onClick={() => setShowTable((v) => !v)}
         >
           {showTable
@@ -36,20 +36,20 @@ export function FacetDistributionChart({ facetKey, label, values }: FacetDistrib
         <table className="w-full text-start text-sm" data-testid={`facet-table-${facetKey}`}>
           <caption className="sr-only">{t(label, { defaultValue: label })}</caption>
           <thead>
-            <tr className="border-b border-slate-200 dark:border-neutral-700">
-              <th className="py-1.5 pe-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+            <tr className="border-b border-border-default">
+              <th className="py-1.5 pe-2 text-xs font-semibold uppercase tracking-wide text-fg-muted">
                 {t('contentTools.analytics.colValue')}
               </th>
-              <th className="py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+              <th className="py-1.5 text-xs font-semibold uppercase tracking-wide text-fg-muted">
                 {t('contentTools.analytics.colCount')}
               </th>
             </tr>
           </thead>
           <tbody>
             {values.map((v) => (
-              <tr key={v.value} className="border-b border-slate-100 dark:border-neutral-800">
-                <td className="py-1.5 pe-2 text-slate-800 dark:text-neutral-200">{v.value}</td>
-                <td className="py-1.5 tabular-nums text-slate-700 dark:text-neutral-300">{v.count}</td>
+              <tr key={v.value} className="border-b border-border-subtle">
+                <td className="py-1.5 pe-2 text-fg-default">{v.value}</td>
+                <td className="py-1.5 tabular-nums text-fg-muted">{v.count}</td>
               </tr>
             ))}
           </tbody>
@@ -58,18 +58,16 @@ export function FacetDistributionChart({ facetKey, label, values }: FacetDistrib
         <div role="img" aria-label={summary} className="space-y-1.5">
           {values.map((v) => (
             <div key={v.value} className="flex items-center gap-2 text-sm">
-              <span className="w-20 shrink-0 truncate text-slate-600 dark:text-neutral-300">
+              <span className="w-20 shrink-0 truncate text-fg-muted">
                 {v.value}
               </span>
-              <div className="h-2 flex-1 rounded-full bg-slate-200/80 dark:bg-neutral-800">
+              <div className="h-2 flex-1 rounded-full bg-slate-200/80 dark:bg-surface-overlay">
                 <div
-                  className={`h-2 rounded-full ${
-                    v.correct === false ? 'bg-amber-500' : 'bg-indigo-500 dark:bg-indigo-400'
-                  }`}
+                  className={`h-2 rounded-full ${ v.correct === false ? 'bg-amber-500' : 'bg-indigo-500 dark:bg-indigo-400' }`}
                   style={{ width: `${(v.count / max) * 100}%` }}
                 />
               </div>
-              <span className="w-8 text-end tabular-nums text-slate-700 dark:text-neutral-200">
+              <span className="w-8 text-end tabular-nums text-fg-default">
                 {v.count}
               </span>
             </div>

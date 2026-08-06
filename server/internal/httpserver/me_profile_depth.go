@@ -36,11 +36,6 @@ func studentVisibleDefinitions(defs []cfrepo.Definition) []map[string]any {
 
 func (d Deps) handleGetMyProfileFields() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -74,11 +69,6 @@ func (d Deps) handleGetMyProfileFields() http.HandlerFunc {
 
 func (d Deps) handlePatchMyProfileFields() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.effectiveConfig().CustomFieldsEnabled {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Custom fields are not enabled.")
 			return
@@ -128,11 +118,6 @@ func (d Deps) handlePatchMyProfileFields() http.HandlerFunc {
 
 func (d Deps) handleGetMyDemographics() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.demographicsEnabled(w) {
 			return
 		}
@@ -155,11 +140,6 @@ func (d Deps) handleGetMyDemographics() http.HandlerFunc {
 
 func (d Deps) handlePatchMyDemographics() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.demographicsEnabled(w) {
 			return
 		}

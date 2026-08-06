@@ -26,7 +26,7 @@ export function BlockFloatingToolbar({
         'pointer-events-auto flex h-9 w-max max-w-[calc(100vw-2rem)] items-center gap-0.5 px-1 py-0.5',
         embedded
           ? 'w-full rounded-none border-0 bg-transparent shadow-none'
-          : 'rounded-lg border border-slate-200 bg-white shadow-md shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-800 dark:shadow-black/40',
+          : 'rounded-lg border border-border-default bg-surface-raised shadow-md shadow-slate-900/10 dark:border-border-default dark:bg-surface-overlay dark:shadow-black/40',
       ].join(' ')}
       onClick={(e) => e.stopPropagation()}
       onKeyDown={(e) => e.stopPropagation()}

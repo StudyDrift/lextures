@@ -102,11 +102,6 @@ func boardJSON(b board.Board) map[string]any {
 // handleListBoards is GET /api/v1/courses/{course_code}/boards.
 func (d Deps) handleListBoards() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -149,11 +144,6 @@ func (d Deps) handleCreateBoard() http.HandlerFunc {
 		Description string `json:"description"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -241,11 +231,6 @@ func (d Deps) applyCreatePolicies(r *http.Request, courseCode string, created *b
 // handleGetBoard is GET /api/v1/courses/{course_code}/boards/{board_id}.
 func (d Deps) handleGetBoard() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -287,11 +272,6 @@ func (d Deps) handlePatchBoard() http.HandlerFunc {
 		FreezeMinutes    *int            `json:"freezeMinutes"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -465,11 +445,6 @@ func (d Deps) handlePatchBoard() http.HandlerFunc {
 // Soft-archives by default; hard-deletes when ?hard=true and caller has enrollments:update (course manage).
 func (d Deps) handleDeleteBoard() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodDelete {
-			w.Header().Set("Allow", http.MethodDelete)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return

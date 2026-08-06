@@ -10,8 +10,8 @@ export function SeatUtilizationBar({
 }) {
   if (license.unlimited) {
     return (
-      <p className="text-sm text-slate-600 dark:text-slate-400">
-        <span className="font-medium text-slate-900 dark:text-slate-100">Seats used:</span>{' '}
+      <p className="text-sm text-fg-muted dark:text-fg-subtle">
+        <span className="font-medium text-fg-default dark:text-slate-100">Seats used:</span>{' '}
         {license.usedSeats} / Unlimited
       </p>
     )
@@ -24,15 +24,15 @@ export function SeatUtilizationBar({
   return (
     <div>
       <div className="flex items-baseline justify-between gap-2">
-        <p id={labelId} className="text-sm font-medium text-slate-900 dark:text-slate-100">
+        <p id={labelId} className="text-sm font-medium text-fg-default dark:text-slate-100">
           Seats used: {license.usedSeats} / {license.maxSeats}
         </p>
-        <span className="text-sm tabular-nums text-slate-500 dark:text-slate-400" aria-hidden>
+        <span className="text-sm tabular-nums text-fg-muted dark:text-fg-subtle" aria-hidden>
           {clamped.toFixed(0)}%
         </span>
       </div>
       <div
-        className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-neutral-800"
+        className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-surface-overlay"
         role="progressbar"
         aria-labelledby={labelId}
         aria-valuemin={0}
@@ -49,23 +49,23 @@ export function SeatUtilizationBar({
 export function LicenseDetailsCard({ license }: { license: OrgLicense }) {
   const labelId = 'seat-utilization-label'
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-      <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">License</h2>
+    <section className="rounded-xl border border-border-default bg-surface-raised p-4 shadow-sm dark:border-border-subtle dark:bg-surface-raised">
+      <h2 className="text-base font-semibold text-fg-default dark:text-slate-100">License</h2>
       <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
         <div>
-          <dt className="text-slate-500 dark:text-slate-400">Tier</dt>
-          <dd className="font-medium capitalize text-slate-900 dark:text-slate-100">{license.tier}</dd>
+          <dt className="text-fg-muted dark:text-fg-subtle">Tier</dt>
+          <dd className="font-medium capitalize text-fg-default dark:text-slate-100">{license.tier}</dd>
         </div>
         {license.contractStart ? (
           <div>
-            <dt className="text-slate-500 dark:text-slate-400">Contract start</dt>
-            <dd className="font-medium text-slate-900 dark:text-slate-100">{license.contractStart}</dd>
+            <dt className="text-fg-muted dark:text-fg-subtle">Contract start</dt>
+            <dd className="font-medium text-fg-default dark:text-slate-100">{license.contractStart}</dd>
           </div>
         ) : null}
         {license.contractEnd ? (
           <div>
-            <dt className="text-slate-500 dark:text-slate-400">Contract end</dt>
-            <dd className="font-medium text-slate-900 dark:text-slate-100">{license.contractEnd}</dd>
+            <dt className="text-fg-muted dark:text-fg-subtle">Contract end</dt>
+            <dd className="font-medium text-fg-default dark:text-slate-100">{license.contractEnd}</dd>
           </div>
         ) : null}
       </dl>
@@ -73,7 +73,7 @@ export function LicenseDetailsCard({ license }: { license: OrgLicense }) {
         <SeatUtilizationBar license={license} labelId={labelId} />
       </div>
       {license.notes ? (
-        <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">{license.notes}</p>
+        <p className="mt-3 text-sm text-fg-muted dark:text-fg-subtle">{license.notes}</p>
       ) : null}
     </section>
   )

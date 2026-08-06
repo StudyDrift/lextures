@@ -155,10 +155,10 @@ export default function IntegrationsAdminPage() {
 
   return (
     <main className="mx-auto max-w-4xl p-6" aria-labelledby={titleId}>
-      <h1 id={titleId} className="text-xl font-bold text-slate-900 dark:text-neutral-100">
+      <h1 id={titleId} className="text-xl font-bold text-fg-default">
         Integrations
       </h1>
-      <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
+      <p className="mt-2 text-sm text-fg-muted">
         Connect Lextures to the tools you already use. Imports are read-only and OAuth tokens are
         stored encrypted.
       </p>
@@ -184,28 +184,28 @@ export default function IntegrationsAdminPage() {
             <li
               key={conn.id ?? conn.provider}
               data-testid={`integration-card-${conn.provider}`}
-              className="rounded-lg border border-slate-200 p-4 dark:border-neutral-700"
+              className="rounded-lg border border-border-default p-4 dark:border-border-default"
             >
               <div className="flex items-center justify-between gap-2">
-                <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+                <h2 className="text-sm font-semibold text-fg-default">
                   {conn.displayName}
                 </h2>
                 <span
                   className={
                     conn.connected
                       ? 'rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-900 dark:text-emerald-100'
-                      : 'rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 dark:bg-neutral-800 dark:text-neutral-300'
+                      : 'rounded-full bg-surface-sunken px-2 py-0.5 text-xs font-medium text-fg-muted dark:bg-surface-overlay dark:text-fg-muted'
                   }
                   data-testid={`integration-status-${conn.provider}`}
                 >
                   {conn.connected ? 'Connected' : 'Not connected'}
                 </span>
               </div>
-              <p className="mt-2 text-xs text-slate-600 dark:text-neutral-400">
+              <p className="mt-2 text-xs text-fg-muted">
                 {PROVIDER_BLURB[conn.provider] ?? ''}
               </p>
               {conn.connected ? (
-                <dl className="mt-3 text-xs text-slate-600 dark:text-neutral-400">
+                <dl className="mt-3 text-xs text-fg-muted">
                   <div className="flex justify-between gap-2">
                     <dt>Last synced</dt>
                     <dd>{formatTimestamp(conn.lastSyncedAt)}</dd>
@@ -232,7 +232,7 @@ export default function IntegrationsAdminPage() {
                     type="button"
                     onClick={() => void handleConnect(conn.provider)}
                     disabled={busy === `connect-${conn.provider}`}
-                    className="rounded bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                    className="rounded bg-accent-solid px-3 py-1.5 text-sm font-medium text-white hover:bg-accent disabled:opacity-50"
                   >
                     {busy === `connect-${conn.provider}` ? 'Connecting…' : 'Connect'}
                   </button>
@@ -243,10 +243,10 @@ export default function IntegrationsAdminPage() {
         </ul>
       )}
 
-      <h2 className="mt-12 text-lg font-semibold text-slate-900 dark:text-neutral-100">
+      <h2 className="mt-12 text-lg font-semibold text-fg-default">
         Classroom bots
       </h2>
-      <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
+      <p className="mt-2 text-sm text-fg-muted">
         Notify students in Slack, Teams, or Discord when assignments are posted, due dates approach, or
         grades are released. Configure channel mappings after connecting a workspace.
       </p>
@@ -258,26 +258,26 @@ export default function IntegrationsAdminPage() {
             <li
               key={platform}
               data-testid={`bot-card-${platform}`}
-              className="rounded-lg border border-slate-200 p-4 dark:border-neutral-700"
+              className="rounded-lg border border-border-default p-4 dark:border-border-default"
             >
               <div className="flex items-center justify-between gap-2">
-                <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+                <h3 className="text-sm font-semibold text-fg-default">
                   {BOT_LABEL[platform]}
                 </h3>
                 <span
                   className={
                     connected
                       ? 'rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-900 dark:text-emerald-100'
-                      : 'rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 dark:bg-neutral-800 dark:text-neutral-300'
+                      : 'rounded-full bg-surface-sunken px-2 py-0.5 text-xs font-medium text-fg-muted dark:bg-surface-overlay dark:text-fg-muted'
                   }
                 >
                   {connected ? 'Connected' : 'Not connected'}
                 </span>
               </div>
-              <p className="mt-2 text-xs text-slate-600 dark:text-neutral-400">{BOT_BLURB[platform]}</p>
+              <p className="mt-2 text-xs text-fg-muted">{BOT_BLURB[platform]}</p>
               {connected && conn ? (
                 <>
-                  <p className="mt-2 text-xs text-slate-500 dark:text-neutral-500">
+                  <p className="mt-2 text-xs text-fg-subtle">
                     Workspace: {conn.workspaceName || conn.workspaceId}
                     {conn.mappings?.length ? ` · ${conn.mappings.length} channel mapping(s)` : null}
                   </p>
@@ -299,7 +299,7 @@ export default function IntegrationsAdminPage() {
                     type="button"
                     onClick={() => void handleBotConnect(platform)}
                     disabled={busy === `bot-connect-${platform}`}
-                    className="rounded bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                    className="rounded bg-accent-solid px-3 py-1.5 text-sm font-medium text-white hover:bg-accent disabled:opacity-50"
                   >
                     {busy === `bot-connect-${platform}`
                       ? 'Connecting…'

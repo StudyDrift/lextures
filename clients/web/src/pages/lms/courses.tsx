@@ -111,7 +111,7 @@ function CatalogPurchasedBadge({
 
 function CourseCatalogHiddenBadge() {
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-slate-600 dark:bg-neutral-800 dark:text-neutral-300">
+    <span className="inline-flex items-center gap-1 rounded-full bg-surface-sunken px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-fg-muted dark:bg-surface-overlay dark:text-fg-muted">
       <EyeOff className="h-3 w-3" aria-hidden />      Hidden
     </span>
   )
@@ -269,7 +269,7 @@ function formatCourseTermLabel(course: CoursePublic): string {
 }
 
 const CATALOG_LIST_HERO_FRAME =
-  'relative aspect-[7/5] w-28 shrink-0 overflow-hidden rounded-lg bg-slate-100 dark:bg-neutral-800'
+  'relative aspect-[7/5] w-28 shrink-0 overflow-hidden rounded-lg bg-surface-sunken'
 
 function CatalogCourseHero({
   course,
@@ -385,7 +385,7 @@ function CourseCard({
       ref={sortable?.setNodeRef}
       style={sortable?.style}
       className={[
-        'flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/5 transition-shadow dark:border-neutral-700 dark:bg-neutral-900',
+        'flex h-full flex-col overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-sm shadow-slate-900/5 transition-shadow dark:border-border-default dark:bg-surface-raised',
         catalogRevealedHiddenClass(course, showHiddenRevealed),
         sortable ? 'touch-none cursor-grab active:cursor-grabbing' : '',
         sortable?.isDragging ? 'shadow-md shadow-slate-900/10 ring-2 ring-indigo-400/40' : '',
@@ -396,7 +396,7 @@ function CourseCard({
       {...(sortable ? sortable.listeners : {})}
     >
       {showHiddenRevealed && isUserCatalogHidden(course) ? (
-        <div className="border-b border-slate-100 px-4 py-2 dark:border-neutral-800">
+        <div className="border-b border-border-subtle px-4 py-2 dark:border-border-subtle">
           <CourseCatalogHiddenBadge />
         </div>
       ) : null}
@@ -428,7 +428,7 @@ function CourseCard({
         </div>
         {invitationPending && course.viewerPendingEnrollmentId ? (
           <>
-            <p className="mt-3 text-start text-sm text-slate-600 dark:text-neutral-400">
+            <p className="mt-3 text-start text-sm text-fg-muted">
               You have been invited to this course. Approve to join or decline to remove the invitation.
             </p>
             <CourseEnrollmentInvitationActions
@@ -440,11 +440,11 @@ function CourseCard({
         ) : (
           <>
             {descriptionBlurb ? (
-              <p className="mt-3 text-start text-sm leading-snug text-slate-600 line-clamp-4 dark:text-neutral-400">
+              <p className="mt-3 text-start text-sm leading-snug text-fg-muted line-clamp-4 dark:text-fg-muted">
                 {descriptionBlurb}
               </p>
             ) : null}
-            <p className="mt-3 text-start text-xs text-slate-400 dark:text-neutral-500">
+            <p className="mt-3 text-start text-xs text-fg-subtle">
               {formatEditedAgo(course.updatedAt)}
             </p>
           </>
@@ -566,7 +566,7 @@ function CourseListRow({
       ref={sortable?.setNodeRef}
       style={sortable?.style}
       className={[
-        'flex overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm shadow-slate-900/5 transition-shadow dark:border-neutral-700 dark:bg-neutral-900',
+        'flex overflow-hidden rounded-xl border border-border-default bg-surface-raised shadow-sm shadow-slate-900/5 transition-shadow dark:border-border-default dark:bg-surface-raised',
         catalogRevealedHiddenClass(course, showHiddenRevealed),
         sortable ? 'touch-none cursor-grab active:cursor-grabbing' : '',
         sortable?.isDragging ? 'shadow-md shadow-slate-900/10 ring-2 ring-indigo-400/40' : '',
@@ -605,7 +605,7 @@ function CourseListRow({
           <div className={`flex flex-wrap items-center gap-2 ${invitationMutedClass}`}>
             <CourseCatalogNicknameEditor
               course={course}
-              titleClassName="text-base font-semibold leading-snug text-slate-900 line-clamp-1 dark:text-neutral-100"
+              titleClassName="text-base font-semibold leading-snug text-fg-default line-clamp-1 dark:text-fg-default"
               openRequest={renameRequest}
               onNicknameChange={onNicknameChange}
             />
@@ -623,14 +623,14 @@ function CourseListRow({
           ) : descriptionBlurb ? (
             <Link
               to={courseHref}
-              className="text-start text-sm leading-snug text-slate-600 line-clamp-2 hover:text-indigo-600 dark:text-neutral-400 dark:hover:text-indigo-300"
+              className="text-start text-sm leading-snug text-fg-muted line-clamp-2 hover:text-accent-fg dark:text-fg-muted dark:hover:text-indigo-300"
               onClick={onCatalogLinkClick}
             >
               {descriptionBlurb}
             </Link>
           ) : null}
           {!invitationPending ? (
-            <p className="text-start text-xs text-slate-400 dark:text-neutral-500">{formatEditedAgo(course.updatedAt)}</p>
+            <p className="text-start text-xs text-fg-subtle">{formatEditedAgo(course.updatedAt)}</p>
           ) : null}
         </div>
         {!invitationPending ? (
@@ -757,7 +757,7 @@ function CourseGalleryTile({
       ref={sortable?.setNodeRef}
       style={sortable?.style}
       className={[
-        'overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm shadow-slate-900/5 transition-shadow dark:border-neutral-700 dark:bg-neutral-900',
+        'overflow-hidden rounded-xl border border-border-default bg-surface-raised shadow-sm shadow-slate-900/5 transition-shadow dark:border-border-default dark:bg-surface-raised',
         catalogRevealedHiddenClass(course, showHiddenRevealed),
         sortable ? 'touch-none cursor-grab active:cursor-grabbing' : '',
         sortable?.isDragging ? 'shadow-md shadow-slate-900/10 ring-2 ring-indigo-400/40' : '',
@@ -768,7 +768,7 @@ function CourseGalleryTile({
       {...(sortable ? sortable.listeners : {})}
     >
       {showHiddenRevealed && isUserCatalogHidden(course) ? (
-        <div className="border-b border-slate-100 px-3 py-1.5 dark:border-neutral-800">
+        <div className="border-b border-border-subtle px-3 py-1.5 dark:border-border-subtle">
           <CourseCatalogHiddenBadge />
         </div>
       ) : null}
@@ -818,7 +818,7 @@ function CourseGalleryTile({
       </Link>
       )}
       </div>
-      <div className="border-t border-slate-100 px-3 py-2 dark:border-neutral-800">
+      <div className="border-t border-border-subtle px-3 py-2 dark:border-border-subtle">
         <div className={invitationMutedClass}>
           <CourseCatalogNicknameEditor course={course} compact onNicknameChange={onNicknameChange} />
         </div>
@@ -891,7 +891,7 @@ function SortableCourseGalleryTile({
 function CourseCatalogTableHeader() {
   return (
     <div
-      className="grid grid-cols-[minmax(0,2.2fr)_minmax(5.5rem,auto)_minmax(0,1.1fr)_minmax(5.5rem,auto)_minmax(4.5rem,auto)] gap-3 border-b border-slate-200 px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-neutral-700 dark:text-neutral-400"
+      className="grid grid-cols-[minmax(0,2.2fr)_minmax(5.5rem,auto)_minmax(0,1.1fr)_minmax(5.5rem,auto)_minmax(4.5rem,auto)] gap-3 border-b border-border-default px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-fg-muted dark:border-border-default dark:text-fg-muted"
       aria-hidden
     >
       <span>Title</span>
@@ -958,9 +958,9 @@ function CourseTableRow({
       ref={sortable?.setNodeRef}
       style={sortable?.style}
       className={[
-        'grid grid-cols-[minmax(0,2.2fr)_minmax(5.5rem,auto)_minmax(0,1.1fr)_minmax(5.5rem,auto)_minmax(4.5rem,auto)] gap-3 border-b border-slate-100 px-4 py-3 text-sm last:border-b-0 dark:border-neutral-800',
+        'grid grid-cols-[minmax(0,2.2fr)_minmax(5.5rem,auto)_minmax(0,1.1fr)_minmax(5.5rem,auto)_minmax(4.5rem,auto)] gap-3 border-b border-border-subtle px-4 py-3 text-sm last:border-b-0 dark:border-border-subtle',
         catalogRevealedHiddenClass(course, showHiddenRevealed),
-        sortable ? 'touch-none cursor-grab bg-white active:cursor-grabbing dark:bg-neutral-900' : 'bg-white dark:bg-neutral-900',
+        sortable ? 'touch-none cursor-grab bg-surface-raised active:cursor-grabbing dark:bg-surface-raised' : 'bg-surface-raised',
         sortable?.isDragging ? 'relative z-20 shadow-md ring-2 ring-indigo-400/40' : '',
       ]
         .filter(Boolean)
@@ -973,7 +973,7 @@ function CourseTableRow({
           <div className={`flex flex-wrap items-center gap-2 ${invitationMutedClass}`}>
             <CourseCatalogNicknameEditor
               course={course}
-              titleClassName="font-semibold text-slate-900 dark:text-neutral-100"
+              titleClassName="font-semibold text-fg-default"
               openRequest={renameRequest}
               onNicknameChange={onNicknameChange}
             />
@@ -989,7 +989,7 @@ function CourseTableRow({
           ) : (
             <Link
               to={courseHref}
-              className={`mt-1 inline-block text-xs font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-300 dark:hover:text-indigo-200 ${invitationMutedClass}`}
+              className={`mt-1 inline-block text-xs font-medium text-accent-fg hover:text-indigo-500 dark:text-indigo-300 dark:hover:text-indigo-200 ${invitationMutedClass}`}
               onClick={onCatalogLinkClick}
             >
               Open course
@@ -1012,13 +1012,13 @@ function CourseTableRow({
         <CourseCatalogStatusPill label={invitationPending ? 'Invitation' : badgeLabel} />
         <CatalogPurchasedBadge course={course} />
       </div>
-      <span className={`self-center truncate text-slate-600 dark:text-neutral-400 ${invitationMutedClass}`}>
+      <span className={`self-center truncate text-fg-muted ${invitationMutedClass}`}>
         {formatCourseTermLabel(course)}
       </span>
-      <span className={`self-center whitespace-nowrap text-xs text-slate-500 dark:text-neutral-400 ${invitationMutedClass}`}>
+      <span className={`self-center whitespace-nowrap text-xs text-fg-muted ${invitationMutedClass}`}>
         {formatRelativeCompact(course.updatedAt)}
       </span>
-      <span className={`self-center truncate font-mono text-xs text-slate-500 dark:text-neutral-400 ${invitationMutedClass}`}>
+      <span className={`self-center truncate font-mono text-xs text-fg-muted ${invitationMutedClass}`}>
         {course.courseCode}
       </span>
     </article>
@@ -1442,7 +1442,7 @@ export default function Courses() {
         case 'table':
           return (
             <div
-              className={`${marginClass} overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900`}
+              className={`${marginClass} overflow-x-auto rounded-xl border border-border-default bg-surface-raised shadow-sm dark:border-border-default dark:bg-surface-raised`}
             >
               <div className="min-w-[42rem]">
                 <CourseCatalogTableHeader />
@@ -1480,7 +1480,7 @@ export default function Courses() {
           {showCourseCreateActions ? (
             <Link
               to="/courses/create"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500"
             >
               <Plus className="h-4 w-4" aria-hidden />
               New course
@@ -1504,8 +1504,8 @@ export default function Courses() {
             className={[
               'inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold shadow-sm transition-[background-color,color,border-color]',
               showHidden
-                ? 'border-indigo-300 bg-indigo-50 text-indigo-700 dark:border-indigo-500/40 dark:bg-indigo-950/40 dark:text-indigo-200'
-                : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:border-neutral-600 dark:hover:bg-neutral-800',
+                ? 'border-indigo-300 bg-indigo-50 text-accent-fg dark:border-indigo-500/40 dark:bg-indigo-950/40 dark:text-indigo-200'
+                : 'border-border-default bg-surface-raised text-fg-muted hover:border-border-strong hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:border-border-default dark:hover:bg-surface-overlay',
             ].join(' ')}
           >
             {showHidden ? <Eye className="h-4 w-4" aria-hidden /> : <EyeOff className="h-4 w-4" aria-hidden />}
@@ -1521,7 +1521,7 @@ export default function Courses() {
               'inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold shadow-sm transition-[background-color,color,border-color]',
               purchasedOnly
                 ? 'border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-500/40 dark:bg-emerald-950/40 dark:text-emerald-200'
-                : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:border-neutral-600 dark:hover:bg-neutral-800',
+                : 'border-border-default bg-surface-raised text-fg-muted hover:border-border-strong hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:border-border-default dark:hover:bg-surface-overlay',
             ].join(' ')}
           >
             {t('courses.filter.purchased')}
@@ -1531,21 +1531,21 @@ export default function Courses() {
         {ffCourseMarketplace ? (
           <Link
             to="/me/purchases"
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-[background-color,color,border-color] hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:border-neutral-600 dark:hover:bg-neutral-800"
+            className="inline-flex items-center gap-2 rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm font-semibold text-fg-muted shadow-sm transition-[background-color,color,border-color] hover:border-border-strong hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:border-border-default dark:hover:bg-surface-overlay"
           >
             {t('purchases.title')}
           </Link>
         ) : null}
         {orgId && termList.length > 0 && (
           <div className="min-w-48 max-w-sm flex-1">
-            <label htmlFor="course-catalog-term-filter" className="text-sm font-medium text-slate-700 dark:text-neutral-200">
+            <label htmlFor="course-catalog-term-filter" className="text-sm font-medium text-fg-default">
               Term
             </label>
             <select
               id="course-catalog-term-filter"
               value={termFilter}
               onChange={(e) => setTermFilter(e.target.value)}
-              className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 shadow-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+              className="mt-1.5 w-full rounded-xl border border-border-default bg-surface-raised px-2 py-1.5 text-sm text-fg-default shadow-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 dark:border-border-default dark:bg-surface-base dark:text-fg-default"
               aria-label="Filter courses by academic term"
             >
               <option value="">All terms</option>
@@ -1559,14 +1559,14 @@ export default function Courses() {
         )}
         {orgType === 'k-12' && (
           <div className="min-w-48 max-w-sm flex-1">
-            <label htmlFor="course-catalog-grade-filter" className="text-sm font-medium text-slate-700 dark:text-neutral-200">
+            <label htmlFor="course-catalog-grade-filter" className="text-sm font-medium text-fg-default">
               Grade level
             </label>
             <select
               id="course-catalog-grade-filter"
               value={gradeLevelFilter}
               onChange={(e) => setGradeLevelFilter(e.target.value)}
-              className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 shadow-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+              className="mt-1.5 w-full rounded-xl border border-border-default bg-surface-raised px-2 py-1.5 text-sm text-fg-default shadow-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 dark:border-border-default dark:bg-surface-base dark:text-fg-default"
               aria-label="Filter courses by grade level"
             >
               <option value="">All grade levels</option>
@@ -1680,7 +1680,7 @@ export default function Courses() {
                 <section key={sec.key} aria-labelledby={`cat-${sec.key}`}>
                   <h2
                     id={`cat-${sec.key}`}
-                    className="text-base font-semibold text-slate-900 dark:text-neutral-100"
+                    className="text-base font-semibold text-fg-default"
                   >
                     {sec.title}
                   </h2>

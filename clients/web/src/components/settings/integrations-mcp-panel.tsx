@@ -57,13 +57,13 @@ export function IntegrationsMcpPanel() {
   }
 
   return (
-    <section className="mt-10 border-t border-slate-200 pt-8 dark:border-neutral-700">
+    <section className="mt-10 border-t border-border-default pt-8 dark:border-border-default">
       <div>
-        <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-neutral-100">
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-fg-default">
           <Bot className="h-4 w-4" aria-hidden />
           MCP for AI agents
         </h3>
-        <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+        <p className="mt-1 text-sm text-fg-muted">
           Connect Cursor, Claude Desktop, or other MCP clients to Lextures using an access key with the{' '}
           <code className="font-mono text-xs">mcp:connect</code> scope.
         </p>
@@ -75,18 +75,18 @@ export function IntegrationsMcpPanel() {
         </p>
       )}
 
-      {loading && <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">Loading MCP setup…</p>}
+      {loading && <p className="mt-4 text-sm text-fg-muted">Loading MCP setup…</p>}
 
       {!loading && config && (
         <div className="mt-4 space-y-6">
-          <ol className="list-decimal space-y-2 ps-5 text-sm text-slate-600 dark:text-neutral-300">
+          <ol className="list-decimal space-y-2 ps-5 text-sm text-fg-muted">
             {config.instructions.map((step) => (
               <li key={step}>{step}</li>
             ))}
           </ol>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
+            <label className="block text-sm font-medium text-fg-default">
               Paste access key (optional — included when copying config)
             </label>
             <input
@@ -95,33 +95,33 @@ export function IntegrationsMcpPanel() {
               value={tokenDraft}
               onChange={(e) => setTokenDraft(e.target.value)}
               placeholder="ltk_…"
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 font-mono text-sm outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+              className="mt-1 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2 font-mono text-sm outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
             />
           </div>
 
           <div>
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-sm font-medium text-slate-700 dark:text-neutral-200">Cursor / Claude Desktop config</p>
+              <p className="text-sm font-medium text-fg-default">Cursor / Claude Desktop config</p>
               <button
                 type="button"
                 onClick={() => void copyJson(configWithToken(config.cursorConfig, tokenDraft))}
-                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                className="inline-flex items-center gap-1 rounded-lg border border-border-default px-3 py-1.5 text-sm font-medium text-fg-muted hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
               >
                 <Copy className="h-4 w-4" aria-hidden />
                 Copy JSON
               </button>
             </div>
-            <pre className="mt-2 max-h-80 overflow-auto rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-800 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100">
+            <pre className="mt-2 max-h-80 overflow-auto rounded-xl border border-border-default bg-surface-base p-3 text-xs text-fg-default dark:border-border-default dark:bg-surface-raised dark:text-fg-default">
               {configWithToken(config.cursorConfig, tokenDraft)}
             </pre>
           </div>
 
           <div>
-            <p className="text-sm font-medium text-slate-700 dark:text-neutral-200">API base URL</p>
-            <p className="mt-1 font-mono text-xs text-slate-600 dark:text-neutral-300">{config.apiBaseUrl}</p>
+            <p className="text-sm font-medium text-fg-default">API base URL</p>
+            <p className="mt-1 font-mono text-xs text-fg-muted">{config.apiBaseUrl}</p>
           </div>
 
-          <p className="text-xs text-slate-500 dark:text-neutral-400">
+          <p className="text-xs text-fg-muted">
             The MCP server runs from <code className="font-mono">clients/mcp/dist/index.js</code> in this repository
             and calls the Lextures API with your key. Build it with{' '}
             <code className="font-mono">cd clients/mcp && npm install && npm run build</code> before connecting.

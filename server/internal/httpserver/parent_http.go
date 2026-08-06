@@ -99,11 +99,6 @@ func (d Deps) handleParentChildren() http.HandlerFunc {
 		LinkedAt      string  `json:"linkedAt"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		parentID, orgID, ok := d.requireParentViewer(w, r)
 		if !ok {
 			return
@@ -133,11 +128,6 @@ func (d Deps) handleParentChildren() http.HandlerFunc {
 // handleParentStudentCourses is GET /api/v1/parent/students/{sid}/courses
 func (d Deps) handleParentStudentCourses() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		parentID, orgID, ok := d.requireParentViewer(w, r)
 		if !ok {
 			return
@@ -162,11 +152,6 @@ func (d Deps) handleParentStudentCourses() http.HandlerFunc {
 // handleParentStudentGrades is GET /api/v1/parent/students/{sid}/grades
 func (d Deps) handleParentStudentGrades() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		parentID, orgID, ok := d.requireParentViewer(w, r)
 		if !ok {
 			return
@@ -203,11 +188,6 @@ func (d Deps) handleParentStudentGrades() http.HandlerFunc {
 // handleParentStudentAttendanceSummary is GET /api/v1/parent/students/{sid}/attendance-summary
 func (d Deps) handleParentStudentAttendanceSummary() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		parentID, orgID, ok := d.requireParentViewer(w, r)
 		if !ok {
 			return
@@ -241,11 +221,6 @@ func (d Deps) handleParentStudentAssignments() http.HandlerFunc {
 		DueAt       *string `json:"dueAt,omitempty"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		parentID, orgID, ok := d.requireParentViewer(w, r)
 		if !ok {
 			return
@@ -407,11 +382,6 @@ func (d Deps) handleOrgParentLinksCollection() http.HandlerFunc {
 // handleOrgParentLinksBulk is POST /api/v1/orgs/{orgId}/parent-links/bulk
 func (d Deps) handleOrgParentLinksBulk() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		orgID, err := uuid.Parse(strings.TrimSpace(chi.URLParam(r, "orgId")))
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid organization id.")
@@ -541,11 +511,6 @@ func (d Deps) handleOrgParentLinksBulk() http.HandlerFunc {
 // handleOrgParentLinkDelete is DELETE /api/v1/orgs/{orgId}/parent-links/{lid}
 func (d Deps) handleOrgParentLinkDelete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodDelete {
-			w.Header().Set("Allow", http.MethodDelete)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		orgID, err := uuid.Parse(strings.TrimSpace(chi.URLParam(r, "orgId")))
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid organization id.")
@@ -584,11 +549,6 @@ func (d Deps) handleParentWeeklySummary() http.HandlerFunc {
 		DueAt       *string `json:"dueAt,omitempty"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		parentID, orgID, ok := d.requireParentViewer(w, r)
 		if !ok {
 			return

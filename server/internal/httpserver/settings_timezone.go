@@ -24,11 +24,6 @@ type timezonesListResponse struct {
 
 func (d Deps) handleGetSettingsTimezone() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -44,11 +39,6 @@ func (d Deps) handleGetSettingsTimezone() http.HandlerFunc {
 
 func (d Deps) handlePutSettingsTimezone() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPut {
-			w.Header().Set("Allow", http.MethodPut)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -80,11 +70,6 @@ func (d Deps) handlePutSettingsTimezone() http.HandlerFunc {
 
 func (d Deps) handleListTimezones() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.Pool == nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Server misconfiguration.")
 			return

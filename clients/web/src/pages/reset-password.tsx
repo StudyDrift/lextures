@@ -122,10 +122,10 @@ export default function ResetPassword() {
         <div className="mb-5 flex justify-center px-2">
           <BrandLogo className="mx-auto h-14 w-auto max-w-[min(100%,240px)] object-contain" />
         </div>
-        <h1 className="lex-auth-display text-[1.7rem] leading-snug text-stone-900 dark:text-neutral-50">
+        <h1 className="lex-auth-display text-[1.7rem] leading-snug text-stone-900">
           Set a new password
         </h1>
-        <p className="mt-2 text-sm leading-relaxed text-stone-600 dark:text-neutral-400">
+        <p className="mt-2 text-sm leading-relaxed text-stone-600 dark:text-fg-muted">
           Choose a strong password you have not used on other sites.
         </p>
       </header>
@@ -133,7 +133,7 @@ export default function ResetPassword() {
       <div className={authCardClass}>
         {status === 'done' ? (
           <div className="space-y-4 text-center">
-            <p className="text-sm text-stone-700 dark:text-neutral-300" role="status">
+            <p className="text-sm text-stone-700 dark:text-fg-muted" role="status">
               {message}
             </p>
             <Link to="/login" className={`inline-block text-sm ${authMutedLinkClass}`}>
@@ -143,20 +143,20 @@ export default function ResetPassword() {
         ) : (
           <form className="space-y-5" onSubmit={onSubmit}>
               {!tokenFromUrl.trim() && (
-                <p className="text-sm text-amber-700" role="status">
+                <p className="text-sm text-warning-fg" role="status">
                   Missing token. Use the link from your reset email, or request a new link from the sign-in page.
                 </p>
               )}
               <div>
                 <label
                   htmlFor="password"
-                  className="mb-1.5 block text-sm font-medium text-stone-800 dark:text-neutral-200"
+                  className="mb-1.5 block text-sm font-medium text-stone-800 dark:text-fg-default"
                 >
                   New password
                 </label>
                 <ul
                   id="password-requirements"
-                  className="mb-2 list-inside list-disc text-xs text-stone-600 dark:text-neutral-400"
+                  className="mb-2 list-inside list-disc text-xs text-stone-600 dark:text-fg-muted"
                 >
                   <li>At least {minLen} characters</li>
                   {policy?.requireUpper ? <li>One uppercase letter</li> : null}
@@ -182,17 +182,11 @@ export default function ResetPassword() {
                   placeholder={`At least ${minLen} characters`}
                 />
                 <div id="password-strength" className="mt-2 flex items-center gap-2" aria-live="polite">
-                  <span className="text-xs font-medium text-stone-600 dark:text-neutral-400">Strength:</span>
-                  <span className="text-xs font-semibold text-stone-800 dark:text-neutral-200">{strengthLabel}</span>
+                  <span className="text-xs font-medium text-stone-600 dark:text-fg-muted">Strength:</span>
+                  <span className="text-xs font-semibold text-stone-800 dark:text-fg-default">{strengthLabel}</span>
                   <div className="h-1.5 flex-1 rounded-full bg-stone-200 dark:bg-neutral-700" aria-hidden>
                     <div
-                      className={`h-full rounded-full ${
-                        strengthKey === 'password.strength.weak'
-                          ? 'w-1/3 bg-rose-500'
-                          : strengthKey === 'password.strength.fair'
-                            ? 'w-2/3 bg-amber-500'
-                            : 'w-full bg-emerald-600'
-                      }`}
+                      className={`h-full rounded-full ${ strengthKey === 'password.strength.weak' ? 'w-1/3 bg-rose-500' : strengthKey === 'password.strength.fair' ? 'w-2/3 bg-amber-500' : 'w-full bg-emerald-600' }`}
                     />
                   </div>
                 </div>
@@ -200,7 +194,7 @@ export default function ResetPassword() {
               <div>
                 <label
                   htmlFor="confirm"
-                  className="mb-1.5 block text-sm font-medium text-stone-800 dark:text-neutral-200"
+                  className="mb-1.5 block text-sm font-medium text-stone-800 dark:text-fg-default"
                 >
                   Confirm password
                 </label>
@@ -235,7 +229,7 @@ export default function ResetPassword() {
           )}
 
           {status !== 'done' && (
-            <p className="mt-6 text-center text-sm text-stone-600 dark:text-neutral-400">
+            <p className="mt-6 text-center text-sm text-stone-600 dark:text-fg-muted">
               <Link to="/login" className={authMutedLinkClass}>
                 Back to sign in
               </Link>

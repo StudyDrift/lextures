@@ -85,25 +85,25 @@ export default function BoardsGovernancePage() {
   if (!ffVisualBoards) {
     return (
       <main className="mx-auto max-w-3xl p-6">
-        <p className="text-sm text-slate-600 dark:text-neutral-400">{t('boards.admin.flagOff')}</p>
+        <p className="text-sm text-fg-muted">{t('boards.admin.flagOff')}</p>
       </main>
     )
   }
 
   return (
     <main className="mx-auto max-w-3xl p-6">
-      <h1 id={titleId} className="text-xl font-bold text-slate-900 dark:text-neutral-100">
+      <h1 id={titleId} className="text-xl font-bold text-fg-default">
         {t('boards.admin.title')}
       </h1>
-      <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">{t('boards.admin.subtitle')}</p>
+      <p className="mt-1 text-sm text-fg-muted">{t('boards.admin.subtitle')}</p>
 
       {error ? (
-        <p className="mt-4 text-sm text-red-600 dark:text-red-400" role="alert">
+        <p className="mt-4 text-sm text-danger-fg" role="alert">
           {error}
         </p>
       ) : null}
       {saved ? (
-        <p className="mt-4 text-sm text-green-700 dark:text-green-400" role="status">
+        <p className="mt-4 text-sm text-success-fg" role="status">
           {t('boards.admin.saved')}
         </p>
       ) : null}
@@ -115,37 +115,37 @@ export default function BoardsGovernancePage() {
       ) : (
         <div className="mt-6 space-y-8">
           <section aria-labelledby={`${titleId}-overview`}>
-            <h2 id={`${titleId}-overview`} className="text-base font-semibold text-slate-900 dark:text-neutral-100">
+            <h2 id={`${titleId}-overview`} className="text-base font-semibold text-fg-default">
               {t('boards.admin.overviewTitle')}
             </h2>
             <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
-              <div className="rounded-md border border-slate-200 p-3 dark:border-neutral-700">
-                <dt className="text-xs text-slate-500">{t('boards.admin.boardCount')}</dt>
+              <div className="rounded-md border border-border-default p-3 dark:border-border-default">
+                <dt className="text-xs text-fg-muted">{t('boards.admin.boardCount')}</dt>
                 <dd className="text-lg font-semibold">{overview.boardCount}</dd>
               </div>
-              <div className="rounded-md border border-slate-200 p-3 dark:border-neutral-700">
-                <dt className="text-xs text-slate-500">{t('boards.admin.activeBoards')}</dt>
+              <div className="rounded-md border border-border-default p-3 dark:border-border-default">
+                <dt className="text-xs text-fg-muted">{t('boards.admin.activeBoards')}</dt>
                 <dd className="text-lg font-semibold">{overview.activeBoardCount}</dd>
               </div>
-              <div className="rounded-md border border-slate-200 p-3 dark:border-neutral-700">
-                <dt className="text-xs text-slate-500">{t('boards.admin.coursesEnabled')}</dt>
+              <div className="rounded-md border border-border-default p-3 dark:border-border-default">
+                <dt className="text-xs text-fg-muted">{t('boards.admin.coursesEnabled')}</dt>
                 <dd className="text-lg font-semibold">{overview.coursesFeatureEnabled}</dd>
               </div>
-              <div className="rounded-md border border-slate-200 p-3 dark:border-neutral-700">
-                <dt className="text-xs text-slate-500">{t('boards.admin.coursesWithBoards')}</dt>
+              <div className="rounded-md border border-border-default p-3 dark:border-border-default">
+                <dt className="text-xs text-fg-muted">{t('boards.admin.coursesWithBoards')}</dt>
                 <dd className="text-lg font-semibold">{overview.coursesWithBoards}</dd>
               </div>
-              <div className="rounded-md border border-slate-200 p-3 dark:border-neutral-700 sm:col-span-2">
-                <dt className="text-xs text-slate-500">{t('boards.admin.storage')}</dt>
+              <div className="rounded-md border border-border-default p-3 dark:border-border-default sm:col-span-2">
+                <dt className="text-xs text-fg-muted">{t('boards.admin.storage')}</dt>
                 <dd className="text-lg font-semibold">{formatBytes(overview.storageBytes)}</dd>
               </div>
             </dl>
             <table className="mt-4 w-full text-start text-sm">
-              <caption className="mb-2 text-start text-xs text-slate-500">
+              <caption className="mb-2 text-start text-xs text-fg-muted">
                 {t('boards.admin.topContentTypes')}
               </caption>
               <thead>
-                <tr className="border-b border-slate-200 text-slate-500 dark:border-neutral-700">
+                <tr className="border-b border-border-default text-fg-muted dark:border-border-default">
                   <th scope="col" className="py-1 font-medium">
                     {t('boards.admin.contentType')}
                   </th>
@@ -157,13 +157,13 @@ export default function BoardsGovernancePage() {
               <tbody>
                 {overview.topContentTypes.length === 0 ? (
                   <tr>
-                    <td colSpan={2} className="py-2 text-slate-500">
+                    <td colSpan={2} className="py-2 text-fg-muted">
                       {t('boards.admin.noContentTypes')}
                     </td>
                   </tr>
                 ) : (
                   overview.topContentTypes.map((row) => (
-                    <tr key={row.contentType} className="border-b border-slate-100 dark:border-neutral-800">
+                    <tr key={row.contentType} className="border-b border-border-subtle">
                       <td className="py-1">{row.contentType}</td>
                       <td className="py-1">{row.count}</td>
                     </tr>
@@ -174,7 +174,7 @@ export default function BoardsGovernancePage() {
           </section>
 
           <section aria-labelledby={`${titleId}-policies`}>
-            <h2 id={`${titleId}-policies`} className="text-base font-semibold text-slate-900 dark:text-neutral-100">
+            <h2 id={`${titleId}-policies`} className="text-base font-semibold text-fg-default">
               {t('boards.admin.policiesTitle')}
             </h2>
             <div className="mt-3 space-y-4">
@@ -187,10 +187,10 @@ export default function BoardsGovernancePage() {
                   onChange={(e) => void persist({ externalSharing: e.target.checked })}
                 />
                 <span>
-                  <span className="font-medium text-slate-900 dark:text-neutral-100">
+                  <span className="font-medium text-fg-default">
                     {t('boards.admin.externalSharing')}
                   </span>
-                  <span className="mt-0.5 block text-slate-600 dark:text-neutral-400">
+                  <span className="mt-0.5 block text-fg-muted">
                     {t('boards.admin.externalSharingHint')}
                   </span>
                 </span>
@@ -204,20 +204,20 @@ export default function BoardsGovernancePage() {
                   onChange={(e) => void persist({ minorModerationFloor: e.target.checked })}
                 />
                 <span>
-                  <span className="font-medium text-slate-900 dark:text-neutral-100">
+                  <span className="font-medium text-fg-default">
                     {t('boards.admin.minorFloor')}
                   </span>
-                  <span className="mt-0.5 block text-slate-600 dark:text-neutral-400">
+                  <span className="mt-0.5 block text-fg-muted">
                     {t('boards.admin.minorFloorHint')}
                   </span>
                 </span>
               </label>
               <label className="block text-sm">
-                <span className="font-medium text-slate-900 dark:text-neutral-100">
+                <span className="font-medium text-fg-default">
                   {t('boards.admin.defaultAttribution')}
                 </span>
                 <select
-                  className="mt-1 block w-full max-w-xs rounded-md border border-slate-300 bg-white px-3 py-2 dark:border-neutral-600 dark:bg-neutral-900"
+                  className="mt-1 block w-full max-w-xs rounded-md border border-border-strong bg-surface-raised px-3 py-2 dark:border-border-default dark:bg-surface-raised"
                   value={policies.defaultAttribution}
                   disabled={saving}
                   onChange={(e) =>
@@ -230,16 +230,16 @@ export default function BoardsGovernancePage() {
                 </select>
               </label>
               <div className="text-sm">
-                <label htmlFor={`${titleId}-cap`} className="font-medium text-slate-900 dark:text-neutral-100">
+                <label htmlFor={`${titleId}-cap`} className="font-medium text-fg-default">
                   {t('boards.admin.boardCap')}
                 </label>
-                <p className="mt-0.5 text-slate-600 dark:text-neutral-400">{t('boards.admin.boardCapHint')}</p>
+                <p className="mt-0.5 text-fg-muted">{t('boards.admin.boardCapHint')}</p>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   <input
                     id={`${titleId}-cap`}
                     type="number"
                     min={0}
-                    className="w-32 rounded-md border border-slate-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-900"
+                    className="w-32 rounded-md border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-raised"
                     value={capDraft}
                     disabled={saving}
                     placeholder={t('boards.admin.unlimited')}

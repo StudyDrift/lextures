@@ -16,7 +16,7 @@ export function EffectivenessChip({ effectiveness, compact = false }: Effectiven
   if (!effectiveness) {
     return (
       <span
-        className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-xs text-slate-600 dark:bg-neutral-800 dark:text-neutral-300"
+        className="inline-flex items-center gap-1 rounded-md bg-surface-sunken px-2 py-0.5 text-xs text-fg-muted dark:bg-surface-overlay dark:text-fg-muted"
         data-testid="ace-effectiveness-chip"
         title="No effectiveness data yet"
       >
@@ -54,14 +54,14 @@ export function EffectivenessChip({ effectiveness, compact = false }: Effectiven
       icon = '●'
       label = `No measurable effect (n=${nT}/${nH})`
       className =
-        'bg-slate-100 text-slate-700 dark:bg-neutral-800 dark:text-neutral-200'
+        'bg-surface-sunken text-fg-muted dark:bg-surface-overlay dark:text-fg-default'
       break
     case 'insufficient_data':
     default:
       icon = '○'
       label = 'Needs more data'
       className =
-        'bg-slate-100 text-slate-600 dark:bg-neutral-800 dark:text-neutral-300'
+        'bg-surface-sunken text-fg-muted dark:bg-surface-overlay dark:text-fg-muted'
       break
   }
 
@@ -89,7 +89,7 @@ export function EffectivenessSummaryTable({
     <table className="mt-2 w-full text-left text-xs" data-testid="ace-effectiveness-table">
       <caption className="sr-only">Adaptive content effectiveness breakdown</caption>
       <thead>
-        <tr className="text-slate-500">
+        <tr className="text-fg-muted">
           <th scope="col" className="py-1 pr-2 font-medium">
             Group
           </th>

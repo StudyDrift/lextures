@@ -62,8 +62,8 @@ export function StudyStatsCard() {
           <div className="flex gap-3 pe-8">
             <Lightbulb className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-300" aria-hidden />
             <div>
-              <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Weekly coaching tip</p>
-              <p className="mt-1 text-sm text-slate-700 dark:text-neutral-300">{tip.tipText}</p>
+              <p className="text-sm font-semibold text-fg-default">Weekly coaching tip</p>
+              <p className="mt-1 text-sm text-fg-muted">{tip.tipText}</p>
               <Link
                 to="/me/study-insights"
                 className="mt-2 inline-block text-xs font-medium text-amber-800 underline dark:text-amber-200"
@@ -78,7 +78,7 @@ export function StudyStatsCard() {
       <div className="rounded-2xl border border-emerald-100 bg-emerald-50/80 px-5 py-4 dark:border-emerald-900/40 dark:bg-emerald-950/30">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Study stats</p>
+            <p className="text-sm font-semibold text-fg-default">Study stats</p>
             {stats.loginStreakDays > 0 ? (
               <p
                 className="mt-1 inline-flex items-center gap-1 text-sm font-medium text-emerald-800 dark:text-emerald-200"
@@ -88,9 +88,9 @@ export function StudyStatsCard() {
                 {stats.loginStreakDays}-day study streak
               </p>
             ) : (
-              <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">Log in daily to build your streak</p>
+              <p className="mt-1 text-xs text-fg-muted">Log in daily to build your streak</p>
             )}
-            <p className="mt-2 text-xs text-slate-600 dark:text-neutral-400">
+            <p className="mt-2 text-xs text-fg-muted">
               {formatHours(hoursStudied)} hour{hoursStudied === 1 ? '' : 's'} studied this week
             </p>
           </div>
@@ -117,7 +117,7 @@ export function StudyStatsCard() {
                 style={{ width: `${goalPct ?? 0}%` }}
               />
             </div>
-            <p className="mt-2 text-xs text-slate-700 dark:text-neutral-300">
+            <p className="mt-2 text-xs text-fg-muted">
               {formatHours(hoursStudied)} of {formatHours(goalHours)} hours
               {stats.goalRemainingHours != null && stats.goalRemainingHours > 0
                 ? ` — ${formatHours(stats.goalRemainingHours)} more to reach your goal this week`

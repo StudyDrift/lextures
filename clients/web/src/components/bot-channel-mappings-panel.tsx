@@ -84,16 +84,16 @@ export function BotChannelMappingsPanel({ connection, onUpdated }: Props) {
   }
 
   return (
-    <div className="mt-4 border-t border-slate-200 pt-4 dark:border-neutral-600" data-testid="bot-mappings">
-      <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+    <div className="mt-4 border-t border-border-default pt-4 dark:border-border-default" data-testid="bot-mappings">
+      <h4 className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
         Channel mappings
       </h4>
       {mappings.length > 0 ? (
-        <ul className="mt-2 space-y-1 text-xs text-slate-600 dark:text-neutral-400">
+        <ul className="mt-2 space-y-1 text-xs text-fg-muted">
           {mappings.map((m) => (
             <li key={m.id} className="flex items-center justify-between gap-2">
               <span>
-                <code className="rounded bg-slate-100 px-1 dark:bg-neutral-800">{m.channelId}</code>
+                <code className="rounded bg-surface-sunken px-1 dark:bg-surface-overlay">{m.channelId}</code>
                 {m.courseId ? ` · course ${m.courseId.slice(0, 8)}…` : ' · all courses'}
                 {' · '}
                 {m.eventTypes.join(', ')}
@@ -110,13 +110,13 @@ export function BotChannelMappingsPanel({ connection, onUpdated }: Props) {
           ))}
         </ul>
       ) : (
-        <p className="mt-2 text-xs text-slate-500 dark:text-neutral-500">
+        <p className="mt-2 text-xs text-fg-subtle">
           No channel mappings yet. Add one below to start receiving notifications.
         </p>
       )}
 
       <div className="mt-3 space-y-2">
-        <label htmlFor={channelId} className="block text-xs font-medium text-slate-700 dark:text-neutral-300">
+        <label htmlFor={channelId} className="block text-xs font-medium text-fg-muted">
           Channel ID
         </label>
         <input
@@ -125,9 +125,9 @@ export function BotChannelMappingsPanel({ connection, onUpdated }: Props) {
           value={channel}
           onChange={(e) => setChannel(e.target.value)}
           placeholder="C01234567 or #general channel id"
-          className="w-full rounded border border-slate-300 px-2 py-1 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+          className="w-full rounded border border-border-strong px-2 py-1 text-sm dark:border-border-default dark:bg-surface-raised"
         />
-        <label htmlFor={courseId} className="block text-xs font-medium text-slate-700 dark:text-neutral-300">
+        <label htmlFor={courseId} className="block text-xs font-medium text-fg-muted">
           Course ID (optional)
         </label>
         <input
@@ -136,14 +136,14 @@ export function BotChannelMappingsPanel({ connection, onUpdated }: Props) {
           value={course}
           onChange={(e) => setCourse(e.target.value)}
           placeholder="Leave blank for org-wide notifications"
-          className="w-full rounded border border-slate-300 px-2 py-1 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+          className="w-full rounded border border-border-strong px-2 py-1 text-sm dark:border-border-default dark:bg-surface-raised"
         />
         <fieldset>
-          <legend className="text-xs font-medium text-slate-700 dark:text-neutral-300">Events</legend>
+          <legend className="text-xs font-medium text-fg-muted">Events</legend>
           <ul className="mt-1 space-y-1">
             {BOT_EVENT_TYPES.map((eventType) => (
               <li key={eventType}>
-                <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-neutral-400">
+                <label className="flex items-center gap-2 text-xs text-fg-muted">
                   <input
                     type="checkbox"
                     checked={events.includes(eventType)}

@@ -67,7 +67,7 @@ export default function AccommodationAuditPage() {
   if (!canManage) {
     return (
       <LmsPage title="Accommodation audit">
-        <p className="text-sm text-slate-600 dark:text-neutral-300">
+        <p className="text-sm text-fg-muted">
           You need the accessibility coordinator or Global Admin role to view accommodation audit records.
         </p>
       </LmsPage>
@@ -77,14 +77,14 @@ export default function AccommodationAuditPage() {
   return (
     <LmsPage title="Accommodation audit report">
       <div className="max-w-5xl space-y-6">
-        <p className="text-sm text-slate-600 dark:text-neutral-300">
+        <p className="text-sm text-fg-muted">
           Append-only log of accommodations applied during quiz attempts and content views. Student identifiers
           are shown as user IDs only (no names) for FERPA-aligned compliance reporting.
         </p>
         <p className="text-sm">
           <Link
             to="/admin/accommodations"
-            className="font-medium text-indigo-700 hover:underline dark:text-indigo-300"
+            className="font-medium text-accent-fg hover:underline dark:text-indigo-300"
           >
             ← Student accommodations
           </Link>
@@ -97,10 +97,10 @@ export default function AccommodationAuditPage() {
         )}
 
         {!disabledMessage && (
-          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
+          <div className="rounded-xl border border-border-default bg-surface-raised p-4 shadow-sm dark:border-border-default dark:bg-surface-raised">
             <label
               htmlFor={`${filterId}-student`}
-              className="mb-1 block text-xs font-medium text-slate-600 dark:text-neutral-400"
+              className="mb-1 block text-xs font-medium text-fg-muted"
             >
               Filter by student user id (optional)
             </label>
@@ -109,7 +109,7 @@ export default function AccommodationAuditPage() {
                 id={`${filterId}-student`}
                 value={studentIdFilter}
                 onChange={(e) => setStudentIdFilter(e.target.value)}
-                className="min-w-[12rem] flex-1 rounded-lg border border-slate-200 px-3 py-2 font-mono text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                className="min-w-[12rem] flex-1 rounded-lg border border-border-default px-3 py-2 font-mono text-sm dark:border-border-default dark:bg-surface-base"
                 placeholder="UUID"
                 spellCheck={false}
                 autoComplete="off"
@@ -118,7 +118,7 @@ export default function AccommodationAuditPage() {
                 type="button"
                 onClick={() => void loadLog()}
                 disabled={listBusy}
-                className="rounded-lg bg-slate-800 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-700 disabled:opacity-50 dark:bg-neutral-200 dark:text-neutral-900 dark:hover:bg-white"
+                className="rounded-lg bg-slate-800 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-700 disabled:opacity-50 dark:bg-neutral-200 dark:text-neutral-900 dark:hover:bg-surface-raised"
               >
                 {listBusy ? 'Loading…' : 'Refresh'}
               </button>
@@ -132,13 +132,13 @@ export default function AccommodationAuditPage() {
         )}
 
         {!disabledMessage && rows.length === 0 && !listBusy && !listError && (
-          <p className="text-sm text-slate-500 dark:text-neutral-400">No audit entries yet.</p>
+          <p className="text-sm text-fg-muted">No audit entries yet.</p>
         )}
 
         {rows.length > 0 && (
-          <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white dark:border-neutral-700 dark:bg-neutral-900">
+          <div className="overflow-x-auto rounded-xl border border-border-default bg-surface-raised dark:border-border-default dark:bg-surface-raised">
             <table className="min-w-full text-start text-sm">
-              <thead className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase text-slate-600 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-400">
+              <thead className="border-b border-border-default bg-surface-base text-xs font-semibold uppercase text-fg-muted dark:border-border-default dark:bg-surface-base dark:text-fg-muted">
                 <tr>
                   <th className="px-3 py-2">Applied at</th>
                   <th className="px-3 py-2">Student id</th>
@@ -149,18 +149,18 @@ export default function AccommodationAuditPage() {
               </thead>
               <tbody>
                 {rows.map((r) => (
-                  <tr key={r.id} className="border-b border-slate-100 dark:border-neutral-800">
-                    <td className="whitespace-nowrap px-3 py-2 text-xs text-slate-600 dark:text-neutral-400">
+                  <tr key={r.id} className="border-b border-border-subtle">
+                    <td className="whitespace-nowrap px-3 py-2 text-xs text-fg-muted">
                       {r.appliedAt}
                     </td>
-                    <td className="px-3 py-2 font-mono text-xs text-slate-800 dark:text-neutral-200">
+                    <td className="px-3 py-2 font-mono text-xs text-fg-default">
                       {r.studentId}
                     </td>
-                    <td className="px-3 py-2 text-slate-800 dark:text-neutral-200">{r.accommodationType}</td>
-                    <td className="max-w-[14rem] truncate px-3 py-2 font-mono text-xs text-slate-600 dark:text-neutral-400">
+                    <td className="px-3 py-2 text-fg-default">{r.accommodationType}</td>
+                    <td className="max-w-[14rem] truncate px-3 py-2 font-mono text-xs text-fg-muted">
                       {formatValueApplied(r.valueApplied)}
                     </td>
-                    <td className="px-3 py-2 text-xs text-slate-600 dark:text-neutral-400">
+                    <td className="px-3 py-2 text-xs text-fg-muted">
                       {r.context}
                       {r.contextId ? (
                         <span className="mt-0.5 block font-mono text-[11px]">{r.contextId}</span>

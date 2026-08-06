@@ -54,15 +54,6 @@ func (d Deps) contentPageMarkupsRequireAccess(w http.ResponseWriter, r *http.Req
 // handleListContentPageMarkups is GET /api/v1/courses/{course_code}/content-pages/{item_id}/markups.
 func (d Deps) handleListContentPageMarkups() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		itemID, err := uuid.Parse(chi.URLParam(r, "item_id"))
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid item id.")
@@ -86,15 +77,6 @@ func (d Deps) handleListContentPageMarkups() http.HandlerFunc {
 // handleCreateContentPageMarkup is POST /api/v1/courses/{course_code}/content-pages/{item_id}/markups.
 func (d Deps) handleCreateContentPageMarkup() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		itemID, err := uuid.Parse(chi.URLParam(r, "item_id"))
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid item id.")
@@ -131,15 +113,6 @@ func (d Deps) handleCreateContentPageMarkup() http.HandlerFunc {
 // handleDeleteContentPageMarkup is DELETE /api/v1/courses/{course_code}/content-pages/{item_id}/markups/{markup_id}.
 func (d Deps) handleDeleteContentPageMarkup() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodDelete {
-			w.Header().Set("Allow", http.MethodDelete+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		itemID, err := uuid.Parse(chi.URLParam(r, "item_id"))
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid item id.")

@@ -66,10 +66,6 @@ func (d Deps) handlePutCourseCatalogListing() http.HandlerFunc {
 		if d.catalogListingOff(w) {
 			return
 		}
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return

@@ -23,7 +23,7 @@ function ProfileSkeleton() {
       {[0, 1, 2].map((i) => (
         <div
           key={i}
-          className="h-28 motion-safe:animate-pulse rounded-2xl border border-slate-200 bg-slate-100 dark:border-neutral-700 dark:bg-neutral-800"
+          className="h-28 motion-safe:animate-pulse rounded-2xl border border-border-default bg-surface-sunken dark:border-border-default dark:bg-surface-overlay"
         />
       ))}
     </div>
@@ -128,10 +128,10 @@ export function LearnerProfilePanel() {
       {ConfirmDialogHost}
 
       <div>
-        <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">
+        <h2 className="text-base font-semibold text-fg-default">
           {t('learnerProfile.title')}
         </h2>
-        <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+        <p className="mt-1 text-sm text-fg-muted">
           {t('learnerProfile.description')}
         </p>
       </div>
@@ -141,17 +141,17 @@ export function LearnerProfilePanel() {
         title={t('learnerProfile.howItWorks.title')}
         description={t('learnerProfile.howItWorks.body')}
       >
-        <p className="text-sm text-slate-600 dark:text-neutral-300">
+        <p className="text-sm text-fg-muted">
           {t('learnerProfile.howItWorks.art22')}
         </p>
       </SettingsSection>
 
       {gdprModuleEnabled ? (
-        <p className="text-sm text-slate-600 dark:text-neutral-300">
+        <p className="text-sm text-fg-muted">
           {t('learnerProfile.privacy.notice')}{' '}
           <Link
             to="/privacy-centre"
-            className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-300"
+            className="font-medium text-accent-fg hover:text-indigo-500 dark:text-indigo-300"
           >
             {t('learnerProfile.privacy.link')}
           </Link>
@@ -194,13 +194,13 @@ export function LearnerProfilePanel() {
 
       {!loading && !error && showEmpty ? (
         <div
-          className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-8 text-center dark:border-neutral-700 dark:bg-neutral-800/50"
+          className="rounded-2xl border border-border-default bg-surface-base px-5 py-8 text-center dark:border-border-default/50"
           role="status"
         >
-          <h3 className="text-base font-semibold text-slate-900 dark:text-neutral-100">
+          <h3 className="text-base font-semibold text-fg-default">
             {t('learnerProfile.empty.title')}
           </h3>
-          <p className="mx-auto mt-2 max-w-md text-sm text-slate-600 dark:text-neutral-300">
+          <p className="mx-auto mt-2 max-w-md text-sm text-fg-muted">
             {t('learnerProfile.empty.body')}
           </p>
         </div>
@@ -224,7 +224,7 @@ export function LearnerProfilePanel() {
             type="button"
             disabled={loading || controlBusy}
             onClick={() => void handleDownload()}
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
+            className="inline-flex items-center gap-2 rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-base disabled:opacity-60 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700"
           >
             <Download className="h-4 w-4" aria-hidden />
             {controlBusy ? t('learnerProfile.manage.exporting') : t('learnerProfile.manage.download')}
@@ -233,7 +233,7 @@ export function LearnerProfilePanel() {
             type="button"
             disabled={loading || controlBusy}
             onClick={() => void handlePauseOrResume()}
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
+            className="inline-flex items-center gap-2 rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-base disabled:opacity-60 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700"
           >
             {isPaused ? (
               <Play className="h-4 w-4" aria-hidden />
@@ -246,7 +246,7 @@ export function LearnerProfilePanel() {
             type="button"
             disabled={loading || controlBusy}
             onClick={() => void handleReset()}
-            className="inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-white px-3 py-2 text-sm font-medium text-rose-800 hover:bg-rose-50 disabled:opacity-60 dark:border-rose-900/50 dark:bg-neutral-800 dark:text-rose-200 dark:hover:bg-rose-950/40"
+            className="inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-surface-raised px-3 py-2 text-sm font-medium text-rose-800 hover:bg-rose-50 disabled:opacity-60 dark:border-rose-900/50 dark:bg-surface-overlay dark:text-rose-200 dark:hover:bg-rose-950/40"
           >
             <RotateCcw className="h-4 w-4" aria-hidden />
             {t('learnerProfile.manage.reset')}

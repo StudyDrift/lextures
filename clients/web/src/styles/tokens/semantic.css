@@ -1,0 +1,260 @@
+/*
+ * UX.1 — Semantic design tokens.
+ * Themes switch via [data-theme] on <html>. Feature code uses semantic names only.
+ * Dark themes use surface elevation (base darkest → raised/overlay lighter).
+ */
+
+/* ── Light (default) — true neutral; coloured tints in surface-tints.css ─── */
+:root,
+[data-theme='light'] {
+  --lx-surface-base: #fafafa;
+  --lx-surface-raised: #ffffff;
+  --lx-surface-overlay: #ffffff;
+  --lx-surface-sunken: #f4f4f5;
+  --lx-surface-inverse: #18181b;
+
+  --lx-fg-default: var(--lx-neutral-900);
+  --lx-fg-muted: var(--lx-neutral-600);
+  --lx-fg-subtle: var(--lx-neutral-500);
+  --lx-fg-on-accent: var(--lx-neutral-0);
+  --lx-fg-inverse: var(--lx-neutral-50);
+
+  --lx-border-default: var(--lx-neutral-200);
+  --lx-border-subtle: var(--lx-neutral-100);
+  /* Strong borders meet SC 1.4.11 (≥3:1) against raised surfaces. */
+  --lx-border-strong: var(--lx-neutral-500);
+  --lx-border-focus: var(--lx-accent-600);
+
+  --lx-info-surface: var(--lx-info-50);
+  --lx-info-fg: var(--lx-info-800);
+  --lx-info-border: var(--lx-info-200);
+
+  --lx-success-surface: var(--lx-success-50);
+  --lx-success-fg: var(--lx-success-800);
+  --lx-success-border: var(--lx-success-200);
+
+  --lx-warning-surface: var(--lx-warning-50);
+  --lx-warning-fg: var(--lx-warning-800);
+  --lx-warning-border: var(--lx-warning-200);
+
+  --lx-danger-surface: var(--lx-danger-50);
+  --lx-danger-fg: var(--lx-danger-700);
+  --lx-danger-border: var(--lx-danger-200);
+
+  --lx-accent-surface: var(--lx-accent-50);
+  --lx-accent-fg: var(--lx-accent-700);
+  --lx-accent-border: var(--lx-accent-200);
+  --lx-accent-solid: var(--lx-accent-600);
+  --lx-accent-solid-hover: var(--lx-accent-700);
+
+  --lx-focus-ring: var(--lx-accent-500);
+  --lx-selection: color-mix(in srgb, var(--lx-accent-400) 35%, transparent);
+  --lx-overlay-scrim: rgb(15 23 42 / 0.45);
+
+  --lx-elevation-0: none;
+  --lx-elevation-1:
+    0 0 0 1px rgb(0 0 0 / 0.06),
+    0 1px 2px -1px rgb(0 0 0 / 0.06),
+    0 2px 4px 0 rgb(0 0 0 / 0.04);
+  --lx-elevation-2:
+    0 0 0 1px rgb(0 0 0 / 0.08),
+    0 4px 12px -2px rgb(0 0 0 / 0.1),
+    0 2px 4px 0 rgb(0 0 0 / 0.06);
+  --lx-elevation-3:
+    0 0 0 1px rgb(0 0 0 / 0.1),
+    0 12px 28px -4px rgb(0 0 0 / 0.14),
+    0 4px 8px 0 rgb(0 0 0 / 0.08);
+
+  /* Card shadow aliases used by existing utilities */
+  --shadow-card: var(--lx-elevation-1);
+  --shadow-card-hover: var(--lx-elevation-2);
+}
+
+/* ── Dark — surface elevation (true near-black; tints in surface-tints.css) ─ */
+[data-theme='dark'],
+html.dark {
+  --lx-surface-base: #0a0a0a;
+  --lx-surface-raised: #141414;
+  --lx-surface-overlay: #1c1c1c;
+  --lx-surface-sunken: #050505;
+  --lx-surface-inverse: #f4f4f5;
+
+  --lx-fg-default: #f4f4f5;
+  --lx-fg-muted: #a1a1aa;
+  --lx-fg-subtle: #a1a1aa;
+  --lx-fg-on-accent: var(--lx-neutral-0);
+  --lx-fg-inverse: #18181b;
+
+  --lx-border-default: #2a2a2a;
+  --lx-border-subtle: #1f1f1f;
+  --lx-border-strong: #a1a1aa;
+  --lx-border-focus: var(--lx-accent-400);
+
+  --lx-info-surface: color-mix(in srgb, var(--lx-info-900) 55%, var(--lx-neutral-950));
+  --lx-info-fg: var(--lx-info-200);
+  --lx-info-border: var(--lx-info-800);
+
+  --lx-success-surface: color-mix(in srgb, var(--lx-success-900) 55%, var(--lx-neutral-950));
+  --lx-success-fg: var(--lx-success-200);
+  --lx-success-border: var(--lx-success-800);
+
+  --lx-warning-surface: color-mix(in srgb, var(--lx-warning-900) 50%, var(--lx-neutral-950));
+  --lx-warning-fg: var(--lx-warning-200);
+  --lx-warning-border: var(--lx-warning-800);
+
+  --lx-danger-surface: color-mix(in srgb, var(--lx-danger-900) 50%, var(--lx-neutral-950));
+  --lx-danger-fg: var(--lx-danger-200);
+  --lx-danger-border: var(--lx-danger-800);
+
+  --lx-accent-surface: color-mix(in srgb, var(--lx-accent-900) 55%, var(--lx-neutral-950));
+  --lx-accent-fg: var(--lx-accent-200);
+  --lx-accent-border: var(--lx-accent-800);
+  /* Keep solid at 600 so white onAccent stays ≥4.5:1 (indigo-500 is ~4.47). */
+  --lx-accent-solid: var(--lx-accent-600);
+  --lx-accent-solid-hover: var(--lx-accent-500);
+
+  --lx-focus-ring: var(--lx-accent-400);
+  --lx-selection: color-mix(in srgb, var(--lx-accent-500) 40%, transparent);
+  --lx-overlay-scrim: rgb(0 0 0 / 0.6);
+
+  --lx-elevation-0: none;
+  --lx-elevation-1: 0 0 0 1px rgb(255 255 255 / 0.08);
+  --lx-elevation-2: 0 0 0 1px rgb(255 255 255 / 0.12), 0 8px 24px rgb(0 0 0 / 0.35);
+  --lx-elevation-3: 0 0 0 1px rgb(255 255 255 / 0.14), 0 16px 40px rgb(0 0 0 / 0.45);
+
+  --shadow-card: var(--lx-elevation-1);
+  --shadow-card-hover: var(--lx-elevation-2);
+}
+
+/* ── High-contrast light ─────────────────────────────────────────────────── */
+[data-theme='high-contrast-light'] {
+  --lx-surface-base: #ffffff;
+  --lx-surface-raised: #ffffff;
+  --lx-surface-overlay: #ffffff;
+  --lx-surface-sunken: #f0f0f0;
+  --lx-surface-inverse: #000000;
+
+  --lx-fg-default: #000000;
+  --lx-fg-muted: #1a1a1a;
+  --lx-fg-subtle: #2a2a2a;
+  --lx-fg-on-accent: #ffffff;
+  --lx-fg-inverse: #ffffff;
+
+  --lx-border-default: #000000;
+  --lx-border-subtle: #333333;
+  --lx-border-strong: #000000;
+  --lx-border-focus: #0000ee;
+
+  --lx-info-surface: #e6f0ff;
+  --lx-info-fg: #000066;
+  --lx-info-border: #0000ee;
+
+  --lx-success-surface: #e6ffe6;
+  --lx-success-fg: #003300;
+  --lx-success-border: #006600;
+
+  --lx-warning-surface: #fff8e6;
+  --lx-warning-fg: #663300;
+  --lx-warning-border: #996600;
+
+  --lx-danger-surface: #ffe6e6;
+  --lx-danger-fg: #660000;
+  --lx-danger-border: #cc0000;
+
+  --lx-accent-surface: #eef2ff;
+  --lx-accent-fg: #1e1b4b;
+  --lx-accent-border: #312e81;
+  --lx-accent-solid: #0000ee;
+  --lx-accent-solid-hover: #0000aa;
+
+  --lx-focus-ring: #0000ee;
+  --lx-selection: #b3d7ff;
+  --lx-overlay-scrim: rgb(0 0 0 / 0.55);
+
+  --lx-elevation-0: none;
+  --lx-elevation-1: 0 0 0 2px #000000;
+  --lx-elevation-2: 0 0 0 2px #000000, 0 4px 0 #000000;
+  --lx-elevation-3: 0 0 0 3px #000000;
+
+  --shadow-card: var(--lx-elevation-1);
+  --shadow-card-hover: var(--lx-elevation-2);
+}
+
+/* ── High-contrast dark ──────────────────────────────────────────────────── */
+[data-theme='high-contrast-dark'] {
+  --lx-surface-base: #000000;
+  --lx-surface-raised: #111111;
+  --lx-surface-overlay: #1a1a1a;
+  --lx-surface-sunken: #000000;
+  --lx-surface-inverse: #ffffff;
+
+  --lx-fg-default: #ffffff;
+  --lx-fg-muted: #e0e0e0;
+  --lx-fg-subtle: #cccccc;
+  --lx-fg-on-accent: #000000;
+  --lx-fg-inverse: #000000;
+
+  --lx-border-default: #ffffff;
+  --lx-border-subtle: #cccccc;
+  --lx-border-strong: #ffffff;
+  --lx-border-focus: #00ffff;
+
+  --lx-info-surface: #001a33;
+  --lx-info-fg: #99ccff;
+  --lx-info-border: #66b3ff;
+
+  --lx-success-surface: #002200;
+  --lx-success-fg: #99ff99;
+  --lx-success-border: #66ff66;
+
+  --lx-warning-surface: #332200;
+  --lx-warning-fg: #ffdd66;
+  --lx-warning-border: #ffcc00;
+
+  --lx-danger-surface: #330000;
+  --lx-danger-fg: #ff9999;
+  --lx-danger-border: #ff6666;
+
+  --lx-accent-surface: #1a0033;
+  --lx-accent-fg: #ffff00;
+  --lx-accent-border: #ffff00;
+  --lx-accent-solid: #ffff00;
+  --lx-accent-solid-hover: #ffff66;
+
+  --lx-focus-ring: #00ffff;
+  --lx-selection: #0044aa;
+  --lx-overlay-scrim: rgb(0 0 0 / 0.75);
+
+  --lx-elevation-0: none;
+  --lx-elevation-1: 0 0 0 1px #ffffff;
+  --lx-elevation-2: 0 0 0 2px #ffffff;
+  --lx-elevation-3: 0 0 0 3px #ffffff;
+
+  --shadow-card: var(--lx-elevation-1);
+  --shadow-card-hover: var(--lx-elevation-2);
+}
+
+/* Org brand accent overrides (set at runtime on :root / html) */
+html[data-brand-accent] {
+  /* accent ramp steps injected as --lx-accent-* by JS after validation */
+}
+
+/* Forced colors (Windows high contrast) */
+@media (forced-colors: active) {
+  :root {
+    --lx-surface-base: Canvas;
+    --lx-surface-raised: Canvas;
+    --lx-surface-overlay: Canvas;
+    --lx-surface-sunken: Canvas;
+    --lx-fg-default: CanvasText;
+    --lx-fg-muted: GrayText;
+    --lx-fg-subtle: GrayText;
+    --lx-fg-on-accent: HighlightText;
+    --lx-border-default: CanvasText;
+    --lx-border-subtle: GrayText;
+    --lx-border-strong: CanvasText;
+    --lx-border-focus: Highlight;
+    --lx-accent-solid: Highlight;
+    --lx-focus-ring: Highlight;
+  }
+}

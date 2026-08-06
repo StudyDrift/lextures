@@ -136,7 +136,7 @@ export default function CourseCatalogPage() {
   if (!ffCatalogIntegration && !ffConsortiumSharing) {
     return (
       <main className="mx-auto max-w-4xl p-6">
-        <p className="text-sm text-slate-600 dark:text-neutral-400">
+        <p className="text-sm text-fg-muted">
           Course catalog integration is not enabled on this platform. Enable{' '}
           <strong>Course catalog integration</strong> or <strong>Consortium sharing</strong> in Settings → Global platform.
         </p>
@@ -152,24 +152,24 @@ export default function CourseCatalogPage() {
             <button type="button" onClick={() => setTab('catalog')} className="rounded-lg border px-3 py-1.5 text-sm">
               Institution catalog
             </button>
-            <button type="button" className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white">
+            <button type="button" className="rounded-lg bg-accent-solid px-3 py-1.5 text-sm font-semibold text-white">
               Partner courses
             </button>
           </div>
         ) : null}
-        {partnerLoading ? <p className="text-sm text-slate-500">Loading…</p> : null}
+        {partnerLoading ? <p className="text-sm text-fg-muted">Loading…</p> : null}
         {partnerError ? <p className="text-sm text-rose-700">{partnerError}</p> : null}
         {!partnerLoading && partnerCourses.length === 0 ? (
-          <p className="text-sm text-slate-600" role="status">No partner courses available.</p>
+          <p className="text-sm text-fg-muted" role="status">No partner courses available.</p>
         ) : null}
         <ul className="mt-4 space-y-3">
           {partnerCourses.map((c) => (
-            <li key={c.id} className="rounded-xl border border-slate-200 p-4 dark:border-neutral-700">
+            <li key={c.id} className="rounded-xl border border-border-default p-4 dark:border-border-default">
               <p className="font-semibold">{c.title}</p>
-              <p className="text-sm text-slate-600">{c.hostOrgName} · {c.courseCode}</p>
+              <p className="text-sm text-fg-muted">{c.hostOrgName} · {c.courseCode}</p>
               <button
                 type="button"
-                className="mt-2 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white"
+                className="mt-2 rounded-lg bg-accent-solid px-3 py-1.5 text-xs font-semibold text-white"
                 onClick={() => void enrollConsortiumCourse(c.id).then(() => loadPartner())}
               >
                 Enroll
@@ -184,10 +184,10 @@ export default function CourseCatalogPage() {
   if (!ffCatalogIntegration) {
     return (
       <main className="mx-auto max-w-4xl p-6">
-        <p className="text-sm text-slate-600 dark:text-neutral-400">
+        <p className="text-sm text-fg-muted">
           Browse partner courses using the Partner institution courses tab.
         </p>
-        <button type="button" onClick={() => setTab('partner')} className="mt-3 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white">
+        <button type="button" onClick={() => setTab('partner')} className="mt-3 rounded-lg bg-accent-solid px-4 py-2 text-sm font-semibold text-white">
           Partner institution courses
         </button>
       </main>
@@ -201,7 +201,7 @@ export default function CourseCatalogPage() {
     >
       {ffConsortiumSharing ? (
         <div className="mb-4 flex gap-2">
-          <button type="button" className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white">
+          <button type="button" className="rounded-lg bg-accent-solid px-3 py-1.5 text-sm font-semibold text-white">
             Institution catalog
           </button>
           <button type="button" onClick={() => setTab('partner')} className="rounded-lg border px-3 py-1.5 text-sm">
@@ -222,27 +222,27 @@ export default function CourseCatalogPage() {
         role="search"
         aria-label="Filter catalog sections"
         onSubmit={handleFilterSubmit}
-        className="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-900"
+        className="mb-6 rounded-2xl border border-border-default bg-surface-raised p-4 shadow-sm dark:border-border-default dark:bg-surface-raised"
       >
         <div className="flex flex-wrap items-end gap-3">
           <div className="min-w-[200px] flex-1">
-            <label htmlFor="catalog-search" className="text-sm font-medium text-slate-700 dark:text-neutral-200">
+            <label htmlFor="catalog-search" className="text-sm font-medium text-fg-default">
               Search
             </label>
             <div className="relative mt-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-subtle" aria-hidden />
               <input
                 id="catalog-search"
                 type="search"
                 value={filter.q}
                 onChange={(e) => setFilter((f) => ({ ...f, q: e.target.value }))}
                 placeholder="Title, subject, CRN…"
-                className="w-full rounded-xl border border-slate-200 py-2 pl-9 pr-3 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+                className="w-full rounded-xl border border-border-default py-2 pl-9 pr-3 text-sm dark:border-border-default dark:bg-surface-overlay"
               />
             </div>
           </div>
           <div>
-            <label htmlFor="catalog-dept" className="text-sm font-medium text-slate-700 dark:text-neutral-200">
+            <label htmlFor="catalog-dept" className="text-sm font-medium text-fg-default">
               Department
             </label>
             <input
@@ -251,18 +251,18 @@ export default function CourseCatalogPage() {
               value={filter.department}
               onChange={(e) => setFilter((f) => ({ ...f, department: e.target.value }))}
               placeholder="CS"
-              className="mt-1 w-24 rounded-xl border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+              className="mt-1 w-24 rounded-xl border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
             />
           </div>
           <div>
-            <label htmlFor="catalog-days" className="text-sm font-medium text-slate-700 dark:text-neutral-200">
+            <label htmlFor="catalog-days" className="text-sm font-medium text-fg-default">
               Days
             </label>
             <select
               id="catalog-days"
               value={filter.days}
               onChange={(e) => setFilter((f) => ({ ...f, days: e.target.value }))}
-              className="mt-1 rounded-xl border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+              className="mt-1 rounded-xl border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
             >
               {DAY_OPTIONS.map((d) => (
                 <option key={d || 'any'} value={d}>
@@ -272,7 +272,7 @@ export default function CourseCatalogPage() {
             </select>
           </div>
           <div>
-            <label htmlFor="catalog-min-credits" className="text-sm font-medium text-slate-700 dark:text-neutral-200">
+            <label htmlFor="catalog-min-credits" className="text-sm font-medium text-fg-default">
               Min credits
             </label>
             <input
@@ -282,12 +282,12 @@ export default function CourseCatalogPage() {
               step={0.5}
               value={filter.minCredits}
               onChange={(e) => setFilter((f) => ({ ...f, minCredits: e.target.value }))}
-              className="mt-1 w-20 rounded-xl border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+              className="mt-1 w-20 rounded-xl border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
             />
           </div>
           <button
             type="submit"
-            className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
+            className="rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
           >
             Apply filters
           </button>
@@ -307,13 +307,13 @@ export default function CourseCatalogPage() {
       {loading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true" aria-label="Loading sections">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-40 animate-pulse rounded-2xl bg-slate-100 dark:bg-neutral-800" />
+            <div key={i} className="h-40 animate-pulse rounded-2xl bg-surface-sunken" />
           ))}
         </div>
       ) : sections.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-200 px-6 py-12 text-center dark:border-neutral-700">
+        <div className="rounded-2xl border border-dashed border-border-default px-6 py-12 text-center dark:border-border-default">
           <BookOpen className="mx-auto h-10 w-10 text-slate-300 dark:text-neutral-600" aria-hidden />
-          <p className="mt-3 text-sm text-slate-600 dark:text-neutral-400">
+          <p className="mt-3 text-sm text-fg-muted">
             No sections found for selected filters.
           </p>
         </div>
@@ -324,25 +324,25 @@ export default function CourseCatalogPage() {
               key={sec.id}
               type="button"
               onClick={() => setSelectedId(sec.id)}
-              className="rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition-[box-shadow,background-color,color,border-color] hover:border-indigo-200 hover:shadow-md dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-indigo-800"
+              className="rounded-2xl border border-border-default bg-surface-raised p-4 text-left shadow-sm transition-[box-shadow,background-color,color,border-color] hover:border-indigo-200 hover:shadow-md dark:border-border-default dark:bg-surface-raised dark:hover:border-indigo-800"
             >
               <div className="flex items-start justify-between gap-2">
-                <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                <p className="text-xs font-medium uppercase tracking-wide text-fg-muted">
                   {sec.subject} {sec.courseNumber}
                   {sec.sectionNumber ? ` · ${sec.sectionNumber}` : ''}
                 </p>
                 <CourseCatalogStatusPill label={sec.status} />
               </div>
-              <p className="mt-1 font-semibold text-slate-900 dark:text-neutral-50">{sec.title}</p>
-              <p className="mt-2 flex items-center gap-1 text-xs text-slate-500 dark:text-neutral-400">
+              <p className="mt-1 font-semibold text-fg-default">{sec.title}</p>
+              <p className="mt-2 flex items-center gap-1 text-xs text-fg-muted">
                 <CalendarDays className="h-3.5 w-3.5" aria-hidden />
                 {formatMeeting(sec.meetingPattern)}
               </p>
               {sec.credits != null && (
-                <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">{sec.credits} credits</p>
+                <p className="mt-1 text-xs text-fg-muted">{sec.credits} credits</p>
               )}
               {sec.instructorName && (
-                <p className="mt-1 text-xs text-slate-600 dark:text-neutral-300">{sec.instructorName}</p>
+                <p className="mt-1 text-xs text-fg-muted">{sec.instructorName}</p>
               )}
               {sec.fulfillsRequirements && sec.fulfillsRequirements.length > 0 ? (
                 <p className="mt-2 inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200">
@@ -363,27 +363,27 @@ export default function CourseCatalogPage() {
           onClick={() => setSelectedId(null)}
         >
           <div
-            className="h-full w-full max-w-md overflow-y-auto bg-white p-6 shadow-xl dark:bg-neutral-900"
+            className="h-full w-full max-w-md overflow-y-auto bg-surface-raised p-6 shadow-xl dark:bg-surface-raised"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-neutral-50">Section detail</h2>
+              <h2 className="text-lg font-semibold text-fg-default">Section detail</h2>
               <button
                 type="button"
                 onClick={() => setSelectedId(null)}
-                className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-neutral-800"
+                className="rounded-lg p-2 text-fg-subtle hover:bg-surface-sunken dark:hover:bg-surface-overlay"
                 aria-label="Close detail panel"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
             {detailLoading || !detail ? (
-              <p className="mt-4 text-sm text-slate-500">Loading…</p>
+              <p className="mt-4 text-sm text-fg-muted">Loading…</p>
             ) : (
               <div className="mt-4 space-y-4 text-sm">
                 <div>
-                  <p className="font-semibold text-slate-900 dark:text-neutral-100">{detail.title}</p>
-                  <p className="text-slate-500 dark:text-neutral-400">
+                  <p className="font-semibold text-fg-default">{detail.title}</p>
+                  <p className="text-fg-muted">
                     {detail.subject} {detail.courseNumber}
                     {detail.sectionNumber ? ` · Section ${detail.sectionNumber}` : ''}
                   </p>
@@ -399,7 +399,7 @@ export default function CourseCatalogPage() {
                   </p>
                 )}
                 <p className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-slate-400" aria-hidden />
+                  <Clock className="h-4 w-4 text-fg-subtle" aria-hidden />
                   {formatMeeting(detail.meetingPattern)}
                   {detail.room ? ` · ${detail.room}` : ''}
                 </p>

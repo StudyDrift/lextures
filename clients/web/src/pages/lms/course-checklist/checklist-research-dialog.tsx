@@ -50,22 +50,22 @@ export function ChecklistResearchDialog({ open, onClose, sourceLabel }: Props) {
       onClick={onClose}
     >
       <div
-        className="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-t-xl border border-slate-200 bg-white shadow-xl sm:rounded-xl dark:border-neutral-700 dark:bg-neutral-900"
+        className="flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-t-xl border border-border-default bg-surface-raised shadow-xl sm:rounded-xl dark:border-border-default dark:bg-surface-raised"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-slate-200 px-5 py-4 dark:border-neutral-700">
+        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-border-default px-5 py-4 dark:border-border-default">
           <div className="min-w-0">
-            <h2 id={titleId} className="text-base font-semibold text-slate-900 dark:text-neutral-50">
+            <h2 id={titleId} className="text-base font-semibold text-fg-default">
               {title}
             </h2>
-            <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+            <p className="mt-1 text-xs text-fg-muted">
               Rule-to-standard mapping for Quality Matters, OSCQR, NSQ, UDL, and WCAG.
             </p>
           </div>
           <button
             ref={closeRef}
             type="button"
-            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-neutral-800"
+            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-fg-muted hover:bg-surface-sunken dark:hover:bg-surface-overlay"
             aria-label={courseChecklistI18n.helpClose}
             onClick={onClose}
           >
@@ -77,17 +77,17 @@ export function ChecklistResearchDialog({ open, onClose, sourceLabel }: Props) {
           <ChecklistResearchBody focusSource={sourceLabel} scrollRootRef={scrollRef} />
         </div>
 
-        <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-t border-slate-200 px-5 py-3 dark:border-neutral-700">
+        <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-t border-border-default px-5 py-3 dark:border-border-default">
           <Link
             to={fullPageHref}
-            className="text-xs font-semibold text-indigo-700 underline-offset-2 hover:underline dark:text-indigo-300"
+            className="text-xs font-semibold text-accent-fg underline-offset-2 hover:underline dark:text-indigo-300"
             onClick={onClose}
           >
             {courseChecklistI18n.sourcesOpenFullPage}
           </Link>
           <button
             type="button"
-            className="inline-flex min-h-11 items-center rounded-lg bg-slate-900 px-3 text-sm font-medium text-white hover:bg-slate-800 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-white"
+            className="inline-flex min-h-11 items-center rounded-lg bg-slate-900 px-3 text-sm font-medium text-white hover:bg-slate-800 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-surface-raised"
             onClick={onClose}
           >
             {courseChecklistI18n.helpClose}

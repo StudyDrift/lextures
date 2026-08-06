@@ -67,11 +67,6 @@ func (d Deps) recordIntroCourseAdminAudit(r *http.Request, actorID uuid.UUID, ac
 // handleAdminIntroCourseStatus is GET /api/v1/admin/intro-course (IC08).
 func (d Deps) handleAdminIntroCourseStatus() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -98,11 +93,6 @@ func (d Deps) handleAdminIntroCourseStatus() http.HandlerFunc {
 // handleMeIntroCourse is GET /api/v1/me/intro-course (IC05).
 func (d Deps) handleMeIntroCourse() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -153,11 +143,6 @@ func (d Deps) handleMeIntroCourse() http.HandlerFunc {
 // handleAdminIntroCourseAnalytics is GET /api/v1/admin/intro-course/analytics (IC05/IC08).
 func (d Deps) handleAdminIntroCourseAnalytics() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -194,11 +179,6 @@ func (d Deps) handleAdminIntroCourseAnalytics() http.HandlerFunc {
 // handleAdminIntroCourseResync is POST /api/v1/admin/intro-course/resync (IC01/IC08).
 func (d Deps) handleAdminIntroCourseResync() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		actorID, ok := d.adminRbacUser(w, r)
 		if !ok {
 			return
@@ -259,11 +239,6 @@ func (d Deps) handleAdminIntroCourseResync() http.HandlerFunc {
 // handleAdminIntroCourseBackfillStart is POST /api/v1/admin/intro-course/backfill (IC02/IC08).
 func (d Deps) handleAdminIntroCourseBackfillStart() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		actorID, ok := d.adminRbacUser(w, r)
 		if !ok {
 			return
@@ -305,11 +280,6 @@ func (d Deps) handleAdminIntroCourseBackfillStart() http.HandlerFunc {
 // handleAdminIntroCourseBackfillStatus is GET /api/v1/admin/intro-course/backfill (IC02).
 func (d Deps) handleAdminIntroCourseBackfillStatus() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -343,11 +313,6 @@ func formatOptionalTime(t *time.Time) any {
 // handleMeIntroCourseWelcomeBannerDismissed is PUT /api/v1/me/intro-course/welcome-banner-dismissed (IC06).
 func (d Deps) handleMeIntroCourseWelcomeBannerDismissed() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPut {
-			w.Header().Set("Allow", http.MethodPut)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -368,11 +333,6 @@ func (d Deps) handleMeIntroCourseWelcomeBannerDismissed() http.HandlerFunc {
 // handleMeIntroCourseCelebrationSeen is PUT /api/v1/me/intro-course/celebration-seen (IC06).
 func (d Deps) handleMeIntroCourseCelebrationSeen() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPut {
-			w.Header().Set("Allow", http.MethodPut)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return

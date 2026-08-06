@@ -118,11 +118,6 @@ func (d Deps) loadSessionRoster(ctx context.Context, courseCode string, courseID
 
 func (d Deps) handleCourseAttendanceSessionsList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -173,11 +168,6 @@ func (d Deps) handleCourseAttendanceSessionsPost() http.HandlerFunc {
 		ClosesAt         *string `json:"closesAt"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -279,11 +269,6 @@ func (d Deps) handleCourseAttendanceSessionsPost() http.HandlerFunc {
 
 func (d Deps) handleCourseAttendanceSessionGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -359,11 +344,6 @@ func (d Deps) handleCourseAttendanceSessionRecordsPut() http.HandlerFunc {
 		Source        string `json:"source"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPut {
-			w.Header().Set("Allow", http.MethodPut)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -447,11 +427,6 @@ func (d Deps) handleCourseAttendanceSessionRecordsPut() http.HandlerFunc {
 
 func (d Deps) handleCourseAttendanceSessionSelfReport() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -513,11 +488,6 @@ func (d Deps) handleCourseAttendanceSessionSelfReport() http.HandlerFunc {
 
 func (d Deps) handleCourseAttendanceSessionClose() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return

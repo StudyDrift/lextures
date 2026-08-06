@@ -37,15 +37,6 @@ func (d Deps) handlePostQuizAttemptSyncCanvas() http.HandlerFunc {
 		PointsEarned  *float64 `json:"pointsEarned"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.CanvasSubmissionSyncQueue == nil || d.CanvasSubmissionSyncJobs == nil {
 			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "Server misconfiguration.")
 			return

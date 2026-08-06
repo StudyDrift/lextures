@@ -51,7 +51,7 @@ export default function SamlCallback() {
 
   if (!token) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+      <div className="flex min-h-screen items-center justify-center bg-surface-base px-4">
         <p className="max-w-md text-center text-rose-600" role="status">
           This page did not receive a sign-in token. Start again from the login page.
         </p>
@@ -59,8 +59,8 @@ export default function SamlCallback() {
     )
   }
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50">
-      <p className="text-slate-600">Signing you in…</p>
+    <div className="flex min-h-screen items-center justify-center bg-surface-base">
+      <p className="text-fg-muted">Signing you in…</p>
     </div>
   )
 }

@@ -19,14 +19,16 @@ type cacheEntry struct {
 
 // Resolved is the public branding payload for a hostname.
 type Resolved struct {
-	OrgID           *uuid.UUID `json:"orgId,omitempty"`
-	OrgSlug         string     `json:"orgSlug,omitempty"`
-	LogoURL         *string    `json:"logoUrl,omitempty"`
-	FaviconURL      *string    `json:"faviconUrl,omitempty"`
-	PrimaryColor    string     `json:"primaryColor"`
-	SecondaryColor  string     `json:"secondaryColor"`
-	CustomDomain    *string    `json:"customDomain,omitempty"`
-	EmailDisplayName *string   `json:"customEmailDisplayName,omitempty"`
+	OrgID              *uuid.UUID `json:"orgId,omitempty"`
+	OrgSlug            string     `json:"orgSlug,omitempty"`
+	LogoURL            *string    `json:"logoUrl,omitempty"`
+	FaviconURL         *string    `json:"faviconUrl,omitempty"`
+	PrimaryColor       string     `json:"primaryColor"`
+	SecondaryColor     string     `json:"secondaryColor"`
+	CustomDomain       *string    `json:"customDomain,omitempty"`
+	EmailDisplayName   *string    `json:"customEmailDisplayName,omitempty"`
+	BrandAccentOklch   *string    `json:"accentOklch,omitempty"`
+	BrandTokensVersion int        `json:"tokensVersion,omitempty"`
 }
 
 // Resolver resolves branding by HTTP host with in-process TTL cache.
@@ -146,6 +148,8 @@ func (r *Resolver) rowToResolved(ctx context.Context, orgID uuid.UUID) (Resolved
 		out.SecondaryColor = row.SecondaryColor
 		out.CustomDomain = row.CustomDomain
 		out.EmailDisplayName = row.CustomEmailDisplayName
+		out.BrandAccentOklch = row.BrandAccentOklch
+		out.BrandTokensVersion = row.BrandTokensVersion
 	}
 	return out, nil
 }

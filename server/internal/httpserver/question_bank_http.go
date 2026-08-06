@@ -108,10 +108,6 @@ func questionEntityToAPI(e questionbank.QuestionEntity, includeDetail bool) qbmo
 // handleListCourseBankQuestions is GET /api/v1/courses/{course_code}/questions
 func (d Deps) handleListCourseBankQuestions() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		_, courseID, _, ok := d.requireQuestionBankStaff(w, r)
 		if !ok {
 			return
@@ -146,10 +142,6 @@ func (d Deps) handleListCourseBankQuestions() http.HandlerFunc {
 // handleGetCourseBankQuestion is GET /api/v1/courses/{course_code}/questions/{question_id}
 func (d Deps) handleGetCourseBankQuestion() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		_, courseID, _, ok := d.requireQuestionBankStaff(w, r)
 		if !ok {
 			return

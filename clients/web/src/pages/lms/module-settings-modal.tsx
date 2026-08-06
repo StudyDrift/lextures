@@ -135,16 +135,16 @@ function ModuleSettingsModalInner({
         if (e.target === e.currentTarget && !busy) onClose()
       }}
     >
-      <div className="flex w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
-        <div className="flex shrink-0 items-center justify-between border-b border-slate-200 px-4 py-3">
-          <h3 id={titleId} className="text-sm font-semibold text-slate-900">
+      <div className="flex w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-xl">
+        <div className="flex shrink-0 items-center justify-between border-b border-border-default px-4 py-3">
+          <h3 id={titleId} className="text-sm font-semibold text-fg-default">
             Module settings
           </h3>
           <button
             type="button"
             onClick={() => onClose()}
             disabled={busy}
-            className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken hover:text-fg-default disabled:cursor-not-allowed disabled:opacity-50"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
@@ -153,7 +153,7 @@ function ModuleSettingsModalInner({
 
         {showRequirementsTab ? (
           <div
-            className="flex shrink-0 gap-1 border-b border-slate-200 px-2"
+            className="flex shrink-0 gap-1 border-b border-border-default px-2"
             role="tablist"
             aria-label="Module settings sections"
           >
@@ -164,11 +164,7 @@ function ModuleSettingsModalInner({
               aria-controls={generalPanelId}
               aria-selected={tab === 'general'}
               onClick={() => setTab('general')}
-              className={`px-3 py-2.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
-                tab === 'general'
-                  ? 'border-b-2 border-indigo-600 text-indigo-700'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
+              className={`px-3 py-2.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${ tab === 'general' ? 'border-b-2 border-indigo-600 text-accent-fg' : 'text-fg-muted hover:text-fg-default' }`}
             >
               General
             </button>
@@ -179,11 +175,7 @@ function ModuleSettingsModalInner({
               aria-controls={requirementsPanelId}
               aria-selected={tab === 'requirements'}
               onClick={() => setTab('requirements')}
-              className={`px-3 py-2.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
-                tab === 'requirements'
-                  ? 'border-b-2 border-indigo-600 text-indigo-700'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
+              className={`px-3 py-2.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${ tab === 'requirements' ? 'border-b-2 border-indigo-600 text-accent-fg' : 'text-fg-muted hover:text-fg-default' }`}
             >
               Requirements
             </button>
@@ -210,7 +202,7 @@ function ModuleSettingsModalInner({
                 })
               }}
             >
-              <label htmlFor={nameInputId} className="text-xs font-medium text-slate-600">
+              <label htmlFor={nameInputId} className="text-xs font-medium text-fg-muted">
                 Module name
               </label>
               <input
@@ -221,7 +213,7 @@ function ModuleSettingsModalInner({
                 placeholder="e.g. Week 1 — Introduction"
                 autoFocus={!showRequirementsTab || tab === 'general'}
                 disabled={busy}
-                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 placeholder:text-slate-400 focus:border-indigo-400 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60"
+                className="mt-1 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm text-fg-default outline-none ring-indigo-500/20 placeholder:text-fg-subtle focus:border-indigo-400 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60"
               />
 
               <div className="mt-4 flex items-center gap-3">
@@ -231,9 +223,9 @@ function ModuleSettingsModalInner({
                   checked={published}
                   onChange={(e) => setPublished(e.target.checked)}
                   disabled={busy}
-                  className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                  className="h-4 w-4 rounded border-border-strong text-accent-fg focus:ring-indigo-500"
                 />
-                <label htmlFor="module-settings-published" className="text-sm text-slate-700">
+                <label htmlFor="module-settings-published" className="text-sm text-fg-muted">
                   Published to students
                 </label>
               </div>
@@ -255,7 +247,7 @@ function ModuleSettingsModalInner({
                   scheduleMode={scheduleMode}
                   relativeAnchorAt={relativeScheduleAnchorAt}
                   defaultTime="00:00"
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60"
                 />
               </div>
               <button type="submit" className="sr-only" tabIndex={-1}>
@@ -282,7 +274,7 @@ function ModuleSettingsModalInner({
           ) : null}
         </div>
 
-        <div className="flex shrink-0 flex-wrap items-center gap-2 border-t border-slate-200 px-4 py-3">
+        <div className="flex shrink-0 flex-wrap items-center gap-2 border-t border-border-default px-4 py-3">
           {onDelete && tab === 'general' ? (
             <button
               type="button"
@@ -298,7 +290,7 @@ function ModuleSettingsModalInner({
               type="button"
               onClick={() => onClose()}
               disabled={busy}
-              className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-xl px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-sunken disabled:cursor-not-allowed disabled:opacity-50"
             >
               Cancel
             </button>
@@ -306,7 +298,7 @@ function ModuleSettingsModalInner({
               type="button"
               onClick={() => submitActiveTab()}
               disabled={saveDisabled}
-              className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {saveLabel}
             </button>

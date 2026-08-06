@@ -452,7 +452,7 @@ export function CourseQuestionBankPage() {
   if (!canEdit) {
     return (
       <LmsPage title="Question bank">
-        <p className="text-sm text-slate-600 dark:text-neutral-300">
+        <p className="text-sm text-fg-muted">
           You do not have access to manage this course&apos;s question bank.
         </p>
       </LmsPage>
@@ -469,7 +469,7 @@ export function CourseQuestionBankPage() {
       }
     >
       <div className="max-w-5xl space-y-4">
-        <p className="text-sm text-slate-600 dark:text-neutral-300">
+        <p className="text-sm text-fg-muted">
           Browse normalized questions for this course. Enable the tool under{' '}
           <strong>Course settings → Course tools</strong> if it is off.
         </p>
@@ -490,26 +490,26 @@ export function CourseQuestionBankPage() {
               setDraft(defaultDraft())
             }}
             disabled={!bankOn}
-            className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-md bg-accent-solid px-3 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
             New question
           </button>
           <div className="min-w-[12rem] flex-1">
-            <label htmlFor={searchId} className="text-xs font-medium text-slate-700 dark:text-neutral-200">
+            <label htmlFor={searchId} className="text-xs font-medium text-fg-default">
               Search stem
             </label>
             <input
               id={searchId}
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              className="mt-1 w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+              className="mt-1 w-full rounded-md border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
               placeholder="Keywords…"
             />
           </div>
           <button
             type="button"
             onClick={() => void load()}
-            className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-500"
+            className="rounded-md bg-accent-solid px-3 py-2 text-sm font-medium text-white hover:bg-indigo-500"
           >
             Search
           </button>
@@ -520,7 +520,7 @@ export function CourseQuestionBankPage() {
           </p>
         )}
         {loading ? (
-          <p className="text-sm text-slate-500 dark:text-neutral-400">Loading…</p>
+          <p className="text-sm text-fg-muted">Loading…</p>
         ) : bankOn && rows.length === 0 ? (
           <EmptyState
             icon={Library}
@@ -539,12 +539,12 @@ export function CourseQuestionBankPage() {
           />
         ) : (
           <div
-            className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950"
+            className="overflow-x-auto rounded-xl border border-border-default bg-surface-raised shadow-sm dark:border-border-subtle dark:bg-surface-base"
             role="grid"
             aria-label="Question bank"
           >
             <table className="min-w-full text-start text-sm">
-              <thead className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-600 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-300">
+              <thead className="border-b border-border-default bg-surface-base text-xs font-semibold uppercase tracking-wide text-fg-muted dark:border-border-subtle dark:bg-surface-raised dark:text-fg-muted">
                 <tr>
                   <th scope="col" className="px-4 py-3">
                     Stem
@@ -569,7 +569,7 @@ export function CourseQuestionBankPage() {
               <tbody className="divide-y divide-slate-100 dark:divide-neutral-800">
                 {rows.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-6 text-slate-500 dark:text-neutral-400">
+                    <td colSpan={6} className="px-4 py-6 text-fg-muted">
                       No questions found. Save a module quiz while the bank is enabled to sync items from the
                       editor.
                     </td>
@@ -577,15 +577,15 @@ export function CourseQuestionBankPage() {
                 ) : (
                   rows.map((r) => (
                     <tr key={r.id} className="hover:bg-slate-50/80 dark:hover:bg-neutral-900/60">
-                      <td className="max-w-md truncate px-4 py-3 text-slate-900 dark:text-neutral-100">
+                      <td className="max-w-md truncate px-4 py-3 text-fg-default">
                         {r.stem}
                       </td>
-                      <td className="px-4 py-3 text-slate-600 dark:text-neutral-300">{r.questionType}</td>
-                      <td className="px-4 py-3 text-slate-600 dark:text-neutral-300">
+                      <td className="px-4 py-3 text-fg-muted">{r.questionType}</td>
+                      <td className="px-4 py-3 text-fg-muted">
                         <QuestionBankStatusChip status={r.status} />
                       </td>
-                      <td className="px-4 py-3 tabular-nums text-slate-600 dark:text-neutral-300">{r.points}</td>
-                      <td className="px-4 py-3 tabular-nums text-slate-600 dark:text-neutral-300">
+                      <td className="px-4 py-3 tabular-nums text-fg-muted">{r.points}</td>
+                      <td className="px-4 py-3 tabular-nums text-fg-muted">
                         {r.versionNumber}
                       </td>
                       <td className="px-4 py-3">
@@ -593,21 +593,21 @@ export function CourseQuestionBankPage() {
                           <button
                             type="button"
                             onClick={() => void loadQuestionForEdit(r.id, 'preview')}
-                            className="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-700 dark:text-neutral-100 dark:hover:bg-neutral-900"
+                            className="rounded-md border border-border-strong px-2 py-1 text-xs font-medium text-fg-muted hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-raised"
                           >
                             Preview
                           </button>
                           <button
                             type="button"
                             onClick={() => void loadQuestionForEdit(r.id, 'edit')}
-                            className="rounded-md border border-indigo-300 px-2 py-1 text-xs font-medium text-indigo-700 hover:bg-indigo-50 dark:border-indigo-500/60 dark:text-indigo-300 dark:hover:bg-indigo-950/40"
+                            className="rounded-md border border-indigo-300 px-2 py-1 text-xs font-medium text-accent-fg hover:bg-indigo-50 dark:border-indigo-500/60 dark:text-indigo-300 dark:hover:bg-indigo-950/40"
                           >
                             Edit
                           </button>
                           <button
                             type="button"
                             onClick={() => void openHistory(r.id)}
-                            className="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-700 dark:text-neutral-100 dark:hover:bg-neutral-900"
+                            className="rounded-md border border-border-strong px-2 py-1 text-xs font-medium text-fg-muted hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-raised"
                           >
                             History
                           </button>
@@ -634,12 +634,12 @@ export function CourseQuestionBankPage() {
             }
           }}
         >
-          <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-slate-200 bg-white p-4 shadow-xl dark:border-neutral-800 dark:bg-neutral-950">
-            <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">
+          <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-border-default bg-surface-raised p-4 shadow-xl dark:border-border-subtle dark:bg-surface-base">
+            <h2 className="text-base font-semibold text-fg-default">
               {editId ? 'Edit question' : 'New question'}
             </h2>
             <div className="mt-4 space-y-3">
-              <label htmlFor={stemFieldId} className="block text-xs font-medium text-slate-700 dark:text-neutral-200">
+              <label htmlFor={stemFieldId} className="block text-xs font-medium text-fg-default">
                 Stem
               </label>
               <textarea
@@ -647,15 +647,15 @@ export function CourseQuestionBankPage() {
                 value={draft.stem}
                 onChange={(e) => setDraft((prev) => ({ ...prev, stem: e.target.value }))}
                 rows={4}
-                className="mt-1 w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                className="mt-1 w-full rounded-md border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
               />
               <div className="grid gap-3 sm:grid-cols-3">
-                <label className="block text-xs font-medium text-slate-700 dark:text-neutral-200">
+                <label className="block text-xs font-medium text-fg-default">
                   Type
                   <select
                     value={draft.questionType}
                     onChange={(e) => setDraft((prev) => ({ ...prev, questionType: e.target.value }))}
-                    className="mt-1 w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                    className="mt-1 w-full rounded-md border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
                   >
                     {QUESTION_TYPE_OPTIONS.map((opt) => (
                       <option key={opt.value} value={opt.value}>
@@ -664,7 +664,7 @@ export function CourseQuestionBankPage() {
                     ))}
                   </select>
                 </label>
-                <label className="block text-xs font-medium text-slate-700 dark:text-neutral-200">
+                <label className="block text-xs font-medium text-fg-default">
                   Status
                   <select
                     value={draft.status}
@@ -674,14 +674,14 @@ export function CourseQuestionBankPage() {
                         status: e.target.value as QuestionDraft['status'],
                       }))
                     }
-                    className="mt-1 w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                    className="mt-1 w-full rounded-md border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
                   >
                     <option value="draft">Draft</option>
                     <option value="active">Active</option>
                     <option value="retired">Retired</option>
                   </select>
                 </label>
-                <label className="block text-xs font-medium text-slate-700 dark:text-neutral-200">
+                <label className="block text-xs font-medium text-fg-default">
                   Points
                   <input
                     type="number"
@@ -689,86 +689,86 @@ export function CourseQuestionBankPage() {
                     step="0.25"
                     value={draft.points}
                     onChange={(e) => setDraft((prev) => ({ ...prev, points: e.target.value }))}
-                    className="mt-1 w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                    className="mt-1 w-full rounded-md border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
                   />
                 </label>
               </div>
               {questionTypeSupportsChoiceShuffle(draft.questionType) && (
-                <label className="flex cursor-pointer items-start gap-2 text-sm text-slate-800 dark:text-neutral-100">
+                <label className="flex cursor-pointer items-start gap-2 text-sm text-fg-default">
                   <input
                     type="checkbox"
                     checked={draft.lockAnswerOrder}
                     onChange={(e) => setDraft((prev) => ({ ...prev, lockAnswerOrder: e.target.checked }))}
-                    className="mt-0.5 h-4 w-4 rounded border-slate-300 text-indigo-600 dark:border-neutral-600"
+                    className="mt-0.5 h-4 w-4 rounded border-border-strong text-accent-fg dark:border-border-default"
                   />
                   <span>
                     <span className="font-medium">Lock answer order</span>
-                    <span className="block text-xs font-normal text-slate-600 dark:text-neutral-400">
+                    <span className="block text-xs font-normal text-fg-muted">
                       When the quiz shuffles options, keep this question&apos;s choices in authored order (e.g.
                       &quot;All of the above&quot; last).
                     </span>
                   </span>
                 </label>
               )}
-              <label className="flex cursor-pointer items-start gap-2 text-sm text-slate-800 dark:text-neutral-100">
+              <label className="flex cursor-pointer items-start gap-2 text-sm text-fg-default">
                 <input
                   type="checkbox"
                   checked={draft.srsEligible}
                   onChange={(e) => setDraft((prev) => ({ ...prev, srsEligible: e.target.checked }))}
-                  className="mt-0.5 h-4 w-4 rounded border-slate-300 text-indigo-600 dark:border-neutral-600"
+                  className="mt-0.5 h-4 w-4 rounded border-border-strong text-accent-fg dark:border-border-default"
                 />
                 <span>
                   <span className="font-medium">Spaced repetition eligible</span>
-                  <span className="block text-xs font-normal text-slate-600 dark:text-neutral-400">
+                  <span className="block text-xs font-normal text-fg-muted">
                     When the course turns on review practice and the server flag is enabled, quiz exposure can queue
                     this item for learner review.
                   </span>
                 </span>
               </label>
-              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-200">
+              <label className="block text-xs font-medium text-fg-default">
                 Explanation (optional)
                 <textarea
                   value={draft.explanation}
                   onChange={(e) => setDraft((prev) => ({ ...prev, explanation: e.target.value }))}
                   rows={2}
-                  className="mt-1 w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                  className="mt-1 w-full rounded-md border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
                 />
               </label>
-              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-200">
+              <label className="block text-xs font-medium text-fg-default">
                 Options JSON (optional)
                 <textarea
                   value={draft.optionsJson}
                   onChange={(e) => setDraft((prev) => ({ ...prev, optionsJson: e.target.value }))}
                   rows={4}
                   placeholder='["Option A", "Option B"]'
-                  className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-2 font-mono text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                  className="mt-1 w-full rounded-md border border-border-default bg-surface-raised px-3 py-2 font-mono text-sm dark:border-border-default dark:bg-surface-base"
                 />
               </label>
-              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-200">
+              <label className="block text-xs font-medium text-fg-default">
                 Correct answer JSON (optional)
                 <textarea
                   value={draft.correctAnswerJson}
                   onChange={(e) => setDraft((prev) => ({ ...prev, correctAnswerJson: e.target.value }))}
                   rows={3}
                   placeholder='{"correctChoiceIndex":0}'
-                  className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-2 font-mono text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                  className="mt-1 w-full rounded-md border border-border-default bg-surface-raised px-3 py-2 font-mono text-sm dark:border-border-default dark:bg-surface-base"
                 />
               </label>
-              <label className="block text-xs font-medium text-slate-700 dark:text-neutral-200">
+              <label className="block text-xs font-medium text-fg-default">
                 Change note (optional)
                 <input
                   value={draft.changeNote}
                   onChange={(e) => setDraft((prev) => ({ ...prev, changeNote: e.target.value }))}
-                  className="mt-1 w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                  className="mt-1 w-full rounded-md border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
                   placeholder="Describe why this revision was made"
                 />
               </label>
               {editId && misconceptionCourseFlag && questionTypeSupportsChoiceShuffle(draft.questionType) ? (
-                <div className="rounded-lg border border-slate-200 p-3 dark:border-neutral-700">
-                  <p className="text-xs font-medium text-slate-800 dark:text-neutral-100">
+                <div className="rounded-lg border border-border-default p-3 dark:border-border-default">
+                  <p className="text-xs font-medium text-fg-default">
                     Misconception tags (distractors)
                   </p>
-                  <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">
+                  <p className="mt-1 text-xs text-fg-muted">
                     Tag wrong choices for remediation when the course enables misconception detection. Stable option
                     UUIDs are required — save the question once if tags are unavailable.
                   </p>
@@ -784,14 +784,14 @@ export function CourseQuestionBankPage() {
                           className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between"
                         >
                           <span
-                            className="min-w-0 truncate text-xs text-slate-700 dark:text-neutral-300"
+                            className="min-w-0 truncate text-xs text-fg-muted"
                             title={c.text}
                           >
                             {c.text || `(Choice ${idx + 1})`}
                           </span>
                           {c.id ? (
                             <select
-                              className="max-w-full rounded-md border border-slate-200 bg-white px-2 py-1 text-xs dark:border-neutral-600 dark:bg-neutral-950"
+                              className="max-w-full rounded-md border border-border-default bg-surface-raised px-2 py-1 text-xs dark:border-border-default dark:bg-surface-base"
                               disabled={mcListLoading || mcTagBusyOptionId === c.id}
                               value={tagByOptionId.get(c.id) ?? ''}
                               onChange={(e) => {
@@ -815,26 +815,26 @@ export function CourseQuestionBankPage() {
                   )}
                   <form
                     onSubmit={(e) => void submitNewMisconception(e)}
-                    className="mt-3 space-y-2 border-t border-slate-200 pt-3 dark:border-neutral-700"
+                    className="mt-3 space-y-2 border-t border-border-default pt-3 dark:border-border-default"
                   >
-                    <p className="text-xs font-medium text-slate-700 dark:text-neutral-200">New misconception</p>
+                    <p className="text-xs font-medium text-fg-default">New misconception</p>
                     <input
                       placeholder="Name"
                       value={newMcName}
                       onChange={(e) => setNewMcName(e.target.value)}
-                      className="w-full rounded-md border border-slate-200 px-2 py-1 text-xs dark:border-neutral-600 dark:bg-neutral-950"
+                      className="w-full rounded-md border border-border-default px-2 py-1 text-xs dark:border-border-default dark:bg-surface-base"
                     />
                     <textarea
                       placeholder="Remediation text (optional)"
                       value={newMcBody}
                       onChange={(e) => setNewMcBody(e.target.value)}
                       rows={2}
-                      className="w-full rounded-md border border-slate-200 px-2 py-1 text-xs dark:border-neutral-600 dark:bg-neutral-950"
+                      className="w-full rounded-md border border-border-default px-2 py-1 text-xs dark:border-border-default dark:bg-surface-base"
                     />
                     <button
                       type="submit"
                       disabled={newMcBusy || !newMcName.trim()}
-                      className="rounded-md border border-indigo-300 px-2 py-1 text-xs font-medium text-indigo-700 disabled:opacity-50 dark:border-indigo-500/60 dark:text-indigo-300"
+                      className="rounded-md border border-indigo-300 px-2 py-1 text-xs font-medium text-accent-fg disabled:opacity-50 dark:border-indigo-500/60 dark:text-indigo-300"
                     >
                       {newMcBusy ? 'Creating…' : 'Create misconception'}
                     </button>
@@ -856,7 +856,7 @@ export function CourseQuestionBankPage() {
                   setEditId(null)
                   setEditDetail(null)
                 }}
-                className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-700 dark:text-neutral-100 dark:hover:bg-neutral-900"
+                className="rounded-md border border-border-strong px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:text-fg-default dark:hover:bg-surface-raised"
               >
                 Cancel
               </button>
@@ -864,7 +864,7 @@ export function CourseQuestionBankPage() {
                 type="button"
                 disabled={busy}
                 onClick={() => void (editId ? submitEdit() : submitCreate())}
-                className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
+                className="rounded-md bg-accent-solid px-3 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
               >
                 {busy ? 'Saving…' : editId ? 'Save changes' : 'Create question'}
               </button>
@@ -881,22 +881,22 @@ export function CourseQuestionBankPage() {
             if (e.target === e.currentTarget && !busy) setHistoryId(null)
           }}
         >
-          <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-slate-200 bg-white p-4 shadow-xl dark:border-neutral-800 dark:bg-neutral-950">
-            <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Version history</h2>
+          <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-border-default bg-surface-raised p-4 shadow-xl dark:border-border-subtle dark:bg-surface-base">
+            <h2 className="text-base font-semibold text-fg-default">Version history</h2>
             {historyLoading ? (
-              <p className="mt-3 text-sm text-slate-500 dark:text-neutral-400">Loading…</p>
+              <p className="mt-3 text-sm text-fg-muted">Loading…</p>
             ) : historyRows.length === 0 ? (
-              <p className="mt-3 text-sm text-slate-500 dark:text-neutral-400">No versions yet.</p>
+              <p className="mt-3 text-sm text-fg-muted">No versions yet.</p>
             ) : (
               <div className="mt-3 space-y-2">
                 {historyRows.map((v) => (
                   <div
                     key={v.versionNumber}
-                    className="flex items-center justify-between rounded-md border border-slate-200 px-3 py-2 text-sm dark:border-neutral-800"
+                    className="flex items-center justify-between rounded-md border border-border-default px-3 py-2 text-sm dark:border-border-subtle"
                   >
                     <div>
-                      <p className="font-medium text-slate-900 dark:text-neutral-100">Version {v.versionNumber}</p>
-                      <p className="text-xs text-slate-600 dark:text-neutral-300">
+                      <p className="font-medium text-fg-default">Version {v.versionNumber}</p>
+                      <p className="text-xs text-fg-muted">
                         {formatDateTime(v.createdAt)} {v.changeNote ? `- ${v.changeNote}` : ''}
                       </p>
                     </div>
@@ -904,7 +904,7 @@ export function CourseQuestionBankPage() {
                       type="button"
                       disabled={busy}
                       onClick={() => void restoreVersion(v.versionNumber)}
-                      className="rounded-md border border-indigo-300 px-2 py-1 text-xs font-medium text-indigo-700 hover:bg-indigo-50 disabled:opacity-50 dark:border-indigo-500/60 dark:text-indigo-300 dark:hover:bg-indigo-950/40"
+                      className="rounded-md border border-indigo-300 px-2 py-1 text-xs font-medium text-accent-fg hover:bg-indigo-50 disabled:opacity-50 dark:border-indigo-500/60 dark:text-indigo-300 dark:hover:bg-indigo-950/40"
                     >
                       Restore
                     </button>
@@ -916,7 +916,7 @@ export function CourseQuestionBankPage() {
               <button
                 type="button"
                 onClick={() => setHistoryId(null)}
-                className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-700 dark:text-neutral-100 dark:hover:bg-neutral-900"
+                className="rounded-md border border-border-strong px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-raised"
               >
                 Close
               </button>
@@ -933,16 +933,16 @@ export function CourseQuestionBankPage() {
             if (e.target === e.currentTarget) setPreviewId(null)
           }}
         >
-          <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-slate-200 bg-white p-4 shadow-xl dark:border-neutral-800 dark:bg-neutral-950">
-            <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Question preview</h2>
+          <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-border-default bg-surface-raised p-4 shadow-xl dark:border-border-subtle dark:bg-surface-base">
+            <h2 className="text-base font-semibold text-fg-default">Question preview</h2>
             {previewLoading ? (
-              <p className="mt-3 text-sm text-slate-500 dark:text-neutral-400">Loading…</p>
+              <p className="mt-3 text-sm text-fg-muted">Loading…</p>
             ) : previewQuestion ? (
               <div className="mt-3 space-y-3 text-sm">
-                <p className="whitespace-pre-wrap rounded-md bg-slate-50 px-3 py-2 text-slate-900 dark:bg-neutral-900 dark:text-neutral-100">
+                <p className="whitespace-pre-wrap rounded-md bg-surface-base px-3 py-2 text-fg-default dark:bg-surface-raised dark:text-fg-default">
                   {previewQuestion.stem}
                 </p>
-                <div className="grid grid-cols-2 gap-2 text-slate-600 dark:text-neutral-300">
+                <div className="grid grid-cols-2 gap-2 text-fg-muted">
                   <p>
                     <strong>Type:</strong> {previewQuestion.questionType}
                   </p>
@@ -957,7 +957,7 @@ export function CourseQuestionBankPage() {
                   </p>
                 </div>
                 {previewQuestion.explanation ? (
-                  <p className="whitespace-pre-wrap text-slate-700 dark:text-neutral-200">
+                  <p className="whitespace-pre-wrap text-fg-default">
                     <strong>Explanation:</strong> {previewQuestion.explanation}
                   </p>
                 ) : null}
@@ -968,13 +968,13 @@ export function CourseQuestionBankPage() {
                 ) : null}
               </div>
             ) : (
-              <p className="mt-3 text-sm text-slate-500 dark:text-neutral-400">Question not found.</p>
+              <p className="mt-3 text-sm text-fg-muted">Question not found.</p>
             )}
             <div className="mt-4 flex justify-end">
               <button
                 type="button"
                 onClick={() => setPreviewId(null)}
-                className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-700 dark:text-neutral-100 dark:hover:bg-neutral-900"
+                className="rounded-md border border-border-strong px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-raised"
               >
                 Close
               </button>

@@ -155,7 +155,7 @@ export function ResizableSplitPane({
       className={`flex min-h-0 flex-1 flex-col lg:flex-row ${className ?? ''}`}
       style={{ '--split-secondary-width': `${secondaryWidth}px` } as CSSProperties}
     >
-      <div className="min-h-[40vh] min-w-0 flex-1 overflow-auto border-b border-slate-200 bg-white dark:border-neutral-600 dark:bg-neutral-800 lg:min-h-0 lg:border-b-0">
+      <div className="min-h-[40vh] min-w-0 flex-1 overflow-auto border-b border-border-default bg-surface-raised dark:border-border-default dark:bg-surface-overlay lg:min-h-0 lg:border-b-0">
         {primary}
       </div>
 
@@ -202,30 +202,22 @@ export function ResizableSplitPane({
             })
           }
         }}
-        className={`relative hidden shrink-0 touch-none lg:block ${
-          dragging ? 'z-20' : 'z-10'
-        }`}
+        className={`relative hidden shrink-0 touch-none lg:block ${ dragging ? 'z-20' : 'z-10' }`}
         style={{ width: 0 }}
       >
         <div
-          className={`absolute inset-y-0 -start-2 flex w-4 cursor-col-resize items-center justify-center ${
-            dragging ? 'bg-indigo-500/10' : ''
-          }`}
+          className={`absolute inset-y-0 -start-2 flex w-4 cursor-col-resize items-center justify-center ${ dragging ? 'bg-indigo-500/10' : '' }`}
           aria-hidden="true"
         >
           <div
-            className={`h-full w-px transition-colors ${
-              dragging
-                ? 'bg-indigo-500'
-                : 'bg-slate-300 hover:bg-indigo-400 dark:bg-neutral-600 dark:hover:bg-indigo-400'
-            }`}
+            className={`h-full w-px transition-colors ${ dragging ? 'bg-indigo-500' : 'bg-slate-300 hover:bg-indigo-400 dark:bg-neutral-600 dark:hover:bg-indigo-400' }`}
           />
         </div>
       </div>
 
       <div
         id="resizable-split-pane-secondary"
-        className="flex min-h-0 w-full shrink-0 flex-col border-t border-slate-200 dark:border-neutral-600 lg:w-[var(--split-secondary-width)] lg:border-t-0 lg:border-l"
+        className="flex min-h-0 w-full shrink-0 flex-col border-t border-border-default lg:w-[var(--split-secondary-width)] lg:border-t-0 lg:border-l"
       >
         {secondary}
       </div>

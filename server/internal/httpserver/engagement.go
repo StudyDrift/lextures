@@ -62,11 +62,6 @@ type engagementEventInput struct {
 func (d Deps) handlePostEngagementEvents() http.HandlerFunc {
 	const maxBatchSize = 50
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.engagementFeatureEnabled(w) {
 			return
 		}
@@ -160,11 +155,6 @@ VALUES ($1, $2, $3, $4, $5, $6, $7)
 // handleGetEnrollmentEngagement is GET /api/v1/courses/{course_code}/enrollments/{enrollment_id}/engagement
 func (d Deps) handleGetEnrollmentEngagement() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.engagementFeatureEnabled(w) {
 			return
 		}
@@ -290,11 +280,6 @@ type videoDropoffPoint struct {
 // handleGetVideoDropoff is GET /api/v1/courses/{course_code}/analytics/video-dropoff/{object_id}
 func (d Deps) handleGetVideoDropoff() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		_, _, courseID, ok := d.requireEngagementInstructor(w, r)
 		if !ok {
 			return
@@ -401,11 +386,6 @@ type engagementOverviewRow struct {
 // handleGetEngagementOverview is GET /api/v1/courses/{course_code}/analytics/engagement-overview
 func (d Deps) handleGetEngagementOverview() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		_, _, courseID, ok := d.requireEngagementInstructor(w, r)
 		if !ok {
 			return

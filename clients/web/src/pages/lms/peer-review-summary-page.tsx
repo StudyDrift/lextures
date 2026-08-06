@@ -66,7 +66,7 @@ export default function PeerReviewSummaryPage() {
   if (!ffPeerReview) {
     return (
       <LmsPage title="Peer review">
-        <p className="text-sm text-slate-500 dark:text-neutral-400">Peer review is not enabled.</p>
+        <p className="text-sm text-fg-muted">Peer review is not enabled.</p>
       </LmsPage>
     )
   }
@@ -77,7 +77,7 @@ export default function PeerReviewSummaryPage() {
         {courseCode && itemId ? (
           <Link
             to={`/courses/${courseCode}/assignments/${itemId}`}
-            className="text-sm text-indigo-600 hover:underline dark:text-indigo-400"
+            className="text-sm text-accent-fg hover:underline dark:text-indigo-400"
           >
             Back to assignment
           </Link>
@@ -87,16 +87,16 @@ export default function PeerReviewSummaryPage() {
             type="button"
             disabled={busy}
             onClick={() => void enableAndAllocate()}
-            className="rounded border border-slate-200 px-3 py-1 text-sm hover:bg-slate-50 disabled:opacity-60 dark:border-neutral-600 dark:hover:bg-neutral-800"
+            className="rounded border border-border-default px-3 py-1 text-sm hover:bg-surface-base disabled:opacity-60 dark:border-border-default dark:hover:bg-surface-overlay"
           >
             {busy ? 'Working…' : 'Configure & allocate'}
           </button>
         ) : null}
       </div>
       {loading ? (
-        <p className="text-sm text-slate-500 dark:text-neutral-400">Loading…</p>
+        <p className="text-sm text-fg-muted">Loading…</p>
       ) : error ? (
-        <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+        <p className="text-sm text-danger-fg" role="alert">
           {error}
         </p>
       ) : summary ? (
@@ -110,7 +110,7 @@ export default function PeerReviewSummaryPage() {
           </p>
           <table className="w-full border-collapse text-left">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-neutral-700">
+              <tr className="border-b border-border-default">
                 <th className="py-2 pr-4 font-medium">Student</th>
                 <th className="py-2 pr-4 font-medium">Peer aggregate</th>
                 <th className="py-2 font-medium">Reviews</th>
@@ -118,7 +118,7 @@ export default function PeerReviewSummaryPage() {
             </thead>
             <tbody>
               {summary.submissions.map((s) => (
-                <tr key={s.submissionId} className="border-b border-slate-100 dark:border-neutral-800">
+                <tr key={s.submissionId} className="border-b border-border-subtle">
                   <td className="py-2 pr-4">
                     <EntityLabel name={s.studentLabel} fallback={t('entityLabel.unknownStudent')} />
                   </td>

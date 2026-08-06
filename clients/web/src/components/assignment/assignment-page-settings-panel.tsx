@@ -110,7 +110,7 @@ export type AssignmentPageSettingsPanelProps = {
 }
 
 const inputClass =
-  'w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500 dark:focus:ring-indigo-500'
+  'w-full rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm text-fg-default focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 disabled:opacity-60 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:focus:border-indigo-500 dark:focus:ring-indigo-500'
 
 function SettingsAccordion({
   title,
@@ -133,15 +133,15 @@ function SettingsAccordion({
   return (
     <details
       key={forceOpen ? 'forced-open' : 'manual'}
-      className="group border-b border-slate-100 last:border-b-0 dark:border-neutral-800/80"
+      className="group border-b border-border-subtle last:border-b-0/80"
       open={forceOpen || undefined}
       data-focus-accordion={sectionId}
       data-focus-anchor={sectionId ? `assignment.${sectionId}` : undefined}
     >
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2 text-[13px] font-medium text-slate-600 outline-none transition-colors hover:bg-slate-50/80 hover:text-slate-800 dark:text-neutral-400 dark:hover:bg-neutral-800/30 dark:hover:text-neutral-200 [&::-webkit-details-marker]:hidden">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2 text-[13px] font-medium text-fg-muted outline-none transition-colors hover:bg-slate-50/80 hover:text-fg-default dark:text-fg-muted dark:hover:bg-neutral-800/30 dark:hover:text-fg-default [&::-webkit-details-marker]:hidden">
         <span>{title}</span>
         <ChevronDown
-          className="h-3.5 w-3.5 shrink-0 text-slate-400/80 transition-transform duration-200 group-open:rotate-180 dark:text-neutral-500"
+          className="h-3.5 w-3.5 shrink-0 text-fg-subtle/80 transition-transform duration-200 group-open:rotate-180"
           aria-hidden
         />
       </summary>
@@ -165,7 +165,7 @@ function AssignmentPinnedGroup({ pins }: { pins: ReturnType<typeof usePinnedSett
 
 function SettingsAccordionGroup({ children }: { children: ReactNode }) {
   return (
-    <div className="overflow-hidden rounded-lg border border-slate-200/70 bg-white dark:border-neutral-700/50 dark:bg-neutral-950/20">
+    <div className="overflow-hidden rounded-lg border border-slate-200/70 bg-surface-raised/50/20">
       {children}
     </div>
   )
@@ -189,10 +189,10 @@ function ToggleRow({
   return (
     <div className="flex items-start justify-between gap-3 py-2">
       <div className="min-w-0">
-        <label htmlFor={id} className="text-[13px] font-medium text-slate-700 dark:text-neutral-200">
+        <label htmlFor={id} className="text-[13px] font-medium text-fg-default">
           {label}
         </label>
-        <p className="mt-0.5 text-[11px] leading-relaxed text-slate-400 dark:text-neutral-500">{description}</p>
+        <p className="mt-0.5 text-[11px] leading-relaxed text-fg-subtle">{description}</p>
       </div>
       <button
         id={id}
@@ -201,14 +201,10 @@ function ToggleRow({
         aria-checked={checked}
         disabled={disabled}
         onClick={() => onChange(!checked)}
-        className={`relative mt-0.5 h-5 w-9 shrink-0 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-          checked ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-neutral-600'
-        }`}
+        className={`relative mt-0.5 h-5 w-9 shrink-0 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${ checked ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-neutral-600' }`}
       >
         <span
-          className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-colors ${
-            checked ? 'start-4.5' : 'start-0.5'
-          }`}
+          className={`absolute top-0.5 h-4 w-4 rounded-full bg-surface-raised transition-colors ${ checked ? 'start-4.5' : 'start-0.5' }`}
         />
       </button>
     </div>
@@ -228,11 +224,11 @@ function Field({
 }) {
   return (
     <div className="space-y-1">
-      <label className="block text-xs font-medium text-slate-500 dark:text-neutral-400" htmlFor={htmlFor}>
+      <label className="block text-xs font-medium text-fg-muted" htmlFor={htmlFor}>
         {label}
       </label>
       {children}
-      {hint ? <p className="text-[11px] leading-snug text-slate-400 dark:text-neutral-500">{hint}</p> : null}
+      {hint ? <p className="text-[11px] leading-snug text-fg-subtle">{hint}</p> : null}
     </div>
   )
 }
@@ -336,13 +332,13 @@ export function AssignmentPageSettingsPanel({
   return (
     <SettingsPanelProvider surface="assignment" query={settingsQuery} pins={pins}>
     <div className="space-y-3">
-      <p className="text-xs leading-relaxed text-slate-500 dark:text-neutral-400">
+      <p className="text-xs leading-relaxed text-fg-muted">
         Save the page from the toolbar to apply changes.
       </p>
 
       <div className="relative">
         <Search
-          className="pointer-events-none absolute start-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400 dark:text-neutral-500"
+          className="pointer-events-none absolute start-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-fg-subtle"
           aria-hidden
         />
         <input
@@ -359,7 +355,7 @@ export function AssignmentPageSettingsPanel({
       <AssignmentPinnedGroup pins={pins} />
 
       {searching && visibleSectionCount === 0 && !hasPinnedSearchHit ? (
-        <p className="rounded-lg border border-slate-200/70 px-3 py-6 text-center text-sm text-slate-400 dark:border-neutral-700/50 dark:text-neutral-500">
+        <p className="rounded-lg border border-slate-200/70 px-3 py-6 text-center text-sm text-fg-subtle/50">
           No settings match &ldquo;{settingsQuery.trim()}&rdquo;
         </p>
       ) : (
@@ -513,7 +509,7 @@ export function AssignmentPageSettingsPanel({
                     </select>
                   </Field>
                 </SettingRow>
-                <p className="text-[11px] leading-snug text-slate-400 dark:text-neutral-500">
+                <p className="text-[11px] leading-snug text-fg-subtle">
                   Scores are advisory only and do not change grades automatically. Discuss unexpected results
                   with your instructor.
                 </p>
@@ -558,7 +554,7 @@ export function AssignmentPageSettingsPanel({
                     </Field>
                   </SettingRow>
                 ) : null}
-                <p className="text-[11px] leading-snug text-slate-400 dark:text-neutral-500">
+                <p className="text-[11px] leading-snug text-fg-subtle">
                   For quizzes, penalties apply automatically to auto-graded scores. For file or text
                   assignments, use this when recording grades or when a submission workflow is enabled.
                 </p>
@@ -569,7 +565,7 @@ export function AssignmentPageSettingsPanel({
           {onPostingPolicyChange && show('grade-posting') ? (
             <SettingsAccordion title="Grade posting" sectionId="grade-posting" forceOpen={sectionForceOpen('grade-posting')}>
               <div className="space-y-3 pt-1">
-                <p className="text-[11px] leading-snug text-slate-400 dark:text-neutral-500">
+                <p className="text-[11px] leading-snug text-fg-subtle">
                   Manual: entered grades stay hidden from students until you post from the course gradebook (or
                   the scheduled time below). Automatic: students see scores as you enter them.
                 </p>
@@ -645,7 +641,7 @@ export function AssignmentPageSettingsPanel({
                   />
                 </SettingRow>
                 {moderatedGrading ? (
-                  <div className="space-y-3 border-t border-slate-100 pt-3 dark:border-neutral-800">
+                  <div className="space-y-3 border-t border-border-subtle pt-3 dark:border-border-subtle">
                     <SettingRow settingId="assignment.grading.agreement-threshold">
                       <Field
                         label="Agreement threshold (% of points)"
@@ -691,13 +687,13 @@ export function AssignmentPageSettingsPanel({
                     </SettingRow>
                     <SettingRow settingId="assignment.grading.provisional-graders">
                       <div>
-                        <p className="mb-2 text-[13px] font-medium text-slate-700 dark:text-neutral-200">
+                        <p className="mb-2 text-[13px] font-medium text-fg-default">
                           Provisional graders
                         </p>
-                        <p className="mb-2 text-[11px] leading-snug text-slate-400 dark:text-neutral-500">
+                        <p className="mb-2 text-[11px] leading-snug text-fg-subtle">
                           Up to ten course staff may submit provisional scores. The moderator cannot be a grader.
                         </p>
-                        <ul className="max-h-48 space-y-1 overflow-y-auto rounded-lg border border-slate-200 p-2 dark:border-neutral-700">
+                        <ul className="max-h-48 space-y-1 overflow-y-auto rounded-lg border border-border-default p-2 dark:border-border-default">
                           {staffDirectory.map((s) => {
                             const checked = provisionalGraderUserIds.includes(s.userId)
                             const mod = moderatorUserId === s.userId
@@ -718,7 +714,7 @@ export function AssignmentPageSettingsPanel({
                                       onProvisionalGraderUserIdsChange([...provisionalGraderUserIds, s.userId])
                                     }
                                   }}
-                                  className="rounded border-slate-300 dark:border-neutral-600"
+                                  className="rounded border-border-strong"
                                 />
                                 <label htmlFor={`grader-${s.userId}`} className="cursor-pointer select-none">
                                   {s.label}
@@ -785,7 +781,7 @@ export function AssignmentPageSettingsPanel({
                   </Field>
                 </SettingRow>
                 {gradingGroups.length === 0 ? (
-                  <p className="text-[11px] leading-snug text-slate-400 dark:text-neutral-500">
+                  <p className="text-[11px] leading-snug text-fg-subtle">
                     Add groups under Course Settings → Assignment groups & weights.
                   </p>
                 ) : null}
@@ -990,33 +986,33 @@ const RUBRIC_STICKY_CRIT = 'w-[18rem] min-w-[18rem] max-w-[18rem]'
 const RUBRIC_STICKY_LEFT_CRIT = 'start-10'
 
 const rubricStickyCell =
-  'border-e border-slate-200 bg-slate-50 shadow-[4px_0_6px_-4px_rgba(15,23,42,0.12)] dark:border-neutral-700 dark:bg-neutral-800 dark:shadow-[4px_0_8px_-4px_rgba(0,0,0,0.45)]'
+  'border-e border-border-default bg-surface-base shadow-[4px_0_6px_-4px_rgba(15,23,42,0.12)] dark:border-border-default dark:bg-surface-overlay dark:shadow-[4px_0_8px_-4px_rgba(0,0,0,0.45)]'
 
 const rubricCellInput =
-  'w-full min-w-0 border-0 bg-transparent px-2 py-1.5 text-sm text-slate-900 outline-none ring-0 placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-inset focus:ring-indigo-400/80 dark:bg-transparent dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:bg-neutral-900/90 dark:focus:ring-indigo-500/70'
+  'w-full min-w-0 border-0 bg-transparent px-2 py-1.5 text-sm text-fg-default outline-none ring-0 placeholder:text-fg-subtle focus:bg-surface-raised focus:ring-2 focus:ring-inset focus:ring-indigo-400/80 dark:bg-transparent dark:text-fg-default dark:placeholder:text-neutral-500 dark:focus:bg-neutral-900/90 dark:focus:ring-indigo-500/70'
 
 const rubricCriterionDescInput =
-  `${rubricCellInput} min-h-[2.75rem] resize-y text-xs leading-relaxed text-slate-600 placeholder:text-slate-400 dark:text-neutral-400 dark:placeholder:text-neutral-500`
+  `${rubricCellInput} min-h-[2.75rem] resize-y text-xs leading-relaxed text-fg-muted placeholder:text-fg-subtle dark:placeholder:text-neutral-500`
 
 /** Per–rating-band notes in the grid (under points). */
 const rubricRatingBandDescInput =
-  `${rubricCellInput} min-h-[2.5rem] resize-y text-xs leading-relaxed text-slate-600 placeholder:text-slate-400 dark:text-neutral-400 dark:placeholder:text-neutral-500`
+  `${rubricCellInput} min-h-[2.5rem] resize-y text-xs leading-relaxed text-fg-muted placeholder:text-fg-subtle dark:placeholder:text-neutral-500`
 
 const rubricCellInputNum =
   `${rubricCellInput} text-end tabular-nums [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`
 
 const rubricToolbarBtn =
-  'inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-800 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800'
+  'inline-flex items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-2.5 py-1.5 text-xs font-medium text-fg-default shadow-sm hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-40 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay'
 
 const rubricStickyActions =
-  'sticky end-0 z-20 w-[5.25rem] min-w-[5.25rem] max-w-[5.25rem] border-s border-slate-200 bg-slate-50 shadow-[-4px_0_6px_-4px_rgba(15,23,42,0.12)] dark:border-neutral-700 dark:bg-neutral-800 dark:shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.45)]'
+  'sticky end-0 z-20 w-[5.25rem] min-w-[5.25rem] max-w-[5.25rem] border-s border-border-default bg-surface-base shadow-[-4px_0_6px_-4px_rgba(15,23,42,0.12)] dark:border-border-default dark:bg-surface-overlay dark:shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.45)]'
 
 /** Google Sheets / Excel–style grid lines on all cells */
 const sheetTableClass =
-  'w-full min-w-max border-collapse border border-slate-300 bg-white text-start text-sm dark:border-neutral-600 dark:bg-neutral-950 [&_th]:border [&_th]:border-slate-300 [&_td]:border [&_td]:border-slate-300 dark:[&_th]:border-neutral-600 dark:[&_td]:border-neutral-600'
+  'w-full min-w-max border-collapse border border-border-strong bg-surface-raised text-start text-sm dark:border-border-default dark:bg-surface-base [&_th]:border [&_th]:border-border-strong [&_td]:border [&_td]:border-border-strong dark:[&_th]:border-border-default dark:[&_td]:border-border-default'
 
 const rubricRatingHeaderInput =
-  'w-full min-w-0 rounded border border-slate-200 bg-white px-2 py-1.5 text-sm font-medium text-slate-900 shadow-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:focus:border-indigo-500 dark:focus:ring-indigo-500'
+  'w-full min-w-0 rounded border border-border-default bg-surface-raised px-2 py-1.5 text-sm font-medium text-fg-default shadow-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:focus:border-indigo-500 dark:focus:ring-indigo-500'
 
 function rubricForSave(r: RubricDefinition): RubricDefinition {
   const t = r.title?.trim()
@@ -1231,41 +1227,35 @@ function RubricEditorModal({
         role="dialog"
         aria-modal
         aria-labelledby="rubric-editor-title"
-        className="flex max-h-[min(92vh,800px)] w-full max-w-6xl flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl dark:border-neutral-600 dark:bg-neutral-900"
+        className="flex max-h-[min(92vh,800px)] w-full max-w-6xl flex-col overflow-hidden rounded-xl border border-border-default bg-surface-raised shadow-2xl dark:border-border-default dark:bg-surface-raised"
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <div className="shrink-0 border-b border-slate-100 px-5 py-4 dark:border-neutral-700">
-          <h2 id="rubric-editor-title" className="text-lg font-semibold text-slate-950 dark:text-neutral-100">
+        <div className="shrink-0 border-b border-border-subtle px-5 py-4 dark:border-border-default">
+          <h2 id="rubric-editor-title" className="text-lg font-semibold text-slate-950 dark:text-fg-default">
             {mode === 'create' ? 'Add rubric' : 'Edit rubric'}
           </h2>
-          <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
-            Like a spreadsheet: each <strong className="font-medium text-slate-700 dark:text-neutral-300">row</strong>{' '}
+          <p className="mt-1 text-sm text-fg-muted">
+            Like a spreadsheet: each <strong className="font-medium text-fg-muted">row</strong>{' '}
             is a criterion (optional description under the title), each{' '}
-            <strong className="font-medium text-slate-700 dark:text-neutral-300">column</strong> is a rating. Edit rating
+            <strong className="font-medium text-fg-muted">column</strong> is a rating. Edit rating
             names in the header row; enter points in the grid. When assignment points are set, the sum of each row&apos;s
             highest rating must equal that total.
           </p>
         </div>
         <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-5 py-4">
-          <div className="flex flex-col gap-3 rounded-xl border border-slate-200/90 bg-slate-50/90 px-3 py-3 dark:border-neutral-700 dark:bg-neutral-900/40 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3 rounded-xl border border-slate-200/90 bg-slate-50/90 px-3 py-3 dark:border-border-default/40 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0 text-sm">
-              <span className="text-slate-600 dark:text-neutral-400">Rubric max total</span>{' '}
+              <span className="text-fg-muted">Rubric max total</span>{' '}
               <span
-                className={`font-semibold tabular-nums text-slate-900 dark:text-neutral-100 ${
-                  pointsWorth != null && pointsWorth > 0
-                    ? pointsMismatch
-                      ? 'text-amber-800 dark:text-amber-200'
-                      : 'text-emerald-800 dark:text-emerald-200'
-                    : ''
-                }`}
+                className={`font-semibold tabular-nums text-fg-default ${ pointsWorth != null && pointsWorth > 0 ? pointsMismatch ? 'text-amber-800 dark:text-amber-200' : 'text-emerald-800 dark:text-emerald-200' : '' }`}
               >
                 {totalMax}
               </span>
               {pointsWorth != null && pointsWorth > 0 ? (
                 <>
-                  <span className="text-slate-400 dark:text-neutral-500"> / </span>
-                  <span className="tabular-nums text-slate-700 dark:text-neutral-300">{pointsWorth}</span>
-                  <span className="text-slate-500 dark:text-neutral-500"> pts worth</span>
+                  <span className="text-fg-subtle"> / </span>
+                  <span className="tabular-nums text-fg-muted">{pointsWorth}</span>
+                  <span className="text-fg-subtle"> pts worth</span>
                   {pointsMismatch ? (
                     <span className="ms-2 text-xs font-medium text-amber-800 dark:text-amber-200">
                       Needs to match before save
@@ -1277,7 +1267,7 @@ function RubricEditorModal({
                   )}
                 </>
               ) : (
-                <span className="text-slate-500 dark:text-neutral-500"> pts (set assignment points to validate)</span>
+                <span className="text-fg-subtle"> pts (set assignment points to validate)</span>
               )}
             </div>
           </div>
@@ -1309,12 +1299,12 @@ function RubricEditorModal({
                   type="button"
                   disabled={disabled || aiBusy}
                   onClick={() => void generateRubricFromAi()}
-                  className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+                  className="inline-flex items-center gap-2 rounded-lg bg-accent-solid px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
                 >
                   {aiBusy ? <Loader2 className="size-3.5 shrink-0 animate-spin" aria-hidden /> : <Sparkles className="size-3.5 shrink-0" aria-hidden />}
                   {aiBusy ? 'Generating…' : 'Generate draft'}
                 </button>
-                <span className="text-[11px] text-slate-600 dark:text-neutral-400">
+                <span className="text-[11px] text-fg-muted">
                   Uses the full assignment text from the editor. Fills the grid below; nothing is stored until
                   you click Save rubric.
                 </span>
@@ -1325,7 +1315,7 @@ function RubricEditorModal({
           <div className="flex flex-wrap items-end gap-3">
             <div className="min-w-0 flex-1">
               <label
-                className="block text-xs font-medium text-slate-500 dark:text-neutral-400"
+                className="block text-xs font-medium text-fg-muted"
                 htmlFor="rubric-sheet-header"
               >
                 Header (optional)
@@ -1368,23 +1358,23 @@ function RubricEditorModal({
               </button>
             </div>
           </div>
-          <div className="max-h-[min(56vh,560px)] overflow-auto rounded-sm border border-slate-300 bg-white shadow-sm dark:border-neutral-600 dark:bg-neutral-950">
+          <div className="max-h-[min(56vh,560px)] overflow-auto rounded-sm border border-border-strong bg-surface-raised shadow-sm dark:border-border-default dark:bg-surface-base">
             <table
               className={sheetTableClass}
               role="grid"
               aria-label="Rubric: one row per criterion (title and optional description), one column per rating"
             >
               <thead>
-                <tr className="bg-[#f3f3f3] dark:bg-neutral-800">
+                <tr className="bg-[#f3f3f3] dark:bg-surface-overlay">
                   <th
                     scope="col"
-                    className={`sticky top-0 z-[41] ${RUBRIC_STICKY_NUM} ${rubricStickyCell} px-1 py-1.5 text-center text-[11px] font-normal text-slate-600 dark:text-neutral-400`}
+                    className={`sticky top-0 z-[41] ${RUBRIC_STICKY_NUM} ${rubricStickyCell} px-1 py-1.5 text-center text-[11px] font-normal text-fg-muted`}
                   >
                     #
                   </th>
                   <th
                     scope="col"
-                    className={`sticky top-0 z-[40] ${RUBRIC_STICKY_CRIT} ${RUBRIC_STICKY_LEFT_CRIT} ${rubricStickyCell} px-2 py-2 text-start text-xs font-semibold text-slate-800 dark:text-neutral-200`}
+                    className={`sticky top-0 z-[40] ${RUBRIC_STICKY_CRIT} ${RUBRIC_STICKY_LEFT_CRIT} ${rubricStickyCell} px-2 py-2 text-start text-xs font-semibold text-fg-default`}
                   >
                     Criterion
                   </th>
@@ -1392,12 +1382,10 @@ function RubricEditorModal({
                     <th
                       key={`rating-h-${ri}`}
                       scope="col"
-                      className={`sticky top-0 z-10 min-w-[9.5rem] bg-[#f3f3f3] px-1.5 py-1.5 text-start align-bottom dark:bg-neutral-800 ${
-                        ri === 0 ? 'border-s-2 border-s-indigo-400 dark:border-s-indigo-500' : ''
-                      }`}
+                      className={`sticky top-0 z-10 min-w-[9.5rem] bg-[#f3f3f3] px-1.5 py-1.5 text-start align-bottom dark:bg-surface-overlay ${ ri === 0 ? 'border-s-2 border-s-indigo-400 dark:border-s-indigo-500' : '' }`}
                     >
                       <div className="flex flex-col gap-1">
-                        <span className="text-[0.65rem] font-normal uppercase tracking-wide text-slate-500 dark:text-neutral-500">
+                        <span className="text-[0.65rem] font-normal uppercase tracking-wide text-fg-subtle">
                           Rating {ri + 1}
                         </span>
                         <input
@@ -1414,7 +1402,7 @@ function RubricEditorModal({
                   ))}
                   <th
                     scope="col"
-                    className={`sticky top-0 z-[42] ${rubricStickyActions} bg-[#f3f3f3] px-0 py-1 text-center dark:bg-neutral-800`}
+                    className={`sticky top-0 z-[42] ${rubricStickyActions} bg-[#f3f3f3] px-0 py-1 text-center dark:bg-surface-overlay`}
                   >
                     <span className="sr-only">Row</span>
                   </th>
@@ -1424,13 +1412,13 @@ function RubricEditorModal({
                 {draft.criteria.map((criterion, ci) => {
                   const rowBg =
                     ci % 2 === 0
-                      ? 'bg-white dark:bg-neutral-950'
-                      : 'bg-[#fafafa] dark:bg-neutral-900/50'
+                      ? 'bg-surface-raised'
+                      : 'bg-[#fafafa]/50'
                   return (
                     <tr key={criterion.id} className={rowBg}>
                       <th
                         scope="row"
-                        className={`sticky start-0 z-[31] ${RUBRIC_STICKY_NUM} ${rubricStickyCell} px-1 py-2 align-top text-center text-[11px] font-normal tabular-nums text-slate-600 dark:text-neutral-400 ${rowBg}`}
+                        className={`sticky start-0 z-[31] ${RUBRIC_STICKY_NUM} ${rubricStickyCell} px-1 py-2 align-top text-center text-[11px] font-normal tabular-nums text-fg-muted ${rowBg}`}
                       >
                         {ci + 1}
                       </th>
@@ -1516,7 +1504,7 @@ function RubricEditorModal({
                             type="button"
                             disabled={disabled}
                             onClick={() => insertRowAfter(ci)}
-                            className="inline-flex items-center justify-center rounded-md p-1.5 text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-950/50"
+                            className="inline-flex items-center justify-center rounded-md p-1.5 text-accent-fg hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-950/50"
                             title="Insert row below"
                             aria-label={`Insert row below row ${ci + 1}`}
                           >
@@ -1539,41 +1527,41 @@ function RubricEditorModal({
                 })}
               </tbody>
               <tfoot>
-                <tr className="bg-[#ececec] dark:bg-neutral-800/95">
+                <tr className="bg-[#ececec]/95">
                   <td
                     colSpan={2}
-                    className={`sticky start-0 z-[31] border-e border-slate-300 bg-[#ececec] px-2 py-2 text-xs font-semibold text-slate-800 shadow-[4px_0_6px_-4px_rgba(15,23,42,0.12)] dark:border-neutral-600 dark:bg-neutral-800/95 dark:text-neutral-200 dark:shadow-[4px_0_8px_-4px_rgba(0,0,0,0.45)]`}
+                    className={`sticky start-0 z-[31] border-e border-border-strong bg-[#ececec] px-2 py-2 text-xs font-semibold text-fg-default shadow-[4px_0_6px_-4px_rgba(15,23,42,0.12)] dark:border-border-default/95 dark:text-fg-default dark:shadow-[4px_0_8px_-4px_rgba(0,0,0,0.45)]`}
                   >
                     Max total (highest rating per row)
                   </td>
                   {levelCount > 0 ? (
                     <td
                       colSpan={levelCount}
-                      className="bg-[#ececec] px-2 py-2 text-end text-[0.65rem] font-medium uppercase tracking-wide text-slate-600 dark:bg-neutral-800/95 dark:text-neutral-400"
+                      className="bg-[#ececec] px-2 py-2 text-end text-[0.65rem] font-medium uppercase tracking-wide text-fg-muted/95 dark:text-fg-muted"
                     >
                       {pointsWorth != null && pointsWorth > 0 ? (
                         <span>
                           Target{' '}
-                          <span className="tabular-nums text-slate-900 dark:text-neutral-100">{pointsWorth}</span>
+                          <span className="tabular-nums text-fg-default">{pointsWorth}</span>
                         </span>
                       ) : (
                         <span>No assignment points set</span>
                       )}
                     </td>
                   ) : null}
-                  <td className={`${rubricStickyActions} bg-[#ececec] dark:bg-neutral-800/95`} />
+                  <td className={`${rubricStickyActions} bg-[#ececec]/95`} />
                 </tr>
-                <tr className="bg-[#f3f3f3] dark:bg-neutral-800/80">
+                <tr className="bg-[#f3f3f3]/80">
                   <td
                     colSpan={2}
-                    className={`sticky start-0 z-[31] border-e border-slate-300 bg-[#f3f3f3] px-2 py-2 text-sm font-bold tabular-nums text-slate-900 shadow-[4px_0_6px_-4px_rgba(15,23,42,0.12)] dark:border-neutral-600 dark:bg-neutral-800/80 dark:text-neutral-100 dark:shadow-[4px_0_8px_-4px_rgba(0,0,0,0.45)]`}
+                    className={`sticky start-0 z-[31] border-e border-border-strong bg-[#f3f3f3] px-2 py-2 text-sm font-bold tabular-nums text-fg-default shadow-[4px_0_6px_-4px_rgba(15,23,42,0.12)] dark:border-border-default/80 dark:text-fg-default dark:shadow-[4px_0_8px_-4px_rgba(0,0,0,0.45)]`}
                   >
                     {totalMax}
                   </td>
                   {levelCount > 0 ? (
                     <td
                       colSpan={levelCount}
-                      className="bg-[#f3f3f3] px-2 py-2 text-end text-sm font-semibold tabular-nums dark:bg-neutral-800/80"
+                      className="bg-[#f3f3f3] px-2 py-2 text-end text-sm font-semibold tabular-nums/80"
                     >
                       {pointsWorth != null && pointsWorth > 0 ? (
                         <span
@@ -1586,22 +1574,22 @@ function RubricEditorModal({
                           {pointsMismatch ? 'Mismatch' : 'Aligned'}
                         </span>
                       ) : (
-                        <span className="text-slate-500 dark:text-neutral-500">—</span>
+                        <span className="text-fg-subtle">—</span>
                       )}
                     </td>
                   ) : null}
-                  <td className={`${rubricStickyActions} bg-[#f3f3f3] dark:bg-neutral-800/80`} />
+                  <td className={`${rubricStickyActions} bg-[#f3f3f3]/80`} />
                 </tr>
               </tfoot>
             </table>
           </div>
         </div>
-        <div className="flex shrink-0 justify-end gap-2 border-t border-slate-100 px-5 py-4 dark:border-neutral-700">
+        <div className="flex shrink-0 justify-end gap-2 border-t border-border-subtle px-5 py-4 dark:border-border-default">
           <button
             type="button"
             disabled={disabled || aiBusy}
             onClick={onClose}
-            className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-100 dark:hover:bg-neutral-800"
+            className="rounded-lg border border-border-default px-4 py-2 text-sm font-medium text-fg-default hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
           >
             Cancel
           </button>
@@ -1609,7 +1597,7 @@ function RubricEditorModal({
             type="button"
             disabled={disabled || aiBusy || draft.criteria.length === 0}
             onClick={() => onSave(rubricForSave(draft))}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+            className="rounded-lg bg-accent-solid px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
           >
             Save rubric
           </button>
@@ -1691,7 +1679,7 @@ function AssignmentRubricSection({
       type="button"
       disabled={disabled || aiBusy}
       onClick={() => void buildWithAi()}
-      className="inline-flex items-center gap-2 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm font-semibold text-indigo-700 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-300 hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-200 dark:hover:bg-indigo-950/70"
+      className="inline-flex items-center gap-2 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm font-semibold text-accent-fg shadow-sm transition-[background-color,color,border-color] hover:border-indigo-300 hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-200 dark:hover:bg-indigo-950/70"
     >
       {aiBusy ? (
         <Loader2 className="size-4 shrink-0 animate-spin" aria-hidden />
@@ -1704,7 +1692,7 @@ function AssignmentRubricSection({
 
   return (
     <div className="space-y-3 pt-1">
-      <p className="text-[11px] leading-relaxed text-slate-500 dark:text-neutral-400">
+      <p className="text-[11px] leading-relaxed text-fg-muted">
         Optional structured grading: each row is a criterion, each column is a rating. Add or edit in the
         dialog—changes apply when you save the rubric, then save the assignment from the toolbar.
         {aiAvailable
@@ -1717,7 +1705,7 @@ function AssignmentRubricSection({
             type="button"
             disabled={disabled || aiBusy}
             onClick={openCreate}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 shadow-sm hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+            className="rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm font-medium text-fg-default shadow-sm hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
           >
             Add rubric
           </button>
@@ -1725,20 +1713,20 @@ function AssignmentRubricSection({
         </div>
       ) : (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-w-0 text-sm text-slate-700 dark:text-neutral-300">
+          <div className="min-w-0 text-sm text-fg-muted">
             {draftRubric.title ? (
-              <span className="me-1 font-medium text-slate-900 dark:text-neutral-100">
+              <span className="me-1 font-medium text-fg-default">
                 {draftRubric.title}
-                <span className="font-normal text-slate-400 dark:text-neutral-500"> · </span>
+                <span className="font-normal text-fg-subtle"> · </span>
               </span>
             ) : null}
-            <span className="font-medium text-slate-900 dark:text-neutral-100">
+            <span className="font-medium text-fg-default">
               {draftRubric.criteria.length}{' '}
               {draftRubric.criteria.length === 1 ? 'criterion' : 'criteria'}
             </span>
-            <span className="text-slate-500 dark:text-neutral-500"> · max total {totalMax} pts</span>
+            <span className="text-fg-subtle"> · max total {totalMax} pts</span>
             {pointsMismatch ? (
-              <span className="ms-2 text-amber-700 dark:text-amber-300">
+              <span className="ms-2 text-warning-fg">
                 (should match {pointsWorth} pts worth)
               </span>
             ) : null}
@@ -1749,7 +1737,7 @@ function AssignmentRubricSection({
               type="button"
               disabled={disabled || aiBusy}
               onClick={openEdit}
-              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 shadow-sm hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+              className="rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm font-medium text-fg-default shadow-sm hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
             >
               Edit rubric
             </button>
@@ -1757,7 +1745,7 @@ function AssignmentRubricSection({
               type="button"
               disabled={disabled || aiBusy}
               onClick={() => onDraftRubricChange(null)}
-              className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
+              className="rounded-lg px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay"
             >
               Remove rubric
             </button>

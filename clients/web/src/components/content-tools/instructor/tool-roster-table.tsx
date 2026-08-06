@@ -35,29 +35,29 @@ export function ToolRosterTable({
   if (loading) {
     return (
       <div
-        className="animate-pulse space-y-2 rounded-2xl border border-slate-200 p-4 dark:border-neutral-700"
+        className="animate-pulse space-y-2 rounded-2xl border border-border-default p-4 dark:border-border-default"
         data-testid="tool-roster-loading"
       >
         <div className="h-4 w-1/3 rounded bg-slate-200 dark:bg-neutral-700" />
-        <div className="h-8 rounded bg-slate-100 dark:bg-neutral-800" />
-        <div className="h-8 rounded bg-slate-100 dark:bg-neutral-800" />
+        <div className="h-8 rounded bg-surface-sunken" />
+        <div className="h-8 rounded bg-surface-sunken" />
       </div>
     )
   }
 
   if (empty || rows.length === 0) {
     return (
-      <p className="text-sm text-slate-600 dark:text-neutral-300" data-testid="tool-roster-empty">
+      <p className="text-sm text-fg-muted" data-testid="tool-roster-empty">
         {t('contentTools.instructor.emptyRoster')}
       </p>
     )
   }
 
   return (
-    <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-neutral-700">
+    <div className="overflow-x-auto rounded-2xl border border-border-default">
       <table className="min-w-full text-sm" data-testid="tool-roster-table">
         <caption className="sr-only">{t('contentTools.instructor.rosterCaption')}</caption>
-        <thead className="bg-slate-50 text-left dark:bg-neutral-900">
+        <thead className="bg-surface-base text-left dark:bg-surface-raised">
           <tr>
             {(
               [
@@ -70,7 +70,7 @@ export function ToolRosterTable({
                 key={key}
                 scope="col"
                 aria-sort={ariaSort(sortKey === key, sortDir)}
-                className="px-3 py-2 font-semibold text-slate-700 dark:text-neutral-200"
+                className="px-3 py-2 font-semibold text-fg-default"
               >
                 {onSort ? (
                   <button
@@ -85,10 +85,10 @@ export function ToolRosterTable({
                 )}
               </th>
             ))}
-            <th scope="col" className="px-3 py-2 font-semibold text-slate-700 dark:text-neutral-200">
+            <th scope="col" className="px-3 py-2 font-semibold text-fg-default">
               {t('contentTools.instructor.colScore')}
             </th>
-            <th scope="col" className="px-3 py-2 font-semibold text-slate-700 dark:text-neutral-200">
+            <th scope="col" className="px-3 py-2 font-semibold text-fg-default">
               {t('contentTools.instructor.colActions')}
             </th>
           </tr>
@@ -97,17 +97,17 @@ export function ToolRosterTable({
           {rows.map((row) => (
             <tr
               key={row.enrollmentId}
-              className="border-t border-slate-100 dark:border-neutral-800"
+              className="border-t border-border-subtle"
               data-enrollment-id={row.enrollmentId}
             >
-              <td className="px-3 py-2 text-slate-900 dark:text-neutral-100">{row.displayName}</td>
-              <td className="px-3 py-2 text-slate-700 dark:text-neutral-300">
+              <td className="px-3 py-2 text-fg-default">{row.displayName}</td>
+              <td className="px-3 py-2 text-fg-muted">
                 {row.status.replace(/_/g, ' ')}
               </td>
-              <td className="px-3 py-2 text-slate-700 dark:text-neutral-300">
+              <td className="px-3 py-2 text-fg-muted">
                 {row.interactionCount}
               </td>
-              <td className="px-3 py-2 text-slate-700 dark:text-neutral-300">
+              <td className="px-3 py-2 text-fg-muted">
                 {row.score ? `${row.score.raw}/${row.score.max}` : '—'}
               </td>
               <td className="px-3 py-2">

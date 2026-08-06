@@ -24,7 +24,7 @@ export function IntroCourseProgressBar({
 
   return (
     <div className="space-y-1">
-      <p className="text-xs font-medium text-slate-600 dark:text-neutral-400">
+      <p className="text-xs font-medium text-fg-muted">
         {t('introCourse.progress.modules', { complete: modulesComplete, total: modulesTotal })}
         <span className="mx-1.5 text-slate-300 dark:text-neutral-600" aria-hidden>
           ·

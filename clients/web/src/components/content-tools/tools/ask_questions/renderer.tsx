@@ -140,7 +140,7 @@ export default function AskQuestionsRenderer({
   return (
     <div className="space-y-3" data-content-tool="ask_questions" data-testid="ask-questions">
       {intro ? (
-        <div className="prose prose-sm dark:prose-invert max-w-none text-slate-800 dark:text-neutral-200">
+        <div className="prose prose-sm dark:prose-invert max-w-none text-fg-default">
           <p className="whitespace-pre-wrap text-sm">{intro}</p>
         </div>
       ) : null}
@@ -151,11 +151,11 @@ export default function AskQuestionsRenderer({
         aria-live="polite"
         aria-relevant="additions"
         aria-label={t('contentTools.tools.ask_questions.messagesLabel')}
-        className="max-h-72 space-y-2 overflow-y-auto rounded-md border border-slate-200 bg-slate-50/60 p-2 dark:border-neutral-700 dark:bg-neutral-950/40"
+        className="max-h-72 space-y-2 overflow-y-auto rounded-md border border-border-default bg-slate-50/60 p-2 dark:border-border-default/40"
         data-testid="ask-questions-log"
       >
         {turns.length === 0 ? (
-          <p className="px-1 py-2 text-xs text-slate-500 dark:text-neutral-400">
+          <p className="px-1 py-2 text-xs text-fg-muted">
             {t('contentTools.tools.ask_questions.empty')}
           </p>
         ) : (
@@ -165,19 +165,19 @@ export default function AskQuestionsRenderer({
               className={
                 turn.role === 'user'
                   ? 'ms-8 rounded-md bg-slate-800 px-2.5 py-1.5 text-sm text-white dark:bg-neutral-200 dark:text-neutral-900'
-                  : 'me-4 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100'
+                  : 'me-4 rounded-md border border-border-default bg-surface-raised px-2.5 py-1.5 text-sm text-fg-default dark:border-border-default dark:bg-surface-raised dark:text-fg-default'
               }
               data-role={turn.role}
             >
               {turn.role === 'assistant' ? (
-                <span className="mb-1 inline-block text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                <span className="mb-1 inline-block text-[10px] font-semibold uppercase tracking-wide text-fg-muted">
                   {t('contentTools.tools.ask_questions.aiBadge')}
                 </span>
               ) : null}
               <p className="whitespace-pre-wrap">{turn.text}</p>
               {showCitations && turn.role === 'assistant' && turn.citations && turn.citations.length > 0 ? (
                 <div className="mt-2 flex flex-wrap gap-1.5" data-testid="ask-questions-sources">
-                  <span className="text-[10px] font-medium uppercase text-slate-500 dark:text-neutral-400">
+                  <span className="text-[10px] font-medium uppercase text-fg-muted">
                     {t('contentTools.tools.ask_questions.sources')}
                   </span>
                   {turn.citations.map((c, i) => {
@@ -192,7 +192,7 @@ export default function AskQuestionsRenderer({
                           href={c.url}
                           target="_blank"
                           rel="noreferrer"
-                          className="rounded bg-slate-100 px-1.5 py-0.5 text-[11px] text-slate-700 underline dark:bg-neutral-800 dark:text-neutral-200"
+                          className="rounded bg-surface-sunken px-1.5 py-0.5 text-[11px] text-fg-muted underline dark:bg-surface-overlay dark:text-fg-default"
                           aria-label={label}
                         >
                           {i + 1}. {c.title || c.id}
@@ -202,7 +202,7 @@ export default function AskQuestionsRenderer({
                     return (
                       <span
                         key={`${turn.id}-${c.id}`}
-                        className="rounded bg-slate-100 px-1.5 py-0.5 text-[11px] text-slate-700 dark:bg-neutral-800 dark:text-neutral-200"
+                        className="rounded bg-surface-sunken px-1.5 py-0.5 text-[11px] text-fg-muted dark:bg-surface-overlay dark:text-fg-default"
                         aria-label={label}
                       >
                         {i + 1}. {c.title || c.id}
@@ -215,7 +215,7 @@ export default function AskQuestionsRenderer({
           ))
         )}
         {busy ? (
-          <p className="text-xs text-slate-500 dark:text-neutral-400" role="status">
+          <p className="text-xs text-fg-muted" role="status">
             {t('contentTools.tools.ask_questions.thinking')}
           </p>
         ) : null}
@@ -224,7 +224,7 @@ export default function AskQuestionsRenderer({
       {!readOnly ? (
         <div className="space-y-2">
           <label className="block space-y-1">
-            <span className="text-xs font-medium text-slate-600 dark:text-neutral-300">
+            <span className="text-xs font-medium text-fg-muted">
               {t('contentTools.tools.ask_questions.inputLabel')}
             </span>
             <textarea
@@ -247,7 +247,7 @@ export default function AskQuestionsRenderer({
                   void onAsk()
                 }
               }}
-              className="w-full rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-900 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+              className="w-full rounded-md border border-border-default bg-surface-raised px-2.5 py-1.5 text-sm text-fg-default dark:border-border-default dark:bg-surface-base dark:text-fg-default"
             />
           </label>
           <div className="flex flex-wrap items-center gap-2">
@@ -265,17 +265,17 @@ export default function AskQuestionsRenderer({
               disabled={busy || turns.length === 0}
               onClick={() => void onClear()}
               data-testid="ask-questions-clear"
-              className="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
+              className="rounded-md border border-border-strong px-3 py-1.5 text-xs font-medium text-fg-muted hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
             >
               {t('contentTools.tools.ask_questions.clear')}
             </button>
-            <span className="text-[11px] text-slate-500 dark:text-neutral-400" data-testid="ask-questions-remaining">
+            <span className="text-[11px] text-fg-muted" data-testid="ask-questions-remaining">
               {t('contentTools.tools.ask_questions.remaining', {
                 left: questionsLeft,
                 max: maxPerDay,
               })}
             </span>
-            <span className="text-[11px] text-slate-400 dark:text-neutral-500">
+            <span className="text-[11px] text-fg-subtle">
               {draft.length}/4000
             </span>
           </div>

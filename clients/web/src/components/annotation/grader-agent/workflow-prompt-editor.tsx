@@ -270,7 +270,7 @@ export function WorkflowPromptEditor({
             left: pickerPosition.left,
             maxWidth: pickerPosition.maxWidth,
           }}
-          className="absolute z-20 min-w-48 max-h-48 overflow-auto rounded-lg border border-slate-200 bg-white py-1 text-sm shadow-lg dark:border-neutral-600 dark:bg-neutral-900"
+          className="absolute z-20 min-w-48 max-h-48 overflow-auto rounded-lg border border-border-default bg-surface-raised py-1 text-sm shadow-lg dark:border-border-default dark:bg-surface-raised"
         >
           {rowsForPicker.map((row, index) => {
             const selected = index === activeIndex
@@ -290,11 +290,7 @@ export function WorkflowPromptEditor({
                 id={`${listId}-opt-${index}`}
                 role="option"
                 aria-selected={selected}
-                className={`cursor-pointer px-3 py-2 ${
-                  selected
-                    ? 'bg-indigo-50 text-indigo-900 dark:bg-indigo-500/15 dark:text-indigo-100'
-                    : 'text-slate-800 hover:bg-slate-50 dark:text-neutral-100 dark:hover:bg-neutral-800'
-                }`}
+                className={`cursor-pointer px-3 py-2 ${ selected ? 'bg-indigo-50 text-indigo-900 dark:bg-indigo-500/15 dark:text-indigo-100' : 'text-fg-default hover:bg-surface-base dark:text-fg-default dark:hover:bg-surface-overlay' }`}
                 onMouseDown={(event) => {
                   event.preventDefault()
                   applyPick(row)
@@ -302,7 +298,7 @@ export function WorkflowPromptEditor({
                 onMouseEnter={() => setActiveIndex(index)}
               >
                 <span className="font-medium">{primary}</span>
-                <span className="ms-2 text-xs text-slate-500 dark:text-neutral-400">{secondary}</span>
+                <span className="ms-2 text-xs text-fg-muted">{secondary}</span>
               </li>
             )
           })}

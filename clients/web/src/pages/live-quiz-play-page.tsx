@@ -154,7 +154,7 @@ export default function LiveQuizPlayPage() {
       <Shell>
         <h1 className="text-2xl font-semibold">{t('liveQuiz.play.kickedTitle')}</h1>
         <p className="mt-3">{t('liveQuiz.play.kicked')}</p>
-        <Link to="/play" className="mt-6 inline-block text-indigo-600 underline">
+        <Link to="/play" className="mt-6 inline-block text-accent-fg underline">
           {t('liveQuiz.play.joinAnother')}
         </Link>
       </Shell>
@@ -181,14 +181,14 @@ export default function LiveQuizPlayPage() {
     <Shell>
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
-          <p className="text-sm font-medium text-slate-500 dark:text-neutral-400">
+          <p className="text-sm font-medium text-fg-muted">
             {t('liveQuiz.play.brand')}
           </p>
           <h1 className="text-2xl font-semibold">
             {lookup?.kitTitle || game.state?.kitTitle || t('liveQuiz.play.title')}
           </h1>
           {nickname && step === 'play' && (
-            <p className="mt-1 text-sm text-slate-600 dark:text-neutral-300">
+            <p className="mt-1 text-sm text-fg-muted">
               {t('liveQuiz.play.playingAs', { nickname })}
             </p>
           )}
@@ -211,18 +211,18 @@ export default function LiveQuizPlayPage() {
               autoComplete="one-time-code"
               value={codeInput}
               onChange={(e) => setCodeInput(e.target.value.replace(/\D/g, '').slice(0, 12))}
-              className="mt-1 min-h-14 w-full rounded-xl border border-slate-300 bg-white px-4 text-center text-3xl tracking-[0.35em] tabular-nums dark:border-neutral-700 dark:bg-neutral-900"
+              className="mt-1 min-h-14 w-full rounded-xl border border-border-strong bg-surface-raised px-4 text-center text-3xl tracking-[0.35em] tabular-nums dark:border-border-default dark:bg-surface-raised"
               placeholder="000000"
               aria-describedby="join-code-hint"
             />
           </label>
-          <p id="join-code-hint" className="text-sm text-slate-500 dark:text-neutral-400">
+          <p id="join-code-hint" className="text-sm text-fg-muted">
             {t('liveQuiz.play.codeHint')}
           </p>
           <button
             type="submit"
             disabled={busy}
-            className="min-h-12 w-full rounded-xl bg-indigo-600 px-4 py-3 text-base font-semibold text-white disabled:opacity-50"
+            className="min-h-12 w-full rounded-xl bg-accent-solid px-4 py-3 text-base font-semibold text-white disabled:opacity-50"
           >
             {t('liveQuiz.play.continue')}
           </button>
@@ -231,7 +231,7 @@ export default function LiveQuizPlayPage() {
 
       {step === 'nickname' && (
         <form onSubmit={onJoin} className="space-y-4">
-          <p className="text-sm text-slate-600 dark:text-neutral-300">
+          <p className="text-sm text-fg-muted">
             {t('liveQuiz.play.nicknameIntro', { title: lookup?.kitTitle ?? '' })}
           </p>
           <label className="block text-sm font-medium">
@@ -241,7 +241,7 @@ export default function LiveQuizPlayPage() {
               onChange={(e) => setNickname(e.target.value)}
               maxLength={24}
               autoComplete="nickname"
-              className="mt-1 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-3 text-lg dark:border-neutral-700 dark:bg-neutral-900"
+              className="mt-1 min-h-12 w-full rounded-xl border border-border-strong bg-surface-raised px-3 text-lg dark:border-border-default dark:bg-surface-raised"
             />
           </label>
           {lookup?.requiresAuth && !getAccessToken() && (
@@ -250,7 +250,7 @@ export default function LiveQuizPlayPage() {
           <button
             type="submit"
             disabled={busy}
-            className="min-h-12 w-full rounded-xl bg-indigo-600 px-4 py-3 text-base font-semibold text-white disabled:opacity-50"
+            className="min-h-12 w-full rounded-xl bg-accent-solid px-4 py-3 text-base font-semibold text-white disabled:opacity-50"
           >
             {t('liveQuiz.play.join')}
           </button>
@@ -262,7 +262,7 @@ export default function LiveQuizPlayPage() {
           {(phase === 'lobby' || phase === 'question_intro' || (!phase && game.conn === 'connecting')) && (
             <div className="rounded-xl bg-indigo-50 p-6 text-center dark:bg-indigo-950/40" role="status">
               <p className="text-xl font-semibold">{t('liveQuiz.play.lobbyTitle')}</p>
-              <p className="mt-2 text-slate-600 dark:text-neutral-300">{t('liveQuiz.play.lobbyHint')}</p>
+              <p className="mt-2 text-fg-muted">{t('liveQuiz.play.lobbyHint')}</p>
             </div>
           )}
 
@@ -279,7 +279,7 @@ export default function LiveQuizPlayPage() {
               <>
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm text-slate-500 dark:text-neutral-400">
+                    <p className="text-sm text-fg-muted">
                       {t('liveQuiz.host.questionN', {
                         n: (game.state?.questionIndex ?? 0) + 1,
                         total: game.state?.questionCount ?? 0,
@@ -298,7 +298,7 @@ export default function LiveQuizPlayPage() {
                 </div>
 
                 {game.hasAnsweredCurrent && phase === 'question_open' && (
-                  <p className="rounded-xl bg-slate-100 px-4 py-3 text-center font-medium dark:bg-neutral-800" role="status">
+                  <p className="rounded-xl bg-surface-sunken px-4 py-3 text-center font-medium dark:bg-surface-overlay" role="status">
                     {t('liveQuiz.answer.received')}
                   </p>
                 )}
@@ -366,7 +366,7 @@ export default function LiveQuizPlayPage() {
 
 function Shell({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-indigo-50 px-4 py-8 text-slate-900 dark:from-neutral-950 dark:to-neutral-900 dark:text-neutral-50">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-indigo-50 px-4 py-8 text-fg-default dark:from-neutral-950 dark:to-neutral-900">
       <div className="mx-auto w-full max-w-lg">{children}</div>
     </div>
   )

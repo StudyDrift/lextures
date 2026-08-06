@@ -50,7 +50,7 @@ export function CourseFileMarkdownImage({ src, alt, className, style }: CourseFi
   if (!src) return null
   if (!url) {
     return (
-      <span className="text-sm text-slate-500 dark:text-neutral-400" style={style}>
+      <span className="text-sm text-fg-muted" style={style}>
         Loading image…
       </span>
     )

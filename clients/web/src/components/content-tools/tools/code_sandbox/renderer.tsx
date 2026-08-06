@@ -195,30 +195,30 @@ export default function CodeSandboxRenderer({
   const checksLeft = Math.max(0, (cfg.checkLimitPerHour ?? 20) - (st.rate?.checks ?? 0))
 
   const secondaryBtn =
-    'rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800'
+    'rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-sm font-medium text-fg-muted shadow-sm hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-50 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay'
   const primaryBtn =
-    'rounded-lg bg-indigo-600 px-3.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400'
+    'rounded-lg bg-accent-solid px-3.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400'
   const checkBtn =
     'rounded-lg bg-emerald-600 px-3.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-emerald-500 dark:hover:bg-emerald-400'
 
   return (
     <div className="space-y-4" data-content-tool="code_sandbox" data-testid="code-sandbox">
       {prompt ? (
-        <div className="text-[15px] leading-relaxed text-slate-800 whitespace-pre-wrap dark:text-neutral-100">
+        <div className="text-[15px] leading-relaxed text-fg-default whitespace-pre-wrap dark:text-fg-default">
           {prompt}
         </div>
       ) : null}
 
       <div className="flex flex-wrap items-center gap-2 text-xs">
-        <span className="rounded-md bg-slate-100 px-2 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wide text-slate-700 dark:bg-neutral-800 dark:text-neutral-200">
+        <span className="rounded-md bg-surface-sunken px-2 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wide text-fg-muted dark:bg-surface-overlay dark:text-fg-default">
           {language}
         </span>
-        <span className="text-slate-500 dark:text-neutral-400">
+        <span className="text-fg-muted">
           {t('contentTools.tools.code_sandbox.lineCount', { count: lineCount(code) })}
         </span>
         <button
           type="button"
-          className="rounded-md px-1.5 py-0.5 font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-300 dark:hover:bg-indigo-950/40"
+          className="rounded-md px-1.5 py-0.5 font-medium text-accent-fg hover:bg-indigo-50 dark:text-indigo-300 dark:hover:bg-indigo-950/40"
           onClick={() => setHelpOpen((v) => !v)}
           aria-expanded={helpOpen}
           aria-controls={helpId}
@@ -229,7 +229,7 @@ export default function CodeSandboxRenderer({
       {helpOpen ? (
         <p
           id={helpId}
-          className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs leading-relaxed text-slate-600 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300"
+          className="rounded-lg border border-border-default bg-surface-base px-3 py-2 text-xs leading-relaxed text-fg-muted dark:border-border-default dark:bg-surface-raised dark:text-fg-muted"
         >
           {t('contentTools.tools.code_sandbox.keyboardHelpBody')}
         </p>
@@ -246,11 +246,11 @@ export default function CodeSandboxRenderer({
       />
 
       <label className="block space-y-1.5">
-        <span className="text-xs font-semibold text-slate-700 dark:text-neutral-300">
+        <span className="text-xs font-semibold text-fg-muted">
           {t('contentTools.tools.code_sandbox.stdin')}
         </span>
         <textarea
-          className="w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-2 font-mono text-xs text-slate-900 shadow-sm outline-none focus-visible:border-indigo-400 focus-visible:ring-2 focus-visible:ring-indigo-500/30 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:focus-visible:border-indigo-500"
+          className="w-full resize-y rounded-xl border border-border-default bg-surface-raised px-3 py-2 font-mono text-xs text-fg-default shadow-sm outline-none focus-visible:border-indigo-400 focus-visible:ring-2 focus-visible:ring-indigo-500/30 disabled:opacity-60 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:focus-visible:border-indigo-500"
           rows={2}
           disabled={readOnly || busy}
           value={stdin}
@@ -304,7 +304,7 @@ export default function CodeSandboxRenderer({
           </button>
         ) : null}
         <span
-          className="text-xs text-slate-500 dark:text-neutral-400"
+          className="text-xs text-fg-muted"
           data-testid="code-sandbox-limits"
         >
           {t('contentTools.tools.code_sandbox.remaining', { runs: runsLeft, checks: checksLeft })}
@@ -343,9 +343,9 @@ export default function CodeSandboxRenderer({
         t={t}
       />
 
-      <footer className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-slate-100 pt-3 text-xs text-slate-500 dark:border-neutral-800 dark:text-neutral-500">
+      <footer className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-border-subtle pt-3 text-xs text-fg-muted dark:border-border-subtle">
         {st.best ? (
-          <span className="font-medium text-slate-600 dark:text-neutral-300" data-testid="code-sandbox-best">
+          <span className="font-medium text-fg-muted" data-testid="code-sandbox-best">
             {t('contentTools.tools.code_sandbox.best', {
               passed: st.best.passed,
               total: st.best.total,

@@ -62,11 +62,6 @@ const structureChangedJSON = `{"type":"structure_changed"}`
 // Notifies clients when course modules/items change (including during Canvas import).
 func (d Deps) handleCourseStructureWS() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.JWTSigner == nil || d.Pool == nil {
 			http.Error(w, "server misconfiguration", http.StatusServiceUnavailable)
 			return

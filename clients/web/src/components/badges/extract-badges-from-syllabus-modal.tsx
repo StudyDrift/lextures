@@ -108,23 +108,23 @@ export function ExtractBadgesFromSyllabusModal({
         if (e.target === e.currentTarget && !creating) onClose()
       }}
     >
-      <div className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-neutral-600 dark:bg-neutral-900">
-        <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-neutral-600">
+      <div className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-raised">
+        <div className="flex items-center justify-between border-b border-border-default px-4 py-3 dark:border-border-default">
           <div className="min-w-0">
             <h3
               id={titleId}
-              className="text-sm font-semibold text-slate-900 dark:text-neutral-100"
+              className="text-sm font-semibold text-fg-default"
             >
               Review extracted badges
             </h3>
-            <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">{sourceLabel}</p>
+            <p className="mt-0.5 text-xs text-fg-muted">{sourceLabel}</p>
           </div>
           <button
             type="button"
             onClick={() => {
               if (!creating) onClose()
             }}
-            className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
+            className="rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken hover:text-fg-default dark:hover:bg-surface-overlay dark:hover:text-fg-default"
             aria-label="Close"
             disabled={creating}
           >
@@ -134,17 +134,17 @@ export function ExtractBadgesFromSyllabusModal({
 
         <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
           {rows.length === 0 ? (
-            <p className="rounded-xl border border-dashed border-slate-200 px-4 py-6 text-center text-sm text-slate-500 dark:border-neutral-700 dark:text-neutral-400">
+            <p className="rounded-xl border border-dashed border-border-default px-4 py-6 text-center text-sm text-fg-muted dark:border-border-default dark:text-fg-muted">
               No badges to create. Close and try again, or add badges manually.
             </p>
           ) : (
             rows.map((row, index) => (
               <div
                 key={row.key}
-                className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 dark:border-neutral-700 dark:bg-neutral-950/40"
+                className="rounded-xl border border-border-default bg-slate-50/60 p-3 dark:border-border-default/40"
               >
                 <div className="mb-2 flex items-center justify-between gap-2">
-                  <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
                     Badge {index + 1}
                   </span>
                   <button
@@ -158,18 +158,18 @@ export function ExtractBadgesFromSyllabusModal({
                   </button>
                 </div>
                 <label className="block">
-                  <span className="mb-1 block text-xs font-medium text-slate-700 dark:text-neutral-300">
+                  <span className="mb-1 block text-xs font-medium text-fg-muted">
                     Name
                   </span>
                   <input
                     value={row.name}
                     onChange={(e) => updateRow(row.key, { name: e.target.value })}
                     disabled={creating}
-                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                    className="w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 disabled:opacity-60 dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
                   />
                 </label>
                 <label className="mt-2 block">
-                  <span className="mb-1 block text-xs font-medium text-slate-700 dark:text-neutral-300">
+                  <span className="mb-1 block text-xs font-medium text-fg-muted">
                     Description
                   </span>
                   <textarea
@@ -177,19 +177,19 @@ export function ExtractBadgesFromSyllabusModal({
                     onChange={(e) => updateRow(row.key, { description: e.target.value })}
                     disabled={creating}
                     rows={2}
-                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                    className="w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 disabled:opacity-60 dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
                   />
                 </label>
                 {outcomes.length > 0 ? (
                   <label className="mt-2 block">
-                    <span className="mb-1 block text-xs font-medium text-slate-700 dark:text-neutral-300">
+                    <span className="mb-1 block text-xs font-medium text-fg-muted">
                       Linked outcome (optional)
                     </span>
                     <select
                       value={row.outcomeId}
                       onChange={(e) => updateRow(row.key, { outcomeId: e.target.value })}
                       disabled={creating}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                      className="w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 disabled:opacity-60 dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
                     >
                       <option value="">None</option>
                       {outcomes.map((o) => (
@@ -211,12 +211,12 @@ export function ExtractBadgesFromSyllabusModal({
           </p>
         ) : null}
 
-        <div className="flex flex-wrap items-center justify-end gap-2 border-t border-slate-200 px-4 py-3 dark:border-neutral-600">
+        <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border-default px-4 py-3 dark:border-border-default">
           <button
             type="button"
             onClick={onClose}
             disabled={creating}
-            className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-800"
+            className="rounded-xl px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-sunken disabled:opacity-50 dark:text-fg-muted dark:hover:bg-surface-overlay"
           >
             Cancel
           </button>
@@ -224,7 +224,7 @@ export function ExtractBadgesFromSyllabusModal({
             type="button"
             onClick={() => void onCreate()}
             disabled={creating || creatable.length === 0}
-            className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-white dark:shadow-none"
+            className="inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-surface-raised dark:shadow-none"
           >
             {creating ? (
               <>

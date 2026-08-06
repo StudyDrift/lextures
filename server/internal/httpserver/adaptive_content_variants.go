@@ -57,10 +57,6 @@ func (d Deps) requireAdaptiveContentReview(w http.ResponseWriter, r *http.Reques
 // handleAdaptiveContentReviewQueue is GET .../adaptive-content/review-queue (instructor|reviewer).
 func (d Deps) handleAdaptiveContentReviewQueue() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, _, _, ok := d.requireAdaptiveContentReview(w, r)
 		if !ok {
 			return
@@ -114,10 +110,6 @@ func (d Deps) handleAdaptiveContentReviewQueue() http.HandlerFunc {
 // handleAdaptiveContentVariantApprove is POST .../variants/{vid}/approve.
 func (d Deps) handleAdaptiveContentVariantApprove() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		if acsvc.KillSwitchEngaged() {
 			writeACEKillSwitch(w)
 			return
@@ -151,10 +143,6 @@ func (d Deps) handleAdaptiveContentVariantApprove() http.HandlerFunc {
 // handleAdaptiveContentVariantReject is POST .../variants/{vid}/reject.
 func (d Deps) handleAdaptiveContentVariantReject() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		if acsvc.KillSwitchEngaged() {
 			writeACEKillSwitch(w)
 			return
@@ -188,10 +176,6 @@ func (d Deps) handleAdaptiveContentVariantReject() http.HandlerFunc {
 // handleAdaptiveContentVariantEditApprove is PUT .../variants/{vid} (edit-and-approve).
 func (d Deps) handleAdaptiveContentVariantEditApprove() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		if acsvc.KillSwitchEngaged() {
 			writeACEKillSwitch(w)
 			return
@@ -233,10 +217,6 @@ func (d Deps) handleAdaptiveContentVariantEditApprove() http.HandlerFunc {
 // handleAdaptiveContentVariantRevoke is POST .../variants/{vid}/revoke (instructor only — not review-only).
 func (d Deps) handleAdaptiveContentVariantRevoke() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		if acsvc.KillSwitchEngaged() {
 			writeACEKillSwitch(w)
 			return
@@ -312,10 +292,6 @@ func (d Deps) handleAdaptiveContentVariantRevoke() http.HandlerFunc {
 // handleAdaptiveContentVariantsBulk is POST .../units/{id}/variants/bulk.
 func (d Deps) handleAdaptiveContentVariantsBulk() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		if acsvc.KillSwitchEngaged() {
 			writeACEKillSwitch(w)
 			return

@@ -145,19 +145,19 @@ export default function LiveQuizKitsPage() {
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
-              className="h-36 motion-safe:animate-pulse rounded-lg border border-slate-200 bg-slate-100 dark:border-neutral-700 dark:bg-neutral-800"
+              className="h-36 motion-safe:animate-pulse rounded-lg border border-border-default bg-surface-sunken dark:border-border-default dark:bg-surface-overlay"
             />
           ))}
         </div>
       ) : error ? (
         <div className="space-y-3">
-          <div className="rounded-md bg-red-50 p-4 text-sm text-red-700 dark:bg-red-950/30 dark:text-red-400">
+          <div className="rounded-md bg-red-50 p-4 text-sm text-danger-fg dark:bg-red-950/30 dark:text-red-400">
             {error}
           </div>
           <button
             type="button"
             onClick={() => void load()}
-            className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+            className="rounded-md bg-accent-solid px-3 py-2 text-sm font-medium text-white hover:bg-accent"
           >
             {t('liveQuiz.gallery.retry')}
           </button>
@@ -165,11 +165,11 @@ export default function LiveQuizKitsPage() {
       ) : (
         <div className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-slate-600 dark:text-neutral-300">{t('liveQuiz.gallery.subtitle')}</p>
+            <p className="text-sm text-fg-muted">{t('liveQuiz.gallery.subtitle')}</p>
             <div className="flex flex-wrap items-center gap-2">
               <Link
                 to={`${base}/library`}
-                className="inline-flex min-h-11 items-center rounded-md px-3 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-950/30"
+                className="inline-flex min-h-11 items-center rounded-md px-3 py-2 text-sm font-medium text-accent-fg hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-950/30"
               >
                 {t('liveQuiz.library.open')}
               </Link>
@@ -178,7 +178,7 @@ export default function LiveQuizKitsPage() {
                   <button
                     type="button"
                     onClick={() => setTemplatePickerOpen(true)}
-                    className="inline-flex min-h-11 items-center rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                    className="inline-flex min-h-11 items-center rounded-md border border-border-strong px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
                   >
                     {t('liveQuiz.template.newFrom')}
                   </button>
@@ -186,7 +186,7 @@ export default function LiveQuizKitsPage() {
                     type="button"
                     onClick={() => setCreating(true)}
                     aria-label={t('liveQuiz.kit.createAria')}
-                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md bg-accent-solid px-3 py-2 text-sm font-medium text-white hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                   >
                     <Plus className="h-4 w-4" aria-hidden="true" />
                     {t('liveQuiz.kit.create')}
@@ -206,14 +206,14 @@ export default function LiveQuizKitsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t('liveQuiz.gallery.searchPlaceholder')}
-              className="min-h-11 w-full max-w-sm rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+              className="min-h-11 w-full max-w-sm rounded-md border border-border-strong px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
             />
-            <label className="inline-flex min-h-11 items-center gap-2 text-sm text-slate-700 dark:text-neutral-200">
+            <label className="inline-flex min-h-11 items-center gap-2 text-sm text-fg-default">
               <input
                 type="checkbox"
                 checked={showArchived}
                 onChange={(e) => setShowArchived(e.target.checked)}
-                className="rounded border-slate-300"
+                className="rounded border-border-strong"
               />
               {t('liveQuiz.gallery.showArchived')}
             </label>
@@ -229,7 +229,7 @@ export default function LiveQuizKitsPage() {
               <div className="space-y-3">
                 <div>
                   <label
-                    className="block text-sm font-medium text-slate-700 dark:text-neutral-300"
+                    className="block text-sm font-medium text-fg-muted"
                     htmlFor="kit-title"
                   >
                     {t('liveQuiz.kit.titleLabel')}
@@ -242,12 +242,12 @@ export default function LiveQuizKitsPage() {
                     maxLength={200}
                     required
                     autoFocus
-                    className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                    className="mt-1 w-full rounded-md border border-border-strong px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
                   />
                 </div>
                 <div>
                   <label
-                    className="block text-sm font-medium text-slate-700 dark:text-neutral-300"
+                    className="block text-sm font-medium text-fg-muted"
                     htmlFor="kit-description"
                   >
                     {t('liveQuiz.kit.descriptionLabel')}
@@ -257,21 +257,21 @@ export default function LiveQuizKitsPage() {
                     value={newDescription}
                     onChange={(e) => setNewDescription(e.target.value)}
                     rows={2}
-                    className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                    className="mt-1 w-full rounded-md border border-border-strong px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
                   />
                 </div>
                 <div className="flex gap-2">
                   <button
                     type="submit"
                     disabled={submitting || !newTitle.trim()}
-                    className="min-h-11 rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                    className="min-h-11 rounded-md bg-accent-solid px-3 py-2 text-sm font-medium text-white hover:bg-accent disabled:opacity-50"
                   >
                     {submitting ? t('common.loading') : t('liveQuiz.kit.createSubmit')}
                   </button>
                   <button
                     type="button"
                     onClick={() => setCreating(false)}
-                    className="min-h-11 rounded-md px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                    className="min-h-11 rounded-md px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-sunken dark:text-fg-default dark:hover:bg-surface-overlay"
                   >
                     {t('dialogs.cancel')}
                   </button>
@@ -282,8 +282,8 @@ export default function LiveQuizKitsPage() {
 
           {kits.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-              <Gamepad2 className="h-10 w-10 text-slate-400 dark:text-neutral-500" aria-hidden />
-              <p className="text-sm text-slate-600 dark:text-neutral-300">{t('liveQuiz.gallery.empty')}</p>
+              <Gamepad2 className="h-10 w-10 text-fg-subtle" aria-hidden />
+              <p className="text-sm text-fg-muted">{t('liveQuiz.gallery.empty')}</p>
             </div>
           ) : (
             <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -291,24 +291,24 @@ export default function LiveQuizKitsPage() {
                 <li key={kit.id} className="relative">
                   <Link
                     to={`${base}/${encodeURIComponent(kit.id)}`}
-                    className="block min-h-11 rounded-lg border border-slate-200 p-4 transition-[background-color,color,border-color] hover:border-indigo-300 hover:bg-indigo-50/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-neutral-700 dark:hover:border-indigo-700 dark:hover:bg-indigo-950/20"
+                    className="block min-h-11 rounded-lg border border-border-default p-4 transition-[background-color,color,border-color] hover:border-indigo-300 hover:bg-indigo-50/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-border-default dark:hover:border-indigo-700 dark:hover:bg-indigo-950/20"
                     aria-label={kit.title}
                   >
                     <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-medium text-slate-900 dark:text-neutral-100">{kit.title}</h3>
-                      <span className="shrink-0 rounded bg-slate-100 px-1.5 py-0.5 text-xs capitalize text-slate-600 dark:bg-neutral-800 dark:text-neutral-300">
+                      <h3 className="font-medium text-fg-default">{kit.title}</h3>
+                      <span className="shrink-0 rounded bg-surface-sunken px-1.5 py-0.5 text-xs capitalize text-fg-muted dark:bg-surface-overlay dark:text-fg-muted">
                         {t(`liveQuiz.kit.status.${kit.status}`)}
                       </span>
                     </div>
                     {kit.description ? (
-                      <p className="mt-1 line-clamp-2 text-sm text-slate-600 dark:text-neutral-300">
+                      <p className="mt-1 line-clamp-2 text-sm text-fg-muted">
                         {kit.description}
                       </p>
                     ) : null}
-                    <p className="mt-3 text-xs text-slate-500 dark:text-neutral-400">
+                    <p className="mt-3 text-xs text-fg-muted">
                       {t('liveQuiz.gallery.questionCount', { count: kit.questionCount })}
                     </p>
-                    <p className="mt-1 text-xs text-slate-400 dark:text-neutral-500">
+                    <p className="mt-1 text-xs text-fg-subtle">
                       {t('liveQuiz.gallery.updated', { date: formatDate(kit.updatedAt) })}
                     </p>
                   </Link>
@@ -320,19 +320,19 @@ export default function LiveQuizKitsPage() {
                         aria-expanded={menuKitId === kit.id}
                         aria-haspopup="menu"
                         onClick={() => setMenuKitId(menuKitId === kit.id ? null : kit.id)}
-                        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
+                        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md text-fg-muted hover:bg-surface-sunken hover:text-fg-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:hover:bg-surface-overlay dark:hover:text-fg-default"
                       >
                         <MoreHorizontal className="h-4 w-4" aria-hidden />
                       </button>
                       {menuKitId === kit.id ? (
                         <div
                           role="menu"
-                          className="absolute end-0 z-10 mt-1 w-40 rounded-md border border-slate-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-900"
+                          className="absolute end-0 z-10 mt-1 w-40 rounded-md border border-border-default bg-surface-raised py-1 shadow-lg dark:border-border-default dark:bg-surface-raised"
                         >
                           <button
                             type="button"
                             role="menuitem"
-                            className="block w-full px-3 py-2 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                            className="block w-full px-3 py-2 text-start text-sm hover:bg-surface-base dark:hover:bg-surface-overlay"
                             onClick={() => void handleDuplicate(kit.id)}
                           >
                             {t('liveQuiz.kit.duplicate')}
@@ -340,7 +340,7 @@ export default function LiveQuizKitsPage() {
                           <button
                             type="button"
                             role="menuitem"
-                            className="block w-full px-3 py-2 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                            className="block w-full px-3 py-2 text-start text-sm hover:bg-surface-base dark:hover:bg-surface-overlay"
                             onClick={() => void handleSaveAsTemplate(kit.id)}
                           >
                             {t('liveQuiz.template.saveAs')}
@@ -348,7 +348,7 @@ export default function LiveQuizKitsPage() {
                           <button
                             type="button"
                             role="menuitem"
-                            className="block w-full px-3 py-2 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                            className="block w-full px-3 py-2 text-start text-sm hover:bg-surface-base dark:hover:bg-surface-overlay"
                             onClick={() => {
                               setMenuKitId(null)
                               setShareKitId(kit.id)
@@ -360,7 +360,7 @@ export default function LiveQuizKitsPage() {
                             <button
                               type="button"
                               role="menuitem"
-                              className="block w-full px-3 py-2 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                              className="block w-full px-3 py-2 text-start text-sm hover:bg-surface-base dark:hover:bg-surface-overlay"
                               onClick={() => void handleSubmitCatalog(kit.id)}
                             >
                               {t('liveQuiz.library.submitCatalog')}
@@ -370,7 +370,7 @@ export default function LiveQuizKitsPage() {
                             <button
                               type="button"
                               role="menuitem"
-                              className="block w-full px-3 py-2 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                              className="block w-full px-3 py-2 text-start text-sm hover:bg-surface-base dark:hover:bg-surface-overlay"
                               onClick={() => void handleRestore(kit.id)}
                             >
                               {t('liveQuiz.kit.restore')}
@@ -379,7 +379,7 @@ export default function LiveQuizKitsPage() {
                             <button
                               type="button"
                               role="menuitem"
-                              className="block w-full px-3 py-2 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                              className="block w-full px-3 py-2 text-start text-sm hover:bg-surface-base dark:hover:bg-surface-overlay"
                               onClick={() => void handleArchive(kit.id)}
                             >
                               {t('liveQuiz.kit.archive')}

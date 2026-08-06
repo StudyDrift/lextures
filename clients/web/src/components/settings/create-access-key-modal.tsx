@@ -58,17 +58,17 @@ function ModalSection({
   children: ReactNode
 }) {
   return (
-    <section className="rounded-xl border border-slate-200 bg-slate-50/80 p-4 dark:border-neutral-700 dark:bg-neutral-800/40">
+    <section className="rounded-xl border border-border-default bg-slate-50/80 p-4 dark:border-border-default/40">
       <div className="flex gap-3">
         <span
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white dark:bg-neutral-100 dark:text-neutral-950"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent-solid text-xs font-bold text-white dark:bg-neutral-100 dark:text-neutral-950"
           aria-hidden
         >
           {step}
         </span>
         <div className="min-w-0 flex-1">
-          <h4 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">{title}</h4>
-          <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">{description}</p>
+          <h4 className="text-sm font-semibold text-fg-default">{title}</h4>
+          <p className="mt-0.5 text-xs text-fg-muted">{description}</p>
           <div className="mt-3">{children}</div>
         </div>
       </div>
@@ -231,20 +231,20 @@ export function CreateAccessKeyModal({ open, scopes, onClose, onCreated }: Creat
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={descId}
-        className="relative z-10 flex max-h-[min(92vh,720px)] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-900"
+        className="relative z-10 flex max-h-[min(92vh,720px)] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-raised"
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <div className="shrink-0 border-b border-slate-200 px-5 py-4 dark:border-neutral-700">
+        <div className="shrink-0 border-b border-border-default px-5 py-4 dark:border-border-default">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-start gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-700 dark:bg-neutral-800 dark:text-neutral-100">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-accent-fg dark:bg-surface-overlay dark:text-fg-default">
                 <KeyRound className="h-5 w-5" aria-hidden />
               </span>
               <div>
-                <h2 id={titleId} className="text-lg font-semibold text-slate-950 dark:text-neutral-100">
+                <h2 id={titleId} className="text-lg font-semibold text-slate-950 dark:text-fg-default">
                   Create access key
                 </h2>
-                <p id={descId} className="mt-1 text-sm text-slate-600 dark:text-neutral-300">
+                <p id={descId} className="mt-1 text-sm text-fg-muted">
                   Set permissions and course limits, then copy the secret once — it won&apos;t be shown again.
                 </p>
               </div>
@@ -253,7 +253,7 @@ export function CreateAccessKeyModal({ open, scopes, onClose, onCreated }: Creat
               type="button"
               onClick={onClose}
               disabled={creating}
-              className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+              className="rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken hover:text-fg-default disabled:opacity-50 dark:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-fg-default"
               aria-label="Close"
             >
               <X className="h-5 w-5" />
@@ -287,7 +287,7 @@ export function CreateAccessKeyModal({ open, scopes, onClose, onCreated }: Creat
                 onChange={(e) => setLabel(e.target.value)}
                 placeholder="e.g. Cursor agent — CS101 grades"
                 autoFocus
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+                className="w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-border-default dark:bg-surface-base dark:text-fg-default"
                 required
               />
             </ModalSection>
@@ -300,7 +300,7 @@ export function CreateAccessKeyModal({ open, scopes, onClose, onCreated }: Creat
               <div className="space-y-4">
                 {scopeGroups.map(([group, items]) => (
                   <fieldset key={group} className="min-w-0">
-                    <legend className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                    <legend className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
                       {group}
                     </legend>
                     <ul className="mt-2 space-y-2">
@@ -308,7 +308,7 @@ export function CreateAccessKeyModal({ open, scopes, onClose, onCreated }: Creat
                         const checked = selectedScopes.includes(s.id)
                         return (
                           <li key={s.id}>
-                            <label className="flex cursor-pointer gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2.5 transition-[background-color,color,border-color] hover:border-indigo-200 dark:border-neutral-600 dark:bg-neutral-900 dark:hover:border-indigo-800/60">
+                            <label className="flex cursor-pointer gap-3 rounded-lg border border-border-default bg-surface-raised px-3 py-2.5 transition-[background-color,color,border-color] hover:border-indigo-200 dark:border-border-default dark:bg-surface-raised dark:hover:border-indigo-800/60">
                               <input
                                 type="checkbox"
                                 checked={checked}
@@ -316,10 +316,10 @@ export function CreateAccessKeyModal({ open, scopes, onClose, onCreated }: Creat
                                 className="mt-0.5 shrink-0"
                               />
                               <span className="min-w-0">
-                                <span className="block text-sm font-medium text-slate-900 dark:text-neutral-100">
+                                <span className="block text-sm font-medium text-fg-default">
                                   {s.label}
                                 </span>
-                                <span className="block text-xs text-slate-500 dark:text-neutral-400">
+                                <span className="block text-xs text-fg-muted">
                                   {s.description}
                                 </span>
                               </span>
@@ -331,7 +331,7 @@ export function CreateAccessKeyModal({ open, scopes, onClose, onCreated }: Creat
                   </fieldset>
                 ))}
               </div>
-              <p className="mt-3 text-xs text-slate-500 dark:text-neutral-400">
+              <p className="mt-3 text-xs text-fg-muted">
                 {selectedScopes.length} permission{selectedScopes.length === 1 ? '' : 's'} selected
               </p>
             </ModalSection>
@@ -347,16 +347,12 @@ export function CreateAccessKeyModal({ open, scopes, onClose, onCreated }: Creat
                   role="radio"
                   aria-checked={courseLimitMode === 'all'}
                   onClick={() => setCourseLimitMode('all')}
-                  className={`cursor-pointer rounded-xl border px-3 py-3 text-start transition-[background-color,color,border-color] ${
-                    courseLimitMode === 'all'
-                      ? 'border-indigo-500 bg-indigo-50 ring-1 ring-indigo-500/30 dark:border-indigo-400 dark:bg-indigo-950/40'
-                      : 'border-slate-200 bg-white hover:border-slate-300 dark:border-neutral-600 dark:bg-neutral-900'
-                  }`}
+                  className={`cursor-pointer rounded-xl border px-3 py-3 text-start transition-[background-color,color,border-color] ${ courseLimitMode === 'all' ? 'border-indigo-500 bg-indigo-50 ring-1 ring-indigo-500/30 dark:border-indigo-400 dark:bg-indigo-950/40' : 'border-border-default bg-surface-raised hover:border-border-strong dark:bg-surface-raised' }`}
                 >
-                  <span className="block text-sm font-medium text-slate-900 dark:text-neutral-100">
+                  <span className="block text-sm font-medium text-fg-default">
                     All my courses
                   </span>
-                  <span className="mt-0.5 block text-xs text-slate-500 dark:text-neutral-400">
+                  <span className="mt-0.5 block text-xs text-fg-muted">
                     Any course you can open in the app
                   </span>
                 </button>
@@ -365,16 +361,12 @@ export function CreateAccessKeyModal({ open, scopes, onClose, onCreated }: Creat
                   role="radio"
                   aria-checked={courseLimitMode === 'specific'}
                   onClick={() => setCourseLimitMode('specific')}
-                  className={`cursor-pointer rounded-xl border px-3 py-3 text-start transition-[background-color,color,border-color] ${
-                    courseLimitMode === 'specific'
-                      ? 'border-indigo-500 bg-indigo-50 ring-1 ring-indigo-500/30 dark:border-indigo-400 dark:bg-indigo-950/40'
-                      : 'border-slate-200 bg-white hover:border-slate-300 dark:border-neutral-600 dark:bg-neutral-900'
-                  }`}
+                  className={`cursor-pointer rounded-xl border px-3 py-3 text-start transition-[background-color,color,border-color] ${ courseLimitMode === 'specific' ? 'border-indigo-500 bg-indigo-50 ring-1 ring-indigo-500/30 dark:border-indigo-400 dark:bg-indigo-950/40' : 'border-border-default bg-surface-raised hover:border-border-strong dark:bg-surface-raised' }`}
                 >
-                  <span className="block text-sm font-medium text-slate-900 dark:text-neutral-100">
+                  <span className="block text-sm font-medium text-fg-default">
                     Selected courses
                   </span>
-                  <span className="mt-0.5 block text-xs text-slate-500 dark:text-neutral-400">
+                  <span className="mt-0.5 block text-xs text-fg-muted">
                     Pick one or more from a list
                   </span>
                 </button>
@@ -387,19 +379,19 @@ export function CreateAccessKeyModal({ open, scopes, onClose, onCreated }: Creat
                     value={courseSearch}
                     onChange={(e) => setCourseSearch(e.target.value)}
                     placeholder="Search by course code or title…"
-                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+                    className="w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base dark:text-fg-default"
                   />
                   {coursesLoading ? (
-                    <p className="text-sm text-slate-500 dark:text-neutral-400">Loading courses…</p>
+                    <p className="text-sm text-fg-muted">Loading courses…</p>
                   ) : filteredCourses.length === 0 ? (
-                    <p className="text-sm text-slate-500 dark:text-neutral-400">No matching courses.</p>
+                    <p className="text-sm text-fg-muted">No matching courses.</p>
                   ) : (
-                    <ul className="max-h-40 space-y-1 overflow-y-auto rounded-xl border border-slate-200 bg-white p-1 dark:border-neutral-600 dark:bg-neutral-950">
+                    <ul className="max-h-40 space-y-1 overflow-y-auto rounded-xl border border-border-default bg-surface-raised p-1 dark:border-border-default dark:bg-surface-base">
                       {filteredCourses.map((c) => {
                         const checked = selectedCourseIds.includes(c.id)
                         return (
                           <li key={c.id}>
-                            <label className="flex cursor-pointer items-start gap-2 rounded-lg px-2 py-1.5 hover:bg-slate-50 dark:hover:bg-neutral-800">
+                            <label className="flex cursor-pointer items-start gap-2 rounded-lg px-2 py-1.5 hover:bg-surface-base dark:hover:bg-surface-overlay">
                               <input
                                 type="checkbox"
                                 checked={checked}
@@ -407,10 +399,10 @@ export function CreateAccessKeyModal({ open, scopes, onClose, onCreated }: Creat
                                 className="mt-0.5"
                               />
                               <span className="min-w-0">
-                                <span className="block text-sm font-medium text-slate-900 dark:text-neutral-100">
+                                <span className="block text-sm font-medium text-fg-default">
                                   {courseCodeLabel(c) || 'No course code'}
                                 </span>
-                                <span className="block truncate text-xs text-slate-500 dark:text-neutral-400">
+                                <span className="block truncate text-xs text-fg-muted">
                                   {courseTitleLabel(c)}
                                 </span>
                               </span>
@@ -420,7 +412,7 @@ export function CreateAccessKeyModal({ open, scopes, onClose, onCreated }: Creat
                       })}
                     </ul>
                   )}
-                  <p className="text-xs text-slate-500 dark:text-neutral-400">
+                  <p className="text-xs text-fg-muted">
                     {selectedCourseIds.length} course{selectedCourseIds.length === 1 ? '' : 's'} selected
                   </p>
                 </div>
@@ -436,25 +428,25 @@ export function CreateAccessKeyModal({ open, scopes, onClose, onCreated }: Creat
                 type="datetime-local"
                 value={expiresAt}
                 onChange={(e) => setExpiresAt(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+                className="w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base dark:text-fg-default"
               />
             </ModalSection>
             </div>
           </div>
 
-          <div className="shrink-0 flex flex-wrap justify-end gap-2 border-t border-slate-200 px-5 py-4 dark:border-neutral-700">
+          <div className="shrink-0 flex flex-wrap justify-end gap-2 border-t border-border-default px-5 py-4 dark:border-border-default">
             <button
               type="button"
               onClick={onClose}
               disabled={creating}
-              className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 disabled:opacity-50 dark:border-neutral-600 dark:text-neutral-200"
+              className="rounded-xl border border-border-default px-4 py-2 text-sm font-medium text-fg-muted disabled:opacity-50 dark:border-border-default dark:text-fg-default"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={creating || !canSubmit}
-              className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-950"
+              className="rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-950"
             >
               {creating ? 'Creating…' : 'Create key'}
             </button>
@@ -516,22 +508,22 @@ export function AccessKeyCreatedModal({ open, token, label, onClose }: AccessKey
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="relative z-10 w-full max-w-xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-900"
+        className="relative z-10 w-full max-w-xl overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-raised"
       >
-        <div className="border-b border-slate-200 px-5 py-4 dark:border-neutral-700">
+        <div className="border-b border-border-default px-5 py-4 dark:border-border-default">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h2 id={titleId} className="text-lg font-semibold text-slate-950 dark:text-neutral-100">
+              <h2 id={titleId} className="text-lg font-semibold text-slate-950 dark:text-fg-default">
                 Copy your access key
               </h2>
               {label ? (
-                <p className="mt-1 text-sm text-slate-600 dark:text-neutral-300">{label}</p>
+                <p className="mt-1 text-sm text-fg-muted">{label}</p>
               ) : null}
             </div>
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
+              className="rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay"
               aria-label="Close"
             >
               <X className="h-5 w-5" />
@@ -547,24 +539,24 @@ export function AccessKeyCreatedModal({ open, token, label, onClose }: AccessKey
           >
             Token generated — copy now. This is the only time we&apos;ll show the full key.
           </p>
-          <code className="block break-all rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 font-mono text-xs text-slate-800 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100">
+          <code className="block break-all rounded-xl border border-border-default bg-surface-base px-3 py-3 font-mono text-xs text-fg-default dark:border-border-default dark:bg-surface-base dark:text-fg-default">
             {token}
           </code>
           <button
             type="button"
             onClick={() => void copyToken()}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-white"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-surface-raised"
           >
             {copied ? <Check className="h-4 w-4" aria-hidden /> : <Copy className="h-4 w-4" aria-hidden />}
             {copied ? 'Copied' : 'Copy access key'}
           </button>
         </div>
 
-        <div className="border-t border-slate-200 px-5 py-4 dark:border-neutral-700">
+        <div className="border-t border-border-default px-5 py-4 dark:border-border-default">
           <button
             type="button"
             onClick={onClose}
-            className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 dark:border-neutral-600 dark:text-neutral-200"
+            className="w-full rounded-xl border border-border-default px-4 py-2 text-sm font-medium text-fg-muted dark:border-border-default dark:text-fg-default"
           >
             Done — I&apos;ve saved it
           </button>

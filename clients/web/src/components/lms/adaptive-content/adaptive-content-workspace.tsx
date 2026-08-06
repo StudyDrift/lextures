@@ -80,9 +80,9 @@ function statusBadgeClass(status: string): string {
       return 'bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-200'
     case 'superseded':
     case 'archived':
-      return 'bg-slate-100 text-slate-600 dark:bg-neutral-800 dark:text-neutral-300'
+      return 'bg-surface-sunken text-fg-muted dark:bg-surface-overlay dark:text-fg-muted'
     default:
-      return 'bg-slate-100 text-slate-700 dark:bg-neutral-800 dark:text-neutral-200'
+      return 'bg-surface-sunken text-fg-muted dark:bg-surface-overlay dark:text-fg-default'
   }
 }
 
@@ -536,17 +536,17 @@ export function AdaptiveContentWorkspace({
 
   if (!adaptiveContentEnabled) {
     return (
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-        <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-50">
+      <section className="rounded-2xl border border-border-default bg-surface-raised p-6 shadow-sm dark:border-border-subtle dark:bg-surface-raised">
+        <h2 className="text-sm font-semibold text-fg-default">
           Adaptive Content
         </h2>
-        <p className="mt-2 text-sm text-slate-600 dark:text-neutral-300">
+        <p className="mt-2 text-sm text-fg-muted">
           Turn on Adaptive Content and add your first unit.
         </p>
         <p className="mt-3 text-sm">
           <Link
             to={`/courses/${encodeURIComponent(courseCode)}/settings/features`}
-            className="font-medium text-indigo-600 hover:text-indigo-500"
+            className="font-medium text-accent-fg hover:text-indigo-500"
           >
             Enable under Features → Adaptive Content
           </Link>
@@ -559,21 +559,17 @@ export function AdaptiveContentWorkspace({
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-50">
+          <h2 className="text-sm font-semibold text-fg-default">
             Adaptive Content workspace
           </h2>
-          <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+          <p className="mt-1 text-xs text-fg-muted">
             Configure units, preview learner archetypes, and review generated variants.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {budget && (
             <span
-              className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-                budgetExhausted
-                  ? 'bg-amber-100 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200'
-                  : 'bg-slate-100 text-slate-700 dark:bg-neutral-800 dark:text-neutral-200'
-              }`}
+              className={`rounded-full px-2.5 py-1 text-xs font-medium ${ budgetExhausted ? 'bg-amber-100 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200' : 'bg-surface-sunken text-fg-muted dark:bg-surface-overlay dark:text-fg-default' }`}
               title={`Period starting ${budget.periodStart}`}
             >
               Budget:{' '}
@@ -586,7 +582,7 @@ export function AdaptiveContentWorkspace({
           <button
             type="button"
             onClick={() => void load()}
-            className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            className="inline-flex items-center gap-1 rounded-lg border border-border-default px-2.5 py-1.5 text-xs font-medium text-fg-muted hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
           >
             <RefreshCw className="h-3.5 w-3.5" aria-hidden />
             Refresh
@@ -605,7 +601,7 @@ export function AdaptiveContentWorkspace({
       )}
 
       {settings && canConfigure && (
-        <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-neutral-300">
+        <label className="flex items-center gap-2 text-sm text-fg-muted">
           <input
             type="checkbox"
             checked={settings.requireInstructorApproval}
@@ -616,17 +612,13 @@ export function AdaptiveContentWorkspace({
         </label>
       )}
 
-      <div className="flex gap-2 border-b border-slate-200 dark:border-neutral-800" role="tablist">
+      <div className="flex gap-2 border-b border-border-default dark:border-border-subtle" role="tablist">
         <button
           type="button"
           role="tab"
           aria-selected={tab === 'units'}
           onClick={() => setTab('units')}
-          className={`px-3 py-2 text-sm font-medium ${
-            tab === 'units'
-              ? 'border-b-2 border-indigo-600 text-indigo-700 dark:text-indigo-300'
-              : 'text-slate-600 dark:text-neutral-400'
-          }`}
+          className={`px-3 py-2 text-sm font-medium ${ tab === 'units' ? 'border-b-2 border-indigo-600 text-accent-fg' : 'text-fg-muted' }`}
         >
           Units
         </button>
@@ -635,11 +627,7 @@ export function AdaptiveContentWorkspace({
           role="tab"
           aria-selected={tab === 'queue'}
           onClick={() => setTab('queue')}
-          className={`px-3 py-2 text-sm font-medium ${
-            tab === 'queue'
-              ? 'border-b-2 border-indigo-600 text-indigo-700 dark:text-indigo-300'
-              : 'text-slate-600 dark:text-neutral-400'
-          }`}
+          className={`px-3 py-2 text-sm font-medium ${ tab === 'queue' ? 'border-b-2 border-indigo-600 text-accent-fg' : 'text-fg-muted' }`}
         >
           Review queue
           {queueTotal > 0 ? ` (${queueTotal})` : ''}
@@ -650,11 +638,7 @@ export function AdaptiveContentWorkspace({
           aria-selected={tab === 'contests'}
           onClick={() => setTab('contests')}
           data-testid="ace-contests-tab"
-          className={`px-3 py-2 text-sm font-medium ${
-            tab === 'contests'
-              ? 'border-b-2 border-indigo-600 text-indigo-700 dark:text-indigo-300'
-              : 'text-slate-600 dark:text-neutral-400'
-          }`}
+          className={`px-3 py-2 text-sm font-medium ${ tab === 'contests' ? 'border-b-2 border-indigo-600 text-accent-fg' : 'text-fg-muted' }`}
         >
           Contests
           {contests.length > 0 ? ` (${contests.length})` : ''}
@@ -665,11 +649,7 @@ export function AdaptiveContentWorkspace({
           aria-selected={tab === 'report'}
           onClick={() => setTab('report')}
           data-testid="ace-report-tab"
-          className={`px-3 py-2 text-sm font-medium ${
-            tab === 'report'
-              ? 'border-b-2 border-indigo-600 text-indigo-700 dark:text-indigo-300'
-              : 'text-slate-600 dark:text-neutral-400'
-          }`}
+          className={`px-3 py-2 text-sm font-medium ${ tab === 'report' ? 'border-b-2 border-indigo-600 text-accent-fg' : 'text-fg-muted' }`}
         >
           Report
         </button>
@@ -694,22 +674,22 @@ export function AdaptiveContentWorkspace({
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="h-12 animate-pulse rounded-xl bg-slate-100 dark:bg-neutral-800"
+              className="h-12 animate-pulse rounded-xl bg-surface-sunken"
             />
           ))}
         </div>
       ) : tab === 'units' ? (
         <>
           {canConfigure && (
-            <section className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-50">
+            <section className="rounded-2xl border border-border-default bg-surface-raised p-4 dark:border-border-subtle dark:bg-surface-raised">
+              <h3 className="text-sm font-semibold text-fg-default">
                 Create unit
               </h3>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                <label className="flex flex-col gap-1 text-xs font-medium text-slate-700 dark:text-neutral-300">
+                <label className="flex flex-col gap-1 text-xs font-medium text-fg-muted">
                   Content page
                   <select
-                    className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+                    className="rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base dark:text-fg-default"
                     value={newBaseId}
                     onChange={(e) => setNewBaseId(e.target.value)}
                   >
@@ -721,10 +701,10 @@ export function AdaptiveContentWorkspace({
                     ))}
                   </select>
                 </label>
-                <label className="flex flex-col gap-1 text-xs font-medium text-slate-700 dark:text-neutral-300">
+                <label className="flex flex-col gap-1 text-xs font-medium text-fg-muted">
                   Pre-check quiz (optional)
                   <select
-                    className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+                    className="rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base dark:text-fg-default"
                     value={newPreId}
                     onChange={(e) => setNewPreId(e.target.value)}
                   >
@@ -736,10 +716,10 @@ export function AdaptiveContentWorkspace({
                     ))}
                   </select>
                 </label>
-                <label className="flex flex-col gap-1 text-xs font-medium text-slate-700 dark:text-neutral-300">
+                <label className="flex flex-col gap-1 text-xs font-medium text-fg-muted">
                   Exit ticket (post-assessment)
                   <select
-                    className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+                    className="rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base dark:text-fg-default"
                     value={newPostId}
                     onChange={(e) => setNewPostId(e.target.value)}
                     data-testid="ace-new-post-assessment"
@@ -752,7 +732,7 @@ export function AdaptiveContentWorkspace({
                     ))}
                   </select>
                 </label>
-                <label className="flex flex-col gap-1 text-xs font-medium text-slate-700 dark:text-neutral-300">
+                <label className="flex flex-col gap-1 text-xs font-medium text-fg-muted">
                   Min fidelity
                   <div className="flex items-center gap-2">
                     <input
@@ -772,15 +752,15 @@ export function AdaptiveContentWorkspace({
                       step={0.05}
                       value={newMinFidelity}
                       onChange={(e) => setNewMinFidelity(Number(e.target.value))}
-                      className="w-16 rounded border border-slate-200 px-1 py-0.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                      className="w-16 rounded border border-border-default px-1 py-0.5 text-sm dark:border-border-default dark:bg-surface-base"
                       aria-label="Min fidelity numeric"
                     />
                   </div>
                 </label>
-                <label className="flex flex-col gap-1 text-xs font-medium text-slate-700 dark:text-neutral-300">
+                <label className="flex flex-col gap-1 text-xs font-medium text-fg-muted">
                   Trigger mode
                   <select
-                    className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+                    className="rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base dark:text-fg-default"
                     value={newTrigger}
                     onChange={(e) => setNewTrigger(e.target.value)}
                   >
@@ -790,12 +770,12 @@ export function AdaptiveContentWorkspace({
                   </select>
                 </label>
                 <fieldset className="sm:col-span-2">
-                  <legend className="text-xs font-medium text-slate-700 dark:text-neutral-300">
+                  <legend className="text-xs font-medium text-fg-muted">
                     Allowed axes
                   </legend>
                   <div className="mt-1 flex flex-wrap gap-3">
                     {ALL_AXES.map((ax) => (
-                      <label key={ax.id} className="flex items-center gap-1.5 text-sm text-slate-700 dark:text-neutral-300">
+                      <label key={ax.id} className="flex items-center gap-1.5 text-sm text-fg-muted">
                         <input
                           type="checkbox"
                           checked={newAxes.includes(ax.id)}
@@ -817,7 +797,7 @@ export function AdaptiveContentWorkspace({
                 type="button"
                 disabled={creating || !newBaseId}
                 onClick={() => void handleCreate()}
-                className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
+                className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-accent-solid px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
               >
                 {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
                 Create unit
@@ -826,7 +806,7 @@ export function AdaptiveContentWorkspace({
           )}
 
           {units.length === 0 ? (
-            <p className="py-8 text-center text-sm text-slate-500 dark:text-neutral-400">
+            <p className="py-8 text-center text-sm text-fg-muted">
               Turn on Adaptive Content and add your first unit.
             </p>
           ) : (
@@ -856,7 +836,7 @@ export function AdaptiveContentWorkspace({
                         }
                       })()
                     }}
-                    className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-900"
+                    className="inline-flex items-center gap-1 rounded-lg border border-border-default px-2 py-1 text-xs font-medium text-fg-muted hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:text-fg-default dark:hover:bg-surface-raised"
                   >
                     {refreshingEff ? (
                       <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -867,9 +847,9 @@ export function AdaptiveContentWorkspace({
                   </button>
                 )}
               </div>
-              <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-neutral-800">
+              <div className="overflow-x-auto rounded-2xl border border-border-default dark:border-border-subtle">
                 <table className="min-w-full text-left text-sm">
-                  <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-neutral-900 dark:text-neutral-400">
+                  <thead className="bg-surface-base text-xs font-semibold uppercase tracking-wide text-fg-muted dark:bg-surface-raised dark:text-fg-muted">
                     <tr>
                       <th className="px-3 py-2">Content page</th>
                       <th className="px-3 py-2">Status</th>
@@ -881,8 +861,8 @@ export function AdaptiveContentWorkspace({
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-neutral-800">
                     {units.map((u) => (
-                      <tr key={u.id} className="bg-white dark:bg-neutral-950">
-                        <td className="px-3 py-2 font-medium text-slate-900 dark:text-neutral-100">
+                      <tr key={u.id} className="bg-surface-raised">
+                        <td className="px-3 py-2 font-medium text-fg-default">
                           {titleById.get(u.baseContentItemId) ?? u.baseContentItemId.slice(0, 8)}
                         </td>
                         <td className="px-3 py-2">
@@ -900,11 +880,11 @@ export function AdaptiveContentWorkspace({
                             compact
                           />
                         </td>
-                        <td className="px-3 py-2 text-slate-600 dark:text-neutral-300">
+                        <td className="px-3 py-2 text-fg-muted">
                           {u.variantTotal ?? 0} total · {u.variantApproved ?? 0} approved ·{' '}
                           {u.variantPendingReview ?? 0} pending
                         </td>
-                        <td className="px-3 py-2 text-xs text-slate-500 dark:text-neutral-400">
+                        <td className="px-3 py-2 text-xs text-fg-muted">
                           {(u.allowedAxes ?? []).join(', ') || '—'}
                         </td>
                         <td className="px-3 py-2">
@@ -912,7 +892,7 @@ export function AdaptiveContentWorkspace({
                             <button
                               type="button"
                               onClick={() => void openUnit(u)}
-                              className="text-xs font-medium text-indigo-600 hover:text-indigo-500"
+                              className="text-xs font-medium text-accent-fg hover:text-indigo-500"
                             >
                               Open
                             </button>
@@ -920,7 +900,7 @@ export function AdaptiveContentWorkspace({
                               <button
                                 type="button"
                                 onClick={() => void handlePrewarm(u.id)}
-                                className="text-xs font-medium text-slate-600 hover:text-slate-800 dark:text-neutral-400"
+                                className="text-xs font-medium text-fg-muted hover:text-fg-default dark:text-fg-muted"
                               >
                                 Pre-warm now
                               </button>
@@ -937,35 +917,35 @@ export function AdaptiveContentWorkspace({
         </>
       ) : tab === 'contests' ? (
         <section
-          className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900"
+          className="rounded-2xl border border-border-default bg-surface-raised p-4 dark:border-border-subtle dark:bg-surface-raised"
           data-testid="ace-contests-inbox"
         >
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-50">
+          <h3 className="text-sm font-semibold text-fg-default">
             Open contests ({contests.length})
           </h3>
-          <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+          <p className="mt-1 text-sm text-fg-muted">
             Students reported that an adaptation seems wrong. Resolve after reviewing the variant.
           </p>
           {contestsLoading ? (
-            <p className="mt-4 text-sm text-slate-500">Loading contests…</p>
+            <p className="mt-4 text-sm text-fg-muted">Loading contests…</p>
           ) : contests.length === 0 ? (
-            <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">No open contests.</p>
+            <p className="mt-4 text-sm text-fg-muted">No open contests.</p>
           ) : (
             <ul className="mt-3 divide-y divide-slate-100 dark:divide-neutral-800">
               {contests.map((c) => (
                 <li key={c.id} className="flex flex-wrap items-start justify-between gap-3 py-3">
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-slate-900 dark:text-neutral-50">
+                    <p className="text-sm font-medium text-fg-default">
                       {titleById.get(
                         units.find((u) => u.id === c.unitId)?.baseContentItemId ?? '',
                       ) ?? 'Adaptive unit'}
                     </p>
                     {c.reason ? (
-                      <p className="mt-1 text-sm text-slate-600 dark:text-neutral-300">{c.reason}</p>
+                      <p className="mt-1 text-sm text-fg-muted">{c.reason}</p>
                     ) : (
-                      <p className="mt-1 text-sm text-slate-500">No reason provided</p>
+                      <p className="mt-1 text-sm text-fg-muted">No reason provided</p>
                     )}
-                    <p className="mt-1 text-xs text-slate-400">
+                    <p className="mt-1 text-xs text-fg-subtle">
                       {new Date(c.createdAt).toLocaleString()}
                     </p>
                   </div>
@@ -989,7 +969,7 @@ export function AdaptiveContentWorkspace({
                     </button>
                     <button
                       type="button"
-                      className="rounded-lg border border-slate-200 px-2.5 py-1 text-xs dark:border-neutral-700"
+                      className="rounded-lg border border-border-default px-2.5 py-1 text-xs dark:border-border-default"
                       onClick={() => {
                         void (async () => {
                           try {
@@ -1011,13 +991,13 @@ export function AdaptiveContentWorkspace({
           )}
         </section>
       ) : tab === 'report' ? (
-        <section className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+        <section className="rounded-2xl border border-border-default bg-surface-raised p-4 dark:border-border-subtle dark:bg-surface-raised">
           <CourseReportPanel courseCode={courseCode} />
         </section>
       ) : (
-        <section className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+        <section className="rounded-2xl border border-border-default bg-surface-raised p-4 dark:border-border-subtle dark:bg-surface-raised">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-50">
+            <h3 className="text-sm font-semibold text-fg-default">
               Pending review ({queueTotal})
             </h3>
             <div className="flex gap-2">
@@ -1040,9 +1020,9 @@ export function AdaptiveContentWorkspace({
             </div>
           </div>
           {queueLoading ? (
-            <p className="mt-4 text-sm text-slate-500">Loading queue…</p>
+            <p className="mt-4 text-sm text-fg-muted">Loading queue…</p>
           ) : queue.length === 0 ? (
-            <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">
+            <p className="mt-4 text-sm text-fg-muted">
               No variants awaiting review.
             </p>
           ) : (
@@ -1065,23 +1045,23 @@ export function AdaptiveContentWorkspace({
                   />
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono text-xs text-slate-600 dark:text-neutral-400">
+                      <span className="font-mono text-xs text-fg-muted">
                         {v.profileSignature.slice(0, 16)}…
                       </span>
                       <span className={`rounded-full px-2 py-0.5 text-xs ${statusBadgeClass(v.status)}`}>
                         {v.status}
                       </span>
-                      <span className="text-xs text-slate-500">
+                      <span className="text-xs text-fg-muted">
                         fidelity {fidelityLabel(v.fidelityScore)}
                       </span>
                       {(v.safetyFlags?.length ?? 0) > 0 && (
                         <span className="text-xs text-rose-600">safety: {v.safetyFlags?.join(', ')}</span>
                       )}
                       {(v.a11yFlags?.length ?? 0) > 0 && (
-                        <span className="text-xs text-amber-700">a11y: {v.a11yFlags?.join(', ')}</span>
+                        <span className="text-xs text-warning-fg">a11y: {v.a11yFlags?.join(', ')}</span>
                       )}
                     </div>
-                    <p className="mt-1 line-clamp-2 text-xs text-slate-600 dark:text-neutral-400">
+                    <p className="mt-1 line-clamp-2 text-xs text-fg-muted">
                       {(v.variantMarkdown ?? '').slice(0, 160)}
                     </p>
                   </div>
@@ -1124,15 +1104,15 @@ export function AdaptiveContentWorkspace({
             aria-label="Close unit editor"
             onClick={() => setEditorOpen(false)}
           />
-          <div className="flex h-full w-full max-w-3xl flex-col overflow-y-auto bg-white shadow-xl dark:bg-neutral-900">
-            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 dark:border-neutral-800 dark:bg-neutral-900">
-              <h3 id="ace-unit-editor-title" className="text-sm font-semibold text-slate-900 dark:text-neutral-50">
+          <div className="flex h-full w-full max-w-3xl flex-col overflow-y-auto bg-surface-raised shadow-xl dark:bg-surface-raised">
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border-default bg-surface-raised px-4 py-3 dark:border-border-subtle dark:bg-surface-raised">
+              <h3 id="ace-unit-editor-title" className="text-sm font-semibold text-fg-default">
                 {titleById.get(selectedUnit.baseContentItemId) ?? 'Unit'}
               </h3>
               <button
                 type="button"
                 onClick={() => setEditorOpen(false)}
-                className="rounded p-1 text-slate-500 hover:bg-slate-100 dark:hover:bg-neutral-800"
+                className="rounded p-1 text-fg-muted hover:bg-surface-sunken dark:hover:bg-surface-overlay"
                 aria-label="Close"
               >
                 <X className="h-5 w-5" />
@@ -1142,12 +1122,12 @@ export function AdaptiveContentWorkspace({
             <div className="space-y-6 p-4">
               {unitEffectiveness && (
                 <section
-                  className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-neutral-800 dark:bg-neutral-900"
+                  className="rounded-lg border border-border-default bg-surface-base p-3 dark:border-border-subtle dark:bg-surface-raised"
                   data-testid="ace-verdict-banner"
                   aria-live="polite"
                 >
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
                       Effectiveness
                     </span>
                     <EffectivenessChip effectiveness={unitEffectiveness} />
@@ -1155,10 +1135,10 @@ export function AdaptiveContentWorkspace({
                   <EffectivenessSummaryTable effectiveness={unitEffectiveness} />
                   {unitEffectiveness.byMode.length > 0 && (
                     <div className="mt-2">
-                      <p className="text-xs font-medium text-slate-600 dark:text-neutral-300">
+                      <p className="text-xs font-medium text-fg-muted">
                         By emphasis mode
                       </p>
-                      <ul className="mt-1 space-y-0.5 text-xs text-slate-600 dark:text-neutral-400">
+                      <ul className="mt-1 space-y-0.5 text-xs text-fg-muted">
                         {unitEffectiveness.byMode.map((m) => (
                           <li key={m.emphasisMode}>
                             {m.emphasisMode}: n={m.n}
@@ -1174,7 +1154,7 @@ export function AdaptiveContentWorkspace({
               )}
               {canConfigure ? (
                 <section className="space-y-3">
-                  <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  <h4 className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
                     Configuration
                   </h4>
                   <div className="grid gap-3 sm:grid-cols-2">
@@ -1183,7 +1163,7 @@ export function AdaptiveContentWorkspace({
                       <select
                         value={editStatus}
                         onChange={(e) => setEditStatus(e.target.value)}
-                        className="rounded-lg border border-slate-200 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                        className="rounded-lg border border-border-default px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
                       >
                         <option value="draft">draft</option>
                         <option value="active">active</option>
@@ -1196,7 +1176,7 @@ export function AdaptiveContentWorkspace({
                       <select
                         value={editTrigger}
                         onChange={(e) => setEditTrigger(e.target.value)}
-                        className="rounded-lg border border-slate-200 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                        className="rounded-lg border border-border-default px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
                       >
                         <option value="pre_quiz">pre_quiz</option>
                         <option value="diagnostic_first_visit">diagnostic_first_visit</option>
@@ -1208,7 +1188,7 @@ export function AdaptiveContentWorkspace({
                       <select
                         value={editPreId}
                         onChange={(e) => setEditPreId(e.target.value)}
-                        className="rounded-lg border border-slate-200 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                        className="rounded-lg border border-border-default px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
                       >
                         <option value="">None</option>
                         {quizzes.map((q) => (
@@ -1223,7 +1203,7 @@ export function AdaptiveContentWorkspace({
                       <select
                         value={editPostId}
                         onChange={(e) => setEditPostId(e.target.value)}
-                        className="rounded-lg border border-slate-200 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                        className="rounded-lg border border-border-default px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
                         data-testid="ace-edit-post-assessment"
                       >
                         <option value="">None</option>
@@ -1253,7 +1233,7 @@ export function AdaptiveContentWorkspace({
                           step={0.05}
                           value={editMinFidelity}
                           onChange={(e) => setEditMinFidelity(Number(e.target.value))}
-                          className="w-16 rounded border border-slate-200 px-1 py-0.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                          className="w-16 rounded border border-border-default px-1 py-0.5 text-sm dark:border-border-default dark:bg-surface-base"
                         />
                       </div>
                     </label>
@@ -1289,7 +1269,7 @@ export function AdaptiveContentWorkspace({
                           onClick={() =>
                             setKeyTerms((prev) => prev.filter((x) => x.term !== t.term))
                           }
-                          className="rounded-full bg-slate-100 px-2 py-0.5 text-xs dark:bg-neutral-800"
+                          className="rounded-full bg-surface-sunken px-2 py-0.5 text-xs dark:bg-surface-overlay"
                           title="Remove"
                         >
                           {t.term} ×
@@ -1308,12 +1288,12 @@ export function AdaptiveContentWorkspace({
                           }
                         }}
                         placeholder="Add term…"
-                        className="flex-1 rounded-lg border border-slate-200 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                        className="flex-1 rounded-lg border border-border-default px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
                       />
                       <button
                         type="button"
                         onClick={addKeyTerm}
-                        className="rounded-lg border border-slate-200 px-2 py-1 text-xs dark:border-neutral-700"
+                        className="rounded-lg border border-border-default px-2 py-1 text-xs dark:border-border-default"
                       >
                         Add
                       </button>
@@ -1330,20 +1310,20 @@ export function AdaptiveContentWorkspace({
                     type="button"
                     disabled={savingUnit}
                     onClick={() => void saveUnitConfig()}
-                    className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+                    className="rounded-lg bg-accent-solid px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
                   >
                     {savingUnit ? 'Saving…' : 'Save configuration'}
                   </button>
                 </section>
               ) : (
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-fg-muted">
                   Review-only access: you can approve or reject variants but cannot change unit
                   settings or budgets.
                 </p>
               )}
 
               <section className="space-y-3">
-                <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <h4 className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
                   Preview
                 </h4>
                 <div className="flex flex-wrap items-end gap-2">
@@ -1354,7 +1334,7 @@ export function AdaptiveContentWorkspace({
                       onChange={(e) =>
                         setPreviewMode(e.target.value as (typeof EMPHASIS_MODES)[number])
                       }
-                      className="rounded-lg border border-slate-200 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                      className="rounded-lg border border-border-default px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
                     >
                       {EMPHASIS_MODES.map((m) => (
                         <option key={m} value={m}>
@@ -1367,7 +1347,7 @@ export function AdaptiveContentWorkspace({
                     type="button"
                     disabled={previewing}
                     onClick={() => void runPreview()}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-accent-solid px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
                   >
                     {previewing ? (
                       <>
@@ -1381,7 +1361,7 @@ export function AdaptiveContentWorkspace({
                       </>
                     )}
                   </button>
-                  <label className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-neutral-400">
+                  <label className="flex items-center gap-1.5 text-xs text-fg-muted">
                     <input
                       type="checkbox"
                       checked={showDiff}
@@ -1397,10 +1377,10 @@ export function AdaptiveContentWorkspace({
                       <span className={`rounded-full px-2 py-0.5 font-medium ${statusBadgeClass(preview.variant.status)}`}>
                         {preview.variant.status}
                       </span>
-                      <span className="rounded-full bg-slate-100 px-2 py-0.5 dark:bg-neutral-800">
+                      <span className="rounded-full bg-surface-sunken px-2 py-0.5 dark:bg-surface-overlay">
                         fidelity {fidelityLabel(preview.fidelityScore)}
                       </span>
-                      <span className="rounded-full bg-slate-100 px-2 py-0.5 dark:bg-neutral-800">
+                      <span className="rounded-full bg-surface-sunken px-2 py-0.5 dark:bg-surface-overlay">
                         tokens {(preview.promptTokens ?? 0) + (preview.completionTokens ?? 0)}
                       </span>
                       {(preview.a11yFlags?.length ?? 0) > 0 && (
@@ -1423,14 +1403,14 @@ export function AdaptiveContentWorkspace({
                     ) : (
                       <div className="grid gap-3 md:grid-cols-2">
                         <div>
-                          <p className="mb-1 text-xs font-medium text-slate-500">Base</p>
-                          <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded-lg border border-slate-200 p-2 text-xs dark:border-neutral-700">
+                          <p className="mb-1 text-xs font-medium text-fg-muted">Base</p>
+                          <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded-lg border border-border-default p-2 text-xs dark:border-border-default">
                             {preview.baseMarkdown ?? '—'}
                           </pre>
                         </div>
                         <div>
-                          <p className="mb-1 text-xs font-medium text-slate-500">Variant</p>
-                          <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded-lg border border-slate-200 p-2 text-xs dark:border-neutral-700">
+                          <p className="mb-1 text-xs font-medium text-fg-muted">Variant</p>
+                          <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded-lg border border-border-default p-2 text-xs dark:border-border-default">
                             {preview.variant.variantMarkdown ?? '—'}
                           </pre>
                         </div>
@@ -1444,7 +1424,7 @@ export function AdaptiveContentWorkspace({
                             value={editMarkdown}
                             onChange={(e) => setEditMarkdown(e.target.value)}
                             rows={6}
-                            className="mt-1 w-full rounded-lg border border-slate-200 p-2 font-mono text-xs dark:border-neutral-700 dark:bg-neutral-950"
+                            className="mt-1 w-full rounded-lg border border-border-default p-2 font-mono text-xs dark:border-border-default dark:bg-surface-base"
                           />
                         </label>
                         <div className="flex flex-wrap gap-2">
@@ -1458,7 +1438,7 @@ export function AdaptiveContentWorkspace({
                           <button
                             type="button"
                             onClick={() => void handleEditApprove(preview.variant)}
-                            className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white"
+                            className="rounded-lg bg-accent-solid px-3 py-1.5 text-xs font-medium text-white"
                           >
                             Edit &amp; approve
                           </button>
@@ -1477,7 +1457,7 @@ export function AdaptiveContentWorkspace({
               </section>
 
               <section>
-                <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <h4 className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
                   Variants ({unitVariants.length})
                 </h4>
                 <ul className="mt-2 divide-y divide-slate-100 dark:divide-neutral-800">
@@ -1516,7 +1496,7 @@ export function AdaptiveContentWorkspace({
                           v.id && (
                             <button
                               type="button"
-                              className="text-amber-700 dark:text-amber-300"
+                              className="text-warning-fg"
                               onClick={() => void handleRevoke(v)}
                             >
                               Revoke
@@ -1526,7 +1506,7 @@ export function AdaptiveContentWorkspace({
                     </li>
                   ))}
                   {unitVariants.length === 0 && (
-                    <li className="py-2 text-slate-500">No variants yet — run a preview.</li>
+                    <li className="py-2 text-fg-muted">No variants yet — run a preview.</li>
                   )}
                 </ul>
               </section>

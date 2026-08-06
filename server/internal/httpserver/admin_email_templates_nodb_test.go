@@ -29,11 +29,12 @@ func TestAdminEmailTemplates_UnauthenticatedReturns401(t *testing.T) {
 }
 
 func TestAdminEmailTemplates_MethodNotAllowed(t *testing.T) {
-	d := Deps{Config: config.Config{EmailTemplateEditorEnabled: true}}
+	// TD.5: method dispatch is owned by chi; wrong verbs must 405 on the full stack.
+	h := NewHandler(Deps{Config: config.Config{EmailTemplateEditorEnabled: true, AdminConsoleEnabled: true}})
 	rr := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodPost, "/api/v1/admin-console/email-templates", nil)
-	d.handleAdminEmailTemplatesList()(rr, r)
+	h.ServeHTTP(rr, r)
 	if rr.Code != http.StatusMethodNotAllowed {
-		t.Fatalf("status=%d", rr.Code)
+		t.Fatalf("status=%d body=%s", rr.Code, rr.Body.String())
 	}
 }

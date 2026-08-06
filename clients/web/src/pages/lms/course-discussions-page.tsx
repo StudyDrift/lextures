@@ -220,7 +220,7 @@ export default function CourseDiscussionsPage() {
   if (!courseCode) {
     return (
       <LmsPage title="Discussions" description="">
-        <p className="mt-6 text-sm text-slate-500">Invalid course.</p>
+        <p className="mt-6 text-sm text-fg-muted">Invalid course.</p>
     </LmsPage>
     )
   }
@@ -237,13 +237,13 @@ export default function CourseDiscussionsPage() {
         className="flex min-h-0 flex-1 flex-col gap-4 md:flex-row"
         data-discussions-root
       >
-        <aside className="flex w-full shrink-0 flex-col gap-2 border-b border-slate-200 pb-4 md:w-56 md:border-b-0 md:border-e md:pb-0 md:pe-4 dark:border-neutral-700">
+        <aside className="flex w-full shrink-0 flex-col gap-2 border-b border-border-default pb-4 md:w-56 md:border-b-0 md:border-e md:pb-0 md:pe-4 dark:border-border-default">
           <div className="flex items-center justify-between gap-2">
-            <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Forums</h2>
+            <h2 className="text-sm font-semibold text-fg-default">Forums</h2>
             {canModerate ? (
               <button
                 type="button"
-                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                className="inline-flex items-center gap-1 rounded-lg border border-border-default px-2 py-1 text-xs font-medium text-fg-muted hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
                 onClick={() => setShowNewForum((v) => !v)}
               >
                 <Plus className="h-3.5 w-3.5" aria-hidden />
@@ -253,7 +253,7 @@ export default function CourseDiscussionsPage() {
           </div>
           {showNewForum && canModerate ? (
             <form
-              className="flex flex-col gap-2 rounded-lg border border-slate-200 p-2 dark:border-neutral-700"
+              className="flex flex-col gap-2 rounded-lg border border-border-default p-2 dark:border-border-default"
               onSubmit={async (ev) => {
                 ev.preventDefault()
                 if (!newForumName.trim()) return
@@ -275,7 +275,7 @@ export default function CourseDiscussionsPage() {
               </label>
               <input
                 id="new-forum-name"
-                className="rounded border border-slate-200 px-2 py-1 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+                className="rounded border border-border-default px-2 py-1 text-sm dark:border-border-default dark:bg-surface-raised"
                 value={newForumName}
                 onChange={(e) => setNewForumName(e.target.value)}
                 placeholder="Forum name"
@@ -283,7 +283,7 @@ export default function CourseDiscussionsPage() {
               <button
                 type="submit"
                 disabled={busy}
-                className="rounded bg-indigo-600 px-2 py-1 text-xs font-semibold text-white disabled:opacity-50"
+                className="rounded bg-accent-solid px-2 py-1 text-xs font-semibold text-white disabled:opacity-50"
               >
                 Create
               </button>
@@ -300,18 +300,14 @@ export default function CourseDiscussionsPage() {
                   setThreadDetail(null)
                   setPosts([])
                 }}
-                className={`rounded-lg px-2 py-1.5 text-start text-sm ${
-                  forumId === f.id
-                    ? 'bg-indigo-50 font-medium text-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-100'
-                    : 'text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800'
-                }`}
+                className={`rounded-lg px-2 py-1.5 text-start text-sm ${ forumId === f.id ? 'bg-indigo-50 font-medium text-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-100' : 'text-fg-muted hover:bg-surface-base dark:text-fg-default dark:hover:bg-surface-overlay' }`}
               >
                 {f.name}
               </button>
             ))}
           </nav>
           {forums.length === 0 && !loadErr ? (
-            <p className="text-xs text-slate-500 dark:text-neutral-400">No forums yet.</p>
+            <p className="text-xs text-fg-muted">No forums yet.</p>
           ) : null}
         </aside>
 
@@ -336,11 +332,11 @@ export default function CourseDiscussionsPage() {
           {!threadId ? (
             <section aria-label="Threads" className="flex min-h-0 flex-1 flex-col">
               <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                <h2 className="text-lg font-semibold text-slate-900 dark:text-neutral-50">Threads</h2>
+                <h2 className="text-lg font-semibold text-fg-default">Threads</h2>
                 <button
                   type="button"
                   disabled={!forumId || busy}
-                  className="inline-flex items-center gap-1 rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white disabled:opacity-50"
+                  className="inline-flex items-center gap-1 rounded-lg bg-accent-solid px-3 py-1.5 text-sm font-semibold text-white disabled:opacity-50"
                   onClick={() => void handleCreateThread()}
                 >
                   <Plus className="h-4 w-4" aria-hidden />
@@ -352,17 +348,17 @@ export default function CourseDiscussionsPage() {
                   <li key={t.id}>
                     <button
                       type="button"
-                      className="flex w-full items-start gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-start text-sm shadow-sm hover:border-indigo-200 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-indigo-800"
+                      className="flex w-full items-start gap-2 rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-start text-sm shadow-sm hover:border-indigo-200 dark:border-border-default dark:bg-surface-raised dark:hover:border-indigo-800"
                       onClick={() => void loadThread(t.id)}
                     >
                       {t.isPinned ? (
                         <Pin className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" aria-label="Pinned" />
                       ) : (
-                        <MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" aria-hidden />
+                        <MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-fg-subtle" aria-hidden />
                       )}
                       <span className="min-w-0 flex-1">
-                        <span className="font-medium text-slate-900 dark:text-neutral-50">{t.title}</span>
-                        <span className="mt-0.5 block text-xs text-slate-500 dark:text-neutral-400">
+                        <span className="font-medium text-fg-default">{t.title}</span>
+                        <span className="mt-0.5 block text-xs text-fg-muted">
                           {t.replyCount} repl{t.replyCount === 1 ? 'y' : 'ies'}
                           {t.isLocked ? ' · Closed' : ''}
                         </span>
@@ -372,7 +368,7 @@ export default function CourseDiscussionsPage() {
                 ))}
               </ul>
               {threads.length === 0 && forumId ? (
-                <p className="text-sm text-slate-500 dark:text-neutral-400">No threads in this forum yet.</p>
+                <p className="text-sm text-fg-muted">No threads in this forum yet.</p>
               ) : null}
             </section>
           ) : (
@@ -380,7 +376,7 @@ export default function CourseDiscussionsPage() {
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
-                  className="inline-flex items-center gap-1 text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-300"
+                  className="inline-flex items-center gap-1 text-sm font-medium text-accent-fg hover:text-indigo-500 dark:text-indigo-300"
                   onClick={() => {
                     setThreadId(null)
                     setThreadDetail(null)
@@ -396,25 +392,25 @@ export default function CourseDiscussionsPage() {
                   </span>
                 ) : null}
                 {threadDetail?.isLocked ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-800 dark:bg-neutral-800 dark:text-neutral-100">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-surface-sunken px-2 py-0.5 text-xs font-semibold text-fg-default dark:bg-surface-overlay dark:text-fg-default">
                     <Lock className="h-3 w-3" aria-hidden />
                     Closed
                   </span>
                 ) : null}
               </div>
               {threadDetail ? (
-                <article className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-                  <h1 className="text-xl font-semibold text-slate-900 dark:text-neutral-50">
+                <article className="rounded-2xl border border-border-default bg-surface-raised p-4 shadow-sm dark:border-border-default dark:bg-surface-raised">
+                  <h1 className="text-xl font-semibold text-fg-default">
                     {threadDetail.title}
                   </h1>
                   <div className="mt-3 text-sm">
                     <DiscussionReadonlyBody docJson={threadDetail.body} />
                   </div>
                   {canModerate ? (
-                    <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-100 pt-3 dark:border-neutral-800">
+                    <div className="mt-4 flex flex-wrap gap-2 border-t border-border-subtle pt-3 dark:border-border-subtle">
                       <button
                         type="button"
-                        className="rounded-lg border border-slate-200 px-2 py-1 text-xs font-medium dark:border-neutral-600"
+                        className="rounded-lg border border-border-default px-2 py-1 text-xs font-medium dark:border-border-default"
                         onClick={async () => {
                           if (!threadDetail) return
                           setBusy(true)
@@ -434,7 +430,7 @@ export default function CourseDiscussionsPage() {
                       </button>
                       <button
                         type="button"
-                        className="rounded-lg border border-slate-200 px-2 py-1 text-xs font-medium dark:border-neutral-600"
+                        className="rounded-lg border border-border-default px-2 py-1 text-xs font-medium dark:border-border-default"
                         onClick={async () => {
                           if (!threadDetail) return
                           setBusy(true)
@@ -459,7 +455,7 @@ export default function CourseDiscussionsPage() {
 
               {hiddenUntilFirstPost ? (
                 <p
-                  className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                  className="rounded-lg border border-border-default bg-surface-base px-3 py-2 text-sm text-fg-default dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
                   role="status"
                 >
                   Other replies are hidden until you post your first response below.
@@ -482,15 +478,15 @@ export default function CourseDiscussionsPage() {
                       key={p.id}
                       role="article"
                       aria-level={displayIndent + 2}
-                      className={`rounded-xl border border-slate-200 bg-white p-3 shadow-sm dark:border-neutral-700 dark:bg-neutral-900 ${marginClass}`}
+                      className={`rounded-xl border border-border-default bg-surface-raised p-3 shadow-sm dark:border-border-default dark:bg-surface-raised ${marginClass}`}
                     >
                       <div className="text-sm">
                         <DiscussionReadonlyBody docJson={p.body} />
                       </div>
-                      <div className="mt-2 flex flex-wrap items-center gap-3 border-t border-slate-100 pt-2 text-xs dark:border-neutral-800">
+                      <div className="mt-2 flex flex-wrap items-center gap-3 border-t border-border-subtle pt-2 text-xs dark:border-border-subtle">
                         <button
                           type="button"
-                          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2 py-1 font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                          className="inline-flex items-center gap-1 rounded-lg border border-border-default px-2 py-1 font-medium text-fg-muted hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
                           aria-label={`Upvote (${p.upvoteCount} votes)`}
                           disabled={busy || threadDetail?.isLocked}
                           onClick={async () => {
@@ -518,7 +514,7 @@ export default function CourseDiscussionsPage() {
                         </button>
                         <button
                           type="button"
-                          className="text-indigo-600 hover:underline dark:text-indigo-300"
+                          className="text-accent-fg hover:underline dark:text-indigo-300"
                           disabled={!!threadDetail?.isLocked}
                           onClick={() => {
                             setReplyParentId(p.id)
@@ -544,12 +540,12 @@ export default function CourseDiscussionsPage() {
               </div>
 
               {threadDetail?.isLocked ? (
-                <p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200">
+                <p className="rounded-lg border border-border-default bg-surface-base px-3 py-2 text-sm text-fg-muted dark:border-border-default dark:bg-surface-overlay dark:text-fg-default">
                   This discussion has been closed by the instructor.
                 </p>
               ) : (
-                <div className="rounded-xl border border-slate-200 bg-white p-3 dark:border-neutral-700 dark:bg-neutral-900">
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                <div className="rounded-xl border border-border-default bg-surface-raised p-3 dark:border-border-default dark:bg-surface-raised">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-fg-muted">
                     {replyParentId ? 'Your reply' : 'Your reply'}
                   </p>
                   <DiscussionDocEditor
@@ -562,7 +558,7 @@ export default function CourseDiscussionsPage() {
                     {replyParentId ? (
                       <button
                         type="button"
-                        className="text-xs text-slate-600 underline dark:text-neutral-300"
+                        className="text-xs text-fg-muted underline dark:text-fg-muted"
                         onClick={() => setReplyParentId(null)}
                       >
                         Post at top level instead
@@ -571,7 +567,7 @@ export default function CourseDiscussionsPage() {
                     <button
                       type="button"
                       disabled={busy}
-                      className="ml-auto rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white disabled:opacity-50"
+                      className="ml-auto rounded-lg bg-accent-solid px-3 py-1.5 text-sm font-semibold text-white disabled:opacity-50"
                       onClick={async () => {
                         if (!threadDetail) return
                         setBusy(true)

@@ -40,15 +40,15 @@ export default function WalletSharePage() {
   }, [token, t])
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-100 to-slate-200 px-4 py-16 text-slate-900 dark:from-neutral-950 dark:to-neutral-900 dark:text-neutral-50">
+    <main className="min-h-screen bg-gradient-to-b from-slate-100 to-slate-200 px-4 py-16 text-fg-default dark:from-neutral-950 dark:to-neutral-900">
       <div className="mx-auto max-w-lg">
         <p className="text-sm font-semibold tracking-wide text-emerald-700 dark:text-emerald-300">Lextures</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight">
           {data?.name || t('wallet.public.heading')}
         </h1>
-        <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">{t('wallet.public.help')}</p>
+        <p className="mt-2 text-sm text-fg-muted">{t('wallet.public.help')}</p>
 
-        {loading ? <p className="mt-8 text-sm text-slate-500">{t('common.loading')}</p> : null}
+        {loading ? <p className="mt-8 text-sm text-fg-muted">{t('common.loading')}</p> : null}
         {error ? (
           <p
             className="mt-8 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-100"
@@ -63,22 +63,22 @@ export default function WalletSharePage() {
             <h2 id="wallet-share-items" className="sr-only">
               {t('wallet.public.itemsHeading')}
             </h2>
-            <p className="text-xs uppercase tracking-wide text-slate-500">
+            <p className="text-xs uppercase tracking-wide text-fg-muted">
               {t('wallet.public.disclosure', { level: data.disclosure })}
             </p>
             <ul className="space-y-3">
               {data.items.map((item, idx) => (
                 <li
                   key={`${item.kind}-${idx}`}
-                  className="rounded-lg border border-slate-200 bg-white/80 p-4 dark:border-neutral-700 dark:bg-neutral-900/80"
+                  className="rounded-lg border border-border-default bg-white/80 p-4 dark:border-border-default/80"
                 >
-                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{item.kind}</p>
+                  <p className="text-xs font-medium uppercase tracking-wide text-fg-muted">{item.kind}</p>
                   {item.title ? (
                     <p className="mt-1 text-base font-semibold">{item.title}</p>
                   ) : (
                     <p className="mt-1 text-base font-semibold">{t('wallet.public.credential')}</p>
                   )}
-                  <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+                  <p className="mt-1 text-sm text-fg-muted">
                     {item.issuer ? `${item.issuer}` : null}
                     {item.issuedAt ? ` · ${formatDate(item.issuedAt)}` : null}
                     {item.revoked
@@ -90,7 +90,7 @@ export default function WalletSharePage() {
                   {item.verifyUrl ? (
                     <a
                       href={item.verifyUrl}
-                      className="mt-2 inline-block text-sm text-indigo-700 underline-offset-2 hover:underline dark:text-indigo-300"
+                      className="mt-2 inline-block text-sm text-accent-fg underline-offset-2 hover:underline dark:text-indigo-300"
                       target="_blank"
                       rel="noreferrer"
                     >
@@ -101,7 +101,7 @@ export default function WalletSharePage() {
               ))}
             </ul>
             <p className="pt-4 text-sm">
-              <Link to="/verify" className="text-indigo-700 underline-offset-2 hover:underline dark:text-indigo-300">
+              <Link to="/verify" className="text-accent-fg underline-offset-2 hover:underline dark:text-indigo-300">
                 {t('wallet.public.verifyPortal')}
               </Link>
             </p>

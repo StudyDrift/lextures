@@ -35,12 +35,12 @@ export function H5PUploadModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-5 shadow-xl dark:border-neutral-600 dark:bg-neutral-800"
+        className="w-full max-w-md rounded-xl border border-border-default bg-surface-raised p-5 shadow-xl dark:border-border-default dark:bg-surface-overlay"
       >
-        <h2 id={titleId} className="text-lg font-semibold text-slate-950 dark:text-neutral-100">
+        <h2 id={titleId} className="text-lg font-semibold text-slate-950 dark:text-fg-default">
           {h5pI18n.uploadLabel}
         </h2>
-        <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">{h5pI18n.uploadHint}</p>
+        <p className="mt-1 text-sm text-fg-muted">{h5pI18n.uploadHint}</p>
         <form
           className="mt-4 space-y-4"
           onSubmit={(e) => {
@@ -49,17 +49,17 @@ export function H5PUploadModal({
             void onSave(title.trim() || file.name.replace(/\.h5p$/i, ''), file)
           }}
         >
-          <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+          <label className="block text-sm font-medium text-fg-muted">
             Title
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+              className="mt-1 w-full rounded-lg border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-raised"
               disabled={saving}
             />
           </label>
-          <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+          <label className="block text-sm font-medium text-fg-muted">
             H5P package (.h5p)
             <input
               id={fileId}
@@ -71,14 +71,14 @@ export function H5PUploadModal({
             />
           </label>
           {errorMessage ? (
-            <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+            <p className="text-sm text-danger-fg" role="alert">
               {errorMessage}
             </p>
           ) : null}
           <div className="flex justify-end gap-2">
             <button
               type="button"
-              className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-neutral-300 dark:hover:bg-neutral-700"
+              className="rounded-lg px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-neutral-700"
               disabled={saving}
               onClick={onClose}
             >
@@ -87,7 +87,7 @@ export function H5PUploadModal({
             <button
               type="submit"
               disabled={saving || !file}
-              className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
+              className="rounded-lg bg-accent-solid px-3 py-2 text-sm font-medium text-white hover:bg-accent disabled:opacity-60"
             >
               {saving ? 'Uploading…' : 'Upload'}
             </button>

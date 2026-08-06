@@ -26,7 +26,7 @@ export function altKeyHint(): string {
 
 function Kbd({ children }: { children: string }) {
   return (
-    <kbd className="rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono text-[10px] font-medium text-slate-600 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
+    <kbd className="rounded-md border border-border-default bg-surface-base px-1.5 py-0.5 font-mono text-[10px] font-medium text-fg-muted dark:border-border-default dark:bg-surface-overlay dark:text-fg-muted">
       {children}
     </kbd>
   )
@@ -85,7 +85,7 @@ export function SpeedGraderShortcutsPopover({ disabled }: { disabled?: boolean }
         aria-label="SpeedGrader keyboard shortcuts"
         title="Keyboard shortcuts"
         onClick={() => setOpen((prev) => !prev)}
-        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-300 dark:hover:bg-neutral-900"
+        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border-strong bg-surface-raised text-fg-muted hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-50 dark:border-border-default dark:bg-surface-base dark:text-fg-muted dark:hover:bg-surface-raised"
       >
         <Keyboard className="h-4 w-4" aria-hidden="true" />
       </button>
@@ -95,20 +95,20 @@ export function SpeedGraderShortcutsPopover({ disabled }: { disabled?: boolean }
           id={panelId}
           role="dialog"
           aria-labelledby={buttonId}
-          className="absolute end-0 top-full z-50 mt-1 w-64 rounded-xl border border-slate-200 bg-white p-3 shadow-lg dark:border-neutral-600 dark:bg-neutral-900"
+          className="absolute end-0 top-full z-50 mt-1 w-64 rounded-xl border border-border-default bg-surface-raised p-3 shadow-lg dark:border-border-default dark:bg-surface-raised"
         >
-          <p className="mb-2 text-xs font-semibold text-slate-900 dark:text-neutral-100">
+          <p className="mb-2 text-xs font-semibold text-fg-default">
             SpeedGrader shortcuts
           </p>
           <ul className="space-y-2">
             {rows.map((row) => (
               <li key={row.keys} className="flex items-center justify-between gap-3 text-xs">
-                <span className="text-slate-600 dark:text-neutral-300">{row.action}</span>
+                <span className="text-fg-muted">{row.action}</span>
                 <Kbd>{row.keys}</Kbd>
               </li>
             ))}
           </ul>
-          <p className="mt-3 text-[10px] leading-relaxed text-slate-500 dark:text-neutral-400">
+          <p className="mt-3 text-[10px] leading-relaxed text-fg-muted">
             Navigation keys work from the score field; other text fields block them.
           </p>
         </div>

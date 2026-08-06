@@ -74,11 +74,6 @@ func (d Deps) handleCreateConsortiumAgreement() http.HandlerFunc {
 		if d.consortiumFeatureOff(w) {
 			return
 		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return

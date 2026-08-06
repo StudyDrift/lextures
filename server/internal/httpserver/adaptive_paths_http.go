@@ -62,10 +62,6 @@ func structurePathRuleToAPI(r adaptivepath.StructurePathRuleRow) apmodel.Structu
 // handleListStructurePathRules is GET /api/v1/courses/{course_code}/structure/items/{item_id}/path-rules
 func (d Deps) handleListStructurePathRules() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, _, ok := d.requireCourseItemCreate(w, r)
 		if !ok {
 			return
@@ -110,10 +106,6 @@ func (d Deps) handleListStructurePathRules() http.HandlerFunc {
 // handleCreateStructurePathRule is POST /api/v1/courses/{course_code}/structure/items/{item_id}/path-rules
 func (d Deps) handleCreateStructurePathRule() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, _, ok := d.requireCourseItemCreate(w, r)
 		if !ok {
 			return
@@ -189,10 +181,6 @@ func (d Deps) handleCreateStructurePathRule() http.HandlerFunc {
 // handleDeleteStructurePathRule is DELETE /api/v1/courses/{course_code}/structure/items/{item_id}/path-rules/{rule_id}
 func (d Deps) handleDeleteStructurePathRule() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, _, ok := d.requireCourseItemCreate(w, r)
 		if !ok {
 			return
@@ -233,10 +221,6 @@ type pathConceptOption struct {
 // handleCourseConceptsForPath is GET /api/v1/courses/{course_code}/concepts-for-path
 func (d Deps) handleCourseConceptsForPath() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, _, ok := d.requireCourseItemCreate(w, r)
 		if !ok {
 			return

@@ -102,7 +102,7 @@ export default function ReadingDashboardPage() {
                     <span
                       className={
                         s.weeklyPages > 0
-                          ? 'font-medium text-green-700 dark:text-green-400'
+                          ? 'font-medium text-success-fg'
                           : 'text-muted-foreground'
                       }
                     >

@@ -76,7 +76,7 @@ function statusChipClass(status: string): string {
     case 'completed':
       return 'bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-100'
     default:
-      return 'bg-slate-100 text-slate-700 dark:bg-neutral-800 dark:text-neutral-200'
+      return 'bg-surface-sunken text-fg-muted dark:bg-surface-overlay dark:text-fg-default'
   }
 }
 
@@ -262,7 +262,7 @@ export default function AdminTranscriptsPage() {
   if (!ffTranscripts) {
     return (
       <div className="mx-auto max-w-5xl px-4 py-10">
-        <p className="text-sm text-slate-600 dark:text-neutral-400">{t('transcripts.registrar.featureOff')}</p>
+        <p className="text-sm text-fg-muted">{t('transcripts.registrar.featureOff')}</p>
       </div>
     )
   }
@@ -270,10 +270,10 @@ export default function AdminTranscriptsPage() {
   if (!loading && !consoleEnabled && !ffTranscriptInbound) {
     return (
       <div className="mx-auto max-w-5xl px-4 py-10">
-        <h1 className="text-2xl font-semibold text-slate-900 dark:text-neutral-50">
+        <h1 className="text-2xl font-semibold text-fg-default">
           {t('transcripts.registrar.title')}
         </h1>
-        <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
+        <p className="mt-2 text-sm text-fg-muted">
           {t('transcripts.registrar.consoleDisabled')}
         </p>
       </div>
@@ -283,19 +283,19 @@ export default function AdminTranscriptsPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <div className="flex items-start gap-3">
-        <FileText className="mt-1 h-6 w-6 text-slate-500" aria-hidden />
+        <FileText className="mt-1 h-6 w-6 text-fg-muted" aria-hidden />
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900 dark:text-neutral-50">
+          <h1 className="text-2xl font-semibold text-fg-default">
             {t('transcripts.registrar.title')}
           </h1>
-          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+          <p className="mt-1 text-sm text-fg-muted">
             {t('transcripts.console.subtitle')}
           </p>
         </div>
       </div>
 
       {!consoleEnabled && ffTranscriptInbound ? (
-        <p className="mt-4 text-sm text-slate-600 dark:text-neutral-400">
+        <p className="mt-4 text-sm text-fg-muted">
           {t('transcripts.registrar.consoleDisabled')}
         </p>
       ) : null}
@@ -311,7 +311,7 @@ export default function AdminTranscriptsPage() {
         </p>
       )}
 
-      <div className="mt-6 border-b border-slate-200 dark:border-neutral-800" role="tablist" aria-label={t('transcripts.console.tabsLabel')}>
+      <div className="mt-6 border-b border-border-default dark:border-border-subtle" role="tablist" aria-label={t('transcripts.console.tabsLabel')}>
         <div className="flex flex-wrap gap-1">
           {visibleTabs.map((id) => (
             <button
@@ -320,11 +320,7 @@ export default function AdminTranscriptsPage() {
               role="tab"
               aria-selected={tab === id}
               onClick={() => setTab(id)}
-              className={`rounded-t-md px-3 py-2 text-sm font-medium ${
-                tab === id
-                  ? 'bg-slate-100 text-slate-900 dark:bg-neutral-800 dark:text-neutral-50'
-                  : 'text-slate-600 hover:bg-slate-50 dark:text-neutral-400 dark:hover:bg-neutral-900'
-              }`}
+              className={`rounded-t-md px-3 py-2 text-sm font-medium ${ tab === id ? 'bg-surface-sunken text-fg-default dark:bg-surface-overlay' : 'text-fg-muted hover:bg-surface-base dark:text-fg-muted dark:hover:bg-surface-raised' }`}
             >
               {t(`transcripts.console.tab.${id}`)}
             </button>
@@ -336,11 +332,11 @@ export default function AdminTranscriptsPage() {
         <>
           <div className="mt-6 flex flex-wrap items-end gap-3">
             <label className="text-sm">
-              <span className="block text-slate-600 dark:text-neutral-400">{t('transcripts.registrar.filterStatus')}</span>
+              <span className="block text-fg-muted">{t('transcripts.registrar.filterStatus')}</span>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="mt-1 rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                className="mt-1 rounded-md border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised"
               >
                 <option value="">{t('transcripts.registrar.filterAll')}</option>
                 <option value="in_review">in_review</option>
@@ -351,11 +347,11 @@ export default function AdminTranscriptsPage() {
               </select>
             </label>
             <label className="text-sm">
-              <span className="block text-slate-600 dark:text-neutral-400">{t('transcripts.registrar.filterHold')}</span>
+              <span className="block text-fg-muted">{t('transcripts.registrar.filterHold')}</span>
               <select
                 value={holdFilter}
                 onChange={(e) => setHoldFilter(e.target.value as 'all' | 'yes' | 'no')}
-                className="mt-1 rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                className="mt-1 rounded-md border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised"
               >
                 <option value="all">{t('transcripts.registrar.filterAll')}</option>
                 <option value="yes">{t('transcripts.registrar.filterHoldYes')}</option>
@@ -363,14 +359,14 @@ export default function AdminTranscriptsPage() {
               </select>
             </label>
             <label className="min-w-[12rem] flex-1 text-sm">
-              <span className="block text-slate-600 dark:text-neutral-400">{t('transcripts.registrar.filterSearch')}</span>
+              <span className="block text-fg-muted">{t('transcripts.registrar.filterSearch')}</span>
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') void loadQueue()
                 }}
-                className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                className="mt-1 w-full rounded-md border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised"
                 placeholder={t('transcripts.registrar.searchPlaceholder')}
               />
             </label>
@@ -385,32 +381,30 @@ export default function AdminTranscriptsPage() {
 
           <div className="mt-6 grid gap-6 lg:grid-cols-[1.2fr_1fr]">
             <section aria-labelledby="queue-heading">
-              <h2 id="queue-heading" className="text-lg font-semibold text-slate-900 dark:text-neutral-50">
+              <h2 id="queue-heading" className="text-lg font-semibold text-fg-default">
                 {t('transcripts.registrar.queueTitle')}
               </h2>
               {loading ? (
-                <p className="mt-4 flex items-center gap-2 text-sm text-slate-500">
+                <p className="mt-4 flex items-center gap-2 text-sm text-fg-muted">
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
                   {t('common.loading')}
                 </p>
               ) : orders.length === 0 ? (
-                <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">{t('transcripts.registrar.queueEmpty')}</p>
+                <p className="mt-4 text-sm text-fg-muted">{t('transcripts.registrar.queueEmpty')}</p>
               ) : (
-                <ul className="mt-3 divide-y divide-slate-200 rounded-lg border border-slate-200 dark:divide-neutral-800 dark:border-neutral-800">
+                <ul className="mt-3 divide-y divide-slate-200 rounded-lg border border-border-default dark:divide-neutral-800 dark:border-border-subtle">
                   {orders.map((o) => (
                     <li key={o.id}>
                       <button
                         type="button"
                         onClick={() => setSelected(o)}
-                        className={`flex w-full items-start justify-between gap-3 px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-neutral-900 ${
-                          selected?.id === o.id ? 'bg-slate-50 dark:bg-neutral-900' : 'bg-white dark:bg-neutral-950'
-                        }`}
+                        className={`flex w-full items-start justify-between gap-3 px-4 py-3 text-left hover:bg-surface-base dark:hover:bg-surface-raised ${ selected?.id === o.id ? 'bg-surface-base' : 'bg-surface-raised' }`}
                       >
                         <div>
-                          <p className="text-sm font-medium text-slate-900 dark:text-neutral-50">
+                          <p className="text-sm font-medium text-fg-default">
                             {o.userEmail ?? o.userId ?? o.id}
                           </p>
-                          <p className="text-xs text-slate-500">
+                          <p className="text-xs text-fg-muted">
                             {o.items.length} {t('transcripts.registrar.recipients')} ·{' '}
                             {o.submittedAt ? new Date(o.submittedAt).toLocaleString() : new Date(o.createdAt).toLocaleString()}
                           </p>
@@ -431,17 +425,17 @@ export default function AdminTranscriptsPage() {
               )}
             </section>
 
-            <section aria-labelledby="detail-heading" className="rounded-lg border border-slate-200 p-4 dark:border-neutral-800">
-              <h2 id="detail-heading" className="text-lg font-semibold text-slate-900 dark:text-neutral-50">
+            <section aria-labelledby="detail-heading" className="rounded-lg border border-border-default p-4 dark:border-border-subtle">
+              <h2 id="detail-heading" className="text-lg font-semibold text-fg-default">
                 {t('transcripts.registrar.detailTitle')}
               </h2>
               {!selected ? (
-                <p className="mt-3 text-sm text-slate-500">{t('transcripts.registrar.detailEmpty')}</p>
+                <p className="mt-3 text-sm text-fg-muted">{t('transcripts.registrar.detailEmpty')}</p>
               ) : (
                 <div className="mt-3 space-y-4">
                   <div>
-                    <p className="text-sm font-medium text-slate-900 dark:text-neutral-50">{selected.userEmail}</p>
-                    <p className="text-xs text-slate-500">{selected.id}</p>
+                    <p className="text-sm font-medium text-fg-default">{selected.userEmail}</p>
+                    <p className="text-xs text-fg-muted">{selected.id}</p>
                     <p className="mt-2">
                       <span
                         className={`rounded px-2 py-0.5 text-xs font-medium ${statusChipClass(selected.status)}`}
@@ -452,7 +446,7 @@ export default function AdminTranscriptsPage() {
                     </p>
                   </div>
                   {selected.paymentStatus ? (
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-fg-muted">
                       {t('transcripts.registrar.payment')}: {selected.paymentStatus}
                       {selected.totalAmount != null
                         ? ` · ${selected.currency?.toUpperCase() ?? 'USD'} ${(selected.totalAmount / 100).toFixed(2)}`
@@ -466,7 +460,7 @@ export default function AdminTranscriptsPage() {
                         type="button"
                         disabled={acting}
                         onClick={() => void runTransition(action)}
-                        className="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-700 dark:hover:bg-neutral-900"
+                        className="rounded-md border border-border-strong px-3 py-1.5 text-xs font-medium hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:hover:bg-surface-raised"
                       >
                         {t(`transcripts.registrar.action.${action}`)}
                       </button>
@@ -500,7 +494,7 @@ export default function AdminTranscriptsPage() {
                     ) : null}
                   </div>
                   <div>
-                    <label htmlFor={rejectReasonId} className="block text-xs font-medium text-slate-600 dark:text-neutral-400">
+                    <label htmlFor={rejectReasonId} className="block text-xs font-medium text-fg-muted">
                       {t('transcripts.registrar.rejectReason')}
                     </label>
                     <div className="mt-1 flex gap-2">
@@ -508,7 +502,7 @@ export default function AdminTranscriptsPage() {
                         id={rejectReasonId}
                         value={rejectReason}
                         onChange={(e) => setRejectReason(e.target.value)}
-                        className="flex-1 rounded-md border border-slate-300 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                        className="flex-1 rounded-md border border-border-strong px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised"
                       />
                       <button
                         type="button"
@@ -522,7 +516,7 @@ export default function AdminTranscriptsPage() {
                   </div>
                   {selected.items?.some((it) => it.documentId) ? (
                     <div>
-                      <h3 className="text-sm font-semibold text-slate-800 dark:text-neutral-200">
+                      <h3 className="text-sm font-semibold text-fg-default">
                         {t('transcripts.registrar.revokeTitle')}
                       </h3>
                       <ul className="mt-2 space-y-2">
@@ -530,7 +524,7 @@ export default function AdminTranscriptsPage() {
                           .filter((it) => it.documentId)
                           .map((it) => (
                             <li key={it.id} className="flex flex-wrap items-center gap-2 text-xs">
-                              <span className="font-mono text-slate-600 dark:text-neutral-400">{it.documentId}</span>
+                              <span className="font-mono text-fg-muted">{it.documentId}</span>
                               <button
                                 type="button"
                                 disabled={acting}
@@ -573,7 +567,7 @@ export default function AdminTranscriptsPage() {
                                     }
                                   })()
                                 }}
-                                className="rounded border border-slate-300 px-2 py-1 hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-700 dark:hover:bg-neutral-900"
+                                className="rounded border border-border-strong px-2 py-1 hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:hover:bg-surface-raised"
                               >
                                 {t('transcripts.registrar.action.unrevoke')}
                               </button>
@@ -584,17 +578,17 @@ export default function AdminTranscriptsPage() {
                   ) : null}
                   {selected.events && selected.events.length > 0 && (
                     <div>
-                      <h3 className="text-sm font-semibold text-slate-800 dark:text-neutral-200">
+                      <h3 className="text-sm font-semibold text-fg-default">
                         {t('transcripts.registrar.timeline')}
                       </h3>
-                      <ol className="mt-2 space-y-2 border-l border-slate-200 pl-3 dark:border-neutral-700">
+                      <ol className="mt-2 space-y-2 border-l border-border-default pl-3 dark:border-border-default">
                         {selected.events.map((ev) => (
-                          <li key={ev.id} className="text-xs text-slate-600 dark:text-neutral-400">
-                            <span className="font-medium text-slate-800 dark:text-neutral-200">
+                          <li key={ev.id} className="text-xs text-fg-muted">
+                            <span className="font-medium text-fg-default">
                               {ev.fromState ?? '—'} → {ev.toState}
                             </span>
                             {ev.reason ? ` · ${ev.reason}` : ''}
-                            <div className="text-[11px] text-slate-400">{new Date(ev.createdAt).toLocaleString()}</div>
+                            <div className="text-[11px] text-fg-subtle">{new Date(ev.createdAt).toLocaleString()}</div>
                           </li>
                         ))}
                       </ol>
@@ -609,26 +603,26 @@ export default function AdminTranscriptsPage() {
 
       {consoleEnabled && tab === 'holds' ? (
         <section className="mt-6" aria-labelledby="holds-heading">
-          <h2 id="holds-heading" className="text-lg font-semibold text-slate-900 dark:text-neutral-50">
+          <h2 id="holds-heading" className="text-lg font-semibold text-fg-default">
             {t('transcripts.registrar.holdsTitle')}
           </h2>
           <form onSubmit={(e) => void handlePlaceHold(e)} className="mt-3 flex flex-wrap items-end gap-2">
             <label className="text-sm">
-              <span className="block text-slate-600 dark:text-neutral-400">{t('transcripts.registrar.holdUserId')}</span>
+              <span className="block text-fg-muted">{t('transcripts.registrar.holdUserId')}</span>
               <input
                 id={holdUserId}
                 value={holdForm.userId}
                 onChange={(e) => setHoldForm((f) => ({ ...f, userId: e.target.value }))}
-                className="mt-1 w-72 rounded-md border border-slate-300 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                className="mt-1 w-72 rounded-md border border-border-strong px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised"
                 required
               />
             </label>
             <label className="text-sm">
-              <span className="block text-slate-600 dark:text-neutral-400">{t('transcripts.registrar.holdType')}</span>
+              <span className="block text-fg-muted">{t('transcripts.registrar.holdType')}</span>
               <select
                 value={holdForm.type}
                 onChange={(e) => setHoldForm((f) => ({ ...f, type: e.target.value as TranscriptHoldType }))}
-                className="mt-1 rounded-md border border-slate-300 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                className="mt-1 rounded-md border border-border-strong px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised"
               >
                 {HOLD_TYPES.map((type) => (
                   <option key={type} value={type}>
@@ -638,11 +632,11 @@ export default function AdminTranscriptsPage() {
               </select>
             </label>
             <label className="min-w-[12rem] flex-1 text-sm">
-              <span className="block text-slate-600 dark:text-neutral-400">{t('transcripts.registrar.holdReason')}</span>
+              <span className="block text-fg-muted">{t('transcripts.registrar.holdReason')}</span>
               <input
                 value={holdForm.reason}
                 onChange={(e) => setHoldForm((f) => ({ ...f, reason: e.target.value }))}
-                className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                className="mt-1 w-full rounded-md border border-border-strong px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised"
               />
             </label>
             <button
@@ -654,17 +648,17 @@ export default function AdminTranscriptsPage() {
             </button>
           </form>
           {holds.length === 0 ? (
-            <p className="mt-4 text-sm text-slate-500">{t('transcripts.registrar.holdsEmpty')}</p>
+            <p className="mt-4 text-sm text-fg-muted">{t('transcripts.registrar.holdsEmpty')}</p>
           ) : (
-            <ul className="mt-4 divide-y divide-slate-200 rounded-lg border border-slate-200 dark:divide-neutral-800 dark:border-neutral-800">
+            <ul className="mt-4 divide-y divide-slate-200 rounded-lg border border-border-default dark:divide-neutral-800 dark:border-border-subtle">
               {holds.map((h) => (
-                <li key={h.id} className="flex items-start justify-between gap-3 bg-white px-4 py-3 dark:bg-neutral-950">
+                <li key={h.id} className="flex items-start justify-between gap-3 bg-surface-raised px-4 py-3 dark:bg-surface-base">
                   <div>
-                    <p className="text-sm font-medium text-slate-900 dark:text-neutral-50">
+                    <p className="text-sm font-medium text-fg-default">
                       {t(`transcripts.holdType.${h.type}`)} · {h.userId}
                     </p>
-                    <p className="text-xs text-slate-600 dark:text-neutral-400">{h.studentMessage}</p>
-                    {h.reason && <p className="mt-1 text-xs text-slate-400">{t('transcripts.registrar.internalReason')}: {h.reason}</p>}
+                    <p className="text-xs text-fg-muted">{h.studentMessage}</p>
+                    {h.reason && <p className="mt-1 text-xs text-fg-subtle">{t('transcripts.registrar.internalReason')}: {h.reason}</p>}
                   </div>
                   <button
                     type="button"
@@ -676,7 +670,7 @@ export default function AdminTranscriptsPage() {
                           setError(err instanceof Error ? err.message : t('transcripts.registrar.holdError')),
                         )
                     }}
-                    className="shrink-0 rounded-md border border-slate-300 px-2 py-1 text-xs font-medium hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-700"
+                    className="shrink-0 rounded-md border border-border-strong px-2 py-1 text-xs font-medium hover:bg-surface-base disabled:opacity-50 dark:border-border-default"
                   >
                     {t('transcripts.registrar.releaseHold')}
                   </button>
@@ -702,7 +696,7 @@ export default function AdminTranscriptsPage() {
       {consoleEnabled && tab === 'fees' ? (
         <section className="mt-6 space-y-4" aria-labelledby="fees-heading">
           <h2 id="fees-heading" className="text-lg font-semibold">{t('transcripts.console.tab.fees')}</h2>
-          <p className="text-sm text-slate-600 dark:text-neutral-400">{t('transcripts.console.feesHelp')}</p>
+          <p className="text-sm text-fg-muted">{t('transcripts.console.feesHelp')}</p>
           {feeSchedule ? (
             <form
               className="flex flex-wrap items-end gap-3"
@@ -731,28 +725,28 @@ export default function AdminTranscriptsPage() {
               }}
             >
               <label className="text-sm">
-                <span className="block text-slate-600">{t('transcripts.console.baseFee')}</span>
-                <input value={baseFeeMajor} onChange={(e) => setBaseFeeMajor(e.target.value)} className="mt-1 w-28 rounded-md border border-slate-300 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900" />
+                <span className="block text-fg-muted">{t('transcripts.console.baseFee')}</span>
+                <input value={baseFeeMajor} onChange={(e) => setBaseFeeMajor(e.target.value)} className="mt-1 w-28 rounded-md border border-border-strong px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised" />
               </label>
               <label className="text-sm">
-                <span className="block text-slate-600">{t('transcripts.console.rushFee')}</span>
-                <input value={rushFeeMajor} onChange={(e) => setRushFeeMajor(e.target.value)} className="mt-1 w-28 rounded-md border border-slate-300 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900" />
+                <span className="block text-fg-muted">{t('transcripts.console.rushFee')}</span>
+                <input value={rushFeeMajor} onChange={(e) => setRushFeeMajor(e.target.value)} className="mt-1 w-28 rounded-md border border-border-strong px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised" />
               </label>
               <label className="text-sm">
-                <span className="block text-slate-600">{t('transcripts.console.perRecipientFee')}</span>
-                <input value={perRecipientMajor} onChange={(e) => setPerRecipientMajor(e.target.value)} className="mt-1 w-28 rounded-md border border-slate-300 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900" />
+                <span className="block text-fg-muted">{t('transcripts.console.perRecipientFee')}</span>
+                <input value={perRecipientMajor} onChange={(e) => setPerRecipientMajor(e.target.value)} className="mt-1 w-28 rounded-md border border-border-strong px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised" />
               </label>
               <button type="submit" disabled={acting} className="rounded-md bg-slate-800 px-3 py-1.5 text-sm text-white disabled:opacity-50">
                 {t('transcripts.console.save')}
               </button>
             </form>
           ) : (
-            <p className="text-sm text-slate-500">{t('common.loading')}</p>
+            <p className="text-sm text-fg-muted">{t('common.loading')}</p>
           )}
           <div>
             <h3 className="text-sm font-semibold">{t('transcripts.console.waiverCodes')}</h3>
             {waivers.length === 0 ? (
-              <p className="mt-2 text-sm text-slate-500">{t('transcripts.console.waiversEmpty')}</p>
+              <p className="mt-2 text-sm text-fg-muted">{t('transcripts.console.waiversEmpty')}</p>
             ) : (
               <ul className="mt-2 text-sm">
                 {waivers.map((w) => (
@@ -798,15 +792,15 @@ export default function AdminTranscriptsPage() {
                 {t('transcripts.console.deliveryV2')}
               </label>
               <label className="block text-sm">
-                <span className="text-slate-600">{t('transcripts.console.webhookUrl')}</span>
+                <span className="text-fg-muted">{t('transcripts.console.webhookUrl')}</span>
                 <input
                   value={deliveryWebhook}
                   onChange={(e) => setDeliveryWebhook(e.target.value)}
-                  className="mt-1 w-full max-w-xl rounded-md border border-slate-300 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                  className="mt-1 w-full max-w-xl rounded-md border border-border-strong px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised"
                   required
                 />
               </label>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-fg-muted">
                 {t('transcripts.console.adapters')}: {deliveryCfg.adapters.join(', ')}
               </p>
               <button type="submit" disabled={acting} className="rounded-md bg-slate-800 px-3 py-1.5 text-sm text-white disabled:opacity-50">
@@ -814,7 +808,7 @@ export default function AdminTranscriptsPage() {
               </button>
             </form>
           ) : (
-            <p className="text-sm text-slate-500">{t('common.loading')}</p>
+            <p className="text-sm text-fg-muted">{t('common.loading')}</p>
           )}
         </section>
       ) : null}
@@ -824,7 +818,7 @@ export default function AdminTranscriptsPage() {
           <h2 id="recipients-heading" className="text-lg font-semibold">{t('transcripts.console.tab.recipients')}</h2>
           <button
             type="button"
-            className="rounded-md border border-slate-300 px-3 py-1.5 text-sm dark:border-neutral-700"
+            className="rounded-md border border-border-strong px-3 py-1.5 text-sm dark:border-border-default"
             onClick={() => {
               void (async () => {
                 try {
@@ -844,18 +838,18 @@ export default function AdminTranscriptsPage() {
             {t('transcripts.console.addRecipient')}
           </button>
           {recipients.length === 0 ? (
-            <p className="text-sm text-slate-500">{t('transcripts.console.recipientsEmpty')}</p>
+            <p className="text-sm text-fg-muted">{t('transcripts.console.recipientsEmpty')}</p>
           ) : (
-            <ul className="divide-y divide-slate-200 rounded-lg border border-slate-200 dark:divide-neutral-800 dark:border-neutral-800">
+            <ul className="divide-y divide-slate-200 rounded-lg border border-border-default dark:divide-neutral-800 dark:border-border-subtle">
               {recipients.map((r) => (
                 <li key={r.id} className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
                   <div>
                     <p className="font-medium">{r.name}</p>
-                    <p className="text-xs text-slate-500">{r.type} · {(r.capabilities ?? []).join(', ')}</p>
+                    <p className="text-xs text-fg-muted">{r.type} · {(r.capabilities ?? []).join(', ')}</p>
                   </div>
                   <button
                     type="button"
-                    className="text-xs text-slate-600 hover:underline"
+                    className="text-xs text-fg-muted hover:underline"
                     onClick={() => {
                       void updateAdminTranscriptRecipient(r.id, { active: !r.active })
                         .then((updated) => {
@@ -878,8 +872,8 @@ export default function AdminTranscriptsPage() {
       {consoleEnabled && tab === 'settings' ? (
         <section className="mt-6 space-y-3" aria-labelledby="settings-heading">
           <h2 id="settings-heading" className="text-lg font-semibold">{t('transcripts.console.tab.settings')}</h2>
-          <p className="text-sm text-slate-600 dark:text-neutral-400">{t('transcripts.console.settingsHelp')}</p>
-          <ul className="list-disc pl-5 text-sm text-slate-700 dark:text-neutral-300">
+          <p className="text-sm text-fg-muted">{t('transcripts.console.settingsHelp')}</p>
+          <ul className="list-disc pl-5 text-sm text-fg-muted">
             {settingsSummary.map((key) => (
               <li key={key}>{t(`transcripts.console.setting.${key}`, { defaultValue: key })}</li>
             ))}

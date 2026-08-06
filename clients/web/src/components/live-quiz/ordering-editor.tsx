@@ -23,7 +23,7 @@ export function OrderingEditor({ options, onChange, disabled }: Props) {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-slate-700 dark:text-neutral-200">
+        <span className="text-sm font-medium text-fg-default">
           {t('liveQuiz.editor.orderingItems')}
         </span>
         <button
@@ -35,24 +35,24 @@ export function OrderingEditor({ options, onChange, disabled }: Props) {
               { id: `ord-${options.length + 1}-${Date.now().toString(36)}`, text: '', isCorrect: false },
             ])
           }
-          className="inline-flex min-h-11 items-center gap-1 rounded-md px-2 text-sm text-indigo-600 disabled:opacity-40 dark:text-indigo-400"
+          className="inline-flex min-h-11 items-center gap-1 rounded-md px-2 text-sm text-accent-fg disabled:opacity-40 dark:text-indigo-400"
         >
           <Plus className="h-4 w-4" aria-hidden />
           {t('liveQuiz.editor.addItem')}
         </button>
       </div>
-      <p className="text-xs text-slate-500 dark:text-neutral-400">{t('liveQuiz.editor.orderingHint')}</p>
+      <p className="text-xs text-fg-muted">{t('liveQuiz.editor.orderingHint')}</p>
       <ol className="space-y-2">
         {options.map((opt, index) => (
           <li key={opt.id} className="flex items-center gap-2">
-            <span className="w-6 text-sm text-slate-500">{index + 1}.</span>
+            <span className="w-6 text-sm text-fg-muted">{index + 1}.</span>
             <input
               value={opt.text}
               disabled={disabled}
               onChange={(e) =>
                 onChange(options.map((o, i) => (i === index ? { ...o, text: e.target.value } : o)))
               }
-              className="min-h-11 min-w-0 flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+              className="min-h-11 min-w-0 flex-1 rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
             />
             <button
               type="button"
@@ -76,7 +76,7 @@ export function OrderingEditor({ options, onChange, disabled }: Props) {
               type="button"
               disabled={disabled || options.length <= 2}
               onClick={() => onChange(options.filter((_, i) => i !== index))}
-              className="min-h-11 rounded-md px-2 text-slate-500 hover:text-red-600 disabled:opacity-40"
+              className="min-h-11 rounded-md px-2 text-fg-muted hover:text-danger-fg disabled:opacity-40"
               aria-label={t('liveQuiz.editor.removeItem')}
             >
               <Trash2 className="h-4 w-4" aria-hidden />

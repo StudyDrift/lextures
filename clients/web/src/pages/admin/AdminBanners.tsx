@@ -157,7 +157,7 @@ export default function AdminBannersPage() {
   if (!maintenanceBannerEnabled) {
     return (
       <div className="mx-auto max-w-3xl p-6">
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-fg-muted">
           Maintenance banners are disabled. Enable them in Settings → Global platform.
         </p>
       </div>
@@ -167,7 +167,7 @@ export default function AdminBannersPage() {
   if (loading) {
     return (
       <div className="mx-auto max-w-3xl p-6">
-        <p className="text-sm text-slate-500">Loading banners…</p>
+        <p className="text-sm text-fg-muted">Loading banners…</p>
       </div>
     )
   }
@@ -175,27 +175,21 @@ export default function AdminBannersPage() {
   return (
     <div className="mx-auto max-w-3xl p-6">
       <div className="flex items-center gap-2">
-        <Megaphone className="h-5 w-5 text-indigo-600" aria-hidden />
-        <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Maintenance notices</h1>
+        <Megaphone className="h-5 w-5 text-accent-fg" aria-hidden />
+        <h1 className="text-xl font-semibold text-fg-default dark:text-slate-100">Maintenance notices</h1>
       </div>
-      <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+      <p className="mt-1 text-sm text-fg-muted dark:text-fg-subtle">
         Publish a site-wide or organization notice visible to users until dismissed or expired.
       </p>
 
       {previewBanner ? (
-        <div className="mt-4 overflow-hidden rounded-lg border border-slate-200 dark:border-neutral-800">
-          <p className="bg-slate-50 px-3 py-1 text-xs font-medium uppercase tracking-wide text-slate-500 dark:bg-neutral-950">
+        <div className="mt-4 overflow-hidden rounded-lg border border-border-default dark:border-border-subtle">
+          <p className="bg-surface-base px-3 py-1 text-xs font-medium uppercase tracking-wide text-fg-muted dark:bg-surface-base">
             Preview
           </p>
           <aside
             role="status"
-            className={`flex items-start gap-3 border-b px-4 py-2 text-sm ${
-              previewBanner.severity === 'error'
-                ? 'border-red-200 bg-red-50 text-red-950 dark:border-red-900/60 dark:bg-red-950/50 dark:text-red-100'
-                : previewBanner.severity === 'warning'
-                  ? 'border-amber-200 bg-amber-50 text-amber-950 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-100'
-                  : 'border-sky-200 bg-sky-50 text-sky-950 dark:border-sky-900/60 dark:bg-sky-950/40 dark:text-sky-100'
-            }`}
+            className={`flex items-start gap-3 border-b px-4 py-2 text-sm ${ previewBanner.severity === 'error' ? 'border-red-200 bg-red-50 text-red-950 dark:border-red-900/60 dark:bg-red-950/50 dark:text-red-100' : previewBanner.severity === 'warning' ? 'border-amber-200 bg-amber-50 text-amber-950 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-100' : 'border-sky-200 bg-sky-50 text-sky-950 dark:border-sky-900/60 dark:bg-sky-950/40 dark:text-sky-100' }`}
           >
             <p className="flex-1">{previewBanner.message}</p>
           </aside>
@@ -205,11 +199,11 @@ export default function AdminBannersPage() {
       <form id={formId} onSubmit={(e) => void onPublish(e)} className="mt-6 max-w-xl space-y-4">
         {isGlobalAdmin ? (
           <label className="block text-sm">
-            <span className="text-slate-600 dark:text-slate-400">Scope</span>
+            <span className="text-fg-muted dark:text-fg-subtle">Scope</span>
             <select
               value={form.scope}
               onChange={(e) => setForm({ ...form, scope: e.target.value as 'global' | 'org' })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+              className="mt-1 w-full rounded-lg border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-raised"
             >
               <option value="org">Organization only</option>
               <option value="global">Global (all organizations)</option>
@@ -217,7 +211,7 @@ export default function AdminBannersPage() {
           </label>
         ) : null}
         <label className="block text-sm">
-          <span className="text-slate-600 dark:text-slate-400">Message</span>
+          <span className="text-fg-muted dark:text-fg-subtle">Message</span>
           <textarea
             value={form.message}
             onChange={(e) => setForm({ ...form, message: e.target.value })}
@@ -225,15 +219,15 @@ export default function AdminBannersPage() {
             rows={3}
             required
             placeholder="Scheduled maintenance Sunday 2am–4am UTC"
-            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+            className="mt-1 w-full rounded-lg border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-raised"
           />
         </label>
         <label className="block text-sm">
-          <span className="text-slate-600 dark:text-slate-400">Severity</span>
+          <span className="text-fg-muted dark:text-fg-subtle">Severity</span>
           <select
             value={form.severity}
             onChange={(e) => setForm({ ...form, severity: e.target.value as BannerForm['severity'] })}
-            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+            className="mt-1 w-full rounded-lg border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-raised"
           >
             <option value="info">Info</option>
             <option value="warning">Warning</option>
@@ -242,50 +236,50 @@ export default function AdminBannersPage() {
         </label>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="block text-sm">
-            <span className="text-slate-600 dark:text-slate-400">Start (optional)</span>
+            <span className="text-fg-muted dark:text-fg-subtle">Start (optional)</span>
             <input
               type="datetime-local"
               value={form.startsAt}
               onChange={(e) => setForm({ ...form, startsAt: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+              className="mt-1 w-full rounded-lg border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-raised"
             />
           </label>
           <label className="block text-sm">
-            <span className="text-slate-600 dark:text-slate-400">Expires (optional)</span>
+            <span className="text-fg-muted dark:text-fg-subtle">Expires (optional)</span>
             <input
               type="datetime-local"
               value={form.expiresAt}
               onChange={(e) => setForm({ ...form, expiresAt: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+              className="mt-1 w-full rounded-lg border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-raised"
             />
           </label>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="block text-sm">
-            <span className="text-slate-600 dark:text-slate-400">CTA label (optional)</span>
+            <span className="text-fg-muted dark:text-fg-subtle">CTA label (optional)</span>
             <input
               value={form.ctaText}
               onChange={(e) => setForm({ ...form, ctaText: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+              className="mt-1 w-full rounded-lg border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-raised"
             />
           </label>
           <label className="block text-sm">
-            <span className="text-slate-600 dark:text-slate-400">CTA URL (optional)</span>
+            <span className="text-fg-muted dark:text-fg-subtle">CTA URL (optional)</span>
             <input
               type="url"
               value={form.ctaUrl}
               onChange={(e) => setForm({ ...form, ctaUrl: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+              className="mt-1 w-full rounded-lg border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-raised"
             />
           </label>
         </div>
-        {message ? <p className="text-sm text-green-700 dark:text-green-400">{message}</p> : null}
-        {error ? <p className="text-sm text-red-600 dark:text-red-400">{error}</p> : null}
+        {message ? <p className="text-sm text-success-fg">{message}</p> : null}
+        {error ? <p className="text-sm text-danger-fg">{error}</p> : null}
         <div className="flex flex-wrap gap-2">
           <button
             type="submit"
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-lg bg-accent-solid px-4 py-2 text-sm font-medium text-white hover:bg-accent disabled:opacity-60"
           >
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             Publish
@@ -294,7 +288,7 @@ export default function AdminBannersPage() {
             type="button"
             disabled={saving}
             onClick={() => void onClear()}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-700 dark:text-slate-200 dark:hover:bg-neutral-900"
+            className="inline-flex items-center gap-2 rounded-lg border border-border-strong px-4 py-2 text-sm font-medium text-fg-muted hover:bg-surface-base dark:border-border-default dark:text-slate-200 dark:hover:bg-surface-raised"
           >
             <Trash2 className="h-4 w-4" />
             Clear active banner

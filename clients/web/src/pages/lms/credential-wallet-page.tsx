@@ -222,7 +222,7 @@ export default function CredentialWalletPage() {
   if (!enabled && !featuresLoading) {
     return (
       <LmsPage title={t('wallet.title')}>
-        <p className="text-sm text-slate-600 dark:text-slate-300">{t('wallet.disabled')}</p>
+        <p className="text-sm text-fg-muted dark:text-slate-300">{t('wallet.disabled')}</p>
       </LmsPage>
     )
   }
@@ -233,20 +233,20 @@ export default function CredentialWalletPage() {
         <div>
           <h1
             id={titleId}
-            className="flex items-center gap-2 text-2xl font-semibold text-slate-900 dark:text-white"
+            className="flex items-center gap-2 text-2xl font-semibold text-fg-default dark:text-white"
           >
             <Wallet className="h-7 w-7 text-emerald-600" aria-hidden />
             {t('wallet.title')}
           </h1>
-          <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">{t('wallet.help')}</p>
+          <p className="mt-1 text-sm text-fg-muted dark:text-slate-300">{t('wallet.help')}</p>
           {alumniNote ? (
-            <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">{t('wallet.alumniNote')}</p>
+            <p className="mt-2 text-xs text-fg-muted dark:text-fg-subtle">{t('wallet.alumniNote')}</p>
           ) : null}
         </div>
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
-            className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-slate-100 dark:text-slate-900"
+            className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-surface-sunken dark:text-fg-default"
             disabled={selected.size === 0}
             onClick={() => {
               setShareResult(null)
@@ -260,7 +260,7 @@ export default function CredentialWalletPage() {
           </button>
           <button
             type="button"
-            className="inline-flex items-center gap-2 rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-800 disabled:opacity-50 dark:border-slate-600 dark:text-slate-100"
+            className="inline-flex items-center gap-2 rounded-md border border-border-strong px-3 py-2 text-sm font-medium text-fg-default disabled:opacity-50 dark:border-slate-600 dark:text-slate-100"
             disabled={exporting || items.length === 0}
             onClick={() => void onExport()}
           >
@@ -271,32 +271,32 @@ export default function CredentialWalletPage() {
       </header>
 
       {exportStatus ? (
-        <p className="mb-4 text-sm text-slate-600 dark:text-slate-300" aria-live="polite">
+        <p className="mb-4 text-sm text-fg-muted dark:text-slate-300" aria-live="polite">
           {exportStatus}
         </p>
       ) : null}
 
       {loading ? (
-        <p className="inline-flex items-center gap-2 text-sm text-slate-600">
+        <p className="inline-flex items-center gap-2 text-sm text-fg-muted">
           <Loader2 className="h-4 w-4 motion-safe:animate-spin" aria-hidden />
           {t('common.loading')}
         </p>
       ) : null}
 
       {error ? (
-        <p role="alert" className="mb-4 text-sm text-red-700 dark:text-red-300">
+        <p role="alert" className="mb-4 text-sm text-danger-fg">
           {error}
         </p>
       ) : null}
 
       {!loading && items.length === 0 ? (
-        <p className="text-sm text-slate-600 dark:text-slate-300">{t('wallet.empty')}</p>
+        <p className="text-sm text-fg-muted dark:text-slate-300">{t('wallet.empty')}</p>
       ) : null}
 
       <div className="space-y-8">
         {[...grouped.entries()].map(([kind, kindItems]) => (
           <section key={kind} aria-labelledby={`wallet-kind-${kind}`}>
-            <h2 id={`wallet-kind-${kind}`} className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
+            <h2 id={`wallet-kind-${kind}`} className="mb-3 text-sm font-semibold uppercase tracking-wide text-fg-muted">
               {kindLabel(kind, t)}
             </h2>
             <ul className="grid gap-3 md:grid-cols-2">
@@ -306,7 +306,7 @@ export default function CredentialWalletPage() {
                 return (
                   <li
                     key={item.id}
-                    className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800"
+                    className="rounded-xl border border-border-default bg-surface-raised p-4 dark:border-slate-700 dark:bg-slate-800"
                   >
                     <div className="flex items-start gap-3">
                       <input
@@ -317,8 +317,8 @@ export default function CredentialWalletPage() {
                         aria-label={t('wallet.selectItem', { title: item.title })}
                       />
                       <div className="min-w-0 flex-1">
-                        <h3 className="text-base font-semibold text-slate-900 dark:text-white">{item.title}</h3>
-                        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                        <h3 className="text-base font-semibold text-fg-default dark:text-white">{item.title}</h3>
+                        <p className="mt-1 text-xs text-fg-muted dark:text-fg-subtle">
                           {item.issuer ? `${item.issuer} · ` : ''}
                           {item.issuedAt ? formatDate(item.issuedAt) : t('wallet.noDate')}
                           {item.revoked ? ` · ${t('wallet.status.revoked')}` : ''}
@@ -331,7 +331,7 @@ export default function CredentialWalletPage() {
                           {downloadPath ? (
                             <button
                               type="button"
-                              className="text-indigo-700 underline-offset-2 hover:underline dark:text-indigo-300"
+                              className="text-accent-fg underline-offset-2 hover:underline dark:text-indigo-300"
                               onClick={() => void onDownloadPath(downloadPath, `${item.kind}.bin`)}
                             >
                               {t('wallet.download')}
@@ -340,7 +340,7 @@ export default function CredentialWalletPage() {
                           {item.verifyUrl ? (
                             <a
                               href={item.verifyUrl}
-                              className="text-indigo-700 underline-offset-2 hover:underline dark:text-indigo-300"
+                              className="text-accent-fg underline-offset-2 hover:underline dark:text-indigo-300"
                               target="_blank"
                               rel="noreferrer"
                             >
@@ -359,23 +359,23 @@ export default function CredentialWalletPage() {
       </div>
 
       <section className="mt-10" aria-labelledby="wallet-collections-heading">
-        <h2 id="wallet-collections-heading" className="mb-3 flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-white">
+        <h2 id="wallet-collections-heading" className="mb-3 flex items-center gap-2 text-lg font-semibold text-fg-default dark:text-white">
           <Award className="h-5 w-5" aria-hidden />
           {t('wallet.collectionsHeading')}
         </h2>
         {collections.length === 0 ? (
-          <p className="text-sm text-slate-600 dark:text-slate-300">{t('wallet.collectionsEmpty')}</p>
+          <p className="text-sm text-fg-muted dark:text-slate-300">{t('wallet.collectionsEmpty')}</p>
         ) : (
           <ul className="space-y-3">
             {collections.map((col) => (
               <li
                 key={col.id}
-                className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800"
+                className="rounded-xl border border-border-default bg-surface-raised p-4 dark:border-slate-700 dark:bg-slate-800"
               >
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                   <div>
-                    <h3 className="font-semibold text-slate-900 dark:text-white">{col.name}</h3>
-                    <p className="text-xs text-slate-500">
+                    <h3 className="font-semibold text-fg-default dark:text-white">{col.name}</h3>
+                    <p className="text-xs text-fg-muted">
                       {t('wallet.collectionMeta', {
                         count: col.itemIds.length,
                         disclosure: col.disclosure,
@@ -383,7 +383,7 @@ export default function CredentialWalletPage() {
                       {col.revoked ? ` · ${t('wallet.shareRevoked')}` : ''}
                     </p>
                     {col.shareUrl && !col.revoked ? (
-                      <p className="mt-2 break-all text-sm text-indigo-700 dark:text-indigo-300">{col.shareUrl}</p>
+                      <p className="mt-2 break-all text-sm text-accent-fg">{col.shareUrl}</p>
                     ) : null}
                   </div>
                   <div className="flex flex-wrap gap-2 text-sm">
@@ -395,13 +395,13 @@ export default function CredentialWalletPage() {
                         {t('wallet.revoke')}
                       </button>
                     ) : null}
-                    <button type="button" className="underline text-red-700 dark:text-red-300" onClick={() => void onDelete(col.id)}>
+                    <button type="button" className="underline text-danger-fg" onClick={() => void onDelete(col.id)}>
                       {t('wallet.delete')}
                     </button>
                   </div>
                 </div>
                 {accessFor === col.id ? (
-                  <ul className="mt-3 space-y-1 border-t border-slate-100 pt-3 text-xs text-slate-600 dark:border-slate-700 dark:text-slate-300">
+                  <ul className="mt-3 space-y-1 border-t border-border-subtle pt-3 text-xs text-fg-muted dark:border-slate-700 dark:text-slate-300">
                     {accessEvents.length === 0 ? <li>{t('wallet.accessEmpty')}</li> : null}
                     {accessEvents.map((ev) => (
                       <li key={ev.id}>
@@ -417,7 +417,7 @@ export default function CredentialWalletPage() {
         )}
       </section>
 
-      <p className="mt-8 text-sm text-slate-500">
+      <p className="mt-8 text-sm text-fg-muted">
         <Link to="/transcripts" className="underline-offset-2 hover:underline">
           {t('wallet.linkTranscripts')}
         </Link>
@@ -438,20 +438,20 @@ export default function CredentialWalletPage() {
           aria-labelledby={shareDialogTitleId}
           className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center"
         >
-          <div className="w-full max-w-md rounded-xl bg-white p-5 shadow-lg dark:bg-slate-900">
-            <h2 id={shareDialogTitleId} className="text-lg font-semibold text-slate-900 dark:text-white">
+          <div className="w-full max-w-md rounded-xl bg-surface-raised p-5 shadow-lg dark:bg-slate-900">
+            <h2 id={shareDialogTitleId} className="text-lg font-semibold text-fg-default dark:text-white">
               {t('wallet.shareDialogTitle')}
             </h2>
-            <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+            <p className="mt-1 text-sm text-fg-muted dark:text-slate-300">
               {t('wallet.shareDialogHelp', { count: selected.size || shareResult?.itemIds.length || 0 })}
             </p>
             {shareResult?.shareUrl ? (
               <div className="mt-4 space-y-2">
                 <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">{t('wallet.shareReady')}</p>
-                <p className="break-all text-sm text-indigo-700 dark:text-indigo-300">{shareResult.shareUrl}</p>
+                <p className="break-all text-sm text-accent-fg">{shareResult.shareUrl}</p>
                 <button
                   type="button"
-                  className="rounded-md bg-slate-900 px-3 py-2 text-sm text-white dark:bg-slate-100 dark:text-slate-900"
+                  className="rounded-md bg-slate-900 px-3 py-2 text-sm text-white dark:bg-surface-sunken dark:text-fg-default"
                   onClick={() => {
                     void navigator.clipboard.writeText(shareResult.shareUrl ?? '')
                   }}
@@ -462,16 +462,16 @@ export default function CredentialWalletPage() {
             ) : (
               <div className="mt-4 space-y-3">
                 <label className="block text-sm">
-                  <span className="text-slate-700 dark:text-slate-200">{t('wallet.collectionName')}</span>
+                  <span className="text-fg-muted dark:text-slate-200">{t('wallet.collectionName')}</span>
                   <input
-                    className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 dark:border-slate-600 dark:bg-slate-800"
+                    className="mt-1 w-full rounded-md border border-border-strong px-3 py-2 dark:border-slate-600 dark:bg-slate-800"
                     value={shareName}
                     onChange={(e) => setShareName(e.target.value)}
                   />
                 </label>
                 <fieldset>
-                  <legend className="text-sm text-slate-700 dark:text-slate-200">{t('wallet.disclosure')}</legend>
-                  <p className="mt-1 text-xs text-slate-500">{t('wallet.disclosureHelp')}</p>
+                  <legend className="text-sm text-fg-muted dark:text-slate-200">{t('wallet.disclosure')}</legend>
+                  <p className="mt-1 text-xs text-fg-muted">{t('wallet.disclosureHelp')}</p>
                   <div className="mt-2 space-y-1 text-sm">
                     {(['validity', 'summary', 'full'] as const).map((level) => (
                       <label key={level} className="flex items-center gap-2">
@@ -491,7 +491,7 @@ export default function CredentialWalletPage() {
             <div className="mt-5 flex justify-end gap-2">
               <button
                 type="button"
-                className="rounded-md px-3 py-2 text-sm text-slate-700 dark:text-slate-200"
+                className="rounded-md px-3 py-2 text-sm text-fg-muted dark:text-slate-200"
                 onClick={() => setShareOpen(false)}
               >
                 {t('wallet.close')}
@@ -499,7 +499,7 @@ export default function CredentialWalletPage() {
               {!shareResult ? (
                 <button
                   type="button"
-                  className="rounded-md bg-slate-900 px-3 py-2 text-sm text-white disabled:opacity-50 dark:bg-slate-100 dark:text-slate-900"
+                  className="rounded-md bg-slate-900 px-3 py-2 text-sm text-white disabled:opacity-50 dark:bg-surface-sunken dark:text-fg-default"
                   disabled={sharing || selected.size === 0}
                   onClick={() => void onCreateShare()}
                 >

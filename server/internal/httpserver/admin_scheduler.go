@@ -16,10 +16,6 @@ import (
 // /admin/scheduler).
 func (d Deps) handleAdminSchedulerList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			jobsMethodNotAllowed(w, http.MethodGet)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -45,10 +41,6 @@ func (d Deps) handleAdminSchedulerList() http.HandlerFunc {
 // (plan 17.4 §10, AC-4).
 func (d Deps) handleAdminSchedulerHistory() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			jobsMethodNotAllowed(w, http.MethodGet)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -70,10 +62,6 @@ func (d Deps) handleAdminSchedulerHistory() http.HandlerFunc {
 // deploy (plan 17.4 FR-6, §9 enable/disable). enabled is fixed per route.
 func (d Deps) handleAdminSchedulerSetEnabled(enabled bool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			jobsMethodNotAllowed(w, http.MethodPost)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -98,10 +86,6 @@ func (d Deps) handleAdminSchedulerSetEnabled(enabled bool) http.HandlerFunc {
 // §9 POST .../trigger). It enqueues onto the durable queue like a normal trigger.
 func (d Deps) handleAdminSchedulerTrigger() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			jobsMethodNotAllowed(w, http.MethodPost)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}

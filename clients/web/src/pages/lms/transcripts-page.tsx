@@ -51,9 +51,9 @@ function statusClass(status: TranscriptRequest['status']): string {
     case 'submitted':
       return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
     case 'failed':
-      return 'bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300'
+      return 'bg-red-50 text-danger-fg dark:bg-red-950 dark:text-red-300'
     case 'queued':
-      return 'bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300'
+      return 'bg-amber-50 text-warning-fg dark:bg-amber-950 dark:text-amber-300'
     default: {
       const _exhaustive: never = status
       return _exhaustive
@@ -180,7 +180,7 @@ export default function TranscriptsPage() {
   if (featuresLoading) {
     return (
       <LmsPage title="Transcripts" description="Preview and request academic transcripts.">
-        <p className="mt-8 text-sm text-slate-500">Loading…</p>
+        <p className="mt-8 text-sm text-fg-muted">Loading…</p>
       </LmsPage>
     )
   }
@@ -188,7 +188,7 @@ export default function TranscriptsPage() {
   if (!ffTranscripts) {
     return (
       <LmsPage title="Transcripts" description="Preview and request academic transcripts.">
-        <p className="mt-8 text-sm text-slate-600 dark:text-neutral-400">
+        <p className="mt-8 text-sm text-fg-muted">
           Transcripts is not enabled on this platform.
         </p>
       </LmsPage>
@@ -199,7 +199,7 @@ export default function TranscriptsPage() {
     <LmsPage title="Transcripts" description="Preview unofficial records and manage issued transcripts.">
       <div className="mt-8 max-w-3xl space-y-10">
         {error && (
-          <div role="alert" className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
+          <div role="alert" className="rounded-md bg-red-50 px-4 py-3 text-sm text-danger-fg dark:bg-red-950 dark:text-red-300">
             {error}
           </div>
         )}
@@ -211,13 +211,13 @@ export default function TranscriptsPage() {
 
         {ffTranscriptInbound ? (
           <section aria-labelledby="inbound-heading">
-            <h2 id="inbound-heading" className="text-lg font-semibold text-slate-800 dark:text-neutral-100">
+            <h2 id="inbound-heading" className="text-lg font-semibold text-fg-default">
               {t('transcripts.inbound.studentSection')}
             </h2>
             {inboundDocs.length === 0 ? (
-              <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">{t('transcripts.inbound.studentEmpty')}</p>
+              <p className="mt-2 text-sm text-fg-muted">{t('transcripts.inbound.studentEmpty')}</p>
             ) : (
-              <ul className="mt-3 divide-y divide-slate-200 rounded-md border border-slate-200 dark:divide-neutral-800 dark:border-neutral-800">
+              <ul className="mt-3 divide-y divide-slate-200 rounded-md border border-border-default dark:divide-neutral-800 dark:border-border-subtle">
                 {inboundDocs.map((doc) => (
                   <li key={doc.id} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
                     <span>
@@ -225,7 +225,7 @@ export default function TranscriptsPage() {
                         school: doc.sourceName || t('transcripts.inbound.unknownSource'),
                       })}
                     </span>
-                    <span className="rounded px-1.5 py-0.5 text-xs bg-slate-100 text-slate-700 dark:bg-neutral-800 dark:text-neutral-200">
+                    <span className="rounded px-1.5 py-0.5 text-xs bg-surface-sunken text-fg-muted dark:bg-surface-overlay dark:text-fg-default">
                       {t(`transcripts.inbound.status.${doc.status}`, { defaultValue: doc.status })}
                     </span>
                   </li>
@@ -236,10 +236,10 @@ export default function TranscriptsPage() {
         ) : null}
 
         <section aria-labelledby="preview-heading">
-          <h2 id="preview-heading" className="text-lg font-semibold text-slate-800 dark:text-neutral-100">
+          <h2 id="preview-heading" className="text-lg font-semibold text-fg-default">
             Unofficial transcript
           </h2>
-          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+          <p className="mt-1 text-sm text-fg-muted">
             Preview your academic record before ordering an official copy. Previews are watermarked and not stored as
             official artifacts.
           </p>
@@ -248,7 +248,7 @@ export default function TranscriptsPage() {
               type="button"
               onClick={() => void handlePreview()}
               disabled={previewLoading}
-              className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
+              className="rounded-md bg-accent-solid px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
             >
               {previewLoading ? 'Loading…' : 'Preview unofficial transcript'}
             </button>
@@ -259,7 +259,7 @@ export default function TranscriptsPage() {
                   setError(e instanceof Error ? e.message : 'Could not download PDF.')
                 })
               }}
-              className="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-900"
+              className="rounded-md border border-border-strong px-4 py-2 text-sm font-semibold text-fg-muted hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-raised"
             >
               Download unofficial PDF
             </button>
@@ -268,7 +268,7 @@ export default function TranscriptsPage() {
                 type="button"
                 onClick={() => void handleIssueOfficial()}
                 disabled={issuing}
-                className="rounded-md border border-indigo-600 px-4 py-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-50 disabled:opacity-50 dark:text-indigo-300 dark:hover:bg-indigo-950"
+                className="rounded-md border border-indigo-600 px-4 py-2 text-sm font-semibold text-accent-fg hover:bg-indigo-50 disabled:opacity-50 dark:text-indigo-300 dark:hover:bg-indigo-950"
               >
                 {issuing ? 'Issuing…' : 'Issue official transcript'}
               </button>
@@ -276,29 +276,29 @@ export default function TranscriptsPage() {
           </div>
 
           {preview ? (
-            <div className="mt-6 space-y-4 rounded-lg border border-slate-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+            <div className="mt-6 space-y-4 rounded-lg border border-border-default bg-surface-raised p-4 dark:border-border-subtle dark:bg-surface-raised">
               {preview.hasInProgress ? (
-                <p role="status" className="text-sm text-amber-700 dark:text-amber-300">
+                <p role="status" className="text-sm text-warning-fg">
                   This record includes in-progress courses that are not yet finalized.
                 </p>
               ) : null}
-              <p className="text-sm font-medium text-slate-900 dark:text-neutral-50">
+              <p className="text-sm font-medium text-fg-default">
                 {preview.student.name}
                 {preview.student.studentId ? ` · ${preview.student.studentId}` : null}
               </p>
-              <p className="text-xs text-slate-500 dark:text-neutral-400">{preview.institution.name}</p>
+              <p className="text-xs text-fg-muted">{preview.institution.name}</p>
               {preview.terms.length === 0 ? (
-                <p className="text-sm text-slate-500 dark:text-neutral-400">
+                <p className="text-sm text-fg-muted">
                   No graded enrollments yet. Final grades must be submitted before courses appear on a transcript.
                 </p>
               ) : (
                 preview.terms.map((term) => (
                   <div key={`${term.label}-${term.startedOn ?? ''}`}>
-                    <h3 className="text-sm font-semibold text-slate-800 dark:text-neutral-100">{term.label}</h3>
+                    <h3 className="text-sm font-semibold text-fg-default">{term.label}</h3>
                     <table className="mt-2 w-full text-start text-sm">
                       <caption className="sr-only">Courses for {term.label}</caption>
                       <thead>
-                        <tr className="border-b border-slate-200 text-xs text-slate-500 dark:border-neutral-700">
+                        <tr className="border-b border-border-default text-xs text-fg-muted dark:border-border-default">
                           <th scope="col" className="py-1 pe-2 font-medium">Code</th>
                           <th scope="col" className="py-1 pe-2 font-medium">Title</th>
                           <th scope="col" className="py-1 pe-2 font-medium">Credits</th>
@@ -307,7 +307,7 @@ export default function TranscriptsPage() {
                       </thead>
                       <tbody>
                         {term.courses.map((c) => (
-                          <tr key={`${c.code}-${c.title}`} className="border-b border-slate-100 dark:border-neutral-800">
+                          <tr key={`${c.code}-${c.title}`} className="border-b border-border-subtle">
                             <td className="py-1.5 pe-2 font-mono text-xs">{c.code}</td>
                             <td className="py-1.5 pe-2">{c.title}</td>
                             <td className="py-1.5 pe-2">{c.creditsEarned}</td>
@@ -316,14 +316,14 @@ export default function TranscriptsPage() {
                         ))}
                       </tbody>
                     </table>
-                    <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+                    <p className="mt-1 text-xs text-fg-muted">
                       Term credits: {term.termCredits}
                       {term.termGpa != null ? ` · Term GPA: ${term.termGpa.toFixed(3)}` : null}
                     </p>
                   </div>
                 ))
               )}
-              <p className="text-sm font-medium text-slate-800 dark:text-neutral-100">
+              <p className="text-sm font-medium text-fg-default">
                 Cumulative credits earned: {preview.cumulative.creditsEarned}
                 {preview.cumulative.gpa != null ? ` · GPA: ${preview.cumulative.gpa.toFixed(3)}` : null}
               </p>
@@ -332,22 +332,22 @@ export default function TranscriptsPage() {
         </section>
 
         <section aria-labelledby="issued-heading">
-          <h2 id="issued-heading" className="text-lg font-semibold text-slate-800 dark:text-neutral-100">
+          <h2 id="issued-heading" className="text-lg font-semibold text-fg-default">
             My issued documents
           </h2>
           {loading ? (
-            <p className="mt-4 text-sm text-slate-500">Loading…</p>
+            <p className="mt-4 text-sm text-fg-muted">Loading…</p>
           ) : documents.length === 0 ? (
-            <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">No issued transcripts yet.</p>
+            <p className="mt-4 text-sm text-fg-muted">No issued transcripts yet.</p>
           ) : (
-            <ul className="mt-4 divide-y divide-slate-200 overflow-hidden rounded-lg border border-slate-200 dark:divide-neutral-800 dark:border-neutral-800">
+            <ul className="mt-4 divide-y divide-slate-200 overflow-hidden rounded-lg border border-border-default dark:divide-neutral-800 dark:border-border-subtle">
               {documents.map((doc) => (
-                <li key={doc.id} className="flex flex-wrap items-center justify-between gap-3 bg-white px-4 py-3 dark:bg-neutral-900">
+                <li key={doc.id} className="flex flex-wrap items-center justify-between gap-3 bg-surface-raised px-4 py-3 dark:bg-surface-raised">
                   <div>
-                    <p className="text-sm font-medium text-slate-900 dark:text-neutral-50">
+                    <p className="text-sm font-medium text-fg-default">
                       {variantLabel(doc.variant)} · v{doc.version}
                     </p>
-                    <p className="text-xs text-slate-500 dark:text-neutral-400">
+                    <p className="text-xs text-fg-muted">
                       {formatDate(doc.generatedAt, { dateStyle: 'medium', timeStyle: 'short' })}
                       {doc.gpaCumulative != null ? ` · GPA ${doc.gpaCumulative.toFixed(3)}` : null}
                       {doc.creditsEarned != null ? ` · ${doc.creditsEarned} credits` : null}
@@ -359,7 +359,7 @@ export default function TranscriptsPage() {
                         href={doc.verificationUrl ?? `/verify/${encodeURIComponent(doc.verifyToken!)}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-sm font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+                        className="text-sm font-medium text-accent-fg hover:underline dark:text-indigo-400"
                       >
                         Verify
                       </a>
@@ -372,7 +372,7 @@ export default function TranscriptsPage() {
                             setError(e instanceof Error ? e.message : 'Could not download PDF.')
                           })
                         }}
-                        className="text-sm font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+                        className="text-sm font-medium text-accent-fg hover:underline dark:text-indigo-400"
                       >
                         PDF
                       </button>
@@ -385,7 +385,7 @@ export default function TranscriptsPage() {
                             setError(e instanceof Error ? e.message : 'Could not download XML.')
                           })
                         }}
-                        className="text-sm font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+                        className="text-sm font-medium text-accent-fg hover:underline dark:text-indigo-400"
                       >
                         XML
                       </button>
@@ -398,10 +398,10 @@ export default function TranscriptsPage() {
         </section>
 
         <section aria-labelledby="request-heading">
-          <h2 id="request-heading" className="text-lg font-semibold text-slate-800 dark:text-neutral-100">
+          <h2 id="request-heading" className="text-lg font-semibold text-fg-default">
             {transcriptConfig?.ordersUiEnabled ? t('transcripts.order.sectionTitle') : 'Request delivery'}
           </h2>
-          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+          <p className="mt-1 text-sm text-fg-muted">
             {transcriptConfig?.ordersUiEnabled
               ? t('transcripts.order.sectionHelp')
               : 'Submit a delivery request to your institution (email, mail, or pickup).'}
@@ -414,7 +414,7 @@ export default function TranscriptsPage() {
                 else setModalOpen(true)
               }}
               disabled={loading}
-              className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
+              className="rounded-md bg-accent-solid px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
             >
               {transcriptConfig?.ordersUiEnabled
                 ? t('transcripts.order.newOrder')
@@ -425,32 +425,32 @@ export default function TranscriptsPage() {
 
         {transcriptConfig?.ordersUiEnabled ? (
           <section aria-labelledby="orders-heading">
-            <h2 id="orders-heading" className="text-lg font-semibold text-slate-800 dark:text-neutral-100">
+            <h2 id="orders-heading" className="text-lg font-semibold text-fg-default">
               {t('transcripts.order.historyTitle')}
             </h2>
             {loading ? (
-              <p className="mt-4 text-sm text-slate-500">{t('common.loading')}</p>
+              <p className="mt-4 text-sm text-fg-muted">{t('common.loading')}</p>
             ) : orders.length === 0 ? (
-              <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">{t('transcripts.order.historyEmpty')}</p>
+              <p className="mt-4 text-sm text-fg-muted">{t('transcripts.order.historyEmpty')}</p>
             ) : (
-              <ul className="mt-4 divide-y divide-slate-200 overflow-hidden rounded-lg border border-slate-200 dark:divide-neutral-800 dark:border-neutral-800">
+              <ul className="mt-4 divide-y divide-slate-200 overflow-hidden rounded-lg border border-border-default dark:divide-neutral-800 dark:border-border-subtle">
                 {orders.map((o) => {
                   const statusKey = `transcripts.status.${o.status}`
                   const onHold = o.onHold || o.status === 'on_hold'
                   const rejected = o.status === 'rejected'
                   return (
-                    <li key={o.id} className="bg-white px-4 py-3 dark:bg-neutral-900">
+                    <li key={o.id} className="bg-surface-raised px-4 py-3 dark:bg-surface-raised">
                       <div className="flex items-start justify-between gap-4">
                         <div className="min-w-0 flex-1">
-                          <p className="text-sm font-medium text-slate-900 dark:text-neutral-50">
+                          <p className="text-sm font-medium text-fg-default">
                             {t('transcripts.order.itemCount', { count: o.items.length })}
                           </p>
-                          <p className="text-xs text-slate-500 dark:text-neutral-400">
+                          <p className="text-xs text-fg-muted">
                             {formatDate(o.createdAt, { dateStyle: 'medium', timeStyle: 'short' })}
                           </p>
                           <ul className="mt-2 space-y-1">
                             {o.items.map((it) => (
-                              <li key={it.id} className="text-xs text-slate-600 dark:text-neutral-400">
+                              <li key={it.id} className="text-xs text-fg-muted">
                                 {it.recipient?.name ?? t('transcripts.order.unnamed')} · {it.deliveryMethod} ·{' '}
                                 {it.urgency} · {it.status}
                               </li>
@@ -493,7 +493,7 @@ export default function TranscriptsPage() {
                               <p className="mt-1">{t('transcripts.consent.pendingHelp')}</p>
                               <button
                                 type="button"
-                                className="mt-2 font-semibold text-indigo-700 underline dark:text-indigo-300"
+                                className="mt-2 font-semibold text-accent-fg underline dark:text-indigo-300"
                                 onClick={() => setConsentOrderId(o.id)}
                               >
                                 {t('transcripts.consent.reviewAndSign')}
@@ -508,7 +508,7 @@ export default function TranscriptsPage() {
                             <div className="mt-3 flex flex-wrap gap-3 text-xs">
                               <button
                                 type="button"
-                                className="font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+                                className="font-medium text-accent-fg hover:underline dark:text-indigo-400"
                                 onClick={() => {
                                   void exportTranscriptConsent(o.id, 'json')
                                     .then(() => setMessage(t('transcripts.consent.exportReady')))
@@ -521,7 +521,7 @@ export default function TranscriptsPage() {
                               </button>
                               <button
                                 type="button"
-                                className="font-medium text-red-600 hover:underline dark:text-red-400"
+                                className="font-medium text-danger-fg hover:underline dark:text-red-400"
                                 onClick={() => {
                                   void (async () => {
                                     const ok = await confirm({
@@ -547,15 +547,7 @@ export default function TranscriptsPage() {
                           ) : null}
                         </div>
                         <span
-                          className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                            onHold
-                              ? 'bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-100'
-                              : rejected
-                                ? 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-100'
-                                : o.status === 'pending_consent'
-                                  ? 'bg-indigo-100 text-indigo-900 dark:bg-indigo-950 dark:text-indigo-100'
-                                  : 'bg-slate-100 text-slate-700 dark:bg-neutral-800 dark:text-neutral-200'
-                          }`}
+                          className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${ onHold ? 'bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-100' : rejected ? 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-100' : o.status === 'pending_consent' ? 'bg-indigo-100 text-indigo-900 dark:bg-indigo-950 dark:text-indigo-100' : 'bg-surface-sunken text-fg-muted dark:bg-surface-overlay dark:text-fg-default' }`}
                           aria-label={t('transcripts.status.aria', { status: o.status })}
                         >
                           {t(statusKey, { defaultValue: o.status })}
@@ -569,40 +561,40 @@ export default function TranscriptsPage() {
           </section>
         ) : (
           <section aria-labelledby="history-heading">
-            <h2 id="history-heading" className="text-lg font-semibold text-slate-800 dark:text-neutral-100">
+            <h2 id="history-heading" className="text-lg font-semibold text-fg-default">
               Delivery requests
             </h2>
             {loading ? (
-              <p className="mt-4 text-sm text-slate-500">Loading…</p>
+              <p className="mt-4 text-sm text-fg-muted">Loading…</p>
             ) : requests.length === 0 ? (
-              <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">No transcript requests yet.</p>
+              <p className="mt-4 text-sm text-fg-muted">No transcript requests yet.</p>
             ) : (
-              <ul className="mt-4 divide-y divide-slate-200 overflow-hidden rounded-lg border border-slate-200 dark:divide-neutral-800 dark:border-neutral-800">
+              <ul className="mt-4 divide-y divide-slate-200 overflow-hidden rounded-lg border border-border-default dark:divide-neutral-800 dark:border-border-subtle">
                 {requests.map((r) => {
                   const urgency = urgencyLabel(r.deliveryType, r.urgencyDays, r.urgencyUnit, r.urgencyDaysMin)
                   return (
-                    <li key={r.id} className="flex items-start justify-between gap-4 bg-white px-4 py-3 dark:bg-neutral-900">
+                    <li key={r.id} className="flex items-start justify-between gap-4 bg-surface-raised px-4 py-3 dark:bg-surface-raised">
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-slate-900 dark:text-neutral-50">
+                        <p className="text-sm font-medium text-fg-default">
                           {deliveryTypeLabel(r.deliveryType)}
                           {urgency ? ` · ${urgency}` : null}
                         </p>
-                        <p className="text-xs text-slate-500 dark:text-neutral-400">
+                        <p className="text-xs text-fg-muted">
                           Submitted {formatDate(r.requestedAt, { dateStyle: 'medium', timeStyle: 'short' })}
                           {r.submittedAt
                             ? ` · Delivered ${formatDate(r.submittedAt, { dateStyle: 'medium', timeStyle: 'short' })}`
                             : null}
                         </p>
                         {r.deliveryEmail && (
-                          <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">To: {r.deliveryEmail}</p>
+                          <p className="mt-1 text-xs text-fg-muted">To: {r.deliveryEmail}</p>
                         )}
                         {r.deliveryAddress && (
-                          <p className="mt-1 whitespace-pre-wrap text-xs text-slate-600 dark:text-neutral-400">
+                          <p className="mt-1 whitespace-pre-wrap text-xs text-fg-muted">
                             {r.deliveryAddress}
                           </p>
                         )}
                         {r.errorMessage && (
-                          <p className="mt-1 text-xs text-red-600 dark:text-red-400">{r.errorMessage}</p>
+                          <p className="mt-1 text-xs text-danger-fg">{r.errorMessage}</p>
                         )}
                       </div>
                       <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${statusClass(r.status)}`}>
@@ -642,9 +634,9 @@ export default function TranscriptsPage() {
             role="dialog"
             aria-modal="true"
             aria-label={t('transcripts.consent.dialogTitle')}
-            className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white p-5 shadow-xl dark:bg-neutral-900"
+            className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-surface-raised p-5 shadow-xl dark:bg-surface-raised"
           >
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-neutral-50">
+            <h2 className="text-lg font-semibold text-fg-default">
               {t('transcripts.consent.dialogTitle')}
             </h2>
             <TranscriptConsentForm

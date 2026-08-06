@@ -95,8 +95,8 @@ function InboxMessageActions({
 
   if (meta.type === 'enrollment_invitation' && meta.courseCode && meta.enrollmentId) {
     return (
-      <div className="mt-6 border-t border-slate-100 pt-4">
-        <p className="mb-3 text-sm font-medium text-slate-700">Respond to this invitation</p>
+      <div className="mt-6 border-t border-border-subtle pt-4">
+        <p className="mb-3 text-sm font-medium text-fg-muted">Respond to this invitation</p>
         <CourseEnrollmentInvitationActions
           courseCode={meta.courseCode}
           enrollmentId={meta.enrollmentId}
@@ -267,22 +267,22 @@ export default function Inbox() {
   return (
     <>
       <h1 className="sr-only">Inbox</h1>
-      <div className="flex h-[calc(100dvh-3.5rem)] min-h-0 flex-col overflow-hidden bg-white">
-        <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 bg-slate-50/80 px-3 py-2.5 sm:px-4">
+      <div className="flex h-[calc(100dvh-3.5rem)] min-h-0 flex-col overflow-hidden bg-surface-raised">
+        <div className="flex flex-wrap items-center gap-2 border-b border-border-default bg-slate-50/80 px-3 py-2.5 sm:px-4">
           <button
             type="button"
             onClick={() => {
               setComposeOpen(true)
               setComposeError(null)
             }}
-            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3.5 py-2 text-sm font-medium text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
+            className="inline-flex items-center gap-2 rounded-lg bg-accent-solid px-3.5 py-2 text-sm font-medium text-white shadow-sm transition-[background-color,color,border-color] hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
           >
             <Mail className="h-4 w-4 shrink-0" aria-hidden />
             Compose
           </button>
           <div className="relative min-w-[12rem] flex-1 sm:max-w-md">
             <Search
-              className="pointer-events-none absolute start-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+              className="pointer-events-none absolute start-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-subtle"
               aria-hidden
             />
             <input
@@ -290,7 +290,7 @@ export default function Inbox() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search mail"
-              className="w-full rounded-lg border border-slate-200 bg-white py-2 ps-9 pe-3 text-sm text-slate-900 outline-none placeholder:text-slate-500 focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/20"
+              className="w-full rounded-lg border border-border-default bg-surface-raised py-2 ps-9 pe-3 text-sm text-fg-default outline-none placeholder:text-fg-muted focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/20"
               aria-label="Search mail"
             />
           </div>
@@ -304,7 +304,7 @@ export default function Inbox() {
 
         <div className="flex min-h-0 min-w-0 flex-1 flex-col md:flex-row">
           <nav
-            className="flex shrink-0 gap-1 border-b border-slate-200 p-2 md:w-52 md:flex-col md:border-b-0 md:border-e md:p-2"
+            className="flex shrink-0 gap-1 border-b border-border-default p-2 md:w-52 md:flex-col md:border-b-0 md:border-e md:p-2"
             aria-label="Mail folders"
           >
             {FOLDERS.map(({ id, label, icon: Icon }) => (
@@ -316,11 +316,7 @@ export default function Inbox() {
                   setSelectedId(null)
                   setMobilePane('list')
                 }}
-                className={`flex items-center gap-2 rounded-lg px-3 py-2 text-start text-sm font-medium transition-[background-color,color,border-color] md:w-full ${
-                  folder === id
-                    ? 'bg-indigo-50 text-indigo-800'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                }`}
+                className={`flex items-center gap-2 rounded-lg px-3 py-2 text-start text-sm font-medium transition-[background-color,color,border-color] md:w-full ${ folder === id ? 'bg-indigo-50 text-indigo-800' : 'text-fg-muted hover:bg-surface-sunken hover:text-fg-default' }`}
               >
                 <Icon className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
                 {label}
@@ -328,18 +324,16 @@ export default function Inbox() {
             ))}
           </nav>
 
-          <div className="relative flex min-h-0 min-w-0 flex-1 flex-col border-slate-200 md:flex-row md:border-s">
+          <div className="relative flex min-h-0 min-w-0 flex-1 flex-col border-border-default md:flex-row md:border-s">
             <div
-              className={`flex min-h-0 w-full shrink-0 flex-col border-slate-200 md:w-[min(100%,24rem)] md:border-e ${
-                mobilePane === 'list' ? 'flex' : 'hidden'
-              } md:flex`}
+              className={`flex min-h-0 w-full shrink-0 flex-col border-border-default md:w-[min(100%,24rem)] md:border-e ${ mobilePane === 'list' ? 'flex' : 'hidden' } md:flex`}
             >
-              <div className="border-b border-slate-100 px-3 py-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+              <div className="border-b border-border-subtle px-3 py-2 text-xs font-medium uppercase tracking-wide text-fg-muted">
                 {loadStatus === 'loading' ? 'Loading…' : `${messages.length} conversation${messages.length === 1 ? '' : 's'}`}
               </div>
               <ul className="min-h-0 flex-1 overflow-y-auto" role="listbox" aria-label="Messages">
                 {loadStatus === 'error' ? (
-                  <li className="px-4 py-12 text-center text-sm text-slate-500">Could not load.</li>
+                  <li className="px-4 py-12 text-center text-sm text-fg-muted">Could not load.</li>
                 ) : messages.length === 0 ? (
                   <li className="list-none p-3" role="presentation">
                     {(() => {
@@ -362,7 +356,7 @@ export default function Inbox() {
                           secondaryAction={
                             searching ? { label: 'Compose', onClick: openCompose } : undefined
                           }
-                          className="border-slate-100 bg-white py-10 dark:border-neutral-800 dark:bg-neutral-950/60"
+                          className="border-border-subtle bg-surface-raised py-10 dark:border-border-subtle/60"
                         />
                       )
                     })()}
@@ -373,9 +367,7 @@ export default function Inbox() {
                     return (
                       <li
                         key={m.id}
-                        className={`flex border-b border-slate-100 transition-[background-color,color,border-color] hover:bg-slate-50 ${
-                          active ? 'bg-indigo-50/60' : ''
-                        } ${!m.read ? 'bg-slate-50/90' : ''}`}
+                        className={`flex border-b border-border-subtle transition-[background-color,color,border-color] hover:bg-surface-base ${ active ? 'bg-indigo-50/60' : '' } ${!m.read ? 'bg-slate-50/90' : ''}`}
                       >
                         <button
                           type="button"
@@ -393,14 +385,14 @@ export default function Inbox() {
                           <span className="min-w-0 flex-1">
                             <span className="flex items-start justify-between gap-2">
                               <span
-                                className={`truncate text-sm ${!m.read ? 'font-semibold text-slate-900' : 'text-slate-800'}`}
+                                className={`truncate text-sm ${!m.read ? 'font-semibold text-fg-default' : 'text-fg-default'}`}
                               >
                                 {m.folder === 'sent' || m.folder === 'drafts'
                                   ? `To: ${m.to}`
                                   : m.from.name}
                               </span>
                               <time
-                                className="shrink-0 text-xs text-slate-500"
+                                className="shrink-0 text-xs text-fg-muted"
                                 dateTime={m.sent_at}
                                 title={formatAbsolute(m.sent_at)}
                               >
@@ -408,11 +400,11 @@ export default function Inbox() {
                               </time>
                             </span>
                             <span
-                              className={`mt-0.5 line-clamp-1 text-sm ${!m.read ? 'font-medium text-slate-900' : 'text-slate-700'}`}
+                              className={`mt-0.5 line-clamp-1 text-sm ${!m.read ? 'font-medium text-fg-default' : 'text-fg-muted'}`}
                             >
                               {m.subject || '(no subject)'}
                             </span>
-                            <span className="mt-0.5 line-clamp-1 text-xs text-slate-500">
+                            <span className="mt-0.5 line-clamp-1 text-xs text-fg-muted">
                               {m.snippet || m.body.slice(0, 100)}
                               {m.body.length > 100 && !m.snippet ? '…' : ''}
                             </span>
@@ -422,7 +414,7 @@ export default function Inbox() {
                           <button
                             type="button"
                             onClick={(e) => void toggleStar(m.id, e)}
-                            className="rounded p-0.5 text-slate-400 hover:bg-slate-200/80 hover:text-amber-500"
+                            className="rounded p-0.5 text-fg-subtle hover:bg-slate-200/80 hover:text-amber-500"
                             aria-label={m.starred ? 'Remove star' : 'Star'}
                           >
                             <Star
@@ -431,7 +423,7 @@ export default function Inbox() {
                             />
                           </button>
                           {m.has_attachment && (
-                            <Paperclip className="h-3.5 w-3.5 text-slate-400" aria-hidden />
+                            <Paperclip className="h-3.5 w-3.5 text-fg-subtle" aria-hidden />
                           )}
                         </div>
                       </li>
@@ -442,17 +434,15 @@ export default function Inbox() {
             </div>
 
             <section
-              className={`min-h-0 min-w-0 flex-1 flex-col bg-white ${
-                mobilePane === 'message' ? 'flex' : 'hidden'
-              } md:flex`}
+              className={`min-h-0 min-w-0 flex-1 flex-col bg-surface-raised ${ mobilePane === 'message' ? 'flex' : 'hidden' } md:flex`}
               aria-label="Message"
             >
               {selected ? (
                 <>
-                  <div className="flex items-center gap-2 border-b border-slate-100 px-2 py-2 md:px-4">
+                  <div className="flex items-center gap-2 border-b border-border-subtle px-2 py-2 md:px-4">
                     <button
                       type="button"
-                      className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm text-slate-600 hover:bg-slate-100 md:hidden"
+                      className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm text-fg-muted hover:bg-surface-sunken md:hidden"
                       onClick={() => {
                         setMobilePane('list')
                       }}
@@ -465,7 +455,7 @@ export default function Inbox() {
                         <button
                           type="button"
                           onClick={() => void archiveFromInbox(selected.id)}
-                          className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm text-slate-600 hover:bg-slate-100"
+                          className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm text-fg-muted hover:bg-surface-sunken"
                           title="Archive"
                         >
                           <Archive className="h-4 w-4" aria-hidden />
@@ -476,7 +466,7 @@ export default function Inbox() {
                         <button
                           type="button"
                           onClick={() => void moveToTrash(selected.id)}
-                          className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm text-slate-600 hover:bg-slate-100"
+                          className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm text-fg-muted hover:bg-surface-sunken"
                           title="Trash"
                         >
                           <Trash2 className="h-4 w-4" aria-hidden />
@@ -486,7 +476,7 @@ export default function Inbox() {
                       <button
                         type="button"
                         onClick={() => void toggleStar(selected.id)}
-                        className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm text-slate-600 hover:bg-slate-100"
+                        className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm text-fg-muted hover:bg-surface-sunken"
                         aria-label={selected.starred ? 'Remove star' : 'Star'}
                       >
                         <Star
@@ -497,10 +487,10 @@ export default function Inbox() {
                     </div>
                   </div>
                   <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 md:px-6 md:py-6">
-                    <h2 className="text-lg font-semibold leading-snug text-slate-900">
+                    <h2 className="text-lg font-semibold leading-snug text-fg-default">
                       {selected.subject || '(no subject)'}
                     </h2>
-                    <div className="mt-4 flex flex-wrap items-start gap-3 border-b border-slate-100 pb-4">
+                    <div className="mt-4 flex flex-wrap items-start gap-3 border-b border-border-subtle pb-4">
                       <span
                         className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-sm font-semibold text-indigo-800"
                         aria-hidden
@@ -508,9 +498,9 @@ export default function Inbox() {
                         {initials(selected.from.name)}
                       </span>
                       <div className="min-w-0 flex-1 text-sm">
-                        <div className="font-medium text-slate-900">{selected.from.name}</div>
-                        <div className="text-slate-500">&lt;{selected.from.email}&gt;</div>
-                        <div className="mt-1 text-xs text-slate-500">
+                        <div className="font-medium text-fg-default">{selected.from.name}</div>
+                        <div className="text-fg-muted">&lt;{selected.from.email}&gt;</div>
+                        <div className="mt-1 text-xs text-fg-muted">
                           To: {selected.to} ·{' '}
                           <time
                             dateTime={selected.sent_at}
@@ -521,22 +511,22 @@ export default function Inbox() {
                         </div>
                       </div>
                       {selected.has_attachment && (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2 py-1 text-xs text-slate-600">
+                        <span className="inline-flex items-center gap-1 rounded-full border border-border-default bg-surface-base px-2 py-1 text-xs text-fg-muted">
                           <Paperclip className="h-3.5 w-3.5" aria-hidden />
                           Attachment
                         </span>
                       )}
                     </div>
-                    <div className="mt-4 max-w-none whitespace-pre-wrap text-sm leading-relaxed text-slate-800">
+                    <div className="mt-4 max-w-none whitespace-pre-wrap text-sm leading-relaxed text-fg-default">
                       {selected.body || (
-                        <span className="text-slate-400">Empty message.</span>
+                        <span className="text-fg-subtle">Empty message.</span>
                       )}
                     </div>
                     {selected.metadata?.resolved === 'approved' ? (
                       <p className="mt-4 text-sm font-medium text-emerald-700">You approved this invitation.</p>
                     ) : null}
                     {selected.metadata?.resolved === 'declined' ? (
-                      <p className="mt-4 text-sm font-medium text-red-700">You declined this invitation.</p>
+                      <p className="mt-4 text-sm font-medium text-danger-fg">You declined this invitation.</p>
                     ) : null}
                     <InboxMessageActions
                       message={selected}
@@ -545,10 +535,10 @@ export default function Inbox() {
                   </div>
                 </>
               ) : (
-                <div className="flex flex-1 flex-col items-center justify-center gap-2 px-6 py-16 text-center text-slate-500">
+                <div className="flex flex-1 flex-col items-center justify-center gap-2 px-6 py-16 text-center text-fg-muted">
                   <Mail className="h-10 w-10 text-slate-300" aria-hidden />
-                  <p className="text-sm font-medium text-slate-600">Select a message to read</p>
-                  <p className="max-w-xs text-xs text-slate-500">
+                  <p className="text-sm font-medium text-fg-muted">Select a message to read</p>
+                  <p className="max-w-xs text-xs text-fg-muted">
                     New mail appears in real time when the server notifies this session.
                   </p>
                 </div>
@@ -565,59 +555,59 @@ export default function Inbox() {
           aria-modal="true"
           aria-labelledby="compose-title"
         >
-          <div className="w-full max-w-lg rounded-xl border border-slate-200 bg-white shadow-xl">
-            <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
-              <h3 id="compose-title" className="text-sm font-semibold text-slate-900">
+          <div className="w-full max-w-lg rounded-xl border border-border-default bg-surface-raised shadow-xl">
+            <div className="flex items-center justify-between border-b border-border-default px-4 py-3">
+              <h3 id="compose-title" className="text-sm font-semibold text-fg-default">
                 New message
               </h3>
               <button
                 type="button"
                 onClick={() => setComposeOpen(false)}
-                className="rounded-lg px-2 py-1 text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                className="rounded-lg px-2 py-1 text-sm text-fg-muted hover:bg-surface-sunken hover:text-fg-default"
               >
                 Close
               </button>
             </div>
             <div className="space-y-3 px-4 py-4">
               {composeError && (
-                <p className="text-sm text-red-600" role="alert">
+                <p className="text-sm text-danger-fg" role="alert">
                   {composeError}
                 </p>
               )}
-              <label className="block text-xs font-medium text-slate-600">
+              <label className="block text-xs font-medium text-fg-muted">
                 To
                 <input
                   value={composeTo}
                   onChange={(e) => setComposeTo(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/20"
+                  className="mt-1 w-full rounded-lg border border-border-default px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/20"
                   placeholder="name@school.edu"
                 />
               </label>
-              <label className="block text-xs font-medium text-slate-600">
+              <label className="block text-xs font-medium text-fg-muted">
                 Subject
                 <input
                   value={composeSubject}
                   onChange={(e) => setComposeSubject(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/20"
+                  className="mt-1 w-full rounded-lg border border-border-default px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/20"
                   placeholder="Subject"
                 />
               </label>
-              <label className="block text-xs font-medium text-slate-600">
+              <label className="block text-xs font-medium text-fg-muted">
                 Message
                 <textarea
                   value={composeBody}
                   onChange={(e) => setComposeBody(e.target.value)}
                   rows={6}
-                  className="mt-1 w-full resize-y rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/20"
+                  className="mt-1 w-full resize-y rounded-lg border border-border-default px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/20"
                   placeholder="Write something…"
                 />
               </label>
             </div>
-            <div className="flex justify-end gap-2 border-t border-slate-200 px-4 py-3">
+            <div className="flex justify-end gap-2 border-t border-border-default px-4 py-3">
               <button
                 type="button"
                 onClick={() => setComposeOpen(false)}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100"
+                className="rounded-lg px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-sunken"
               >
                 Cancel
               </button>
@@ -625,7 +615,7 @@ export default function Inbox() {
                 type="button"
                 disabled={composeBusy}
                 onClick={() => void sendCompose()}
-                className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 disabled:opacity-60"
+                className="inline-flex items-center gap-2 rounded-lg bg-accent-solid px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-accent disabled:opacity-60"
               >
                 <Send className="h-4 w-4" aria-hidden />
                 Send

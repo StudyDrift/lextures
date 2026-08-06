@@ -68,11 +68,6 @@ func (d Deps) boardExportStorage() filestorage.Driver {
 // handleCreateBoardExport is POST .../boards/{board_id}/export (VC.9).
 func (d Deps) handleCreateBoardExport() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode := chi.URLParam(r, "course_code")
 		boardID := chi.URLParam(r, "board_id")
 		if d.visualBoardsFeatureOff(w, r, courseCode) {

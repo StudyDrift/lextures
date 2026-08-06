@@ -81,7 +81,7 @@ export function NotebookTasksCard({ courseTitles }: NotebookTasksCardProps) {
 
   return (
     <section aria-label="Notebook tasks">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-fg-muted">
         Notebook tasks
       </h2>
       {error ? (
@@ -90,7 +90,7 @@ export function NotebookTasksCard({ courseTitles }: NotebookTasksCardProps) {
         </p>
       ) : null}
       {tasks.length === 0 && !error ? (
-        <p className="mt-3 rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm text-slate-600 dark:border-neutral-700 dark:bg-neutral-900/50 dark:text-neutral-300">
+        <p className="mt-3 rounded-xl border border-border-default bg-slate-50/80 px-4 py-3 text-sm text-fg-muted dark:border-border-default/50 dark:text-fg-muted">
           Add tasks in a notebook with <span className="font-mono text-xs">/task</span> or{' '}
           <span className="font-mono text-xs">/todo</span>. Open tasks show up here.
         </p>
@@ -103,13 +103,13 @@ export function NotebookTasksCard({ courseTitles }: NotebookTasksCardProps) {
           return (
             <li
               key={task.id}
-              className="flex items-start gap-3 rounded-xl bg-white px-3 py-3 shadow-card dark:bg-neutral-900"
+              className="flex items-start gap-3 rounded-xl bg-surface-raised px-3 py-3 shadow-card dark:bg-surface-raised"
             >
               <button
                 type="button"
                 disabled={busy}
                 onClick={() => void onComplete(task)}
-                className="mt-0.5 shrink-0 rounded p-0.5 text-slate-400 transition-[background-color,color,border-color] hover:bg-slate-100 hover:text-indigo-600 disabled:opacity-50 dark:hover:bg-neutral-800 dark:hover:text-indigo-400"
+                className="mt-0.5 shrink-0 rounded p-0.5 text-fg-subtle transition-[background-color,color,border-color] hover:bg-surface-sunken hover:text-accent-fg disabled:opacity-50 dark:hover:bg-surface-overlay dark:hover:text-indigo-400"
                 aria-label={`Complete task: ${label}`}
               >
                 <Square className="h-4 w-4" aria-hidden />
@@ -117,15 +117,15 @@ export function NotebookTasksCard({ courseTitles }: NotebookTasksCardProps) {
               <div className="min-w-0 flex-1">
                 <Link
                   to={href}
-                  className="block text-sm font-medium text-slate-900 hover:text-indigo-700 dark:text-neutral-100 dark:hover:text-indigo-300"
+                  className="block text-sm font-medium text-fg-default hover:text-accent-fg dark:text-fg-default dark:hover:text-indigo-300"
                 >
                   {label}
                 </Link>
-                <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
+                <p className="mt-0.5 text-xs text-fg-muted">
                   {taskCourseLabel(task.courseCode, courseTitles)}
                 </p>
                 {task.dueAt ? (
-                  <p className="mt-1 flex items-center gap-1 text-xs text-slate-500 dark:text-neutral-400">
+                  <p className="mt-1 flex items-center gap-1 text-xs text-fg-muted">
                     <CalendarDays className="h-3 w-3 shrink-0" aria-hidden />
                     Due {formatDate(task.dueAt, { dateStyle: 'medium' })}
                   </p>
@@ -133,7 +133,7 @@ export function NotebookTasksCard({ courseTitles }: NotebookTasksCardProps) {
               </div>
               <Link
                 to={href}
-                className="shrink-0 self-center text-xs font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
+                className="shrink-0 self-center text-xs font-medium text-accent-fg hover:text-indigo-500 dark:text-indigo-400"
               >
                 Open
               </Link>
@@ -142,7 +142,7 @@ export function NotebookTasksCard({ courseTitles }: NotebookTasksCardProps) {
         })}
       </ul>
       {tasks.length > 0 ? (
-        <p className="mt-2 flex items-center gap-1.5 text-xs text-slate-500 dark:text-neutral-400">
+        <p className="mt-2 flex items-center gap-1.5 text-xs text-fg-muted">
           <CheckSquare className="h-3.5 w-3.5" aria-hidden />
           Complete a task here to remove it from this list. In your notebook it stays visible, crossed out.
         </p>

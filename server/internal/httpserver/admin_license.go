@@ -87,11 +87,6 @@ func (d Deps) registerAdminLicenseRoutes(r chi.Router) {
 
 func (d Deps) handleAdminConsoleLicenseGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.seatManagementEnabled(w) {
 			return
 		}
@@ -110,11 +105,6 @@ func (d Deps) handleAdminConsoleLicenseGet() http.HandlerFunc {
 
 func (d Deps) handleAdminLicensesList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.seatManagementEnabled(w) {
 			return
 		}
@@ -172,11 +162,6 @@ func parseLicenseDate(s *string) (*time.Time, error) {
 
 func (d Deps) handleAdminLicensePatch() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.seatManagementEnabled(w) {
 			return
 		}
@@ -228,11 +213,6 @@ func (d Deps) handleAdminLicensePatch() http.HandlerFunc {
 
 func (d Deps) handleAdminLicenseResync() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.seatManagementEnabled(w) {
 			return
 		}

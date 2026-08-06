@@ -45,7 +45,7 @@ function sessionStatusBadge(status: AttendanceSession['status']) {
     )
   }
   return (
-    <span className="inline-flex rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400">
+    <span className="inline-flex rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-neutral-600 dark:bg-surface-overlay dark:text-fg-muted">
       Closed
     </span>
   )
@@ -67,16 +67,12 @@ function CollectionMethodCard({
       role="radio"
       aria-checked={selected}
       onClick={onSelect}
-      className={`flex min-w-0 flex-1 flex-col rounded-xl border p-4 text-start transition-[background-color,color,border-color] ${
-        selected
-          ? 'border-indigo-500 bg-indigo-50/80 ring-2 ring-indigo-500/30 dark:border-indigo-400 dark:bg-indigo-950/40'
-          : 'border-slate-200 bg-white hover:border-slate-300 dark:border-neutral-700 dark:bg-neutral-900/40 dark:hover:border-neutral-600'
-      }`}
+      className={`flex min-w-0 flex-1 flex-col rounded-xl border p-4 text-start transition-[background-color,color,border-color] ${ selected ? 'border-indigo-500 bg-indigo-50/80 ring-2 ring-indigo-500/30 dark:border-indigo-400 dark:bg-indigo-950/40' : 'border-border-default bg-surface-raised hover:border-border-strong/40 dark:hover:border-border-default' }`}
     >
-      <span className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+      <span className="text-sm font-semibold text-fg-default">
         {isRollCall ? 'Roll call' : 'Self report'}
       </span>
-      <span className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-neutral-400">
+      <span className="mt-1 text-xs leading-relaxed text-fg-muted">
         {isRollCall
           ? 'Mark each student present, absent, or tardy from the roster.'
           : 'Students check in during an open window; you review and finalize.'}
@@ -271,13 +267,13 @@ export default function CourseAttendance() {
   }
 
   if (!courseCode) {
-    return <p className="p-4 text-red-600">No course selected.</p>
+    return <p className="p-4 text-danger-fg">No course selected.</p>
   }
 
   if (featuresLoading || permLoading) {
     return (
       <LmsPage title="Attendance">
-        <p className="text-sm text-slate-500" aria-busy="true">
+        <p className="text-sm text-fg-muted" aria-busy="true">
           Loading…
         </p>
       </LmsPage>
@@ -311,22 +307,22 @@ export default function CourseAttendance() {
       />
 
       {error && (
-        <div role="alert" className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
+        <div role="alert" className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-danger-fg dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
           {error}
         </div>
       )}
 
       {loading ? (
-        <p className="text-sm text-slate-500" aria-busy="true">
+        <p className="text-sm text-fg-muted" aria-busy="true">
           Loading…
         </p>
       ) : (
         <>
           {isStaff && !activeSessionId && (
-            <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-800 dark:bg-neutral-950">
-              <div className="border-b border-slate-100 pb-4 dark:border-neutral-800">
-                <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">New session</h2>
-                <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+            <section className="mb-8 rounded-2xl border border-border-default bg-surface-raised p-5 shadow-sm shadow-slate-900/5 dark:border-border-subtle dark:bg-surface-base">
+              <div className="border-b border-border-subtle pb-4 dark:border-border-subtle">
+                <h2 className="text-base font-semibold text-fg-default">New session</h2>
+                <p className="mt-1 text-sm text-fg-muted">
                   Choose how to collect attendance, then start a session for today.
                 </p>
               </div>
@@ -336,7 +332,7 @@ export default function CourseAttendance() {
                   <div className="max-w-xs">
                     <label
                       htmlFor="attendance-section"
-                      className="block text-sm font-medium text-slate-700 dark:text-neutral-300"
+                      className="block text-sm font-medium text-fg-muted"
                     >
                       Section
                     </label>
@@ -344,7 +340,7 @@ export default function CourseAttendance() {
                       id="attendance-section"
                       value={selectedSection}
                       onChange={(e) => setSelectedSection(e.target.value)}
-                      className="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+                      className="mt-1.5 w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-raised"
                     >
                       {sections.map((s) => (
                         <option key={s.id} value={s.id}>
@@ -356,7 +352,7 @@ export default function CourseAttendance() {
                 )}
 
                 <fieldset>
-                  <legend className="text-sm font-medium text-slate-700 dark:text-neutral-300">
+                  <legend className="text-sm font-medium text-fg-muted">
                     Collection method
                   </legend>
                   <div
@@ -377,7 +373,7 @@ export default function CourseAttendance() {
                   </div>
                 </fieldset>
 
-                <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4 dark:border-neutral-800 dark:bg-neutral-900/50">
+                <div className="rounded-xl border border-border-default bg-slate-50/80 p-4 dark:border-border-subtle/50">
                   <label className="flex cursor-pointer items-start gap-3">
                     <input
                       type="checkbox"
@@ -386,20 +382,20 @@ export default function CourseAttendance() {
                       className="mt-0.5"
                     />
                     <span>
-                      <span className="block text-sm font-medium text-slate-900 dark:text-neutral-100">
+                      <span className="block text-sm font-medium text-fg-default">
                         Add to gradebook
                       </span>
-                      <span className="mt-0.5 block text-xs text-slate-500 dark:text-neutral-400">
+                      <span className="mt-0.5 block text-xs text-fg-muted">
                         Creates a gradebook column when you close the session.
                       </span>
                     </span>
                   </label>
 
                   {gradebookEnabled && (
-                    <div className="mt-4 border-t border-slate-200 pt-4 dark:border-neutral-700">
+                    <div className="mt-4 border-t border-border-default pt-4 dark:border-border-default">
                       <label
                         htmlFor="attendance-points"
-                        className="block text-sm font-medium text-slate-700 dark:text-neutral-300"
+                        className="block text-sm font-medium text-fg-muted"
                       >
                         Points possible
                       </label>
@@ -409,19 +405,19 @@ export default function CourseAttendance() {
                         min={1}
                         value={pointsPossible}
                         onChange={(e) => setPointsPossible(Number(e.target.value) || 1)}
-                        className="mt-1.5 w-28 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+                        className="mt-1.5 w-28 rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-raised"
                       />
                     </div>
                   )}
                 </div>
               </div>
 
-              <div className="mt-6 flex justify-end border-t border-slate-100 pt-4 dark:border-neutral-800">
+              <div className="mt-6 flex justify-end border-t border-border-subtle pt-4 dark:border-border-subtle">
                 <button
                   type="button"
                   onClick={() => void handleCreateSession()}
                   disabled={creating}
-                  className="rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
+                  className="rounded-lg bg-accent-solid px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent disabled:opacity-50"
                 >
                   {creating ? 'Starting…' : 'Start session'}
                 </button>
@@ -458,20 +454,18 @@ export default function CourseAttendance() {
 
           {sessions.length > 0 && (
             <section className="mb-8">
-              <h2 className="mb-3 text-sm font-semibold text-slate-900 dark:text-neutral-100">Recent sessions</h2>
-              <ul className="divide-y divide-slate-200 overflow-hidden rounded-2xl border border-slate-200 dark:divide-neutral-800 dark:border-neutral-800">
+              <h2 className="mb-3 text-sm font-semibold text-fg-default">Recent sessions</h2>
+              <ul className="divide-y divide-slate-200 overflow-hidden rounded-2xl border border-border-default dark:divide-neutral-800 dark:border-border-subtle">
                 {sessions.map((s) => (
                   <li key={s.id}>
                     <button
                       type="button"
                       onClick={() => setActiveSessionId(s.id)}
-                      className={`flex w-full items-center justify-between gap-3 px-4 py-3.5 text-start transition-[background-color,color,border-color] hover:bg-slate-50 dark:hover:bg-neutral-900/60 ${
-                        activeSessionId === s.id ? 'bg-indigo-50 dark:bg-indigo-950/30' : 'bg-white dark:bg-neutral-950'
-                      }`}
+                      className={`flex w-full items-center justify-between gap-3 px-4 py-3.5 text-start transition-[background-color,color,border-color] hover:bg-surface-base dark:hover:bg-neutral-900/60 ${ activeSessionId === s.id ? 'bg-accent-surface' : 'bg-surface-raised' }`}
                     >
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-slate-900 dark:text-neutral-100">{s.title}</p>
-                        <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
+                        <p className="truncate text-sm font-medium text-fg-default">{s.title}</p>
+                        <p className="mt-0.5 text-xs text-fg-muted">
                           {s.sessionDate} · {collectionMethodLabel(s.collectionMethod)}
                           {s.gradebookEnabled ? ' · Gradebook' : ''}
                         </p>
@@ -485,31 +479,31 @@ export default function CourseAttendance() {
           )}
 
           {sessions.length === 0 && !isStaff && (
-            <p className="text-sm text-slate-500">No open attendance sessions.</p>
+            <p className="text-sm text-fg-muted">No open attendance sessions.</p>
           )}
 
           {isStaff && activeSessionId && sessionDetail?.records && sessionDetail.records.length > 0 && (
-            <section className="rounded-2xl border border-slate-200 bg-white dark:border-neutral-800 dark:bg-neutral-950">
-              <div className="flex flex-wrap items-center gap-3 border-b border-slate-100 px-4 py-3 dark:border-neutral-800">
+            <section className="rounded-2xl border border-border-default bg-surface-raised dark:border-border-subtle dark:bg-surface-base">
+              <div className="flex flex-wrap items-center gap-3 border-b border-border-subtle px-4 py-3 dark:border-border-subtle">
                 <div className="min-w-0 flex-1">
-                  <h2 className="truncate text-sm font-semibold text-slate-900 dark:text-neutral-100">
+                  <h2 className="truncate text-sm font-semibold text-fg-default">
                     {sessionDetail.title}
                   </h2>
-                  <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
+                  <p className="mt-0.5 text-xs text-fg-muted">
                     {sessionDetail.records.length} students · {collectionMethodLabel(sessionDetail.collectionMethod)}
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setActiveSessionId(null)}
-                  className="text-xs font-medium text-slate-500 hover:text-slate-700 dark:text-neutral-400 dark:hover:text-neutral-200"
+                  className="text-xs font-medium text-fg-muted hover:text-fg-muted dark:text-fg-muted dark:hover:text-fg-default"
                 >
                   Back to list
                 </button>
               </div>
 
               {sessionDetail.status === 'open' && (
-                <div className="flex flex-wrap gap-2 border-b border-slate-100 px-4 py-3 dark:border-neutral-800">
+                <div className="flex flex-wrap gap-2 border-b border-border-subtle px-4 py-3 dark:border-border-subtle">
                   <button
                     type="button"
                     onClick={handleMarkAllPresent}
@@ -521,7 +515,7 @@ export default function CourseAttendance() {
                     type="button"
                     onClick={() => void handleSave()}
                     disabled={saving}
-                    className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
+                    className="rounded-lg bg-accent-solid px-3 py-1.5 text-xs font-semibold text-white hover:bg-accent disabled:opacity-50"
                   >
                     {saving ? 'Saving…' : 'Save'}
                   </button>
@@ -529,7 +523,7 @@ export default function CourseAttendance() {
                     type="button"
                     onClick={() => void handleClose()}
                     disabled={saving}
-                    className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-300 dark:hover:bg-neutral-900"
+                    className="rounded-lg border border-border-strong px-3 py-1.5 text-xs font-semibold text-fg-muted hover:bg-surface-base dark:border-border-default dark:text-fg-muted dark:hover:bg-surface-raised"
                   >
                     Close session
                   </button>
@@ -543,7 +537,7 @@ export default function CourseAttendance() {
               >
                 <div
                   role="row"
-                  className="grid grid-cols-[1fr_180px] border-b bg-slate-50 text-sm font-medium dark:bg-neutral-800"
+                  className="grid grid-cols-[1fr_180px] border-b bg-surface-base text-sm font-medium dark:bg-surface-overlay"
                 >
                   <div role="columnheader" className="px-3 py-2">
                     Student
@@ -556,9 +550,9 @@ export default function CourseAttendance() {
                   const status = draft[student.studentUserId] ?? student.status
                   const rowClass =
                     status === 'absent'
-                      ? 'bg-red-50 dark:bg-red-950/20'
+                      ? 'bg-danger-surface'
                       : status === 'tardy'
-                        ? 'bg-amber-50 dark:bg-amber-950/20'
+                        ? 'bg-warning-surface'
                         : status === 'present' || status === 'excused'
                           ? 'bg-emerald-50 dark:bg-emerald-950/20'
                           : ''
@@ -567,7 +561,7 @@ export default function CourseAttendance() {
                       key={student.studentUserId}
                       role="row"
                       aria-rowindex={idx + 2}
-                      className={`grid grid-cols-[1fr_180px] border-b border-slate-100 text-sm last:border-0 dark:border-neutral-800 ${rowClass}`}
+                      className={`grid grid-cols-[1fr_180px] border-b border-border-subtle text-sm last:border-0 dark:border-border-subtle ${rowClass}`}
                     >
                       <div role="gridcell" className="px-3 py-2">
                         {studentLabel(student)}
@@ -582,7 +576,7 @@ export default function CourseAttendance() {
                             announce(`Status changed to ${v}.`)
                           }}
                           aria-label={`Attendance status for ${studentLabel(student)}`}
-                          className="w-full rounded border border-slate-300 px-2 py-0.5 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+                          className="w-full rounded border border-border-strong px-2 py-0.5 text-sm dark:border-border-default dark:bg-surface-overlay"
                         >
                           {ATTENDANCE_STATUS_OPTIONS.map((opt) => (
                             <option key={opt.value} value={opt.value}>
@@ -599,7 +593,7 @@ export default function CourseAttendance() {
           )}
 
           {isStaff && activeSessionId && sessionDetail?.records?.length === 0 && (
-            <p className="text-sm text-slate-500">No students enrolled for this session scope.</p>
+            <p className="text-sm text-fg-muted">No students enrolled for this session scope.</p>
           )}
         </>
       )}

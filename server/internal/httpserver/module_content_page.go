@@ -87,15 +87,6 @@ func buildModuleContentPageGetResponse(itemID uuid.UUID, row *coursemoduleconten
 // handleGetModuleContentPage is GET /api/v1/courses/{course_code}/content-pages/{item_id}.
 func (d Deps) handleGetModuleContentPage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -254,15 +245,6 @@ func (d Deps) applyAdaptiveContentServing(r *http.Request, courseID, itemID, vie
 // handlePatchModuleContentPage is PATCH /api/v1/courses/{course_code}/content-pages/{item_id}.
 func (d Deps) handlePatchModuleContentPage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return

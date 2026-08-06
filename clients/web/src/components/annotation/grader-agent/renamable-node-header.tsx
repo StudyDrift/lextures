@@ -90,7 +90,7 @@ export function RenamableNodeHeader({
   defaultLabel,
   headerClassName,
   dotClassName,
-  titleClassName = 'text-sm font-semibold text-slate-800 dark:text-neutral-100',
+  titleClassName = 'text-sm font-semibold text-fg-default',
   trailing,
 }: RenamableNodeHeaderProps) {
   const { t } = useTranslation('common')
@@ -124,7 +124,7 @@ export function RenamableNodeHeader({
           onKeyDown={onKeyDown}
           onClick={(event) => event.stopPropagation()}
           onPointerDown={(event) => event.stopPropagation()}
-          className={`nodrag nopan min-w-0 flex-1 rounded border border-slate-300 bg-white px-1.5 py-0.5 text-sm font-semibold text-slate-800 outline-none ring-indigo-500/30 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 ${titleClassName}`}
+          className={`nodrag nopan min-w-0 flex-1 rounded border border-border-strong bg-surface-raised px-1.5 py-0.5 text-sm font-semibold text-fg-default outline-none ring-indigo-500/30 focus:ring-2 dark:border-border-default dark:bg-surface-base dark:text-fg-default ${titleClassName}`}
           aria-label={t('gradingAgent.canvas.nodeLabel.renameInput')}
         />
       ) : (
@@ -169,7 +169,7 @@ export function RenamableNodeTitle({
         onKeyDown={onKeyDown}
         onClick={(event) => event.stopPropagation()}
         onPointerDown={(event) => event.stopPropagation()}
-        className={`nodrag nopan w-full rounded border border-slate-300 bg-white px-1.5 py-0.5 outline-none ring-indigo-500/30 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-950 ${className}`}
+        className={`nodrag nopan w-full rounded border border-border-strong bg-surface-raised px-1.5 py-0.5 outline-none ring-indigo-500/30 focus:ring-2 dark:border-border-default dark:bg-surface-base ${className}`}
         aria-label={t('gradingAgent.canvas.nodeLabel.renameInput')}
       />
     )

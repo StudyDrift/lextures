@@ -107,12 +107,12 @@ export function NotificationPreferencesPanel() {
   }
 
   if (loading) {
-    return <p className="mt-4 text-sm text-slate-500">Loading notification preferences…</p>
+    return <p className="mt-4 text-sm text-fg-muted">Loading notification preferences…</p>
   }
 
   return (
     <div>
-      <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
+      <p className="mt-2 text-sm text-fg-muted">
         Choose which events send you notifications.
       </p>
 
@@ -121,22 +121,22 @@ export function NotificationPreferencesPanel() {
         <div className="mt-4 flex items-center justify-between rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3 dark:border-indigo-800 dark:bg-indigo-950/30">
           <div>
             <p className="text-sm font-medium text-indigo-900 dark:text-indigo-200">Enable browser push notifications</p>
-            <p className="text-xs text-indigo-700 dark:text-indigo-400">Get real-time alerts even when the tab is in the background.</p>
+            <p className="text-xs text-accent-fg dark:text-indigo-400">Get real-time alerts even when the tab is in the background.</p>
           </div>
           <button
             type="button"
             onClick={() => void enablePush()}
             disabled={pushLoading}
-            className="shrink-0 rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
+            className="shrink-0 rounded-lg bg-accent-solid px-3 py-1.5 text-sm font-medium text-white hover:bg-accent disabled:opacity-60"
           >
             {pushLoading ? 'Enabling…' : 'Enable push'}
           </button>
         </div>
       )}
 
-      <div className="mt-4 overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-700">
+      <div className="mt-4 overflow-x-auto rounded-xl border border-border-default">
         <table className="min-w-full text-sm" data-testid="notification-preferences-table">
-          <thead className="bg-slate-50 text-start text-xs font-semibold uppercase tracking-wide text-slate-600 dark:bg-neutral-800 dark:text-neutral-300">
+          <thead className="bg-surface-base text-start text-xs font-semibold uppercase tracking-wide text-fg-muted dark:bg-surface-overlay dark:text-fg-muted">
             <tr>
               <th className="px-4 py-3" scope="col">
                 Event
@@ -163,8 +163,8 @@ export function NotificationPreferencesPanel() {
               const digestId = `${baseId}-${row.eventType}-digest`
               const label = EVENT_LABELS[row.eventType] ?? row.eventType
               return (
-                <tr key={row.eventType} className="bg-white dark:bg-neutral-900">
-                  <td className="px-4 py-3 font-medium text-slate-900 dark:text-neutral-100">
+                <tr key={row.eventType} className="bg-surface-raised">
+                  <td className="px-4 py-3 font-medium text-fg-default">
                     {label}
                   </td>
                   <td className="px-4 py-3">
@@ -179,14 +179,10 @@ export function NotificationPreferencesPanel() {
                       onClick={() =>
                         updateRow(row.eventType, { emailEnabled: !row.emailEnabled })
                       }
-                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${
-                        row.emailEnabled ? 'bg-indigo-600' : 'bg-slate-200 dark:bg-neutral-600'
-                      }`}
+                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${ row.emailEnabled ? 'bg-accent-solid' : 'bg-slate-200 dark:bg-neutral-600' }`}
                     >
                       <span
-                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
-                          row.emailEnabled ? 'translate-x-5' : 'translate-x-0'
-                        }`}
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-surface-raised shadow transition-transform ${ row.emailEnabled ? 'translate-x-5' : 'translate-x-0' }`}
                       />
                     </button>
                   </td>
@@ -202,14 +198,10 @@ export function NotificationPreferencesPanel() {
                       onClick={() =>
                         updateRow(row.eventType, { pushEnabled: !row.pushEnabled })
                       }
-                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${
-                        row.pushEnabled ? 'bg-indigo-600' : 'bg-slate-200 dark:bg-neutral-600'
-                      }`}
+                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${ row.pushEnabled ? 'bg-accent-solid' : 'bg-slate-200 dark:bg-neutral-600' }`}
                     >
                       <span
-                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
-                          row.pushEnabled ? 'translate-x-5' : 'translate-x-0'
-                        }`}
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-surface-raised shadow transition-transform ${ row.pushEnabled ? 'translate-x-5' : 'translate-x-0' }`}
                       />
                     </button>
                   </td>
@@ -225,14 +217,10 @@ export function NotificationPreferencesPanel() {
                       onClick={() =>
                         updateRow(row.eventType, { smsEnabled: !row.smsEnabled })
                       }
-                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${
-                        row.smsEnabled ? 'bg-indigo-600' : 'bg-slate-200 dark:bg-neutral-600'
-                      }`}
+                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${ row.smsEnabled ? 'bg-accent-solid' : 'bg-slate-200 dark:bg-neutral-600' }`}
                     >
                       <span
-                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
-                          row.smsEnabled ? 'translate-x-5' : 'translate-x-0'
-                        }`}
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-surface-raised shadow transition-transform ${ row.smsEnabled ? 'translate-x-5' : 'translate-x-0' }`}
                       />
                     </button>
                   </td>
@@ -249,7 +237,7 @@ export function NotificationPreferencesPanel() {
                           digestMode: e.target.value as PreferenceRow['digestMode'],
                         })
                       }
-                      className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+                      className="rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised"
                     >
                       {DIGEST_OPTIONS.map((o) => (
                         <option key={o.value} value={o.value}>
@@ -269,7 +257,7 @@ export function NotificationPreferencesPanel() {
           type="button"
           onClick={() => void save()}
           disabled={saving}
-          className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-lg bg-accent-solid px-4 py-2 text-sm font-medium text-white hover:bg-accent disabled:opacity-60"
         >
           <Save className="h-4 w-4" aria-hidden />
           {saving ? 'Saving…' : 'Save preferences'}

@@ -14,7 +14,7 @@ import type {
 import { validateRouterIssues } from './router-validation'
 
 const fieldClass =
-  'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100'
+  'w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base dark:text-fg-default'
 
 type ConditionalRouterInspectorProps = {
   nodeId: string
@@ -79,8 +79,8 @@ export function ConditionalRouterInspector({
   const showTextValue = condition.field === 'submissionText' || condition.field === 'matchesRegex'
 
   return (
-    <div className="space-y-3 text-sm text-slate-700 dark:text-neutral-200">
-      <p className="font-medium text-slate-800 dark:text-neutral-100">{title}</p>
+    <div className="space-y-3 text-sm text-fg-default">
+      <p className="font-medium text-fg-default">{title}</p>
       <p>{t('gradingAgent.canvas.inspector.routerHelp')}</p>
 
       <fieldset className="space-y-3">
@@ -140,7 +140,7 @@ export function ConditionalRouterInspector({
         ) : null}
       </fieldset>
 
-      <p className="rounded-lg bg-slate-100 px-3 py-2 text-xs dark:bg-neutral-800" aria-live="polite">
+      <p className="rounded-lg bg-surface-sunken px-3 py-2 text-xs dark:bg-surface-overlay" aria-live="polite">
         {t('gradingAgent.canvas.inspector.conditionPreview', {
           sentence: formatRouterConditionSentence(condition),
         })}
@@ -154,7 +154,7 @@ export function ConditionalRouterInspector({
       {branchIssues
         .filter((i) => i.field.endsWith('.then') || i.field.endsWith('.else'))
         .map((issue) => (
-          <p key={issue.field} className="text-xs text-amber-700 dark:text-amber-300" role="status">
+          <p key={issue.field} className="text-xs text-warning-fg" role="status">
             {issue.message}
           </p>
         ))}

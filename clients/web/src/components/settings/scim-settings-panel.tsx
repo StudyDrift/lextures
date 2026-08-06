@@ -108,7 +108,7 @@ export function ScimSettingsPanel() {
 
   return (
     <div className="mt-6 space-y-8">
-      <p className="text-sm text-slate-600 dark:text-neutral-400">
+      <p className="text-sm text-fg-muted">
         Configure IdP provisioning with RFC 7644. Use the same institution UUID as OneRoster / SAML mappings where applicable.
       </p>
       {error && (
@@ -117,44 +117,44 @@ export function ScimSettingsPanel() {
         </p>
       )}
       <section>
-        <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">SCIM endpoint</h3>
-        <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+        <h3 className="text-sm font-semibold text-fg-default">SCIM endpoint</h3>
+        <p className="mt-1 text-xs text-fg-muted">
           Base URL for Okta / Entra (configure path suffix <code className="font-mono">/Users</code> etc.).
         </p>
         <input
           readOnly
           value={scimBase}
-          className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 font-mono text-xs text-slate-800 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+          className="mt-2 w-full rounded-xl border border-border-default bg-surface-base px-3 py-2 font-mono text-xs text-fg-default dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
           aria-label="SCIM API base URL"
         />
       </section>
 
       <section>
-        <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Institution</h3>
-        <label className="mt-2 block text-sm font-medium text-slate-700 dark:text-neutral-200">Institution ID (UUID)</label>
+        <h3 className="text-sm font-semibold text-fg-default">Institution</h3>
+        <label className="mt-2 block text-sm font-medium text-fg-default">Institution ID (UUID)</label>
         <input
           value={institutionId}
           onChange={(e) => setInstitutionId(e.target.value)}
           placeholder="00000000-0000-0000-0000-000000000000"
-          className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 font-mono text-sm outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+          className="mt-1 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2 font-mono text-sm outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
         />
       </section>
 
       <section>
-        <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Bearer token</h3>
+        <h3 className="text-sm font-semibold text-fg-default">Bearer token</h3>
         <form onSubmit={onGenerate} className="mt-3 flex flex-wrap items-end gap-3">
           <div className="min-w-[200px] flex-1">
-            <label className="block text-xs font-medium text-slate-600 dark:text-neutral-400">Label (optional)</label>
+            <label className="block text-xs font-medium text-fg-muted">Label (optional)</label>
             <input
               value={label}
               onChange={(e) => setLabel(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+              className="mt-1 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
             />
           </div>
           <button
             type="submit"
             disabled={!instOk}
-            className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-white"
+            className="rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-surface-raised"
           >
             Generate token
           </button>
@@ -166,7 +166,7 @@ export function ScimSettingsPanel() {
               readOnly
               value={newToken}
               aria-label="SCIM bearer token (shown once)"
-              className="mt-2 w-full rounded-lg border border-amber-200 bg-white px-2 py-1.5 font-mono text-xs dark:border-amber-900/50 dark:bg-neutral-900 dark:text-amber-50"
+              className="mt-2 w-full rounded-lg border border-amber-200 bg-surface-raised px-2 py-1.5 font-mono text-xs dark:border-amber-900/50 dark:bg-surface-raised dark:text-amber-50"
               onFocus={(e) => e.currentTarget.select()}
             />
             <button
@@ -181,16 +181,16 @@ export function ScimSettingsPanel() {
       </section>
 
       <section>
-        <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Tokens</h3>
-        {loading && <p className="mt-2 text-sm text-slate-500">Loading…</p>}
-        {!loading && !instOk && <p className="mt-2 text-sm text-slate-500">Enter a valid institution UUID.</p>}
+        <h3 className="text-sm font-semibold text-fg-default">Tokens</h3>
+        {loading && <p className="mt-2 text-sm text-fg-muted">Loading…</p>}
+        {!loading && !instOk && <p className="mt-2 text-sm text-fg-muted">Enter a valid institution UUID.</p>}
         {!loading && instOk && tokens.length === 0 && (
-          <p className="mt-2 text-sm text-slate-500">No tokens yet for this institution.</p>
+          <p className="mt-2 text-sm text-fg-muted">No tokens yet for this institution.</p>
         )}
         {instOk && tokens.length > 0 && (
-          <div className="mt-3 overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-700">
+          <div className="mt-3 overflow-x-auto rounded-xl border border-border-default">
             <table className="min-w-full text-start text-sm">
-              <thead className="bg-slate-50 text-xs font-semibold uppercase text-slate-600 dark:bg-neutral-800 dark:text-neutral-400">
+              <thead className="bg-surface-base text-xs font-semibold uppercase text-fg-muted dark:bg-surface-overlay dark:text-fg-muted">
                 <tr>
                   <th className="px-3 py-2">Label</th>
                   <th className="px-3 py-2">Created</th>
@@ -200,7 +200,7 @@ export function ScimSettingsPanel() {
               </thead>
               <tbody>
                 {tokens.map((t) => (
-                  <tr key={t.id} className="border-t border-slate-100 dark:border-neutral-700">
+                  <tr key={t.id} className="border-t border-border-subtle dark:border-border-default">
                     <td className="px-3 py-2">{t.label || '—'}</td>
                     <td className="px-3 py-2 font-mono text-xs">{formatDateTime(t.createdAt)}</td>
                     <td className="px-3 py-2">{t.revokedAt ? 'Revoked' : 'Active'}</td>
@@ -224,14 +224,14 @@ export function ScimSettingsPanel() {
       </section>
 
       <section>
-        <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Provisioning events</h3>
+        <h3 className="text-sm font-semibold text-fg-default">Provisioning events</h3>
         {instOk && events.length === 0 && !loading && (
-          <p className="mt-2 text-sm text-slate-500">No events logged yet.</p>
+          <p className="mt-2 text-sm text-fg-muted">No events logged yet.</p>
         )}
         {instOk && events.length > 0 && (
-          <div className="mt-3 overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-700">
+          <div className="mt-3 overflow-x-auto rounded-xl border border-border-default">
             <table className="min-w-full text-start text-sm">
-              <thead className="bg-slate-50 text-xs font-semibold uppercase text-slate-600 dark:bg-neutral-800 dark:text-neutral-400">
+              <thead className="bg-surface-base text-xs font-semibold uppercase text-fg-muted dark:bg-surface-overlay dark:text-fg-muted">
                 <tr>
                   <th className="px-3 py-2">Time</th>
                   <th className="px-3 py-2">Operation</th>
@@ -241,7 +241,7 @@ export function ScimSettingsPanel() {
               </thead>
               <tbody>
                 {events.map((ev) => (
-                  <tr key={ev.id} className="border-t border-slate-100 dark:border-neutral-700">
+                  <tr key={ev.id} className="border-t border-border-subtle dark:border-border-default">
                     <td className="px-3 py-2 font-mono text-xs">{formatDateTime(ev.createdAt)}</td>
                     <td className="px-3 py-2">{ev.operation}</td>
                     <td className="px-3 py-2">{ev.scimResource}</td>

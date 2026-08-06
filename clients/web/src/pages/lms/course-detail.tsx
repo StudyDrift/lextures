@@ -450,7 +450,7 @@ export default function CourseDetail() {
   if (!courseCode) {
     return (
       <LmsPage title="Course" description="">
-        <p className="mt-6 text-sm text-slate-500">Invalid link.</p>
+        <p className="mt-6 text-sm text-fg-muted">Invalid link.</p>
       </LmsPage>
     )
   }
@@ -478,13 +478,13 @@ export default function CourseDetail() {
       fillHeight={landing === 'calendar'}
     >
       <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2">
-        <Link to="/courses" className="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+        <Link to="/courses" className="text-sm font-medium text-accent-fg hover:text-indigo-500">
           ← All courses
         </Link>
         {courseCode && (
           <Link
             to={`/courses/${encodeURIComponent(courseCode)}/settings/general`}
-            className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+            className="text-sm font-medium text-accent-fg hover:text-indigo-500"
           >
             Course settings
           </Link>
@@ -499,7 +499,7 @@ export default function CourseDetail() {
         ) : null}
         {course?.blueprintParentCourseCode ? (
           <span
-            className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-800 dark:bg-neutral-800 dark:text-neutral-100"
+            className="rounded-full bg-surface-sunken px-2.5 py-0.5 text-xs font-semibold text-fg-default dark:bg-surface-overlay dark:text-fg-default"
             title="Linked to a district blueprint course"
           >
             Blueprint child ({course.blueprintParentCourseCode})
@@ -507,7 +507,7 @@ export default function CourseDetail() {
         ) : null}
       </div>
 
-      {loading && <p className="mt-6 text-sm text-slate-500">Loading…</p>}
+      {loading && <p className="mt-6 text-sm text-fg-muted">Loading…</p>}
       {error && (
         <p className="mt-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
           {error}
@@ -539,28 +539,28 @@ export default function CourseDetail() {
           {catalogInfo && (
             <aside
               aria-label="Catalog metadata"
-              className="mt-6 rounded-2xl border border-slate-200 bg-slate-50/80 p-4 text-sm dark:border-neutral-700 dark:bg-neutral-900/60"
+              className="mt-6 rounded-2xl border border-border-default bg-slate-50/80 p-4 text-sm dark:border-border-default/60"
             >
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+              <p className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
                 Official catalog
               </p>
               <dl className="mt-3 grid gap-2 sm:grid-cols-2">
                 {catalogInfo.crn && (
                   <div>
-                    <dt className="text-xs text-slate-500 dark:text-neutral-400">CRN</dt>
-                    <dd className="font-medium text-slate-900 dark:text-neutral-100">{catalogInfo.crn}</dd>
+                    <dt className="text-xs text-fg-muted">CRN</dt>
+                    <dd className="font-medium text-fg-default">{catalogInfo.crn}</dd>
                   </div>
                 )}
                 {catalogInfo.credits != null && (
                   <div>
-                    <dt className="text-xs text-slate-500 dark:text-neutral-400">Credits</dt>
-                    <dd className="font-medium text-slate-900 dark:text-neutral-100">{catalogInfo.credits}</dd>
+                    <dt className="text-xs text-fg-muted">Credits</dt>
+                    <dd className="font-medium text-fg-default">{catalogInfo.credits}</dd>
                   </div>
                 )}
                 {catalogInfo.meetingPattern && (
                   <div className="sm:col-span-2">
-                    <dt className="text-xs text-slate-500 dark:text-neutral-400">Meeting</dt>
-                    <dd className="font-medium text-slate-900 dark:text-neutral-100">
+                    <dt className="text-xs text-fg-muted">Meeting</dt>
+                    <dd className="font-medium text-fg-default">
                       {catalogInfo.meetingPattern.days ?? '—'}
                       {catalogInfo.meetingPattern.startTime
                         ? ` ${catalogInfo.meetingPattern.startTime}${catalogInfo.meetingPattern.endTime ? `–${catalogInfo.meetingPattern.endTime}` : ''}`
@@ -572,7 +572,7 @@ export default function CourseDetail() {
               </dl>
               {catalogInfo.prerequisites && catalogInfo.prerequisites.length > 0 && (
                 <div className="mt-3">
-                  <p className="text-xs text-slate-500 dark:text-neutral-400">Prerequisites</p>
+                  <p className="text-xs text-fg-muted">Prerequisites</p>
                   <ul className="mt-1 space-y-1">
                     {catalogInfo.prerequisites.map((p) => {
                       const st = catalogInfo.prerequisiteStatus?.find((s) => s.code === p.code)
@@ -632,7 +632,7 @@ export default function CourseDetail() {
                 </p>
               )}
               {!structureError && structure === null && (
-                <p className="text-sm text-slate-500 dark:text-neutral-400">Loading calendar…</p>
+                <p className="text-sm text-fg-muted">Loading calendar…</p>
               )}
               {!structureError && structure !== null && courseCalendarEnabled && (
                 <CourseCalendar
@@ -653,7 +653,7 @@ export default function CourseDetail() {
               <CourseHeroBanner course={course} />
               {viewerIsStudent && courseRecs.length > 0 && courseCode ? (
                 <section aria-label="Suggestions for this course" className="mt-8">
-                  <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                  <h2 className="text-sm font-semibold uppercase tracking-wide text-fg-muted">
                     Suggested next steps
                   </h2>
                   <ul className="mt-3 space-y-2">
@@ -665,13 +665,13 @@ export default function CourseDetail() {
                       >
                         <Link
                           to={hrefForRecommendationItem(courseCode, r)}
-                          className="block rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50/40 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-indigo-800 dark:hover:bg-indigo-950/30"
+                          className="block rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-sm shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50/40 dark:border-border-default dark:bg-surface-raised dark:hover:border-indigo-800 dark:hover:bg-indigo-950/30"
                         >
-                          <span className="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-300">
+                          <span className="text-xs font-semibold uppercase tracking-wide text-accent-fg dark:text-indigo-300">
                             {surfaceLabel(r.surface)}
                           </span>
-                          <p className="mt-1 font-medium text-slate-900 dark:text-neutral-50">{r.title}</p>
-                          <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">{r.reason}</p>
+                          <p className="mt-1 font-medium text-fg-default">{r.title}</p>
+                          <p className="mt-0.5 text-xs text-fg-muted">{r.reason}</p>
                           {r.profileRationale ? (
                             <ProfileRationaleChip rationale={r.profileRationale} className="mt-2" />
                           ) : null}
@@ -683,19 +683,19 @@ export default function CourseDetail() {
               ) : null}
               {lastVisited ? (
                 <section aria-label="Continue where you left off" className="mt-8">
-                  <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                  <h2 className="text-sm font-semibold uppercase tracking-wide text-fg-muted">
                     Continue where you left off
                   </h2>
                   <div className="mt-3 rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50/90 to-white p-5 shadow-sm dark:border-indigo-900/40 dark:from-indigo-950/40 dark:to-neutral-900">
-                    <p className="text-xs text-slate-500 dark:text-neutral-400">
+                    <p className="text-xs text-fg-muted">
                       Opened {formatTimeAgoFromIso(lastVisited.openedAt)}
                     </p>
-                    <p className="mt-1 text-lg font-semibold tracking-tight text-slate-900 dark:text-neutral-50">
+                    <p className="mt-1 text-lg font-semibold tracking-tight text-fg-default">
                       {lastVisited.title}
                     </p>
                     <Link
                       to={hrefForLastVisited(courseCode, lastVisited.kind, lastVisited.itemId)}
-                      className="mt-4 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500"
+                      className="mt-4 inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500"
                     >
                       Continue
                       <ArrowRight className="h-4 w-4" aria-hidden />
@@ -705,31 +705,31 @@ export default function CourseDetail() {
               ) : null}
 
               <section aria-label="Course overview" className="mt-8">
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-fg-muted">
                   At a glance
                 </h2>
                 <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-                    <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+                  <div className="rounded-2xl border border-border-default bg-surface-raised p-5 shadow-sm dark:border-border-default dark:bg-surface-raised">
+                    <div className="flex items-center gap-2 text-accent-fg">
                       <CalendarDays className="h-5 w-5 shrink-0" aria-hidden />
-                      <span className="text-sm font-semibold text-slate-900 dark:text-neutral-50">
+                      <span className="text-sm font-semibold text-fg-default">
                         This week
                       </span>
                     </div>
-                    <p className="mt-2 text-3xl font-bold tabular-nums text-slate-900 dark:text-neutral-50">
+                    <p className="mt-2 text-3xl font-bold tabular-nums text-fg-default">
                       {dueWeek.length}
                     </p>
-                    <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">Items due in the next 7 days</p>
+                    <p className="mt-1 text-xs text-fg-muted">Items due in the next 7 days</p>
                     {dueWeek.length > 0 ? (
-                      <ul className="mt-3 space-y-2 border-t border-slate-100 pt-3 dark:border-neutral-800">
+                      <ul className="mt-3 space-y-2 border-t border-border-subtle pt-3 dark:border-border-subtle">
                         {dueWeek.slice(0, 4).map((it) => (
                           <li key={it.id}>
                             <Link
                               to={itemHref(courseCode, it)}
-                              className="flex flex-col gap-0.5 text-sm text-indigo-700 hover:text-indigo-500 dark:text-indigo-300 dark:hover:text-indigo-200"
+                              className="flex flex-col gap-0.5 text-sm text-accent-fg hover:text-indigo-500 dark:text-indigo-300 dark:hover:text-indigo-200"
                             >
-                              <span className="font-medium text-slate-900 dark:text-neutral-100">{it.title}</span>
-                              <span className="text-xs text-slate-500 dark:text-neutral-400">
+                              <span className="font-medium text-fg-default">{it.title}</span>
+                              <span className="text-xs text-fg-muted">
                                 {formatDueShort(it.dueAt!)}
                               </span>
                             </Link>
@@ -737,21 +737,21 @@ export default function CourseDetail() {
                         ))}
                       </ul>
                     ) : (
-                      <p className="mt-3 text-xs text-slate-500 dark:text-neutral-400">Nothing due this week.</p>
+                      <p className="mt-3 text-xs text-fg-muted">Nothing due this week.</p>
                     )}
                     <Link
                       to={`/courses/${encodeURIComponent(courseCode)}/calendar`}
-                      className="mt-4 inline-flex text-xs font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
+                      className="mt-4 inline-flex text-xs font-semibold text-accent-fg hover:text-indigo-500 dark:text-indigo-400"
                     >
                       Open full calendar →
                     </Link>
                   </div>
 
                   {announcement ? (
-                    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-                      <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+                    <div className="rounded-2xl border border-border-default bg-surface-raised p-5 shadow-sm dark:border-border-default dark:bg-surface-raised">
+                      <div className="flex items-center gap-2 text-accent-fg">
                         <Megaphone className="h-5 w-5 shrink-0" aria-hidden />
-                        <span className="text-sm font-semibold text-slate-900 dark:text-neutral-50">
+                        <span className="text-sm font-semibold text-fg-default">
                           {announcement.channelName}
                           {announcement.pinned ? (
                             <span className="ms-2 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold uppercase text-amber-900 dark:bg-amber-950 dark:text-amber-100">
@@ -760,38 +760,38 @@ export default function CourseDetail() {
                           ) : null}
                         </span>
                       </div>
-                      <p className="mt-2 line-clamp-4 text-sm text-slate-700 dark:text-neutral-300">
+                      <p className="mt-2 line-clamp-4 text-sm text-fg-muted">
                         {announcement.snippet}
                       </p>
-                      <p className="mt-2 text-xs text-slate-500 dark:text-neutral-500">
+                      <p className="mt-2 text-xs text-fg-subtle">
                         {announcement.author} · {formatTimeAgoFromIso(announcement.createdAt)}
                       </p>
                       <Link
                         to={`/courses/${encodeURIComponent(courseCode)}/feed`}
-                        className="mt-4 inline-flex text-xs font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
+                        className="mt-4 inline-flex text-xs font-semibold text-accent-fg hover:text-indigo-500 dark:text-indigo-400"
                       >
                         Open course feed →
                       </Link>
                     </div>
                   ) : (
-                    <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 p-5 dark:border-neutral-700 dark:bg-neutral-900/50">
-                      <div className="flex items-center gap-2 text-slate-500 dark:text-neutral-400">
+                    <div className="rounded-2xl border border-dashed border-border-default bg-slate-50/80 p-5 dark:border-border-default/50">
+                      <div className="flex items-center gap-2 text-fg-muted">
                         <Megaphone className="h-5 w-5 shrink-0" aria-hidden />
-                        <span className="text-sm font-semibold text-slate-700 dark:text-neutral-200">
+                        <span className="text-sm font-semibold text-fg-default">
                           Announcements
                         </span>
                       </div>
-                      <p className="mt-2 text-sm text-slate-500 dark:text-neutral-400">
+                      <p className="mt-2 text-sm text-fg-muted">
                         No recent announcement to preview, or the feed is off for this course.
                       </p>
                     </div>
                   )}
 
                   {viewerIsStudent && myGrades && myGrades.columns.some((c) => c.maxPoints && c.maxPoints > 0) ? (
-                    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-                      <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+                    <div className="rounded-2xl border border-border-default bg-surface-raised p-5 shadow-sm dark:border-border-default dark:bg-surface-raised">
+                      <div className="flex items-center gap-2 text-accent-fg">
                         <BarChart3 className="h-5 w-5 shrink-0" aria-hidden />
-                        <span className="text-sm font-semibold text-slate-900 dark:text-neutral-50">Grades</span>
+                        <span className="text-sm font-semibold text-fg-default">Grades</span>
                       </div>
                       <ul className="mt-3 max-h-40 space-y-2 overflow-y-auto text-sm">
                         {myGrades.columns
@@ -802,17 +802,17 @@ export default function CourseDetail() {
                             return (
                               <li
                                 key={c.id}
-                                className="flex items-center justify-between gap-2 border-b border-slate-100 pb-2 last:border-0 dark:border-neutral-800"
+                                className="flex items-center justify-between gap-2 border-b border-border-subtle pb-2 last:border-0 dark:border-border-subtle"
                               >
-                                <span className="truncate font-medium text-slate-800 dark:text-neutral-200">
+                                <span className="truncate font-medium text-fg-default">
                                   {c.title}
                                 </span>
                                 {sn ? (
-                                  <span className="shrink-0 text-xs text-slate-600 dark:text-neutral-400">
+                                  <span className="shrink-0 text-xs text-fg-muted">
                                     {sn.label}
                                   </span>
                                 ) : (
-                                  <span className="shrink-0 text-xs text-slate-400">—</span>
+                                  <span className="shrink-0 text-xs text-fg-subtle">—</span>
                                 )}
                               </li>
                             )
@@ -820,7 +820,7 @@ export default function CourseDetail() {
                       </ul>
                       <Link
                         to={`/courses/${encodeURIComponent(courseCode)}/my-grades`}
-                        className="mt-4 inline-flex text-xs font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
+                        className="mt-4 inline-flex text-xs font-semibold text-accent-fg hover:text-indigo-500 dark:text-indigo-400"
                       >
                         My grades →
                       </Link>
@@ -830,14 +830,14 @@ export default function CourseDetail() {
                   {courseCode ? <ChecklistDashboardCardContainer courseCode={courseCode} /> : null}
 
                   {staff ? (
-                    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-900 sm:col-span-2 lg:col-span-1">
-                      <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+                    <div className="rounded-2xl border border-border-default bg-surface-raised p-5 shadow-sm dark:border-border-default dark:bg-surface-raised sm:col-span-2 lg:col-span-1">
+                      <div className="flex items-center gap-2 text-accent-fg">
                         <LayoutDashboard className="h-5 w-5 shrink-0" aria-hidden />
-                        <span className="text-sm font-semibold text-slate-900 dark:text-neutral-50">Teaching</span>
+                        <span className="text-sm font-semibold text-fg-default">Teaching</span>
                       </div>
                       {gradingBacklog.length > 0 ? (
                         <div className="mt-3">
-                          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                          <p className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
                             Needs grading
                           </p>
                           <div className="mt-2">
@@ -845,7 +845,7 @@ export default function CourseDetail() {
                           </div>
                         </div>
                       ) : (
-                        <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
+                        <p className="mt-2 text-sm text-fg-muted">
                           No ungraded submissions right now.
                           {gradebookEmptyCells != null && gradebookEmptyCells > 0
                             ? ` ${gradebookEmptyCells} empty grade cell${gradebookEmptyCells === 1 ? '' : 's'} remain in the gradebook.`
@@ -855,20 +855,20 @@ export default function CourseDetail() {
                       <div className="mt-4 flex flex-wrap gap-2">
                         <Link
                           to={`/courses/${encodeURIComponent(courseCode)}/gradebook`}
-                          className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white hover:bg-indigo-500"
+                          className="inline-flex items-center gap-1.5 rounded-lg bg-accent-solid px-3 py-2 text-xs font-semibold text-white hover:bg-indigo-500"
                         >
                           <ClipboardList className="h-3.5 w-3.5" aria-hidden />
                           Gradebook
                         </Link>
                         <Link
                           to={`/courses/${encodeURIComponent(courseCode)}/modules`}
-                          className="inline-flex rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-800 hover:border-indigo-200 dark:border-neutral-600 dark:text-neutral-100"
+                          className="inline-flex rounded-lg border border-border-default px-3 py-2 text-xs font-semibold text-fg-default hover:border-indigo-200 dark:border-border-default dark:text-fg-default"
                         >
                           Modules
                         </Link>
                         <Link
                           to={`/courses/${encodeURIComponent(courseCode)}/enrollments`}
-                          className="inline-flex rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-800 hover:border-indigo-200 dark:border-neutral-600 dark:text-neutral-100"
+                          className="inline-flex rounded-lg border border-border-default px-3 py-2 text-xs font-semibold text-fg-default hover:border-indigo-200 dark:border-border-default dark:text-fg-default"
                         >
                           People
                         </Link>
@@ -878,41 +878,41 @@ export default function CourseDetail() {
                 </div>
               </section>
 
-              <details className="group mt-8 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-                <summary className="cursor-pointer list-none text-sm font-semibold text-slate-800 marker:hidden dark:text-neutral-100 [&::-webkit-details-marker]:hidden">
+              <details className="group mt-8 rounded-2xl border border-border-default bg-surface-raised p-4 shadow-sm dark:border-border-default dark:bg-surface-raised">
+                <summary className="cursor-pointer list-none text-sm font-semibold text-fg-default marker:hidden dark:text-fg-default [&::-webkit-details-marker]:hidden">
                   <span className="inline-flex items-center gap-2">
                     Course details
-                    <span className="text-xs font-normal text-slate-500 group-open:hidden dark:text-neutral-400">
+                    <span className="text-xs font-normal text-fg-muted group-open:hidden dark:text-fg-muted">
                       (show)
                     </span>
                   </span>
                 </summary>
                 <dl className="mt-4 grid max-w-xl gap-4 text-sm">
                   <div>
-                    <dt className="font-medium text-slate-500">Course code</dt>
-                    <dd className="mt-1 text-slate-900 dark:text-neutral-100">{course.courseCode}</dd>
+                    <dt className="font-medium text-fg-muted">Course code</dt>
+                    <dd className="mt-1 text-fg-default">{course.courseCode}</dd>
                   </div>
                   {course.scheduleMode === 'relative' &&
                   course.viewerEnrollmentRoles?.some((r) => r === 'teacher' || r === 'instructor') ? (
                     <>
                       <div>
-                        <dt className="font-medium text-slate-500">Schedule</dt>
-                        <dd className="mt-1 text-slate-900 dark:text-neutral-100">
+                        <dt className="font-medium text-fg-muted">Schedule</dt>
+                        <dd className="mt-1 text-fg-default">
                           Relative to each student&apos;s enrollment. Module release and due dates are shifted from the
                           course timeline anchor (see course settings).
                         </dd>
                       </div>
                       <div>
-                        <dt className="font-medium text-slate-500">Course length</dt>
-                        <dd className="mt-1 text-slate-900 dark:text-neutral-100">
+                        <dt className="font-medium text-fg-muted">Course length</dt>
+                        <dd className="mt-1 text-fg-default">
                           {course.relativeEndAfter
                             ? `${formatIsoDurationHuman(course.relativeEndAfter)} after enrollment`
                             : 'No fixed end'}
                         </dd>
                       </div>
                       <div>
-                        <dt className="font-medium text-slate-500">Catalog visibility</dt>
-                        <dd className="mt-1 text-slate-900 dark:text-neutral-100">
+                        <dt className="font-medium text-fg-muted">Catalog visibility</dt>
+                        <dd className="mt-1 text-fg-default">
                           {course.relativeHiddenAfter
                             ? `Hidden ${formatIsoDurationHuman(course.relativeHiddenAfter)} after enrollment`
                             : 'Not limited by a hide-after duration'}
@@ -922,24 +922,24 @@ export default function CourseDetail() {
                   ) : (
                     <>
                       <div>
-                        <dt className="font-medium text-slate-500">Starts / ends</dt>
-                        <dd className="mt-1 text-slate-900 dark:text-neutral-100">
+                        <dt className="font-medium text-fg-muted">Starts / ends</dt>
+                        <dd className="mt-1 text-fg-default">
                           {formatAbsolute(course.startsAt)} — {formatAbsolute(course.endsAt)}
                         </dd>
                       </div>
                       <div>
-                        <dt className="font-medium text-slate-500">Visible / hidden window</dt>
-                        <dd className="mt-1 text-slate-900 dark:text-neutral-100">
+                        <dt className="font-medium text-fg-muted">Visible / hidden window</dt>
+                        <dd className="mt-1 text-fg-default">
                           {formatAbsolute(course.visibleFrom)} — {formatAbsolute(course.hiddenAt)}
                         </dd>
                       </div>
                     </>
                   )}
                   <div>
-                    <dt className="font-medium text-slate-500">Published</dt>
-                    <dd className="mt-1 flex flex-wrap items-center gap-2 text-slate-900 dark:text-neutral-100">
+                    <dt className="font-medium text-fg-muted">Published</dt>
+                    <dd className="mt-1 flex flex-wrap items-center gap-2 text-fg-default">
                       <CourseVisibilityPill published={course.published} size="md" />
-                      <span className="text-sm text-slate-600 dark:text-neutral-400">
+                      <span className="text-sm text-fg-muted">
                         {course.published ? 'Visible in catalog when dates allow' : 'Staff-only until published'}
                       </span>
                     </dd>

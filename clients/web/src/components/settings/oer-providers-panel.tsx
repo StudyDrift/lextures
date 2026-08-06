@@ -57,26 +57,26 @@ export function OERProvidersPanel() {
 
   return (
     <section>
-      <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">OER library sources</h2>
-      <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+      <h2 className="text-base font-semibold text-fg-default">OER library sources</h2>
+      <p className="mt-1 text-sm text-fg-muted">
         Enable or disable open educational resource catalogs shown in the course module editor.
       </p>
-      {loading && <p className="mt-4 text-sm text-slate-500">Loading…</p>}
+      {loading && <p className="mt-4 text-sm text-fg-muted">Loading…</p>}
       {error && (
         <p className="mt-4 text-sm text-rose-700 dark:text-rose-300" role="alert">
           {error}
         </p>
       )}
       {!loading && !error && (
-        <ul className="mt-4 divide-y divide-slate-200 rounded-xl border border-slate-200 dark:divide-neutral-700 dark:border-neutral-700">
+        <ul className="mt-4 divide-y divide-slate-200 rounded-xl border border-border-default dark:divide-neutral-700 dark:border-border-default">
           {providers.map((p) => {
             const meta = PROVIDER_META[p.provider]
             if (!meta) return null
             return (
               <li key={p.provider} className="flex items-start gap-4 px-4 py-4">
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-slate-900 dark:text-neutral-100">{meta.label}</p>
-                  <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">{meta.description}</p>
+                  <p className="text-sm font-medium text-fg-default">{meta.label}</p>
+                  <p className="mt-0.5 text-xs text-fg-muted">{meta.description}</p>
                 </div>
                 <label className="flex shrink-0 items-center gap-2 text-sm">
                   <input
@@ -85,7 +85,7 @@ export function OERProvidersPanel() {
                     disabled={saving === p.provider}
                     onChange={(e) => void handleToggle(p.provider, e.target.checked)}
                   />
-                  <span className="text-slate-600 dark:text-neutral-300">
+                  <span className="text-fg-muted">
                     {saving === p.provider ? 'Saving…' : p.enabled ? 'Enabled' : 'Disabled'}
                   </span>
                 </label>

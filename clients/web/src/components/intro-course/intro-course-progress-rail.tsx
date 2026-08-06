@@ -28,7 +28,7 @@ export function IntroCourseProgressRail({ courseCode }: { courseCode: string }) 
       aria-label={t('introCourse.rail.ariaLabel')}
       className="rounded-xl border border-sky-100 bg-sky-50/50 p-4 dark:border-sky-900/40 dark:bg-sky-950/20"
     >
-      <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-50">
+      <h2 className="text-sm font-semibold text-fg-default">
         {t('introCourse.rail.title')}
       </h2>
       <div className="mt-3">
@@ -39,7 +39,7 @@ export function IntroCourseProgressRail({ courseCode }: { courseCode: string }) 
         />
       </div>
       {progress.nextItem?.title && !progress.completedAt ? (
-        <p className="mt-3 text-xs text-slate-600 dark:text-neutral-400">
+        <p className="mt-3 text-xs text-fg-muted">
           {t('introCourse.rail.nextUp', { title: progress.nextItem.title })}
         </p>
       ) : null}
@@ -48,16 +48,16 @@ export function IntroCourseProgressRail({ courseCode }: { courseCode: string }) 
           {modules.map((mod) => (
             <li
               key={mod.slug}
-              className="flex items-center gap-2 text-sm text-slate-700 dark:text-neutral-200"
+              className="flex items-center gap-2 text-sm text-fg-default"
             >
               <ModuleStatusIcon status={mod.status} />
               <span
                 className={
                   mod.status === 'current'
-                    ? 'font-semibold text-slate-900 dark:text-neutral-50'
+                    ? 'font-semibold text-fg-default'
                     : mod.status === 'done'
-                      ? 'text-slate-600 dark:text-neutral-400'
-                      : 'text-slate-500 dark:text-neutral-500'
+                      ? 'text-fg-muted'
+                      : 'text-fg-subtle'
                 }
               >
                 {mod.title}

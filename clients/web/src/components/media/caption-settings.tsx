@@ -80,7 +80,7 @@ export function CaptionSettings({ open, prefs, onChange, onClose }: Props) {
         </select>
       </label>
 
-      <p className="mt-2 text-xs text-slate-400" role="status" aria-live="polite">
+      <p className="mt-2 text-xs text-fg-subtle" role="status" aria-live="polite">
         Settings apply to videos this session.
       </p>
     </div>

@@ -1,0 +1,18 @@
+{
+  "description": "UX.2 design-system coverage baseline (FR-10). Coverage may only increase; raw counts may only decrease.",
+  "generatedAt": "2026-08-06T04:30:30.834Z",
+  "metrics": {
+    "design_system_coverage": 0.008207,
+    "design_system_tags": 32,
+    "raw_button_count": 2008,
+    "raw_input_count": 930,
+    "raw_select_count": 266,
+    "raw_textarea_count": 173,
+    "raw_dialog_count": 151,
+    "raw_menu_count": 42,
+    "raw_tablist_count": 23,
+    "title_tooltip_count": 274,
+    "raw_interactive_total": 3867,
+    "total_interactive": 3899
+  }
+}

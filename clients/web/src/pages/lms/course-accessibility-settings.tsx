@@ -48,7 +48,7 @@ export function CourseAccessibilitySettingsSection({
 
   if (featuresLoading) {
     return (
-      <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-neutral-300">
+      <div className="flex items-center gap-2 text-sm text-fg-muted">
         <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
         Loading platform settings…
       </div>
@@ -57,7 +57,7 @@ export function CourseAccessibilitySettingsSection({
 
   if (!enabled) {
     return (
-      <p className="text-sm text-slate-600 dark:text-neutral-300">
+      <p className="text-sm text-fg-muted">
         Alt-text enforcement is not enabled on this platform. Ask a global admin to turn it on under
         Settings → Global platform.
       </p>
@@ -66,7 +66,7 @@ export function CourseAccessibilitySettingsSection({
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-neutral-300">
+      <div className="flex items-center gap-2 text-sm text-fg-muted">
         <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
         Loading accessibility coverage…
       </div>
@@ -82,27 +82,27 @@ export function CourseAccessibilitySettingsSection({
 
   return (
     <section className="space-y-4" data-focus-anchor="course.accessibility.settings">
-      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-        <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100" data-focus-anchor="content.image-alt">
+      <div className="rounded-xl border border-border-default bg-surface-raised p-4 shadow-sm dark:border-border-default dark:bg-surface-raised">
+        <h2 className="text-base font-semibold text-fg-default" data-focus-anchor="content.image-alt">
           Image alt-text coverage
         </h2>
-        <p className="mt-1 text-sm text-slate-600 dark:text-neutral-300">
+        <p className="mt-1 text-sm text-fg-muted">
           Percentage of images in course content and assignments that have descriptive alt text or
           are marked decorative.
         </p>
-        <p className="mt-3 text-2xl font-bold text-slate-900 dark:text-neutral-50">
+        <p className="mt-3 text-2xl font-bold text-fg-default">
           {formatCoverageLabel(cov.withAlt, cov.total)}
         </p>
         {data?.hardBlockSave ? (
-          <p className="mt-2 text-xs text-amber-700 dark:text-amber-300">
+          <p className="mt-2 text-xs text-warning-fg">
             Save is blocked for pages with missing alt text until images are updated.
           </p>
         ) : null}
       </div>
 
       {cov.uncoveredItems.length > 0 ? (
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+        <div className="rounded-xl border border-border-default bg-surface-raised p-4 shadow-sm dark:border-border-default dark:bg-surface-raised">
+          <h3 className="text-sm font-semibold text-fg-default">
             Items needing alt text
           </h3>
           <ul className="mt-2 space-y-2">
@@ -114,11 +114,11 @@ export function CourseAccessibilitySettingsSection({
                       ? `/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(item.itemId)}`
                       : `/courses/${encodeURIComponent(courseCode)}/modules/content/${encodeURIComponent(item.itemId)}`
                   }
-                  className="text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-300"
+                  className="text-sm font-medium text-accent-fg hover:text-indigo-500 dark:text-indigo-300"
                 >
                   {item.title || 'Untitled'}
                 </Link>
-                <span className="ms-2 text-xs text-slate-500 dark:text-neutral-400">
+                <span className="ms-2 text-xs text-fg-muted">
                   {item.missing} missing / {item.total} images
                 </span>
               </li>

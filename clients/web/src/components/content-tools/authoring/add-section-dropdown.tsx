@@ -132,8 +132,8 @@ export function AddSectionDropdown({
     : 'pointer-events-none opacity-0 group-hover/divider:pointer-events-auto group-hover/divider:opacity-100 group-focus-within/divider:pointer-events-auto group-focus-within/divider:opacity-100'
   const triggerClass =
     variant === 'divider'
-      ? `relative z-10 inline-flex h-7 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 shadow-sm hover:text-slate-900 disabled:cursor-not-allowed motion-safe:transition-opacity dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:text-neutral-50 ${dividerVisible}`
-      : 'flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-slate-300 px-4 py-4 text-sm font-medium text-slate-600 motion-safe:transition-[background-color,color,border-color] hover:border-indigo-400 hover:bg-white hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-700 dark:text-neutral-300 dark:hover:border-indigo-500 dark:hover:bg-neutral-900 dark:hover:text-indigo-400'
+      ? `relative z-10 inline-flex h-7 items-center gap-1.5 rounded-full border border-border-default bg-surface-raised px-3 text-xs font-medium text-fg-muted shadow-sm hover:text-fg-default disabled:cursor-not-allowed motion-safe:transition-opacity dark:border-border-default dark:bg-surface-overlay dark:text-fg-muted dark:hover:text-neutral-50 ${dividerVisible}`
+      : 'flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-border-strong px-4 py-4 text-sm font-medium text-fg-muted motion-safe:transition-[background-color,color,border-color] hover:border-indigo-400 hover:bg-surface-raised hover:text-accent-fg disabled:cursor-not-allowed disabled:opacity-50 dark:border-border-default dark:text-fg-muted dark:hover:border-indigo-500 dark:hover:bg-surface-raised dark:hover:text-indigo-400'
 
   const menu =
     open && menuPos
@@ -152,7 +152,7 @@ export function AddSectionDropdown({
               width: menuPos.width,
               zIndex: 80,
             }}
-            className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-900"
+            className="overflow-hidden rounded-lg border border-border-default bg-surface-raised shadow-lg shadow-slate-900/10 dark:border-border-default dark:bg-surface-raised"
           >
             {view === 'root' ? (
               <div className="p-1">
@@ -163,7 +163,7 @@ export function AddSectionDropdown({
                     close()
                     onAddContent()
                   }}
-                  className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-start text-sm font-medium text-slate-800 hover:bg-slate-100 dark:text-neutral-100 dark:hover:bg-neutral-800"
+                  className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-start text-sm font-medium text-fg-default hover:bg-surface-sunken dark:text-fg-default dark:hover:bg-surface-overlay"
                 >
                   <FileText className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
                   {t('contentTools.authoring.addSectionContent')}
@@ -174,7 +174,7 @@ export function AddSectionDropdown({
                   aria-haspopup="menu"
                   title={toolsDisabled ? toolsDisabledReason : undefined}
                   onClick={() => setView('tools')}
-                  className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-start text-sm font-medium text-slate-800 hover:bg-slate-100 dark:text-neutral-100 dark:hover:bg-neutral-800"
+                  className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-start text-sm font-medium text-fg-default hover:bg-surface-sunken dark:text-fg-default dark:hover:bg-surface-overlay"
                 >
                   <Wrench className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
                   <span className="flex-1">{t('contentTools.authoring.addSectionTool')}</span>
@@ -182,11 +182,11 @@ export function AddSectionDropdown({
                 </button>
               </div>
             ) : emptyCatalog && !loading ? (
-              <div className="space-y-2 p-3 text-xs text-slate-600 dark:text-neutral-300">
+              <div className="space-y-2 p-3 text-xs text-fg-muted">
                 <button
                   type="button"
                   onClick={() => setView('root')}
-                  className="mb-1 inline-flex items-center gap-1 text-xs font-medium text-slate-700 hover:text-slate-900 dark:text-neutral-200 dark:hover:text-neutral-50"
+                  className="mb-1 inline-flex items-center gap-1 text-xs font-medium text-fg-muted hover:text-fg-default dark:text-fg-default dark:hover:text-neutral-50"
                 >
                   <ChevronLeft className="h-3.5 w-3.5" aria-hidden />
                   {t('contentTools.authoring.addSectionBack')}
@@ -195,7 +195,7 @@ export function AddSectionDropdown({
                 {settingsHref ? (
                   <a
                     href={settingsHref}
-                    className="font-medium text-slate-800 underline dark:text-neutral-100"
+                    className="font-medium text-fg-default underline dark:text-fg-default"
                   >
                     {t('contentTools.authoring.openSettings')}
                   </a>
@@ -203,16 +203,16 @@ export function AddSectionDropdown({
               </div>
             ) : (
               <div className="flex flex-col">
-                <div className="flex items-center gap-1 border-b border-slate-200 px-2 py-1.5 dark:border-neutral-700">
+                <div className="flex items-center gap-1 border-b border-border-default px-2 py-1.5 dark:border-border-default">
                   <button
                     type="button"
                     onClick={() => setView('root')}
-                    className="inline-flex items-center gap-1 rounded px-1.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                    className="inline-flex items-center gap-1 rounded px-1.5 py-1 text-xs font-medium text-fg-muted hover:bg-surface-sunken dark:text-fg-default dark:hover:bg-surface-overlay"
                   >
                     <ChevronLeft className="h-3.5 w-3.5" aria-hidden />
                     {t('contentTools.authoring.addSectionBack')}
                   </button>
-                  <span className="text-xs font-semibold text-slate-500 dark:text-neutral-400">
+                  <span className="text-xs font-semibold text-fg-muted">
                     {t('contentTools.authoring.addSectionPickTool')}
                   </span>
                 </div>

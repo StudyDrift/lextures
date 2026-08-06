@@ -276,15 +276,6 @@ func bookstoreConfigToJSON(r *bookstoreConfigRow) bookstoreConfigJSON {
 // handleCreateModuleTextbookResource is POST .../modules/{module_id}/textbook-resources.
 func (d Deps) handleCreateModuleTextbookResource() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.requireBookstoreEnabled(w) {
 			return
 		}

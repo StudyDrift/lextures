@@ -161,11 +161,6 @@ func (d Deps) handleSchoolDemographicsReport() http.HandlerFunc {
 		if !d.demographicsEnabled(w) {
 			return
 		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		actorID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -215,11 +210,6 @@ func (d Deps) handleSchoolDemographicsReport() http.HandlerFunc {
 func (d Deps) handleSchoolDisaggregatedPerformance() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !d.demographicsEnabled(w) {
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
 		actorID, ok := d.meUserID(w, r)

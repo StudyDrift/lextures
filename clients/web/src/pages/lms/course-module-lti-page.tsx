@@ -63,18 +63,18 @@ export default function CourseModuleLtiPage() {
       <div className="mb-4">
         <Link
           to={`/courses/${encodeURIComponent(courseCode ?? '')}/modules`}
-          className="text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
+          className="text-sm font-medium text-accent-fg hover:text-indigo-500 dark:text-indigo-400"
         >
           ← Back to modules
         </Link>
       </div>
       {canEdit ? (
-        <p className="mb-3 text-sm text-slate-600 dark:text-neutral-400">
+        <p className="mb-3 text-sm text-fg-muted">
           Instructors can set the AGS line item URL on this module item so external tools can send grades back to the
           gradebook.
         </p>
       ) : null}
-      {loading ? <p className="text-sm text-slate-600 dark:text-neutral-400">Preparing launch…</p> : null}
+      {loading ? <p className="text-sm text-fg-muted">Preparing launch…</p> : null}
       {error ? (
         <p className="text-sm text-rose-600 dark:text-rose-400" role="alert">
           {error}
@@ -82,11 +82,11 @@ export default function CourseModuleLtiPage() {
       ) : null}
       {iframeSrc && !error ? (
         <>
-          <p className="mb-2 text-sm text-slate-600 dark:text-neutral-400">
+          <p className="mb-2 text-sm text-fg-muted">
             If the tool does not load, use your browser&apos;s option to open the frame in a new tab or check that LTI
             is enabled on the server.
           </p>
-          <iframe title={safeTitle} src={iframeSrc} className="h-[min(80vh,720px)] w-full rounded-xl border border-slate-200 dark:border-neutral-600" />
+          <iframe title={safeTitle} src={iframeSrc} className="h-[min(80vh,720px)] w-full rounded-xl border border-border-default" />
         </>
       ) : null}
     </LmsPage>

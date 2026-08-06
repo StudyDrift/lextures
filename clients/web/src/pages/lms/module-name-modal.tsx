@@ -127,16 +127,16 @@ function ModuleNameModalInner({
         if (e.target === e.currentTarget && !saving) onClose()
       }}
     >
-      <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
-        <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
-          <h3 id={titleId} className="text-sm font-semibold text-slate-900">
+      <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-xl">
+        <div className="flex items-center justify-between border-b border-border-default px-4 py-3">
+          <h3 id={titleId} className="text-sm font-semibold text-fg-default">
             {headingText}
           </h3>
           <button
             type="button"
             onClick={() => onClose()}
             disabled={saving}
-            className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken hover:text-fg-default disabled:cursor-not-allowed disabled:opacity-50"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
@@ -151,7 +151,7 @@ function ModuleNameModalInner({
             void onSave(t)
           }}
         >
-          <label htmlFor={inputId} className="text-xs font-medium text-slate-600">
+          <label htmlFor={inputId} className="text-xs font-medium text-fg-muted">
             {fieldLabel}
           </label>
           <input
@@ -162,7 +162,7 @@ function ModuleNameModalInner({
             placeholder={placeholder}
             autoFocus
             disabled={saving}
-            className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 placeholder:text-slate-400 focus:border-indigo-400 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-1 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm text-fg-default outline-none ring-indigo-500/20 placeholder:text-fg-subtle focus:border-indigo-400 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60"
           />
           {errorMessage && (
             <p className="mt-3 text-sm text-rose-700" role="status">
@@ -174,14 +174,14 @@ function ModuleNameModalInner({
               type="button"
               onClick={() => onClose()}
               disabled={saving}
-              className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-xl px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-sunken disabled:cursor-not-allowed disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving || !value.trim()}
-              className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {saving ? 'Saving…' : primarySubmitLabel}
             </button>

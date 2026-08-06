@@ -34,15 +34,15 @@ export function AnswerOrdering({
         {order.map((id, i) => (
           <li
             key={id}
-            className="flex min-h-12 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+            className="flex min-h-12 items-center gap-2 rounded-xl border border-border-default bg-surface-raised px-3 py-2 dark:border-border-default dark:bg-surface-raised"
           >
-            <span className="w-6 tabular-nums text-slate-500">{i + 1}</span>
+            <span className="w-6 tabular-nums text-fg-muted">{i + 1}</span>
             <span className="flex-1">{byId.get(id) ?? id}</span>
             {!locked && (
               <div className="flex gap-1">
                 <button
                   type="button"
-                  className="min-h-11 min-w-11 rounded-md bg-slate-100 dark:bg-neutral-800"
+                  className="min-h-11 min-w-11 rounded-md bg-surface-sunken"
                   onClick={() => move(id, -1)}
                   aria-label={t('liveQuiz.answer.moveUp')}
                 >
@@ -50,7 +50,7 @@ export function AnswerOrdering({
                 </button>
                 <button
                   type="button"
-                  className="min-h-11 min-w-11 rounded-md bg-slate-100 dark:bg-neutral-800"
+                  className="min-h-11 min-w-11 rounded-md bg-surface-sunken"
                   onClick={() => move(id, 1)}
                   aria-label={t('liveQuiz.answer.moveDown')}
                 >
@@ -65,7 +65,7 @@ export function AnswerOrdering({
         type="button"
         disabled={locked}
         onClick={() => onSubmit(order)}
-        className="min-h-12 w-full rounded-xl bg-indigo-600 px-4 py-3 text-base font-semibold text-white disabled:opacity-40"
+        className="min-h-12 w-full rounded-xl bg-accent-solid px-4 py-3 text-base font-semibold text-white disabled:opacity-40"
       >
         {t('liveQuiz.answer.submit')}
       </button>

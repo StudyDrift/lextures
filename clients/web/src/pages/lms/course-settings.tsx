@@ -767,7 +767,7 @@ export default function CourseSettings() {
   if (!courseCode) {
     return (
       <LmsPage title="Course settings" description="">
-        <p className="mt-6 text-sm text-slate-500">Invalid link.</p>
+        <p className="mt-6 text-sm text-fg-muted">Invalid link.</p>
       </LmsPage>
     )
   }
@@ -900,7 +900,7 @@ export default function CourseSettings() {
       <button
         type="button"
         onClick={() => setCreateGradingAgentOpen(true)}
-        className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
+        className="inline-flex items-center gap-2 rounded-lg bg-accent-solid px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
       >
         <Plus className="h-4 w-4" aria-hidden />
         {t('gradingAgent.settings.create.button')}
@@ -912,13 +912,13 @@ export default function CourseSettings() {
       <p className="mt-2">
         <Link
           to={`/courses/${encodeURIComponent(courseCode)}`}
-          className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+          className="text-sm font-medium text-accent-fg hover:text-indigo-500"
         >
           ← Back to course
         </Link>
       </p>
 
-      {loading && <p className="mt-6 text-sm text-slate-500">Loading…</p>}
+      {loading && <p className="mt-6 text-sm text-fg-muted">Loading…</p>}
       {loadError && (
         <p className="mt-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
           {loadError}
@@ -938,37 +938,37 @@ export default function CourseSettings() {
               className="space-y-6 pb-24"
             >
               <section
-                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-800 dark:bg-neutral-900"
+                className="rounded-2xl border border-border-default bg-surface-raised p-5 shadow-sm shadow-slate-900/5 dark:border-border-subtle dark:bg-surface-raised"
                 data-focus-anchor="course.general.language"
               >
-                <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-50">Basic information</h2>
+                <h2 className="text-sm font-semibold text-fg-default">Basic information</h2>
                 <div className="mt-4 space-y-4">
                   <label className="block" data-focus-anchor="course.general.title">
-                    <span className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-neutral-300">Title</span>
+                    <span className="mb-1.5 block text-sm font-medium text-fg-muted">Title</span>
                     <input
                       type="text"
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       required
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-50"
+                      className="w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-border-default dark:bg-surface-base"
                     />
                   </label>
                   <label className="block" data-focus-anchor="course.general.description">
-                    <span className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-neutral-300">
+                    <span className="mb-1.5 block text-sm font-medium text-fg-muted">
                       Description
                     </span>
                     <textarea
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                       rows={5}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 placeholder:text-slate-400 focus:border-indigo-400 focus:ring-2 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-50"
+                      className="w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm text-fg-default outline-none ring-indigo-500/20 placeholder:text-fg-subtle focus:border-indigo-400 focus:ring-2 dark:border-border-default dark:bg-surface-base"
                       placeholder="What is this course about?"
                     />
                   </label>
                   <div>
-                    <span className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-neutral-300">
+                    <span className="mb-1.5 block text-sm font-medium text-fg-muted">
                       Grade levels{' '}
-                      <span className="font-normal text-slate-500 dark:text-neutral-400">(optional)</span>
+                      <span className="font-normal text-fg-muted">(optional)</span>
                     </span>
                     <GradeLevelMultiSelect
                       id="course-settings-grade-level"
@@ -981,14 +981,14 @@ export default function CourseSettings() {
               </section>
 
               <section
-                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-800 dark:bg-neutral-900"
+                className="rounded-2xl border border-border-default bg-surface-raised p-5 shadow-sm shadow-slate-900/5 dark:border-border-subtle dark:bg-surface-raised"
                 data-focus-anchor="course.general.timezone"
               >
-                <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-50">Course time zone</h2>
-                <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+                <h2 className="text-sm font-semibold text-fg-default">Course time zone</h2>
+                <p className="mt-1 text-sm text-fg-muted">
                   Choose how due dates work for this course. With a named zone (or UTC), a deadline is one shared
                   moment worldwide and learners see it converted to their own zone. Choose{' '}
-                  <span className="font-medium text-slate-700 dark:text-neutral-200">Learner local time</span> if
+                  <span className="font-medium text-fg-default">Learner local time</span> if
                   you want “11:59 PM” to mean 11:59 PM in each learner’s time zone.
                 </p>
                 <div className="mt-4 max-w-md">
@@ -1003,13 +1003,13 @@ export default function CourseSettings() {
                   />
                 </div>
                 {courseTimezone === COURSE_TIMEZONE_LOCAL && (
-                  <p className="mt-3 text-xs text-slate-500 dark:text-neutral-400">
+                  <p className="mt-3 text-xs text-fg-muted">
                     Learner local time: when you set a due date of 11:59 PM, each learner has until 11:59 PM in their
                     own zone (not a single global instant).
                   </p>
                 )}
                 {courseTimezone === 'UTC' && (
-                  <p className="mt-3 text-xs text-slate-500 dark:text-neutral-400">
+                  <p className="mt-3 text-xs text-fg-muted">
                     UTC is one global clock. 11:59 PM UTC falls at different local times for learners (for example
                     afternoon in the US, late evening in Europe).
                   </p>
@@ -1017,11 +1017,11 @@ export default function CourseSettings() {
               </section>
 
               <section
-                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-800 dark:bg-neutral-900"
+                className="rounded-2xl border border-border-default bg-surface-raised p-5 shadow-sm shadow-slate-900/5 dark:border-border-subtle dark:bg-surface-raised"
                 data-focus-anchor="course.general.published"
               >
-                <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-50">Publishing</h2>
-                <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+                <h2 className="text-sm font-semibold text-fg-default">Publishing</h2>
+                <p className="mt-1 text-sm text-fg-muted">
                   Published courses appear in the catalog. Drafts are only reachable by direct link.
                 </p>
                 <div className="mt-4 flex items-center gap-3">
@@ -1037,31 +1037,29 @@ export default function CourseSettings() {
                     }
                     onClick={() => onPublishedToggle()}
                     disabled={saveStatus === 'saving'}
-                    className={`relative inline-flex h-7 w-12 shrink-0 rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:opacity-50 ${published ? 'bg-indigo-600' : 'bg-slate-200 dark:bg-neutral-800'
-                      }`}
+                    className={`relative inline-flex h-7 w-12 shrink-0 rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:opacity-50 ${published ? 'bg-accent-solid' : 'bg-slate-200 dark:bg-surface-overlay' }`}
                   >
                     <span
-                      className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition-transform ${published ? 'translate-x-5' : 'translate-x-0.5'
-                        }`}
+                      className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-surface-raised shadow ring-0 transition-transform ${published ? 'translate-x-5' : 'translate-x-0.5' }`}
                     />
                   </button>
-                  <span className="text-sm font-medium text-slate-800 dark:text-neutral-300">
+                  <span className="text-sm font-medium text-fg-default dark:text-fg-muted">
                     {published ? 'Published' : 'Draft'}
                   </span>
                 </div>
               </section>
 
               <section
-                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-800 dark:bg-neutral-900"
+                className="rounded-2xl border border-border-default bg-surface-raised p-5 shadow-sm shadow-slate-900/5 dark:border-border-subtle dark:bg-surface-raised"
                 data-focus-anchor="course.general.home-landing"
               >
-                <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-50">Course home</h2>
-                <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+                <h2 className="text-sm font-semibold text-fg-default">Course home</h2>
+                <p className="mt-1 text-sm text-fg-muted">
                   What learners and staff see first when they open this course (the course dashboard).
                 </p>
                 <fieldset className="mt-4 space-y-3">
                   <legend className="sr-only">Course home layout</legend>
-                  <label className="flex cursor-pointer gap-3 rounded-xl border border-slate-100 p-3 hover:border-indigo-200 dark:border-neutral-800/50 dark:hover:border-indigo-800">
+                  <label className="flex cursor-pointer gap-3 rounded-xl border border-border-subtle p-3 hover:border-indigo-200/50 dark:hover:border-indigo-800">
                     <input
                       type="radio"
                       name="courseHomeLanding"
@@ -1073,15 +1071,15 @@ export default function CourseSettings() {
                       className="mt-1"
                     />
                     <span>
-                      <span className="block text-sm font-medium text-slate-900 dark:text-neutral-50">
+                      <span className="block text-sm font-medium text-fg-default">
                         Data dashboard
                       </span>
-                      <span className="mt-0.5 block text-xs text-slate-500 dark:text-neutral-400">
+                      <span className="mt-0.5 block text-xs text-fg-muted">
                         Deadlines, announcements, grades, and course details at a glance.
                       </span>
                     </span>
                   </label>
-                  <label className="flex cursor-pointer gap-3 rounded-xl border border-slate-100 p-3 hover:border-indigo-200 dark:border-neutral-800/50 dark:hover:border-indigo-800">
+                  <label className="flex cursor-pointer gap-3 rounded-xl border border-border-subtle p-3 hover:border-indigo-200/50 dark:hover:border-indigo-800">
                     <input
                       type="radio"
                       name="courseHomeLanding"
@@ -1093,15 +1091,15 @@ export default function CourseSettings() {
                       className="mt-1"
                     />
                     <span>
-                      <span className="block text-sm font-medium text-slate-900 dark:text-neutral-50">
+                      <span className="block text-sm font-medium text-fg-default">
                         Course calendar
                       </span>
-                      <span className="mt-0.5 block text-xs text-slate-500 dark:text-neutral-400">
+                      <span className="mt-0.5 block text-xs text-fg-muted">
                         Due dates and the month / week views as the landing experience.
                       </span>
                     </span>
                   </label>
-                  <label className="flex cursor-pointer gap-3 rounded-xl border border-slate-100 p-3 hover:border-indigo-200 dark:border-neutral-800/50 dark:hover:border-indigo-800">
+                  <label className="flex cursor-pointer gap-3 rounded-xl border border-border-subtle p-3 hover:border-indigo-200/50 dark:hover:border-indigo-800">
                     <input
                       type="radio"
                       name="courseHomeLanding"
@@ -1110,10 +1108,10 @@ export default function CourseSettings() {
                       className="mt-1"
                     />
                     <span>
-                      <span className="block text-sm font-medium text-slate-900 dark:text-neutral-50">
+                      <span className="block text-sm font-medium text-fg-default">
                         A specific content page
                       </span>
-                      <span className="mt-0.5 block text-xs text-slate-500 dark:text-neutral-400">
+                      <span className="mt-0.5 block text-xs text-fg-muted">
                         Open the course directly on a page from the module outline (for example, a welcome page).
                       </span>
                     </span>
@@ -1121,13 +1119,13 @@ export default function CourseSettings() {
                 </fieldset>
                 {courseHomeLanding === 'content_page' ? (
                   <label className="mt-4 block">
-                    <span className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-neutral-300">
+                    <span className="mb-1.5 block text-sm font-medium text-fg-muted">
                       Content page
                     </span>
                     <select
                       value={courseHomeContentItemId}
                       onChange={(e) => setCourseHomeContentItemId(e.target.value)}
-                      className="w-full max-w-lg rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-50"
+                      className="w-full max-w-lg rounded-xl border border-border-default bg-surface-raised px-2 py-1.5 text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-border-default dark:bg-surface-base"
                     >
                       <option value="">Select a page…</option>
                       {structureForHomePicker
@@ -1147,9 +1145,9 @@ export default function CourseSettings() {
                 ) : null}
               </section>
 
-              <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-800 dark:bg-neutral-900">
-                <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-50">Fixed Schedule & Visibility</h2>
-                <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+              <section className="rounded-2xl border border-border-default bg-surface-raised p-5 shadow-sm shadow-slate-900/5 dark:border-border-subtle dark:bg-surface-raised">
+                <h2 className="text-sm font-semibold text-fg-default">Fixed Schedule & Visibility</h2>
+                <p className="mt-1 text-sm text-fg-muted">
                   Control whether the course uses fixed calendar dates or a timeline from each
                   student’s enrollment. Module release and due dates follow the same mode: relative
                   courses shift those dates by the same offset.
@@ -1168,15 +1166,13 @@ export default function CourseSettings() {
                       setScheduleMode((m) => (m === 'fixed' ? 'relative' : 'fixed'))
                     }
                     disabled={saveStatus === 'saving'}
-                    className={`relative inline-flex h-7 w-12 shrink-0 rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:opacity-50 ${scheduleMode === 'relative' ? 'bg-indigo-600' : 'bg-slate-200 dark:bg-neutral-800'
-                      }`}
+                    className={`relative inline-flex h-7 w-12 shrink-0 rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:opacity-50 ${scheduleMode === 'relative' ? 'bg-accent-solid' : 'bg-slate-200 dark:bg-surface-overlay' }`}
                   >
                     <span
-                      className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition-transform ${scheduleMode === 'relative' ? 'translate-x-5' : 'translate-x-0.5'
-                        }`}
+                      className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-surface-raised shadow ring-0 transition-transform ${scheduleMode === 'relative' ? 'translate-x-5' : 'translate-x-0.5' }`}
                     />
                   </button>
-                  <span className="text-sm font-medium text-slate-800 dark:text-neutral-300">
+                  <span className="text-sm font-medium text-fg-default dark:text-fg-muted">
                     {scheduleMode === 'fixed'
                       ? 'Fixed (calendar dates)'
                       : 'Relative (from enrollment)'}
@@ -1184,7 +1180,7 @@ export default function CourseSettings() {
                 </div>
                 {scheduleMode === 'fixed' ? (
                   <>
-                    <p className="mt-3 text-sm text-slate-500 dark:text-neutral-400">
+                    <p className="mt-3 text-sm text-fg-muted">
                       Clear a field to remove that date. Times use your local timezone.
                     </p>
                     <div className="mt-4 grid gap-4 sm:grid-cols-2">
@@ -1220,7 +1216,7 @@ export default function CourseSettings() {
                   </>
                 ) : (
                   <>
-                    <p className="mt-3 text-sm text-slate-500 dark:text-neutral-400">
+                    <p className="mt-3 text-sm text-fg-muted">
                       Start and catalog visibility begin when the student is enrolled. Set how long
                       the course runs and when it drops from the catalog (optional). Durations use
                       ISO-style lengths (days, weeks, months, or years).
@@ -1248,18 +1244,18 @@ export default function CourseSettings() {
               </section>
 
               <section
-                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-800 dark:bg-neutral-900"
+                className="rounded-2xl border border-border-default bg-surface-raised p-5 shadow-sm shadow-slate-900/5 dark:border-border-subtle dark:bg-surface-raised"
                 data-focus-anchor="course.general.hero-image"
               >
-                <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-50">Hero image</h2>
-                <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+                <h2 className="text-sm font-semibold text-fg-default">Hero image</h2>
+                <p className="mt-1 text-sm text-fg-muted">
                   Generate a cover image with AI or upload your own (PNG, JPEG, GIF, or WebP up to 10MB).
                 </p>
                 {course.heroImageUrl && (
                   <CourseHeroImage
                     src={course.heroImageUrl}
                     alt=""
-                    className="mt-4 max-h-48 w-full max-w-md rounded-xl border border-slate-200 object-cover dark:border-neutral-805"
+                    className="mt-4 max-h-48 w-full max-w-md rounded-xl border border-border-default object-cover dark:border-neutral-805"
                     style={heroImageObjectStyle(course.heroImageObjectPosition)}
                   />
                 )}
@@ -1267,12 +1263,12 @@ export default function CourseSettings() {
                   <button
                     type="button"
                     onClick={openImageModal}
-                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-900 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-350 dark:hover:border-indigo-900 dark:hover:bg-indigo-950 dark:hover:text-indigo-100"
+                    className="inline-flex items-center gap-2 rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-900 dark:border-border-subtle dark:bg-surface-base dark:text-neutral-350 dark:hover:border-indigo-900 dark:hover:bg-indigo-950 dark:hover:text-indigo-100"
                   >
                     <ImageIcon className="h-4 w-4" aria-hidden />
                     Generate image
                   </button>
-                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-900 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-350 dark:hover:border-indigo-900 dark:hover:bg-indigo-950 dark:hover:text-indigo-100">
+                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-900 dark:border-border-subtle dark:bg-surface-base dark:text-neutral-350 dark:hover:border-indigo-900 dark:hover:bg-indigo-950 dark:hover:text-indigo-100">
                     <Upload className="h-4 w-4" aria-hidden />
                     {heroUploadStatus === 'uploading' ? 'Uploading…' : 'Upload image'}
                     <input
@@ -1288,7 +1284,7 @@ export default function CourseSettings() {
                     onClick={openPositionModal}
                     disabled={!course.heroImageUrl}
                     title={!course.heroImageUrl ? 'Add a hero image first' : undefined}
-                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-900 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-350 dark:hover:border-indigo-900 dark:hover:bg-indigo-950 dark:hover:text-indigo-100"
+                    className="inline-flex items-center gap-2 rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-900 disabled:cursor-not-allowed disabled:opacity-50 dark:border-border-subtle dark:bg-surface-base dark:text-neutral-350 dark:hover:border-indigo-900 dark:hover:bg-indigo-950 dark:hover:text-indigo-100"
                   >
                     <Move className="h-4 w-4" aria-hidden />
                     Position image
@@ -1308,11 +1304,11 @@ export default function CourseSettings() {
                 )}
               </section>
 
-              <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-800 dark:bg-neutral-900">
+              <section className="rounded-2xl border border-border-default bg-surface-raised p-5 shadow-sm shadow-slate-900/5 dark:border-border-subtle dark:bg-surface-raised">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-50">Reading theme</h2>
-                    <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+                    <h2 className="text-sm font-semibold text-fg-default">Reading theme</h2>
+                    <p className="mt-1 text-sm text-fg-muted">
                       Applies to the syllabus, content pages, and assignments. Choosing a preset is staged and saved via the main save bar.
                     </p>
                   </div>
@@ -1327,31 +1323,17 @@ export default function CourseSettings() {
                         type="button"
                         onClick={() => selectMarkdownPreset(meta.id)}
                         disabled={saveStatus === 'saving'}
-                        className={`relative flex flex-col rounded-xl border p-4 text-start transition-[background-color,color,border-color] ${selected
-                          ? 'border-indigo-500 bg-indigo-50/60 ring-2 ring-indigo-500/30 dark:border-indigo-500 dark:bg-indigo-950/30'
-                          : 'border-slate-200 bg-white hover:border-indigo-200 hover:bg-slate-50/80 dark:border-neutral-800 dark:bg-neutral-950 dark:hover:border-indigo-850 dark:hover:bg-neutral-900/50'
-                          } disabled:opacity-60`}
+                        className={`relative flex flex-col rounded-xl border p-4 text-start transition-[background-color,color,border-color] ${selected ? 'border-indigo-500 bg-indigo-50/60 ring-2 ring-indigo-500/30 dark:border-indigo-500 dark:bg-indigo-950/30' : 'border-border-default bg-surface-raised hover:border-indigo-200 hover:bg-slate-50/80 dark:border-border-subtle dark:bg-surface-base dark:hover:border-indigo-850 dark:hover:bg-neutral-900/50' } disabled:opacity-60`}
                       >
                         {selected && (
-                          <span className="absolute end-3 top-3 flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600 text-white">
+                          <span className="absolute end-3 top-3 flex h-6 w-6 items-center justify-center rounded-full bg-accent-solid text-white">
                             <Check className="h-3.5 w-3.5" aria-hidden />
                           </span>
                         )}
-                        <span className="text-sm font-semibold text-slate-900 dark:text-neutral-50">{meta.title}</span>
-                        <span className="mt-1 text-xs leading-snug text-slate-600 dark:text-neutral-400">{meta.description}</span>
+                        <span className="text-sm font-semibold text-fg-default">{meta.title}</span>
+                        <span className="mt-1 text-xs leading-snug text-fg-muted">{meta.description}</span>
                         <span
-                          className={`mt-3 block h-8 rounded-md ${meta.id === 'night'
-                            ? 'bg-slate-900'
-                            : meta.id === 'reader'
-                              ? 'bg-stone-100 ring-1 ring-stone-200 dark:ring-stone-850'
-                              : meta.id === 'contrast'
-                                ? 'border-2 border-black bg-white dark:border-neutral-50 dark:bg-neutral-950'
-                                : meta.id === 'serif'
-                                  ? 'bg-amber-50/80 dark:bg-amber-950/25'
-                                  : meta.id === 'accent'
-                                    ? 'bg-violet-100/80 dark:bg-violet-950/25'
-                                    : 'bg-slate-100 dark:bg-neutral-800'
-                            }`}
+                          className={`mt-3 block h-8 rounded-md ${meta.id === 'night' ? 'bg-slate-900' : meta.id === 'reader' ? 'bg-stone-100 ring-1 ring-stone-200 dark:ring-stone-850' : meta.id === 'contrast' ? 'border-2 border-black bg-surface-raised dark:border-neutral-50 dark:bg-surface-base' : meta.id === 'serif' ? 'bg-amber-50/80 dark:bg-amber-950/25' : meta.id === 'accent' ? 'bg-violet-100/80 dark:bg-violet-950/25' : 'bg-surface-sunken' }`}
                           aria-hidden
                         />
                       </button>
@@ -1359,14 +1341,14 @@ export default function CourseSettings() {
                   })}
                 </div>
 
-                <div className="mt-8 border-t border-slate-200 pt-6 dark:border-neutral-800">
-                  <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-50">Custom theme</h3>
-                  <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+                <div className="mt-8 border-t border-border-default pt-6 dark:border-border-subtle">
+                  <h3 className="text-sm font-semibold text-fg-default">Custom theme</h3>
+                  <p className="mt-1 text-sm text-fg-muted">
                     Set colors and layout. Active when{' '}
-                    <span className="font-medium text-slate-700 dark:text-neutral-300">Custom</span> preset is active — edit values below, then save with the main save bar.
+                    <span className="font-medium text-fg-muted">Custom</span> preset is active — edit values below, then save with the main save bar.
                   </p>
                   <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    <label className="block text-xs font-medium text-slate-600 dark:text-neutral-400">
+                    <label className="block text-xs font-medium text-fg-muted">
                       Heading color
                       <input
                         type="color"
@@ -1374,10 +1356,10 @@ export default function CourseSettings() {
                         onChange={(e) =>
                           updateCustomDraft((d) => ({ ...d, headingColor: e.target.value }))
                         }
-                        className="mt-1 h-9 w-full cursor-pointer rounded border border-slate-200 bg-white dark:border-neutral-800 dark:bg-neutral-950"
+                        className="mt-1 h-9 w-full cursor-pointer rounded border border-border-default bg-surface-raised dark:border-border-subtle dark:bg-surface-base"
                       />
                     </label>
-                    <label className="block text-xs font-medium text-slate-600 dark:text-neutral-400">
+                    <label className="block text-xs font-medium text-fg-muted">
                       Body text
                       <input
                         type="color"
@@ -1385,10 +1367,10 @@ export default function CourseSettings() {
                         onChange={(e) =>
                           updateCustomDraft((d) => ({ ...d, bodyColor: e.target.value }))
                         }
-                        className="mt-1 h-9 w-full cursor-pointer rounded border border-slate-200 bg-white dark:border-neutral-800 dark:bg-neutral-950"
+                        className="mt-1 h-9 w-full cursor-pointer rounded border border-border-default bg-surface-raised dark:border-border-subtle dark:bg-surface-base"
                       />
                     </label>
-                    <label className="block text-xs font-medium text-slate-600 dark:text-neutral-400">
+                    <label className="block text-xs font-medium text-fg-muted">
                       Links
                       <input
                         type="color"
@@ -1396,10 +1378,10 @@ export default function CourseSettings() {
                         onChange={(e) =>
                           updateCustomDraft((d) => ({ ...d, linkColor: e.target.value }))
                         }
-                        className="mt-1 h-9 w-full cursor-pointer rounded border border-slate-200 bg-white dark:border-neutral-800 dark:bg-neutral-950"
+                        className="mt-1 h-9 w-full cursor-pointer rounded border border-border-default bg-surface-raised dark:border-border-subtle dark:bg-surface-base"
                       />
                     </label>
-                    <label className="block text-xs font-medium text-slate-600 dark:text-neutral-400">
+                    <label className="block text-xs font-medium text-fg-muted">
                       Code &amp; blocks background
                       <input
                         type="color"
@@ -1407,10 +1389,10 @@ export default function CourseSettings() {
                         onChange={(e) =>
                           updateCustomDraft((d) => ({ ...d, codeBackground: e.target.value }))
                         }
-                        className="mt-1 h-9 w-full cursor-pointer rounded border border-slate-200 bg-white dark:border-neutral-800 dark:bg-neutral-950"
+                        className="mt-1 h-9 w-full cursor-pointer rounded border border-border-default bg-surface-raised dark:border-border-subtle dark:bg-surface-base"
                       />
                     </label>
-                    <label className="block text-xs font-medium text-slate-600 dark:text-neutral-400">
+                    <label className="block text-xs font-medium text-fg-muted">
                       Borders &amp; quotes
                       <input
                         type="color"
@@ -1418,10 +1400,10 @@ export default function CourseSettings() {
                         onChange={(e) =>
                           updateCustomDraft((d) => ({ ...d, blockquoteBorder: e.target.value }))
                         }
-                        className="mt-1 h-9 w-full cursor-pointer rounded border border-slate-200 bg-white dark:border-neutral-800 dark:bg-neutral-950"
+                        className="mt-1 h-9 w-full cursor-pointer rounded border border-border-default bg-surface-raised dark:border-border-subtle dark:bg-surface-base"
                       />
                     </label>
-                    <label className="block text-xs font-medium text-slate-600 dark:text-neutral-400">
+                    <label className="block text-xs font-medium text-fg-muted">
                       Article width
                       <select
                         value={customDraft.articleWidth ?? markdownThemeCustomSeed.articleWidth}
@@ -1431,7 +1413,7 @@ export default function CourseSettings() {
                             articleWidth: e.target.value as MarkdownThemeCustom['articleWidth'],
                           }))
                         }
-                        className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
+                        className="mt-1 w-full rounded-xl border border-border-default bg-surface-raised px-2 py-1.5 text-sm text-fg-default dark:border-border-subtle dark:bg-surface-base"
                       >
                         <option value="narrow">Narrow</option>
                         <option value="comfortable">Comfortable</option>
@@ -1439,7 +1421,7 @@ export default function CourseSettings() {
                         <option value="full">Full width</option>
                       </select>
                     </label>
-                    <label className="block text-xs font-medium text-slate-600 dark:text-neutral-400">
+                    <label className="block text-xs font-medium text-fg-muted">
                       Font
                       <select
                         value={customDraft.fontFamily ?? markdownThemeCustomSeed.fontFamily}
@@ -1449,7 +1431,7 @@ export default function CourseSettings() {
                             fontFamily: e.target.value as MarkdownThemeCustom['fontFamily'],
                           }))
                         }
-                        className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
+                        className="mt-1 w-full rounded-xl border border-border-default bg-surface-raised px-2 py-1.5 text-sm text-fg-default dark:border-border-subtle dark:bg-surface-base"
                       >
                         <option value="sans">Sans-serif</option>
                         <option value="serif">Serif</option>
@@ -1460,7 +1442,7 @@ export default function CourseSettings() {
                     {course.markdownThemePreset === 'custom' && !isDirty ? (
                       <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Custom theme is active for this course.</span>
                     ) : markdownThemePreset === 'custom' ? (
-                      <span className="text-xs font-medium text-indigo-600 dark:text-indigo-400">Custom theme will be saved when you apply changes.</span>
+                      <span className="text-xs font-medium text-accent-fg">Custom theme will be saved when you apply changes.</span>
                     ) : null}
                   </div>
                 </div>
@@ -1478,7 +1460,7 @@ export default function CourseSettings() {
           )}
           {section === 'plagiarism' && (featuresLoading || ffPlagiarismChecks) ? (
             featuresLoading ? (
-              <p className="text-sm text-slate-600 dark:text-neutral-300">Loading plagiarism settings…</p>
+              <p className="text-sm text-fg-muted">Loading plagiarism settings…</p>
             ) : (
               <CoursePlagiarismSettingsSection courseCode={courseCode} />
             )
@@ -1520,7 +1502,7 @@ export default function CourseSettings() {
           )}
           {section === 'accessibility' && (featuresLoading || altTextEnforcementEnabled) ? (
             featuresLoading ? (
-              <p className="text-sm text-slate-600 dark:text-neutral-300">Loading accessibility settings…</p>
+              <p className="text-sm text-fg-muted">Loading accessibility settings…</p>
             ) : (
               <CourseAccessibilitySettingsSection courseCode={courseCode} />
             )
@@ -1539,7 +1521,7 @@ export default function CourseSettings() {
                 />
               </>
             ) : (
-              <p className="text-sm text-slate-600 dark:text-neutral-300">
+              <p className="text-sm text-fg-muted">
                 Turn on <span className="font-medium">Course sections</span> under the Features tab
                 first, then return here to add sections and overrides.
               </p>
@@ -1571,28 +1553,27 @@ export default function CourseSettings() {
             if (e.target === e.currentTarget) closePositionModal()
           }}
         >
-          <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
-            <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
-              <h3 id="position-hero-title" className="text-sm font-semibold text-slate-900">
+          <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-xl">
+            <div className="flex items-center justify-between border-b border-border-default px-4 py-3">
+              <h3 id="position-hero-title" className="text-sm font-semibold text-fg-default">
                 Position banner crop
               </h3>
               <button
                 type="button"
                 onClick={() => closePositionModal()}
-                className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                className="rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken hover:text-fg-default"
                 aria-label="Close"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
             <div className="p-4">
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-fg-muted">
                 Drag across the preview or tap once to choose which part of the image stays visible on
                 course cards (same height as the catalog banner).
               </p>
               <div
-                className={`relative mt-4 h-36 w-full touch-none select-none overflow-hidden rounded-xl border border-slate-200 bg-slate-100 ${positionDragging ? 'cursor-grabbing' : 'cursor-grab'
-                  }`}
+                className={`relative mt-4 h-36 w-full touch-none select-none overflow-hidden rounded-xl border border-border-default bg-surface-sunken ${positionDragging ? 'cursor-grabbing' : 'cursor-grab' }`}
                 role="presentation"
                 onPointerDown={(e) => {
                   if (e.button !== 0) return
@@ -1633,7 +1614,7 @@ export default function CourseSettings() {
                   }}
                 />
                 <span
-                  className="pointer-events-none absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-indigo-600 shadow ring-2 ring-indigo-600/30"
+                  className="pointer-events-none absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-accent-solid shadow ring-2 ring-indigo-600/30"
                   style={{ left: `${positionDraft.x}%`, top: `${positionDraft.y}%` }}
                   aria-hidden
                 />
@@ -1642,7 +1623,7 @@ export default function CourseSettings() {
                 <button
                   type="button"
                   onClick={() => setPositionDraft({ x: 50, y: 50 })}
-                  className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+                  className="text-sm font-medium text-accent-fg hover:text-indigo-500"
                 >
                   Reset to center
                 </button>
@@ -1661,7 +1642,7 @@ export default function CourseSettings() {
                 <button
                   type="button"
                   onClick={() => closePositionModal()}
-                  className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100"
+                  className="rounded-xl px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-sunken"
                 >
                   Cancel
                 </button>
@@ -1669,7 +1650,7 @@ export default function CourseSettings() {
                   type="button"
                   onClick={() => void onSaveHeroPosition()}
                   disabled={positionSaveStatus === 'saving'}
-                  className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {positionSaveStatus === 'saving' ? 'Saving…' : 'Save position'}
                 </button>
@@ -1689,15 +1670,15 @@ export default function CourseSettings() {
             if (e.target === e.currentTarget) closeImageModal()
           }}
         >
-          <div className="max-h-[min(90vh,720px)] w-full max-w-3xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
-            <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
-              <h3 id="gen-image-title" className="text-sm font-semibold text-slate-900">
+          <div className="max-h-[min(90vh,720px)] w-full max-w-3xl overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-xl">
+            <div className="flex items-center justify-between border-b border-border-default px-4 py-3">
+              <h3 id="gen-image-title" className="text-sm font-semibold text-fg-default">
                 Generate hero image
               </h3>
               <button
                 type="button"
                 onClick={() => closeImageModal()}
-                className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                className="rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken hover:text-fg-default"
                 aria-label="Close"
               >
                 <X className="h-5 w-5" />
@@ -1705,7 +1686,7 @@ export default function CourseSettings() {
             </div>
             <form onSubmit={onGenerateInModal} className="flex max-h-[calc(min(90vh,720px)-56px)] flex-col gap-4 p-4 md:flex-row md:items-stretch">
               <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-                <label htmlFor="modal-image-prompt" className="text-xs font-medium text-slate-600">
+                <label htmlFor="modal-image-prompt" className="text-xs font-medium text-fg-muted">
                   Prompt
                 </label>
                 <textarea
@@ -1714,7 +1695,7 @@ export default function CourseSettings() {
                   onChange={(e) => setImagePrompt(e.target.value)}
                   rows={8}
                   placeholder="Describe the image you want, e.g. soft watercolor campus scene at sunset."
-                  className="mt-1 min-h-[140px] flex-1 resize-y rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2"
+                  className="mt-1 min-h-[140px] flex-1 resize-y rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2"
                 />
                 {genMessage && (
                   <p
@@ -1732,7 +1713,7 @@ export default function CourseSettings() {
                   <button
                     type="button"
                     onClick={() => closeImageModal()}
-                    className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100"
+                    className="rounded-xl px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-sunken"
                   >
                     Close
                   </button>
@@ -1750,17 +1731,17 @@ export default function CourseSettings() {
                   <button
                     type="submit"
                     disabled={genStatus === 'loading' || !imagePrompt.trim()}
-                    className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {genStatus === 'loading' ? 'Generating…' : 'Generate'}
                   </button>
                 </div>
               </div>
               <div className="flex w-full shrink-0 flex-col md:w-72 lg:w-80">
-                <span className="text-xs font-medium text-slate-600">Preview</span>
-                <div className="mt-1 flex min-h-[200px] flex-1 items-center justify-center overflow-hidden rounded-xl border border-dashed border-slate-200 bg-slate-50">
+                <span className="text-xs font-medium text-fg-muted">Preview</span>
+                <div className="mt-1 flex min-h-[200px] flex-1 items-center justify-center overflow-hidden rounded-xl border border-dashed border-border-default bg-surface-base">
                   {genStatus === 'loading' && (
-                    <span className="text-sm text-slate-500">Generating…</span>
+                    <span className="text-sm text-fg-muted">Generating…</span>
                   )}
                   {genStatus !== 'loading' && previewUrl && (
                     <CourseHeroImage
@@ -1770,7 +1751,7 @@ export default function CourseSettings() {
                     />
                   )}
                   {genStatus !== 'loading' && !previewUrl && (
-                    <span className="px-4 text-center text-sm text-slate-400">
+                    <span className="px-4 text-center text-sm text-fg-subtle">
                       Generated image will appear here
                     </span>
                   )}
@@ -1799,14 +1780,14 @@ function DateField({
   return (
     <div>
       <div className="mb-1.5 flex items-center justify-between gap-2">
-        <label htmlFor={id} className="text-sm font-medium text-slate-700">
+        <label htmlFor={id} className="text-sm font-medium text-fg-muted">
           {label}
         </label>
         {value ? (
           <button
             type="button"
             onClick={onClear}
-            className="text-xs font-medium text-indigo-600 hover:text-indigo-500"
+            className="text-xs font-medium text-accent-fg hover:text-indigo-500"
           >
             Clear
           </button>
@@ -1817,7 +1798,7 @@ function DateField({
         type="datetime-local"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2"
+        className="w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2"
       />
     </div>
   )
@@ -1842,14 +1823,14 @@ function RelativeDurationField({
   return (
     <div>
       <div className="mb-1.5 flex items-center justify-between gap-2">
-        <label htmlFor={id} className="text-sm font-medium text-slate-700">
+        <label htmlFor={id} className="text-sm font-medium text-fg-muted">
           {label}
         </label>
         {amount ? (
           <button
             type="button"
             onClick={onClear}
-            className="text-xs font-medium text-indigo-600 hover:text-indigo-500"
+            className="text-xs font-medium text-accent-fg hover:text-indigo-500"
           >
             Clear
           </button>
@@ -1865,13 +1846,13 @@ function RelativeDurationField({
           placeholder="e.g. 3"
           value={amount}
           onChange={(e) => onAmountChange(e.target.value)}
-          className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 placeholder:text-slate-400 focus:border-indigo-400 focus:ring-2"
+          className="min-w-0 flex-1 rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm text-fg-default outline-none ring-indigo-500/20 placeholder:text-fg-subtle focus:border-indigo-400 focus:ring-2"
         />
         <select
           aria-label={`${label} unit`}
           value={unit}
           onChange={(e) => onUnitChange(e.target.value as RelativeDurationUnit)}
-          className="w-36 shrink-0 rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2"
+          className="w-36 shrink-0 rounded-xl border border-border-default bg-surface-raised px-2 py-1.5 text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2"
         >
           <option value="D">Days</option>
           <option value="W">Weeks</option>

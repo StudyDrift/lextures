@@ -129,10 +129,10 @@ export default function Signup() {
         <div className="mb-5 flex justify-center px-2">
           <BrandLogo className="mx-auto h-14 w-auto max-w-[min(100%,240px)] object-contain" />
         </div>
-        <h1 className="lex-auth-display text-[1.7rem] leading-snug text-stone-900 dark:text-neutral-50">
+        <h1 className="lex-auth-display text-[1.7rem] leading-snug text-stone-900">
           {t('auth.signup.title')}
         </h1>
-        <p className="mt-2 text-sm leading-relaxed text-stone-600 dark:text-neutral-400">
+        <p className="mt-2 text-sm leading-relaxed text-stone-600 dark:text-fg-muted">
           {t('auth.signup.subtitle')}
         </p>
       </header>
@@ -143,10 +143,10 @@ export default function Signup() {
             <div>
               <label
                 htmlFor="displayName"
-                className="mb-1.5 block text-sm font-medium text-stone-800 dark:text-neutral-200"
+                className="mb-1.5 block text-sm font-medium text-stone-800 dark:text-fg-default"
               >
                 {t('auth.signup.displayName')}{' '}
-                <span className="font-normal text-stone-500 dark:text-neutral-500">
+                <span className="font-normal text-stone-500">
                   {t('auth.signup.displayNameOptional')}
                 </span>
               </label>
@@ -162,7 +162,7 @@ export default function Signup() {
               />
             </div>
             <div>
-              <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-stone-800 dark:text-neutral-200">
+              <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-stone-800 dark:text-fg-default">
                 {t('auth.signup.email')}
               </label>
               <input
@@ -180,13 +180,13 @@ export default function Signup() {
             <div>
               <label
                 htmlFor="password"
-                className="mb-1.5 block text-sm font-medium text-stone-800 dark:text-neutral-200"
+                className="mb-1.5 block text-sm font-medium text-stone-800 dark:text-fg-default"
               >
                 {t('auth.signup.password')}
               </label>
               <ul
                 id="password-requirements"
-                className="mb-2 list-inside list-disc text-xs text-stone-600 dark:text-neutral-400"
+                className="mb-2 list-inside list-disc text-xs text-stone-600 dark:text-fg-muted"
               >
                 <li>At least {minLen} characters</li>
                 {policy?.requireUpper ? <li>One uppercase letter</li> : null}
@@ -212,23 +212,17 @@ export default function Signup() {
                 placeholder={`At least ${minLen} characters`}
               />
               <div id="password-strength" className="mt-2 flex items-center gap-2" aria-live="polite">
-                <span className="text-xs font-medium text-stone-600 dark:text-neutral-400">Strength:</span>
-                <span className="text-xs font-semibold text-stone-800 dark:text-neutral-200">{strengthLabel}</span>
+                <span className="text-xs font-medium text-stone-600 dark:text-fg-muted">Strength:</span>
+                <span className="text-xs font-semibold text-stone-800 dark:text-fg-default">{strengthLabel}</span>
                 <div className="h-1.5 flex-1 rounded-full bg-stone-200 dark:bg-neutral-700" aria-hidden>
                   <div
-                    className={`h-full rounded-full ${
-                      strengthKey === 'password.strength.weak'
-                        ? 'w-1/3 bg-rose-500'
-                        : strengthKey === 'password.strength.fair'
-                          ? 'w-2/3 bg-amber-500'
-                          : 'w-full bg-emerald-600'
-                    }`}
+                    className={`h-full rounded-full ${ strengthKey === 'password.strength.weak' ? 'w-1/3 bg-rose-500' : strengthKey === 'password.strength.fair' ? 'w-2/3 bg-amber-500' : 'w-full bg-emerald-600' }`}
                   />
                 </div>
               </div>
             </div>
 
-            <div className="rounded-lg border border-stone-200 bg-stone-50/80 px-3 py-3 dark:border-neutral-700 dark:bg-neutral-900/40">
+            <div className="rounded-lg border border-stone-200 bg-stone-50/80 px-3 py-3 dark:border-border-default/40">
               <TimezoneSelector
                 value={timezone}
                 onChange={(v) => setTimezone(v ?? detectBrowserTimezone())}
@@ -236,16 +230,16 @@ export default function Signup() {
               />
             </div>
 
-            <div className="flex items-start gap-3 rounded-lg border border-stone-200 bg-stone-50/80 px-3 py-3 dark:border-neutral-700 dark:bg-neutral-900/40">
+            <div className="flex items-start gap-3 rounded-lg border border-stone-200 bg-stone-50/80 px-3 py-3 dark:border-border-default/40">
               <input
                 id="registerAsParent"
                 name="registerAsParent"
                 type="checkbox"
                 checked={registerAsParent}
                 onChange={(e) => setRegisterAsParent(e.target.checked)}
-                className="mt-1 h-4 w-4 shrink-0 rounded border-stone-300 text-indigo-600 focus:ring-indigo-500 dark:border-neutral-600"
+                className="mt-1 h-4 w-4 shrink-0 rounded border-stone-300 text-accent-fg focus:ring-indigo-500 dark:border-border-default"
               />
-              <label htmlFor="registerAsParent" className="text-sm leading-snug text-stone-800 dark:text-neutral-200">
+              <label htmlFor="registerAsParent" className="text-sm leading-snug text-stone-800 dark:text-fg-default">
                 {t('auth.signup.registerAsParent')}
               </label>
             </div>
@@ -261,7 +255,7 @@ export default function Signup() {
             </button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-stone-600 dark:text-neutral-400">
+          <p className="mt-6 text-center text-sm text-stone-600 dark:text-fg-muted">
             {t('auth.signup.alreadyHave')}{' '}
             <Link to="/login" className={authMutedLinkClass}>
               {t('auth.signup.signIn')}

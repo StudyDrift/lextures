@@ -240,10 +240,6 @@ func (d Deps) contentToolsStateRateLimited(w http.ResponseWriter, r *http.Reques
 
 func (d Deps) handleContentToolsStateGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, viewer, courseID, ok := d.requireContentToolsCourse(w, r)
 		if !ok {
 			return
@@ -308,10 +304,6 @@ func decodeContentToolsSaveBody(r *http.Request) (ctmodel.SaveStateRequest, erro
 
 func (d Deps) handleContentToolsStatePut() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, viewer, courseID, ok := d.requireContentToolsCourse(w, r)
 		if !ok {
 			return
@@ -468,10 +460,6 @@ func (d Deps) handleContentToolsStatePut() http.HandlerFunc {
 
 func (d Deps) handleContentToolsStateSubmit() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, viewer, courseID, ok := d.requireContentToolsCourse(w, r)
 		if !ok {
 			return

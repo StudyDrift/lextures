@@ -20,7 +20,7 @@ export function ZoomControls({
       <button
         type="button"
         data-testid="diagram-zoom-out"
-        className="rounded border border-slate-300 px-2 py-1 dark:border-neutral-600"
+        className="rounded border border-border-strong px-2 py-1 dark:border-border-default"
         onClick={onZoomOut}
       >
         {t('contentTools.tools.diagram_hotspot.zoomOut')}
@@ -29,14 +29,14 @@ export function ZoomControls({
       <button
         type="button"
         data-testid="diagram-zoom-in"
-        className="rounded border border-slate-300 px-2 py-1 dark:border-neutral-600"
+        className="rounded border border-border-strong px-2 py-1 dark:border-border-default"
         onClick={onZoomIn}
       >
         {t('contentTools.tools.diagram_hotspot.zoomIn')}
       </button>
       <button
         type="button"
-        className="rounded border border-slate-300 px-2 py-1 dark:border-neutral-600"
+        className="rounded border border-border-strong px-2 py-1 dark:border-border-default"
         onClick={onReset}
       >
         {t('contentTools.tools.diagram_hotspot.resetView')}

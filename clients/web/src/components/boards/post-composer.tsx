@@ -238,7 +238,7 @@ export function PostComposer({ courseCode, boardId, onCreated }: PostComposerPro
           if (open) closePopover()
           else setOpen(true)
         }}
-        className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+        className="inline-flex items-center gap-2 rounded-md bg-accent-solid px-3 py-2 text-sm font-medium text-white hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
         aria-label={t('boards.compose.openAria')}
         aria-haspopup="dialog"
         aria-expanded={open}
@@ -254,7 +254,7 @@ export function PostComposer({ courseCode, boardId, onCreated }: PostComposerPro
           ref={panelRef}
           onDragOver={(e) => e.preventDefault()}
           onDrop={onDrop}
-          className="absolute end-0 top-full z-50 mt-2 w-[min(24rem,calc(100vw-1.5rem))] max-h-[min(32rem,calc(100dvh-6rem))] overflow-y-auto rounded-xl border border-slate-200 bg-white p-4 shadow-xl ring-1 ring-black/5 dark:border-neutral-700 dark:bg-neutral-900 dark:ring-white/10"
+          className="absolute end-0 top-full z-50 mt-2 w-[min(24rem,calc(100vw-1.5rem))] max-h-[min(32rem,calc(100dvh-6rem))] overflow-y-auto rounded-xl border border-border-default bg-surface-raised p-4 shadow-xl ring-1 ring-black/5 dark:border-border-default dark:bg-surface-raised dark:ring-white/10"
           role="dialog"
           aria-modal="true"
           aria-label={t('boards.compose.dialogAria')}
@@ -267,11 +267,7 @@ export function PostComposer({ courseCode, boardId, onCreated }: PostComposerPro
                 role="tab"
                 aria-selected={contentType === ct}
                 onClick={() => setContentType(ct)}
-                className={`rounded-md px-2.5 py-1 text-xs font-medium ${
-                  contentType === ct
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-slate-100 text-slate-700 dark:bg-neutral-800 dark:text-neutral-200'
-                }`}
+                className={`rounded-md px-2.5 py-1 text-xs font-medium ${ contentType === ct ? 'bg-accent-solid text-white' : 'bg-surface-sunken text-fg-muted dark:bg-surface-overlay dark:text-fg-default' }`}
               >
                 {t(`boards.post.type.${ct}`)}
               </button>
@@ -280,36 +276,36 @@ export function PostComposer({ courseCode, boardId, onCreated }: PostComposerPro
 
           <div className="space-y-3">
             <label className="block text-sm">
-              <span className="mb-1 block text-slate-600 dark:text-neutral-300">{t('boards.compose.titleLabel')}</span>
+              <span className="mb-1 block text-fg-muted">{t('boards.compose.titleLabel')}</span>
               <input
                 ref={titleInputRef}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-800"
+                className="w-full rounded-md border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-overlay"
               />
             </label>
 
             {contentType === 'text' ? (
               <label className="block text-sm">
-                <span className="mb-1 block text-slate-600 dark:text-neutral-300">{t('boards.compose.bodyLabel')}</span>
+                <span className="mb-1 block text-fg-muted">{t('boards.compose.bodyLabel')}</span>
                 <textarea
                   value={textBody}
                   onChange={(e) => setTextBody(e.target.value)}
                   rows={4}
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-800"
+                  className="w-full rounded-md border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-overlay"
                 />
               </label>
             ) : null}
 
             {(contentType === 'link' || (contentType === 'video' && !file)) ? (
               <label className="block text-sm">
-                <span className="mb-1 block text-slate-600 dark:text-neutral-300">{t('boards.compose.linkLabel')}</span>
+                <span className="mb-1 block text-fg-muted">{t('boards.compose.linkLabel')}</span>
                 <input
                   value={linkUrl}
                   onChange={(e) => setLinkUrl(e.target.value)}
                   type="url"
                   placeholder="https://"
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-800"
+                  className="w-full rounded-md border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-overlay"
                 />
               </label>
             ) : null}
@@ -332,19 +328,19 @@ export function PostComposer({ courseCode, boardId, onCreated }: PostComposerPro
                   className="block w-full text-sm"
                 />
                 {file ? (
-                  <p className="text-xs text-slate-500">{file.name}</p>
+                  <p className="text-xs text-fg-muted">{file.name}</p>
                 ) : (
-                  <p className="text-xs text-slate-500">{t('boards.compose.dropHint')}</p>
+                  <p className="text-xs text-fg-muted">{t('boards.compose.dropHint')}</p>
                 )}
                 {contentType === 'image' ? (
                   <label className="block text-sm">
-                    <span className="mb-1 block text-slate-600 dark:text-neutral-300">
+                    <span className="mb-1 block text-fg-muted">
                       {t('boards.compose.altLabel')}
                     </span>
                     <input
                       value={altText}
                       onChange={(e) => setAltText(e.target.value)}
-                      className="w-full rounded-md border border-slate-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-800"
+                      className="w-full rounded-md border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-overlay"
                     />
                   </label>
                 ) : null}
@@ -352,11 +348,11 @@ export function PostComposer({ courseCode, boardId, onCreated }: PostComposerPro
                   <button
                     type="button"
                     onClick={() => (recording ? stopRecording() : void startRecording())}
-                    className="inline-flex items-center gap-2 rounded-md border border-slate-300 px-3 py-1.5 text-sm dark:border-neutral-600"
+                    className="inline-flex items-center gap-2 rounded-md border border-border-strong px-3 py-1.5 text-sm dark:border-border-default"
                   >
                     {recording ? (
                       <>
-                        <Square className="size-4 text-red-600" aria-hidden />
+                        <Square className="size-4 text-danger-fg" aria-hidden />
                         {t('boards.compose.stopRecord')}
                       </>
                     ) : (
@@ -379,7 +375,7 @@ export function PostComposer({ courseCode, boardId, onCreated }: PostComposerPro
             <button
               type="button"
               onClick={closePopover}
-              className="rounded-md px-3 py-1.5 text-sm text-slate-600 dark:text-neutral-300"
+              className="rounded-md px-3 py-1.5 text-sm text-fg-muted"
               disabled={submitting}
             >
               {t('dialogs.cancel')}
@@ -388,7 +384,7 @@ export function PostComposer({ courseCode, boardId, onCreated }: PostComposerPro
               type="button"
               onClick={() => void submit()}
               disabled={submitting}
-              className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+              className="rounded-md bg-accent-solid px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
             >
               {submitting ? t('common.loading') : t('boards.compose.submit')}
             </button>
@@ -456,12 +452,12 @@ function MiniSketchPad({
 
   return (
     <div>
-      <p className="mb-1 text-sm text-slate-600 dark:text-neutral-300">{t('boards.compose.drawHint')}</p>
+      <p className="mb-1 text-sm text-fg-muted">{t('boards.compose.drawHint')}</p>
       <canvas
         ref={canvasRef}
         width={360}
         height={200}
-        className="w-full touch-none rounded border border-slate-300 bg-slate-50 dark:border-neutral-600"
+        className="w-full touch-none rounded border border-border-strong bg-surface-base dark:border-border-default"
         aria-label={t('boards.compose.drawCanvasAria')}
         onPointerDown={(e) => {
           drawingRef.current = true
@@ -491,7 +487,7 @@ function MiniSketchPad({
       />
       <button
         type="button"
-        className="mt-1 text-xs text-slate-500 underline"
+        className="mt-1 text-xs text-fg-muted underline"
         onClick={() => onChange([])}
       >
         {t('boards.compose.clearDrawing')}

@@ -144,7 +144,7 @@ export function CanvasLayout(props: LayoutRendererProps) {
   if (props.posts.length === 0) {
     return (
       <div className="flex min-h-0 flex-1 items-center justify-center">
-        <p className="max-w-md px-4 text-center text-sm text-slate-500 dark:text-neutral-400">
+        <p className="max-w-md px-4 text-center text-sm text-fg-muted">
           {t('boards.detail.emptyPosts')}
         </p>
       </div>
@@ -153,19 +153,19 @@ export function CanvasLayout(props: LayoutRendererProps) {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2">
-      <div className="flex shrink-0 items-center gap-2 text-xs text-slate-500">
-        <button type="button" className="rounded border px-2 py-1 dark:border-neutral-700" onClick={() => setZoom((z) => Math.min(2.5, z + 0.1))}>
+      <div className="flex shrink-0 items-center gap-2 text-xs text-fg-muted">
+        <button type="button" className="rounded border px-2 py-1 dark:border-border-default" onClick={() => setZoom((z) => Math.min(2.5, z + 0.1))}>
           +
         </button>
-        <button type="button" className="rounded border px-2 py-1 dark:border-neutral-700" onClick={() => setZoom((z) => Math.max(0.35, z - 0.1))}>
+        <button type="button" className="rounded border px-2 py-1 dark:border-border-default" onClick={() => setZoom((z) => Math.max(0.35, z - 0.1))}>
           −
         </button>
         <span>{Math.round(zoom * 100)}%</span>
-        <span className="text-slate-400">{t('boards.layout.canvasHint')}</span>
+        <span className="text-fg-subtle">{t('boards.layout.canvasHint')}</span>
       </div>
       <div
         ref={containerRef}
-        className="relative min-h-0 flex-1 overflow-hidden rounded-lg border border-slate-200 bg-[radial-gradient(circle_at_1px_1px,#cbd5e1_1px,transparent_0)] bg-[length:16px_16px] dark:border-neutral-700 dark:bg-[radial-gradient(circle_at_1px_1px,#404040_1px,transparent_0)]"
+        className="relative min-h-0 flex-1 overflow-hidden rounded-lg border border-border-default bg-[radial-gradient(circle_at_1px_1px,#cbd5e1_1px,transparent_0)] bg-[length:16px_16px] dark:border-border-default dark:bg-[radial-gradient(circle_at_1px_1px,#404040_1px,transparent_0)]"
         role="region"
         aria-label={t('boards.layout.canvas')}
         onWheel={onWheel}

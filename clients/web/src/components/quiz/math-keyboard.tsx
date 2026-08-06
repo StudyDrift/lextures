@@ -90,7 +90,7 @@ export function MathKeyboard({ onInsert, disabled, className }: MathKeyboardProp
   return (
     <div
       className={[
-        'rounded-xl border border-slate-200 bg-slate-50/80 dark:border-neutral-600 dark:bg-neutral-900/60',
+        'rounded-xl border border-border-default bg-slate-50/80 dark:border-border-default/60',
         className ?? '',
       ].join(' ')}
     >
@@ -100,23 +100,19 @@ export function MathKeyboard({ onInsert, disabled, className }: MathKeyboardProp
         aria-expanded={open}
         aria-controls={`${baseId}-panel`}
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between gap-2 px-3 py-2 text-start text-xs font-medium text-slate-700 dark:text-neutral-200"
+        className="flex w-full items-center justify-between gap-2 px-3 py-2 text-start text-xs font-medium text-fg-default"
       >
         <span>Math symbols</span>
         {open ? <ChevronUp className="h-4 w-4 shrink-0" aria-hidden /> : <ChevronDown className="h-4 w-4 shrink-0" aria-hidden />}
       </button>
       {open ? (
-        <div id={`${baseId}-panel`} className="border-t border-slate-200 px-2 pb-3 pt-1 dark:border-neutral-600">
-          <div className="flex flex-wrap gap-1 border-b border-slate-200 pb-2 dark:border-neutral-600">
+        <div id={`${baseId}-panel`} className="border-t border-border-default px-2 pb-3 pt-1 dark:border-border-default">
+          <div className="flex flex-wrap gap-1 border-b border-border-default pb-2 dark:border-border-default">
             {(Object.keys(GROUPS) as GroupKey[]).map((gk) => (
               <button
                 key={gk}
                 type="button"
-                className={`min-h-[44px] min-w-[44px] rounded-lg px-2 text-[11px] font-medium ${
-                  expanded === gk
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-white text-slate-700 shadow-sm dark:bg-neutral-800 dark:text-neutral-200'
-                }`}
+                className={`min-h-[44px] min-w-[44px] rounded-lg px-2 text-[11px] font-medium ${ expanded === gk ? 'bg-accent-solid text-white' : 'bg-surface-raised text-fg-muted shadow-sm dark:bg-surface-overlay dark:text-fg-default' }`}
                 onClick={() => setExpanded((e) => (e === gk ? null : gk))}
               >
                 {GROUPS[gk].label}
@@ -132,7 +128,7 @@ export function MathKeyboard({ onInsert, disabled, className }: MathKeyboardProp
                   disabled={disabled}
                   title={sym}
                   onClick={() => insert(sym)}
-                  className="min-h-[44px] min-w-[44px] max-w-[8rem] shrink rounded-lg border border-slate-200 bg-white px-1.5 py-1 font-mono text-[13px] text-slate-800 shadow-sm hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700"
+                  className="min-h-[44px] min-w-[44px] max-w-[8rem] shrink rounded-lg border border-border-default bg-surface-raised px-1.5 py-1 font-mono text-[13px] text-fg-default shadow-sm hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700"
                 >
                   {sym.length > 14 ? `${sym.slice(0, 14)}…` : sym}
                 </button>

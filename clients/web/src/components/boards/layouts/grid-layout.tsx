@@ -10,7 +10,7 @@ export function GridLayout(props: LayoutRendererProps) {
 
   if (posts.length === 0) {
     return (
-      <p className="m-auto max-w-md px-4 text-center text-sm text-slate-500 dark:text-neutral-400">
+      <p className="m-auto max-w-md px-4 text-center text-sm text-fg-muted">
         {t('boards.detail.emptyPosts')}
       </p>
     )

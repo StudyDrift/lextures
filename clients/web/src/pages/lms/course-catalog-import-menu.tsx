@@ -33,7 +33,7 @@ export function CourseCatalogImportMenu({
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-neutral-600 dark:hover:bg-neutral-800 sm:w-auto"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:border-border-strong hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:border-border-default dark:hover:bg-surface-overlay sm:w-auto"
       >
         <Download className="h-4 w-4 shrink-0" aria-hidden />
         <span>Import</span>
@@ -48,7 +48,7 @@ export function CourseCatalogImportMenu({
           id={menuId}
           role="menu"
           aria-label="Import course from"
-          className="absolute start-0 end-0 z-50 mt-1 min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10 sm:left-auto sm:end-0 sm:min-w-[14rem] dark:border-neutral-600 dark:bg-neutral-800 dark:shadow-black/40"
+          className="absolute start-0 end-0 z-50 mt-1 min-w-0 overflow-hidden rounded-xl border border-border-default bg-surface-raised py-1 shadow-lg shadow-slate-900/10 sm:left-auto sm:end-0 sm:min-w-[14rem] dark:border-border-default dark:bg-surface-overlay dark:shadow-black/40"
         >
           <button
             type="button"
@@ -57,10 +57,10 @@ export function CourseCatalogImportMenu({
               onImportFromCourse()
               setOpen(false)
             }}
-            className="flex w-full flex-col gap-0.5 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:hover:bg-neutral-700"
+            className="flex w-full flex-col gap-0.5 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:hover:bg-neutral-700"
           >
-            <span className="font-semibold text-slate-950 dark:text-neutral-100">From another course</span>
-            <span className="text-xs text-slate-500 dark:text-neutral-400">
+            <span className="font-semibold text-slate-950 dark:text-fg-default">From another course</span>
+            <span className="text-xs text-fg-muted">
               Copy content from a course you already teach in Lextures
             </span>
           </button>
@@ -71,10 +71,10 @@ export function CourseCatalogImportMenu({
               onImportCanvas()
               setOpen(false)
             }}
-            className="flex w-full flex-col gap-0.5 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:hover:bg-neutral-700"
+            className="flex w-full flex-col gap-0.5 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:hover:bg-neutral-700"
           >
-            <span className="font-semibold text-slate-950 dark:text-neutral-100">Canvas LMS</span>
-            <span className="text-xs text-slate-500 dark:text-neutral-400">
+            <span className="font-semibold text-slate-950 dark:text-fg-default">Canvas LMS</span>
+            <span className="text-xs text-fg-muted">
               Import courses with a Canvas API token
             </span>
           </button>
@@ -85,10 +85,10 @@ export function CourseCatalogImportMenu({
               onImportFromJson()
               setOpen(false)
             }}
-            className="flex w-full flex-col gap-0.5 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:hover:bg-neutral-700"
+            className="flex w-full flex-col gap-0.5 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:hover:bg-neutral-700"
           >
-            <span className="font-semibold text-slate-950 dark:text-neutral-100">From JSON</span>
-            <span className="text-xs text-slate-500 dark:text-neutral-400">
+            <span className="font-semibold text-slate-950 dark:text-fg-default">From JSON</span>
+            <span className="text-xs text-fg-muted">
               Create a course from a Lextures JSON export file
             </span>
           </button>

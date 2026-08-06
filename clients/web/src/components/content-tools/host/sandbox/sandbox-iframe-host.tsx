@@ -159,7 +159,7 @@ export function SandboxIframeHost({
         className="w-full border-0"
         style={{ height, display: ready ? 'block' : 'none' }}
       />
-      <p className="mt-1 text-[11px] text-slate-500 dark:text-neutral-400">
+      <p className="mt-1 text-[11px] text-fg-muted">
         {t('contentTools.sdk.sandboxBadge')}
       </p>
     </div>

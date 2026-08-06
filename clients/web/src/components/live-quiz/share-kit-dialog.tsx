@@ -71,31 +71,31 @@ export function ShareKitDialog({ courseCode, kitId, open, onClose }: Props) {
       aria-modal="true"
       aria-labelledby="share-kit-title"
     >
-      <div className="w-full max-w-lg rounded-lg border border-slate-200 bg-white p-4 shadow-xl dark:border-neutral-700 dark:bg-neutral-900">
+      <div className="w-full max-w-lg rounded-lg border border-border-default bg-surface-raised p-4 shadow-xl dark:border-border-default dark:bg-surface-raised">
         <div className="flex items-start justify-between gap-3">
-          <h2 id="share-kit-title" className="text-lg font-semibold text-slate-900 dark:text-neutral-100">
+          <h2 id="share-kit-title" className="text-lg font-semibold text-fg-default">
             {t('liveQuiz.share.title')}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="min-h-11 rounded-md px-3 text-sm text-slate-600 hover:bg-slate-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+            className="min-h-11 rounded-md px-3 text-sm text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay"
           >
             {t('dialogs.close')}
           </button>
         </div>
-        <p className="mt-1 text-sm text-slate-600 dark:text-neutral-300">{t('liveQuiz.share.subtitle')}</p>
+        <p className="mt-1 text-sm text-fg-muted">{t('liveQuiz.share.subtitle')}</p>
 
         <form onSubmit={(e) => void handleCreate(e)} className="mt-4 space-y-3">
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="block text-sm">
-              <span className="font-medium text-slate-700 dark:text-neutral-200">
+              <span className="font-medium text-fg-default">
                 {t('liveQuiz.share.granteeType')}
               </span>
               <select
                 value={granteeType}
                 onChange={(e) => setGranteeType(e.target.value as KitShareGranteeType)}
-                className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-800"
+                className="mt-1 w-full rounded-md border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-overlay"
               >
                 <option value="org">{t('liveQuiz.share.grantee.org')}</option>
                 <option value="course">{t('liveQuiz.share.grantee.course')}</option>
@@ -104,13 +104,13 @@ export function ShareKitDialog({ courseCode, kitId, open, onClose }: Props) {
               </select>
             </label>
             <label className="block text-sm">
-              <span className="font-medium text-slate-700 dark:text-neutral-200">
+              <span className="font-medium text-fg-default">
                 {t('liveQuiz.share.permission')}
               </span>
               <select
                 value={permission}
                 onChange={(e) => setPermission(e.target.value as KitSharePermission)}
-                className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-800"
+                className="mt-1 w-full rounded-md border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-overlay"
               >
                 <option value="view">{t('liveQuiz.share.perm.view')}</option>
                 <option value="copy">{t('liveQuiz.share.perm.copy')}</option>
@@ -120,34 +120,34 @@ export function ShareKitDialog({ courseCode, kitId, open, onClose }: Props) {
           </div>
           {granteeType !== 'org' ? (
             <label className="block text-sm">
-              <span className="font-medium text-slate-700 dark:text-neutral-200">
+              <span className="font-medium text-fg-default">
                 {t('liveQuiz.share.granteeId')}
               </span>
               <input
                 value={granteeId}
                 onChange={(e) => setGranteeId(e.target.value)}
                 required
-                className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-800"
+                className="mt-1 w-full rounded-md border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-overlay"
               />
             </label>
           ) : null}
           <button
             type="submit"
             disabled={submitting}
-            className="min-h-11 rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+            className="min-h-11 rounded-md bg-accent-solid px-3 py-2 text-sm font-medium text-white hover:bg-accent disabled:opacity-50"
           >
             {t('liveQuiz.share.add')}
           </button>
         </form>
 
         <div className="mt-4">
-          <h3 className="text-sm font-medium text-slate-800 dark:text-neutral-100">
+          <h3 className="text-sm font-medium text-fg-default">
             {t('liveQuiz.share.current')}
           </h3>
           {loading ? (
-            <p className="mt-2 text-sm text-slate-500">{t('common.loading')}</p>
+            <p className="mt-2 text-sm text-fg-muted">{t('common.loading')}</p>
           ) : shares.length === 0 ? (
-            <p className="mt-2 text-sm text-slate-500">{t('liveQuiz.share.empty')}</p>
+            <p className="mt-2 text-sm text-fg-muted">{t('liveQuiz.share.empty')}</p>
           ) : (
             <ul className="mt-2 divide-y divide-slate-200 dark:divide-neutral-700">
               {shares.map((s) => (
@@ -159,7 +159,7 @@ export function ShareKitDialog({ courseCode, kitId, open, onClose }: Props) {
                   <button
                     type="button"
                     onClick={() => void handleRevoke(s.id)}
-                    className="min-h-11 rounded-md px-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
+                    className="min-h-11 rounded-md px-2 text-danger-fg hover:bg-red-50 dark:hover:bg-red-950/30"
                   >
                     {t('liveQuiz.share.revoke')}
                   </button>

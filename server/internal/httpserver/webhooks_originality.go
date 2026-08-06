@@ -27,15 +27,6 @@ type webhookOriginalityBody struct {
 // handleOriginalityWebhook is POST /api/v1/webhooks/originality/{provider} (provider callback; HMAC-signed).
 func (d Deps) handleOriginalityWebhook() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.effectiveConfig().OriginalityDetectionEnabled {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
 			return

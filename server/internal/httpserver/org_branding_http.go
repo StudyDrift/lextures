@@ -57,11 +57,6 @@ func effectiveHostForBranding(r *http.Request) string {
 // GET /api/v1/public/branding/resolve
 func (d Deps) handlePublicBrandingResolve() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		ctx := r.Context()
 		host := effectiveHostForBranding(r)
 		var res orgbranding.Resolved
@@ -88,17 +83,32 @@ func (d Deps) handlePublicBrandingResolve() http.HandlerFunc {
 			warnPrimary = true
 			ratioPrimary = &ratio
 		}
+		var accent any
+		derivedRamp := map[string]string{}
+		if res.BrandAccentOklch != nil && strings.TrimSpace(*res.BrandAccentOklch) != "" {
+			accent = *res.BrandAccentOklch
+			if _, okl, err := orgbranding.ValidateOklch(*res.BrandAccentOklch); err == nil {
+				derivedRamp = orgbranding.DeriveAccentRamp(okl)
+			}
+		}
+		tokensVersion := res.BrandTokensVersion
+		if tokensVersion == 0 {
+			tokensVersion = 1
+		}
 		payload := map[string]any{
-			"orgId":            uuidPtrStr(res.OrgID),
-			"orgSlug":          nilOrStr(res.OrgSlug),
-			"logoUrl":          res.LogoURL,
-			"faviconUrl":       res.FaviconURL,
-			"primaryColor":     res.PrimaryColor,
-			"secondaryColor":   res.SecondaryColor,
-			"customDomain":     res.CustomDomain,
+			"orgId":                  uuidPtrStr(res.OrgID),
+			"orgSlug":                nilOrStr(res.OrgSlug),
+			"logoUrl":                res.LogoURL,
+			"faviconUrl":             res.FaviconURL,
+			"primaryColor":           res.PrimaryColor,
+			"secondaryColor":         res.SecondaryColor,
+			"customDomain":           res.CustomDomain,
 			"customEmailDisplayName": res.EmailDisplayName,
-			"contrastWarningPrimary":   warnPrimary,
-			"contrastRatioPrimary":     ratioPrimary,
+			"contrastWarningPrimary": warnPrimary,
+			"contrastRatioPrimary":   ratioPrimary,
+			"accentOklch":            accent,
+			"derivedRamp":            derivedRamp,
+			"tokensVersion":          tokensVersion,
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(payload)
@@ -126,6 +136,28 @@ type brandingPutBody struct {
 	SecondaryColor         *string `json:"secondaryColor"`
 	CustomDomain           *string `json:"customDomain"`
 	CustomEmailDisplayName *string `json:"customEmailDisplayName"`
+	// AccentOklch is UX.1 brand accent; null clears; omitted = leave unchanged.
+	AccentOklch *string `json:"accentOklch"`
+}
+
+func brandingAccentFields(row *orgbranding.Row) (accent any, ramp map[string]string, version int) {
+	version = 1
+	if row != nil {
+		version = row.BrandTokensVersion
+		if version == 0 {
+			version = 1
+		}
+		if row.BrandAccentOklch != nil && strings.TrimSpace(*row.BrandAccentOklch) != "" {
+			accent = *row.BrandAccentOklch
+			if _, okl, err := orgbranding.ValidateOklch(*row.BrandAccentOklch); err == nil {
+				ramp = orgbranding.DeriveAccentRamp(okl)
+			}
+		}
+	}
+	if ramp == nil {
+		ramp = map[string]string{}
+	}
+	return accent, ramp, version
 }
 
 func (d Deps) handleOrgBrandingItem() http.HandlerFunc {
@@ -164,6 +196,7 @@ func (d Deps) handleOrgBrandingItem() http.HandlerFunc {
 				warn = true
 				ratio = &rat
 			}
+			accent, ramp, tokensVersion := brandingAccentFields(row)
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			_ = json.NewEncoder(w).Encode(map[string]any{
 				"logoUrl":                logo,
@@ -174,6 +207,9 @@ func (d Deps) handleOrgBrandingItem() http.HandlerFunc {
 				"customEmailDisplayName": email,
 				"contrastWarningPrimary": warn,
 				"contrastRatioPrimary":   ratio,
+				"accentOklch":            accent,
+				"derivedRamp":            ramp,
+				"tokensVersion":          tokensVersion,
 			})
 		case http.MethodPut:
 			var body brandingPutBody
@@ -265,7 +301,37 @@ SELECT org_id FROM tenant.org_branding WHERE LOWER(TRIM(custom_domain)) = $1 AND
 				return
 			}
 
-			if err := orgbranding.UpsertReplace(ctx, d.Pool, orgID, logo, fav, p1, p2, domPtr, emailPtr); err != nil {
+			setAccent := body.AccentOklch != nil
+			var accentPtr *string
+			var derivedRamp map[string]string
+			if setAccent {
+				raw := strings.TrimSpace(*body.AccentOklch)
+				if raw == "" {
+					accentPtr = nil
+					derivedRamp = map[string]string{}
+				} else {
+					norm, okl, err := orgbranding.ValidateOklch(raw)
+					if err != nil {
+						apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid accentOklch (expected oklch(L C H)).")
+						return
+					}
+					ramp, failing, suggestion := orgbranding.ValidateAccentRampAA(okl)
+					if len(failing) > 0 {
+						w.Header().Set("Content-Type", "application/json; charset=utf-8")
+						w.WriteHeader(http.StatusUnprocessableEntity)
+						_ = json.NewEncoder(w).Encode(map[string]any{
+							"error":        "brand_accent_contrast",
+							"failingPairs": failing,
+							"suggestion":   suggestion,
+						})
+						return
+					}
+					accentPtr = &norm
+					derivedRamp = ramp
+				}
+			}
+
+			if err := orgbranding.UpsertReplaceWithAccent(ctx, d.Pool, orgID, logo, fav, p1, p2, domPtr, emailPtr, accentPtr, setAccent); err != nil {
 				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save branding.")
 				return
 			}
@@ -277,6 +343,16 @@ SELECT org_id FROM tenant.org_branding WHERE LOWER(TRIM(custom_domain)) = $1 AND
 				warn = true
 				ratio = &rat
 			}
+			saved, _ := orgbranding.Get(ctx, d.Pool, orgID)
+			accentOut, rampOut, tokensVersion := brandingAccentFields(saved)
+			if setAccent && derivedRamp != nil {
+				rampOut = derivedRamp
+				if accentPtr != nil {
+					accentOut = *accentPtr
+				} else {
+					accentOut = nil
+				}
+			}
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			_ = json.NewEncoder(w).Encode(map[string]any{
 				"logoUrl":                logo,
@@ -287,6 +363,9 @@ SELECT org_id FROM tenant.org_branding WHERE LOWER(TRIM(custom_domain)) = $1 AND
 				"customEmailDisplayName": emailPtr,
 				"contrastWarningPrimary": warn,
 				"contrastRatioPrimary":   ratio,
+				"accentOklch":            accentOut,
+				"derivedRamp":            rampOut,
+				"tokensVersion":          tokensVersion,
 			})
 		default:
 			w.Header().Set("Allow", strings.Join([]string{http.MethodGet, http.MethodPut}, ", "))
@@ -309,11 +388,6 @@ func mergeStrPtr(cur *orgbranding.Row, prev func(*orgbranding.Row) *string, body
 
 func (d Deps) handleOrgBrandingUpload(kind string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		orgStr := strings.TrimSpace(chi.URLParam(r, "orgId"))
 		orgID, err := uuid.Parse(orgStr)
 		if err != nil {
@@ -457,11 +531,6 @@ func svgSnippetLooksLikeSVG(data []byte) bool {
 // GET /api/v1/public/org-branding/{orgId}/{asset}
 func (d Deps) handlePublicOrgBrandAsset() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		orgStr := strings.TrimSpace(chi.URLParam(r, "orgId"))
 		orgID, err := uuid.Parse(orgStr)
 		if err != nil {

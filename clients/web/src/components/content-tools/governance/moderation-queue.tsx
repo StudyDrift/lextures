@@ -53,7 +53,7 @@ export function ModerationQueue({ courseCode, instanceId }: Props) {
       <h3 id="ct-moderation-title" className="text-sm font-semibold">
         {t('contentTools.safety.moderationTitle')}
       </h3>
-      <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
+      <p className="mt-1 text-xs text-fg-muted dark:text-fg-subtle">
         {t('contentTools.safety.moderationHelp')}
       </p>
       {error ? (
@@ -62,20 +62,20 @@ export function ModerationQueue({ courseCode, instanceId }: Props) {
         </p>
       ) : null}
       {items.length === 0 ? (
-        <p className="mt-2 text-sm text-slate-600">{t('contentTools.safety.moderationEmpty')}</p>
+        <p className="mt-2 text-sm text-fg-muted">{t('contentTools.safety.moderationEmpty')}</p>
       ) : (
         <ul className="mt-2 space-y-2" role="list">
           {items.map((item) => (
             <li
               key={item.id}
-              className="rounded border border-slate-200 p-2 text-sm dark:border-neutral-700"
+              className="rounded border border-border-default p-2 text-sm dark:border-border-default"
               data-moderation-id={item.id}
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span>
                   <strong>{item.action}</strong>
                   {item.category ? ` · ${item.category}` : ''}
-                  <span className="ms-2 text-xs text-slate-500">{item.createdAt}</span>
+                  <span className="ms-2 text-xs text-fg-muted">{item.createdAt}</span>
                 </span>
                 {item.action === 'reported' ? (
                   <span className="flex gap-1">

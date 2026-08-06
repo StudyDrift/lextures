@@ -43,12 +43,12 @@ export default function CourseReviewsModerationPage() {
   }
 
   if (featuresLoading) {
-    return <p className="p-8 text-sm text-slate-600">Loading…</p>
+    return <p className="p-8 text-sm text-fg-muted">Loading…</p>
   }
 
   if (!ffCourseReviews) {
     return (
-      <p className="p-8 text-sm text-slate-600 dark:text-neutral-300">
+      <p className="p-8 text-sm text-fg-muted">
         Course reviews are not enabled on this platform.
       </p>
     )
@@ -56,31 +56,31 @@ export default function CourseReviewsModerationPage() {
 
   return (
     <div className="mx-auto max-w-4xl p-6">
-      <h1 className="text-2xl font-bold text-slate-900 dark:text-neutral-100">Review moderation</h1>
-      <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+      <h1 className="text-2xl font-bold text-fg-default">Review moderation</h1>
+      <p className="mt-1 text-sm text-fg-muted">
         Flagged learner reviews awaiting admin action.
       </p>
 
       {error ? (
-        <p role="alert" className="mt-4 text-sm text-red-600 dark:text-red-400">
+        <p role="alert" className="mt-4 text-sm text-danger-fg">
           {error}
         </p>
       ) : null}
 
       {loading ? (
-        <p className="mt-6 text-sm text-slate-600">Loading queue…</p>
+        <p className="mt-6 text-sm text-fg-muted">Loading queue…</p>
       ) : reviews.length === 0 ? (
-        <p className="mt-6 text-sm text-slate-600 dark:text-neutral-400">No flagged reviews.</p>
+        <p className="mt-6 text-sm text-fg-muted">No flagged reviews.</p>
       ) : (
         <ul className="mt-6 space-y-4">
           {reviews.map((review) => (
             <li
               key={review.id}
-              className="rounded-xl border border-slate-200 p-4 dark:border-neutral-800 dark:bg-neutral-900"
+              className="rounded-xl border border-border-default p-4 dark:border-border-subtle dark:bg-surface-raised"
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <p className="font-medium text-slate-900 dark:text-neutral-100">
+                  <p className="font-medium text-fg-default">
                     {review.reviewerDisplayName}
                   </p>
                   <div className="mt-1 flex items-center gap-1 text-amber-500">
@@ -89,7 +89,7 @@ export default function CourseReviewsModerationPage() {
                     ))}
                   </div>
                   {review.reviewText ? (
-                    <p className="mt-2 text-sm text-slate-700 dark:text-neutral-300">
+                    <p className="mt-2 text-sm text-fg-muted">
                       {review.reviewText}
                     </p>
                   ) : null}
@@ -98,7 +98,7 @@ export default function CourseReviewsModerationPage() {
                   type="button"
                   disabled={busyId === review.id}
                   onClick={() => void handleRemove(review.id)}
-                  className="inline-flex items-center gap-1 rounded-lg border border-red-200 px-3 py-1.5 text-sm text-red-700 hover:bg-red-50 dark:border-red-900 dark:text-red-300 dark:hover:bg-red-950"
+                  className="inline-flex items-center gap-1 rounded-lg border border-red-200 px-3 py-1.5 text-sm text-danger-fg hover:bg-red-50 dark:border-red-900 dark:text-red-300 dark:hover:bg-red-950"
                 >
                   <Trash2 className="h-4 w-4" aria-hidden="true" />
                   Remove

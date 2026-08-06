@@ -173,7 +173,7 @@ export function AiProvidersPanel({ activeProvider, onCredentialsChanged }: Props
   if (disabledByFlag) {
     return (
       <section className="mt-6" aria-labelledby="ai-providers-heading">
-        <h3 id="ai-providers-heading" className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+        <h3 id="ai-providers-heading" className="text-sm font-semibold text-fg-default">
           {t('settings.ai.providers.title')}
         </h3>
         <p
@@ -188,12 +188,12 @@ export function AiProvidersPanel({ activeProvider, onCredentialsChanged }: Props
 
   return (
     <section className="mt-6" aria-labelledby="ai-providers-heading">
-      <h3 id="ai-providers-heading" className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+      <h3 id="ai-providers-heading" className="text-sm font-semibold text-fg-default">
         {t('settings.ai.providers.title')}
       </h3>
-      <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">{t('settings.ai.providers.description')}</p>
+      <p className="mt-1 text-sm text-fg-muted">{t('settings.ai.providers.description')}</p>
 
-      {loading && <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">{t('common.loading')}</p>}
+      {loading && <p className="mt-4 text-sm text-fg-muted">{t('common.loading')}</p>}
       {error && (
         <p className="mt-4 text-sm text-rose-700 dark:text-rose-300" role="alert">
           {error}
@@ -209,7 +209,7 @@ export function AiProvidersPanel({ activeProvider, onCredentialsChanged }: Props
           <p className="mt-2">
             <a
               href="https://github.com/lextures/lextures/blob/main/docs/ai-providers-byok.md"
-              className="font-medium text-indigo-700 underline hover:text-indigo-600 dark:text-indigo-300"
+              className="font-medium text-accent-fg underline hover:text-accent-fg dark:text-indigo-300"
               target="_blank"
               rel="noreferrer"
             >
@@ -221,7 +221,7 @@ export function AiProvidersPanel({ activeProvider, onCredentialsChanged }: Props
 
       {!loading && !error && (
         <>
-          <ul className="mt-4 divide-y divide-slate-200 rounded-xl border border-slate-200 dark:divide-neutral-700 dark:border-neutral-700">
+          <ul className="mt-4 divide-y divide-slate-200 rounded-xl border border-border-default dark:divide-neutral-700 dark:border-border-default">
             {credentials.map((cred) => {
               const draft = drafts[cred.provider]
               if (!draft) return null
@@ -242,32 +242,32 @@ export function AiProvidersPanel({ activeProvider, onCredentialsChanged }: Props
             })}
           </ul>
 
-          <div className="mt-6 rounded-xl border border-slate-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-900">
-            <h4 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+          <div className="mt-6 rounded-xl border border-border-default bg-surface-raised p-4 dark:border-border-default dark:bg-surface-raised">
+            <h4 className="text-sm font-semibold text-fg-default">
               {t('settings.ai.policy.title')}
             </h4>
-            <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">{t('settings.ai.policy.description')}</p>
-            <label className="mt-3 flex items-center gap-2 text-sm text-slate-700 dark:text-neutral-200">
+            <p className="mt-1 text-xs text-fg-muted">{t('settings.ai.policy.description')}</p>
+            <label className="mt-3 flex items-center gap-2 text-sm text-fg-default">
               <input
                 type="checkbox"
                 checked={tenantByokAllowed}
                 disabled={policySaving}
                 onChange={(e) => setTenantByokAllowed(e.target.checked)}
-                className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                className="rounded border-border-strong text-accent-fg focus:ring-indigo-500"
               />
               {t('settings.ai.policy.allowByok')}
             </label>
             {tenantByokAllowed && allProviders.length > 0 && (
               <fieldset className="mt-3">
-                <legend className="text-xs font-medium text-slate-600 dark:text-neutral-300">
+                <legend className="text-xs font-medium text-fg-muted">
                   {t('settings.ai.policy.allowedProviders')}
                 </legend>
-                <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+                <p className="mt-1 text-xs text-fg-muted">
                   {t('settings.ai.policy.allowedProvidersHelp')}
                 </p>
                 <div className="mt-2 flex flex-wrap gap-3">
                   {allProviders.map((p) => (
-                    <label key={p} className="flex items-center gap-1.5 text-sm text-slate-700 dark:text-neutral-200">
+                    <label key={p} className="flex items-center gap-1.5 text-sm text-fg-default">
                       <input
                         type="checkbox"
                         checked={
@@ -282,7 +282,7 @@ export function AiProvidersPanel({ activeProvider, onCredentialsChanged }: Props
                           }
                           toggleAllowedProvider(p)
                         }}
-                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                        className="rounded border-border-strong text-accent-fg focus:ring-indigo-500"
                       />
                       {p}
                     </label>
@@ -294,7 +294,7 @@ export function AiProvidersPanel({ activeProvider, onCredentialsChanged }: Props
               type="button"
               disabled={policySaving}
               onClick={() => void handleSavePolicy()}
-              className="mt-4 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 disabled:opacity-50 dark:border-neutral-600 dark:text-neutral-200"
+              className="mt-4 rounded-lg border border-border-strong px-3 py-1.5 text-sm font-medium text-fg-muted disabled:opacity-50 dark:border-border-default dark:text-fg-default"
             >
               {policySaving ? t('settings.ai.actions.saving') : t('settings.ai.policy.save')}
             </button>

@@ -26,11 +26,6 @@ func (d Deps) handlePatchAdminUserUIMode() http.HandlerFunc {
 		UIModeOverride *string `json:"uiModeOverride"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		// Auth before feature flag: unauthenticated requests always get 401.
 		requesterID, ok := d.meUserID(w, r)
 		if !ok {

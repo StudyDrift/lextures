@@ -57,7 +57,7 @@ export default function CourseModuleQuizAttemptPage() {
 
   if (!courseCode || !itemId) {
     return (
-      <div className="px-4 py-8 text-sm text-slate-600 dark:text-neutral-400">
+      <div className="px-4 py-8 text-sm text-fg-muted">
         Missing course or quiz.
       </div>
     )
@@ -65,8 +65,8 @@ export default function CourseModuleQuizAttemptPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-4 py-16 text-sm text-slate-600 dark:text-neutral-400">
-        <Loader2 className="h-6 w-6 animate-spin text-indigo-600 dark:text-indigo-400" aria-hidden />
+      <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-4 py-16 text-sm text-fg-muted">
+        <Loader2 className="h-6 w-6 animate-spin text-accent-fg" aria-hidden />
         Loading quiz…
       </div>
     )
@@ -75,10 +75,10 @@ export default function CourseModuleQuizAttemptPage() {
   if (loadError || !quiz || !advanced) {
     return (
       <div className="px-4 py-8 sm:px-6 md:px-8">
-        <p className="text-sm text-red-700 dark:text-red-400">{loadError ?? 'Could not load this quiz.'}</p>
+        <p className="text-sm text-danger-fg dark:text-red-400">{loadError ?? 'Could not load this quiz.'}</p>
         <Link
           to={quizHref}
-          className="mt-4 inline-block text-sm font-medium text-indigo-700 hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-200"
+          className="mt-4 inline-block text-sm font-medium text-accent-fg hover:text-indigo-900 dark:text-indigo-300 dark:hover:text-indigo-200"
         >
           Back to quiz
         </Link>

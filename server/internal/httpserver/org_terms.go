@@ -20,11 +20,6 @@ type termsCollectionResponse struct {
 
 func (d Deps) handleOrgTermsPost() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		orgIDStr := strings.TrimSpace(chi.URLParam(r, "orgId"))
 		orgID, err := uuid.Parse(orgIDStr)
 		if err != nil {
@@ -73,11 +68,6 @@ func (d Deps) handleOrgTermsPost() http.HandlerFunc {
 // Used by Canvas import so many courses share one "Fall 2025" row instead of creating duplicates.
 func (d Deps) handleOrgTermsEnsure() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		orgIDStr := strings.TrimSpace(chi.URLParam(r, "orgId"))
 		orgID, err := uuid.Parse(orgIDStr)
 		if err != nil {
@@ -155,11 +145,6 @@ func (d Deps) handleOrgTermsEnsure() http.HandlerFunc {
 
 func (d Deps) handleOrgTermPatch() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		orgIDStr := strings.TrimSpace(chi.URLParam(r, "orgId"))
 		orgID, err := uuid.Parse(orgIDStr)
 		if err != nil {
@@ -219,11 +204,6 @@ func (d Deps) handleOrgTermPatch() http.HandlerFunc {
 
 func (d Deps) handleOrgTermDelete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodDelete {
-			w.Header().Set("Allow", http.MethodDelete)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		orgIDStr := strings.TrimSpace(chi.URLParam(r, "orgId"))
 		orgID, err := uuid.Parse(orgIDStr)
 		if err != nil {
@@ -262,11 +242,6 @@ func (d Deps) handleOrgTermDelete() http.HandlerFunc {
 // handleAdminOrgTermsList is GET /api/v1/admin/orgs/{orgId}/terms (platform admin).
 func (d Deps) handleAdminOrgTermsList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		_, ok := d.adminRbacUser(w, r)
 		if !ok {
 			return
@@ -291,11 +266,6 @@ func (d Deps) handleAdminOrgTermsList() http.HandlerFunc {
 }
 func (d Deps) handleOrgTermsRead() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		orgIDStr := strings.TrimSpace(chi.URLParam(r, "orgId"))
 		orgID, err := uuid.Parse(orgIDStr)
 		if err != nil {

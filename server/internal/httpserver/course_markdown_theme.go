@@ -37,15 +37,6 @@ type markdownThemeCustomFields struct {
 // handlePatchCourseMarkdownTheme is PATCH /api/v1/courses/{course_code}/markdown-theme
 func (d Deps) handlePatchCourseMarkdownTheme() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode := chi.URLParam(r, "course_code")
 		if courseCode == "" {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Missing course code.")

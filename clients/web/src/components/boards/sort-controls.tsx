@@ -15,12 +15,12 @@ export function SortControls({ value, onChange, hidden }: SortControlsProps) {
   if (hidden) return null
 
   return (
-    <label className="inline-flex items-center gap-2 text-xs text-slate-600 dark:text-neutral-300">
+    <label className="inline-flex items-center gap-2 text-xs text-fg-muted">
       <span>{t('boards.sort.label')}</span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value as BoardSortMode)}
-        className="rounded border border-slate-200 bg-white px-2 py-1 text-xs dark:border-neutral-700 dark:bg-neutral-800"
+        className="rounded border border-border-default bg-surface-raised px-2 py-1 text-xs dark:border-border-default dark:bg-surface-overlay"
         aria-label={t('boards.sort.label')}
       >
         {MODES.map((mode) => (

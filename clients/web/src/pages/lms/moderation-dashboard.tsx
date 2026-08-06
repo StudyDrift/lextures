@@ -79,7 +79,7 @@ export default function ModerationDashboard() {
   if (!courseCode || !itemId) {
     return (
       <LmsPage title="Moderation" description="">
-        <p className="mt-6 text-sm text-slate-500">Invalid link.</p>
+        <p className="mt-6 text-sm text-fg-muted">Invalid link.</p>
       </LmsPage>
     )
   }
@@ -93,7 +93,7 @@ export default function ModerationDashboard() {
       actions={
         <Link
           to={back}
-          className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:hover:bg-neutral-900"
+          className="rounded-xl border border-border-strong bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:hover:bg-surface-raised"
         >
           Back to assignment
         </Link>
@@ -111,32 +111,32 @@ export default function ModerationDashboard() {
         </p>
       ) : null}
       {loading ? (
-        <p className="mt-8 text-sm text-slate-500 dark:text-neutral-400">Loading…</p>
+        <p className="mt-8 text-sm text-fg-muted">Loading…</p>
       ) : (
-        <div className="mt-6 overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-700">
+        <div className="mt-6 overflow-x-auto rounded-xl border border-border-default">
           <table
             className="min-w-full border-collapse text-start text-sm"
             role="grid"
             aria-label="Moderated grading reconciliation"
           >
-            <thead className="bg-slate-50 text-slate-600 dark:bg-neutral-900 dark:text-neutral-300">
+            <thead className="bg-surface-base text-fg-muted dark:bg-surface-raised dark:text-fg-muted">
               <tr>
-                <th className="border-b border-slate-200 px-3 py-2 font-medium dark:border-neutral-700">
+                <th className="border-b border-border-default px-3 py-2 font-medium dark:border-border-default">
                   Submission
                 </th>
-                <th className="border-b border-slate-200 px-3 py-2 font-medium dark:border-neutral-700">
+                <th className="border-b border-border-default px-3 py-2 font-medium dark:border-border-default">
                   Student
                 </th>
-                <th className="border-b border-slate-200 px-3 py-2 font-medium dark:border-neutral-700">
+                <th className="border-b border-border-default px-3 py-2 font-medium dark:border-border-default">
                   Provisional scores
                 </th>
-                <th className="border-b border-slate-200 px-3 py-2 font-medium dark:border-neutral-700">
+                <th className="border-b border-border-default px-3 py-2 font-medium dark:border-border-default">
                   Status
                 </th>
-                <th className="border-b border-slate-200 px-3 py-2 font-medium dark:border-neutral-700">
+                <th className="border-b border-border-default px-3 py-2 font-medium dark:border-border-default">
                   Final
                 </th>
-                <th className="border-b border-slate-200 px-3 py-2 font-medium dark:border-neutral-700">
+                <th className="border-b border-border-default px-3 py-2 font-medium dark:border-border-default">
                   Actions
                 </th>
               </tr>
@@ -145,26 +145,26 @@ export default function ModerationDashboard() {
               {rows.map((r) => (
                 <tr
                   key={r.submissionId}
-                  className="border-b border-slate-100 last:border-0 dark:border-neutral-800"
+                  className="border-b border-border-subtle last:border-0 dark:border-border-subtle"
                 >
-                  <td className="px-3 py-2 text-slate-800 dark:text-neutral-100">
+                  <td className="px-3 py-2 text-fg-default">
                     <EntityLabel
                       name={r.submissionLabel ?? r.studentName}
                       fallback={t('entityLabel.unknownSubmission')}
                     />
                   </td>
-                  <td className="px-3 py-2 text-slate-800 dark:text-neutral-100">
+                  <td className="px-3 py-2 text-fg-default">
                     <EntityLabel name={r.studentName} fallback={t('entityLabel.unknownStudent')} />
                   </td>
-                  <td className="px-3 py-2 text-slate-800 dark:text-neutral-100">
+                  <td className="px-3 py-2 text-fg-default">
                     {r.provisional.length === 0 ? (
-                      <span className="text-slate-400">—</span>
+                      <span className="text-fg-subtle">—</span>
                     ) : (
                       <ul className="list-inside list-disc">
                         {r.provisional.map((p) => (
                           <li key={`${p.graderId}-${p.score}`}>
                             {p.score}
-                            <span className="ms-1 text-xs text-slate-400">
+                            <span className="ms-1 text-xs text-fg-subtle">
                               (
                               {formatEntityLabel({
                                 name: p.graderName,
@@ -183,13 +183,13 @@ export default function ModerationDashboard() {
                         Needs review
                       </span>
                     ) : (
-                      <span className="text-xs text-slate-500 dark:text-neutral-500">Within threshold</span>
+                      <span className="text-xs text-fg-subtle">Within threshold</span>
                     )}
                   </td>
-                  <td className="px-3 py-2 text-slate-800 dark:text-neutral-100">
+                  <td className="px-3 py-2 text-fg-default">
                     {r.finalScore != null ? String(r.finalScore) : '—'}
                     {r.reconciliationSource ? (
-                      <span className="ms-1 text-xs text-slate-400">({r.reconciliationSource})</span>
+                      <span className="ms-1 text-xs text-fg-subtle">({r.reconciliationSource})</span>
                     ) : null}
                   </td>
                   <td className="px-3 py-2">
@@ -205,7 +205,7 @@ export default function ModerationDashboard() {
                               graderId: p.graderId,
                             })
                           }
-                          className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:hover:bg-neutral-900"
+                          className="rounded-lg border border-border-default bg-surface-raised px-2 py-1 text-xs font-medium text-fg-default hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:hover:bg-surface-raised"
                         >
                           Use {p.score}
                         </button>
@@ -215,7 +215,7 @@ export default function ModerationDashboard() {
                           type="button"
                           disabled={busyId === r.submissionId}
                           onClick={() => void reconcile(r.submissionId, { action: 'average' })}
-                          className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:hover:bg-neutral-900"
+                          className="rounded-lg border border-border-default bg-surface-raised px-2 py-1 text-xs font-medium text-fg-default hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:hover:bg-surface-raised"
                         >
                           Average
                         </button>
@@ -225,7 +225,7 @@ export default function ModerationDashboard() {
                           type="button"
                           disabled={busyId === r.submissionId}
                           onClick={() => void reconcile(r.submissionId, { action: 'single' })}
-                          className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:hover:bg-neutral-900"
+                          className="rounded-lg border border-border-default bg-surface-raised px-2 py-1 text-xs font-medium text-fg-default hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:hover:bg-surface-raised"
                         >
                           Confirm single
                         </button>

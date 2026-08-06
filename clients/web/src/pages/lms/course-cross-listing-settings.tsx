@@ -129,9 +129,9 @@ export function CourseCrossListingSection({ courseCode, courseId, orgId }: Props
   if (!orgId || !canOrgAdmin) {
     return (
       <>
-        <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-          <h3 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Cross-listing</h3>
-          <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
+        <section className="mt-10 rounded-2xl border border-border-default bg-surface-raised p-6 shadow-sm dark:border-border-default dark:bg-surface-raised">
+          <h3 className="text-base font-semibold text-fg-default">Cross-listing</h3>
+          <p className="mt-2 text-sm text-fg-muted">
             Cross-list sections so instructors see one combined gradebook. Only organization administrators can
             configure cross-list groups.
           </p>
@@ -142,40 +142,40 @@ export function CourseCrossListingSection({ courseCode, courseId, orgId }: Props
   }
 
   return (
-    <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-      <h3 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Cross-listing</h3>
-      <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
+    <section className="mt-10 rounded-2xl border border-border-default bg-surface-raised p-6 shadow-sm dark:border-border-default dark:bg-surface-raised">
+      <h3 className="text-base font-semibold text-fg-default">Cross-listing</h3>
+      <p className="mt-2 text-sm text-fg-muted">
         Link teaching sections of this course so enrollments appear together in the gradebook. Content stays on the
         primary section&apos;s course shell; students remain enrolled under their own section code.
       </p>
 
       {loadErr && (
-        <p className="mt-4 text-sm text-red-600 dark:text-red-400" role="alert">
+        <p className="mt-4 text-sm text-danger-fg" role="alert">
           {loadErr}
         </p>
       )}
 
-      {sections === null && !loadErr && <p className="mt-4 text-sm text-slate-500">Loading…</p>}
+      {sections === null && !loadErr && <p className="mt-4 text-sm text-fg-muted">Loading…</p>}
 
       {group === null && sections !== null && activeSections.length < 2 && (
-        <p className="mt-4 text-sm text-slate-600 dark:text-neutral-400">
+        <p className="mt-4 text-sm text-fg-muted">
           Add at least two active sections above before you can cross-list them.
         </p>
       )}
 
       {group === null && activeSections.length >= 2 && (
         <form className="mt-6 space-y-4" onSubmit={onCreate}>
-          <p className="text-sm font-medium text-slate-800 dark:text-neutral-200">Create cross-list group</p>
+          <p className="text-sm font-medium text-fg-default">Create cross-list group</p>
           <div className="flex flex-wrap gap-4">
             <div className="min-w-[12rem] flex-1">
-              <label htmlFor="cl-primary" className="block text-xs font-medium text-slate-600 dark:text-neutral-400">
+              <label htmlFor="cl-primary" className="block text-xs font-medium text-fg-muted">
                 Primary section (content shell)
               </label>
               <select
                 id="cl-primary"
                 value={primaryPick}
                 onChange={(e) => setPrimaryPick(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+                className="mt-1 w-full rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base dark:text-fg-default"
                 required
               >
                 <option value="">Choose section…</option>
@@ -188,7 +188,7 @@ export function CourseCrossListingSection({ courseCode, courseId, orgId }: Props
               </select>
             </div>
             <div className="min-w-[12rem] flex-1">
-              <label htmlFor="cl-name" className="block text-xs font-medium text-slate-600 dark:text-neutral-400">
+              <label htmlFor="cl-name" className="block text-xs font-medium text-fg-muted">
                 Label (optional)
               </label>
               <input
@@ -196,14 +196,14 @@ export function CourseCrossListingSection({ courseCode, courseId, orgId }: Props
                 value={groupName}
                 onChange={(e) => setGroupName(e.target.value)}
                 placeholder="e.g. HIST/WMST 301 combined"
-                className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+                className="mt-1 w-full rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base dark:text-fg-default"
               />
             </div>
           </div>
           <button
             type="submit"
             disabled={busy || !primaryPick}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Create cross-list group
           </button>
@@ -212,20 +212,20 @@ export function CourseCrossListingSection({ courseCode, courseId, orgId }: Props
 
       {group != null && group !== undefined && (
         <div className="mt-6 space-y-4">
-          <div className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 dark:border-neutral-600 dark:bg-neutral-800/60">
-            <p className="text-sm font-medium text-slate-800 dark:text-neutral-100">
+          <div className="rounded-xl border border-border-subtle bg-surface-base px-4 py-3 dark:border-border-default/60">
+            <p className="text-sm font-medium text-fg-default">
               {group.name?.trim() ? group.name : 'Cross-listed sections'}
             </p>
-            <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">
+            <p className="mt-1 text-xs text-fg-muted">
               Primary section owns course content. Combined enrollment:{' '}
-              <span className="font-medium text-slate-800 dark:text-neutral-200">{group.members.length}</span> linked
+              <span className="font-medium text-fg-default">{group.members.length}</span> linked
               sections.
             </p>
             <ul className="mt-3 space-y-2">
               {group.members.map((m) => (
                 <li
                   key={m.sectionId}
-                  className="flex flex-wrap items-center justify-between gap-2 text-sm text-slate-800 dark:text-neutral-100"
+                  className="flex flex-wrap items-center justify-between gap-2 text-sm text-fg-default"
                 >
                   <span>
                     <span className="font-mono">{m.sectionCode}</span>
@@ -254,14 +254,14 @@ export function CourseCrossListingSection({ courseCode, courseId, orgId }: Props
           {addCandidates.length > 0 ? (
             <form className="flex flex-wrap items-end gap-3" onSubmit={onAddMember}>
               <div className="min-w-[12rem] flex-1">
-                <label htmlFor="cl-add" className="block text-xs font-medium text-slate-600 dark:text-neutral-400">
+                <label htmlFor="cl-add" className="block text-xs font-medium text-fg-muted">
                   Add section to group
                 </label>
                 <select
                   id="cl-add"
                   value={addPick}
                   onChange={(e) => setAddPick(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+                  className="mt-1 w-full rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base dark:text-fg-default"
                 >
                   <option value="">Choose section…</option>
                   {addCandidates.map((s) => (
@@ -275,13 +275,13 @@ export function CourseCrossListingSection({ courseCode, courseId, orgId }: Props
               <button
                 type="submit"
                 disabled={busy || !addPick}
-                className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800 shadow-sm hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+                className="rounded-lg border border-border-default bg-surface-raised px-4 py-2 text-sm font-medium text-fg-default shadow-sm hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700/80"
               >
                 Add section
               </button>
             </form>
           ) : (
-            <p className="text-sm text-slate-600 dark:text-neutral-400">All active sections are in this group.</p>
+            <p className="text-sm text-fg-muted">All active sections are in this group.</p>
           )}
         </div>
       )}

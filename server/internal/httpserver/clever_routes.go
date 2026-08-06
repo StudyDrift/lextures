@@ -14,11 +14,6 @@ import (
 // handleCleverLogin is GET /auth/clever/login — Clever OAuth with PKCE.
 func (d Deps) handleCleverLogin() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.Pool == nil {
 			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "Database is not configured.")
 			return
@@ -43,11 +38,6 @@ func (d Deps) handleCleverLogin() http.HandlerFunc {
 // handleCleverCallback is GET /auth/clever/callback — token exchange + JIT provision + app JWT fragment redirect.
 func (d Deps) handleCleverCallback() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.Pool == nil {
 			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "Database is not configured.")
 			return

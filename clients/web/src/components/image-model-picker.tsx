@@ -10,18 +10,18 @@ function MetaLine({ m }: { m: ImageModelOption }) {
   const mod = m.modalitiesSummary?.trim()
 
   return (
-    <span className="text-xs leading-snug text-slate-500">
+    <span className="text-xs leading-snug text-fg-muted">
       {mod ? (
         <>
           {mod}
-          <span className="mx-1 text-slate-400">·</span>
+          <span className="mx-1 text-fg-subtle">·</span>
         </>
       ) : null}
-      <span className="font-semibold text-slate-600">Context:</span> {ctx}
-      <span className="mx-1 text-slate-400">·</span>
-      <span className="font-semibold text-slate-600">In:</span> {inn}
-      <span className="mx-1 text-slate-400">·</span>
-      <span className="font-semibold text-slate-600">Out:</span> {out}
+      <span className="font-semibold text-fg-muted">Context:</span> {ctx}
+      <span className="mx-1 text-fg-subtle">·</span>
+      <span className="font-semibold text-fg-muted">In:</span> {inn}
+      <span className="mx-1 text-fg-subtle">·</span>
+      <span className="font-semibold text-fg-muted">Out:</span> {out}
     </span>
   )
 }
@@ -97,7 +97,7 @@ export function ImageModelPicker({
   return (
     <div ref={rootRef} className="relative">
       <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
-        <label htmlFor={id} className="text-sm font-medium text-slate-700">
+        <label htmlFor={id} className="text-sm font-medium text-fg-muted">
           {label}
         </label>
         {onRefresh && (
@@ -105,7 +105,7 @@ export function ImageModelPicker({
             type="button"
             onClick={() => void onRefresh()}
             disabled={disabled || refreshing}
-            className="text-xs font-medium text-indigo-600 hover:text-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="text-xs font-medium text-accent-fg hover:text-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {refreshing ? (
               <span className="inline-flex items-center gap-1">
@@ -127,35 +127,35 @@ export function ImageModelPicker({
         aria-expanded={open}
         aria-controls={open ? `${id}-listbox` : undefined}
         onClick={() => void toggle()}
-        className="flex w-full items-start justify-between gap-2 rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-start text-sm outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60"
+        className="flex w-full items-start justify-between gap-2 rounded-xl border border-border-default bg-surface-raised px-2 py-1.5 text-start text-sm outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60"
       >
         <span className="min-w-0 flex-1">
           {unknownId ? (
             <>
-              <span className="block font-semibold text-slate-400">Unknown model</span>
-              <span className="mt-0.5 block font-mono text-xs text-slate-500">{value}</span>
+              <span className="block font-semibold text-fg-subtle">Unknown model</span>
+              <span className="mt-0.5 block font-mono text-xs text-fg-muted">{value}</span>
             </>
           ) : selected ? (
             <>
-              <span className="block font-semibold text-slate-900">{selected.name}</span>
-              <span className="mt-0.5 block font-mono text-xs text-slate-500">{selected.id}</span>
+              <span className="block font-semibold text-fg-default">{selected.name}</span>
+              <span className="mt-0.5 block font-mono text-xs text-fg-muted">{selected.id}</span>
             </>
           ) : (
-            <span className="block text-slate-500">Choose a model…</span>
+            <span className="block text-fg-muted">Choose a model…</span>
           )}
         </span>
         <ChevronDown
-          className={`mt-0.5 h-4 w-4 shrink-0 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`}
+          className={`mt-0.5 h-4 w-4 shrink-0 text-fg-subtle transition-transform ${open ? 'rotate-180' : ''}`}
           aria-hidden
         />
       </button>
 
       {open && (
         <div
-          className="absolute z-50 mt-1 flex max-h-[min(60vh,22rem)] w-full flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg shadow-slate-900/10"
+          className="absolute z-50 mt-1 flex max-h-[min(60vh,22rem)] w-full flex-col overflow-hidden rounded-xl border border-border-default bg-surface-raised shadow-lg shadow-slate-900/10"
           id={`${id}-listbox`}
         >
-          <div className="shrink-0 border-b border-slate-100 bg-white px-2 py-2">
+          <div className="shrink-0 border-b border-border-subtle bg-surface-raised px-2 py-2">
             <label htmlFor={filterFieldId} className="sr-only">
               Filter models
             </label>
@@ -168,7 +168,7 @@ export function ImageModelPicker({
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
               placeholder="Filter models…"
-              className="w-full rounded-lg border border-slate-200 bg-slate-50/80 px-2.5 py-2 text-sm text-slate-900 outline-none ring-indigo-500/20 placeholder:text-slate-400 focus:border-indigo-400 focus:bg-white focus:ring-2"
+              className="w-full rounded-lg border border-border-default bg-slate-50/80 px-2.5 py-2 text-sm text-fg-default outline-none ring-indigo-500/20 placeholder:text-fg-subtle focus:border-indigo-400 focus:bg-surface-raised focus:ring-2"
               onMouseDown={(e) => e.stopPropagation()}
             />
             <div className="mt-2 flex flex-wrap gap-1.5" role="group" aria-label="Quick filters">
@@ -177,11 +177,7 @@ export function ImageModelPicker({
                 aria-pressed={pillFree}
                 onClick={() => setPillFree((v) => !v)}
                 onMouseDown={(e) => e.stopPropagation()}
-                className={`rounded-full border px-2 py-0.5 text-xs font-medium transition-[background-color,color,border-color] ${
-                  pillFree
-                    ? 'border-indigo-300 bg-indigo-100 text-indigo-900'
-                    : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                }`}
+                className={`rounded-full border px-2 py-0.5 text-xs font-medium transition-[background-color,color,border-color] ${ pillFree ? 'border-indigo-300 bg-indigo-100 text-indigo-900' : 'border-border-default bg-surface-raised text-fg-muted hover:bg-surface-base' }`}
               >
                 Free
               </button>
@@ -190,11 +186,7 @@ export function ImageModelPicker({
                 aria-pressed={pillPopularity}
                 onClick={() => setPillPopularity((v) => !v)}
                 onMouseDown={(e) => e.stopPropagation()}
-                className={`rounded-full border px-2 py-0.5 text-xs font-medium transition-[background-color,color,border-color] ${
-                  pillPopularity
-                    ? 'border-indigo-300 bg-indigo-100 text-indigo-900'
-                    : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                }`}
+                className={`rounded-full border px-2 py-0.5 text-xs font-medium transition-[background-color,color,border-color] ${ pillPopularity ? 'border-indigo-300 bg-indigo-100 text-indigo-900' : 'border-border-default bg-surface-raised text-fg-muted hover:bg-surface-base' }`}
               >
                 Popularity
               </button>
@@ -206,11 +198,11 @@ export function ImageModelPicker({
             className="min-h-0 flex-1 overflow-y-auto overscroll-contain py-1"
           >
             {unknownId && (
-              <li role="presentation" className="border-b border-slate-100 px-3 py-2.5">
+              <li role="presentation" className="border-b border-border-subtle px-3 py-2.5">
                 <span className="block text-xs font-medium text-amber-800">
                   Saved model (not in current list)
                 </span>
-                <span className="mt-0.5 block font-mono text-xs text-slate-600">{value}</span>
+                <span className="mt-0.5 block font-mono text-xs text-fg-muted">{value}</span>
               </li>
             )}
             {filteredModels.map((m) => {
@@ -223,12 +215,10 @@ export function ImageModelPicker({
                       onChange(m.id)
                       setOpen(false)
                     }}
-                    className={`w-full px-2.5 py-2 text-start transition-[background-color,color,border-color] hover:bg-slate-50 ${
-                      isSel ? 'bg-indigo-50/80' : ''
-                    }`}
+                    className={`w-full px-2.5 py-2 text-start transition-[background-color,color,border-color] hover:bg-surface-base ${ isSel ? 'bg-indigo-50/80' : '' }`}
                   >
-                    <span className="block font-semibold text-slate-900">{m.name}</span>
-                    <span className="mt-0.5 block font-mono text-xs text-slate-500">{m.id}</span>
+                    <span className="block font-semibold text-fg-default">{m.name}</span>
+                    <span className="mt-0.5 block font-mono text-xs text-fg-muted">{m.id}</span>
                     <span className="mt-1 block">
                       <MetaLine m={m} />
                     </span>
@@ -237,7 +227,7 @@ export function ImageModelPicker({
               )
             })}
             {filteredModels.length === 0 && (
-              <li className="px-3 py-6 text-center text-sm text-slate-500">No models match your filter.</li>
+              <li className="px-3 py-6 text-center text-sm text-fg-muted">No models match your filter.</li>
             )}
           </ul>
         </div>

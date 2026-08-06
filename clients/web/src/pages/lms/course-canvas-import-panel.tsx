@@ -72,12 +72,12 @@ export function CourseCanvasImportPanel({
   onImport,
 }: CourseCanvasImportPanelProps) {
   return (
-    <div className="mt-8 border-t border-slate-200 pt-8 dark:border-neutral-600">
-      <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+    <div className="mt-8 border-t border-border-default pt-8 dark:border-border-default">
+      <h3 className="text-sm font-semibold text-fg-default">
         From Canvas LMS
       </h3>
       <CanvasReadOnlyNotice className="mt-3" />
-      <p className="mt-3 text-sm text-slate-500 dark:text-neutral-400">
+      <p className="mt-3 text-sm text-fg-muted">
         Use a Canvas personal access token with read-only access. Choose what to pull below (all
         are on by default). We map Canvas into this course; roster members with an email in
         Canvas get a Lextures account when needed and are enrolled when enrollments are included.
@@ -86,15 +86,15 @@ export function CourseCanvasImportPanel({
         when the import finishes. You can optionally keep the URL and token in this browser for
         the next course import.
       </p>
-      <fieldset className="mt-4 rounded-xl border border-slate-200 p-4 dark:border-neutral-600">
-        <legend className="px-1 text-xs font-medium text-slate-700 dark:text-neutral-300">
+      <fieldset className="mt-4 rounded-xl border border-border-default p-4 dark:border-border-default">
+        <legend className="px-1 text-xs font-medium text-fg-muted">
           Import from Canvas
         </legend>
         <div className="mt-2 grid gap-2 sm:grid-cols-2">
           {CANVAS_INCLUDE_OPTIONS.map(([key, label, hint]) => (
             <label
               key={key}
-              className="flex cursor-pointer items-start gap-2 rounded-lg border border-transparent px-1 py-1 hover:border-slate-200 hover:bg-slate-50 dark:hover:border-neutral-600 dark:hover:bg-neutral-800/60"
+              className="flex cursor-pointer items-start gap-2 rounded-lg border border-transparent px-1 py-1 hover:border-border-default hover:bg-surface-base dark:hover:border-border-default dark:hover:bg-neutral-800/60"
             >
               <input
                 type="checkbox"
@@ -105,10 +105,10 @@ export function CourseCanvasImportPanel({
                 }
               />
               <span>
-                <span className="block text-sm font-medium text-slate-900 dark:text-neutral-100">
+                <span className="block text-sm font-medium text-fg-default">
                   {label}
                 </span>
-                <span className="mt-0.5 block text-xs text-slate-500 dark:text-neutral-500">
+                <span className="mt-0.5 block text-xs text-fg-subtle">
                   {hint}
                 </span>
               </span>
@@ -118,7 +118,7 @@ export function CourseCanvasImportPanel({
       </fieldset>
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <label className="block sm:col-span-2">
-          <span className="text-xs font-medium text-slate-600 dark:text-neutral-400">
+          <span className="text-xs font-medium text-fg-muted">
             Canvas base URL
           </span>
           <input
@@ -127,12 +127,12 @@ export function CourseCanvasImportPanel({
             onChange={(e) => onCanvasBaseUrlChange(e.target.value)}
             placeholder="https://yourschool.instructure.com"
             autoComplete="off"
-            className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner outline-none ring-indigo-500/0 transition-[background-color,color,border-color] focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+            className="mt-1 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm text-fg-default shadow-inner outline-none ring-indigo-500/0 transition-[background-color,color,border-color] focus:border-indigo-400 focus:ring-2 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
           />
           <CanvasAccessTokenSettingsLink canvasBaseUrl={canvasBaseUrl} className="mt-1.5" />
         </label>
         <label className="block">
-          <span className="text-xs font-medium text-slate-600 dark:text-neutral-400">
+          <span className="text-xs font-medium text-fg-muted">
             Canvas course ID
           </span>
           <input
@@ -142,11 +142,11 @@ export function CourseCanvasImportPanel({
             onChange={(e) => onCanvasCourseIdChange(e.target.value)}
             placeholder="e.g. 1234567"
             autoComplete="off"
-            className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner outline-none ring-indigo-500/0 transition-[background-color,color,border-color] focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+            className="mt-1 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm text-fg-default shadow-inner outline-none ring-indigo-500/0 transition-[background-color,color,border-color] focus:border-indigo-400 focus:ring-2 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
           />
         </label>
         <label className="block">
-          <span className="text-xs font-medium text-slate-600 dark:text-neutral-400">
+          <span className="text-xs font-medium text-fg-muted">
             Access token
           </span>
           <input
@@ -155,11 +155,11 @@ export function CourseCanvasImportPanel({
             onChange={(e) => onCanvasTokenChange(e.target.value)}
             placeholder="Canvas API token"
             autoComplete="off"
-            className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner outline-none ring-indigo-500/0 transition-[background-color,color,border-color] focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+            className="mt-1 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm text-fg-default shadow-inner outline-none ring-indigo-500/0 transition-[background-color,color,border-color] focus:border-indigo-400 focus:ring-2 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
           />
         </label>
       </div>
-      <label className="mt-3 flex cursor-pointer items-start gap-2 rounded-xl border border-slate-200 p-3 dark:border-neutral-600">
+      <label className="mt-3 flex cursor-pointer items-start gap-2 rounded-xl border border-border-default p-3 dark:border-border-default">
         <input
           type="checkbox"
           className="mt-0.5"
@@ -173,10 +173,10 @@ export function CourseCanvasImportPanel({
           }}
         />
         <span>
-          <span className="block text-sm font-medium text-slate-900 dark:text-neutral-100">
+          <span className="block text-sm font-medium text-fg-default">
             Save Canvas URL and access token on this device
           </span>
-          <span className="mt-0.5 block text-xs text-slate-500 dark:text-neutral-500">
+          <span className="mt-0.5 block text-xs text-fg-subtle">
             Reuses the same connection when you import into other courses in Lextures. Stored
             only in this browser; avoid on shared computers.
           </span>
@@ -190,16 +190,16 @@ export function CourseCanvasImportPanel({
           onChange={(e) => onEnableGradeSyncChange(e.target.checked)}
         />
         <span>
-          <span className="block text-sm font-medium text-slate-900 dark:text-neutral-100">
+          <span className="block text-sm font-medium text-fg-default">
             Sync grades back to Canvas when grading
           </span>
-          <span className="mt-0.5 block text-xs text-slate-600 dark:text-neutral-400">
+          <span className="mt-0.5 block text-xs text-fg-muted">
             When enabled, saving a grade in Lextures automatically pushes it to Canvas. Your
             token needs permission to update grades in Canvas.
           </span>
         </span>
       </label>
-      <p className="mt-3 text-xs text-slate-500 dark:text-neutral-500">
+      <p className="mt-3 text-xs text-fg-subtle">
         In Canvas: Account or Profile → Settings → New access token. Use a token with
         permission to read the course, assignments, pages, quizzes, enrollments, and the course
         user list (roster).
@@ -215,7 +215,7 @@ export function CourseCanvasImportPanel({
             !canvasToken.trim()
           }
           aria-busy={importing}
-          className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {importing ? (
             <span

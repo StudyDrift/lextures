@@ -60,13 +60,13 @@ export function AIDisclosureBanner({ courseCode, toolId, requiresAI, onOptOut }:
 
   return (
     <div
-      className="mb-3 rounded-md border border-slate-300 bg-slate-50 p-3 text-sm text-slate-800 dark:border-neutral-600 dark:bg-neutral-900 dark:text-slate-100"
+      className="mb-3 rounded-md border border-border-strong bg-surface-base p-3 text-sm text-fg-default dark:border-border-default dark:bg-surface-raised dark:text-slate-100"
       role="region"
       aria-label={t('contentTools.governance.aiDisclosureTitle')}
       data-testid="content-tool-ai-disclosure"
     >
       <p className="font-medium">{t('contentTools.governance.aiDisclosureTitle')}</p>
-      <p className="mt-1 text-slate-600 dark:text-slate-300">
+      <p className="mt-1 text-fg-muted dark:text-slate-300">
         {t('contentTools.governance.aiDisclosureBody')}
       </p>
       {error ? (
@@ -77,7 +77,7 @@ export function AIDisclosureBanner({ courseCode, toolId, requiresAI, onOptOut }:
       <div className="mt-3 flex gap-2">
         <button
           type="button"
-          className="min-w-0 flex-1 rounded-lg bg-slate-900 px-3 py-2 text-center text-sm font-medium text-white disabled:opacity-50 dark:bg-slate-100 dark:text-slate-900"
+          className="min-w-0 flex-1 rounded-lg bg-slate-900 px-3 py-2 text-center text-sm font-medium text-white disabled:opacity-50 dark:bg-surface-sunken dark:text-fg-default"
           disabled={busy}
           onClick={() => void decide('acknowledged')}
           data-testid="content-tool-ai-ack"

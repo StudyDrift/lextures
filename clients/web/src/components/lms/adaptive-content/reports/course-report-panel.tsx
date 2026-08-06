@@ -40,14 +40,14 @@ function reasonLabel(reason: string): string {
 
 function Kpi({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
-    <div className="rounded-xl border border-slate-200 px-3 py-2 dark:border-neutral-700">
-      <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+    <div className="rounded-xl border border-border-default px-3 py-2 dark:border-border-default">
+      <p className="text-xs font-medium uppercase tracking-wide text-fg-muted">
         {label}
       </p>
-      <p className="mt-0.5 text-lg font-semibold tabular-nums text-slate-900 dark:text-neutral-100">
+      <p className="mt-0.5 text-lg font-semibold tabular-nums text-fg-default">
         {value}
       </p>
-      {hint ? <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">{hint}</p> : null}
+      {hint ? <p className="mt-0.5 text-xs text-fg-muted">{hint}</p> : null}
     </div>
   )
 }
@@ -61,17 +61,17 @@ function ModeBarChart({
   const [showTable, setShowTable] = useState(false)
   const maxN = Math.max(1, ...modes.map((m) => m.n))
   if (modes.length === 0) {
-    return <p className="text-sm text-slate-500 dark:text-neutral-400">No mode breakdown yet.</p>
+    return <p className="text-sm text-fg-muted">No mode breakdown yet.</p>
   }
   return (
     <div>
       <div className="flex items-center justify-between gap-2">
-        <p className="text-sm text-slate-600 dark:text-neutral-300">
+        <p className="text-sm text-fg-muted">
           Mean lift by emphasis mode (suppressed when n &lt; small-cell minimum).
         </p>
         <button
           type="button"
-          className="text-xs font-medium text-indigo-700 underline dark:text-indigo-300"
+          className="text-xs font-medium text-accent-fg underline dark:text-indigo-300"
           aria-controls={tableId}
           aria-expanded={showTable}
           onClick={() => setShowTable((v) => !v)}
@@ -82,11 +82,11 @@ function ModeBarChart({
       <ul className="mt-3 space-y-2" aria-hidden={showTable}>
         {modes.map((m) => (
           <li key={m.emphasisMode} className="flex items-center gap-3 text-sm">
-            <span className="w-24 shrink-0 font-medium text-slate-700 dark:text-neutral-200">
+            <span className="w-24 shrink-0 font-medium text-fg-default">
               {m.emphasisMode}
             </span>
             <div
-              className="h-3 flex-1 rounded bg-slate-100 dark:bg-neutral-800"
+              className="h-3 flex-1 rounded bg-surface-sunken"
               role="presentation"
             >
               <div
@@ -94,7 +94,7 @@ function ModeBarChart({
                 style={{ width: `${(m.n / maxN) * 100}%` }}
               />
             </div>
-            <span className="w-28 shrink-0 tabular-nums text-slate-600 dark:text-neutral-300">
+            <span className="w-28 shrink-0 tabular-nums text-fg-muted">
               n={m.n} · {formatLift(m.meanLift)}
             </span>
           </li>
@@ -104,7 +104,7 @@ function ModeBarChart({
         <table id={tableId} className="mt-3 w-full text-left text-sm">
           <caption className="sr-only">Effectiveness by emphasis mode</caption>
           <thead>
-            <tr className="border-b border-slate-200 dark:border-neutral-700">
+            <tr className="border-b border-border-default">
               <th scope="col" className="py-1 pe-2 font-medium">
                 Mode
               </th>
@@ -118,7 +118,7 @@ function ModeBarChart({
           </thead>
           <tbody>
             {modes.map((m) => (
-              <tr key={m.emphasisMode} className="border-b border-slate-100 dark:border-neutral-800">
+              <tr key={m.emphasisMode} className="border-b border-border-subtle">
                 <td className="py-1 pe-2">{m.emphasisMode}</td>
                 <td className="py-1 pe-2 tabular-nums">{m.n}</td>
                 <td className="py-1 tabular-nums">{formatLift(m.meanLift)}</td>
@@ -140,7 +140,7 @@ function UnitsToReviewList({
 }) {
   if (items.length === 0) {
     return (
-      <p className="text-sm text-slate-500 dark:text-neutral-400">
+      <p className="text-sm text-fg-muted">
         No units currently need review.
       </p>
     )
@@ -150,17 +150,17 @@ function UnitsToReviewList({
       {items.map((u, idx) => (
         <li
           key={`${u.unitId}-${u.reason}`}
-          className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 px-3 py-2 dark:border-neutral-700"
+          className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border-default px-3 py-2 dark:border-border-default"
           data-testid={idx === 0 ? 'ace-report-top-review-unit' : undefined}
         >
           <div className="min-w-0">
-            <p className="text-sm font-medium text-slate-900 dark:text-neutral-100">
+            <p className="text-sm font-medium text-fg-default">
               {reasonLabel(u.reason)}
-              <span className="ms-2 font-mono text-xs text-slate-500">
+              <span className="ms-2 font-mono text-xs text-fg-muted">
                 {u.unitId.slice(0, 8)}…
               </span>
             </p>
-            <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
+            <p className="mt-0.5 text-xs text-fg-muted">
               Verdict: {u.verdict.replaceAll('_', ' ')}
               {u.meanLift != null ? ` · lift ${formatLift(u.meanLift)}` : ''}
               {u.meanFidelity != null
@@ -170,7 +170,7 @@ function UnitsToReviewList({
           </div>
           <Link
             to={`/courses/${encodeURIComponent(courseCode)}/settings/adaptive-content?unit=${encodeURIComponent(u.unitId)}`}
-            className="text-sm font-medium text-indigo-700 hover:underline dark:text-indigo-300"
+            className="text-sm font-medium text-accent-fg hover:underline dark:text-indigo-300"
           >
             Open in workspace
           </Link>
@@ -213,7 +213,7 @@ export function CourseReportPanel({ courseCode }: Props) {
     return (
       <div className="space-y-2" aria-busy="true" data-testid="ace-report-loading">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="h-14 animate-pulse rounded-xl bg-slate-100 dark:bg-neutral-800" />
+          <div key={i} className="h-14 animate-pulse rounded-xl bg-surface-sunken" />
         ))}
       </div>
     )
@@ -232,13 +232,13 @@ export function CourseReportPanel({ courseCode }: Props) {
   if (report.empty) {
     return (
       <section
-        className="rounded-2xl border border-dashed border-slate-300 px-6 py-10 text-center dark:border-neutral-700"
+        className="rounded-2xl border border-dashed border-border-strong px-6 py-10 text-center dark:border-border-default"
         data-testid="ace-report-empty"
       >
-        <h3 className="text-base font-semibold text-slate-900 dark:text-neutral-50">
+        <h3 className="text-base font-semibold text-fg-default">
           No adaptive data yet
         </h3>
-        <p className="mx-auto mt-2 max-w-md text-sm text-slate-600 dark:text-neutral-400">
+        <p className="mx-auto mt-2 max-w-md text-sm text-fg-muted">
           Set up an adaptive content unit and collect servings and post-assessment outcomes to see
           coverage, lift vs. control, and units to review here.
         </p>
@@ -254,11 +254,11 @@ export function CourseReportPanel({ courseCode }: Props) {
     <div className="space-y-6" data-testid="ace-course-report">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h3 className="text-base font-semibold text-slate-900 dark:text-neutral-50">
+          <h3 className="text-base font-semibold text-fg-default">
             Adaptive Content report
           </h3>
           {report.dataAsOf ? (
-            <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
+            <p className="mt-0.5 text-xs text-fg-muted">
               Data as of {new Date(report.dataAsOf).toLocaleString()}
             </p>
           ) : null}
@@ -268,7 +268,7 @@ export function CourseReportPanel({ courseCode }: Props) {
             type="button"
             disabled={busy}
             data-testid="ace-report-refresh"
-            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 dark:border-neutral-600 dark:text-neutral-200"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-border-default px-3 py-1.5 text-sm font-medium text-fg-muted dark:border-border-default dark:text-fg-default"
             onClick={() => {
               void (async () => {
                 setBusy(true)
@@ -336,11 +336,11 @@ export function CourseReportPanel({ courseCode }: Props) {
       <section aria-labelledby="ace-units-to-review-heading">
         <h4
           id="ace-units-to-review-heading"
-          className="text-sm font-semibold text-slate-900 dark:text-neutral-50"
+          className="text-sm font-semibold text-fg-default"
         >
           Units to review
         </h4>
-        <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+        <p className="mt-1 text-xs text-fg-muted">
           Ranked regressing → low fidelity → insufficient data. Open a unit in the authoring
           workspace to act.
         </p>
@@ -352,7 +352,7 @@ export function CourseReportPanel({ courseCode }: Props) {
       <section aria-labelledby="ace-mode-heading">
         <h4
           id="ace-mode-heading"
-          className="text-sm font-semibold text-slate-900 dark:text-neutral-50"
+          className="text-sm font-semibold text-fg-default"
         >
           Effectiveness by emphasis mode
         </h4>
@@ -365,13 +365,13 @@ export function CourseReportPanel({ courseCode }: Props) {
         <div className="flex items-center justify-between gap-2">
           <h4
             id="ace-unit-eff-heading"
-            className="text-sm font-semibold text-slate-900 dark:text-neutral-50"
+            className="text-sm font-semibold text-fg-default"
           >
             Effectiveness by unit
           </h4>
           <button
             type="button"
-            className="text-xs font-medium text-indigo-700 underline dark:text-indigo-300"
+            className="text-xs font-medium text-accent-fg underline dark:text-indigo-300"
             aria-controls={unitTableId}
             aria-expanded={showUnitTable}
             onClick={() => setShowUnitTable((v) => !v)}
@@ -383,24 +383,24 @@ export function CourseReportPanel({ courseCode }: Props) {
           {report.units.map((u) => (
             <li
               key={u.unitId}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 px-3 py-2 dark:border-neutral-700"
+              className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border-default px-3 py-2 dark:border-border-default"
             >
-              <span className="font-mono text-xs text-slate-500">{u.unitId.slice(0, 8)}…</span>
+              <span className="font-mono text-xs text-fg-muted">{u.unitId.slice(0, 8)}…</span>
               <EffectivenessChip effectiveness={u} />
-              <span className="text-sm tabular-nums text-slate-600 dark:text-neutral-300">
+              <span className="text-sm tabular-nums text-fg-muted">
                 {formatLift(u.treatmentMinusHoldout)}
               </span>
             </li>
           ))}
           {report.units.length === 0 ? (
-            <li className="text-sm text-slate-500">No effectiveness rows yet.</li>
+            <li className="text-sm text-fg-muted">No effectiveness rows yet.</li>
           ) : null}
         </ul>
         {showUnitTable ? (
           <table id={unitTableId} className="mt-3 w-full text-left text-sm">
             <caption className="sr-only">Per-unit effectiveness</caption>
             <thead>
-              <tr className="border-b border-slate-200 dark:border-neutral-700">
+              <tr className="border-b border-border-default">
                 <th scope="col" className="py-1 pe-2">
                   Unit
                 </th>
@@ -420,7 +420,7 @@ export function CourseReportPanel({ courseCode }: Props) {
             </thead>
             <tbody>
               {report.units.map((u) => (
-                <tr key={u.unitId} className="border-b border-slate-100 dark:border-neutral-800">
+                <tr key={u.unitId} className="border-b border-border-subtle">
                   <td className="py-1 pe-2 font-mono text-xs">{u.unitId}</td>
                   <td className="py-1 pe-2">{u.verdict}</td>
                   <td className="py-1 pe-2 tabular-nums">{u.nTreatment}</td>
@@ -436,20 +436,20 @@ export function CourseReportPanel({ courseCode }: Props) {
       <section aria-labelledby="ace-cost-heading">
         <h4
           id="ace-cost-heading"
-          className="text-sm font-semibold text-slate-900 dark:text-neutral-50"
+          className="text-sm font-semibold text-fg-default"
         >
           Cost &amp; budget
         </h4>
         <div className="mt-3">
           {report.cost.unlimited ? (
-            <p className="text-sm text-slate-600 dark:text-neutral-300">
+            <p className="text-sm text-fg-muted">
               {report.cost.tokensUsedPeriod.toLocaleString()} tokens used this period (unlimited
               budget). Period start {report.cost.periodStart}.
             </p>
           ) : (
             <>
               <div
-                className="h-3 overflow-hidden rounded-full bg-slate-100 dark:bg-neutral-800"
+                className="h-3 overflow-hidden rounded-full bg-surface-sunken"
                 role="progressbar"
                 aria-valuemin={0}
                 aria-valuemax={report.cost.monthlyTokenBudget}
@@ -467,7 +467,7 @@ export function CourseReportPanel({ courseCode }: Props) {
                   }}
                 />
               </div>
-              <p className="mt-2 text-sm text-slate-600 dark:text-neutral-300">
+              <p className="mt-2 text-sm text-fg-muted">
                 {report.cost.tokensUsedPeriod.toLocaleString()} /{' '}
                 {report.cost.monthlyTokenBudget.toLocaleString()} tokens ·{' '}
                 {(report.cost.budgetRemaining ?? 0).toLocaleString()} remaining · period start{' '}
@@ -475,9 +475,9 @@ export function CourseReportPanel({ courseCode }: Props) {
               </p>
             </>
           )}
-          <p className="mt-2 text-xs text-slate-500 dark:text-neutral-400">
+          <p className="mt-2 text-xs text-fg-muted">
             Platform AI reports include the same spend under feature{' '}
-            <code className="rounded bg-slate-100 px-1 dark:bg-neutral-800">adaptive_content</code>.
+            <code className="rounded bg-surface-sunken px-1 dark:bg-surface-overlay">adaptive_content</code>.
           </p>
         </div>
       </section>

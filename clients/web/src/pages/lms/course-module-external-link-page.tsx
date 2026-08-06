@@ -27,12 +27,12 @@ const PROVIDER_LABELS: Record<string, string> = {
 const PROVIDER_COLORS: Record<string, string> = {
   google_drive: 'bg-blue-50 text-blue-700 border-blue-200/80 dark:bg-blue-950/55 dark:text-blue-300 dark:border-blue-500/40',
   onedrive: 'bg-sky-50 text-sky-700 border-sky-200/80 dark:bg-sky-950/55 dark:text-sky-300 dark:border-sky-500/40',
-  dropbox: 'bg-indigo-50 text-indigo-700 border-indigo-200/80 dark:bg-indigo-950/55 dark:text-indigo-300 dark:border-indigo-500/40',
+  dropbox: 'bg-indigo-50 text-accent-fg border-indigo-200/80 dark:bg-indigo-950/55 dark:text-indigo-300 dark:border-indigo-500/40',
 }
 
 function ProviderBadge({ provider }: { provider: string }) {
   const label = PROVIDER_LABELS[provider] ?? provider
-  const color = PROVIDER_COLORS[provider] ?? 'bg-slate-50 text-slate-700 border-slate-200/80 dark:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-600'
+  const color = PROVIDER_COLORS[provider] ?? 'bg-surface-base text-fg-muted border-slate-200/80 dark:bg-surface-overlay dark:text-fg-muted dark:border-border-default'
   return (
     <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${color}`}>
       {label}
@@ -152,13 +152,13 @@ export default function CourseModuleExternalLinkPage() {
   return (
     <LmsPage title={data?.title ?? 'External link'}>
       <div className="mx-auto max-w-2xl">
-        <p className="mb-4 text-sm text-slate-600 dark:text-neutral-400">
-          <Link to={modulesHref} className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">
+        <p className="mb-4 text-sm text-fg-muted">
+          <Link to={modulesHref} className="font-medium text-accent-fg hover:text-indigo-500 dark:text-indigo-400">
             ← Modules
           </Link>
         </p>
 
-        {loading && <p className="text-sm text-slate-600 dark:text-neutral-400">Loading…</p>}
+        {loading && <p className="text-sm text-fg-muted">Loading…</p>}
         {loadError && (
           <p className="text-sm text-rose-700 dark:text-rose-300" role="alert">
             {loadError}
@@ -166,7 +166,7 @@ export default function CourseModuleExternalLinkPage() {
         )}
 
         {!loading && !loadError && data && (
-          <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-900/85">
+          <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-5 shadow-sm dark:border-border-default/85">
             <div className="flex items-start gap-3">
               <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-violet-200/90 bg-violet-50 text-violet-700 dark:border-violet-500/40 dark:bg-violet-950/55 dark:text-violet-200">
                 {isCloudLink && data.iconUrl ? (
@@ -190,12 +190,12 @@ export default function CourseModuleExternalLinkPage() {
                   </div>
                 ) : null}
                 {data.attributionText ? (
-                  <p className="mt-2 text-xs text-slate-600 dark:text-neutral-400">
+                  <p className="mt-2 text-xs text-fg-muted">
                     <span className="font-medium">Required attribution:</span> {data.attributionText}
                   </p>
                 ) : null}
                 {!canEdit && data.url ? (
-                  <p className="mt-3 text-sm text-slate-600 dark:text-neutral-400">
+                  <p className="mt-3 text-sm text-fg-muted">
                     Opening in a new tab… If nothing opened, use the button below (your browser may
                     have blocked the pop-up).
                   </p>
@@ -206,21 +206,21 @@ export default function CourseModuleExternalLinkPage() {
                       href={data.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500"
+                      className="inline-flex items-center justify-center rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500"
                     >
                       {openLabel}
                     </a>
                   ) : (
-                    <p className="text-sm text-slate-600 dark:text-neutral-400">
+                    <p className="text-sm text-fg-muted">
                       No URL has been set for this item yet.
                     </p>
                   )}
                 </div>
 
                 {canEdit && (
-                  <form className="mt-6 space-y-5 border-t border-slate-200 pt-6 dark:border-neutral-700" onSubmit={onSave}>
+                  <form className="mt-6 space-y-5 border-t border-border-default pt-6 dark:border-border-default" onSubmit={onSave}>
                     <div>
-                      <label htmlFor={urlFieldId} className="text-xs font-medium text-slate-600 dark:text-neutral-300">
+                      <label htmlFor={urlFieldId} className="text-xs font-medium text-fg-muted">
                         Destination URL
                       </label>
                       <input
@@ -229,7 +229,7 @@ export default function CourseModuleExternalLinkPage() {
                         value={draftUrl}
                         onChange={(e) => setDraftUrl(e.target.value)}
                         disabled={saving}
-                        className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+                        className="mt-1 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 disabled:opacity-60 dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
                       />
                       {saveError ? (
                         <p className="mt-2 text-sm text-rose-700 dark:text-rose-300" role="status">
@@ -240,14 +240,14 @@ export default function CourseModuleExternalLinkPage() {
                         <button
                           type="submit"
                           disabled={saving || !draftUrl.trim()}
-                          className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-white"
+                          className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-surface-raised"
                         >
                           {saving ? 'Saving…' : 'Save URL'}
                         </button>
                       </div>
                     </div>
 
-                    <div className="border-t border-slate-100 pt-4 dark:border-neutral-800">
+                    <div className="border-t border-border-subtle pt-4 dark:border-border-subtle">
                       <CloudPickerButtons onPicked={(f) => void onCloudPicked(f)} disabled={saving} />
                     </div>
                   </form>

@@ -87,7 +87,7 @@ export function AiDisclosureBanner({ featureKey, modelLabel, providerLabel: prov
           type="button"
           disabled={busy}
           onClick={() => void acknowledge()}
-          className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+          className="rounded-lg bg-accent-solid px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
         >
           {aiDisclosureI18n.bannerUnderstand}
         </button>

@@ -29,7 +29,7 @@ function FunnelTable({ analytics }: { analytics: IntroCourseAdminAnalytics }) {
   const funnel = analytics.perModuleFunnel ?? []
   if (funnel.length === 0) {
     return (
-      <p className="text-sm text-slate-500 dark:text-neutral-400">
+      <p className="text-sm text-fg-muted">
         {t('introCourse.admin.analytics.empty')}
       </p>
     )
@@ -39,7 +39,7 @@ function FunnelTable({ analytics }: { analytics: IntroCourseAdminAnalytics }) {
       <table className="min-w-full text-start text-sm">
         <caption className="sr-only">{t('introCourse.admin.analytics.funnelCaption')}</caption>
         <thead>
-          <tr className="border-b border-slate-200 text-slate-500 dark:border-neutral-700 dark:text-neutral-400">
+          <tr className="border-b border-border-default text-fg-muted dark:border-border-default dark:text-fg-muted">
             <th scope="col" className="py-2 pr-4 font-medium">
               {t('introCourse.admin.analytics.module')}
             </th>
@@ -55,13 +55,13 @@ function FunnelTable({ analytics }: { analytics: IntroCourseAdminAnalytics }) {
           {funnel.map((row) => (
             <tr
               key={row.moduleSlug}
-              className="border-b border-slate-100 dark:border-neutral-800"
+              className="border-b border-border-subtle"
             >
-              <td className="py-2 pr-4 text-slate-900 dark:text-neutral-100">{row.moduleTitle}</td>
-              <td className="py-2 pr-4 tabular-nums text-slate-700 dark:text-neutral-300">
+              <td className="py-2 pr-4 text-fg-default">{row.moduleTitle}</td>
+              <td className="py-2 pr-4 tabular-nums text-fg-muted">
                 {row.quizAttempted}
               </td>
-              <td className="py-2 tabular-nums text-slate-700 dark:text-neutral-300">
+              <td className="py-2 tabular-nums text-fg-muted">
                 {percentLabel(row.attemptRate)}
               </td>
             </tr>
@@ -175,7 +175,7 @@ export function IntroCoursePanel() {
 
   if (loading || featuresLoading) {
     return (
-      <p className="mt-6 flex items-center gap-2 text-sm text-slate-500 dark:text-neutral-400">
+      <p className="mt-6 flex items-center gap-2 text-sm text-fg-muted">
         <Loader2 className="h-4 w-4 motion-safe:animate-spin" aria-hidden />
         {t('introCourse.admin.loading')}
       </p>
@@ -184,7 +184,7 @@ export function IntroCoursePanel() {
 
   if (error) {
     return (
-      <p role="alert" className="mt-6 text-sm text-red-600 dark:text-red-400">
+      <p role="alert" className="mt-6 text-sm text-danger-fg">
         {error}
       </p>
     )
@@ -198,7 +198,7 @@ export function IntroCoursePanel() {
     <div className="mt-6 space-y-6">
       {ConfirmDialogHost}
 
-      <p className="text-sm text-slate-500 dark:text-neutral-400">{t('introCourse.admin.auditNote')}</p>
+      <p className="text-sm text-fg-muted">{t('introCourse.admin.auditNote')}</p>
 
       {introFeature ? (
         <SettingsSection
@@ -223,29 +223,29 @@ export function IntroCoursePanel() {
       >
         <dl className="grid gap-3 text-sm sm:grid-cols-2">
           <div>
-            <dt className="text-slate-500 dark:text-neutral-500">{t('introCourse.admin.status.version')}</dt>
-            <dd className="font-mono text-slate-900 dark:text-neutral-100">{status?.contentVersion ?? '—'}</dd>
+            <dt className="text-fg-subtle">{t('introCourse.admin.status.version')}</dt>
+            <dd className="font-mono text-fg-default">{status?.contentVersion ?? '—'}</dd>
           </div>
           <div>
-            <dt className="text-slate-500 dark:text-neutral-500">{t('introCourse.admin.status.modules')}</dt>
-            <dd className="text-slate-900 dark:text-neutral-100">{status?.moduleCount ?? 0}</dd>
+            <dt className="text-fg-subtle">{t('introCourse.admin.status.modules')}</dt>
+            <dd className="text-fg-default">{status?.moduleCount ?? 0}</dd>
           </div>
           <div>
-            <dt className="text-slate-500 dark:text-neutral-500">{t('introCourse.admin.status.lastSync')}</dt>
-            <dd className="text-slate-900 dark:text-neutral-100">
+            <dt className="text-fg-subtle">{t('introCourse.admin.status.lastSync')}</dt>
+            <dd className="text-fg-default">
               {status?.lastSyncedAt ? formatDateTime(status.lastSyncedAt) : t('introCourse.admin.status.never')}
               {status?.lastSyncResult ? ` (${status.lastSyncResult})` : ''}
             </dd>
           </div>
           <div>
-            <dt className="text-slate-500 dark:text-neutral-500">{t('introCourse.admin.status.validation')}</dt>
-            <dd className="text-slate-900 dark:text-neutral-100">
+            <dt className="text-fg-subtle">{t('introCourse.admin.status.validation')}</dt>
+            <dd className="text-fg-default">
               {status?.lastValidationResult ?? t('introCourse.admin.status.unknown')}
             </dd>
           </div>
           <div className="sm:col-span-2">
-            <dt className="text-slate-500 dark:text-neutral-500">{t('introCourse.admin.status.locales')}</dt>
-            <dd className="text-slate-900 dark:text-neutral-100">
+            <dt className="text-fg-subtle">{t('introCourse.admin.status.locales')}</dt>
+            <dd className="text-fg-default">
               {(status?.availableLocales ?? []).map((loc) => {
                 const cov = status?.localeCoverage?.[loc]
                 const pct = cov != null ? ` ${Math.round(cov * 100)}%` : ''
@@ -259,7 +259,7 @@ export function IntroCoursePanel() {
           <p className="mt-4 text-sm">
             <Link
               to={`/courses/${encodeURIComponent(status.courseCode)}`}
-              className="font-medium text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
+              className="font-medium text-accent-fg hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
             >
               {t('introCourse.admin.status.openCourse')}
             </Link>
@@ -271,7 +271,7 @@ export function IntroCoursePanel() {
             type="button"
             disabled={busy}
             onClick={() => void runResync()}
-            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60 dark:bg-indigo-500 dark:hover:bg-indigo-600"
+            className="inline-flex items-center gap-2 rounded-lg bg-accent-solid px-4 py-2 text-sm font-medium text-white hover:bg-accent disabled:opacity-60 dark:bg-indigo-500 dark:hover:bg-accent-solid"
           >
             <RefreshCw className="h-4 w-4" aria-hidden />
             {t('introCourse.admin.actions.resync')}
@@ -280,7 +280,7 @@ export function IntroCoursePanel() {
             type="button"
             disabled={busy || !introCourseEnabled}
             onClick={() => void runBackfill()}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            className="inline-flex items-center gap-2 rounded-lg border border-border-default bg-surface-raised px-4 py-2 text-sm font-medium text-fg-muted hover:bg-surface-base disabled:opacity-60 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
           >
             <Users className="h-4 w-4" aria-hidden />
             {t('introCourse.admin.actions.backfill')}
@@ -288,7 +288,7 @@ export function IntroCoursePanel() {
         </div>
 
         {status?.backfill ? (
-          <p className="mt-3 text-sm text-slate-600 dark:text-neutral-400">
+          <p className="mt-3 text-sm text-fg-muted">
             {t('introCourse.admin.backfill.remaining', { count: status.backfill.remaining })}
             {status.backfill.completedAt
               ? ` · ${t('introCourse.admin.backfill.completed')}`
@@ -308,33 +308,33 @@ export function IntroCoursePanel() {
           <div className="space-y-4">
             <dl className="grid gap-3 text-sm sm:grid-cols-3">
               <div>
-                <dt className="text-slate-500 dark:text-neutral-500">{t('introCourse.admin.analytics.enrolled')}</dt>
-                <dd className="text-lg font-semibold tabular-nums text-slate-900 dark:text-neutral-100">
+                <dt className="text-fg-subtle">{t('introCourse.admin.analytics.enrolled')}</dt>
+                <dd className="text-lg font-semibold tabular-nums text-fg-default">
                   {analytics.enrolled}
                 </dd>
               </div>
               <div>
-                <dt className="text-slate-500 dark:text-neutral-500">{t('introCourse.admin.analytics.completed')}</dt>
-                <dd className="text-lg font-semibold tabular-nums text-slate-900 dark:text-neutral-100">
+                <dt className="text-fg-subtle">{t('introCourse.admin.analytics.completed')}</dt>
+                <dd className="text-lg font-semibold tabular-nums text-fg-default">
                   {analytics.completed}
                 </dd>
               </div>
               <div>
-                <dt className="text-slate-500 dark:text-neutral-500">{t('introCourse.admin.analytics.rate')}</dt>
-                <dd className="text-lg font-semibold tabular-nums text-slate-900 dark:text-neutral-100">
+                <dt className="text-fg-subtle">{t('introCourse.admin.analytics.rate')}</dt>
+                <dd className="text-lg font-semibold tabular-nums text-fg-default">
                   {percentLabel(analytics.completionRate)}
                 </dd>
               </div>
             </dl>
             {analytics.avgTimeToCompleteHours != null ? (
-              <p className="text-sm text-slate-600 dark:text-neutral-400">
+              <p className="text-sm text-fg-muted">
                 {t('introCourse.admin.analytics.avgHours', {
                   hours: analytics.avgTimeToCompleteHours.toFixed(1),
                 })}
               </p>
             ) : null}
             {dropOffTitle ? (
-              <p className="text-sm text-slate-600 dark:text-neutral-400">
+              <p className="text-sm text-fg-muted">
                 {t('introCourse.admin.analytics.dropOff', { module: dropOffTitle })}
               </p>
             ) : null}

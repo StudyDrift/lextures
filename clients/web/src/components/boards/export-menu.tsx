@@ -108,13 +108,13 @@ export function BoardExportMenu({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="w-full max-w-md rounded-lg bg-white p-5 shadow-xl dark:bg-neutral-900"
+        className="w-full max-w-md rounded-lg bg-surface-raised p-5 shadow-xl dark:bg-surface-raised"
       >
-        <h2 id={titleId} className="text-lg font-semibold text-slate-900 dark:text-neutral-100">
+        <h2 id={titleId} className="text-lg font-semibold text-fg-default">
           {t('boards.export.title')}
         </h2>
-        <p className="mt-1 text-sm text-slate-600 dark:text-neutral-300">{t('boards.export.subtitle')}</p>
-        <label className="mt-4 flex items-center gap-2 text-sm text-slate-700 dark:text-neutral-200">
+        <p className="mt-1 text-sm text-fg-muted">{t('boards.export.subtitle')}</p>
+        <label className="mt-4 flex items-center gap-2 text-sm text-fg-default">
           <input
             type="checkbox"
             checked={includeModeration}
@@ -123,7 +123,7 @@ export function BoardExportMenu({
           {t('boards.export.includeModeration')}
         </label>
         {error ? (
-          <p className="mt-3 text-sm text-red-600 dark:text-red-400" role="alert">
+          <p className="mt-3 text-sm text-danger-fg" role="alert">
             {error}
           </p>
         ) : null}
@@ -133,7 +133,7 @@ export function BoardExportMenu({
               key={format}
               type="button"
               disabled={busy !== null}
-              className="rounded-md border border-slate-300 px-3 py-2 text-start text-sm hover:bg-slate-50 disabled:opacity-60 dark:border-neutral-600 dark:hover:bg-neutral-800"
+              className="rounded-md border border-border-strong px-3 py-2 text-start text-sm hover:bg-surface-base disabled:opacity-60 dark:border-border-default dark:hover:bg-surface-overlay"
               onClick={() => void runServerExport(format)}
             >
               {busy === format ? t('boards.export.working') : t(`boards.export.${format}`)}
@@ -142,7 +142,7 @@ export function BoardExportMenu({
           <button
             type="button"
             disabled={busy !== null}
-            className="rounded-md border border-slate-300 px-3 py-2 text-start text-sm hover:bg-slate-50 disabled:opacity-60 dark:border-neutral-600 dark:hover:bg-neutral-800"
+            className="rounded-md border border-border-strong px-3 py-2 text-start text-sm hover:bg-surface-base disabled:opacity-60 dark:border-border-default dark:hover:bg-surface-overlay"
             onClick={() => void runClientImage()}
           >
             {busy === 'client-image' ? t('boards.export.working') : t('boards.export.clientImage')}
@@ -151,7 +151,7 @@ export function BoardExportMenu({
         <div className="mt-4 flex justify-end">
           <button
             type="button"
-            className="rounded-md px-3 py-1.5 text-sm text-slate-600 dark:text-neutral-300"
+            className="rounded-md px-3 py-1.5 text-sm text-fg-muted"
             onClick={onClose}
           >
             {t('dialogs.cancel')}

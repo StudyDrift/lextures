@@ -214,14 +214,14 @@ export default function PredictRevealRenderer({
 
   return (
     <div className="space-y-4" data-content-tool="predict_reveal" data-testid="predict-reveal">
-      <p id={questionId} className="text-sm font-medium text-slate-900 dark:text-neutral-100">
+      <p id={questionId} className="text-sm font-medium text-fg-default">
         {question}
       </p>
 
       {!committed ? (
         <>
           <fieldset disabled={readOnly || busy} aria-labelledby={predLegendId}>
-            <legend id={predLegendId} className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-300">
+            <legend id={predLegendId} className="mb-2 text-xs font-semibold uppercase tracking-wide text-fg-muted">
               {t('contentTools.tools.predict_reveal.yourPrediction')}
             </legend>
             {mode === 'choice' ? (
@@ -229,7 +229,7 @@ export default function PredictRevealRenderer({
                 {outcomes.map((o) => (
                   <label
                     key={o.id}
-                    className="flex cursor-pointer items-start gap-2 rounded border border-slate-200 px-3 py-2 text-sm dark:border-neutral-700"
+                    className="flex cursor-pointer items-start gap-2 rounded border border-border-default px-3 py-2 text-sm dark:border-border-default"
                   >
                     <input
                       type="radio"
@@ -248,7 +248,7 @@ export default function PredictRevealRenderer({
               </div>
             ) : (
               <textarea
-                className="w-full rounded border border-slate-300 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                className="w-full rounded border border-border-strong bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
                 rows={3}
                 placeholder={openPlaceholder || t('contentTools.tools.predict_reveal.openPlaceholder')}
                 value={text}
@@ -263,7 +263,7 @@ export default function PredictRevealRenderer({
 
           {confidenceScale !== 'none' ? (
             <fieldset disabled={readOnly || busy} aria-labelledby={confLegendId}>
-              <legend id={confLegendId} className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-300">
+              <legend id={confLegendId} className="mb-2 text-xs font-semibold uppercase tracking-wide text-fg-muted">
                 {t('contentTools.tools.predict_reveal.howSure')}
               </legend>
               <div className="flex flex-wrap gap-3" role="radiogroup" aria-labelledby={confLegendId}>
@@ -299,7 +299,7 @@ export default function PredictRevealRenderer({
                   ? t('contentTools.tools.predict_reveal.committing')
                   : t('contentTools.tools.predict_reveal.commit')}
               </button>
-              <p className="text-xs text-slate-500 dark:text-neutral-400">
+              <p className="text-xs text-fg-muted">
                 {t('contentTools.tools.predict_reveal.commitHelper')}
               </p>
             </div>
@@ -307,37 +307,37 @@ export default function PredictRevealRenderer({
         </>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2" data-testid="predict-reveal-side-by-side">
-          <div className="rounded border border-slate-200 p-3 dark:border-neutral-700">
-            <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-300">
+          <div className="rounded border border-border-default p-3 dark:border-border-default">
+            <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-fg-muted">
               {t('contentTools.tools.predict_reveal.yourPrediction')}
             </h3>
-            <p className="text-sm text-slate-900 dark:text-neutral-100">{predictionLabel}</p>
+            <p className="text-sm text-fg-default">{predictionLabel}</p>
           </div>
-          <div className="rounded border border-slate-200 p-3 dark:border-neutral-700">
+          <div className="rounded border border-border-default p-3 dark:border-border-default">
             <h3
               ref={revealHeadingRef}
               tabIndex={-1}
-              className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-600 outline-none dark:text-neutral-300"
+              className="mb-1 text-xs font-semibold uppercase tracking-wide text-fg-muted outline-none dark:text-fg-muted"
               data-testid="predict-reveal-heading"
             >
               {t('contentTools.tools.predict_reveal.whatHappens')}
             </h3>
             {reveal ? (
-              <div className="space-y-2 text-sm text-slate-900 dark:text-neutral-100">
+              <div className="space-y-2 text-sm text-fg-default">
                 <p className="whitespace-pre-wrap">{reveal.markdown}</p>
                 {reveal.imageUrl ? (
                   <img src={reveal.imageUrl} alt="" className="max-h-48 rounded" />
                 ) : null}
               </div>
             ) : (
-              <p className="text-sm text-slate-500">{t('contentTools.runtime.loading')}</p>
+              <p className="text-sm text-fg-muted">{t('contentTools.runtime.loading')}</p>
             )}
           </div>
         </div>
       )}
 
       {peerResults ? (
-        <div data-testid="predict-reveal-peers" className="text-sm text-slate-700 dark:text-neutral-200">
+        <div data-testid="predict-reveal-peers" className="text-sm text-fg-default">
           {peerResults.suppressed ? (
             <p>{t('contentTools.tools.predict_reveal.peersSuppressed')}</p>
           ) : (
@@ -362,10 +362,10 @@ export default function PredictRevealRenderer({
 
       {committed && reflectionPrompt && !readOnly ? (
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-slate-800 dark:text-neutral-100">
+          <label className="block text-sm font-medium text-fg-default">
             {reflectionPrompt}
             <textarea
-              className="mt-1 w-full rounded border border-slate-300 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+              className="mt-1 w-full rounded border border-border-strong bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
               rows={2}
               value={reflection}
               onChange={(e) => setReflection(e.target.value)}
@@ -374,7 +374,7 @@ export default function PredictRevealRenderer({
           </label>
           <button
             type="button"
-            className="rounded border border-slate-300 px-3 py-1.5 text-sm dark:border-neutral-600"
+            className="rounded border border-border-strong px-3 py-1.5 text-sm dark:border-border-default"
             disabled={busy || !reflection.trim()}
             onClick={() => void onReflect()}
           >
@@ -384,7 +384,7 @@ export default function PredictRevealRenderer({
       ) : null}
 
       {committed && reflectionPrompt && readOnly && savedReflection ? (
-        <p className="text-sm text-slate-700 dark:text-neutral-200">
+        <p className="text-sm text-fg-default">
           <span className="font-medium">{reflectionPrompt}</span> {savedReflection}
         </p>
       ) : null}

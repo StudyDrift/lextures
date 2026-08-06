@@ -19,15 +19,6 @@ var validOERProviders = map[string]bool{
 // handleGetAdminOERProviders is GET /api/v1/admin/oer-providers.
 func (d Deps) handleGetAdminOERProviders() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -60,15 +51,6 @@ func (d Deps) handleGetAdminOERProviders() http.HandlerFunc {
 // handlePutAdminOERProvider is PUT /api/v1/admin/oer-providers/{provider}.
 func (d Deps) handlePutAdminOERProvider() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPut {
-			w.Header().Set("Allow", http.MethodPut+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}

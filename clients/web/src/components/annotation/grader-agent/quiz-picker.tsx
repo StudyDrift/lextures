@@ -32,7 +32,7 @@ export function QuizPicker({
   const visibleQuizzes = useMemo(() => filterQuizOptions(quizzes, query), [quizzes, query])
 
   if (quizzes.length === 0) {
-    return <p className="text-sm text-slate-500 dark:text-neutral-400">{emptyLabel}</p>
+    return <p className="text-sm text-fg-muted">{emptyLabel}</p>
   }
 
   return (
@@ -40,7 +40,7 @@ export function QuizPicker({
       <label htmlFor={searchId} className="relative block">
         <span className="sr-only">{searchPlaceholder}</span>
         <Search
-          className="pointer-events-none absolute start-2.5 top-1/2 size-3.5 -translate-y-1/2 text-slate-400 dark:text-neutral-500"
+          className="pointer-events-none absolute start-2.5 top-1/2 size-3.5 -translate-y-1/2 text-fg-subtle"
           aria-hidden
         />
         <input
@@ -51,7 +51,7 @@ export function QuizPicker({
           placeholder={searchPlaceholder}
           autoComplete="off"
           onChange={(event) => setQuery(event.target.value)}
-          className="w-full rounded-lg border border-slate-300 bg-white py-2 ps-8 pe-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-indigo-400"
+          className="w-full rounded-lg border border-border-strong bg-surface-raised py-2 ps-8 pe-3 text-sm text-fg-default outline-none placeholder:text-fg-subtle focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-60 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:placeholder:text-neutral-500 dark:focus:border-indigo-400"
         />
       </label>
 
@@ -59,10 +59,10 @@ export function QuizPicker({
         id={listId}
         role="radiogroup"
         aria-labelledby={searchId}
-        className="max-h-56 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50/50 dark:border-neutral-700 dark:bg-neutral-950/40"
+        className="max-h-56 overflow-y-auto rounded-xl border border-border-default bg-slate-50/50 dark:border-border-default/40"
       >
         {visibleQuizzes.length === 0 ? (
-          <p className="px-3 py-4 text-sm text-slate-500 dark:text-neutral-400">{noMatchLabel}</p>
+          <p className="px-3 py-4 text-sm text-fg-muted">{noMatchLabel}</p>
         ) : (
           visibleQuizzes.map((quiz) => {
             const selected = quiz.id === value
@@ -70,11 +70,7 @@ export function QuizPicker({
             return (
               <label
                 key={quiz.id}
-                className={`flex cursor-pointer items-start gap-3 border-b border-slate-200 px-3 py-2.5 transition-[background-color,border-color] last:border-b-0 dark:border-neutral-800 ${
-                  selected
-                    ? 'bg-indigo-50/80 dark:bg-indigo-950/30'
-                    : 'hover:bg-white dark:hover:bg-neutral-900/60'
-                } ${disabled ? 'cursor-not-allowed opacity-60' : ''}`}
+                className={`flex cursor-pointer items-start gap-3 border-b border-border-default px-3 py-2.5 transition-[background-color,border-color] last:border-b-0 dark:border-border-subtle ${ selected ? 'bg-indigo-50/80 dark:bg-indigo-950/30' : 'hover:bg-surface-raised dark:hover:bg-neutral-900/60' } ${disabled ? 'cursor-not-allowed opacity-60' : ''}`}
               >
                 <input
                   type="radio"
@@ -86,10 +82,10 @@ export function QuizPicker({
                   className="mt-1 shrink-0"
                 />
                 <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-medium text-slate-900 dark:text-neutral-100">
+                  <span className="block text-sm font-medium text-fg-default">
                     {quiz.title}
                   </span>
-                  <span className="mt-0.5 block text-xs text-slate-500 dark:text-neutral-400">
+                  <span className="mt-0.5 block text-xs text-fg-muted">
                     {moduleLabel}
                   </span>
                 </span>

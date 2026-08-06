@@ -147,11 +147,6 @@ func parseOutcomesReportFilters(r *http.Request) (sectionID, groupID *uuid.UUID,
 // handleCourseOutcomesAnalyticsGet is GET /api/v1/courses/{course_code}/analytics/outcomes.
 func (d Deps) handleCourseOutcomesAnalyticsGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.guardOutcomesReport(w) {
 			return
 		}
@@ -232,11 +227,6 @@ type outcomesReportSettingsBody struct {
 // handleCourseOutcomesAnalyticsSettingsPut is PUT /api/v1/courses/{course_code}/analytics/outcomes/settings.
 func (d Deps) handleCourseOutcomesAnalyticsSettingsPut() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPut {
-			w.Header().Set("Allow", http.MethodPut)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.guardOutcomesReport(w) {
 			return
 		}
@@ -285,11 +275,6 @@ type outcomeImprovementNoteBody struct {
 // handleCourseOutcomeImprovementNotePut is PUT /api/v1/courses/{course_code}/outcomes/{outcome_id}/notes.
 func (d Deps) handleCourseOutcomeImprovementNotePut() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPut {
-			w.Header().Set("Allow", http.MethodPut)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.guardOutcomesReport(w) {
 			return
 		}
@@ -349,11 +334,6 @@ func (d Deps) handleCourseOutcomeImprovementNotePut() http.HandlerFunc {
 // handleCourseOutcomesAnalyticsRefreshPost is POST /api/v1/courses/{course_code}/analytics/outcomes/refresh.
 func (d Deps) handleCourseOutcomesAnalyticsRefreshPost() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.guardOutcomesReport(w) {
 			return
 		}

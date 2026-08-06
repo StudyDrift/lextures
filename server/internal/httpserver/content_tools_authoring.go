@@ -104,10 +104,6 @@ func (d Deps) maybeReconcileContentToolMarkdownBodies(
 
 func (d Deps) handleContentToolsInstanceDuplicate() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, viewer, courseID, ok := d.requireContentToolsCourse(w, r)
 		if !ok {
 			return
@@ -192,10 +188,6 @@ func (d Deps) handleContentToolsInstanceDuplicate() http.HandlerFunc {
 
 func (d Deps) handleContentToolsInstanceUsage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, viewer, courseID, ok := d.requireContentToolsCourse(w, r)
 		if !ok {
 			return

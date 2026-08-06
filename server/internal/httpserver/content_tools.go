@@ -208,10 +208,6 @@ func (d Deps) enrichInstanceMarketplace(ctx context.Context, courseCode string, 
 
 func (d Deps) handleContentToolsCatalog() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, _, courseID, ok := d.requireContentToolsCourse(w, r)
 		if !ok {
 			return
@@ -278,10 +274,6 @@ func (d Deps) handleContentToolsCatalog() http.HandlerFunc {
 
 func (d Deps) handleContentToolsManifestGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, _, _, ok := d.requireContentToolsCourse(w, r)
 		if !ok {
 			return
@@ -337,10 +329,6 @@ func (d Deps) handleContentToolsManifestGet() http.HandlerFunc {
 
 func (d Deps) handleContentToolsSettingsGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		// CT.M9 FR-1/FR-5: any course member may read settings + governance snapshot
 		// (allowlist, studentResetAllowed, org policy, kill state). Writes stay editor-only.
 		courseCode, _, courseID, ok := d.requireContentToolsCourse(w, r)
@@ -402,10 +390,6 @@ func (d Deps) enrichContentToolsSettingsGovernance(r *http.Request, courseCode s
 
 func (d Deps) handleContentToolsSettingsPut() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, viewer, courseID, ok := d.requireContentToolsCourse(w, r)
 		if !ok {
 			return

@@ -232,7 +232,7 @@ in code blocks or tables.
 ## 13. Dependencies & Sequencing
 
 - **Must ship after** — [UX.1](UX.1-semantic-design-token-system.md) (breakpoint
-  tokens), [UX.2](UX.2-core-component-library-and-adoption-ratchet.md) (components
+  tokens), [UX.2](../../completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md) (components
   own responsiveness), [UX.3](UX.3-typography-and-reading-system.md) (`clamp()`
   scale), [UX.5](UX.5-wcag-2.2-aa-conformance-uplift.md) (target size),
   [UX.11](UX.11-data-table-and-gradebook-system.md) (tables are the single largest
@@ -338,7 +338,7 @@ in code blocks or tables.
 - External: [WCAG 2.2 SC 1.4.10 Reflow](https://www.w3.org/TR/WCAG22/#reflow),
   [SC 1.3.4 Orientation](https://www.w3.org/TR/WCAG22/#orientation),
   [SC 2.5.8 Target Size](https://www.w3.org/TR/WCAG22/#target-size-minimum)
-- Related plans: [UX.2](UX.2-core-component-library-and-adoption-ratchet.md),
+- Related plans: [UX.2](../../completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md),
   [UX.5](UX.5-wcag-2.2-aa-conformance-uplift.md),
   [UX.11](UX.11-data-table-and-gradebook-system.md),
   [UX.17](UX.17-perceived-performance-and-web-vitals-budget.md),

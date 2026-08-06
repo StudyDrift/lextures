@@ -43,11 +43,6 @@ func normalizeLocaleInput(raw string) (string, error) {
 
 func (d Deps) handleGetSettingsLocale() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -71,11 +66,6 @@ func (d Deps) handleGetSettingsLocale() http.HandlerFunc {
 
 func (d Deps) handlePutSettingsLocale() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPut {
-			w.Header().Set("Allow", http.MethodPut)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return

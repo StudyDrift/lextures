@@ -144,15 +144,6 @@ func (d Deps) guardScormAccess(w http.ResponseWriter, r *http.Request, courseCod
 // handleCreateModuleScorm is POST .../structure/modules/{module_id}/scorm (multipart .zip upload).
 func (d Deps) handleCreateModuleScorm() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.meUserID(w, r); !ok {
 			return
 		}
@@ -388,13 +379,6 @@ type scormCommitBody struct {
 // handlePostScormRTECommit is POST /api/v1/scorm/rte/{registration_id}/commit.
 func (d Deps) handlePostScormRTECommit() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.Header().Set("Access-Control-Allow-Origin", "*")
-			w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
-			w.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type")
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		if !d.guardScormFeature(w) {
 			return
 		}
@@ -459,10 +443,6 @@ func (d Deps) handlePostScormRTECommit() http.HandlerFunc {
 // handleGetScormRender serves sandboxed HTML with SCORM 1.2 API shim.
 func (d Deps) handleGetScormRender() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		if !d.guardScormFeature(w) {
 			return
 		}

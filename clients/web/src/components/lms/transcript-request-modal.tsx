@@ -131,7 +131,7 @@ export function TranscriptRequestModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/40 p-4 sm:items-center dark:bg-neutral-950/80"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/40 p-4 sm:items-center/80"
       role="dialog"
       aria-modal="true"
       aria-labelledby="transcript-request-title"
@@ -139,16 +139,16 @@ export function TranscriptRequestModal({
         if (e.target === e.currentTarget && !submitting) onClose()
       }}
     >
-      <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-950">
-        <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 dark:border-neutral-800">
-          <h3 id="transcript-request-title" className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+      <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-base">
+        <div className="flex items-center justify-between border-b border-border-subtle px-4 py-3 dark:border-border-subtle">
+          <h3 id="transcript-request-title" className="text-sm font-semibold text-fg-default">
             Request transcript
           </h3>
           <button
             type="button"
             onClick={() => !submitting && onClose()}
             disabled={submitting}
-            className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-800"
+            className="rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken disabled:opacity-50 dark:text-fg-muted dark:hover:bg-surface-overlay"
             aria-label="Close"
           >
             <X className="h-5 w-5" aria-hidden />
@@ -157,13 +157,13 @@ export function TranscriptRequestModal({
 
         <form onSubmit={handleSubmit} className="space-y-4 p-4">
           {formError && (
-            <p role="alert" className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
+            <p role="alert" className="rounded-md bg-red-50 px-3 py-2 text-sm text-danger-fg dark:bg-red-950 dark:text-red-300">
               {formError}
             </p>
           )}
 
           <div>
-            <label htmlFor={deliveryTypeId} className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+            <label htmlFor={deliveryTypeId} className="block text-sm font-medium text-fg-muted">
               Delivery method
             </label>
             <select
@@ -171,7 +171,7 @@ export function TranscriptRequestModal({
               value={deliveryType}
               onChange={(e) => handleDeliveryTypeChange(e.target.value as TranscriptDeliveryType)}
               disabled={submitting}
-              className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-50"
+              className="mt-1 block w-full rounded-md border border-border-strong bg-surface-raised px-3 py-2 text-sm text-fg-default focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-border-default dark:bg-surface-raised"
             >
               {deliveryOptions.map((option) => (
                 <option key={option} value={option}>
@@ -183,7 +183,7 @@ export function TranscriptRequestModal({
 
           {deliveryType === 'email' && (
             <div>
-              <label htmlFor={emailId} className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+              <label htmlFor={emailId} className="block text-sm font-medium text-fg-muted">
                 Email address
               </label>
               <input
@@ -195,14 +195,14 @@ export function TranscriptRequestModal({
                 onChange={(e) => setDeliveryEmail(e.target.value)}
                 disabled={submitting}
                 placeholder="you@example.com"
-                className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-50"
+                className="mt-1 block w-full rounded-md border border-border-strong bg-surface-raised px-3 py-2 text-sm text-fg-default focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-border-default dark:bg-surface-raised"
               />
             </div>
           )}
 
           {deliveryType === 'mail' && (
             <div>
-              <label htmlFor={addressId} className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+              <label htmlFor={addressId} className="block text-sm font-medium text-fg-muted">
                 Mailing address
               </label>
               <textarea
@@ -213,14 +213,14 @@ export function TranscriptRequestModal({
                 onChange={(e) => setDeliveryAddress(e.target.value)}
                 disabled={submitting}
                 placeholder={'Full name\nStreet address\nCity, State ZIP\nCountry'}
-                className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-50"
+                className="mt-1 block w-full rounded-md border border-border-strong bg-surface-raised px-3 py-2 text-sm text-fg-default focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-border-default dark:bg-surface-raised"
               />
             </div>
           )}
 
           {deliveryType === 'pickup' && config?.pickupInstructions && (
-            <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-700 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300">
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+            <div className="rounded-md border border-border-default bg-surface-base px-3 py-3 text-sm text-fg-muted dark:border-border-default dark:bg-surface-raised dark:text-fg-muted">
+              <p className="text-xs font-medium uppercase tracking-wide text-fg-muted">
                 Pickup instructions
               </p>
               <p className="mt-2 whitespace-pre-wrap">{config.pickupInstructions}</p>
@@ -229,7 +229,7 @@ export function TranscriptRequestModal({
 
           {showUrgency && (
             <div>
-              <label htmlFor={urgencyId} className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+              <label htmlFor={urgencyId} className="block text-sm font-medium text-fg-muted">
                 Urgency
               </label>
               {deliveryType === 'mail' ? (
@@ -238,7 +238,7 @@ export function TranscriptRequestModal({
                   value={mailUrgency}
                   onChange={(e) => setMailUrgency(e.target.value as MailUrgency)}
                   disabled={submitting}
-                  className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-50"
+                  className="mt-1 block w-full rounded-md border border-border-strong bg-surface-raised px-3 py-2 text-sm text-fg-default focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-border-default dark:bg-surface-raised"
                 >
                   {MAIL_URGENCY_OPTIONS.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -252,7 +252,7 @@ export function TranscriptRequestModal({
                   value={pickupUrgencyDays}
                   onChange={(e) => setPickupUrgencyDays(Number(e.target.value))}
                   disabled={submitting}
-                  className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-50"
+                  className="mt-1 block w-full rounded-md border border-border-strong bg-surface-raised px-3 py-2 text-sm text-fg-default focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-border-default dark:bg-surface-raised"
                 >
                   {PICKUP_URGENCY_OPTIONS.map((option) => (
                     <option key={option.days} value={option.days}>
@@ -261,23 +261,23 @@ export function TranscriptRequestModal({
                   ))}
                 </select>
               )}
-              <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">{urgencyHint}</p>
+              <p className="mt-1 text-xs text-fg-muted">{urgencyHint}</p>
             </div>
           )}
 
-          <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-4 dark:border-neutral-800">
+          <div className="flex items-center justify-end gap-2 border-t border-border-subtle pt-4 dark:border-border-subtle">
             <button
               type="button"
               onClick={() => !submitting && onClose()}
               disabled={submitting}
-              className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-50 dark:text-neutral-300 dark:hover:bg-neutral-800"
+              className="rounded-xl px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-sunken disabled:opacity-50 dark:text-fg-muted dark:hover:bg-surface-overlay"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50"
+              className="rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50"
             >
               {submitting ? 'Submitting…' : 'Submit request'}
             </button>

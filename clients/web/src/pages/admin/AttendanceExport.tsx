@@ -129,12 +129,12 @@ export default function AttendanceExport() {
         )}
 
         {error && (
-          <div role="alert" className="text-red-600 text-sm">
+          <div role="alert" className="text-danger-fg text-sm">
             {error}
           </div>
         )}
         {success && (
-          <div role="status" className="text-green-700 text-sm font-medium">
+          <div role="status" className="text-success-fg text-sm font-medium">
             Export downloaded successfully.
           </div>
         )}

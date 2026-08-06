@@ -54,15 +54,15 @@ export function ReviewForm({
       aria-labelledby={titleId}
       className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/60 p-4 sm:items-center"
     >
-      <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-xl dark:border-neutral-700 dark:bg-neutral-900">
+      <div className="w-full max-w-lg rounded-2xl border border-border-default bg-surface-raised p-6 shadow-xl dark:border-border-default dark:bg-surface-raised">
         <div className="mb-4 flex items-start justify-between gap-3">
-          <h2 id={titleId} className="text-lg font-semibold text-slate-900 dark:text-neutral-100">
+          <h2 id={titleId} className="text-lg font-semibold text-fg-default">
             {thanks ? 'Thanks for your review!' : 'Write a review'}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1 text-slate-500 hover:bg-slate-100 dark:hover:bg-neutral-800"
+            className="rounded-lg p-1 text-fg-muted hover:bg-surface-sunken dark:hover:bg-surface-overlay"
             aria-label="Close"
           >
             <X className="h-5 w-5" aria-hidden="true" />
@@ -70,24 +70,20 @@ export function ReviewForm({
         </div>
 
         {thanks ? (
-          <p className="text-sm text-slate-600 dark:text-neutral-300">
+          <p className="text-sm text-fg-muted">
             Your feedback helps other learners choose the right course.
           </p>
         ) : (
           <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
             <fieldset>
-              <legend className="mb-2 text-sm font-medium text-slate-700 dark:text-neutral-200">
+              <legend className="mb-2 text-sm font-medium text-fg-default">
                 Your rating
               </legend>
               <div role="radiogroup" aria-label="Course rating" className="flex flex-wrap gap-2">
                 {[1, 2, 3, 4, 5].map((value) => (
                   <label
                     key={value}
-                    className={`flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-xl border px-3 py-2 text-sm font-medium transition-[background-color,color,border-color] ${
-                      rating === value
-                        ? 'border-amber-500 bg-amber-50 text-amber-800 dark:border-amber-400 dark:bg-amber-950 dark:text-amber-200'
-                        : 'border-slate-200 text-slate-600 hover:border-slate-300 dark:border-neutral-700 dark:text-neutral-300'
-                    }`}
+                    className={`flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-xl border px-3 py-2 text-sm font-medium transition-[background-color,color,border-color] ${ rating === value ? 'border-amber-500 bg-amber-50 text-amber-800 dark:border-amber-400 dark:bg-amber-950 dark:text-amber-200' : 'border-border-default text-fg-muted hover:border-border-strong dark:text-fg-muted' }`}
                   >
                     <input
                       type="radio"
@@ -111,7 +107,7 @@ export function ReviewForm({
             <div>
               <label
                 htmlFor="review-text"
-                className="mb-1 block text-sm font-medium text-slate-700 dark:text-neutral-200"
+                className="mb-1 block text-sm font-medium text-fg-default"
               >
                 Review (optional)
               </label>
@@ -122,13 +118,13 @@ export function ReviewForm({
                 maxLength={2000}
                 rows={4}
                 aria-describedby={error ? errorId : undefined}
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                className="w-full rounded-xl border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
                 placeholder="What did you like or dislike?"
               />
             </div>
 
             {error ? (
-              <p id={errorId} role="alert" className="text-sm text-red-600 dark:text-red-400">
+              <p id={errorId} role="alert" className="text-sm text-danger-fg">
                 {error}
               </p>
             ) : null}
@@ -137,14 +133,14 @@ export function ReviewForm({
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-lg px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                className="rounded-lg px-4 py-2 text-sm text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={submitting}
-                className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+                className="rounded-lg bg-accent-solid px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
               >
                 {submitting ? 'Submitting…' : 'Submit review'}
               </button>

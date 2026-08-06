@@ -1,0 +1,8 @@
+{
+  "name": "@lextures/tokens",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Lextures design tokens (W3C Design Tokens Format Module) — UX.1",
+  "main": "tokens.json",
+  "files": ["tokens.json", "README.md"]
+}

@@ -677,9 +677,9 @@ export default function Dashboard() {
           skeleton={<DashboardLoadingSkeleton />}
         >
       {catalog && catalog.length === 0 && (
-        <div className="mt-10 rounded-2xl border border-slate-200 bg-slate-50/80 px-6 py-8 text-center dark:border-neutral-700 dark:bg-neutral-900/50">
-          <p className="text-sm font-medium text-slate-800 dark:text-neutral-100">{t('dashboard.empty.noCourses')}</p>
-          <p className="mt-2 text-xs text-slate-500 dark:text-neutral-400">
+        <div className="mt-10 rounded-2xl border border-border-default bg-slate-50/80 px-6 py-8 text-center dark:border-border-default/50">
+          <p className="text-sm font-medium text-fg-default">{t('dashboard.empty.noCourses')}</p>
+          <p className="mt-2 text-xs text-fg-muted">
             {showCourseCreateActions
               ? t('dashboard.empty.joinOrCreate')
               : t('dashboard.empty.joinOnly')}
@@ -687,7 +687,7 @@ export default function Dashboard() {
           <div className="mt-5 flex flex-wrap justify-center gap-3">
             <Link
               to="/courses"
-              className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500"
+              className="inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500"
             >
               {t('dashboard.empty.browseCourses')}
               <ArrowRight className="h-4 w-4" aria-hidden />
@@ -703,19 +703,19 @@ export default function Dashboard() {
             <div className="flex flex-wrap gap-3">
               <Link
                 to="/inbox"
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-neutral-600 dark:hover:bg-neutral-800"
+                className="inline-flex items-center gap-2 rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm font-medium text-fg-default shadow-sm transition-[background-color,color,border-color] hover:border-border-strong hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:border-border-default dark:hover:bg-surface-overlay"
               >
                 <Inbox className="h-4 w-4 text-indigo-500" aria-hidden />
                 {t('dashboard.quickLinks.inbox')}
                 {inboxUnread > 0 ? (
-                  <span className="rounded-full bg-indigo-600 px-2 py-0.5 text-xs font-semibold text-white">
+                  <span className="rounded-full bg-accent-solid px-2 py-0.5 text-xs font-semibold text-white">
                     {inboxUnread > 99 ? '99+' : inboxUnread}
                   </span>
                 ) : null}
               </Link>
               <Link
                 to="/courses"
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-neutral-600 dark:hover:bg-neutral-800"
+                className="inline-flex items-center gap-2 rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm font-medium text-fg-default shadow-sm transition-[background-color,color,border-color] hover:border-border-strong hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:border-border-default dark:hover:bg-surface-overlay"
               >
                 <BookOpen className="h-4 w-4 text-indigo-500" aria-hidden />
                 {t('dashboard.quickLinks.allCourses')}
@@ -723,7 +723,7 @@ export default function Dashboard() {
               {ffEportfolio ? (
                 <Link
                   to="/portfolios"
-                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-neutral-600 dark:hover:bg-neutral-800"
+                  className="inline-flex items-center gap-2 rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm font-medium text-fg-default shadow-sm transition-[background-color,color,border-color] hover:border-border-strong hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:border-border-default dark:hover:bg-surface-overlay"
                 >
                   <FolderOpen className="h-4 w-4 text-indigo-500" aria-hidden />
                   {t('dashboard.quickLinks.myPortfolio')}
@@ -732,7 +732,7 @@ export default function Dashboard() {
               {ffAdvisingIntegration ? (
                 <Link
                   to="/advising-notes"
-                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-neutral-600 dark:hover:bg-neutral-800"
+                  className="inline-flex items-center gap-2 rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm font-medium text-fg-default shadow-sm transition-[background-color,color,border-color] hover:border-border-strong hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:border-border-default dark:hover:bg-surface-overlay"
                 >
                   <GraduationCap className="h-4 w-4 text-indigo-500" aria-hidden />
                   {t('dashboard.quickLinks.advisingNotes')}
@@ -744,7 +744,7 @@ export default function Dashboard() {
                   {t('dashboard.quickLinks.feedUnread', { count: totalFeedUnread })}
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-2 rounded-xl border border-slate-100 bg-slate-50 px-4 py-2.5 text-xs text-slate-500 dark:border-neutral-800 dark:bg-neutral-900/40 dark:text-neutral-500">
+                <span className="inline-flex items-center gap-2 rounded-xl border border-border-subtle bg-surface-base px-4 py-2.5 text-xs text-fg-muted dark:border-border-subtle/40">
                   <MessageCircle className="h-4 w-4" aria-hidden />
                   {t('dashboard.quickLinks.feedUnreadHint')}
                 </span>
@@ -764,7 +764,7 @@ export default function Dashboard() {
           {whatsNext && anyStudentExperience && (
             <StaggerReveal index={2} enabled={ffMotionReveal} as="section">
               <div aria-label={t('dashboard.whatsNext.ariaLabel')}>
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-fg-muted">
                 {t('dashboard.whatsNext.title')}
               </h2>
               {whatsNext.primary ? (
@@ -783,10 +783,10 @@ export default function Dashboard() {
                       {surfaceLabel(whatsNext.primary.surface)}
                     </span>
                   </div>
-                  <p className="mt-2 text-lg font-semibold tracking-tight text-slate-900 dark:text-neutral-50">
+                  <p className="mt-2 text-lg font-semibold tracking-tight text-fg-default">
                     {whatsNext.primary.title}
                   </p>
-                  <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">{whatsNext.primary.reason}</p>
+                  <p className="mt-1 text-xs text-fg-muted">{whatsNext.primary.reason}</p>
                   {whatsNext.primary.profileRationale ? (
                     <ProfileRationaleChip
                       rationale={whatsNext.primary.profileRationale}
@@ -831,7 +831,7 @@ export default function Dashboard() {
                               rank: idx + 1,
                             }).catch(() => {})
                           }}
-                          className="inline-flex items-center gap-1 rounded-lg border border-violet-200 bg-white px-2.5 py-1 text-xs font-medium text-violet-900 shadow-sm hover:bg-violet-50 dark:border-violet-800 dark:bg-neutral-900 dark:text-violet-100 dark:hover:bg-violet-950/40"
+                          className="inline-flex items-center gap-1 rounded-lg border border-violet-200 bg-surface-raised px-2.5 py-1 text-xs font-medium text-violet-900 shadow-sm hover:bg-violet-50 dark:border-violet-800 dark:bg-surface-raised dark:text-violet-100 dark:hover:bg-violet-950/40"
                         >
                           <span className="text-violet-600 dark:text-violet-300">{surfaceLabel(c.surface)}</span>
                           <span className="max-w-[10rem] truncate">{c.title}</span>
@@ -841,7 +841,7 @@ export default function Dashboard() {
                   ) : null}
                 </article>
               ) : (
-                <p className="mt-3 rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-4 text-sm text-slate-700 dark:border-neutral-700 dark:bg-neutral-900/50 dark:text-neutral-200">
+                <p className="mt-3 rounded-2xl border border-border-default bg-slate-50/80 px-4 py-4 text-sm text-fg-muted dark:border-border-default/50 dark:text-fg-default">
                   {t('dashboard.whatsNext.caughtUp', { courseTitle: whatsNext.course.title })}
                 </p>
               )}
@@ -873,10 +873,10 @@ export default function Dashboard() {
             <section aria-label={t('dashboard.continuingEducation.ariaLabel')}>
               <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-teal-100 bg-teal-50/80 px-5 py-4 dark:border-teal-900/40 dark:bg-teal-950/30">
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+                  <p className="text-sm font-semibold text-fg-default">
                     {t('dashboard.continuingEducation.title')}
                   </p>
-                  <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">
+                  <p className="mt-1 text-xs text-fg-muted">
                     {t('dashboard.continuingEducation.description')}
                   </p>
                 </div>
@@ -895,10 +895,10 @@ export default function Dashboard() {
             <section aria-label={t('dashboard.achievements.ariaLabel')}>
               <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-violet-100 bg-violet-50/80 px-5 py-4 dark:border-violet-900/40 dark:bg-violet-950/30">
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+                  <p className="text-sm font-semibold text-fg-default">
                     {t('dashboard.achievements.title')}
                   </p>
-                  <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">
+                  <p className="mt-1 text-xs text-fg-muted">
                     {t('dashboard.achievements.description')}
                   </p>
                 </div>
@@ -917,10 +917,10 @@ export default function Dashboard() {
             <section aria-label={t('dashboard.credentials.ariaLabel')}>
               <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-emerald-100 bg-emerald-50/80 px-5 py-4 dark:border-emerald-900/40 dark:bg-emerald-950/30">
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+                  <p className="text-sm font-semibold text-fg-default">
                     {t('dashboard.credentials.title')}
                   </p>
-                  <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">
+                  <p className="mt-1 text-xs text-fg-muted">
                     {t('dashboard.credentials.description')}
                   </p>
                 </div>
@@ -941,10 +941,10 @@ export default function Dashboard() {
             <section aria-label={t('dashboard.review.ariaLabel')}>
               <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-amber-100 bg-amber-50/80 px-5 py-4 dark:border-amber-900/40 dark:bg-amber-950/30">
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+                  <p className="text-sm font-semibold text-fg-default">
                     {t('dashboard.review.title')}
                   </p>
-                  <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">
+                  <p className="mt-1 text-xs text-fg-muted">
                     {reviewStats.dueToday > 0
                       ? t('dashboard.review.dueToday', { count: reviewStats.dueToday })
                       : t('dashboard.review.noneDue')}
@@ -971,17 +971,17 @@ export default function Dashboard() {
 
           {ffAcademicCalendar && upcomingCalendarEvents.length > 0 && (
             <section aria-label={t('dashboard.upcomingDates.ariaLabel')}>
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-fg-muted">
                 {t('dashboard.upcomingDates.title')}
               </h2>
               <ul className="mt-4 space-y-2">
                 {upcomingCalendarEvents.map((ev) => (
                   <li
                     key={ev.id}
-                    className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm shadow-sm dark:border-neutral-700 dark:bg-neutral-900"
+                    className="flex items-center justify-between rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-sm shadow-sm dark:border-border-default dark:bg-surface-raised"
                   >
-                    <span className="font-medium text-slate-900 dark:text-neutral-100">{ev.eventName}</span>
-                    <span className="text-slate-500 dark:text-neutral-400">
+                    <span className="font-medium text-fg-default">{ev.eventName}</span>
+                    <span className="text-fg-muted">
                       <time dateTime={ev.startDate}>{ev.startDate}</time>
                       {ev.endDate && ev.endDate !== ev.startDate && (
                         <> – <time dateTime={ev.endDate}>{ev.endDate}</time></>
@@ -996,12 +996,12 @@ export default function Dashboard() {
           {ffCatalogIntegration && schedule.length > 0 && (
             <section aria-label={t('dashboard.schedule.ariaLabel')}>
               <div className="flex items-center justify-between">
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-fg-muted">
                   {t('dashboard.schedule.title')}
                 </h2>
                 <Link
                   to="/catalog"
-                  className="text-xs font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+                  className="text-xs font-medium text-accent-fg hover:underline dark:text-indigo-400"
                 >
                   {t('dashboard.schedule.browseCatalog')}
                 </Link>
@@ -1029,24 +1029,24 @@ export default function Dashboard() {
                     <li key={sec.id}>
                       <Link
                         to={href}
-                        className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-indigo-800 sm:flex-row sm:items-center sm:justify-between"
+                        className="flex flex-col gap-2 rounded-xl border border-border-default bg-surface-raised px-4 py-3 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 dark:border-border-default dark:bg-surface-raised dark:hover:border-indigo-800 sm:flex-row sm:items-center sm:justify-between"
                       >
                         <div className="min-w-0">
-                          <p className="text-xs font-medium text-slate-500 dark:text-neutral-400">
+                          <p className="text-xs font-medium text-fg-muted">
                             {sec.subject} {sec.courseNumber}
                             {sec.sectionNumber ? ` · ${sec.sectionNumber}` : ''}
                             {sec.crn ? t('dashboard.schedule.crn', { crn: sec.crn }) : ''}
                           </p>
-                          <p className="truncate font-semibold text-slate-900 dark:text-neutral-100">
+                          <p className="truncate font-semibold text-fg-default">
                             {entry.courseTitle ?? sec.title}
                           </p>
-                          <p className="mt-0.5 flex items-center gap-1 text-xs text-slate-500 dark:text-neutral-400">
+                          <p className="mt-0.5 flex items-center gap-1 text-xs text-fg-muted">
                             <CalendarDays className="h-3.5 w-3.5 shrink-0" aria-hidden />
                             {meeting}
                             {sec.room ? ` · ${sec.room}` : ''}
                           </p>
                         </div>
-                        <span className="inline-flex shrink-0 items-center rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-200">
+                        <span className="inline-flex shrink-0 items-center rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-accent-fg dark:bg-indigo-950/50 dark:text-indigo-200">
                           {regLabel}
                         </span>
                       </Link>
@@ -1061,20 +1061,20 @@ export default function Dashboard() {
 
           {continueTarget && (
             <section aria-label={t('dashboard.continue.ariaLabel')}>
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-fg-muted">
                 {t('dashboard.continue.title')}
               </h2>
               <div className="mt-3 rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50/90 to-white p-5 shadow-sm dark:border-indigo-900/40 dark:from-indigo-950/40 dark:to-neutral-900">
-                <p className="text-xs font-medium text-indigo-700 dark:text-indigo-200">
+                <p className="text-xs font-medium text-accent-fg dark:text-indigo-200">
                   {courses?.find((c) => c.courseCode === continueTarget.courseCode)?.title ??
                     continueTarget.courseCode}
                 </p>
-                <p className="mt-1 text-lg font-semibold tracking-tight text-slate-900 dark:text-neutral-50">
+                <p className="mt-1 text-lg font-semibold tracking-tight text-fg-default">
                   {continueTarget.title}
                 </p>
                 <Link
                   to={hrefForLastVisited(continueTarget.courseCode, continueTarget.kind, continueTarget.itemId)}
-                  className="mt-4 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500"
+                  className="mt-4 inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500"
                 >
                   {t('dashboard.continue.button')}
                   <ArrowRight className="h-4 w-4" aria-hidden />
@@ -1087,12 +1087,12 @@ export default function Dashboard() {
             <StaggerReveal index={4} enabled={ffMotionReveal} as="section">
             <div aria-label={t('dashboard.learning.ariaLabel')}>
               <div className="flex items-center justify-between">
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-fg-muted">
                   {t('dashboard.learning.title')}
                 </h2>
                 <button
                   onClick={() => toggleSection('student-overview')}
-                  className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
+                  className="rounded-md p-1 text-fg-subtle hover:bg-surface-sunken hover:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-fg-muted"
                   aria-label={
                     collapsedSections['student-overview']
                       ? t('dashboard.learning.expandAria')
@@ -1109,23 +1109,23 @@ export default function Dashboard() {
 
               {!collapsedSections['student-overview'] && (
                 <>
-                  <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
+                  <div className="mt-4 rounded-2xl border border-border-default bg-surface-raised p-5 shadow-sm dark:border-border-default dark:bg-surface-raised">
                     <div className="flex flex-wrap items-end justify-between gap-3">
                       <div>
-                        <p className="text-base font-semibold text-slate-900 dark:text-neutral-100">
+                        <p className="text-base font-semibold text-fg-default">
                           {t('dashboard.learning.dueThisWeek')}
                         </p>
-                        <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+                        <p className="mt-1 text-xs text-fg-muted">
                           {formatDate(weekStart, { dateStyle: 'medium' })} –{' '}
                           {formatDate(weekEnd, { dateStyle: 'medium' })}
                         </p>
                       </div>
                       <div className="min-w-[140px] flex-1 max-w-xs">
-                        <div className="flex justify-between text-[0.65rem] font-medium uppercase tracking-wide text-slate-400 dark:text-neutral-500">
+                        <div className="flex justify-between text-[0.65rem] font-medium uppercase tracking-wide text-fg-subtle">
                           <span>{t('dashboard.learning.weekLabel')}</span>
                           <span>{Math.round(weekFrac * 100)}%</span>
                         </div>
-                        <div className="mt-1 h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-neutral-800">
+                        <div className="mt-1 h-2 overflow-hidden rounded-full bg-surface-sunken">
                           <div
                             className="h-full rounded-full bg-indigo-500 motion-safe:transition-[width]"
                             style={{ width: `${Math.round(weekFrac * 100)}%` }}
@@ -1153,19 +1153,19 @@ export default function Dashboard() {
                             <li key={`${row.course.courseCode}-${it.id}`}>
                               <Link
                                 to={href}
-                                className="flex flex-col gap-1 rounded-xl border border-slate-100 px-3 py-3 transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50/40 dark:border-neutral-800 dark:hover:border-indigo-900/50 dark:hover:bg-indigo-950/20 sm:flex-row sm:items-center sm:justify-between"
+                                className="flex flex-col gap-1 rounded-xl border border-border-subtle px-3 py-3 transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50/40 dark:border-border-subtle dark:hover:border-indigo-900/50 dark:hover:bg-indigo-950/20 sm:flex-row sm:items-center sm:justify-between"
                               >
                                 <div className="min-w-0">
-                                  <p className="text-xs font-medium text-slate-500 dark:text-neutral-400">
+                                  <p className="text-xs font-medium text-fg-muted">
                                     {row.course.title}
                                     {courseSectionSubtitle(row.course, t)
                                       ? ` · ${courseSectionSubtitle(row.course, t)}`
                                       : ''}
                                   </p>
-                                  <p className="truncate text-sm font-semibold text-slate-900 dark:text-neutral-100">
+                                  <p className="truncate text-sm font-semibold text-fg-default">
                                     {it.title}
                                   </p>
-                                  <p className="mt-0.5 flex items-center gap-1 text-xs text-slate-500 dark:text-neutral-400">
+                                  <p className="mt-0.5 flex items-center gap-1 text-xs text-fg-muted">
                                     <CalendarDays className="h-3.5 w-3.5 shrink-0" aria-hidden />
                                     <DeadlineDateTime
                                       iso={it.dueAt!}
@@ -1175,10 +1175,10 @@ export default function Dashboard() {
                                 </div>
                                 {g ? (
                                   <div className="flex shrink-0 flex-col items-start gap-1 sm:items-end">
-                                    <span className="text-xs font-medium text-slate-600 dark:text-neutral-300">
+                                    <span className="text-xs font-medium text-fg-muted">
                                       {g.label}
                                     </span>
-                                    <div className="h-1.5 w-full min-w-[96px] overflow-hidden rounded-full bg-slate-100 dark:bg-neutral-800 sm:w-28">
+                                    <div className="h-1.5 w-full min-w-[96px] overflow-hidden rounded-full bg-surface-sunken sm:w-28">
                                       <div
                                         className="h-full rounded-full bg-emerald-500"
                                         style={{ width: `${Math.round(g.pct)}%` }}
@@ -1186,7 +1186,7 @@ export default function Dashboard() {
                                     </div>
                                   </div>
                                 ) : (
-                                  <span className="text-xs text-slate-400 dark:text-neutral-500">—</span>
+                                  <span className="text-xs text-fg-subtle">—</span>
                                 )}
                               </Link>
                             </li>
@@ -1194,10 +1194,10 @@ export default function Dashboard() {
                         })}
                     </ul>
                     {studentRows.every((r) => dueThisWeekItems(r.structure, weekStart, weekEnd).length === 0) && (
-                      <p className="mt-2 text-sm text-slate-500 dark:text-neutral-400">
+                      <p className="mt-2 text-sm text-fg-muted">
                         {t('dashboard.learning.nothingDue')}{' '}
                         <Link
-                          className="font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+                          className="font-medium text-accent-fg hover:underline dark:text-indigo-400"
                           to="/calendar"
                         >
                           {t('dashboard.learning.openCalendar')}
@@ -1236,12 +1236,12 @@ export default function Dashboard() {
                       return (
                         <div
                           key={row.course.courseCode}
-                          className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-900"
+                          className="rounded-2xl border border-border-default bg-surface-raised p-5 shadow-sm dark:border-border-default dark:bg-surface-raised"
                         >
                           <div className="flex flex-wrap items-center gap-2">
                             <Link
                               to={base}
-                              className="text-base font-semibold text-slate-900 hover:text-indigo-600 dark:text-neutral-100 dark:hover:text-indigo-300"
+                              className="text-base font-semibold text-fg-default hover:text-accent-fg dark:text-fg-default dark:hover:text-indigo-300"
                             >
                               {row.course.title}
                             </Link>
@@ -1255,34 +1255,34 @@ export default function Dashboard() {
                             ) : null}
                           </div>
                           {courseSectionSubtitle(row.course, t) ? (
-                            <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
+                            <p className="mt-0.5 text-xs text-fg-muted">
                               {courseSectionSubtitle(row.course, t)}
                             </p>
                           ) : null}
-                          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-neutral-500">
+                          <p className="mt-3 text-xs font-medium uppercase tracking-wide text-fg-subtle">
                             {t('dashboard.learning.courseGrade')}
                           </p>
-                          <p className="mt-1 text-2xl font-semibold tracking-tight text-slate-900 dark:text-neutral-50">
+                          <p className="mt-1 text-2xl font-semibold tracking-tight text-fg-default">
                             {row.myGrades ? formatFinalPercent(finalPct) : '—'}
                           </p>
                           <div className="mt-4 flex flex-wrap gap-2">
                             <Link
                               to={`${base}/modules`}
-                              className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                              className="inline-flex items-center gap-1 rounded-lg border border-border-default px-3 py-1.5 text-xs font-medium text-fg-muted transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
                             >
                               <ClipboardList className="h-3.5 w-3.5" aria-hidden />
                               {t('dashboard.learning.modules')}
                             </Link>
                             <Link
                               to={`${base}/feed`}
-                              className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                              className="inline-flex items-center gap-1 rounded-lg border border-border-default px-3 py-1.5 text-xs font-medium text-fg-muted transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
                             >
                               <MessageCircle className="h-3.5 w-3.5" aria-hidden />
                               {t('dashboard.learning.feed')}
                             </Link>
                             <Link
                               to={`${base}/my-grades`}
-                              className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                              className="inline-flex items-center gap-1 rounded-lg border border-border-default px-3 py-1.5 text-xs font-medium text-fg-muted transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
                             >
                               <Sparkles className="h-3.5 w-3.5" aria-hidden />
                               {t('dashboard.learning.grades')}
@@ -1295,20 +1295,20 @@ export default function Dashboard() {
 
                   {announcements.length > 0 && (
                     <div className="mt-8">
-                      <h3 className="text-sm font-semibold text-slate-800 dark:text-neutral-100">
+                      <h3 className="text-sm font-semibold text-fg-default">
                         {t('dashboard.learning.announcementsTitle')}
                       </h3>
                       <ul className="mt-3 space-y-3">
                         {announcements.map((a) => (
                           <li
                             key={`${a.courseCode}-${a.createdAt}`}
-                            className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-900"
+                            className="rounded-2xl border border-border-default bg-surface-raised p-4 shadow-sm dark:border-border-default dark:bg-surface-raised"
                           >
                             <div className="flex flex-wrap items-center gap-2">
                               <Megaphone className="h-4 w-4 text-amber-500" aria-hidden />
                               <Link
                                 to={`/courses/${encodeURIComponent(a.courseCode)}/feed`}
-                                className="text-sm font-semibold text-slate-900 hover:text-indigo-600 dark:text-neutral-100 dark:hover:text-indigo-300"
+                                className="text-sm font-semibold text-fg-default hover:text-accent-fg dark:text-fg-default dark:hover:text-indigo-300"
                               >
                                 {a.courseTitle}
                               </Link>
@@ -1318,14 +1318,14 @@ export default function Dashboard() {
                                 </span>
                               ) : null}
                             </div>
-                            <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+                            <p className="mt-1 text-xs text-fg-muted">
                               {a.channelName} · {a.author} ·{' '}
                               {formatDateTime(a.createdAt, {
                                 dateStyle: 'medium',
                                 timeStyle: 'short',
                               })}
                             </p>
-                            <p className="mt-2 text-sm leading-relaxed text-slate-700 dark:text-neutral-200">
+                            <p className="mt-2 text-sm leading-relaxed text-fg-default">
                               {a.snippet}
                             </p>
                           </li>
@@ -1343,12 +1343,12 @@ export default function Dashboard() {
             <StaggerReveal index={5} enabled={ffMotionReveal} as="section">
             <div aria-label={t('dashboard.teaching.ariaLabel')}>
               <div className="flex items-center justify-between">
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-fg-muted">
                   {t('dashboard.teaching.title')}
                 </h2>
                 <button
                   onClick={() => toggleSection('teaching-overview')}
-                  className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
+                  className="rounded-md p-1 text-fg-subtle hover:bg-surface-sunken hover:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-fg-muted"
                   aria-label={
                     collapsedSections['teaching-overview']
                       ? t('dashboard.teaching.expandAria')
@@ -1367,10 +1367,10 @@ export default function Dashboard() {
                 <>
                   {allGradingBacklog.length > 0 ? (
                     <div className="mt-4 rounded-2xl border border-amber-100 bg-amber-50/50 p-5 shadow-sm dark:border-amber-900/40 dark:bg-amber-950/20">
-                      <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+                      <h3 className="text-sm font-semibold text-fg-default">
                         {t('dashboard.teaching.needsGrading')}
                       </h3>
-                      <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">
+                      <p className="mt-1 text-xs text-fg-muted">
                         {t('dashboard.teaching.needsGradingHint')}
                       </p>
                       <div className="mt-3">
@@ -1384,22 +1384,22 @@ export default function Dashboard() {
                     return (
                       <div
                         key={row.course.courseCode}
-                        className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-900"
+                        className="rounded-2xl border border-border-default bg-surface-raised p-5 shadow-sm dark:border-border-default dark:bg-surface-raised"
                       >
                         <Link
                           to={base}
-                          className="text-base font-semibold text-slate-900 hover:text-indigo-600 dark:text-neutral-100 dark:hover:text-indigo-300"
+                          className="text-base font-semibold text-fg-default hover:text-accent-fg dark:text-fg-default dark:hover:text-indigo-300"
                         >
                           {row.course.title}
                         </Link>
                         {courseSectionSubtitle(row.course, t) ? (
-                          <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
+                          <p className="mt-0.5 text-xs text-fg-muted">
                             {courseSectionSubtitle(row.course, t)}
                           </p>
                         ) : null}
                         {row.gradingBacklog.length > 0 ? (
                           <div className="mt-4">
-                            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
                               {t('dashboard.teaching.ungradedSubmissions')}
                             </p>
                             <div className="mt-2">
@@ -1407,22 +1407,22 @@ export default function Dashboard() {
                             </div>
                           </div>
                         ) : (
-                          <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">
+                          <p className="mt-4 text-sm text-fg-muted">
                             {t('dashboard.teaching.noUngraded')}
                           </p>
                         )}
                         <dl className="mt-4 space-y-3 text-sm">
                           <div className="flex justify-between gap-3">
-                            <dt className="text-slate-500 dark:text-neutral-400">
+                            <dt className="text-fg-muted">
                               {t('dashboard.teaching.gradebookGaps')}
                             </dt>
-                            <dd className="font-semibold text-slate-900 dark:text-neutral-100">
+                            <dd className="font-semibold text-fg-default">
                               {row.emptyGradeCells == null ? (
-                                <span className="text-slate-400">{t('dashboard.teaching.noAccess')}</span>
+                                <span className="text-fg-subtle">{t('dashboard.teaching.noAccess')}</span>
                               ) : (
                                 <>
                                   {row.emptyGradeCells}{' '}
-                                  <span className="font-normal text-slate-500 dark:text-neutral-400">
+                                  <span className="font-normal text-fg-muted">
                                     {t('dashboard.teaching.emptyCells')}
                                   </span>
                                 </>
@@ -1433,13 +1433,13 @@ export default function Dashboard() {
                         <div className="mt-4 flex flex-wrap gap-2">
                           <Link
                             to={`${base}/gradebook`}
-                            className="inline-flex items-center gap-1 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500"
+                            className="inline-flex items-center gap-1 rounded-lg bg-accent-solid px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500"
                           >
                             {t('dashboard.teaching.openGradebook')}
                           </Link>
                           <Link
                             to={`${base}/modules`}
-                            className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                            className="inline-flex items-center gap-1 rounded-lg border border-border-default px-3 py-1.5 text-xs font-medium text-fg-muted transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
                           >
                             {t('dashboard.teaching.modules')}
                           </Link>
@@ -1455,7 +1455,7 @@ export default function Dashboard() {
           )}
 
           {!anyStudentExperience && !anyStaffExperience && hasCourses && (
-            <p className="text-sm text-slate-500 dark:text-neutral-400">
+            <p className="text-sm text-fg-muted">
               {t('dashboard.noEnrollments')}
             </p>
           )}
@@ -1466,7 +1466,7 @@ export default function Dashboard() {
                 type="button"
                 onClick={loadMoreCourses}
                 disabled={loadingMoreCourses}
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-neutral-600 dark:hover:bg-neutral-800"
+                className="inline-flex items-center gap-2 rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm font-medium text-fg-default shadow-sm transition-[background-color,color,border-color] hover:border-border-strong hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-60 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:border-border-default dark:hover:bg-surface-overlay"
               >
                 {loadingMoreCourses
                   ? t('dashboard.loadMore.loading')

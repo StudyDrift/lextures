@@ -526,7 +526,7 @@ export function SubmissionGradingPanel({
 
   if (!submissionId && !studentUserId) {
     return (
-      <div className="flex h-full items-center justify-center p-6 text-center text-sm text-slate-600 dark:text-neutral-400">
+      <div className="flex h-full items-center justify-center p-6 text-center text-sm text-fg-muted">
         Select a student to grade.
       </div>
     )
@@ -546,16 +546,16 @@ export function SubmissionGradingPanel({
       }}
     >
       <div className="flex-1 space-y-4 overflow-y-auto p-5">
-        <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-neutral-600 dark:bg-neutral-900/60">
+        <div className="rounded-xl border border-border-default bg-surface-raised p-4 dark:border-border-default/60">
           <div className="flex items-end justify-between gap-3">
             <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+              <p className="text-xs font-medium uppercase tracking-wide text-fg-muted">
                 Current score
               </p>
-              <p className="mt-1 text-3xl font-semibold tabular-nums text-slate-900 dark:text-neutral-50">
+              <p className="mt-1 text-3xl font-semibold tabular-nums text-fg-default">
                 {displayScore}
                 {maxPoints != null ? (
-                  <span className="ms-1 text-lg font-normal text-slate-500 dark:text-neutral-400">
+                  <span className="ms-1 text-lg font-normal text-fg-muted">
                     / {maxPoints}
                   </span>
                 ) : null}
@@ -585,11 +585,11 @@ export function SubmissionGradingPanel({
         </div>
 
         {mode === 'student' && posted && gradedByAi ? (
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm dark:border-neutral-600 dark:bg-neutral-900/40">
-            <p className="text-slate-700 dark:text-neutral-200">{t('gradingAgent.student.disclosure')}</p>
+          <div className="rounded-xl border border-border-default bg-surface-base p-4 text-sm dark:border-border-default/40">
+            <p className="text-fg-default">{t('gradingAgent.student.disclosure')}</p>
             <button
               type="button"
-              className="mt-2 text-sm font-semibold text-indigo-700 hover:underline dark:text-indigo-300"
+              className="mt-2 text-sm font-semibold text-accent-fg hover:underline dark:text-indigo-300"
               onClick={() => void postGraderAgentRegradeRequest(courseCode, itemId)}
             >
               {t('gradingAgent.student.regradeRequest')}
@@ -598,7 +598,7 @@ export function SubmissionGradingPanel({
         ) : null}
 
         {loading ? (
-          <p className="text-sm text-slate-500 dark:text-neutral-400" role="status">
+          <p className="text-sm text-fg-muted" role="status">
             Loading grade…
           </p>
         ) : null}
@@ -611,7 +611,7 @@ export function SubmissionGradingPanel({
         {hasRubric && rubric ? (
           <>
             <div
-              className="inline-flex w-full rounded-xl border border-slate-200 bg-slate-100 p-1 dark:border-neutral-600 dark:bg-neutral-900"
+              className="inline-flex w-full rounded-xl border border-border-default bg-surface-sunken p-1 dark:border-border-default dark:bg-surface-raised"
               role="tablist"
               aria-label="Grading method"
             >
@@ -621,11 +621,7 @@ export function SubmissionGradingPanel({
                 aria-selected={gradeMode === 'rubric'}
                 disabled={formDisabled}
                 onClick={() => setGradeMode('rubric')}
-                className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition-[background-color,color,border-color] disabled:opacity-50 ${
-                  gradeMode === 'rubric'
-                    ? 'bg-white text-indigo-700 shadow-sm dark:bg-neutral-800 dark:text-indigo-300'
-                    : 'text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-neutral-100'
-                }`}
+                className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition-[background-color,color,border-color] disabled:opacity-50 ${ gradeMode === 'rubric' ? 'bg-surface-raised text-accent-fg shadow-sm dark:bg-surface-overlay dark:text-indigo-300' : 'text-fg-muted hover:text-fg-default dark:text-fg-muted dark:hover:text-fg-default' }`}
               >
                 Rubric
               </button>
@@ -635,11 +631,7 @@ export function SubmissionGradingPanel({
                 aria-selected={gradeMode === 'points'}
                 disabled={formDisabled}
                 onClick={() => setGradeMode('points')}
-                className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition-[background-color,color,border-color] disabled:opacity-50 ${
-                  gradeMode === 'points'
-                    ? 'bg-white text-indigo-700 shadow-sm dark:bg-neutral-800 dark:text-indigo-300'
-                    : 'text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-neutral-100'
-                }`}
+                className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition-[background-color,color,border-color] disabled:opacity-50 ${ gradeMode === 'points' ? 'bg-surface-raised text-accent-fg shadow-sm dark:bg-surface-overlay dark:text-indigo-300' : 'text-fg-muted hover:text-fg-default dark:text-fg-muted dark:hover:text-fg-default' }`}
               >
                 Points
               </button>
@@ -654,8 +646,8 @@ export function SubmissionGradingPanel({
                 compact
               />
             ) : (
-              <label className="block text-sm text-slate-700 dark:text-neutral-200">
-                <span className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-neutral-400">
+              <label className="block text-sm text-fg-default">
+                <span className="mb-1.5 block text-xs font-medium text-fg-muted">
                   Override score{maxPoints != null ? ` (out of ${maxPoints})` : ''}
                 </span>
                 <input
@@ -665,20 +657,20 @@ export function SubmissionGradingPanel({
                   min={0}
                   max={maxPoints ?? undefined}
                   step="any"
-                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm tabular-nums dark:border-neutral-600 dark:bg-neutral-950"
+                  className="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2.5 text-sm tabular-nums dark:border-border-default dark:bg-surface-base"
                   value={pointsInput}
                   onChange={(e) => setPointsInput(e.target.value)}
                   disabled={formDisabled}
                 />
-                <p className="mt-1.5 text-xs text-slate-500 dark:text-neutral-400">
+                <p className="mt-1.5 text-xs text-fg-muted">
                   Use this when you want to enter a score without following the rubric.
                 </p>
               </label>
             )}
           </>
         ) : (
-          <label className="block text-sm text-slate-700 dark:text-neutral-200">
-            <span className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-neutral-400">
+          <label className="block text-sm text-fg-default">
+            <span className="mb-1.5 block text-xs font-medium text-fg-muted">
               Score{maxPoints != null ? ` (out of ${maxPoints})` : ''}
             </span>
             <input
@@ -688,7 +680,7 @@ export function SubmissionGradingPanel({
               min={0}
               max={maxPoints ?? undefined}
               step="any"
-              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm tabular-nums dark:border-neutral-600 dark:bg-neutral-950"
+              className="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2.5 text-sm tabular-nums dark:border-border-default dark:bg-surface-base"
               value={pointsInput}
               onChange={(e) => setPointsInput(e.target.value)}
               disabled={formDisabled}
@@ -696,9 +688,9 @@ export function SubmissionGradingPanel({
           </label>
         )}
 
-        <div className="space-y-3 text-sm text-slate-700 dark:text-neutral-200">
+        <div className="space-y-3 text-sm text-fg-default">
           <div>
-            <span className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-neutral-400">
+            <span className="mb-1.5 block text-xs font-medium text-fg-muted">
               Feedback conversation
             </span>
             <SubmissionCommentThread
@@ -713,18 +705,18 @@ export function SubmissionGradingPanel({
           </div>
           {mode === 'staff' ? (
             <label className="block">
-              <span className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-neutral-400">
+              <span className="mb-1.5 block text-xs font-medium text-fg-muted">
                 Add comment
               </span>
               <textarea
-                className="min-h-24 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm leading-relaxed dark:border-neutral-600 dark:bg-neutral-950"
+                className="min-h-24 w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2.5 text-sm leading-relaxed dark:border-border-default dark:bg-surface-base"
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 disabled={formDisabled}
                 placeholder="Write feedback to add to the conversation…"
                 rows={4}
               />
-              <p className="mt-1.5 text-xs text-slate-500 dark:text-neutral-400">
+              <p className="mt-1.5 text-xs text-fg-muted">
                 Your comment is added to the thread when you save the grade.
               </p>
             </label>
@@ -732,7 +724,7 @@ export function SubmissionGradingPanel({
         </div>
       </div>
 
-      <div className="shrink-0 space-y-2 border-t border-slate-200 bg-slate-50 p-4 dark:border-neutral-600 dark:bg-neutral-900/80">
+      <div className="shrink-0 space-y-2 border-t border-border-default bg-surface-base p-4 dark:border-border-default/80">
         {saveError ? (
           <p className="text-sm text-rose-700 dark:text-rose-300" role="alert">
             {saveError}
@@ -752,7 +744,7 @@ export function SubmissionGradingPanel({
               type="button"
               disabled={formDisabled}
               onClick={() => void handleClearGrade()}
-              className="flex-1 rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold text-rose-600 hover:bg-rose-50 dark:border-neutral-700 dark:bg-neutral-950 dark:text-rose-400 dark:hover:bg-rose-950/30 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex-1 rounded-xl border border-border-strong bg-surface-raised px-3 py-2.5 text-sm font-semibold text-rose-600 hover:bg-rose-50 dark:border-border-default dark:bg-surface-base dark:text-rose-400 dark:hover:bg-rose-950/30 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Mark ungraded
             </button>
@@ -762,7 +754,7 @@ export function SubmissionGradingPanel({
             disabled={formDisabled}
             onClick={() => void handleSave()}
             title={`Save grade (${altKeyHint()}+Enter)`}
-            className={`${hasGrade ? 'flex-1' : 'w-full'} rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50`}
+            className={`${hasGrade ? 'flex-1' : 'w-full'} rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50`}
           >
             {saving ? 'Saving…' : 'Save grade'}
           </button>

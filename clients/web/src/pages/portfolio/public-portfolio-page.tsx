@@ -65,21 +65,21 @@ export default function PublicPortfolioPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50/50 text-slate-900 dark:bg-neutral-950 dark:text-neutral-100">
+    <div className="min-h-screen bg-slate-50/50 text-fg-default dark:bg-surface-base dark:text-fg-default">
       <a
         href="#portfolio-artifacts"
         className="sr-only focus:not-sr-only focus:absolute focus:start-2 focus:top-2 focus:z-10 focus:rounded focus:bg-primary focus:px-3 focus:py-1.5 focus:text-sm focus:text-primary-foreground"
       >
         Skip to artifacts
       </a>
-      <header className="border-b border-slate-100 bg-white dark:border-neutral-800 dark:bg-neutral-900/50">
+      <header className="border-b border-border-subtle bg-surface-raised dark:border-border-subtle/50">
         <div className="mx-auto max-w-3xl px-4 py-12">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-neutral-50">{portfolio.title}</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-fg-default">{portfolio.title}</h1>
           {portfolio.ownerName && (
             <p className="mt-2 text-sm font-semibold text-indigo-650 dark:text-indigo-400">{portfolio.ownerName}</p>
           )}
           {portfolio.introText && (
-            <p className="mt-5 max-w-2xl text-base leading-relaxed text-slate-600 dark:text-neutral-350">{portfolio.introText}</p>
+            <p className="mt-5 max-w-2xl text-base leading-relaxed text-fg-muted dark:text-neutral-350">{portfolio.introText}</p>
           )}
         </div>
       </header>
@@ -97,7 +97,7 @@ export default function PublicPortfolioPage() {
               isPortfolioHeading(a) ? (
                 <h2
                   key={a.id}
-                  className="border-t border-slate-200/80 pt-6 text-xl font-bold tracking-tight text-slate-950 first:border-t-0 first:pt-0 dark:border-neutral-800 dark:text-neutral-100"
+                  className="border-t border-slate-200/80 pt-6 text-xl font-bold tracking-tight text-slate-950 first:border-t-0 first:pt-0 dark:border-border-subtle dark:text-fg-default"
                 >
                   {a.title}
                 </h2>
@@ -105,11 +105,11 @@ export default function PublicPortfolioPage() {
               <article
                 key={a.id}
                 role="article"
-                className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition-[transform,box-shadow,background-color,color,border-color] hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-neutral-700"
+                className="rounded-2xl border border-slate-200/80 bg-surface-raised p-5 shadow-sm transition-[transform,box-shadow,background-color,color,border-color] hover:-translate-y-0.5 hover:border-border-strong hover:shadow-md dark:border-border-subtle dark:bg-surface-raised dark:hover:border-border-default"
               >
                 <div className="flex min-w-0 items-center gap-3">
                   <span
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-indigo-200/80 bg-indigo-50 text-indigo-600 dark:border-indigo-500/35 dark:bg-indigo-950/60 dark:text-indigo-300"
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-indigo-200/80 bg-indigo-50 text-accent-fg dark:border-indigo-500/35 dark:bg-indigo-950/60 dark:text-indigo-300"
                     aria-hidden
                   >
                     <FileText className="h-4 w-4" strokeWidth={2} />
@@ -117,28 +117,28 @@ export default function PublicPortfolioPage() {
                   <h2 className="min-w-0 flex-1 text-base font-semibold leading-snug">
                     <Link
                       to={publicPortfolioContentPageHref(slug, a.id)}
-                      className="text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+                      className="text-accent-fg hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
                     >
                       {a.title}
                     </Link>
                   </h2>
                 </div>
                 {a.description ? (
-                  <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">{a.description}</p>
+                  <p className="mt-2 text-sm text-fg-muted">{a.description}</p>
                 ) : null}
               </article>
               ) : (
               <article
                 key={a.id}
                 role="article"
-                className="flex flex-col rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition-[transform,box-shadow,background-color,color,border-color] hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-neutral-700"
+                className="flex flex-col rounded-2xl border border-slate-200/80 bg-surface-raised p-5 shadow-sm transition-[transform,box-shadow,background-color,color,border-color] hover:-translate-y-0.5 hover:border-border-strong hover:shadow-md dark:border-border-subtle dark:bg-surface-raised dark:hover:border-border-default"
               >
-                <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900 dark:text-neutral-100">
+                <h2 className="flex items-center gap-2 text-base font-semibold text-fg-default">
                   <FileText className="h-4 w-4 text-indigo-500" aria-hidden />
                   {a.title}
                 </h2>
                 {a.description && (
-                  <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">{a.description}</p>
+                  <p className="mt-2 text-sm text-fg-muted">{a.description}</p>
                 )}
                 {a.artifactType === 'url' && a.externalUrl && (
                   <div className="mt-4 flex-1">
@@ -146,14 +146,14 @@ export default function PublicPortfolioPage() {
                       href={a.externalUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 hover:text-indigo-505 dark:text-indigo-400 dark:hover:text-indigo-300"
+                      className="inline-flex items-center gap-1 text-sm font-semibold text-accent-fg hover:text-indigo-505 dark:text-indigo-400 dark:hover:text-indigo-300"
                     >
                       <ExternalLink className="h-3.5 w-3.5" aria-hidden /> View resource
                     </a>
                   </div>
                 )}
                 {a.fileName && (
-                  <div className="mt-3 rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs text-slate-500 dark:bg-neutral-950 dark:text-neutral-400">
+                  <div className="mt-3 rounded-lg bg-surface-base px-2.5 py-1.5 text-xs text-fg-muted dark:bg-surface-base dark:text-fg-muted">
                     Attachment: <span className="font-medium">{a.fileName}</span>
                   </div>
                 )}
@@ -162,7 +162,7 @@ export default function PublicPortfolioPage() {
                     {a.outcomeIds.map((oid) => (
                       <li
                         key={oid}
-                        className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600 dark:bg-neutral-800 dark:text-neutral-400"
+                        className="rounded-full bg-surface-sunken px-2.5 py-0.5 text-xs font-semibold text-fg-muted dark:bg-surface-overlay dark:text-fg-muted"
                       >
                         Outcome
                       </li>
@@ -176,8 +176,8 @@ export default function PublicPortfolioPage() {
         )}
       </main>
 
-      <footer className="border-t border-slate-150 bg-slate-50/50 dark:border-neutral-800 dark:bg-neutral-950">
-        <div className="mx-auto max-w-3xl px-4 py-8 text-xs text-slate-500 dark:text-neutral-500">
+      <footer className="border-t border-slate-150 bg-slate-50/50 dark:border-border-subtle dark:bg-surface-base">
+        <div className="mx-auto max-w-3xl px-4 py-8 text-xs text-fg-subtle">
           <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
             <p>Conforms to WCAG 2.1 AA accessibility standards.</p>
             <p className="font-semibold">{portfolio.viewCount} view{portfolio.viewCount === 1 ? '' : 's'}</p>

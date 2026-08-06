@@ -17,36 +17,36 @@ export function EmbeddedBoard({ board, posts, sections, readOnly }: Props) {
 
   return (
     <div
-      className="max-h-96 overflow-auto bg-white p-3 dark:bg-neutral-950"
+      className="max-h-96 overflow-auto bg-surface-raised p-3 dark:bg-surface-base"
       role="region"
       aria-label={t('boards.embed.surfaceAria', { title: board.title })}
     >
       {visible.length === 0 ? (
-        <p className="text-sm text-slate-500 dark:text-neutral-400">{t('boards.detail.emptyPosts')}</p>
+        <p className="text-sm text-fg-muted">{t('boards.detail.emptyPosts')}</p>
       ) : (
         <ul className="space-y-2">
           {visible.slice(0, 40).map((p) => (
             <li
               key={p.id}
-              className="rounded-md border border-slate-200 px-3 py-2 dark:border-neutral-700"
+              className="rounded-md border border-border-default px-3 py-2 dark:border-border-default"
             >
               {p.sectionId && secMap.get(p.sectionId) ? (
-                <p className="text-xs font-medium uppercase tracking-wide text-indigo-600 dark:text-indigo-400">
+                <p className="text-xs font-medium uppercase tracking-wide text-accent-fg">
                   {secMap.get(p.sectionId)}
                 </p>
               ) : null}
-              <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+              <p className="text-sm font-semibold text-fg-default">
                 {p.title || t('boards.present.untitled')}
               </p>
               {p.body?.text ? (
-                <p className="mt-0.5 line-clamp-3 text-sm text-slate-600 dark:text-neutral-300">{p.body.text}</p>
+                <p className="mt-0.5 line-clamp-3 text-sm text-fg-muted">{p.body.text}</p>
               ) : null}
             </li>
           ))}
         </ul>
       )}
       {readOnly ? (
-        <p className="mt-2 text-xs text-slate-500 dark:text-neutral-400">{t('boards.embed.readonlyHint')}</p>
+        <p className="mt-2 text-xs text-fg-muted">{t('boards.embed.readonlyHint')}</p>
       ) : null}
     </div>
   )

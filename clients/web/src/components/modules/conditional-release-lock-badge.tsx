@@ -5,7 +5,7 @@ export function ConditionalReleaseLockBadge({ reason }: { reason?: LockReason | 
   if (!reason) {
     return (
       <span
-        className="inline-flex shrink-0 items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-800 dark:bg-neutral-800 dark:text-neutral-100"
+        className="inline-flex shrink-0 items-center gap-1 rounded-full bg-surface-sunken px-2 py-0.5 text-[11px] font-semibold text-fg-default dark:bg-surface-overlay dark:text-fg-default"
         aria-label="Locked"
       >
         <Lock className="h-3 w-3" strokeWidth={2} aria-hidden />
@@ -15,7 +15,7 @@ export function ConditionalReleaseLockBadge({ reason }: { reason?: LockReason | 
   }
   return (
     <span
-      className="inline-flex shrink-0 items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-800 dark:bg-neutral-800 dark:text-neutral-100"
+      className="inline-flex shrink-0 items-center gap-1 rounded-full bg-surface-sunken px-2 py-0.5 text-[11px] font-semibold text-fg-default dark:bg-surface-overlay dark:text-fg-default"
       aria-label={`Locked — ${reason.message}`}
       title={reason.message}
     >

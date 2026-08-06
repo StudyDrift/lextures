@@ -25,10 +25,6 @@ func (d Deps) registerAdaptiveContentServingRoutes(r chi.Router) {
 // handleAdaptiveContentOptoutGet is GET .../adaptive-content/optout (student).
 func (d Deps) handleAdaptiveContentOptoutGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -67,15 +63,6 @@ func (d Deps) handleAdaptiveContentOptoutGet() http.HandlerFunc {
 // handleAdaptiveContentOptoutPut is PUT .../adaptive-content/optout (student).
 func (d Deps) handleAdaptiveContentOptoutPut() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPut {
-			w.Header().Set("Allow", http.MethodPut+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -140,15 +127,6 @@ func (d Deps) handleAdaptiveContentOptoutPut() http.HandlerFunc {
 // handleAdaptiveContentViewedOriginal is POST .../units/{unit_id}/viewed-original (student).
 func (d Deps) handleAdaptiveContentViewedOriginal() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return

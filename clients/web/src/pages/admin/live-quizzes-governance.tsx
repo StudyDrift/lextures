@@ -121,18 +121,18 @@ export default function LiveQuizzesGovernancePage() {
 
   return (
     <main className="mx-auto max-w-4xl p-6">
-      <h1 id={titleId} className="text-xl font-bold text-slate-900 dark:text-neutral-100">
+      <h1 id={titleId} className="text-xl font-bold text-fg-default">
         {t('admin.liveQuiz.title')}
       </h1>
-      <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">{t('admin.liveQuiz.subtitle')}</p>
+      <p className="mt-1 text-sm text-fg-muted">{t('admin.liveQuiz.subtitle')}</p>
 
       {error ? (
-        <p className="mt-4 text-sm text-red-600 dark:text-red-400" role="alert">
+        <p className="mt-4 text-sm text-danger-fg" role="alert">
           {error}
         </p>
       ) : null}
       {saved ? (
-        <p className="mt-4 text-sm text-green-700 dark:text-green-400" role="status">
+        <p className="mt-4 text-sm text-success-fg" role="status">
           {t('admin.liveQuiz.saved')}
         </p>
       ) : null}
@@ -149,7 +149,7 @@ export default function LiveQuizzesGovernancePage() {
             </h2>
             {analytics.liveGamesNow >= (settings.maxConcurrentGames ?? Number.POSITIVE_INFINITY) &&
             settings.maxConcurrentGames != null ? (
-              <p className="mt-2 text-sm text-amber-700 dark:text-amber-400" role="status">
+              <p className="mt-2 text-sm text-warning-fg dark:text-amber-400" role="status">
                 {t('admin.liveQuiz.quotaBreach')}
               </p>
             ) : null}
@@ -170,11 +170,11 @@ export default function LiveQuizzesGovernancePage() {
               <Stat label={t('admin.liveQuiz.pendingReviews')} value={analytics.pendingReviewCount} />
             </dl>
             <table className="mt-4 w-full text-start text-sm">
-              <caption className="mb-2 text-start text-xs text-slate-500">
+              <caption className="mb-2 text-start text-xs text-fg-muted">
                 {t('admin.liveQuiz.gamesByMode')}
               </caption>
               <thead>
-                <tr className="border-b border-slate-200 text-slate-500 dark:border-neutral-700">
+                <tr className="border-b border-border-default text-fg-muted dark:border-border-default">
                   <th scope="col" className="py-1 font-medium">
                     {t('admin.liveQuiz.mode')}
                   </th>
@@ -186,13 +186,13 @@ export default function LiveQuizzesGovernancePage() {
               <tbody>
                 {Object.keys(analytics.gamesByMode).length === 0 ? (
                   <tr>
-                    <td colSpan={2} className="py-2 text-slate-500">
+                    <td colSpan={2} className="py-2 text-fg-muted">
                       {t('admin.liveQuiz.noData')}
                     </td>
                   </tr>
                 ) : (
                   Object.entries(analytics.gamesByMode).map(([mode, count]) => (
-                    <tr key={mode} className="border-b border-slate-100 dark:border-neutral-800">
+                    <tr key={mode} className="border-b border-border-subtle">
                       <td className="py-1">{mode}</td>
                       <td className="py-1">{count}</td>
                     </tr>
@@ -210,7 +210,7 @@ export default function LiveQuizzesGovernancePage() {
               <label className="block text-sm">
                 <span className="font-medium">{t('admin.liveQuiz.guestPolicy')}</span>
                 <select
-                  className="mt-1 block w-full max-w-xs rounded border border-slate-300 bg-white px-2 py-1 dark:border-neutral-600 dark:bg-neutral-900"
+                  className="mt-1 block w-full max-w-xs rounded border border-border-strong bg-surface-raised px-2 py-1 dark:border-border-default dark:bg-surface-raised"
                   value={settings.guestJoinPolicy}
                   disabled={saving}
                   onChange={(e) =>
@@ -227,7 +227,7 @@ export default function LiveQuizzesGovernancePage() {
                 <input
                   type="number"
                   min={1}
-                  className="mt-1 block w-40 rounded border border-slate-300 px-2 py-1 dark:border-neutral-600 dark:bg-neutral-900"
+                  className="mt-1 block w-40 rounded border border-border-strong px-2 py-1 dark:border-border-default dark:bg-surface-raised"
                   defaultValue={settings.maxPlayersPerGame}
                   disabled={saving}
                   onBlur={(e) => {
@@ -243,7 +243,7 @@ export default function LiveQuizzesGovernancePage() {
                 <input
                   type="number"
                   min={1}
-                  className="mt-1 block w-40 rounded border border-slate-300 px-2 py-1 dark:border-neutral-600 dark:bg-neutral-900"
+                  className="mt-1 block w-40 rounded border border-border-strong px-2 py-1 dark:border-border-default dark:bg-surface-raised"
                   defaultValue={settings.retentionDays}
                   disabled={saving}
                   onBlur={(e) => {
@@ -264,7 +264,7 @@ export default function LiveQuizzesGovernancePage() {
                 />
                 <span>
                   <span className="font-medium">{t('admin.liveQuiz.aiEnabled')}</span>
-                  <span className="mt-0.5 block text-slate-600 dark:text-neutral-400">
+                  <span className="mt-0.5 block text-fg-muted">
                     {t('admin.liveQuiz.aiEnabledHint')}
                   </span>
                 </span>
@@ -275,7 +275,7 @@ export default function LiveQuizzesGovernancePage() {
                   <input
                     type="text"
                     inputMode="numeric"
-                    className="mt-1 block w-40 rounded border border-slate-300 px-2 py-1 dark:border-neutral-600 dark:bg-neutral-900"
+                    className="mt-1 block w-40 rounded border border-border-strong px-2 py-1 dark:border-border-default dark:bg-surface-raised"
                     value={concurrentDraft}
                     disabled={saving}
                     placeholder={t('admin.liveQuiz.unlimited')}
@@ -287,7 +287,7 @@ export default function LiveQuizzesGovernancePage() {
                   <input
                     type="text"
                     inputMode="numeric"
-                    className="mt-1 block w-40 rounded border border-slate-300 px-2 py-1 dark:border-neutral-600 dark:bg-neutral-900"
+                    className="mt-1 block w-40 rounded border border-border-strong px-2 py-1 dark:border-border-default dark:bg-surface-raised"
                     value={kitsDraft}
                     disabled={saving}
                     placeholder={t('admin.liveQuiz.unlimited')}
@@ -311,17 +311,17 @@ export default function LiveQuizzesGovernancePage() {
               {t('admin.liveQuiz.reviewTitle')} ({pendingCount})
             </h2>
             {queue.length === 0 ? (
-              <p className="mt-2 text-sm text-slate-500">{t('admin.liveQuiz.emptyQueue')}</p>
+              <p className="mt-2 text-sm text-fg-muted">{t('admin.liveQuiz.emptyQueue')}</p>
             ) : (
               <ul className="mt-3 space-y-3">
                 {queue.map((item) => (
                   <li
                     key={item.id}
-                    className="rounded border border-slate-200 p-3 dark:border-neutral-700"
+                    className="rounded border border-border-default p-3 dark:border-border-default"
                   >
                     <div className="text-sm font-medium">
                       {item.kitTitle || item.kitId || item.id}{' '}
-                      <span className="font-normal text-slate-500">({item.kind})</span>
+                      <span className="font-normal text-fg-muted">({item.kind})</span>
                     </div>
                     <div className="mt-2 flex flex-wrap items-center gap-2">
                       <button
@@ -336,7 +336,7 @@ export default function LiveQuizzesGovernancePage() {
                       </button>
                       <input
                         type="text"
-                        className="min-w-[12rem] flex-1 rounded border border-slate-300 px-2 py-1 text-xs dark:border-neutral-600 dark:bg-neutral-900"
+                        className="min-w-[12rem] flex-1 rounded border border-border-strong px-2 py-1 text-xs dark:border-border-default dark:bg-surface-raised"
                         placeholder={t('admin.liveQuiz.rejectReason')}
                         value={rejectReasons[item.id] ?? ''}
                         onChange={(e) =>
@@ -369,11 +369,11 @@ export default function LiveQuizzesGovernancePage() {
               {t('admin.liveQuiz.liveGamesTitle')}
             </h2>
             {games.length === 0 ? (
-              <p className="mt-2 text-sm text-slate-500">{t('admin.liveQuiz.noLiveGames')}</p>
+              <p className="mt-2 text-sm text-fg-muted">{t('admin.liveQuiz.noLiveGames')}</p>
             ) : (
               <table className="mt-3 w-full text-start text-sm">
                 <thead>
-                  <tr className="border-b border-slate-200 text-slate-500 dark:border-neutral-700">
+                  <tr className="border-b border-border-default text-fg-muted dark:border-border-default">
                     <th scope="col" className="py-1 font-medium">
                       {t('admin.liveQuiz.course')}
                     </th>
@@ -390,7 +390,7 @@ export default function LiveQuizzesGovernancePage() {
                 </thead>
                 <tbody>
                   {games.map((g) => (
-                    <tr key={g.id} className="border-b border-slate-100 dark:border-neutral-800">
+                    <tr key={g.id} className="border-b border-border-subtle">
                       <td className="py-1">
                         {g.courseCode}
                         {g.joinCode ? ` · ${g.joinCode}` : ''}
@@ -400,7 +400,7 @@ export default function LiveQuizzesGovernancePage() {
                       <td className="py-1">
                         <button
                           type="button"
-                          className="rounded border border-slate-300 px-2 py-0.5 text-xs dark:border-neutral-600"
+                          className="rounded border border-border-strong px-2 py-0.5 text-xs dark:border-border-default"
                           onClick={() => void postAdminIQForceEnd(g.id).then(() => load())}
                         >
                           {t('admin.liveQuiz.forceEnd')}
@@ -413,7 +413,7 @@ export default function LiveQuizzesGovernancePage() {
             )}
             <button
               type="button"
-              className="mt-4 rounded border border-slate-300 px-3 py-1.5 text-sm dark:border-neutral-600"
+              className="mt-4 rounded border border-border-strong px-3 py-1.5 text-sm dark:border-border-default"
               onClick={() =>
                 void postAdminIQBulkArchiveKits(365, orgId).then((r) => {
                   setSaved(true)
@@ -436,8 +436,8 @@ export default function LiveQuizzesGovernancePage() {
 
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-md border border-slate-200 p-3 dark:border-neutral-700">
-      <dt className="text-xs text-slate-500">{label}</dt>
+    <div className="rounded-md border border-border-default p-3 dark:border-border-default">
+      <dt className="text-xs text-fg-muted">{label}</dt>
       <dd className="text-lg font-semibold">{value}</dd>
     </div>
   )

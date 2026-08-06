@@ -50,23 +50,23 @@ export function DailyGoalProgressCard() {
               r={radius}
               fill="none"
               stroke="currentColor"
-              className="text-indigo-600 dark:text-indigo-300"
+              className="text-accent-fg dark:text-indigo-300"
               strokeWidth="8"
               strokeDasharray={circumference}
               strokeDashoffset={offset}
               strokeLinecap="round"
             />
           </svg>
-          <span className="absolute inset-0 flex items-center justify-center text-sm font-semibold text-slate-900 dark:text-neutral-100">
+          <span className="absolute inset-0 flex items-center justify-center text-sm font-semibold text-fg-default">
             {pct}%
           </span>
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <Target className="h-5 w-5 text-indigo-600 dark:text-indigo-300" aria-hidden />
-            <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Daily study goal</p>
+            <Target className="h-5 w-5 text-accent-fg dark:text-indigo-300" aria-hidden />
+            <p className="text-sm font-semibold text-fg-default">Daily study goal</p>
           </div>
-          <p className="mt-1 text-sm text-slate-700 dark:text-neutral-300">
+          <p className="mt-1 text-sm text-fg-muted">
             {config.minutesStudiedToday} of {config.dailyGoalMinutes} minutes today
             {config.goalMetToday ? ' — goal met!' : ''}
           </p>

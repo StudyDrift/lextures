@@ -45,11 +45,6 @@ func (d Deps) requireInsightsInstructor(w http.ResponseWriter, r *http.Request) 
 // handleGetCourseInsights is GET /api/v1/courses/{course_code}/analytics/insights
 func (d Deps) handleGetCourseInsights() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, _, ok := d.requireInsightsInstructor(w, r)
 		if !ok {
 			return
@@ -73,11 +68,6 @@ func (d Deps) handleGetCourseInsights() http.HandlerFunc {
 // handleGetCrossSection is GET /api/v1/courses/{course_code}/analytics/cross-section
 func (d Deps) handleGetCrossSection() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, _, ok := d.requireInsightsInstructor(w, r)
 		if !ok {
 			return
@@ -106,11 +96,6 @@ type dismissSignalBody struct {
 // handleDismissInsightSignal is POST /api/v1/courses/{course_code}/analytics/insights/dismiss
 func (d Deps) handleDismissInsightSignal() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireInsightsInstructor(w, r)
 		if !ok {
 			return
@@ -140,11 +125,6 @@ func (d Deps) handleDismissInsightSignal() http.HandlerFunc {
 // handleRefreshInsights is POST /api/v1/courses/{course_code}/analytics/insights/refresh
 func (d Deps) handleRefreshInsights() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, _, ok := d.requireInsightsInstructor(w, r)
 		if !ok {
 			return

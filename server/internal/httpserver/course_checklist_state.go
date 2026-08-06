@@ -14,10 +14,6 @@ import (
 
 func (d Deps) handleCourseChecklistGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, _, ok := d.requireCourseChecklistAccess(w, r)
 		if !ok {
 			coursechecklist.ObserveAPIRequest("get", "4xx")
@@ -37,10 +33,6 @@ func (d Deps) handleCourseChecklistGet() http.HandlerFunc {
 
 func (d Deps) handleCourseChecklistSummary() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, _, ok := d.requireCourseChecklistAccess(w, r)
 		if !ok {
 			coursechecklist.ObserveAPIRequest("summary", "4xx")
@@ -59,10 +51,6 @@ func (d Deps) handleCourseChecklistSummary() http.HandlerFunc {
 
 func (d Deps) handleCourseChecklistRefresh() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, _, ok := d.requireCourseChecklistAccess(w, r)
 		if !ok {
 			coursechecklist.ObserveAPIRequest("refresh", "4xx")
@@ -87,10 +75,6 @@ func (d Deps) handleCourseChecklistRefresh() http.HandlerFunc {
 
 func (d Deps) handleCourseChecklistHistory() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, _, ok := d.requireCourseChecklistAccess(w, r)
 		if !ok {
 			coursechecklist.ObserveAPIRequest("history", "4xx")
@@ -109,10 +93,6 @@ func (d Deps) handleCourseChecklistHistory() http.HandlerFunc {
 
 func (d Deps) handleCourseChecklistDismiss() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, userID, ok := d.requireCourseChecklistAccess(w, r)
 		if !ok {
 			coursechecklist.ObserveAPIRequest("dismiss", "4xx")
@@ -147,10 +127,6 @@ func (d Deps) handleCourseChecklistDismiss() http.HandlerFunc {
 
 func (d Deps) handleCourseChecklistRestore() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, userID, ok := d.requireCourseChecklistAccess(w, r)
 		if !ok {
 			coursechecklist.ObserveAPIRequest("restore", "4xx")
@@ -176,10 +152,6 @@ func (d Deps) handleCourseChecklistRestore() http.HandlerFunc {
 
 func (d Deps) handleCourseChecklistRecheck() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, _, ok := d.requireCourseChecklistAccess(w, r)
 		if !ok {
 			coursechecklist.ObserveAPIRequest("recheck", "4xx")

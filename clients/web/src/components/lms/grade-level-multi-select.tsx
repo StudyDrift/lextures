@@ -72,19 +72,19 @@ export function GradeLevelMultiSelect({
         aria-controls={listboxId}
         aria-label={ariaLabel}
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left text-sm text-slate-900 shadow-sm outline-none ring-indigo-500/0 transition-[background-color,color,border-color,box-shadow] focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-50 dark:focus:border-indigo-500/60"
+        className="flex w-full items-center justify-between gap-2 rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-left text-sm text-fg-default shadow-sm outline-none ring-indigo-500/0 transition-[background-color,color,border-color,box-shadow] focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-border-default dark:bg-surface-base dark:focus:border-indigo-500/60"
       >
         <span
           className={
             value.length === 0
-              ? 'truncate text-slate-500 dark:text-neutral-400'
+              ? 'truncate text-fg-muted'
               : 'truncate'
           }
         >
           {summary}
         </span>
         <ChevronDown
-          className={`h-4 w-4 shrink-0 text-slate-400 transition-transform dark:text-neutral-500 ${open ? 'rotate-180' : ''}`}
+          className={`h-4 w-4 shrink-0 text-fg-subtle transition-transform ${open ? 'rotate-180' : ''}`}
           aria-hidden
         />
       </button>
@@ -95,10 +95,10 @@ export function GradeLevelMultiSelect({
           role="listbox"
           aria-multiselectable="true"
           aria-label={ariaLabel}
-          className="absolute z-30 mt-1.5 max-h-72 w-full overflow-auto rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10 dark:border-neutral-700 dark:bg-neutral-950 dark:shadow-black/40"
+          className="absolute z-30 mt-1.5 max-h-72 w-full overflow-auto rounded-xl border border-border-default bg-surface-raised py-1 shadow-lg shadow-slate-900/10 dark:border-border-default dark:bg-surface-base dark:shadow-black/40"
         >
-          <div className="sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-slate-100 bg-white px-3 py-2 dark:border-neutral-800 dark:bg-neutral-950">
-            <span className="text-xs font-medium text-slate-500 dark:text-neutral-400">
+          <div className="sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-border-subtle bg-surface-raised px-3 py-2 dark:border-border-subtle dark:bg-surface-base">
+            <span className="text-xs font-medium text-fg-muted">
               {value.length === 0
                 ? 'None selected'
                 : `${value.length} selected`}
@@ -107,7 +107,7 @@ export function GradeLevelMultiSelect({
               <button
                 type="button"
                 onClick={clearAll}
-                className="text-xs font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+                className="text-xs font-medium text-accent-fg hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
               >
                 Clear
               </button>
@@ -121,18 +121,10 @@ export function GradeLevelMultiSelect({
                   <button
                     type="button"
                     onClick={() => toggle(opt.value)}
-                    className={`flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm transition-colors hover:bg-slate-50 dark:hover:bg-neutral-900 ${
-                      checked
-                        ? 'bg-indigo-50/70 text-slate-900 dark:bg-indigo-950/40 dark:text-neutral-50'
-                        : 'text-slate-800 dark:text-neutral-100'
-                    }`}
+                    className={`flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm transition-colors hover:bg-surface-base dark:hover:bg-surface-raised ${ checked ? 'bg-indigo-50/70 text-fg-default dark:bg-indigo-950/40' : 'text-fg-default' }`}
                   >
                     <span
-                      className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
-                        checked
-                          ? 'border-indigo-600 bg-indigo-600 text-white dark:border-indigo-500 dark:bg-indigo-500'
-                          : 'border-slate-300 bg-white dark:border-neutral-600 dark:bg-neutral-900'
-                      }`}
+                      className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${ checked ? 'border-indigo-600 bg-accent-solid text-white dark:border-indigo-500 dark:bg-indigo-500' : 'border-border-strong bg-surface-raised dark:border-border-default dark:bg-surface-raised' }`}
                       aria-hidden
                     >
                       {checked ? <Check className="h-3 w-3" strokeWidth={3} /> : null}

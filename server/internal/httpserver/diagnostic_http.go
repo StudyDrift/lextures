@@ -33,11 +33,6 @@ func (d Deps) handleEnrollmentDiagnosticGet() http.HandlerFunc {
 		Attempt      *attemptPub `json:"attempt,omitempty"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		viewer, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -139,11 +134,6 @@ func (d Deps) handleEnrollmentDiagnosticStart() http.HandlerFunc {
 		FirstQuestion coursemodulequiz.AdaptiveQuizGeneratedQuestion `json:"firstQuestion"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -198,11 +188,6 @@ func (d Deps) handleEnrollmentDiagnosticStart() http.HandlerFunc {
 
 func (d Deps) handleEnrollmentDiagnosticBypass() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -245,11 +230,6 @@ func (d Deps) handleEnrollmentDiagnosticBypass() http.HandlerFunc {
 
 func (d Deps) handleDiagnosticAttemptRespond() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -317,11 +297,6 @@ func (d Deps) handleCourseDiagnosticResults() http.HandlerFunc {
 		Students []studentRow `json:"students"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -404,11 +379,6 @@ func (d Deps) handleCourseDiagnosticConfigGet() http.HandlerFunc {
 		Diagnostic *diagrepo.CourseDiagnosticRow `json:"diagnostic"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -463,11 +433,6 @@ func (d Deps) handleCourseDiagnosticConfigPut() http.HandlerFunc {
 		ThetaCutScores *json.RawMessage `json:"thetaCutScores,omitempty"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPut {
-			w.Header().Set("Allow", http.MethodPut)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return

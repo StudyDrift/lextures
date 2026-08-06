@@ -90,22 +90,22 @@ export function BadgeProfileSettingsPanel() {
 
   if (!loaded && !error) {
     return (
-      <section className="rounded-xl border border-slate-200 p-4 dark:border-neutral-700">
-        <h2 className="text-base font-semibold text-slate-900 dark:text-white">Public badge page</h2>
-        <p className="mt-1 text-sm text-slate-500">Loading…</p>
+      <section className="rounded-xl border border-border-default p-4 dark:border-border-default">
+        <h2 className="text-base font-semibold text-fg-default dark:text-white">Public badge page</h2>
+        <p className="mt-1 text-sm text-fg-muted">Loading…</p>
       </section>
     )
   }
 
   return (
-    <section className="rounded-xl border border-slate-200 p-4 dark:border-neutral-700">
-      <h2 className="text-base font-semibold text-slate-900 dark:text-white">Public badge page</h2>
-      <p className="mt-1 text-sm text-slate-600 dark:text-neutral-300">
+    <section className="rounded-xl border border-border-default p-4 dark:border-border-default">
+      <h2 className="text-base font-semibold text-fg-default dark:text-white">Public badge page</h2>
+      <p className="mt-1 text-sm text-fg-muted">
         Choose a handle for your shareable badge backpack URL. Pages are private by default.
       </p>
 
       {error ? (
-        <p role="alert" className="mt-3 text-sm text-red-700 dark:text-red-300">
+        <p role="alert" className="mt-3 text-sm text-danger-fg">
           {error}
         </p>
       ) : null}
@@ -116,25 +116,25 @@ export function BadgeProfileSettingsPanel() {
             Handle
           </label>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-slate-500">/badges/</span>
+            <span className="text-sm text-fg-muted">/badges/</span>
             <input
               id={handleId}
               value={handle}
               onChange={(e) => setHandle(e.target.value.toLowerCase())}
-              className="w-full max-w-xs rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+              className="w-full max-w-xs rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-raised"
               autoComplete="off"
               spellCheck={false}
             />
           </div>
           {availability ? (
-            <p className="mt-1 text-xs text-slate-500" aria-live="polite">
+            <p className="mt-1 text-xs text-fg-muted" aria-live="polite">
               {availability}
             </p>
           ) : null}
           {profile?.publicUrl ? (
-            <p className="mt-2 text-xs text-slate-500">
+            <p className="mt-2 text-xs text-fg-muted">
               Public URL:{' '}
-              <a href={profile.publicUrl} className="text-indigo-600 hover:underline dark:text-indigo-400">
+              <a href={profile.publicUrl} className="text-accent-fg hover:underline dark:text-indigo-400">
                 {profile.publicUrl}
               </a>
             </p>
@@ -173,7 +173,7 @@ export function BadgeProfileSettingsPanel() {
           type="button"
           onClick={() => void onSave()}
           disabled={saving}
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-60"
+          className="rounded-lg bg-accent-solid px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-60"
         >
           {saving ? 'Saving…' : 'Save badge page settings'}
         </button>

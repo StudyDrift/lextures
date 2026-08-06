@@ -266,14 +266,14 @@ export function MarkdownImageUploadModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="flex max-h-[min(40rem,calc(100vh-2rem))] w-full max-w-lg flex-col rounded-xl border border-slate-200 bg-white shadow-xl dark:border-neutral-600 dark:bg-neutral-900"
+        className="flex max-h-[min(40rem,calc(100vh-2rem))] w-full max-w-lg flex-col rounded-xl border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-raised"
       >
-        <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-5 py-4 dark:border-neutral-800">
+        <div className="flex items-start justify-between gap-3 border-b border-border-subtle px-5 py-4 dark:border-border-subtle">
           <div>
-            <h2 id={titleId} className="text-lg font-semibold text-slate-950 dark:text-neutral-100">
+            <h2 id={titleId} className="text-lg font-semibold text-slate-950 dark:text-fg-default">
               Insert file or image
             </h2>
-            <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+            <p className="mt-1 text-sm text-fg-muted">
               {canBrowse
                 ? 'Choose from course files or upload new ones, then click Insert.'
                 : 'Upload a file or image, then click Insert.'}
@@ -283,7 +283,7 @@ export function MarkdownImageUploadModal({
             type="button"
             onClick={handleClose}
             disabled={busy}
-            className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 disabled:opacity-50 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+            className="rounded p-1 text-fg-subtle hover:bg-surface-sunken hover:text-fg-muted disabled:opacity-50 dark:hover:bg-surface-overlay dark:hover:text-fg-default"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
@@ -298,18 +298,18 @@ export function MarkdownImageUploadModal({
                   type="button"
                   disabled={busy || listLoading}
                   onClick={() => void loadFolder(undefined)}
-                  className="rounded px-1.5 py-0.5 font-medium text-indigo-600 hover:bg-indigo-50 disabled:opacity-50 dark:text-indigo-300 dark:hover:bg-indigo-950/40"
+                  className="rounded px-1.5 py-0.5 font-medium text-accent-fg hover:bg-indigo-50 disabled:opacity-50 dark:text-indigo-300 dark:hover:bg-indigo-950/40"
                 >
                   Course files
                 </button>
                 {breadcrumbs.map((crumb) => (
                   <span key={crumb.id} className="flex items-center gap-1">
-                    <ChevronRight className="h-3 w-3 text-slate-400" aria-hidden />
+                    <ChevronRight className="h-3 w-3 text-fg-subtle" aria-hidden />
                     <button
                       type="button"
                       disabled={busy || listLoading}
                       onClick={() => void loadFolder(crumb.id)}
-                      className="rounded px-1.5 py-0.5 font-medium text-indigo-600 hover:bg-indigo-50 disabled:opacity-50 dark:text-indigo-300 dark:hover:bg-indigo-950/40"
+                      className="rounded px-1.5 py-0.5 font-medium text-accent-fg hover:bg-indigo-50 disabled:opacity-50 dark:text-indigo-300 dark:hover:bg-indigo-950/40"
                     >
                       {crumb.name}
                     </button>
@@ -321,16 +321,16 @@ export function MarkdownImageUploadModal({
                 role="listbox"
                 aria-label="Course files"
                 aria-multiselectable="true"
-                className="max-h-48 overflow-auto rounded-lg border border-slate-200 dark:border-neutral-700"
+                className="max-h-48 overflow-auto rounded-lg border border-border-default"
               >
                 {listLoading ? (
-                  <p className="px-3 py-4 text-sm text-slate-500 dark:text-neutral-400">Loading files…</p>
+                  <p className="px-3 py-4 text-sm text-fg-muted">Loading files…</p>
                 ) : listError ? (
                   <p className="px-3 py-4 text-sm text-rose-600 dark:text-rose-400" role="alert">
                     {listError}
                   </p>
                 ) : folders.length === 0 && files.length === 0 ? (
-                  <p className="px-3 py-4 text-sm text-slate-500 dark:text-neutral-400">
+                  <p className="px-3 py-4 text-sm text-fg-muted">
                     This folder is empty. Upload a file below.
                   </p>
                 ) : (
@@ -341,7 +341,7 @@ export function MarkdownImageUploadModal({
                           type="button"
                           disabled={busy}
                           onClick={() => void loadFolder(folder.id)}
-                          className="flex w-full items-center gap-2 px-3 py-2 text-start text-sm text-slate-800 hover:bg-slate-50 disabled:opacity-50 dark:text-neutral-100 dark:hover:bg-neutral-800"
+                          className="flex w-full items-center gap-2 px-3 py-2 text-start text-sm text-fg-default hover:bg-surface-base disabled:opacity-50 dark:text-fg-default dark:hover:bg-surface-overlay"
                         >
                           <Folder className="h-4 w-4 shrink-0 text-amber-500" aria-hidden />
                           <span className="truncate font-medium">{folder.name}</span>
@@ -359,17 +359,13 @@ export function MarkdownImageUploadModal({
                             aria-selected={selected}
                             disabled={busy}
                             onClick={() => toggleSelected(file.id)}
-                            className={`flex w-full items-center gap-2 px-3 py-2 text-start text-sm disabled:opacity-50 ${
-                              selected
-                                ? 'bg-indigo-50 text-indigo-950 dark:bg-indigo-950/40 dark:text-indigo-50'
-                                : 'text-slate-800 hover:bg-slate-50 dark:text-neutral-100 dark:hover:bg-neutral-800'
-                            }`}
+                            className={`flex w-full items-center gap-2 px-3 py-2 text-start text-sm disabled:opacity-50 ${ selected ? 'bg-indigo-50 text-indigo-950 dark:bg-indigo-950/40 dark:text-indigo-50' : 'text-fg-default hover:bg-surface-base dark:text-fg-default dark:hover:bg-surface-overlay' }`}
                           >
-                            <Icon className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
+                            <Icon className="h-4 w-4 shrink-0 text-fg-muted" aria-hidden />
                             <span className="min-w-0 flex-1 truncate font-medium">
                               {file.displayName || file.originalFilename}
                             </span>
-                            <span className="shrink-0 text-xs text-slate-400 dark:text-neutral-500">
+                            <span className="shrink-0 text-xs text-fg-subtle">
                               {formatBytes(file.byteSize)}
                             </span>
                           </button>
@@ -418,23 +414,19 @@ export function MarkdownImageUploadModal({
                   if (busy) return
                   stageFiles([...e.dataTransfer.files])
                 }}
-                className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-8 text-center transition-[background-color,color,border-color] ${
-                  dragOver
-                    ? 'border-indigo-400 bg-indigo-50/80 dark:border-indigo-500 dark:bg-indigo-950/30'
-                    : 'border-slate-200 bg-slate-50/70 hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-950/50 dark:hover:border-neutral-600 dark:hover:bg-neutral-950'
-                } ${busy ? 'pointer-events-none opacity-60' : ''}`}
+                className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-8 text-center transition-[background-color,color,border-color] ${ dragOver ? 'border-indigo-400 bg-indigo-50/80 dark:border-indigo-500 dark:bg-indigo-950/30' : 'border-border-default bg-slate-50/70 hover:border-border-strong hover:bg-surface-base dark:border-border-default/50 dark:hover:border-border-default dark:hover:bg-surface-base' } ${busy ? 'pointer-events-none opacity-60' : ''}`}
               >
-                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm dark:bg-neutral-800">
+                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-surface-raised shadow-sm dark:bg-surface-overlay">
                   {busy ? (
                     <Upload className="h-5 w-5 motion-safe:animate-pulse text-indigo-500" aria-hidden />
                   ) : (
                     <ImageIcon className="h-5 w-5 text-indigo-500" aria-hidden />
                   )}
                 </div>
-                <span className="text-sm font-medium text-slate-800 dark:text-neutral-100">
+                <span className="text-sm font-medium text-fg-default">
                   {busy ? 'Inserting…' : 'Drop files here'}
                 </span>
-                <span className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+                <span className="mt-1 text-xs text-fg-muted">
                   {canBrowse
                     ? 'or click to browse (images, PDFs, and common documents)'
                     : 'or click to browse (PNG, JPEG, GIF, WebP)'}
@@ -448,18 +440,18 @@ export function MarkdownImageUploadModal({
                     return (
                       <li
                         key={key}
-                        className="flex items-center gap-2 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                        className="flex items-center gap-2 rounded-md border border-border-default bg-surface-raised px-2.5 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
                       >
-                        <Icon className="h-4 w-4 shrink-0 text-slate-500" aria-hidden />
-                        <span className="min-w-0 flex-1 truncate text-slate-800 dark:text-neutral-100">
+                        <Icon className="h-4 w-4 shrink-0 text-fg-muted" aria-hidden />
+                        <span className="min-w-0 flex-1 truncate text-fg-default">
                           {file.name}
                         </span>
-                        <span className="shrink-0 text-xs text-slate-400">{formatBytes(file.size)}</span>
+                        <span className="shrink-0 text-xs text-fg-subtle">{formatBytes(file.size)}</span>
                         <button
                           type="button"
                           disabled={busy}
                           onClick={() => removeStaged(key)}
-                          className="rounded p-0.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 disabled:opacity-50 dark:hover:bg-neutral-800"
+                          className="rounded p-0.5 text-fg-subtle hover:bg-surface-sunken hover:text-fg-muted disabled:opacity-50 dark:hover:bg-surface-overlay"
                           aria-label={`Remove ${file.name}`}
                         >
                           <X className="h-3.5 w-3.5" />
@@ -479,8 +471,8 @@ export function MarkdownImageUploadModal({
           ) : null}
         </div>
 
-        <div className="flex items-center justify-between gap-3 border-t border-slate-100 px-5 py-3 dark:border-neutral-800">
-          <p className="text-xs text-slate-500 dark:text-neutral-400">
+        <div className="flex items-center justify-between gap-3 border-t border-border-subtle px-5 py-3 dark:border-border-subtle">
+          <p className="text-xs text-fg-muted">
             {selectionCount === 0
               ? 'Nothing selected'
               : `${selectionCount} selected`}
@@ -490,7 +482,7 @@ export function MarkdownImageUploadModal({
               type="button"
               onClick={handleClose}
               disabled={busy}
-              className="rounded-md px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100 disabled:opacity-50 dark:text-neutral-300 dark:hover:bg-neutral-800"
+              className="rounded-md px-3 py-1.5 text-sm text-fg-muted hover:bg-surface-sunken disabled:opacity-50 dark:text-fg-muted dark:hover:bg-surface-overlay"
             >
               Cancel
             </button>
@@ -498,7 +490,7 @@ export function MarkdownImageUploadModal({
               type="button"
               onClick={() => void handleInsert()}
               disabled={busy || selectionCount === 0}
-              className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+              className="rounded-md bg-accent-solid px-3 py-1.5 text-sm font-medium text-white hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
             >
               {busy ? 'Inserting…' : 'Insert'}
             </button>

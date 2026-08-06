@@ -78,8 +78,8 @@ export function MarkdownEmailEditor({
 
   return (
     <>
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50/40 dark:border-neutral-600 dark:bg-neutral-950/30">
-      <div className="flex flex-wrap items-center gap-0.5 border-b border-slate-200 bg-white px-2 py-1.5 dark:border-neutral-600 dark:bg-neutral-900">
+    <div className="overflow-hidden rounded-xl border border-border-default bg-slate-50/40 dark:border-border-default/30">
+      <div className="flex flex-wrap items-center gap-0.5 border-b border-border-default bg-surface-raised px-2 py-1.5 dark:border-border-default dark:bg-surface-raised">
         <button
           type="button"
           disabled={disabled}
@@ -98,7 +98,7 @@ export function MarkdownEmailEditor({
               el.setSelectionRange(start + 3, end + 3)
             })
           }}
-          className="flex h-7 min-w-7 shrink-0 items-center justify-center rounded px-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-50 dark:text-neutral-300 dark:hover:bg-neutral-700"
+          className="flex h-7 min-w-7 shrink-0 items-center justify-center rounded px-1.5 text-xs font-semibold text-fg-muted hover:bg-surface-sunken disabled:opacity-50 dark:text-fg-muted dark:hover:bg-neutral-700"
           aria-label={t('emailTemplates.toolbar.heading', { defaultValue: 'Heading' })}
           title={t('emailTemplates.toolbar.heading', { defaultValue: 'Heading' })}
         >
@@ -122,10 +122,10 @@ export function MarkdownEmailEditor({
         }
         onChange={(e) => onChange(e.target.value)}
         rows={14}
-        className="block min-h-[260px] w-full resize-y border-0 bg-transparent px-3.5 py-3 font-mono text-[13px] leading-relaxed text-slate-900 outline-none focus:ring-0 disabled:opacity-50 dark:text-neutral-100"
+        className="block min-h-[260px] w-full resize-y border-0 bg-transparent px-3.5 py-3 font-mono text-[13px] leading-relaxed text-fg-default outline-none focus:ring-0 disabled:opacity-50 dark:text-fg-default"
         spellCheck
       />
-      <div className="border-t border-slate-200 bg-white px-3 py-2 text-xs text-slate-500 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-400">
+      <div className="border-t border-border-default bg-surface-raised px-3 py-2 text-xs text-fg-muted dark:border-border-default dark:bg-surface-raised dark:text-fg-muted">
         {t('emailTemplates.editorHint', {
           defaultValue: 'Markdown with merge fields. Type {{ or use the field buttons to insert tokens.',
         })}
@@ -177,7 +177,7 @@ export function MergeFieldChip({
       type="button"
       disabled={disabled}
       onClick={() => onInsert(token)}
-      className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 shadow-sm transition-colors hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-800 disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:border-indigo-500/40 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
+      className="inline-flex items-center rounded-lg border border-border-default bg-surface-raised px-2.5 py-1 text-xs font-medium text-fg-muted shadow-sm transition-colors hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-800 disabled:opacity-50 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:border-indigo-500/40 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
       title={token}
     >
       {label}

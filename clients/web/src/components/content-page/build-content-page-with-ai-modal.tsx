@@ -98,11 +98,11 @@ export function BuildContentPageWithAiModal({
         if (e.target === e.currentTarget && !busy) onClose()
       }}
     >
-      <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-900">
-        <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-neutral-700">
+      <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-raised">
+        <div className="flex items-center justify-between border-b border-border-default px-4 py-3 dark:border-border-default">
           <h3
             id={titleId}
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-900 dark:text-neutral-100"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-fg-default"
           >
             <Sparkles className="h-4 w-4 text-indigo-500" aria-hidden />
             Build with AI
@@ -111,16 +111,16 @@ export function BuildContentPageWithAiModal({
             type="button"
             onClick={onClose}
             disabled={busy}
-            className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
+            className="rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken hover:text-fg-default disabled:opacity-50 dark:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-fg-default"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
         <div className="space-y-4 p-4">
-          <p className="text-sm text-slate-600 dark:text-neutral-300">{description}</p>
+          <p className="text-sm text-fg-muted">{description}</p>
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-neutral-400" htmlFor={promptId}>
+            <label className="mb-1 block text-xs font-medium text-fg-muted" htmlFor={promptId}>
               Topic description
             </label>
             <textarea
@@ -131,7 +131,7 @@ export function BuildContentPageWithAiModal({
               disabled={busy}
               autoFocus
               placeholder={placeholder}
-              className="w-full resize-y rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:placeholder:text-neutral-500"
+              className="w-full resize-y rounded-xl border border-border-default px-3 py-2 text-sm text-fg-default placeholder:text-fg-subtle focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:placeholder:text-neutral-500"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
                   e.preventDefault()
@@ -139,12 +139,12 @@ export function BuildContentPageWithAiModal({
                 }
               }}
             />
-            <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+            <p className="mt-1 text-xs text-fg-muted">
               ⌘/Ctrl + Enter to generate
             </p>
           </div>
           {contentToolsAvailable ? (
-            <div className="rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-3 dark:border-neutral-700 dark:bg-neutral-950/40">
+            <div className="rounded-xl border border-border-default bg-slate-50/80 px-3 py-3 dark:border-border-default/40">
               <label className="flex cursor-pointer items-start gap-3" htmlFor={toolsToggleId}>
                 <input
                   id={toolsToggleId}
@@ -152,13 +152,13 @@ export function BuildContentPageWithAiModal({
                   checked={includeTools}
                   disabled={busy}
                   onChange={(e) => setIncludeTools(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 disabled:opacity-60"
+                  className="mt-0.5 h-4 w-4 rounded border-border-strong text-accent-fg focus:ring-indigo-500 disabled:opacity-60"
                 />
                 <span className="min-w-0">
-                  <span className="block text-sm font-medium text-slate-800 dark:text-neutral-100">
+                  <span className="block text-sm font-medium text-fg-default">
                     Include interactive tools
                   </span>
-                  <span className="mt-0.5 block text-xs leading-relaxed text-slate-500 dark:text-neutral-400">
+                  <span className="mt-0.5 block text-xs leading-relaxed text-fg-muted">
                     Let AI add checks for understanding, flashcards, polls, and other content tools
                     alongside the prose. You can edit or remove them before saving.
                   </span>
@@ -172,12 +172,12 @@ export function BuildContentPageWithAiModal({
             </p>
           ) : null}
         </div>
-        <div className="flex items-center justify-end gap-2 border-t border-slate-200 bg-slate-50/80 px-4 py-3 dark:border-neutral-700 dark:bg-neutral-950/50">
+        <div className="flex items-center justify-end gap-2 border-t border-border-default bg-slate-50/80 px-4 py-3 dark:border-border-default/50">
           <button
             type="button"
             onClick={onClose}
             disabled={busy}
-            className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-50 dark:text-neutral-300 dark:hover:bg-neutral-800"
+            className="rounded-xl px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-sunken disabled:opacity-50 dark:text-fg-muted dark:hover:bg-surface-overlay"
           >
             Cancel
           </button>
@@ -185,7 +185,7 @@ export function BuildContentPageWithAiModal({
             type="button"
             onClick={() => void submit()}
             disabled={busy || prompt.trim() === ''}
-            className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-60"
           >
             {busy ? <Loader2 className="h-4 w-4 motion-safe:animate-spin" aria-hidden /> : null}
             {busy

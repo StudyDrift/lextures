@@ -36,11 +36,6 @@ import (
 // Legacy endpoint: accepts the same first message as before, enqueues the import, and returns the job id.
 func (d Deps) handleCourseImportCanvasWS() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.JWTSigner == nil || d.Pool == nil || d.CanvasImportQueue == nil {
 			http.Error(w, "server misconfiguration", http.StatusServiceUnavailable)
 			return

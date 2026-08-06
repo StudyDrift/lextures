@@ -113,7 +113,7 @@ export function ReactionControl({
           aria-pressed={pressed}
           aria-label={pressed ? t('boards.react.unlike') : t('boards.react.like')}
           onClick={() => void toggleLikeOrVote('like')}
-          className="inline-flex min-h-9 items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-50 dark:text-neutral-300 dark:hover:bg-neutral-800"
+          className="inline-flex min-h-9 items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-fg-muted hover:bg-surface-sunken disabled:opacity-50 dark:text-fg-muted dark:hover:bg-surface-overlay"
         >
           <Heart className={`size-4 ${pressed ? 'fill-rose-500 text-rose-500' : ''}`} aria-hidden />
           {count > 0 ? <span className="tabular-nums">{count}</span> : null}
@@ -127,7 +127,7 @@ export function ReactionControl({
           aria-pressed={pressed}
           aria-label={pressed ? t('boards.react.unvote') : t('boards.react.vote')}
           onClick={() => void toggleLikeOrVote('vote')}
-          className="inline-flex min-h-9 items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-50 dark:text-neutral-300 dark:hover:bg-neutral-800"
+          className="inline-flex min-h-9 items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-fg-muted hover:bg-surface-sunken disabled:opacity-50 dark:text-fg-muted dark:hover:bg-surface-overlay"
         >
           <ArrowBigUp
             className={`size-4 ${pressed ? 'fill-indigo-500 text-indigo-500' : ''}`}
@@ -154,7 +154,7 @@ export function ReactionControl({
             </button>
           ))}
           {post.avgStars != null ? (
-            <span className="ms-1 text-xs tabular-nums text-slate-500 dark:text-neutral-400">
+            <span className="ms-1 text-xs tabular-nums text-fg-muted">
               {t('boards.react.avgStars', { avg: post.avgStars.toFixed(1), count })}
             </span>
           ) : null}
@@ -166,14 +166,14 @@ export function ReactionControl({
         <div className="flex flex-wrap items-center gap-2">
           {canGrade ? (
             <>
-              <label className="flex items-center gap-1 text-xs text-slate-600 dark:text-neutral-300">
+              <label className="flex items-center gap-1 text-xs text-fg-muted">
                 <span>{t('boards.react.grade')}</span>
                 <input
                   type="number"
                   inputMode="decimal"
                   defaultValue={post.grade ?? post.myReaction?.value ?? ''}
                   disabled={busy}
-                  className="w-16 rounded border border-slate-300 px-1.5 py-1 text-xs dark:border-neutral-600 dark:bg-neutral-800"
+                  className="w-16 rounded border border-border-strong px-1.5 py-1 text-xs dark:border-border-default dark:bg-surface-overlay"
                   aria-label={t('boards.react.gradeInput')}
                   onBlur={(e) => {
                     if (e.target.value !== '') void setGrade(e.target.value)
@@ -191,14 +191,14 @@ export function ReactionControl({
                   type="button"
                   disabled={busy || post.grade == null}
                   onClick={() => void sendToGradebook()}
-                  className="rounded-md border border-slate-200 px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50 disabled:opacity-50 dark:border-neutral-700 dark:text-indigo-400 dark:hover:bg-indigo-950/30"
+                  className="rounded-md border border-border-default px-2 py-1 text-xs font-medium text-accent-fg hover:bg-indigo-50 disabled:opacity-50 dark:border-border-default dark:text-indigo-400 dark:hover:bg-indigo-950/30"
                 >
                   {t('boards.react.sendGradebook')}
                 </button>
               ) : null}
             </>
           ) : post.grade != null ? (
-            <span className="text-xs font-medium text-slate-700 dark:text-neutral-200">
+            <span className="text-xs font-medium text-fg-default">
               {t('boards.react.yourGrade', { value: post.grade })}
             </span>
           ) : null}

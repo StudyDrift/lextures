@@ -95,12 +95,12 @@ export function ExplainItBackEditor({
   return (
     <div className="space-y-4" data-testid="explain-it-back-editor">
       <label className="block space-y-1 text-xs">
-        <span className="font-medium text-slate-700 dark:text-neutral-300">
+        <span className="font-medium text-fg-muted">
           {t('contentTools.tools.explain_it_back.editor.prompt')}
         </span>
         <textarea
           id={`${idPrefix}-${baseId}-prompt`}
-          className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+          className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
           rows={3}
           disabled={disabled}
           value={typeof value.prompt === 'string' ? value.prompt : ''}
@@ -110,28 +110,28 @@ export function ExplainItBackEditor({
 
       <div className="grid grid-cols-2 gap-3">
         <label className="block space-y-1 text-xs">
-          <span className="font-medium text-slate-700 dark:text-neutral-300">
+          <span className="font-medium text-fg-muted">
             {t('contentTools.tools.explain_it_back.editor.minWords')}
           </span>
           <input
             type="number"
             min={5}
             max={500}
-            className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+            className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
             disabled={disabled}
             value={typeof value.minWords === 'number' ? value.minWords : 25}
             onChange={(e) => patch({ minWords: Number(e.target.value) || 25 })}
           />
         </label>
         <label className="block space-y-1 text-xs">
-          <span className="font-medium text-slate-700 dark:text-neutral-300">
+          <span className="font-medium text-fg-muted">
             {t('contentTools.tools.explain_it_back.editor.maxWords')}
           </span>
           <input
             type="number"
             min={10}
             max={1000}
-            className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+            className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
             disabled={disabled}
             value={typeof value.maxWords === 'number' ? value.maxWords : 150}
             onChange={(e) => patch({ maxWords: Number(e.target.value) || 150 })}
@@ -140,13 +140,13 @@ export function ExplainItBackEditor({
       </div>
 
       <div className="space-y-2">
-        <div className="text-xs font-medium text-slate-700 dark:text-neutral-300">
+        <div className="text-xs font-medium text-fg-muted">
           {t('contentTools.tools.explain_it_back.editor.keyPoints')}
         </div>
         {keyPoints.map((kp, idx) => (
           <div
             key={kp.id}
-            className="space-y-1 rounded border border-slate-200 p-2 dark:border-neutral-700"
+            className="space-y-1 rounded border border-border-default p-2 dark:border-border-default"
           >
             <div className="flex items-center justify-between gap-2">
               <span className="text-xs font-medium">
@@ -162,7 +162,7 @@ export function ExplainItBackEditor({
               </button>
             </div>
             <input
-              className="w-full rounded border border-slate-300 bg-white px-2 py-1 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+              className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1 text-sm dark:border-border-default dark:bg-surface-base"
               disabled={disabled}
               placeholder={t('contentTools.tools.explain_it_back.editor.label')}
               value={kp.label}
@@ -173,7 +173,7 @@ export function ExplainItBackEditor({
               }}
             />
             <textarea
-              className="w-full rounded border border-slate-300 bg-white px-2 py-1 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+              className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1 text-sm dark:border-border-default dark:bg-surface-base"
               rows={2}
               disabled={disabled}
               placeholder={t('contentTools.tools.explain_it_back.editor.description')}
@@ -202,11 +202,11 @@ export function ExplainItBackEditor({
       </div>
 
       <label className="block space-y-1 text-xs">
-        <span className="font-medium text-slate-700 dark:text-neutral-300">
+        <span className="font-medium text-fg-muted">
           {t('contentTools.tools.explain_it_back.editor.feedbackStyle')}
         </span>
         <select
-          className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+          className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
           disabled={disabled}
           value={feedbackStyle}
           onChange={(e) => patch({ feedbackStyle: e.target.value })}
@@ -257,7 +257,7 @@ export function ExplainItBackEditor({
             type="number"
             min={1}
             max={10}
-            className="w-16 rounded border border-slate-300 bg-white px-1 py-0.5 dark:border-neutral-600 dark:bg-neutral-950"
+            className="w-16 rounded border border-border-strong bg-surface-raised px-1 py-0.5 dark:border-border-default dark:bg-surface-base"
             disabled={disabled}
             value={typeof value.attempts === 'number' ? value.attempts : 3}
             onChange={(e) => patch({ attempts: Number(e.target.value) || 3 })}
@@ -265,12 +265,12 @@ export function ExplainItBackEditor({
         </label>
       </div>
 
-      <div className="space-y-2 rounded border border-dashed border-slate-300 p-3 dark:border-neutral-600">
-        <div className="text-xs font-medium text-slate-700 dark:text-neutral-300">
+      <div className="space-y-2 rounded border border-dashed border-border-strong p-3 dark:border-border-default">
+        <div className="text-xs font-medium text-fg-muted">
           {t('contentTools.tools.explain_it_back.editor.testSample')}
         </div>
         <textarea
-          className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+          className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
           rows={3}
           disabled={disabled || sampleBusy}
           value={sample}
@@ -289,13 +289,13 @@ export function ExplainItBackEditor({
             : t('contentTools.tools.explain_it_back.editor.runSample')}
         </button>
         {!courseCode || !instanceId ? (
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-fg-muted">
             {t('contentTools.tools.explain_it_back.editor.testUnavailable')}
           </p>
         ) : null}
         {sampleError ? <p className="text-xs text-rose-700">{sampleError}</p> : null}
         {sampleFeedback ? (
-          <pre className="whitespace-pre-wrap text-xs text-slate-700 dark:text-neutral-300">
+          <pre className="whitespace-pre-wrap text-xs text-fg-muted">
             {sampleFeedback}
           </pre>
         ) : null}

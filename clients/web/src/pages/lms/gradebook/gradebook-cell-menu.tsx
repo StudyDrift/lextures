@@ -8,7 +8,7 @@ import { MoreVertical } from 'lucide-react'
 import type { GradebookCellMenuItem, GradebookCellMenuState } from './gradebook-cell-menu-utils'
 
 function menuItemClass() {
-  return 'block w-full px-2.5 py-1.5 text-start text-sm text-slate-800 hover:bg-slate-100 dark:text-neutral-100 dark:hover:bg-neutral-800'
+  return 'block w-full px-2.5 py-1.5 text-start text-sm text-fg-default hover:bg-surface-sunken dark:text-fg-default dark:hover:bg-surface-overlay'
 }
 
 export function GradebookCellMenuPortal({
@@ -55,7 +55,7 @@ export function GradebookCellMenuPortal({
     <div
       ref={panelRef}
       role="menu"
-      className="fixed z-[200] min-w-[11rem] rounded-lg border border-slate-200 bg-white py-1 shadow-lg dark:border-neutral-600 dark:bg-neutral-900"
+      className="fixed z-[200] min-w-[11rem] rounded-lg border border-border-default bg-surface-raised py-1 shadow-lg dark:border-border-default dark:bg-surface-raised"
       style={{ top: menu.top, left: menu.left }}
     >
       {children}
@@ -96,7 +96,7 @@ export function GradebookCellMenuTrigger({
   return (
     <button
       type="button"
-      className="absolute start-0 top-0 z-[2] inline-flex size-5 items-center justify-center rounded text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+      className="absolute start-0 top-0 z-[2] inline-flex size-5 items-center justify-center rounded text-fg-subtle hover:bg-surface-sunken hover:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-fg-default"
       aria-label={`Actions for ${studentName}, ${columnTitle}`}
       aria-haspopup="menu"
       onClick={onOpen}

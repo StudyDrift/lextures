@@ -18,7 +18,7 @@ export function PlotSvg({ points, xLabel, yLabel, summary, reducedMotion }: Prop
       <div
         role="img"
         aria-label={summary}
-        className="flex h-48 items-center justify-center rounded border border-dashed border-slate-300 text-sm text-slate-500 dark:border-neutral-600"
+        className="flex h-48 items-center justify-center rounded border border-dashed border-border-strong text-sm text-fg-muted dark:border-border-default"
       >
         No plot data
       </div>

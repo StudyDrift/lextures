@@ -125,18 +125,18 @@ export function FeedbackDialog({ open, onClose }: FeedbackDialogProps) {
         aria-labelledby={titleId}
         aria-describedby={privacyId}
         data-testid="feedback-dialog"
-        className="relative z-10 flex w-full max-w-lg flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-xl dark:border-neutral-700 dark:bg-neutral-900"
+        className="relative z-10 flex w-full max-w-lg flex-col rounded-2xl border border-border-default bg-surface-raised p-5 shadow-xl dark:border-border-default dark:bg-surface-raised"
         onSubmit={(e) => void handleSubmit(e)}
       >
-        <h2 id={titleId} className="text-lg font-semibold text-slate-950 dark:text-neutral-100">
+        <h2 id={titleId} className="text-lg font-semibold text-slate-950 dark:text-fg-default">
           {t('feedback.dialog.title')}
         </h2>
-        <p id={privacyId} className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+        <p id={privacyId} className="mt-1 text-sm text-fg-muted">
           {t('feedback.dialog.privacy')}
         </p>
 
         <div className="mt-4">
-          <label htmlFor="feedback-message" className="text-xs font-medium text-slate-700 dark:text-neutral-200">
+          <label htmlFor="feedback-message" className="text-xs font-medium text-fg-default">
             {t('feedback.message.label')}
           </label>
           <textarea
@@ -148,15 +148,15 @@ export function FeedbackDialog({ open, onClose }: FeedbackDialogProps) {
             rows={5}
             placeholder={t('feedback.message.placeholder')}
             onChange={(e) => setMessage(e.target.value)}
-            className="mt-1.5 w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:placeholder:text-neutral-500"
+            className="mt-1.5 w-full resize-y rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm text-fg-default placeholder:text-fg-subtle focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40 disabled:opacity-60 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:placeholder:text-neutral-500"
           />
-          <p className="mt-1 text-end text-xs text-slate-500 dark:text-neutral-400" aria-live="polite">
+          <p className="mt-1 text-end text-xs text-fg-muted" aria-live="polite">
             {t('feedback.message.counter', { count: trimmedLen, max: FEEDBACK_MAX_MESSAGE_LEN })}
           </p>
         </div>
 
         <div className="mt-3">
-          <label htmlFor="feedback-category" className="text-xs font-medium text-slate-700 dark:text-neutral-200">
+          <label htmlFor="feedback-category" className="text-xs font-medium text-fg-default">
             {t('feedback.category.label')}
           </label>
           <select
@@ -164,7 +164,7 @@ export function FeedbackDialog({ open, onClose }: FeedbackDialogProps) {
             value={category}
             disabled={submitting}
             onChange={(e) => setCategory(e.target.value as FeedbackCategoryOption)}
-            className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+            className="mt-1.5 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm text-fg-default focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40 disabled:opacity-60 dark:border-border-default dark:bg-surface-base dark:text-fg-default"
           >
             <option value="">{t('feedback.category.none')}</option>
             {CATEGORY_OPTIONS.map((value) => (
@@ -191,7 +191,7 @@ export function FeedbackDialog({ open, onClose }: FeedbackDialogProps) {
             type="button"
             disabled={submitting}
             onClick={onClose}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out motion-safe:active:scale-[0.96] hover:bg-slate-50 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+            className="rounded-xl border border-border-default bg-surface-raised px-4 py-2 text-sm font-semibold text-fg-default shadow-sm motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out motion-safe:active:scale-[0.96] hover:bg-surface-base disabled:opacity-60 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
           >
             {t('feedback.cancel')}
           </button>
@@ -199,7 +199,7 @@ export function FeedbackDialog({ open, onClose }: FeedbackDialogProps) {
             type="submit"
             disabled={!canSend}
             aria-describedby={errorKey ? errorId : undefined}
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out motion-safe:active:scale-[0.96] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out motion-safe:active:scale-[0.96] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {submitting ? (
               <>

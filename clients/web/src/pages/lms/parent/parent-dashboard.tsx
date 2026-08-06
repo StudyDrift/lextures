@@ -59,14 +59,14 @@ function SectionError({ message }: { message: string }) {
 
 function GradeItemRow({ item, t }: { item: ParentGradeItem; t: (key: string, opts?: Record<string, unknown>) => string }) {
   return (
-    <li className="rounded-md bg-slate-50 px-3 py-2 text-sm dark:bg-neutral-900">
+    <li className="rounded-md bg-surface-base px-3 py-2 text-sm dark:bg-surface-raised">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="font-medium text-slate-900 dark:text-neutral-100">{item.title}</p>
+          <p className="font-medium text-fg-default">{item.title}</p>
           {item.category && (
-            <p className="text-xs text-slate-500 dark:text-neutral-500">{item.category}</p>
+            <p className="text-xs text-fg-subtle">{item.category}</p>
           )}
-          <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">
+          <p className="mt-1 text-xs text-fg-muted">
             {t(gradeStatusKey(item.status))}
             {item.dueAt && (
               <>
@@ -82,7 +82,7 @@ function GradeItemRow({ item, t }: { item: ParentGradeItem; t: (key: string, opt
             )}
           </p>
         </div>
-        <span className="shrink-0 font-medium tabular-nums text-slate-900 dark:text-neutral-100">
+        <span className="shrink-0 font-medium tabular-nums text-fg-default">
           {parentGradeScoreLabel(item)}
         </span>
       </div>
@@ -224,15 +224,15 @@ export default function ParentDashboard() {
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8 md:px-8">
-      <header className="flex flex-col gap-2 border-b border-slate-200 pb-6 dark:border-neutral-800">
-        <div className="flex items-center gap-2 text-sm font-medium text-indigo-700 dark:text-indigo-300">
+      <header className="flex flex-col gap-2 border-b border-border-default pb-6 dark:border-border-subtle">
+        <div className="flex items-center gap-2 text-sm font-medium text-accent-fg">
           <Users className="h-4 w-4" aria-hidden />
           {t('parent.badge')}
         </div>
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-neutral-50">
+        <h1 className="text-2xl font-semibold tracking-tight text-fg-default">
           {t('parent.title')}
         </h1>
-        <p className="max-w-prose text-sm leading-relaxed text-slate-600 dark:text-neutral-400">
+        <p className="max-w-prose text-sm leading-relaxed text-fg-muted">
           {t('parent.subtitle')}
         </p>
         {ffConferenceScheduling && (
@@ -265,11 +265,7 @@ export default function ParentDashboard() {
                   type="button"
                   role="option"
                   aria-selected={active}
-                  className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
-                    active
-                      ? 'border-indigo-600 bg-indigo-600 text-white dark:border-indigo-500 dark:bg-indigo-600'
-                      : 'border-slate-200 bg-white text-slate-800 hover:border-indigo-300 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-indigo-500/60'
-                  }`}
+                  className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${ active ? 'border-indigo-600 bg-accent-solid text-white dark:border-indigo-500 dark:bg-accent-solid' : 'border-border-default bg-surface-raised text-fg-default hover:border-indigo-300 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:border-indigo-500/60' }`}
                   onClick={() => setParams({ student: c.studentUserId })}
                 >
                   <span className="max-w-[12rem] truncate">
@@ -291,15 +287,15 @@ export default function ParentDashboard() {
           )}
 
           <section className="space-y-3" aria-labelledby="parent-grades-heading">
-            <h2 id="parent-grades-heading" className="text-lg font-semibold text-slate-900 dark:text-neutral-100">
+            <h2 id="parent-grades-heading" className="text-lg font-semibold text-fg-default">
               {t('parent.section.grades')}
             </h2>
             {grades.loading && (
-              <p className="text-sm text-slate-500 dark:text-neutral-400">{t('parent.grades.loading')}</p>
+              <p className="text-sm text-fg-muted">{t('parent.grades.loading')}</p>
             )}
             {grades.error && <SectionError message={grades.error} />}
             {!grades.loading && !grades.error && grades.data && grades.data.length === 0 && (
-              <p className="text-sm text-slate-600 dark:text-neutral-400">{t('parent.grades.empty')}</p>
+              <p className="text-sm text-fg-muted">{t('parent.grades.empty')}</p>
             )}
             {!grades.loading && !grades.error && grades.data && grades.data.length > 0 && (
               <ul className="space-y-4">
@@ -308,12 +304,12 @@ export default function ParentDashboard() {
                   return (
                     <li
                       key={row.courseCode}
-                      className="rounded-lg border border-slate-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-950"
+                      className="rounded-lg border border-border-default bg-surface-raised p-4 dark:border-border-subtle dark:bg-surface-base"
                     >
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div>
-                          <h3 className="font-medium text-slate-900 dark:text-neutral-50">{row.title}</h3>
-                          <p className="text-xs text-slate-500 dark:text-neutral-500">{row.courseCode}</p>
+                          <h3 className="font-medium text-fg-default">{row.title}</h3>
+                          <p className="text-xs text-fg-subtle">{row.courseCode}</p>
                         </div>
                         {ffParentPortalV2 && row.teacherEmail && (
                           <Link
@@ -332,7 +328,7 @@ export default function ParentDashboard() {
                         )}
                       </div>
                       {items.length === 0 ? (
-                        <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
+                        <p className="mt-2 text-sm text-fg-muted">
                           {t('parent.grades.noScores')}
                         </p>
                       ) : (
@@ -351,16 +347,16 @@ export default function ParentDashboard() {
 
           {ffParentPortalV2 && (
             <section className="space-y-3" aria-labelledby="parent-attendance-heading">
-              <h2 id="parent-attendance-heading" className="text-lg font-semibold text-slate-900 dark:text-neutral-100">
+              <h2 id="parent-attendance-heading" className="text-lg font-semibold text-fg-default">
                 {t('parent.section.attendance')}
               </h2>
               {attendance.loading && (
-                <p className="text-sm text-slate-500 dark:text-neutral-400">{t('parent.attendance.loading')}</p>
+                <p className="text-sm text-fg-muted">{t('parent.attendance.loading')}</p>
               )}
               {attendance.error && <SectionError message={attendance.error} />}
               {!attendance.loading && !attendance.error && attendance.data && (
-                <div className="rounded-lg border border-slate-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-950">
-                  <p className="text-sm font-medium text-slate-900 dark:text-neutral-100">
+                <div className="rounded-lg border border-border-default bg-surface-raised p-4 dark:border-border-subtle dark:bg-surface-base">
+                  <p className="text-sm font-medium text-fg-default">
                     {t('parent.attendance.summary', {
                       present: attendance.data.present,
                       absent: attendance.data.absent,
@@ -368,19 +364,19 @@ export default function ParentDashboard() {
                     })}
                   </p>
                   {attendance.data.recentDays.length === 0 ? (
-                    <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
+                    <p className="mt-2 text-sm text-fg-muted">
                       {t('parent.attendance.empty')}
                     </p>
                   ) : (
                     <>
-                      <p className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-500">
+                      <p className="mt-3 text-xs font-medium uppercase tracking-wide text-fg-subtle">
                         {t('parent.attendance.recent')}
                       </p>
                       <ul className="mt-2 divide-y divide-slate-100 dark:divide-neutral-800">
                         {attendance.data.recentDays.map((day) => (
                           <li key={`${day.date}-${day.period ?? day.code}`} className="flex justify-between py-2 text-sm">
                             <time dateTime={day.date}>{day.date}</time>
-                            <span className="text-slate-600 dark:text-neutral-400">{day.codeLabel || day.category}</span>
+                            <span className="text-fg-muted">{day.codeLabel || day.category}</span>
                           </li>
                         ))}
                       </ul>
@@ -393,20 +389,20 @@ export default function ParentDashboard() {
 
           {ffParentPortalV2 && (
             <section className="space-y-3" aria-labelledby="parent-behavior-heading">
-              <h2 id="parent-behavior-heading" className="text-lg font-semibold text-slate-900 dark:text-neutral-100">
+              <h2 id="parent-behavior-heading" className="text-lg font-semibold text-fg-default">
                 {t('parent.section.behavior')}
               </h2>
               {behavior.loading && (
-                <p className="text-sm text-slate-500 dark:text-neutral-400">{t('parent.behavior.loading')}</p>
+                <p className="text-sm text-fg-muted">{t('parent.behavior.loading')}</p>
               )}
               {behavior.error && <SectionError message={behavior.error} />}
               {!behavior.loading && !behavior.error && behavior.data && (
-                <div className="rounded-lg border border-slate-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-950">
+                <div className="rounded-lg border border-border-default bg-surface-raised p-4 dark:border-border-subtle dark:bg-surface-base">
                   {(behavior.data.totalPoints ?? 0) === 0 &&
                   (behavior.data.referrals?.length ?? 0) === 0 ? (
-                    <p className="text-sm text-slate-600 dark:text-neutral-400">{t('parent.behavior.empty')}</p>
+                    <p className="text-sm text-fg-muted">{t('parent.behavior.empty')}</p>
                   ) : (
-                    <p className="text-sm text-slate-900 dark:text-neutral-100">
+                    <p className="text-sm text-fg-default">
                       {t('parent.behavior.summary', {
                         points: behavior.data.totalPoints ?? 0,
                         referrals: behavior.data.referrals?.length ?? 0,
@@ -420,15 +416,15 @@ export default function ParentDashboard() {
 
           {ffParentPortalV2 && ffReportCards && (
             <section className="space-y-3" aria-labelledby="parent-report-cards-heading">
-              <h2 id="parent-report-cards-heading" className="text-lg font-semibold text-slate-900 dark:text-neutral-100">
+              <h2 id="parent-report-cards-heading" className="text-lg font-semibold text-fg-default">
                 {t('parent.section.reportCards')}
               </h2>
               {reportCards.loading && (
-                <p className="text-sm text-slate-500 dark:text-neutral-400">{t('parent.reportCards.loading')}</p>
+                <p className="text-sm text-fg-muted">{t('parent.reportCards.loading')}</p>
               )}
               {reportCards.error && <SectionError message={reportCards.error} />}
               {!reportCards.loading && !reportCards.error && reportCards.data && reportCards.data.length === 0 && (
-                <p className="text-sm text-slate-600 dark:text-neutral-400">{t('parent.reportCards.empty')}</p>
+                <p className="text-sm text-fg-muted">{t('parent.reportCards.empty')}</p>
               )}
               {!reportCards.loading && !reportCards.error && reportCards.data && reportCards.data.length > 0 && (
                 <ul className="space-y-2">
@@ -440,7 +436,7 @@ export default function ParentDashboard() {
                           href={card.pdfUrl!}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex text-sm font-medium text-indigo-700 underline underline-offset-2 dark:text-indigo-300"
+                          className="inline-flex text-sm font-medium text-accent-fg underline underline-offset-2 dark:text-indigo-300"
                         >
                           {t('parent.reportCards.viewPdf', { period: card.gradingPeriod })}
                         </a>
@@ -452,29 +448,29 @@ export default function ParentDashboard() {
           )}
 
           <section className="space-y-3" aria-labelledby="parent-assignments-heading">
-            <h2 id="parent-assignments-heading" className="text-lg font-semibold text-slate-900 dark:text-neutral-100">
+            <h2 id="parent-assignments-heading" className="text-lg font-semibold text-fg-default">
               {t('parent.section.assignments')}
             </h2>
             {assignments.loading && (
-              <p className="text-sm text-slate-500 dark:text-neutral-400">{t('parent.assignments.loading')}</p>
+              <p className="text-sm text-fg-muted">{t('parent.assignments.loading')}</p>
             )}
             {assignments.error && <SectionError message={assignments.error} />}
             {!assignments.loading && !assignments.error && assignments.data && assignments.data.length === 0 && (
-              <p className="text-sm text-slate-600 dark:text-neutral-400">{t('parent.assignments.empty')}</p>
+              <p className="text-sm text-fg-muted">{t('parent.assignments.empty')}</p>
             )}
             {!assignments.loading && !assignments.error && assignments.data && assignments.data.length > 0 && (
-              <ul className="divide-y divide-slate-200 overflow-hidden rounded-lg border border-slate-200 dark:divide-neutral-800 dark:border-neutral-800">
+              <ul className="divide-y divide-slate-200 overflow-hidden rounded-lg border border-border-default dark:divide-neutral-800 dark:border-border-subtle">
                 {assignments.data.map((a) => (
-                  <li key={`${a.courseCode}-${a.itemId}`} className="bg-white px-4 py-3 dark:bg-neutral-950">
+                  <li key={`${a.courseCode}-${a.itemId}`} className="bg-surface-raised px-4 py-3 dark:bg-surface-base">
                     <div className="flex flex-wrap items-baseline justify-between gap-2">
                       <div className="min-w-0">
-                        <p className="truncate font-medium text-slate-900 dark:text-neutral-50">{a.title}</p>
-                        <p className="text-xs text-slate-500 dark:text-neutral-500">
+                        <p className="truncate font-medium text-fg-default">{a.title}</p>
+                        <p className="text-xs text-fg-subtle">
                           {a.courseTitle} · {a.kind}
                         </p>
                       </div>
                       {a.dueAt && (
-                        <time className="shrink-0 text-xs text-slate-600 dark:text-neutral-400" dateTime={a.dueAt}>
+                        <time className="shrink-0 text-xs text-fg-muted" dateTime={a.dueAt}>
                           {t('parent.assignments.due', { date: formatDateTime(a.dueAt) })}
                         </time>
                       )}
@@ -485,7 +481,7 @@ export default function ParentDashboard() {
             )}
           </section>
 
-          <p className="text-sm text-slate-600 dark:text-neutral-400">
+          <p className="text-sm text-fg-muted">
             <Trans
               i18nKey="parent.messageInboxHint"
               ns="parent"
@@ -493,7 +489,7 @@ export default function ParentDashboard() {
                 inboxLink: (
                   <Link
                     to="/inbox"
-                    className="text-indigo-700 underline underline-offset-2 dark:text-indigo-300"
+                    className="text-accent-fg underline underline-offset-2 dark:text-indigo-300"
                   />
                 ),
               }}

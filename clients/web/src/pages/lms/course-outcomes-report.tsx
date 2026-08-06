@@ -16,7 +16,7 @@ import { usePlatformFeatures } from '../../context/platform-features-context'
 function OutcomeAchievementBar({ outcome }: { outcome: OutcomesReportOutcome }) {
   if (outcome.noAlignments) {
     return (
-      <p className="text-sm text-slate-500 dark:text-neutral-400">
+      <p className="text-sm text-fg-muted">
         No assessments aligned — align assignments to see data.
       </p>
     )
@@ -32,7 +32,7 @@ function OutcomeAchievementBar({ outcome }: { outcome: OutcomesReportOutcome }) 
         aria-valuemax={100}
         aria-valuenow={Math.round(metPct)}
         aria-label={label}
-        className="flex h-3 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-neutral-800"
+        className="flex h-3 w-full overflow-hidden rounded-full bg-surface-sunken"
       >
         <div
           className="h-full bg-emerald-500"
@@ -45,7 +45,7 @@ function OutcomeAchievementBar({ outcome }: { outcome: OutcomesReportOutcome }) 
           title={`${notMetPct}% not met`}
         />
       </div>
-      <p className="text-xs text-slate-600 dark:text-neutral-400 tabular-nums">
+      <p className="text-xs text-fg-muted tabular-nums">
         {metPct}% met · {notMetPct}% not met
         {outcome.meanScore != null ? ` · class avg ${outcome.meanScore.toFixed(1)}%` : ''}
       </p>
@@ -85,7 +85,7 @@ function OutcomeNoteField({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="text-sm font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+        className="text-sm font-medium text-accent-fg hover:underline dark:text-indigo-400"
       >
         {open ? 'Hide note' : 'Add improvement note'}
       </button>
@@ -104,7 +104,7 @@ function OutcomeNoteField({
             onChange={(e) => setText(e.target.value)}
             onBlur={() => void save()}
             disabled={saving}
-            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+            className="w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm text-fg-default shadow-sm dark:border-border-default dark:bg-surface-base dark:text-fg-default"
             placeholder="Qualitative notes for accreditation portfolio…"
           />
         </div>
@@ -180,7 +180,7 @@ export default function CourseOutcomesReport() {
   if (featuresLoading) {
     return (
       <LmsPage title="Outcomes report" description="Course learning outcomes achievement.">
-        <p className="mt-8 text-sm text-slate-500 dark:text-neutral-400" aria-live="polite">
+        <p className="mt-8 text-sm text-fg-muted" aria-live="polite">
           Loading…
         </p>
       </LmsPage>
@@ -190,7 +190,7 @@ export default function CourseOutcomesReport() {
   if (!outcomesReportEnabled) {
     return (
       <LmsPage title="Outcomes report" description="Course learning outcomes achievement.">
-        <p className="mt-8 text-sm text-slate-600 dark:text-neutral-400">
+        <p className="mt-8 text-sm text-fg-muted">
           Outcomes reporting is not enabled on this platform. Ask a global administrator to turn on
           &quot;Outcomes report&quot; in Settings → Global platform.
         </p>
@@ -208,7 +208,7 @@ export default function CourseOutcomesReport() {
       description="Cohort achievement on course learning outcomes for accreditation and standards reporting."
       actions={
         <div className="flex flex-wrap items-center gap-3">
-          <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-neutral-300">
+          <label className="flex items-center gap-2 text-sm text-fg-muted">
             <span>Mastery threshold</span>
             <input
               type="number"
@@ -218,7 +218,7 @@ export default function CourseOutcomesReport() {
               onChange={(e) => setThreshold(Number(e.target.value))}
               onBlur={() => void handleThresholdBlur()}
               aria-label="Mastery threshold percent"
-              className="w-16 rounded-lg border border-slate-200 px-2 py-1 tabular-nums dark:border-neutral-700 dark:bg-neutral-900"
+              className="w-16 rounded-lg border border-border-default px-2 py-1 tabular-nums dark:border-border-default dark:bg-surface-raised"
             />
             <span>%</span>
           </label>
@@ -227,7 +227,7 @@ export default function CourseOutcomesReport() {
             onClick={() => void handleRefresh()}
             disabled={refreshing}
             aria-label="Refresh outcomes report"
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50/60 disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200"
+            className="inline-flex items-center gap-2 rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm font-semibold text-fg-muted shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50/60 disabled:opacity-50 dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
           >
             <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} aria-hidden />
             {refreshing ? 'Refreshing…' : 'Refresh'}
@@ -236,7 +236,7 @@ export default function CourseOutcomesReport() {
       }
     >
       {loading && (
-        <p className="mt-8 text-sm text-slate-500 dark:text-neutral-400" aria-live="polite">
+        <p className="mt-8 text-sm text-fg-muted" aria-live="polite">
           Loading outcomes report…
         </p>
       )}
@@ -249,15 +249,15 @@ export default function CourseOutcomesReport() {
         </p>
       )}
       {!loading && !error && allEmpty && (
-        <div className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 px-6 py-10 text-center dark:border-neutral-700 dark:bg-neutral-900">
+        <div className="mt-8 rounded-2xl border border-border-default bg-surface-base px-6 py-10 text-center dark:border-border-default dark:bg-surface-raised">
           <Target className="mx-auto h-10 w-10 text-indigo-500" aria-hidden />
-          <p className="mt-3 text-base font-semibold text-slate-800 dark:text-neutral-100">
+          <p className="mt-3 text-base font-semibold text-fg-default">
             Align your assignments to outcomes to see this report
           </p>
-          <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+          <p className="mt-1 text-sm text-fg-muted">
             <Link
               to={`/courses/${encodeURIComponent(courseCode ?? '')}/settings/outcomes`}
-              className="text-indigo-600 underline-offset-2 hover:underline dark:text-indigo-400"
+              className="text-accent-fg underline-offset-2 hover:underline dark:text-indigo-400"
             >
               Open learning outcomes settings
             </Link>{' '}
@@ -267,24 +267,24 @@ export default function CourseOutcomesReport() {
       )}
       {!loading && !error && report && hasOutcomes && !allEmpty && (
         <div className="mt-8 space-y-6">
-          <p className="text-xs text-slate-500 dark:text-neutral-400">
+          <p className="text-xs text-fg-muted">
             Data as of{' '}
             {formatDateTime(report.dataAsOf, {
               dateStyle: 'medium',
               timeStyle: 'short',
             })}
             {report.staleMinutes >= 120 && (
-              <span className="ms-2 text-amber-700 dark:text-amber-300">
+              <span className="ms-2 text-warning-fg">
                 (stale — refresh recommended)
               </span>
             )}
           </p>
-          <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
+          <div className="overflow-x-auto rounded-2xl border border-border-default bg-surface-raised shadow-sm dark:border-border-subtle dark:bg-surface-base">
             <table className="min-w-full text-start text-sm">
               <caption className="sr-only">
                 Course learning outcomes achievement summary
               </caption>
-              <thead className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-600 dark:border-neutral-700 dark:bg-neutral-800/80 dark:text-neutral-300">
+              <thead className="border-b border-border-default bg-surface-base text-xs font-semibold uppercase tracking-wide text-fg-muted dark:border-border-default/80 dark:text-fg-muted">
                 <tr>
                   <th scope="col" className="px-4 py-3">
                     Outcome
@@ -301,13 +301,13 @@ export default function CourseOutcomesReport() {
                 {report.outcomes.map((o) => (
                   <tr key={o.outcomeId} className="align-top">
                     <td className="px-4 py-4">
-                      <p className="font-medium text-slate-900 dark:text-neutral-100">{o.title}</p>
+                      <p className="font-medium text-fg-default">{o.title}</p>
                       {o.noAlignments ? (
-                        <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+                        <p className="mt-1 text-xs text-fg-muted">
                           No assessments aligned —{' '}
                           <Link
                             to={`/courses/${encodeURIComponent(courseCode ?? '')}/settings/outcomes`}
-                            className="text-indigo-600 hover:underline dark:text-indigo-400"
+                            className="text-accent-fg hover:underline dark:text-indigo-400"
                           >
                             align assessments
                           </Link>
@@ -320,7 +320,7 @@ export default function CourseOutcomesReport() {
                         />
                       )}
                     </td>
-                    <td className="px-4 py-4 text-end tabular-nums text-slate-700 dark:text-neutral-300">
+                    <td className="px-4 py-4 text-end tabular-nums text-fg-muted">
                       {o.nAssessed} / {o.nStudents}
                     </td>
                     <td className="px-4 py-4">
@@ -334,7 +334,7 @@ export default function CourseOutcomesReport() {
           <div
             role="img"
             aria-label="Chart legend: green indicates students who met the mastery threshold; red indicates students who did not."
-            className="flex flex-wrap gap-4 text-xs text-slate-600 dark:text-neutral-400"
+            className="flex flex-wrap gap-4 text-xs text-fg-muted"
           >
             <span className="inline-flex items-center gap-1.5">
               <span className="h-2 w-4 rounded bg-emerald-500" /> Met threshold

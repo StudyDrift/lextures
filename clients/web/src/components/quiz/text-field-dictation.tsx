@@ -69,7 +69,7 @@ export function TextFieldDictation({
         }}
       />
       {displayInterim ? (
-        <p className="text-sm italic text-slate-400 dark:text-neutral-500" aria-hidden>
+        <p className="text-sm italic text-fg-subtle" aria-hidden>
           {displayInterim}
         </p>
       ) : null}

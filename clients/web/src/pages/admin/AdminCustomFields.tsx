@@ -192,20 +192,20 @@ export default function AdminCustomFields() {
   }
 
   if (!customFieldsEnabled) {
-    return <p className="text-sm text-slate-500">Custom fields are not enabled for this platform.</p>
+    return <p className="text-sm text-fg-muted">Custom fields are not enabled for this platform.</p>
   }
 
   return (
     <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <h1 id={titleId} className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+        <h1 id={titleId} className="text-xl font-semibold text-fg-default dark:text-slate-100">
           Custom fields
         </h1>
         {canManage && (
           <button
             type="button"
             onClick={openCreate}
-            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+            className="inline-flex items-center gap-2 rounded-lg bg-accent-solid px-3 py-2 text-sm font-medium text-white hover:bg-accent"
           >
             <Plus className="h-4 w-4" aria-hidden />
             Add field
@@ -213,7 +213,7 @@ export default function AdminCustomFields() {
         )}
       </div>
 
-      <div role="tablist" aria-label="Entity type" className="mb-4 flex gap-1 border-b border-slate-200 dark:border-neutral-800">
+      <div role="tablist" aria-label="Entity type" className="mb-4 flex gap-1 border-b border-border-default dark:border-border-subtle">
         {ENTITY_TABS.map((tab) => (
           <button
             key={tab.id}
@@ -221,11 +221,7 @@ export default function AdminCustomFields() {
             role="tab"
             aria-selected={entityType === tab.id}
             onClick={() => setEntityType(tab.id)}
-            className={`px-4 py-2 text-sm font-medium ${
-              entityType === tab.id
-                ? 'border-b-2 border-indigo-600 text-indigo-700 dark:text-indigo-300'
-                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400'
-            }`}
+            className={`px-4 py-2 text-sm font-medium ${ entityType === tab.id ? 'border-b-2 border-indigo-600 text-accent-fg' : 'text-fg-muted hover:text-fg-default dark:text-fg-subtle' }`}
           >
             {tab.label}
           </button>
@@ -239,11 +235,11 @@ export default function AdminCustomFields() {
       )}
 
       {loading ? (
-        <p className="text-sm text-slate-500">Loading custom fields…</p>
+        <p className="text-sm text-fg-muted">Loading custom fields…</p>
       ) : fields.length === 0 ? (
-        <p className="text-sm text-slate-500">No custom fields defined for {entityType}s yet.</p>
+        <p className="text-sm text-fg-muted">No custom fields defined for {entityType}s yet.</p>
       ) : (
-        <ul className="divide-y divide-slate-200 rounded-lg border border-slate-200 dark:divide-neutral-800 dark:border-neutral-800">
+        <ul className="divide-y divide-slate-200 rounded-lg border border-border-default dark:divide-neutral-800 dark:border-border-subtle">
           {fields.map((field) => (
             <li
               key={field.id}
@@ -253,23 +249,23 @@ export default function AdminCustomFields() {
               onDragOver={(e) => e.preventDefault()}
               onDrop={() => void onDrop(field.id)}
             >
-              {canManage && <GripVertical className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />}
+              {canManage && <GripVertical className="h-4 w-4 shrink-0 text-fg-subtle" aria-hidden />}
               <div className="min-w-0 flex-1">
-                <p className="font-medium text-slate-900 dark:text-slate-100">{field.label}</p>
-                <p className="text-xs text-slate-500">
+                <p className="font-medium text-fg-default dark:text-slate-100">{field.label}</p>
+                <p className="text-xs text-fg-muted">
                   {field.key} · {field.fieldType} · {field.visibility.replace('_', ' ')}
                   {field.isRequired ? ' · required' : ''}
                 </p>
               </div>
               {canManage && (
                 <div className="flex gap-2">
-                  <button type="button" onClick={() => openEdit(field)} className="text-sm text-indigo-600 hover:underline">
+                  <button type="button" onClick={() => openEdit(field)} className="text-sm text-accent-fg hover:underline">
                     Edit
                   </button>
                   <button
                     type="button"
                     onClick={() => void removeField(field)}
-                    className="inline-flex items-center gap-1 text-sm text-red-600 hover:underline"
+                    className="inline-flex items-center gap-1 text-sm text-danger-fg hover:underline"
                   >
                     <Trash2 className="h-3.5 w-3.5" aria-hidden />
                     Delete
@@ -286,7 +282,7 @@ export default function AdminCustomFields() {
           <div
             role="dialog"
             aria-labelledby={drawerTitleId}
-            className="h-full w-full max-w-md overflow-y-auto bg-white p-6 shadow-xl dark:bg-neutral-950"
+            className="h-full w-full max-w-md overflow-y-auto bg-surface-raised p-6 shadow-xl dark:bg-surface-base"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 id={drawerTitleId} className="mb-4 text-lg font-semibold">
@@ -299,7 +295,7 @@ export default function AdminCustomFields() {
                   <input
                     value={draft.key}
                     onChange={(e) => setDraft({ ...draft, key: e.target.value })}
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+                    className="w-full rounded-lg border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-raised"
                     placeholder="student_id"
                   />
                 </label>
@@ -309,7 +305,7 @@ export default function AdminCustomFields() {
                 <input
                   value={draft.label}
                   onChange={(e) => setDraft({ ...draft, label: e.target.value })}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+                  className="w-full rounded-lg border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-raised"
                 />
               </label>
               <label className="block text-sm">
@@ -318,7 +314,7 @@ export default function AdminCustomFields() {
                   value={draft.fieldType}
                   onChange={(e) => setDraft({ ...draft, fieldType: e.target.value as CustomFieldType })}
                   disabled={!!editing}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+                  className="w-full rounded-lg border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-raised"
                 >
                   {FIELD_TYPES.map((t) => (
                     <option key={t} value={t}>
@@ -333,7 +329,7 @@ export default function AdminCustomFields() {
                   <input
                     value={draft.selectOptions}
                     onChange={(e) => setDraft({ ...draft, selectOptions: e.target.value })}
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+                    className="w-full rounded-lg border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-raised"
                     placeholder="Math, Science"
                   />
                 </label>
@@ -343,7 +339,7 @@ export default function AdminCustomFields() {
                 <select
                   value={draft.visibility}
                   onChange={(e) => setDraft({ ...draft, visibility: e.target.value as CustomFieldVisibility })}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+                  className="w-full rounded-lg border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-raised"
                 >
                   {VISIBILITIES.map((v) => (
                     <option key={v.value} value={v.value}>
@@ -369,7 +365,7 @@ export default function AdminCustomFields() {
                 type="button"
                 disabled={busy}
                 onClick={() => void saveField()}
-                className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                className="rounded-lg bg-accent-solid px-3 py-2 text-sm font-medium text-white hover:bg-accent disabled:opacity-50"
               >
                 Save
               </button>

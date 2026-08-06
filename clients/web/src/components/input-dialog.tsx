@@ -105,20 +105,20 @@ export function InputDialog({
         aria-modal={!exiting}
         aria-labelledby={titleId}
         aria-describedby={description ? descId : undefined}
-        className={`relative z-10 w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-xl dark:border-neutral-700 dark:bg-neutral-900 ${classes.panel}`}
+        className={`relative z-10 w-full max-w-md rounded-2xl border border-border-default bg-surface-raised p-5 shadow-xl dark:border-border-default dark:bg-surface-raised ${classes.panel}`}
         onSubmit={handleSubmit}
       >
-        <h2 id={titleId} className="text-lg font-semibold text-slate-950 dark:text-neutral-100">
+        <h2 id={titleId} className="text-lg font-semibold text-slate-950 dark:text-fg-default">
           {title}
         </h2>
         {description ? (
-          <div id={descId} className="mt-2 text-sm text-slate-600 dark:text-neutral-300">
+          <div id={descId} className="mt-2 text-sm text-fg-muted">
             {description}
           </div>
         ) : null}
         <div className="mt-4">
           {label ? (
-            <label htmlFor={inputId} className="text-xs font-medium text-slate-700 dark:text-neutral-200">
+            <label htmlFor={inputId} className="text-xs font-medium text-fg-default">
               {label}
             </label>
           ) : null}
@@ -130,7 +130,7 @@ export function InputDialog({
             placeholder={placeholder}
             disabled={busy}
             onChange={(e) => onValueChange(e.target.value)}
-            className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+            className="mt-1.5 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base dark:text-fg-default"
           />
         </div>
         <div className="mt-6 flex flex-wrap justify-end gap-2">
@@ -138,14 +138,14 @@ export function InputDialog({
             type="button"
             disabled={busy}
             onClick={onClose}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out motion-safe:active:scale-[0.96] hover:bg-slate-50 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+            className="rounded-xl border border-border-default bg-surface-raised px-4 py-2 text-sm font-semibold text-fg-default shadow-sm motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out motion-safe:active:scale-[0.96] hover:bg-surface-base disabled:opacity-60 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
           >
             {cancelLabel ?? t('dialogs.cancel')}
           </button>
           <button
             type="submit"
             disabled={busy}
-            className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out motion-safe:active:scale-[0.96] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out motion-safe:active:scale-[0.96] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {busy ? t('dialogs.working') : (confirmLabel ?? t('dialogs.confirm'))}
           </button>

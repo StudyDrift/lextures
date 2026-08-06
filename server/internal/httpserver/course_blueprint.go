@@ -93,11 +93,6 @@ func (d Deps) handlePatchCourseBlueprint() http.HandlerFunc {
 		IsBlueprint bool `json:"isBlueprint"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, _, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -137,11 +132,6 @@ func (d Deps) handlePatchCourseBlueprint() http.HandlerFunc {
 // handleGetCourseBlueprintChildren is GET /api/v1/courses/{course_code}/blueprint/children.
 func (d Deps) handleGetCourseBlueprintChildren() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, _, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -188,11 +178,6 @@ func (d Deps) handlePostCourseBlueprintChild() http.HandlerFunc {
 		ChildCourseCode string `json:"childCourseCode"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		bpCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -264,11 +249,6 @@ func (d Deps) handlePostCourseBlueprintChild() http.HandlerFunc {
 // handleDeleteCourseBlueprintChild is DELETE /api/v1/courses/{course_code}/blueprint/children/{child_course_code}.
 func (d Deps) handleDeleteCourseBlueprintChild() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodDelete {
-			w.Header().Set("Allow", http.MethodDelete)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		bpCode, _, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -316,11 +296,6 @@ func (d Deps) handleDeleteCourseBlueprintChild() http.HandlerFunc {
 // handlePostCourseBlueprintPush is POST /api/v1/courses/{course_code}/blueprint/push.
 func (d Deps) handlePostCourseBlueprintPush() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		bpCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -370,11 +345,6 @@ type blueprintSyncLogRow struct {
 // handleGetCourseBlueprintSyncLogs is GET /api/v1/courses/{course_code}/blueprint/sync-logs.
 func (d Deps) handleGetCourseBlueprintSyncLogs() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		bpCode, _, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return

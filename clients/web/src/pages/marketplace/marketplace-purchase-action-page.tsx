@@ -90,15 +90,15 @@ export default function MarketplacePurchaseActionPage() {
   return (
     <LmsPage title={isClaim ? t('marketplace.enrollFree') : t('marketplace.checkoutTitle')}>
       <div
-        className="max-w-xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-neutral-700 dark:bg-neutral-900"
+        className="max-w-xl rounded-2xl border border-border-default bg-surface-raised p-6 shadow-sm dark:border-border-default dark:bg-surface-raised"
         data-testid="marketplace-purchase-action"
         data-flow={isClaim ? 'claim' : 'checkout'}
         aria-live="polite"
       >
         {status === 'working' || status === 'done' ? (
           <div className="flex flex-col items-center gap-3 py-4 text-center">
-            <Loader2 className="h-8 w-8 motion-safe:animate-spin text-indigo-600" aria-hidden />
-            <p className="text-sm text-slate-600 dark:text-neutral-300">
+            <Loader2 className="h-8 w-8 motion-safe:animate-spin text-accent-fg" aria-hidden />
+            <p className="text-sm text-fg-muted">
               {t('marketplace.cta.processing')}
             </p>
           </div>
@@ -109,14 +109,14 @@ export default function MarketplacePurchaseActionPage() {
             <div className="flex flex-wrap gap-3">
               <button
                 type="button"
-                className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-500"
+                className="rounded-lg bg-accent-solid px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-500"
                 onClick={() => setRetryKey((k) => k + 1)}
               >
                 {t('marketplace.error.retry')}
               </button>
               <Link
                 to={slug ? `/marketplace/${encodeURIComponent(slug)}` : '/marketplace'}
-                className="text-sm font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
+                className="text-sm font-semibold text-accent-fg hover:text-indigo-500 dark:text-indigo-400"
               >
                 {t('marketplace.back')}
               </Link>

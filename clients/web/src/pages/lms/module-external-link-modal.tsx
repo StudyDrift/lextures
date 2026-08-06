@@ -73,16 +73,16 @@ function ModuleExternalLinkModalInner({
         if (e.target === e.currentTarget && !saving) onClose()
       }}
     >
-      <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-neutral-600 dark:bg-neutral-800">
-        <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-neutral-600">
-          <h3 id={titleId} className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+      <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-overlay">
+        <div className="flex items-center justify-between border-b border-border-default px-4 py-3 dark:border-border-default">
+          <h3 id={titleId} className="text-sm font-semibold text-fg-default">
             New external link
           </h3>
           <button
             type="button"
             onClick={() => onClose()}
             disabled={saving}
-            className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-100"
+            className="rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken hover:text-fg-default disabled:cursor-not-allowed disabled:opacity-50 dark:text-fg-muted dark:hover:bg-neutral-700 dark:hover:text-fg-default"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
@@ -98,7 +98,7 @@ function ModuleExternalLinkModalInner({
             void onSave(t, u, provider, externalId, iconUrl)
           }}
         >
-          <label htmlFor={titleFieldId} className="text-xs font-medium text-slate-600 dark:text-neutral-300">
+          <label htmlFor={titleFieldId} className="text-xs font-medium text-fg-muted">
             Link title
           </label>
           <input
@@ -109,11 +109,11 @@ function ModuleExternalLinkModalInner({
             placeholder="e.g. Course textbook"
             autoFocus
             disabled={saving}
-            className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 placeholder:text-slate-400 focus:border-indigo-400 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-500"
+            className="mt-1 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm text-fg-default outline-none ring-indigo-500/20 placeholder:text-fg-subtle focus:border-indigo-400 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:placeholder:text-neutral-500"
           />
           <label
             htmlFor={urlFieldId}
-            className="mt-4 block text-xs font-medium text-slate-600 dark:text-neutral-300"
+            className="mt-4 block text-xs font-medium text-fg-muted"
           >
             URL
           </label>
@@ -125,14 +125,14 @@ function ModuleExternalLinkModalInner({
             onChange={(e) => handleUrlChange(e.target.value)}
             placeholder="https://example.com"
             disabled={saving}
-            className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 placeholder:text-slate-400 focus:border-indigo-400 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-500"
+            className="mt-1 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm text-fg-default outline-none ring-indigo-500/20 placeholder:text-fg-subtle focus:border-indigo-400 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:placeholder:text-neutral-500"
           />
-          <p className="mt-2 text-xs text-slate-500 dark:text-neutral-400">
+          <p className="mt-2 text-xs text-fg-muted">
             Must start with <span className="font-mono">http://</span> or{' '}
             <span className="font-mono">https://</span>. Learners open this link in a new tab.
           </p>
 
-          <div className="mt-4 border-t border-slate-100 pt-4 dark:border-neutral-700">
+          <div className="mt-4 border-t border-border-subtle pt-4 dark:border-border-default">
             <CloudPickerButtons
               label="Or pick from cloud storage"
               disabled={saving}
@@ -150,14 +150,14 @@ function ModuleExternalLinkModalInner({
               type="button"
               onClick={() => onClose()}
               disabled={saving}
-              className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-300 dark:hover:bg-neutral-700"
+              className="rounded-xl px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-sunken disabled:cursor-not-allowed disabled:opacity-50 dark:text-fg-muted dark:hover:bg-neutral-700"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving || !title.trim() || !url.trim()}
-              className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {saving ? 'Saving…' : 'Save link'}
             </button>

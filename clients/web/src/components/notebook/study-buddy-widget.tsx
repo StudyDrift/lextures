@@ -131,15 +131,15 @@ export function StudyBuddyWidget({ courseCode, floating = true }: StudyBuddyWidg
       aria-modal="true"
       className={
         floating
-          ? 'fixed inset-x-0 bottom-0 z-50 flex max-h-[85vh] flex-col rounded-t-2xl border border-slate-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-900 sm:inset-auto sm:bottom-6 sm:end-6 sm:h-[32rem] sm:w-96 sm:rounded-2xl'
-          : 'flex h-[28rem] flex-col rounded-2xl border border-slate-200 bg-white shadow-lg dark:border-neutral-700 dark:bg-neutral-900'
+          ? 'fixed inset-x-0 bottom-0 z-50 flex max-h-[85vh] flex-col rounded-t-2xl border border-border-default bg-surface-raised shadow-2xl dark:border-border-default dark:bg-surface-raised sm:inset-auto sm:bottom-6 sm:end-6 sm:h-[32rem] sm:w-96 sm:rounded-2xl'
+          : 'flex h-[28rem] flex-col rounded-2xl border border-border-default bg-surface-raised shadow-lg dark:border-border-default dark:bg-surface-raised'
       }
     >
-      <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-neutral-800">
+      <div className="flex items-center justify-between border-b border-border-default px-4 py-3 dark:border-border-subtle">
         <div className="flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-violet-600" aria-hidden />
           <div>
-            <span className="font-semibold text-slate-900 dark:text-neutral-100">Study Buddy</span>
+            <span className="font-semibold text-fg-default">Study Buddy</span>
             <span className="ms-2 rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-violet-800 dark:bg-violet-950 dark:text-violet-200">
               AI
             </span>
@@ -149,7 +149,7 @@ export function StudyBuddyWidget({ courseCode, floating = true }: StudyBuddyWidg
           type="button"
           aria-label="Close study buddy"
           onClick={() => setOpen(false)}
-          className="rounded p-1 text-slate-500 hover:bg-slate-100 dark:hover:bg-neutral-800"
+          className="rounded p-1 text-fg-muted hover:bg-surface-sunken dark:hover:bg-surface-overlay"
         >
           <X className="h-5 w-5" />
         </button>
@@ -183,7 +183,7 @@ export function StudyBuddyWidget({ courseCode, floating = true }: StudyBuddyWidg
         ) : null}
 
         {messages.length === 0 && !streaming && !disabled ? (
-          <p className="text-sm text-slate-600 dark:text-neutral-400">
+          <p className="text-sm text-fg-muted">
             Ask me anything about your course! I&apos;m an AI — I use your course materials and learning
             goals to help you study.
           </p>
@@ -195,27 +195,27 @@ export function StudyBuddyWidget({ courseCode, floating = true }: StudyBuddyWidg
               key={idx}
               className={
                 m.role === 'user'
-                  ? 'ms-8 rounded-2xl bg-indigo-600 px-3 py-2 text-sm text-white'
-                  : 'me-4 rounded-2xl bg-slate-100 px-3 py-2 text-sm text-slate-900 dark:bg-neutral-800 dark:text-neutral-100'
+                  ? 'ms-8 rounded-2xl bg-accent-solid px-3 py-2 text-sm text-white'
+                  : 'me-4 rounded-2xl bg-surface-sunken px-3 py-2 text-sm text-fg-default dark:bg-surface-overlay dark:text-fg-default'
               }
               role={m.role === 'assistant' ? 'status' : undefined}
             >
               <p className="whitespace-pre-wrap">{m.content}</p>
               {m.citations && m.citations.length > 0 ? (
-                <ul className="mt-2 space-y-1 border-t border-slate-200 pt-2 text-xs dark:border-neutral-700">
+                <ul className="mt-2 space-y-1 border-t border-border-default pt-2 text-xs dark:border-border-default">
                   {m.citations.map((c) => (
                     <li key={`${c.itemId}-${c.title}`}>
                       {c.itemId ? (
                         <Link
                           to={learnerCourseItemHref(courseCode, { kind: 'content_page', id: c.itemId })}
-                          className="font-medium text-indigo-700 underline underline-offset-2 dark:text-indigo-300"
+                          className="font-medium text-accent-fg underline underline-offset-2 dark:text-indigo-300"
                         >
                           {c.title}
                         </Link>
                       ) : (
                         <span className="font-medium">{c.title}</span>
                       )}
-                      {c.excerpt ? <span className="text-slate-500"> — {c.excerpt}</span> : null}
+                      {c.excerpt ? <span className="text-fg-muted"> — {c.excerpt}</span> : null}
                     </li>
                   ))}
                 </ul>
@@ -224,7 +224,7 @@ export function StudyBuddyWidget({ courseCode, floating = true }: StudyBuddyWidg
           ))}
           {streamedText ? (
             <div
-              className="me-4 rounded-2xl bg-slate-100 px-3 py-2 text-sm text-slate-900 dark:bg-neutral-800 dark:text-neutral-100"
+              className="me-4 rounded-2xl bg-surface-sunken px-3 py-2 text-sm text-fg-default dark:bg-surface-overlay dark:text-fg-default"
               role="status"
               aria-live="polite"
             >
@@ -236,7 +236,7 @@ export function StudyBuddyWidget({ courseCode, floating = true }: StudyBuddyWidg
       </div>
 
       {!disabled ? (
-        <div className="border-t border-slate-200 p-3 dark:border-neutral-800">
+        <div className="border-t border-border-default p-3 dark:border-border-subtle">
           {error ? <p className="mb-2 text-xs text-rose-600 dark:text-rose-400">{error}</p> : null}
           <div className="flex items-end gap-2">
             <textarea
@@ -248,7 +248,7 @@ export function StudyBuddyWidget({ courseCode, floating = true }: StudyBuddyWidg
               placeholder="Ask about your course…"
               rows={2}
               disabled={streaming}
-              className="min-h-[2.5rem] flex-1 resize-none rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+              className="min-h-[2.5rem] flex-1 resize-none rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-raised"
             />
             <button
               type="button"
@@ -322,13 +322,13 @@ export function StudyBuddyPromptsCard({ courseCode }: { courseCode: string }) {
       <div className="flex items-start gap-3">
         <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-violet-600" aria-hidden />
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Ready for a review?</p>
-          <ul className="mt-2 space-y-1 text-sm text-slate-700 dark:text-neutral-300">
+          <p className="text-sm font-semibold text-fg-default">Ready for a review?</p>
+          <ul className="mt-2 space-y-1 text-sm text-fg-muted">
             {prompts.slice(0, 3).map((p) => (
               <li key={p.id}>{p.message}</li>
             ))}
           </ul>
-          <p className="mt-2 text-xs text-slate-500 dark:text-neutral-400">
+          <p className="mt-2 text-xs text-fg-muted">
             Open the study buddy chat (bottom-right) to ask questions grounded in your course materials.
           </p>
         </div>

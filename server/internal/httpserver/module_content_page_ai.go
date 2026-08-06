@@ -213,15 +213,6 @@ func (d Deps) requireContentPageEdit(
 // Returns draft sections only; does not persist.
 func (d Deps) handleBuildModuleContentPageWithAI() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, courseID, _, viewer, pageTitle, ok := d.requireContentPageEdit(w, r)
 		if !ok {
 			return
@@ -240,15 +231,6 @@ func (d Deps) handleBuildModuleContentPageWithAI() http.HandlerFunc {
 // Returns draft sections only; does not persist. Quiz intro is prose-only (no content tools).
 func (d Deps) handleBuildModuleQuizIntroWithAI() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, courseID, itemID, viewer, ok := d.requireQuizItemEdit(w, r)
 		if !ok {
 			return

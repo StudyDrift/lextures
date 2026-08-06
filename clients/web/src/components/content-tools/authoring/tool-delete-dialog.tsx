@@ -68,23 +68,23 @@ export function ToolDeleteDialog({
       aria-modal="true"
       aria-labelledby="content-tool-delete-title"
     >
-      <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-4 shadow-xl dark:border-neutral-700 dark:bg-neutral-900">
+      <div className="w-full max-w-md rounded-lg border border-border-default bg-surface-raised p-4 shadow-xl dark:border-border-default dark:bg-surface-raised">
         <h2
           id="content-tool-delete-title"
-          className="text-sm font-semibold text-slate-900 dark:text-neutral-100"
+          className="text-sm font-semibold text-fg-default"
         >
           {t('contentTools.authoring.deleteTitle')}
         </h2>
         {loading ? (
-          <p className="mt-2 text-xs text-slate-500 dark:text-neutral-400">
+          <p className="mt-2 text-xs text-fg-muted">
             {t('contentTools.authoring.loadingUsage')}
           </p>
         ) : learners > 0 ? (
-          <p className="mt-2 text-sm text-slate-700 dark:text-neutral-300">
+          <p className="mt-2 text-sm text-fg-muted">
             {t('contentTools.authoring.deleteWithUsage', { count: learners })}
           </p>
         ) : (
-          <p className="mt-2 text-sm text-slate-700 dark:text-neutral-300">
+          <p className="mt-2 text-sm text-fg-muted">
             {t('contentTools.authoring.deleteNoUsage')}
           </p>
         )}
@@ -98,7 +98,7 @@ export function ToolDeleteDialog({
             type="button"
             disabled={busy}
             onClick={onClose}
-            className="rounded-md px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            className="rounded-md px-3 py-1.5 text-xs font-medium text-fg-muted hover:bg-surface-sunken dark:text-fg-default dark:hover:bg-surface-overlay"
           >
             {t('contentTools.authoring.cancel')}
           </button>

@@ -21,15 +21,6 @@ type quizAnalyticsJSON struct {
 
 func (d Deps) handleGetQuizAnalytics() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 
 		_, _, itemID, ok := d.requireItemAnalysisAccess(w, r)
 		if !ok {

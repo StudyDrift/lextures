@@ -22,14 +22,14 @@ export function QuestionTypePicker({ value, onChange, disabled }: Props) {
   const { t } = useTranslation('common')
   return (
     <label className="block text-sm">
-      <span className="mb-1 block font-medium text-slate-700 dark:text-neutral-200">
+      <span className="mb-1 block font-medium text-fg-default">
         {t('liveQuiz.editor.questionType')}
       </span>
       <select
         value={value}
         disabled={disabled}
         onChange={(e) => onChange(e.target.value as LiveQuizQuestionType)}
-        className="w-full min-h-11 rounded-md border border-slate-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+        className="w-full min-h-11 rounded-md border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
       >
         {TYPES.map((type) => (
           <option key={type} value={type}>

@@ -144,7 +144,7 @@ export function CourseArchivedContentSection({ courseCode }: { courseCode: strin
 
   if (!canEdit) {
     return (
-      <p className="text-sm text-slate-600 dark:text-neutral-400">
+      <p className="text-sm text-fg-muted">
         You need permission to edit course modules to view or restore archived content.
       </p>
     )
@@ -159,13 +159,13 @@ export function CourseArchivedContentSection({ courseCode }: { courseCode: strin
   }
 
   if (items === null) {
-    return <p className="text-sm text-slate-500">Loading…</p>
+    return <p className="text-sm text-fg-muted">Loading…</p>
   }
 
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-        <p className="text-sm text-slate-600 dark:text-neutral-400">
+        <p className="text-sm text-fg-muted">
           Archived module items are hidden from students but stay in the course. Restoring an item
           returns it to the module outline.
         </p>
@@ -174,7 +174,7 @@ export function CourseArchivedContentSection({ courseCode }: { courseCode: strin
             type="button"
             onClick={() => setFactoryResetConfirmOpen(true)}
             disabled={archiveCourseBusy || factoryResetBusy}
-            className="rounded-xl border border-amber-200 bg-white px-4 py-2.5 text-sm font-semibold text-amber-900 shadow-sm transition-[background-color,color,border-color] hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-amber-900/50 dark:bg-neutral-900/40 dark:text-amber-200 dark:hover:bg-amber-950/30"
+            className="rounded-xl border border-amber-200 bg-surface-raised px-4 py-2.5 text-sm font-semibold text-amber-900 shadow-sm transition-[background-color,color,border-color] hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-amber-900/50/40 dark:text-amber-200 dark:hover:bg-amber-950/30"
           >
             Factory Reset Course
           </button>
@@ -182,7 +182,7 @@ export function CourseArchivedContentSection({ courseCode }: { courseCode: strin
             type="button"
             onClick={() => setDeleteCourseConfirmOpen(true)}
             disabled={archiveCourseBusy || factoryResetBusy}
-            className="rounded-xl border border-rose-200 bg-white px-4 py-2.5 text-sm font-semibold text-rose-700 shadow-sm transition-[background-color,color,border-color] hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-rose-900/60 dark:bg-neutral-900/40 dark:text-rose-300 dark:hover:bg-rose-950/40"
+            className="rounded-xl border border-rose-200 bg-surface-raised px-4 py-2.5 text-sm font-semibold text-rose-700 shadow-sm transition-[background-color,color,border-color] hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-rose-900/60/40 dark:text-rose-300 dark:hover:bg-rose-950/40"
           >
             Delete Course
           </button>
@@ -194,20 +194,20 @@ export function CourseArchivedContentSection({ courseCode }: { courseCode: strin
         </p>
       )}
       {archivedRows.length === 0 ? (
-        <p className="text-sm text-slate-500">No archived content.</p>
+        <p className="text-sm text-fg-muted">No archived content.</p>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/5 dark:border-neutral-700 dark:bg-neutral-900/40">
+        <div className="overflow-x-auto rounded-2xl border border-border-default bg-surface-raised shadow-sm shadow-slate-900/5 dark:border-border-default/40">
           <table className="min-w-full text-start text-sm">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-50/80 dark:border-neutral-700 dark:bg-neutral-800/50">
-                <th className="px-4 py-3 font-semibold text-slate-900 dark:text-neutral-100">
+              <tr className="border-b border-border-default bg-slate-50/80 dark:border-border-default/50">
+                <th className="px-4 py-3 font-semibold text-fg-default">
                   Title
                 </th>
-                <th className="px-4 py-3 font-semibold text-slate-900 dark:text-neutral-100">Type</th>
-                <th className="px-4 py-3 font-semibold text-slate-900 dark:text-neutral-100">
+                <th className="px-4 py-3 font-semibold text-fg-default">Type</th>
+                <th className="px-4 py-3 font-semibold text-fg-default">
                   Module
                 </th>
-                <th className="px-4 py-3 font-semibold text-slate-900 dark:text-neutral-100">
+                <th className="px-4 py-3 font-semibold text-fg-default">
                   <span className="sr-only">Actions</span>
                 </th>
               </tr>
@@ -216,15 +216,15 @@ export function CourseArchivedContentSection({ courseCode }: { courseCode: strin
               {archivedRows.map((row) => (
                 <tr
                   key={row.id}
-                  className="border-b border-slate-100 last:border-0 dark:border-neutral-800"
+                  className="border-b border-border-subtle last:border-0 dark:border-border-subtle"
                 >
-                  <td className="px-4 py-3 font-medium text-slate-900 dark:text-neutral-100">
+                  <td className="px-4 py-3 font-medium text-fg-default">
                     {row.title || '—'}
                   </td>
-                  <td className="px-4 py-3 text-slate-600 dark:text-neutral-400">
+                  <td className="px-4 py-3 text-fg-muted">
                     {kindLabel(row.kind)}
                   </td>
-                  <td className="px-4 py-3 text-slate-600 dark:text-neutral-400">
+                  <td className="px-4 py-3 text-fg-muted">
                     {row.parentId ? moduleTitleById.get(row.parentId) ?? '—' : '—'}
                   </td>
                   <td className="px-4 py-3 text-end">
@@ -232,7 +232,7 @@ export function CourseArchivedContentSection({ courseCode }: { courseCode: strin
                       type="button"
                       onClick={() => void onUnarchive(row)}
                       disabled={busyId === row.id}
-                      className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700"
+                      className="rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-sm font-medium text-fg-default shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-60 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700"
                     >
                       {busyId === row.id ? 'Restoring…' : 'Unarchive'}
                     </button>
@@ -256,12 +256,12 @@ export function CourseArchivedContentSection({ courseCode }: { courseCode: strin
             role="dialog"
             aria-modal="true"
             aria-labelledby="factory-reset-course-title"
-            className="w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-900"
+            className="w-full max-w-md overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-raised"
           >
-            <div className="flex items-center justify-between gap-3 border-b border-slate-200 px-4 py-3 dark:border-neutral-700">
+            <div className="flex items-center justify-between gap-3 border-b border-border-default px-4 py-3 dark:border-border-default">
               <h3
                 id="factory-reset-course-title"
-                className="text-sm font-semibold text-slate-900 dark:text-neutral-100"
+                className="text-sm font-semibold text-fg-default"
               >
                 Factory reset course
               </h3>
@@ -271,14 +271,14 @@ export function CourseArchivedContentSection({ courseCode }: { courseCode: strin
                   if (!factoryResetBusy) setFactoryResetConfirmOpen(false)
                 }}
                 disabled={factoryResetBusy}
-                className="shrink-0 rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
+                className="shrink-0 rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken hover:text-fg-default disabled:cursor-not-allowed disabled:opacity-50 dark:text-fg-muted dark:hover:bg-neutral-700 dark:hover:text-fg-default"
                 aria-label="Close"
               >
                 <X className="h-5 w-5" aria-hidden />
               </button>
             </div>
             <div className="p-4">
-              <p className="text-sm leading-relaxed text-slate-600 dark:text-neutral-300">
+              <p className="text-sm leading-relaxed text-fg-muted">
                 This permanently deletes all modules, pages, assignments, quizzes, links, the
                 syllabus, uploaded course files, and archived items. Grading is reset to a single
                 default group. The course stays open with the same enrollments; title and schedule
@@ -289,7 +289,7 @@ export function CourseArchivedContentSection({ courseCode }: { courseCode: strin
                   type="button"
                   onClick={() => setFactoryResetConfirmOpen(false)}
                   disabled={factoryResetBusy}
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700/80"
+                  className="rounded-xl border border-border-default bg-surface-raised px-4 py-2 text-sm font-medium text-fg-muted shadow-sm hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-50 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700/80"
                 >
                   Cancel
                 </button>
@@ -319,12 +319,12 @@ export function CourseArchivedContentSection({ courseCode }: { courseCode: strin
             role="dialog"
             aria-modal="true"
             aria-labelledby="archive-course-title"
-            className="w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-900"
+            className="w-full max-w-md overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-raised"
           >
-            <div className="flex items-center justify-between gap-3 border-b border-slate-200 px-4 py-3 dark:border-neutral-700">
+            <div className="flex items-center justify-between gap-3 border-b border-border-default px-4 py-3 dark:border-border-default">
               <h3
                 id="archive-course-title"
-                className="text-sm font-semibold text-slate-900 dark:text-neutral-100"
+                className="text-sm font-semibold text-fg-default"
               >
                 Delete course
               </h3>
@@ -334,14 +334,14 @@ export function CourseArchivedContentSection({ courseCode }: { courseCode: strin
                   if (!archiveCourseBusy) setDeleteCourseConfirmOpen(false)
                 }}
                 disabled={archiveCourseBusy}
-                className="shrink-0 rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
+                className="shrink-0 rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken hover:text-fg-default disabled:cursor-not-allowed disabled:opacity-50 dark:text-fg-muted dark:hover:bg-neutral-700 dark:hover:text-fg-default"
                 aria-label="Close"
               >
                 <X className="h-5 w-5" aria-hidden />
               </button>
             </div>
             <div className="p-4">
-              <p className="text-sm leading-relaxed text-slate-600 dark:text-neutral-300">
+              <p className="text-sm leading-relaxed text-fg-muted">
                 This archives the entire course. It will disappear from your course list, home
                 dashboard, and search. Your content is kept on the server.
               </p>
@@ -350,7 +350,7 @@ export function CourseArchivedContentSection({ courseCode }: { courseCode: strin
                   type="button"
                   onClick={() => setDeleteCourseConfirmOpen(false)}
                   disabled={archiveCourseBusy}
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700/80"
+                  className="rounded-xl border border-border-default bg-surface-raised px-4 py-2 text-sm font-medium text-fg-muted shadow-sm hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-50 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700/80"
                 >
                   Cancel
                 </button>

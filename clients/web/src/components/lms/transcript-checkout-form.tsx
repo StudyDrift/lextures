@@ -96,30 +96,30 @@ export function TranscriptCheckoutForm({
   }
 
   if (loading) {
-    return <p className="mt-5 text-sm text-slate-500">{t('transcripts.checkout.loading')}</p>
+    return <p className="mt-5 text-sm text-fg-muted">{t('transcripts.checkout.loading')}</p>
   }
 
   return (
     <div className="mt-5 space-y-4">
-      <p className="text-sm text-slate-600 dark:text-neutral-400">{t('transcripts.checkout.help')}</p>
+      <p className="text-sm text-fg-muted">{t('transcripts.checkout.help')}</p>
       {error ? (
-        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+        <p role="alert" className="text-sm text-danger-fg">
           {error}
         </p>
       ) : null}
       {quote ? (
         <table className="w-full text-start text-sm" aria-label={t('transcripts.checkout.summaryLabel')}>
           <thead>
-            <tr className="border-b border-slate-200 text-slate-500 dark:border-neutral-800">
+            <tr className="border-b border-border-default text-fg-muted dark:border-border-subtle">
               <th className="py-2 font-medium">{t('transcripts.checkout.line')}</th>
               <th className="py-2 text-end font-medium">{t('transcripts.checkout.amount')}</th>
             </tr>
           </thead>
           <tbody>
             {quote.lines.map((line) => (
-              <tr key={`${line.code}-${line.description}`} className="border-b border-slate-100 dark:border-neutral-900">
-                <td className="py-2 text-slate-800 dark:text-neutral-100">{line.description}</td>
-                <td className="py-2 text-end tabular-nums text-slate-800 dark:text-neutral-100">
+              <tr key={`${line.code}-${line.description}`} className="border-b border-border-subtle dark:border-neutral-900">
+                <td className="py-2 text-fg-default">{line.description}</td>
+                <td className="py-2 text-end tabular-nums text-fg-default">
                   {formatMinor(line.amount, quote.currency)}
                 </td>
               </tr>
@@ -127,10 +127,10 @@ export function TranscriptCheckoutForm({
           </tbody>
           <tfoot>
             <tr>
-              <th className="pt-3 font-semibold text-slate-900 dark:text-neutral-50">
+              <th className="pt-3 font-semibold text-fg-default">
                 {t('transcripts.checkout.total')}
               </th>
-              <td className="pt-3 text-end font-semibold tabular-nums text-slate-900 dark:text-neutral-50">
+              <td className="pt-3 text-end font-semibold tabular-nums text-fg-default">
                 {formatMinor(quote.total, quote.currency)}
               </td>
             </tr>
@@ -139,7 +139,7 @@ export function TranscriptCheckoutForm({
       ) : null}
 
       <div>
-        <label htmlFor={waiverId} className="block text-sm font-medium text-slate-800 dark:text-neutral-100">
+        <label htmlFor={waiverId} className="block text-sm font-medium text-fg-default">
           {t('transcripts.checkout.waiverCode')}
         </label>
         <div className="mt-1 flex gap-2">
@@ -148,14 +148,14 @@ export function TranscriptCheckoutForm({
             type="text"
             value={waiverCode}
             onChange={(e) => setWaiverCode(e.target.value)}
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+            className="w-full rounded-md border border-border-strong bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
             autoComplete="off"
           />
           <button
             type="button"
             onClick={() => void refreshQuote()}
             disabled={busy}
-            className="rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-700"
+            className="rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default"
           >
             {t('transcripts.checkout.apply')}
           </button>
@@ -167,7 +167,7 @@ export function TranscriptCheckoutForm({
           type="button"
           onClick={onCancel}
           disabled={busy}
-          className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium dark:border-neutral-700"
+          className="rounded-md border border-border-strong px-4 py-2 text-sm font-medium dark:border-border-default"
         >
           {t('transcripts.order.cancel')}
         </button>
@@ -175,7 +175,7 @@ export function TranscriptCheckoutForm({
           type="button"
           onClick={() => void handlePay()}
           disabled={busy || !quote}
-          className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
+          className="rounded-md bg-accent-solid px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
         >
           {busy
             ? t('transcripts.checkout.processing')

@@ -342,11 +342,11 @@ export default function CourseCreate() {
       title="Create course"
       titleContent={
         <div className="space-y-3">
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-neutral-100">
+          <h1 className="text-2xl font-semibold tracking-tight text-fg-default">
             Create course
           </h1>
           <nav aria-label="Progress">
-            <ol className="flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500 dark:text-neutral-400">
+            <ol className="flex flex-wrap items-center gap-2 text-xs font-medium text-fg-muted">
               {([1, 2, 3, 4] as const).map((n, idx) => (
                 <li key={n} className="flex items-center gap-2">
                   {idx > 0 ? (
@@ -357,7 +357,7 @@ export default function CourseCreate() {
                       step === n
                         ? 'rounded-full bg-indigo-100 px-2.5 py-1 text-indigo-800 dark:bg-indigo-950/80 dark:text-indigo-100'
                         : step > n
-                          ? 'rounded-full px-2.5 py-1 text-slate-600 dark:text-neutral-300'
+                          ? 'rounded-full px-2.5 py-1 text-fg-muted'
                           : 'rounded-full px-2.5 py-1'
                     }
                   >
@@ -368,14 +368,14 @@ export default function CourseCreate() {
               ))}
             </ol>
           </nav>
-          <p className="text-xs font-medium text-indigo-700 dark:text-indigo-200/90">{stepTitle}</p>
+          <p className="text-xs font-medium text-accent-fg dark:text-indigo-200/90">{stepTitle}</p>
         </div>
       }
       description={descriptionText}
       actions={
         <Link
           to="/courses"
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-900 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-indigo-500/40 dark:hover:bg-indigo-950/40"
+          className="inline-flex items-center gap-2 rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-900 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:border-indigo-500/40 dark:hover:bg-indigo-950/40"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden />
           Back to courses
@@ -385,9 +385,9 @@ export default function CourseCreate() {
       <RequirePermission
         permission={PERM_COURSE_CREATE}
         fallback={
-          <p className="mt-8 max-w-xl rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 dark:border-neutral-700 dark:bg-neutral-900/60 dark:text-neutral-200">
+          <p className="mt-8 max-w-xl rounded-xl border border-border-default bg-surface-base px-4 py-3 text-sm text-fg-muted dark:border-border-default/60 dark:text-fg-default">
             You do not have permission to create courses. Ask an administrator to grant{' '}
-            <code className="rounded bg-slate-200/80 px-1.5 py-0.5 font-mono text-xs dark:bg-neutral-800">
+            <code className="rounded bg-slate-200/80 px-1.5 py-0.5 font-mono text-xs dark:bg-surface-overlay">
               {PERM_COURSE_CREATE}
             </code>
             .
@@ -408,7 +408,7 @@ export default function CourseCreate() {
           {step === 1 && (
             <form className="space-y-5" onSubmit={(e) => void submitBasics(e)}>
               <div>
-                <label htmlFor="course-title" className="text-sm font-medium text-slate-700 dark:text-neutral-200">
+                <label htmlFor="course-title" className="text-sm font-medium text-fg-default">
                   Title
                 </label>
                 <input
@@ -420,14 +420,14 @@ export default function CourseCreate() {
                   placeholder="Introduction to Biology"
                   aria-invalid={error ? true : undefined}
                   aria-describedby={error ? formErrorId : undefined}
-                  className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm outline-none ring-indigo-500/0 transition-[background-color,color,border-color] focus:border-indigo-300 focus:ring-2 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500/60"
+                  className="mt-1.5 w-full rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm text-fg-default shadow-sm outline-none ring-indigo-500/0 transition-[background-color,color,border-color] focus:border-indigo-300 focus:ring-2 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:focus:border-indigo-500/60"
                 />
               </div>
 
               <div>
                 <label
                   htmlFor="course-description"
-                  className="text-sm font-medium text-slate-700 dark:text-neutral-200"
+                  className="text-sm font-medium text-fg-default"
                 >
                   Description
                 </label>
@@ -440,26 +440,22 @@ export default function CourseCreate() {
                   placeholder="Optional overview for the course catalog."
                   aria-invalid={error ? true : undefined}
                   aria-describedby={error ? formErrorId : undefined}
-                  className="mt-1.5 w-full resize-y rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm outline-none ring-indigo-500/0 transition-[background-color,color,border-color] focus:border-indigo-300 focus:ring-2 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500/60"
+                  className="mt-1.5 w-full resize-y rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm text-fg-default shadow-sm outline-none ring-indigo-500/0 transition-[background-color,color,border-color] focus:border-indigo-300 focus:ring-2 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:focus:border-indigo-500/60"
                 />
               </div>
 
               <fieldset className="space-y-3">
-                <legend className="text-sm font-medium text-slate-700 dark:text-neutral-200">Course structure</legend>
-                <p className="text-xs text-slate-600 dark:text-neutral-400">
+                <legend className="text-sm font-medium text-fg-default">Course structure</legend>
+                <p className="text-xs text-fg-muted">
                   Traditional courses behave like a standard LMS outline. Competency-based courses require outcomes and
                   assessments per competency; each competency is a module and the next module stays locked until prior
                   assessments are completed.
                 </p>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <label
-                    className={`flex cursor-pointer flex-col rounded-2xl border p-4 text-start shadow-sm transition-[background-color,color,border-color] ${
-                      courseMode === 'traditional'
-                        ? 'border-indigo-400 bg-indigo-50/80 ring-2 ring-indigo-300/60 dark:border-indigo-500/70 dark:bg-indigo-950/30 dark:ring-indigo-500/40'
-                        : 'border-slate-200 bg-white hover:border-slate-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-neutral-600'
-                    }`}
+                    className={`flex cursor-pointer flex-col rounded-2xl border p-4 text-start shadow-sm transition-[background-color,color,border-color] ${ courseMode === 'traditional' ? 'border-indigo-400 bg-indigo-50/80 ring-2 ring-indigo-300/60 dark:border-indigo-500/70 dark:bg-indigo-950/30 dark:ring-indigo-500/40' : 'border-border-default bg-surface-raised hover:border-border-strong dark:bg-surface-raised dark:hover:border-border-default' }`}
                   >
-                    <span className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-neutral-100">
+                    <span className="flex items-center gap-2 text-sm font-semibold text-fg-default">
                       <input
                         type="radio"
                         name="course-mode"
@@ -470,18 +466,14 @@ export default function CourseCreate() {
                       />
                       Traditional
                     </span>
-                    <span className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-neutral-400">
+                    <span className="mt-2 text-xs leading-relaxed text-fg-muted">
                       Linear modules; visibility follows your publish dates and release rules.
                     </span>
                   </label>
                   <label
-                    className={`flex cursor-pointer flex-col rounded-2xl border p-4 text-start shadow-sm transition-[background-color,color,border-color] ${
-                      courseMode === 'competency_based'
-                        ? 'border-indigo-400 bg-indigo-50/80 ring-2 ring-indigo-300/60 dark:border-indigo-500/70 dark:bg-indigo-950/30 dark:ring-indigo-500/40'
-                        : 'border-slate-200 bg-white hover:border-slate-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-neutral-600'
-                    }`}
+                    className={`flex cursor-pointer flex-col rounded-2xl border p-4 text-start shadow-sm transition-[background-color,color,border-color] ${ courseMode === 'competency_based' ? 'border-indigo-400 bg-indigo-50/80 ring-2 ring-indigo-300/60 dark:border-indigo-500/70 dark:bg-indigo-950/30 dark:ring-indigo-500/40' : 'border-border-default bg-surface-raised hover:border-border-strong dark:bg-surface-raised dark:hover:border-border-default' }`}
                   >
-                    <span className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-neutral-100">
+                    <span className="flex items-center gap-2 text-sm font-semibold text-fg-default">
                       <input
                         type="radio"
                         name="course-mode"
@@ -492,7 +484,7 @@ export default function CourseCreate() {
                       />
                       Competency-based
                     </span>
-                    <span className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-neutral-400">
+                    <span className="mt-2 text-xs leading-relaxed text-fg-muted">
                       Outcomes, sub-outcomes, and assessments per competency; sequential unlock between modules.
                     </span>
                   </label>
@@ -503,15 +495,15 @@ export default function CourseCreate() {
                 <div>
                   <label
                     htmlFor="course-term"
-                    className="text-sm font-medium text-slate-700 dark:text-neutral-200"
+                    className="text-sm font-medium text-fg-default"
                   >
-                    Academic term <span className="font-normal text-slate-500">(optional)</span>
+                    Academic term <span className="font-normal text-fg-muted">(optional)</span>
                   </label>
                   <select
                     id="course-term"
                     value={selectedTermId}
                     onChange={(e) => setSelectedTermId(e.target.value)}
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 shadow-sm outline-none ring-indigo-500/0 transition-[background-color,color,border-color] focus:border-indigo-300 focus:ring-2 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500/60"
+                    className="mt-1.5 w-full rounded-xl border border-border-default bg-surface-raised px-2 py-1.5 text-sm text-fg-default shadow-sm outline-none ring-indigo-500/0 transition-[background-color,color,border-color] focus:border-indigo-300 focus:ring-2 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:focus:border-indigo-500/60"
                     aria-label="Academic term for default schedule dates"
                   >
                     <option value="">No term — self-paced or ongoing</option>
@@ -521,7 +513,7 @@ export default function CourseCreate() {
                       </option>
                     ))}
                   </select>
-                  <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">
+                  <p className="mt-1 text-xs text-fg-muted">
                     When selected, the course schedule dates default to the term window. You can still adjust them in
                     course settings.
                   </p>
@@ -531,9 +523,9 @@ export default function CourseCreate() {
               <div>
                 <label
                   htmlFor="course-grade-level"
-                  className="text-sm font-medium text-slate-700 dark:text-neutral-200"
+                  className="text-sm font-medium text-fg-default"
                 >
-                  Grade levels <span className="font-normal text-slate-500">(optional)</span>
+                  Grade levels <span className="font-normal text-fg-muted">(optional)</span>
                 </label>
                 <div className="mt-1.5">
                   <GradeLevelMultiSelect
@@ -549,14 +541,14 @@ export default function CourseCreate() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Continue
                   <ChevronRight className="h-4 w-4" aria-hidden />
                 </button>
                 <Link
                   to="/courses"
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+                  className="rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
                 >
                   Cancel
                 </Link>
@@ -566,7 +558,7 @@ export default function CourseCreate() {
 
           {step === 2 && (
             <div className="space-y-5">
-              <p className="text-sm text-slate-600 dark:text-neutral-300">
+              <p className="text-sm text-fg-muted">
                 Templates add editable syllabus sections. Choose <strong className="font-semibold">Blank syllabus</strong> if
                 you prefer to build from scratch.
               </p>
@@ -574,21 +566,17 @@ export default function CourseCreate() {
                 <button
                   type="button"
                   onClick={() => setSelectedTemplateId(BLANK_TEMPLATE_ID)}
-                  className={`flex flex-col rounded-2xl border p-4 text-start shadow-sm transition-[background-color,color,border-color] ${
-                    selectedTemplateId === BLANK_TEMPLATE_ID
-                      ? 'border-indigo-400 bg-indigo-50/80 ring-2 ring-indigo-300/60 dark:border-indigo-500/70 dark:bg-indigo-950/30 dark:ring-indigo-500/40'
-                      : 'border-slate-200 bg-white hover:border-slate-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-neutral-600'
-                  }`}
+                  className={`flex flex-col rounded-2xl border p-4 text-start shadow-sm transition-[background-color,color,border-color] ${ selectedTemplateId === BLANK_TEMPLATE_ID ? 'border-indigo-400 bg-indigo-50/80 ring-2 ring-indigo-300/60 dark:border-indigo-500/70 dark:bg-indigo-950/30 dark:ring-indigo-500/40' : 'border-border-default bg-surface-raised hover:border-border-strong dark:bg-surface-raised dark:hover:border-border-default' }`}
                 >
-                  <span className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-neutral-100">
-                    <FileText className="h-5 w-5 text-slate-500 dark:text-neutral-400" aria-hidden />
+                  <span className="flex items-center gap-2 text-sm font-semibold text-fg-default">
+                    <FileText className="h-5 w-5 text-fg-muted" aria-hidden />
                     Blank syllabus
                   </span>
-                  <span className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-neutral-400">
+                  <span className="mt-2 text-xs leading-relaxed text-fg-muted">
                     No prefilled sections — add them later under Syllabus.
                   </span>
                   {selectedTemplateId === BLANK_TEMPLATE_ID ? (
-                    <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-indigo-700 dark:text-indigo-200">
+                    <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-accent-fg dark:text-indigo-200">
                       <Check className="h-3.5 w-3.5" aria-hidden />
                       Selected
                     </span>
@@ -601,21 +589,17 @@ export default function CourseCreate() {
                       key={tmpl.id}
                       type="button"
                       onClick={() => setSelectedTemplateId(tmpl.id)}
-                      className={`flex flex-col rounded-2xl border p-4 text-start shadow-sm transition-[background-color,color,border-color] ${
-                        selected
-                          ? 'border-indigo-400 bg-indigo-50/80 ring-2 ring-indigo-300/60 dark:border-indigo-500/70 dark:bg-indigo-950/30 dark:ring-indigo-500/40'
-                          : 'border-slate-200 bg-white hover:border-slate-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-neutral-600'
-                      }`}
+                      className={`flex flex-col rounded-2xl border p-4 text-start shadow-sm transition-[background-color,color,border-color] ${ selected ? 'border-indigo-400 bg-indigo-50/80 ring-2 ring-indigo-300/60 dark:border-indigo-500/70 dark:bg-indigo-950/30 dark:ring-indigo-500/40' : 'border-border-default bg-surface-raised hover:border-border-strong dark:bg-surface-raised dark:hover:border-border-default' }`}
                     >
-                      <span className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-neutral-100">
+                      <span className="flex items-center gap-2 text-sm font-semibold text-fg-default">
                         <LayoutList className="h-5 w-5 text-indigo-500 dark:text-indigo-300" aria-hidden />
                         {tmpl.name}
                       </span>
-                      <span className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-neutral-400">
+                      <span className="mt-2 text-xs leading-relaxed text-fg-muted">
                         {tmpl.summary}
                       </span>
                       {selected ? (
-                        <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-indigo-700 dark:text-indigo-200">
+                        <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-accent-fg dark:text-indigo-200">
                           <Check className="h-3.5 w-3.5" aria-hidden />
                           Selected
                         </span>
@@ -629,7 +613,7 @@ export default function CourseCreate() {
                   type="button"
                   disabled={submitting}
                   onClick={() => void continueFromSyllabusStep()}
-                  className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Continue
                   <ChevronRight className="h-4 w-4" aria-hidden />
@@ -638,7 +622,7 @@ export default function CourseCreate() {
                   type="button"
                   disabled={submitting}
                   onClick={goBack}
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+                  className="rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
                 >
                   Back
                 </button>
@@ -648,13 +632,13 @@ export default function CourseCreate() {
 
           {step === 3 && !isCompetency && (
             <div className="space-y-5">
-              <p className="text-sm text-slate-600 dark:text-neutral-300">
+              <p className="text-sm text-fg-muted">
                 Modules organize pages, assignments, and quizzes. You can rename, reorder, and add items anytime.
               </p>
               <div>
                 <label
                   htmlFor="first-module-title"
-                  className="text-sm font-medium text-slate-700 dark:text-neutral-200"
+                  className="text-sm font-medium text-fg-default"
                 >
                   First module title
                 </label>
@@ -664,7 +648,7 @@ export default function CourseCreate() {
                   onChange={(e) => setFirstModuleTitle(e.target.value)}
                   maxLength={500}
                   placeholder="e.g. Week 1: Introduction"
-                  className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm outline-none ring-indigo-500/0 transition-[background-color,color,border-color] focus:border-indigo-300 focus:ring-2 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500/60"
+                  className="mt-1.5 w-full rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm text-fg-default shadow-sm outline-none ring-indigo-500/0 transition-[background-color,color,border-color] focus:border-indigo-300 focus:ring-2 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:focus:border-indigo-500/60"
                 />
               </div>
               <div className="flex flex-wrap gap-3">
@@ -672,7 +656,7 @@ export default function CourseCreate() {
                   type="button"
                   disabled={submitting}
                   onClick={() => continueFromTraditionalStep(false)}
-                  className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Continue
                   <ChevronRight className="h-4 w-4" aria-hidden />
@@ -681,7 +665,7 @@ export default function CourseCreate() {
                   type="button"
                   disabled={submitting}
                   onClick={() => continueFromTraditionalStep(true)}
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+                  className="rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
                 >
                   Skip module
                 </button>
@@ -689,7 +673,7 @@ export default function CourseCreate() {
                   type="button"
                   disabled={submitting}
                   onClick={goBack}
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+                  className="rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
                 >
                   Back
                 </button>
@@ -699,7 +683,7 @@ export default function CourseCreate() {
 
           {step === 3 && isCompetency && (
             <div className="space-y-6">
-              <p className="text-sm text-slate-600 dark:text-neutral-300">
+              <p className="text-sm text-fg-muted">
                 Each competency becomes one published module. Add sub-outcomes, then an assessment (quiz or assignment)
                 for each sub-outcome. You can edit questions and pages after setup.
               </p>
@@ -708,10 +692,10 @@ export default function CourseCreate() {
                 {competencies.map((comp, ci) => (
                   <div
                     key={ci}
-                    className="rounded-2xl border border-slate-200 bg-slate-50/60 p-4 dark:border-neutral-700 dark:bg-neutral-900/40"
+                    className="rounded-2xl border border-border-default bg-slate-50/60 p-4 dark:border-border-default/40"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3">
-                      <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+                      <h2 className="text-sm font-semibold text-fg-default">
                         Competency {ci + 1}
                       </h2>
                       {competencies.length > 1 ? (
@@ -727,7 +711,7 @@ export default function CourseCreate() {
                     </div>
                     <div className="mt-3 space-y-3">
                       <div>
-                        <label className="text-xs font-medium text-slate-600 dark:text-neutral-400">Module title</label>
+                        <label className="text-xs font-medium text-fg-muted">Module title</label>
                         <input
                           value={comp.title}
                           onChange={(e) => {
@@ -736,11 +720,11 @@ export default function CourseCreate() {
                           }}
                           maxLength={500}
                           placeholder="e.g. Patient assessment"
-                          className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+                          className="mt-1 w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base dark:text-fg-default"
                         />
                       </div>
                       <div>
-                        <label className="text-xs font-medium text-slate-600 dark:text-neutral-400">
+                        <label className="text-xs font-medium text-fg-muted">
                           Outcome description
                         </label>
                         <textarea
@@ -752,20 +736,20 @@ export default function CourseCreate() {
                           rows={2}
                           maxLength={20000}
                           placeholder="What learners will demonstrate in this competency"
-                          className="mt-1 w-full resize-y rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+                          className="mt-1 w-full resize-y rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base dark:text-fg-default"
                         />
                       </div>
                     </div>
 
-                    <div className="mt-4 space-y-4 border-t border-slate-200 pt-4 dark:border-neutral-700">
-                      <p className="text-xs font-medium text-slate-600 dark:text-neutral-400">Sub-outcomes & assessments</p>
+                    <div className="mt-4 space-y-4 border-t border-border-default pt-4 dark:border-border-default">
+                      <p className="text-xs font-medium text-fg-muted">Sub-outcomes & assessments</p>
                       {comp.subOutcomes.map((sub, sj) => (
                         <div
                           key={sj}
-                          className="rounded-xl border border-slate-200 bg-white p-3 dark:border-neutral-600 dark:bg-neutral-950"
+                          className="rounded-xl border border-border-default bg-surface-raised p-3 dark:border-border-default dark:bg-surface-base"
                         >
                           <div className="flex flex-wrap items-center justify-between gap-2">
-                            <span className="text-xs font-semibold text-slate-700 dark:text-neutral-200">
+                            <span className="text-xs font-semibold text-fg-default">
                               Sub-outcome {sj + 1}
                             </span>
                             {comp.subOutcomes.length > 1 ? (
@@ -806,7 +790,7 @@ export default function CourseCreate() {
                             }}
                             maxLength={500}
                             placeholder="Sub-outcome title"
-                            className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+                            className="mt-2 w-full rounded-lg border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
                           />
                           <textarea
                             value={sub.description}
@@ -828,11 +812,11 @@ export default function CourseCreate() {
                             rows={2}
                             maxLength={20000}
                             placeholder="Optional detail"
-                            className="mt-2 w-full resize-y rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+                            className="mt-2 w-full resize-y rounded-lg border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
                           />
                           <div className="mt-2 grid gap-2 sm:grid-cols-2">
                             <div>
-                              <label className="text-xs text-slate-600 dark:text-neutral-400">Assessment title</label>
+                              <label className="text-xs text-fg-muted">Assessment title</label>
                               <input
                                 value={sub.assessmentTitle}
                                 onChange={(e) => {
@@ -852,11 +836,11 @@ export default function CourseCreate() {
                                 }}
                                 maxLength={500}
                                 placeholder="e.g. Check-in quiz"
-                                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+                                className="mt-1 w-full rounded-lg border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
                               />
                             </div>
                             <div>
-                              <label className="text-xs text-slate-600 dark:text-neutral-400">Type</label>
+                              <label className="text-xs text-fg-muted">Type</label>
                               <select
                                 value={sub.assessmentKind}
                                 onChange={(e) => {
@@ -874,7 +858,7 @@ export default function CourseCreate() {
                                     ),
                                   )
                                 }}
-                                className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+                                className="mt-1 w-full rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
                               >
                                 <option value="quiz">Quiz</option>
                                 <option value="assignment">Assignment</option>
@@ -885,7 +869,7 @@ export default function CourseCreate() {
                       ))}
                       <button
                         type="button"
-                        className="inline-flex items-center gap-1 text-sm font-semibold text-indigo-700 hover:underline dark:text-indigo-300"
+                        className="inline-flex items-center gap-1 text-sm font-semibold text-accent-fg hover:underline dark:text-indigo-300"
                         onClick={() =>
                           setCompetencies((rows) =>
                             rows.map((r, i) => (i === ci ? { ...r, subOutcomes: [...r.subOutcomes, emptySubOutcome()] } : r)),
@@ -914,7 +898,7 @@ export default function CourseCreate() {
                   type="button"
                   disabled={submitting}
                   onClick={() => continueFromCompetencyStep()}
-                  className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Continue
                   <ChevronRight className="h-4 w-4" aria-hidden />
@@ -923,7 +907,7 @@ export default function CourseCreate() {
                   type="button"
                   disabled={submitting}
                   onClick={goBack}
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+                  className="rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
                 >
                   Back
                 </button>
@@ -933,7 +917,7 @@ export default function CourseCreate() {
 
           {step === 4 && createdCourse && (
             <div className="space-y-5">
-              <p className="text-sm text-slate-600 dark:text-neutral-300">
+              <p className="text-sm text-fg-muted">
                 Turn tools on or off for everyone in this course. Disabled tools disappear from the course menu. You can
                 change these anytime in course settings.
               </p>
@@ -951,7 +935,7 @@ export default function CourseCreate() {
                       ? finishCompetencyBased()
                       : finishTraditional(skipFirstModule))
                   }
-                  className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <Sparkles className="h-4 w-4" aria-hidden />
                   {isCompetency
@@ -964,7 +948,7 @@ export default function CourseCreate() {
                   type="button"
                   disabled={submitting}
                   onClick={goBack}
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+                  className="rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
                 >
                   Back
                 </button>

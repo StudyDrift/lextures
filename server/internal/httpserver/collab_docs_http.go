@@ -47,11 +47,6 @@ func docJSON(d collabdocs.Doc) map[string]any {
 // handleListCollabDocs is GET /api/v1/courses/{course_code}/collab-docs.
 func (d Deps) handleListCollabDocs() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, _, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -85,11 +80,6 @@ func (d Deps) handleCreateCollabDoc() http.HandlerFunc {
 		DocType string `json:"docType"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -133,11 +123,6 @@ func (d Deps) handleCreateCollabDoc() http.HandlerFunc {
 // handleGetCollabDoc is GET /api/v1/courses/{course_code}/collab-docs/{doc_id}.
 func (d Deps) handleGetCollabDoc() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, _, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -176,11 +161,6 @@ func (d Deps) handlePatchCollabDoc() http.HandlerFunc {
 		Title *string `json:"title"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, _, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -225,11 +205,6 @@ func (d Deps) handlePatchCollabDoc() http.HandlerFunc {
 // handleDeleteCollabDoc is DELETE /api/v1/courses/{course_code}/collab-docs/{doc_id}.
 func (d Deps) handleDeleteCollabDoc() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodDelete {
-			w.Header().Set("Allow", http.MethodDelete)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -268,11 +243,6 @@ func (d Deps) handleDeleteCollabDoc() http.HandlerFunc {
 // handleGetCollabDocSnapshots is GET /api/v1/courses/{course_code}/collab-docs/{doc_id}/snapshots.
 func (d Deps) handleGetCollabDocSnapshots() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return

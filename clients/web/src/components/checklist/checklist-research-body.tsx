@@ -5,27 +5,27 @@ import remarkGfm from 'remark-gfm'
 import researchMarkdown from '../../content/checklist/research.md?raw'
 import { buildSourceIndex, sourceToAnchorId } from '../../lib/checklist-research-anchors'
 
-const proseClassName = `space-y-4 text-sm leading-relaxed text-slate-700 dark:text-neutral-200
-  [&_a]:font-medium [&_a]:text-indigo-700 [&_a]:underline-offset-2 hover:[&_a]:underline
+const proseClassName = `space-y-4 text-sm leading-relaxed text-fg-default
+  [&_a]:font-medium [&_a]:text-accent-fg [&_a]:underline-offset-2 hover:[&_a]:underline
   dark:[&_a]:text-indigo-300
-  [&_h1]:text-2xl [&_h1]:font-semibold [&_h1]:text-slate-900 dark:[&_h1]:text-neutral-50
-  [&_h2]:mt-8 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-slate-900 dark:[&_h2]:text-neutral-50
-  [&_h3]:mt-6 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-slate-900 dark:[&_h3]:text-neutral-50
+  [&_h1]:text-2xl [&_h1]:font-semibold [&_h1]:text-fg-default dark:[&_h1]:text-neutral-50
+  [&_h2]:mt-8 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-fg-default dark:[&_h2]:text-neutral-50
+  [&_h3]:mt-6 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-fg-default dark:[&_h3]:text-neutral-50
   [&_p]:my-3
   [&_ul]:my-3 [&_ul]:list-disc [&_ul]:pl-5
   [&_ol]:my-3 [&_ol]:list-decimal [&_ol]:pl-5
   [&_li]:my-1
-  [&_blockquote]:border-l-4 [&_blockquote]:border-slate-200 [&_blockquote]:pl-3
-  dark:[&_blockquote]:border-neutral-700
+  [&_blockquote]:border-l-4 [&_blockquote]:border-border-default [&_blockquote]:pl-3
+  dark:[&_blockquote]:border-border-default
   [&_table]:my-4 [&_table]:w-full [&_table]:border-collapse [&_table]:text-left [&_table]:text-xs
   sm:[&_table]:text-sm
-  [&_th]:border-b [&_th]:border-slate-200 [&_th]:bg-slate-100 [&_th]:px-2 [&_th]:py-2 [&_th]:font-semibold
-  dark:[&_th]:border-neutral-700 dark:[&_th]:bg-neutral-900
-  [&_td]:border-b [&_td]:border-slate-100 [&_td]:px-2 [&_td]:py-2 align-top
-  dark:[&_td]:border-neutral-800
-  [&_code]:rounded [&_code]:bg-slate-100 [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-[0.9em]
-  dark:[&_code]:bg-neutral-800
-  [&_hr]:my-8 [&_hr]:border-slate-200 dark:[&_hr]:border-neutral-800`
+  [&_th]:border-b [&_th]:border-border-default [&_th]:bg-surface-sunken [&_th]:px-2 [&_th]:py-2 [&_th]:font-semibold
+  dark:[&_th]:border-border-default dark:[&_th]:bg-surface-raised
+  [&_td]:border-b [&_td]:border-border-subtle [&_td]:px-2 [&_td]:py-2 align-top
+  dark:[&_td]:border-border-subtle
+  [&_code]:rounded [&_code]:bg-surface-sunken [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-[0.9em]
+  dark:[&_code]:bg-surface-overlay
+  [&_hr]:my-8 [&_hr]:border-border-default dark:[&_hr]:border-border-subtle`
 
 type Props = {
   className?: string
@@ -91,7 +91,7 @@ export function ChecklistResearchBody({ className = '', focusSource, scrollRootR
               if (href.startsWith('#')) {
                 return <a href={href}>{children}</a>
               }
-              return <span className="font-medium text-slate-800 dark:text-neutral-100">{children}</span>
+              return <span className="font-medium text-fg-default">{children}</span>
             },
           }}
         >
@@ -99,11 +99,11 @@ export function ChecklistResearchBody({ className = '', focusSource, scrollRootR
         </ReactMarkdown>
       </article>
 
-      <section className="mt-10 border-t border-slate-200 pt-8 dark:border-neutral-800" aria-labelledby="standards-index-heading">
+      <section className="mt-10 border-t border-border-default pt-8 dark:border-border-subtle" aria-labelledby="standards-index-heading">
         <h2 id="standards-index-heading" className="!mt-0">
           Standards index
         </h2>
-        <p className="text-sm text-slate-600 dark:text-neutral-400">
+        <p className="text-sm text-fg-muted">
           Each source chip on the checklist links here. Use these anchors to share a specific standard.
         </p>
         <ul className="!list-none !pl-0 space-y-4">
@@ -111,14 +111,14 @@ export function ChecklistResearchBody({ className = '', focusSource, scrollRootR
             <li
               key={entry.anchorId}
               id={entry.anchorId}
-              className="scroll-mt-4 rounded-lg border border-slate-200 bg-slate-50/80 p-4 dark:border-neutral-700 dark:bg-neutral-900/60"
+              className="scroll-mt-4 rounded-lg border border-border-default bg-slate-50/80 p-4 dark:border-border-default/60"
             >
-              <h3 className="!mt-0 text-base font-semibold text-slate-900 dark:text-neutral-50">
+              <h3 className="!mt-0 text-base font-semibold text-fg-default">
                 <a href={`#${entry.anchorId}`} className="!no-underline hover:!underline">
                   {entry.source}
                 </a>
               </h3>
-              <p className="!my-1 text-xs text-slate-500 dark:text-neutral-400">
+              <p className="!my-1 text-xs text-fg-muted">
                 Checklist items that cite this source:
               </p>
               <ul className="!my-1 !list-disc !pl-5 text-sm">

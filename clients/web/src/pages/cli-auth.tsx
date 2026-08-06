@@ -42,30 +42,30 @@ export default function CliAuthPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-4 py-12">
-      <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-        <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-surface-base px-4 py-12">
+      <div className="w-full max-w-sm rounded-2xl border border-border-default bg-surface-raised p-8 shadow-sm">
+        <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-accent-fg">
           <Terminal className="h-6 w-6" aria-hidden />
         </div>
 
         {status === 'approved' ? (
           <>
-            <h1 className="text-xl font-semibold text-slate-900">CLI access granted</h1>
-            <p className="mt-2 text-sm leading-relaxed text-slate-500">
+            <h1 className="text-xl font-semibold text-fg-default">CLI access granted</h1>
+            <p className="mt-2 text-sm leading-relaxed text-fg-muted">
               You can close this tab. Your terminal should now be authenticated.
             </p>
           </>
         ) : status === 'error' ? (
           <>
-            <h1 className="text-xl font-semibold text-slate-900">Something went wrong</h1>
+            <h1 className="text-xl font-semibold text-fg-default">Something went wrong</h1>
             <p className="mt-2 text-sm text-rose-600" role="alert">
               {errorMsg}
             </p>
           </>
         ) : (
           <>
-            <h1 className="text-xl font-semibold text-slate-900">Approve CLI access</h1>
-            <p className="mt-2 text-sm leading-relaxed text-slate-500">
+            <h1 className="text-xl font-semibold text-fg-default">Approve CLI access</h1>
+            <p className="mt-2 text-sm leading-relaxed text-fg-muted">
               A Lextures CLI session is requesting access to your account. Only approve if you
               initiated this from your terminal.
             </p>
@@ -73,7 +73,7 @@ export default function CliAuthPage() {
               type="button"
               onClick={handleApprove}
               disabled={status === 'approving'}
-              className="mt-6 w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+              className="mt-6 w-full rounded-lg bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
             >
               {status === 'approving' ? 'Approving…' : 'Approve'}
             </button>

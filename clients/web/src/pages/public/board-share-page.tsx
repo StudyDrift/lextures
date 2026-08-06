@@ -78,61 +78,61 @@ export default function BoardSharePage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 py-8 text-slate-900 dark:bg-neutral-950 dark:text-neutral-100">
+    <div className="min-h-screen bg-surface-base px-4 py-8 text-fg-default dark:bg-surface-base dark:text-fg-default">
       <div className="mx-auto max-w-2xl">
-        <p className="text-sm font-medium text-slate-500 dark:text-neutral-400">{t('boards.share.publicLabel')}</p>
+        <p className="text-sm font-medium text-fg-muted">{t('boards.share.publicLabel')}</p>
         {loading ? (
           <p className="mt-6 text-sm">{t('common.loading')}</p>
         ) : needsPassword && !board ? (
           <form
-            className="mt-6 space-y-3 rounded-lg border border-slate-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900"
+            className="mt-6 space-y-3 rounded-lg border border-border-default bg-surface-raised p-4 dark:border-border-subtle dark:bg-surface-raised"
             onSubmit={(e) => {
               e.preventDefault()
               void load(password)
             }}
           >
             <h1 className="text-xl font-semibold">{t('boards.share.passwordPrompt')}</h1>
-            {error ? <p className="text-sm text-red-600">{error}</p> : null}
+            {error ? <p className="text-sm text-danger-fg">{error}</p> : null}
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-md border border-slate-300 px-3 py-2 pe-16 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+                className="w-full rounded-md border border-border-strong px-3 py-2 pe-16 text-sm dark:border-border-default dark:bg-surface-overlay"
                 aria-label={t('boards.share.passwordOptional')}
                 autoComplete="current-password"
               />
               <button
                 type="button"
-                className="absolute end-2 top-1/2 -translate-y-1/2 text-xs text-slate-500"
+                className="absolute end-2 top-1/2 -translate-y-1/2 text-xs text-fg-muted"
                 onClick={() => setShowPassword((v) => !v)}
               >
                 {showPassword ? t('boards.share.hidePassword') : t('boards.share.showPassword')}
               </button>
             </div>
-            <button type="submit" className="rounded-md bg-indigo-600 px-3 py-2 text-sm text-white">
+            <button type="submit" className="rounded-md bg-accent-solid px-3 py-2 text-sm text-white">
               {t('boards.share.unlock')}
             </button>
           </form>
         ) : error && !board ? (
-          <p className="mt-6 text-sm text-red-600">{error}</p>
+          <p className="mt-6 text-sm text-danger-fg">{error}</p>
         ) : board ? (
           <>
             <h1 className="mt-2 text-2xl font-semibold">{board.title}</h1>
             {board.description ? (
-              <p className="mt-1 text-sm text-slate-600 dark:text-neutral-300">{board.description}</p>
+              <p className="mt-1 text-sm text-fg-muted">{board.description}</p>
             ) : null}
             {capability === 'view' ? (
-              <p className="mt-2 text-xs text-slate-500">{t('boards.share.readOnly')}</p>
+              <p className="mt-2 text-xs text-fg-muted">{t('boards.share.readOnly')}</p>
             ) : null}
             {capability === 'contribute' ? (
-              <div className="mt-4 space-y-2 rounded-lg border border-slate-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+              <div className="mt-4 space-y-2 rounded-lg border border-border-default bg-surface-raised p-4 dark:border-border-subtle dark:bg-surface-raised">
                 <label className="block text-sm font-medium">
                   {t('boards.share.displayName')}
                   <input
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
-                    className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+                    className="mt-1 w-full rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
                   />
                 </label>
                 <label className="block text-sm font-medium">
@@ -141,13 +141,13 @@ export default function BoardSharePage() {
                     value={draft}
                     onChange={(e) => setDraft(e.target.value)}
                     rows={3}
-                    className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+                    className="mt-1 w-full rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
                   />
                 </label>
                 <button
                   type="button"
                   onClick={() => void submitPost()}
-                  className="rounded-md bg-indigo-600 px-3 py-2 text-sm text-white"
+                  className="rounded-md bg-accent-solid px-3 py-2 text-sm text-white"
                 >
                   {t('boards.share.postAsGuest')}
                 </button>
@@ -157,7 +157,7 @@ export default function BoardSharePage() {
               {posts.map((p) => (
                 <li
                   key={p.id}
-                  className="rounded-lg border border-slate-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900"
+                  className="rounded-lg border border-border-default bg-surface-raised p-4 dark:border-border-subtle dark:bg-surface-raised"
                 >
                   {p.title ? <h2 className="font-medium">{p.title}</h2> : null}
                   <p className="mt-1 whitespace-pre-wrap text-sm">
@@ -166,7 +166,7 @@ export default function BoardSharePage() {
                       : ''}
                   </p>
                   {p.guestDisplayName ? (
-                    <p className="mt-2 text-xs text-slate-500">{p.guestDisplayName}</p>
+                    <p className="mt-2 text-xs text-fg-muted">{p.guestDisplayName}</p>
                   ) : null}
                 </li>
               ))}

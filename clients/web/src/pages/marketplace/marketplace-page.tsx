@@ -35,7 +35,7 @@ const SORTS = [
 ] as const
 
 const selectClassName =
-  'mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100'
+  'mt-1 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm text-fg-default shadow-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 dark:border-border-default dark:bg-surface-base dark:text-fg-default'
 
 function MarketplaceCourseCard({
   course,
@@ -50,7 +50,7 @@ function MarketplaceCourseCard({
 }) {
   const accessibleName = marketplaceCardAccessibleName(course, freeLabel, ownedLabel, locale)
   return (
-    <article className="relative flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm motion-safe:transition-[box-shadow,border-color] hover:border-indigo-200 hover:shadow-md dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-indigo-800">
+    <article className="relative flex flex-col overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-sm motion-safe:transition-[box-shadow,border-color] hover:border-indigo-200 hover:shadow-md dark:border-border-default dark:bg-surface-raised dark:hover:border-indigo-800">
       {course.heroImageUrl ? (
         <CourseHeroImage
           src={course.heroImageUrl}
@@ -62,10 +62,10 @@ function MarketplaceCourseCard({
         <div className="h-40 w-full bg-gradient-to-br from-indigo-100 to-sky-100 dark:from-indigo-950 dark:to-sky-950" />
       )}
       <div className="flex flex-1 flex-col gap-2 p-4">
-        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-neutral-400">
+        <div className="flex flex-wrap items-center gap-2 text-xs text-fg-muted">
           {course.category ? <span>{course.category}</span> : null}
           {course.level ? (
-            <span className="rounded-full bg-slate-100 px-2 py-0.5 capitalize dark:bg-neutral-800">
+            <span className="rounded-full bg-surface-sunken px-2 py-0.5 capitalize dark:bg-surface-overlay">
               {course.level}
             </span>
           ) : null}
@@ -78,7 +78,7 @@ function MarketplaceCourseCard({
             </span>
           ) : null}
         </div>
-        <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">
+        <h2 className="text-base font-semibold text-fg-default">
           <Link
             to={`/marketplace/${encodeURIComponent(course.slug || course.courseCode)}`}
             className="after:absolute after:inset-0 focus:outline-none focus-visible:underline"
@@ -89,7 +89,7 @@ function MarketplaceCourseCard({
           </Link>
         </h2>
         {course.instructorName ? (
-          <p className="text-sm text-slate-600 dark:text-neutral-300">{course.instructorName}</p>
+          <p className="text-sm text-fg-muted">{course.instructorName}</p>
         ) : null}
         <div className="mt-auto flex items-center justify-between gap-2 pt-2 text-sm">
           <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
@@ -99,9 +99,9 @@ function MarketplaceCourseCard({
                 <span>{course.averageRating.toFixed(1)}</span>
               </>
             ) : (
-              <span className="text-slate-400 dark:text-neutral-500">—</span>
+              <span className="text-fg-subtle">—</span>
             )}
-            <span className="ms-2 text-slate-500 dark:text-neutral-400">
+            <span className="ms-2 text-fg-muted">
               {course.enrollmentCount.toLocaleString()}
             </span>
           </span>
@@ -249,20 +249,20 @@ export default function MarketplacePage() {
       <form
         role="search"
         aria-label={t('marketplace.filters.label')}
-        className="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-900"
+        className="mb-6 rounded-2xl border border-border-default bg-surface-raised p-4 shadow-sm dark:border-border-default dark:bg-surface-raised"
         onSubmit={(e) => e.preventDefault()}
       >
         <div className="flex flex-wrap items-end gap-3">
           <div className="min-w-[200px] flex-1">
             <label
               htmlFor={searchId}
-              className="text-sm font-medium text-slate-700 dark:text-neutral-200"
+              className="text-sm font-medium text-fg-default"
             >
               {t('marketplace.searchPlaceholder')}
             </label>
             <div className="relative mt-1">
               <Search
-                className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+                className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-subtle"
                 aria-hidden
               />
               <input
@@ -271,7 +271,7 @@ export default function MarketplacePage() {
                 value={queryText}
                 onChange={(e) => setQueryText(e.target.value)}
                 placeholder={t('marketplace.searchPlaceholder')}
-                className="w-full rounded-xl border border-slate-200 py-2 ps-9 pe-3 text-sm text-slate-900 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                className="w-full rounded-xl border border-border-default py-2 ps-9 pe-3 text-sm text-fg-default outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
                 data-testid="marketplace-search"
               />
             </div>
@@ -280,7 +280,7 @@ export default function MarketplacePage() {
           <div className="min-w-36">
             <label
               htmlFor="marketplace-filter-category"
-              className="text-sm font-medium text-slate-700 dark:text-neutral-200"
+              className="text-sm font-medium text-fg-default"
             >
               {t('marketplace.filters.category')}
             </label>
@@ -303,7 +303,7 @@ export default function MarketplacePage() {
           <div className="min-w-32">
             <label
               htmlFor="marketplace-filter-level"
-              className="text-sm font-medium text-slate-700 dark:text-neutral-200"
+              className="text-sm font-medium text-fg-default"
             >
               {t('marketplace.filters.level')}
             </label>
@@ -325,7 +325,7 @@ export default function MarketplacePage() {
           <div className="min-w-32">
             <label
               htmlFor="marketplace-filter-price"
-              className="text-sm font-medium text-slate-700 dark:text-neutral-200"
+              className="text-sm font-medium text-fg-default"
             >
               {t('marketplace.filters.price')}
             </label>
@@ -347,7 +347,7 @@ export default function MarketplacePage() {
           <div className="min-w-40">
             <label
               htmlFor="marketplace-sort"
-              className="text-sm font-medium text-slate-700 dark:text-neutral-200"
+              className="text-sm font-medium text-fg-default"
             >
               {t('marketplace.sort.label')}
             </label>
@@ -368,7 +368,7 @@ export default function MarketplacePage() {
         </div>
       </form>
 
-      <p className="mb-4 text-sm text-slate-600 dark:text-neutral-400" aria-live="polite">
+      <p className="mb-4 text-sm text-fg-muted" aria-live="polite">
         {loading ? t('marketplace.loading') : t('marketplace.resultsCount', { count: total })}
       </p>
 
@@ -381,7 +381,7 @@ export default function MarketplacePage() {
           <p>{error}</p>
           <button
             type="button"
-            className="mt-3 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            className="mt-3 rounded-xl border border-border-default bg-surface-raised px-3 py-1.5 text-sm font-semibold text-fg-muted shadow-sm hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
             onClick={() => setRetryToken((n) => n + 1)}
             data-testid="marketplace-retry"
           >
@@ -397,7 +397,7 @@ export default function MarketplacePage() {
           {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={i}
-              className="h-72 motion-safe:animate-pulse rounded-2xl bg-slate-100 dark:bg-neutral-800"
+              className="h-72 motion-safe:animate-pulse rounded-2xl bg-surface-sunken"
               data-testid="marketplace-skeleton"
             />
           ))}
@@ -427,7 +427,7 @@ export default function MarketplacePage() {
               <button
                 type="button"
                 onClick={loadMore}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                className="rounded-xl border border-border-default bg-surface-raised px-4 py-2 text-sm font-semibold text-fg-muted shadow-sm hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
                 data-testid="marketplace-load-more"
               >
                 {t('marketplace.loadMore')}

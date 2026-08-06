@@ -30,7 +30,7 @@ function RatingQuestion({
   }
   return (
     <fieldset className="mb-6">
-      <legend className="mb-2 text-sm font-medium text-slate-900 dark:text-neutral-100">
+      <legend className="mb-2 text-sm font-medium text-fg-default">
         {index + 1}. {question.text}
         {question.required && <span className="ml-1 text-red-500">*</span>}
       </legend>
@@ -42,11 +42,7 @@ function RatingQuestion({
         {ratings.map((r) => (
           <label
             key={r}
-            className={`flex cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-2 text-sm transition-[background-color,color,border-color] ${
-              value === r
-                ? 'border-indigo-500 bg-indigo-50 font-semibold text-indigo-700 ring-2 ring-indigo-400/30 dark:border-indigo-400 dark:bg-indigo-950/40 dark:text-indigo-300'
-                : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300'
-            }`}
+            className={`flex cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-2 text-sm transition-[background-color,color,border-color] ${ value === r ? 'border-indigo-500 bg-indigo-50 font-semibold text-accent-fg ring-2 ring-indigo-400/30 dark:border-indigo-400 dark:bg-indigo-950/40 dark:text-indigo-300' : 'border-border-default bg-surface-raised text-fg-muted hover:border-border-strong dark:bg-surface-raised dark:text-fg-muted' }`}
           >
             <input
               type="radio"
@@ -78,7 +74,7 @@ function MultipleChoiceQuestion({
 }) {
   return (
     <fieldset className="mb-6">
-      <legend className="mb-2 text-sm font-medium text-slate-900 dark:text-neutral-100">
+      <legend className="mb-2 text-sm font-medium text-fg-default">
         {index + 1}. {question.text}
         {question.required && <span className="ml-1 text-red-500">*</span>}
       </legend>
@@ -86,7 +82,7 @@ function MultipleChoiceQuestion({
         {(question.options ?? []).map((opt) => (
           <label
             key={opt}
-            className="flex cursor-pointer items-center gap-2 text-sm text-slate-700 dark:text-neutral-300"
+            className="flex cursor-pointer items-center gap-2 text-sm text-fg-muted"
           >
             <input
               type="radio"
@@ -119,7 +115,7 @@ function OpenTextQuestion({
     <div className="mb-6">
       <label
         htmlFor={`q-${index}`}
-        className="mb-1.5 block text-sm font-medium text-slate-900 dark:text-neutral-100"
+        className="mb-1.5 block text-sm font-medium text-fg-default"
       >
         {index + 1}. {question.text}
         {question.required && <span className="ml-1 text-red-500">*</span>}
@@ -129,7 +125,7 @@ function OpenTextQuestion({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         rows={4}
-        className="w-full resize-y rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder-neutral-500"
+        className="w-full resize-y rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-fg-default placeholder-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:placeholder-neutral-500"
         placeholder="Your response (optional)"
       />
     </div>
@@ -221,10 +217,10 @@ export default function CourseEvaluation() {
       <LmsPage title="Course Evaluation">
         <div className="mx-auto max-w-xl py-16 text-center">
           <div className="mb-4 text-4xl">✓</div>
-          <h2 className="mb-2 text-xl font-semibold text-slate-900 dark:text-neutral-100">
+          <h2 className="mb-2 text-xl font-semibold text-fg-default">
             Thank you!
           </h2>
-          <p className="text-slate-600 dark:text-neutral-400">
+          <p className="text-fg-muted">
             Your response has been recorded. Your feedback is anonymous.
           </p>
         </div>
@@ -236,10 +232,10 @@ export default function CourseEvaluation() {
     return (
       <LmsPage title="Course Evaluation">
         <div className="mx-auto max-w-xl py-16 text-center">
-          <h2 className="mb-2 text-xl font-semibold text-slate-900 dark:text-neutral-100">
+          <h2 className="mb-2 text-xl font-semibold text-fg-default">
             No evaluation open
           </h2>
-          <p className="text-slate-600 dark:text-neutral-400">
+          <p className="text-fg-muted">
             There is no active course evaluation at this time.
           </p>
         </div>
@@ -293,7 +289,7 @@ export default function CourseEvaluation() {
           })}
 
           {error && (
-            <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400">
+            <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-danger-fg dark:border-red-800 dark:bg-red-950/30 dark:text-red-400">
               {error}
             </p>
           )}
@@ -301,7 +297,7 @@ export default function CourseEvaluation() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white transition-[background-color,color,border-color] hover:bg-indigo-700 disabled:opacity-60 dark:bg-indigo-500 dark:hover:bg-indigo-600"
+            className="w-full rounded-xl bg-accent-solid px-6 py-3 text-sm font-semibold text-white transition-[background-color,color,border-color] hover:bg-accent disabled:opacity-60 dark:bg-indigo-500 dark:hover:bg-accent-solid"
           >
             {submitting ? 'Submitting…' : 'Submit Evaluation'}
           </button>

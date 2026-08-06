@@ -25,12 +25,12 @@ function entryTone(status: string): string {
       return 'text-emerald-700 dark:text-emerald-300'
     case 'failed':
     case 'rejected':
-      return 'text-red-700 dark:text-red-300'
+      return 'text-danger-fg'
     case 'on_hold':
     case 'canceled':
       return 'text-amber-800 dark:text-amber-200'
     default:
-      return 'text-slate-800 dark:text-neutral-200'
+      return 'text-fg-default'
   }
 }
 
@@ -113,9 +113,9 @@ export function TranscriptOrderTimeline({ order, onChanged }: Props) {
   const entries = timeline?.entries ?? []
 
   return (
-    <div className="mt-3 rounded-md border border-slate-100 bg-slate-50 px-3 py-2 dark:border-neutral-800 dark:bg-neutral-950">
+    <div className="mt-3 rounded-md border border-border-subtle bg-surface-base px-3 py-2 dark:border-border-subtle dark:bg-surface-base">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-xs font-semibold text-slate-700 dark:text-neutral-200">
+        <p className="text-xs font-semibold text-fg-default">
           {t('transcripts.tracking.title')}
         </p>
         <div className="flex flex-wrap gap-2">
@@ -125,7 +125,7 @@ export function TranscriptOrderTimeline({ order, onChanged }: Props) {
               type="button"
               disabled={busy}
               onClick={() => void onResend(itemId)}
-              className="text-xs font-medium text-indigo-600 hover:underline disabled:opacity-50 dark:text-indigo-400"
+              className="text-xs font-medium text-accent-fg hover:underline disabled:opacity-50 dark:text-indigo-400"
             >
               {t('transcripts.delivery.resend')}
             </button>
@@ -135,7 +135,7 @@ export function TranscriptOrderTimeline({ order, onChanged }: Props) {
               type="button"
               disabled={busy}
               onClick={() => void onCancel()}
-              className="text-xs font-medium text-red-600 hover:underline disabled:opacity-50 dark:text-red-400"
+              className="text-xs font-medium text-danger-fg hover:underline disabled:opacity-50 dark:text-red-400"
             >
               {t('transcripts.tracking.cancelOrder')}
             </button>
@@ -147,11 +147,11 @@ export function TranscriptOrderTimeline({ order, onChanged }: Props) {
         {liveMsg}
       </div>
 
-      {loading && !timeline ? <p className="mt-1 text-xs text-slate-500">{t('common.loading')}</p> : null}
-      {error ? <p className="mt-1 text-xs text-red-600 dark:text-red-400">{error}</p> : null}
+      {loading && !timeline ? <p className="mt-1 text-xs text-fg-muted">{t('common.loading')}</p> : null}
+      {error ? <p className="mt-1 text-xs text-danger-fg">{error}</p> : null}
 
       {!loading && entries.length === 0 ? (
-        <p className="mt-1 text-xs text-slate-500">{t('transcripts.tracking.empty')}</p>
+        <p className="mt-1 text-xs text-fg-muted">{t('transcripts.tracking.empty')}</p>
       ) : (
         <ol className="mt-2 space-y-1.5" aria-label={t('transcripts.tracking.title')}>
           {entries.map((e) => (
@@ -168,7 +168,7 @@ function TimelineStep({ entry }: { entry: TranscriptTimelineEntry }) {
   const kindLabel =
     entry.kind === 'delivery' ? t('transcripts.tracking.kindDelivery') : t('transcripts.tracking.kindOrder')
   return (
-    <li className="flex gap-2 text-xs text-slate-600 dark:text-neutral-400">
+    <li className="flex gap-2 text-xs text-fg-muted">
       <span
         className="mt-1 h-2 w-2 shrink-0 rounded-full bg-slate-400 dark:bg-neutral-500"
         aria-hidden
@@ -177,19 +177,19 @@ function TimelineStep({ entry }: { entry: TranscriptTimelineEntry }) {
         <p className={`font-medium ${entryTone(entry.status)}`}>
           <span className="sr-only">{kindLabel}: </span>
           {entry.label}
-          <span className="font-normal text-slate-500 dark:text-neutral-500">
+          <span className="font-normal text-fg-subtle">
             {' · '}
             {formatDate(entry.at, { dateStyle: 'short', timeStyle: 'short' })}
           </span>
         </p>
         {entry.adapter ? (
-          <p className="text-[11px] text-slate-500 dark:text-neutral-500">
+          <p className="text-[11px] text-fg-subtle">
             {entry.adapter}
             {entry.attemptNo != null ? ` #${entry.attemptNo}` : ''}
           </p>
         ) : null}
         {entry.reason || entry.detail ? (
-          <p className="text-[11px] text-slate-500 dark:text-neutral-500">{entry.reason || entry.detail}</p>
+          <p className="text-[11px] text-fg-subtle">{entry.reason || entry.detail}</p>
         ) : null}
       </div>
     </li>

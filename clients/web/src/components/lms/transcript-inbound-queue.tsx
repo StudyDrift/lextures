@@ -28,7 +28,7 @@ function inboundStatusClass(status: string): string {
     case 'accepted':
       return 'bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-100'
     default:
-      return 'bg-slate-100 text-slate-700 dark:bg-neutral-800 dark:text-neutral-200'
+      return 'bg-surface-sunken text-fg-muted dark:bg-surface-overlay dark:text-fg-default'
   }
 }
 
@@ -165,14 +165,14 @@ export function TranscriptInboundQueue({ enabled }: Props) {
   if (!enabled) return null
 
   return (
-    <section className="mt-10 border-t border-slate-200 pt-8 dark:border-neutral-800" aria-labelledby="inbound-queue-heading">
+    <section className="mt-10 border-t border-border-default pt-8 dark:border-border-subtle" aria-labelledby="inbound-queue-heading">
       <div className="flex items-start gap-3">
-        <Inbox className="mt-1 h-5 w-5 text-slate-500" aria-hidden />
+        <Inbox className="mt-1 h-5 w-5 text-fg-muted" aria-hidden />
         <div>
-          <h2 id="inbound-queue-heading" className="text-xl font-semibold text-slate-900 dark:text-neutral-50">
+          <h2 id="inbound-queue-heading" className="text-xl font-semibold text-fg-default">
             {t('transcripts.inbound.title')}
           </h2>
-          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">{t('transcripts.inbound.subtitle')}</p>
+          <p className="mt-1 text-sm text-fg-muted">{t('transcripts.inbound.subtitle')}</p>
         </div>
       </div>
 
@@ -189,11 +189,11 @@ export function TranscriptInboundQueue({ enabled }: Props) {
 
       <div className="mt-4 flex flex-wrap items-end gap-3">
         <label className="text-sm">
-          <span className="block text-slate-600 dark:text-neutral-400">{t('transcripts.inbound.filterStatus')}</span>
+          <span className="block text-fg-muted">{t('transcripts.inbound.filterStatus')}</span>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="mt-1 rounded-md border border-slate-300 bg-white px-2 py-1.5 dark:border-neutral-700 dark:bg-neutral-900"
+            className="mt-1 rounded-md border border-border-strong bg-surface-raised px-2 py-1.5 dark:border-border-default dark:bg-surface-raised"
           >
             <option value="">{t('transcripts.inbound.filterAll')}</option>
             <option value="unmatched">{t('transcripts.inbound.status.unmatched')}</option>
@@ -204,18 +204,18 @@ export function TranscriptInboundQueue({ enabled }: Props) {
           </select>
         </label>
         <label className="text-sm">
-          <span className="block text-slate-600 dark:text-neutral-400">{t('transcripts.inbound.filterSearch')}</span>
+          <span className="block text-fg-muted">{t('transcripts.inbound.filterSearch')}</span>
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t('transcripts.inbound.searchPlaceholder')}
-            className="mt-1 w-56 rounded-md border border-slate-300 bg-white px-2 py-1.5 dark:border-neutral-700 dark:bg-neutral-900"
+            className="mt-1 w-56 rounded-md border border-border-strong bg-surface-raised px-2 py-1.5 dark:border-border-default dark:bg-surface-raised"
           />
         </label>
         <button
           type="button"
           onClick={() => void load()}
-          className="rounded-md border border-slate-300 px-3 py-1.5 text-sm dark:border-neutral-700"
+          className="rounded-md border border-border-strong px-3 py-1.5 text-sm dark:border-border-default"
         >
           {t('transcripts.inbound.refresh')}
         </button>
@@ -223,34 +223,32 @@ export function TranscriptInboundQueue({ enabled }: Props) {
 
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <div>
-          <h3 className="text-sm font-medium text-slate-800 dark:text-neutral-200">{t('transcripts.inbound.queueTitle')}</h3>
+          <h3 className="text-sm font-medium text-fg-default">{t('transcripts.inbound.queueTitle')}</h3>
           {loading ? (
-            <p className="mt-3 flex items-center gap-2 text-sm text-slate-500">
+            <p className="mt-3 flex items-center gap-2 text-sm text-fg-muted">
               <Loader2 className="h-4 w-4 motion-safe:animate-spin" aria-hidden />
               {t('transcripts.inbound.loading')}
             </p>
           ) : docs.length === 0 ? (
-            <p className="mt-3 text-sm text-slate-500">{t('transcripts.inbound.queueEmpty')}</p>
+            <p className="mt-3 text-sm text-fg-muted">{t('transcripts.inbound.queueEmpty')}</p>
           ) : (
-            <ul className="mt-3 divide-y divide-slate-200 rounded-md border border-slate-200 dark:divide-neutral-800 dark:border-neutral-800">
+            <ul className="mt-3 divide-y divide-slate-200 rounded-md border border-border-default dark:divide-neutral-800 dark:border-border-subtle">
               {docs.map((doc) => (
                 <li key={doc.id}>
                   <button
                     type="button"
                     onClick={() => void selectDoc(doc)}
-                    className={`w-full px-3 py-3 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-900 ${
-                      selected?.id === doc.id ? 'bg-slate-50 dark:bg-neutral-900' : ''
-                    }`}
+                    className={`w-full px-3 py-3 text-start text-sm hover:bg-surface-base dark:hover:bg-surface-raised ${ selected?.id === doc.id ? 'bg-surface-base' : '' }`}
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-medium text-slate-900 dark:text-neutral-50">
+                      <span className="font-medium text-fg-default">
                         {doc.sourceName || t('transcripts.inbound.unknownSource')}
                       </span>
                       <span className={`rounded px-1.5 py-0.5 text-xs ${inboundStatusClass(doc.status)}`}>
                         {t(`transcripts.inbound.status.${doc.status}`, { defaultValue: doc.status })}
                       </span>
                     </div>
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="mt-1 text-xs text-fg-muted">
                       {doc.studentName || t('transcripts.inbound.unknownStudent')} · {new Date(doc.receivedAt).toLocaleString()}
                     </p>
                   </button>
@@ -261,28 +259,28 @@ export function TranscriptInboundQueue({ enabled }: Props) {
         </div>
 
         <div>
-          <h3 className="text-sm font-medium text-slate-800 dark:text-neutral-200">{t('transcripts.inbound.detailTitle')}</h3>
+          <h3 className="text-sm font-medium text-fg-default">{t('transcripts.inbound.detailTitle')}</h3>
           {!selected ? (
-            <p className="mt-3 text-sm text-slate-500">{t('transcripts.inbound.detailEmpty')}</p>
+            <p className="mt-3 text-sm text-fg-muted">{t('transcripts.inbound.detailEmpty')}</p>
           ) : (
-            <div className="mt-3 space-y-4 rounded-md border border-slate-200 p-4 dark:border-neutral-800">
+            <div className="mt-3 space-y-4 rounded-md border border-border-default p-4 dark:border-border-subtle">
               <dl className="grid grid-cols-2 gap-2 text-sm">
-                <dt className="text-slate-500">{t('transcripts.inbound.fieldFormat')}</dt>
+                <dt className="text-fg-muted">{t('transcripts.inbound.fieldFormat')}</dt>
                 <dd>{docFormatLabel(selected.format)}</dd>
-                <dt className="text-slate-500">{t('transcripts.inbound.fieldConfidence')}</dt>
+                <dt className="text-fg-muted">{t('transcripts.inbound.fieldConfidence')}</dt>
                 <dd>{selected.matchConfidence != null ? selected.matchConfidence.toFixed(2) : '—'}</dd>
-                <dt className="text-slate-500">{t('transcripts.inbound.fieldMatchedUser')}</dt>
+                <dt className="text-fg-muted">{t('transcripts.inbound.fieldMatchedUser')}</dt>
                 <dd className="break-all">{selected.matchedUserId || '—'}</dd>
               </dl>
 
               {selected.quarantineReason && (
-                <p className="text-sm text-red-700 dark:text-red-300">
+                <p className="text-sm text-danger-fg">
                   {t('transcripts.inbound.quarantineReason')}: {selected.quarantineReason}
                 </p>
               )}
 
               <div>
-                <label htmlFor={matchUserId} className="block text-sm text-slate-600 dark:text-neutral-400">
+                <label htmlFor={matchUserId} className="block text-sm text-fg-muted">
                   {t('transcripts.inbound.matchUser')}
                 </label>
                 <div className="mt-1 flex flex-wrap gap-2">
@@ -291,7 +289,7 @@ export function TranscriptInboundQueue({ enabled }: Props) {
                     value={matchUser}
                     onChange={(e) => setMatchUser(e.target.value)}
                     placeholder={t('transcripts.inbound.matchUserPlaceholder')}
-                    className="min-w-[14rem] flex-1 rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                    className="min-w-[14rem] flex-1 rounded-md border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised"
                   />
                   <button
                     type="button"
@@ -316,14 +314,14 @@ export function TranscriptInboundQueue({ enabled }: Props) {
                 <button
                   type="button"
                   onClick={() => void openOriginal()}
-                  className="rounded-md border border-slate-300 px-3 py-1.5 text-sm dark:border-neutral-700"
+                  className="rounded-md border border-border-strong px-3 py-1.5 text-sm dark:border-border-default"
                 >
                   {t('transcripts.inbound.viewOriginal')}
                 </button>
               </div>
 
               <div>
-                <label htmlFor={rejectReasonId} className="block text-sm text-slate-600 dark:text-neutral-400">
+                <label htmlFor={rejectReasonId} className="block text-sm text-fg-muted">
                   {t('transcripts.inbound.rejectReason')}
                 </label>
                 <div className="mt-1 flex flex-wrap gap-2">
@@ -331,7 +329,7 @@ export function TranscriptInboundQueue({ enabled }: Props) {
                     id={rejectReasonId}
                     value={rejectReason}
                     onChange={(e) => setRejectReason(e.target.value)}
-                    className="min-w-[14rem] flex-1 rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                    className="min-w-[14rem] flex-1 rounded-md border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised"
                   />
                   <button
                     type="button"
@@ -347,11 +345,11 @@ export function TranscriptInboundQueue({ enabled }: Props) {
               <div>
                 <h4 className="text-sm font-medium">{t('transcripts.inbound.coursesTitle')}</h4>
                 {courses.length === 0 ? (
-                  <p className="mt-1 text-sm text-slate-500">{t('transcripts.inbound.coursesEmpty')}</p>
+                  <p className="mt-1 text-sm text-fg-muted">{t('transcripts.inbound.coursesEmpty')}</p>
                 ) : (
                   <ul className="mt-2 max-h-48 overflow-auto text-sm">
                     {courses.map((c, i) => (
-                      <li key={`${c.code}-${i}`} className="border-t border-slate-100 py-1 dark:border-neutral-800">
+                      <li key={`${c.code}-${i}`} className="border-t border-border-subtle py-1 dark:border-border-subtle">
                         <span className="font-medium">{c.code}</span> {c.title} — {c.grade} ({c.creditsEarned})
                       </li>
                     ))}
@@ -361,7 +359,7 @@ export function TranscriptInboundQueue({ enabled }: Props) {
 
               <div>
                 <h4 className="text-sm font-medium">{t('transcripts.inbound.eventsTitle')}</h4>
-                <ul className="mt-2 max-h-40 overflow-auto text-xs text-slate-600 dark:text-neutral-400">
+                <ul className="mt-2 max-h-40 overflow-auto text-xs text-fg-muted">
                   {events.map((e) => (
                     <li key={e.id} className="py-0.5">
                       {new Date(e.createdAt).toLocaleString()} · {e.eventType}

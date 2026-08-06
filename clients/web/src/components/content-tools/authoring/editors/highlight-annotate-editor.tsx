@@ -65,12 +65,12 @@ export function HighlightAnnotateEditor({
   return (
     <div className="space-y-4" data-testid="highlight-annotate-editor">
       <label className="block space-y-1 text-xs">
-        <span className="font-medium text-slate-700 dark:text-neutral-300">
+        <span className="font-medium text-fg-muted">
           {t('contentTools.tools.highlight_annotate.editor.prompt')}
         </span>
         <textarea
           id={`${idPrefix}-${baseId}-prompt`}
-          className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+          className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
           rows={2}
           disabled={disabled}
           value={typeof value.prompt === 'string' ? value.prompt : ''}
@@ -79,11 +79,11 @@ export function HighlightAnnotateEditor({
       </label>
 
       <label className="block space-y-1 text-xs">
-        <span className="font-medium text-slate-700 dark:text-neutral-300">
+        <span className="font-medium text-fg-muted">
           {t('contentTools.tools.highlight_annotate.editor.passageSource')}
         </span>
         <select
-          className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+          className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
           disabled={disabled}
           value={passageSource}
           onChange={(e) => patch({ passageSource: e.target.value })}
@@ -102,11 +102,11 @@ export function HighlightAnnotateEditor({
 
       {passageSource === 'inline' ? (
         <label className="block space-y-1 text-xs">
-          <span className="font-medium text-slate-700 dark:text-neutral-300">
+          <span className="font-medium text-fg-muted">
             {t('contentTools.tools.highlight_annotate.editor.passageMarkdown')}
           </span>
           <textarea
-            className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+            className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
             rows={5}
             disabled={disabled}
             value={typeof value.passageMarkdown === 'string' ? value.passageMarkdown : ''}
@@ -118,11 +118,11 @@ export function HighlightAnnotateEditor({
 
       {passageSource === 'section_anchor' ? (
         <label className="block space-y-1 text-xs">
-          <span className="font-medium text-slate-700 dark:text-neutral-300">
+          <span className="font-medium text-fg-muted">
             {t('contentTools.tools.highlight_annotate.editor.sectionAnchor')}
           </span>
           <input
-            className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+            className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
             disabled={disabled}
             value={typeof value.sectionAnchor === 'string' ? value.sectionAnchor : ''}
             onChange={(e) => patch({ sectionAnchor: e.target.value })}
@@ -131,11 +131,11 @@ export function HighlightAnnotateEditor({
       ) : null}
 
       <label className="block space-y-1 text-xs">
-        <span className="font-medium text-slate-700 dark:text-neutral-300">
+        <span className="font-medium text-fg-muted">
           {t('contentTools.tools.highlight_annotate.editor.granularity')}
         </span>
         <select
-          className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+          className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
           disabled={disabled}
           value={
             typeof value.unitGranularity === 'string' ? value.unitGranularity : 'sentence'
@@ -149,13 +149,13 @@ export function HighlightAnnotateEditor({
       </label>
 
       <div className="space-y-2">
-        <div className="text-xs font-medium text-slate-700 dark:text-neutral-300">
+        <div className="text-xs font-medium text-fg-muted">
           {t('contentTools.tools.highlight_annotate.editor.tags')}
         </div>
         {tags.map((tag, idx) => (
           <div key={tag.id} className="flex flex-wrap items-center gap-2">
             <input
-              className="min-w-[8rem] flex-1 rounded border border-slate-300 bg-white px-2 py-1 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+              className="min-w-[8rem] flex-1 rounded border border-border-strong bg-surface-raised px-2 py-1 text-sm dark:border-border-default dark:bg-surface-base"
               disabled={disabled}
               value={tag.label}
               placeholder={t('contentTools.tools.highlight_annotate.editor.tagLabel')}
@@ -177,7 +177,7 @@ export function HighlightAnnotateEditor({
               }}
             />
             {!contrastOk(tag.color) ? (
-              <span className="text-[10px] text-amber-700">
+              <span className="text-[10px] text-warning-fg">
                 {t('contentTools.tools.highlight_annotate.editor.contrastWarn')}
               </span>
             ) : null}
@@ -193,7 +193,7 @@ export function HighlightAnnotateEditor({
         ))}
         <button
           type="button"
-          className="text-xs text-slate-700 underline dark:text-neutral-300"
+          className="text-xs text-fg-muted underline dark:text-fg-muted"
           disabled={disabled || tags.length >= 6}
           onClick={() =>
             setTags([
@@ -212,28 +212,28 @@ export function HighlightAnnotateEditor({
 
       <div className="grid gap-3 sm:grid-cols-3">
         <label className="block space-y-1 text-xs">
-          <span className="font-medium text-slate-700 dark:text-neutral-300">
+          <span className="font-medium text-fg-muted">
             {t('contentTools.tools.highlight_annotate.editor.minAnnotations')}
           </span>
           <input
             type="number"
             min={1}
             max={50}
-            className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+            className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
             disabled={disabled}
             value={typeof value.minAnnotations === 'number' ? value.minAnnotations : 1}
             onChange={(e) => patch({ minAnnotations: Number(e.target.value) || 1 })}
           />
         </label>
         <label className="block space-y-1 text-xs">
-          <span className="font-medium text-slate-700 dark:text-neutral-300">
+          <span className="font-medium text-fg-muted">
             {t('contentTools.tools.highlight_annotate.editor.maxAnnotations')}
           </span>
           <input
             type="number"
             min={1}
             max={50}
-            className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+            className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
             disabled={disabled}
             value={typeof value.maxAnnotations === 'number' ? value.maxAnnotations : 20}
             onChange={(e) => patch({ maxAnnotations: Number(e.target.value) || 20 })}
@@ -246,23 +246,23 @@ export function HighlightAnnotateEditor({
             checked={value.requireNote === true}
             onChange={(e) => patch({ requireNote: e.target.checked })}
           />
-          <span className="font-medium text-slate-700 dark:text-neutral-300">
+          <span className="font-medium text-fg-muted">
             {t('contentTools.tools.highlight_annotate.editor.requireNote')}
           </span>
         </label>
       </div>
 
       <div className="space-y-2">
-        <div className="text-xs font-medium text-slate-700 dark:text-neutral-300">
+        <div className="text-xs font-medium text-fg-muted">
           {t('contentTools.tools.highlight_annotate.editor.expectedRegions')}
         </div>
-        <p className="text-[11px] text-slate-500">
+        <p className="text-[11px] text-fg-muted">
           {t('contentTools.tools.highlight_annotate.editor.expectedHelp')}
         </p>
         {expected.map((er, idx) => (
           <div key={`${er.tagId}-${idx}`} className="flex flex-wrap items-center gap-2">
             <select
-              className="rounded border border-slate-300 bg-white px-2 py-1 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+              className="rounded border border-border-strong bg-surface-raised px-2 py-1 text-sm dark:border-border-default dark:bg-surface-base"
               disabled={disabled}
               value={er.tagId}
               onChange={(e) => {
@@ -278,7 +278,7 @@ export function HighlightAnnotateEditor({
               ))}
             </select>
             <input
-              className="min-w-[12rem] flex-1 rounded border border-slate-300 bg-white px-2 py-1 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+              className="min-w-[12rem] flex-1 rounded border border-border-strong bg-surface-raised px-2 py-1 text-sm dark:border-border-default dark:bg-surface-base"
               disabled={disabled}
               value={er.quote}
               placeholder={t('contentTools.tools.highlight_annotate.editor.expectedQuote')}
@@ -302,7 +302,7 @@ export function HighlightAnnotateEditor({
         ))}
         <button
           type="button"
-          className="text-xs text-slate-700 underline dark:text-neutral-300"
+          className="text-xs text-fg-muted underline dark:text-fg-muted"
           disabled={disabled || tags.length === 0}
           onClick={() =>
             patch({

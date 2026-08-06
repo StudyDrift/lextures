@@ -219,17 +219,17 @@ function RubricGradeForm({
       aria-modal
       aria-labelledby="rubric-grade-title"
     >
-      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-slate-200 bg-white p-5 shadow-xl dark:border-neutral-600 dark:bg-neutral-900">
-        <h2 id="rubric-grade-title" className="text-lg font-semibold text-slate-950 dark:text-neutral-100">
+      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-border-default bg-surface-raised p-5 shadow-xl dark:border-border-default dark:bg-surface-raised">
+        <h2 id="rubric-grade-title" className="text-lg font-semibold text-slate-950 dark:text-fg-default">
           Rubric: {state.columnTitle}
         </h2>
-        <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">{state.studentName}</p>
+        <p className="mt-1 text-sm text-fg-muted">{state.studentName}</p>
         <div className="mt-4 space-y-4">
           {state.rubric.criteria.map((c) => (
-            <div key={c.id} className="rounded-lg border border-slate-100 p-3 dark:border-neutral-700">
-              <p className="text-sm font-medium text-slate-900 dark:text-neutral-100">{c.title}</p>
+            <div key={c.id} className="rounded-lg border border-border-subtle p-3 dark:border-border-default">
+              <p className="text-sm font-medium text-fg-default">{c.title}</p>
               {c.description ? (
-                <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">{c.description}</p>
+                <p className="mt-1 text-xs text-fg-muted">{c.description}</p>
               ) : null}
               <div className="mt-2 flex flex-wrap gap-2">
                 {c.levels.map((lvl, i) => (
@@ -237,17 +237,13 @@ function RubricGradeForm({
                     key={`${c.id}-${i}`}
                     type="button"
                     onClick={() => setLocal((prev) => ({ ...prev, [c.id]: lvl.points }))}
-                    className={`max-w-full rounded-md border px-2.5 py-1.5 text-start text-xs font-medium transition-[background-color,color,border-color] ${
-                      local[c.id] === lvl.points
-                        ? 'border-indigo-500 bg-indigo-50 text-indigo-950 dark:border-indigo-400 dark:bg-indigo-950/60 dark:text-indigo-100'
-                        : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700'
-                    }`}
+                    className={`max-w-full rounded-md border px-2.5 py-1.5 text-start text-xs font-medium transition-[background-color,color,border-color] ${ local[c.id] === lvl.points ? 'border-indigo-500 bg-indigo-50 text-indigo-950 dark:border-indigo-400 dark:bg-indigo-950/60 dark:text-indigo-100' : 'border-border-default bg-surface-raised text-fg-muted hover:bg-surface-base dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700' }`}
                   >
                     <span className="block">
                       {lvl.label} ({formatPointsCell(lvl.points)})
                     </span>
                     {lvl.description ? (
-                      <span className="mt-0.5 block text-[10px] font-normal leading-snug text-slate-500 dark:text-neutral-400">
+                      <span className="mt-0.5 block text-[10px] font-normal leading-snug text-fg-muted">
                         {lvl.description}
                       </span>
                     ) : null}
@@ -257,14 +253,14 @@ function RubricGradeForm({
             </div>
           ))}
         </div>
-        <p className="mt-4 text-sm text-slate-600 dark:text-neutral-300">
+        <p className="mt-4 text-sm text-fg-muted">
           Total: <span className="font-semibold tabular-nums">{formatPointsCell(total)}</span>
         </p>
         <div className="mt-6 flex justify-end gap-2">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-100 dark:hover:bg-neutral-800"
+            className="rounded-lg border border-border-default px-4 py-2 text-sm font-medium text-fg-default hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
           >
             Cancel
           </button>
@@ -276,7 +272,7 @@ function RubricGradeForm({
               )
             }
             onClick={() => onSave(local)}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+            className="rounded-lg bg-accent-solid px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
           >
             Apply
           </button>
@@ -780,7 +776,7 @@ export default function CourseGradebook() {
             <>
               <button
                 type="button"
-                className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 shadow-sm hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+                className="rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm font-medium text-fg-default shadow-sm hover:bg-surface-base dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700/80"
                 onClick={() => void handleExportCsv()}
               >
                 Export CSV
@@ -788,7 +784,7 @@ export default function CourseGradebook() {
               {canEditGrades ? (
                 <button
                   type="button"
-                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 shadow-sm hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+                  className="rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm font-medium text-fg-default shadow-sm hover:bg-surface-base dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700/80"
                   onClick={() => setImportModalOpen(true)}
                 >
                   Import CSV
@@ -800,7 +796,7 @@ export default function CourseGradebook() {
           {ffGradeSubmission && courseCode && canEditGrades ? (
             <Link
               to={`/courses/${encodeURIComponent(courseCode)}/final-grades`}
-              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 shadow-sm hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+              className="rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm font-medium text-fg-default shadow-sm hover:bg-surface-base dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700/80"
             >
               Submit Final Grades
             </Link>
@@ -810,15 +806,15 @@ export default function CourseGradebook() {
     >
       {loadState === 'loading' && <GradebookLoadingSkeleton />}
       {loadState === 'error' && loadError && (
-        <p className="mt-6 text-sm text-red-600 dark:text-red-400" role="alert">
+        <p className="mt-6 text-sm text-danger-fg" role="alert">
           {loadError}
         </p>
       )}
       {loadState === 'ok' && savedGrades != null && (
         <>
           {sectionsEnabled && canEditGrades && sections.length > 0 ? (
-            <div className="lms-print-hide mt-6 flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-              <span id="gb-crosslist-label" className="text-sm font-medium text-slate-700 dark:text-neutral-200">
+            <div className="lms-print-hide mt-6 flex flex-wrap items-center gap-3 rounded-xl border border-border-default bg-surface-raised px-4 py-3 shadow-sm dark:border-border-default dark:bg-surface-raised">
+              <span id="gb-crosslist-label" className="text-sm font-medium text-fg-default">
                 Combined cross-listed sections
               </span>
               <button
@@ -827,19 +823,15 @@ export default function CourseGradebook() {
                 aria-checked={crossListMerge}
                 aria-labelledby="gb-crosslist-label"
                 onClick={() => setCrossListMerge((v) => !v)}
-                className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 ${
-                  crossListMerge ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-neutral-600'
-                }`}
+                className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-900 ${ crossListMerge ? 'bg-accent-solid' : 'bg-slate-300 dark:bg-neutral-600' }`}
               >
                 <span className="sr-only">Toggle combined cross-list gradebook</span>
                 <span
                   aria-hidden
-                  className={`pointer-events-none inline-block h-6 w-6 translate-y-0.5 rounded-full bg-white shadow transition-transform ${
-                    crossListMerge ? 'translate-x-5' : 'translate-x-1'
-                  }`}
+                  className={`pointer-events-none inline-block h-6 w-6 translate-y-0.5 rounded-full bg-surface-raised shadow transition-transform ${ crossListMerge ? 'translate-x-5' : 'translate-x-1' }`}
                 />
               </button>
-              <label htmlFor="gb-section-filter" className="text-sm font-medium text-slate-700 dark:text-neutral-200">
+              <label htmlFor="gb-section-filter" className="text-sm font-medium text-fg-default">
                 Section
               </label>
               <select
@@ -847,7 +839,7 @@ export default function CourseGradebook() {
                 aria-label="Filter by section"
                 value={gradebookSectionId}
                 onChange={(e) => setGradebookSectionId(e.target.value)}
-                className="min-w-[12rem] rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+                className="min-w-[12rem] rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm text-fg-default dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
               >
                 <option value="">All sections</option>
                 {sections.map((s) => (
@@ -861,14 +853,14 @@ export default function CourseGradebook() {
           ) : null}
           {canEditGrades && gridStudents.length > 0 && gridColumns.length > 0 && (
             <div
-              className="lms-print-hide mt-6 flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-neutral-700 dark:bg-neutral-900"
+              className="lms-print-hide mt-6 flex flex-wrap items-center gap-3 rounded-xl border border-border-default bg-surface-raised px-4 py-3 shadow-sm dark:border-border-default dark:bg-surface-raised"
               aria-live="polite"
             >
-              <div className="min-w-0 flex-1 text-sm text-slate-600 dark:text-neutral-400">
+              <div className="min-w-0 flex-1 text-sm text-fg-muted">
                 {gradesDirty ? (
                   <span>
                     Unsaved grade changes — <span className="font-medium text-amber-800 dark:text-amber-200">Save</span>{' '}
-                    writes them to the server. <span className="font-medium text-slate-800 dark:text-neutral-200">Discard</span>{' '}
+                    writes them to the server. <span className="font-medium text-fg-default">Discard</span>{' '}
                     restores the last saved copy (same as reloading the page).
                   </span>
                 ) : (
@@ -879,7 +871,7 @@ export default function CourseGradebook() {
                     </span>
                     {lastSavedAt ? (
                       <time
-                        className="text-slate-500 dark:text-neutral-500"
+                        className="text-fg-subtle"
                         dateTime={lastSavedAt.toISOString()}
                         title={formatAbsolute(lastSavedAt)}
                       >
@@ -894,7 +886,7 @@ export default function CourseGradebook() {
                 <button
                   type="button"
                   disabled={!gradesDirty || saving}
-                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+                  className="rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm font-medium text-fg-default shadow-sm hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-50 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700/80"
                   onClick={handleDiscard}
                 >
                   Discard
@@ -902,7 +894,7 @@ export default function CourseGradebook() {
                 <button
                   type="button"
                   disabled={!gradesDirty || saving}
-                  className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+                  className="rounded-lg bg-accent-solid px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
                   onClick={() => void handleSave()}
                 >
                   {saving ? 'Saving…' : 'Save'}
@@ -911,7 +903,7 @@ export default function CourseGradebook() {
             </div>
           )}
           {saveError && (
-            <p className="mt-3 text-sm text-red-600 dark:text-red-400" role="alert">
+            <p className="mt-3 text-sm text-danger-fg" role="alert">
               {saveError}
             </p>
           )}
@@ -923,7 +915,7 @@ export default function CourseGradebook() {
           {canEditGrades && gradesDirty ? (
             <div className="mt-3 max-w-xl">
               <label
-                className="block text-xs font-medium text-slate-600 dark:text-neutral-400"
+                className="block text-xs font-medium text-fg-muted"
                 htmlFor="gradebook-change-reason"
               >
                 Note for grade change log (optional, stored with this save)
@@ -931,7 +923,7 @@ export default function CourseGradebook() {
               <input
                 id="gradebook-change-reason"
                 type="text"
-                className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+                className="mt-1 w-full rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-sm text-fg-default shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
                 placeholder="e.g. late policy applied"
                 value={gradeChangeReason}
                 onChange={(e) => setGradeChangeReason(e.target.value)}
@@ -1047,7 +1039,7 @@ export default function CourseGradebook() {
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="grade-history-dlg-title"
-                className="relative z-[1] w-full max-w-md rounded-xl border border-slate-200 bg-white p-5 shadow-xl dark:border-neutral-700 dark:bg-neutral-900"
+                className="relative z-[1] w-full max-w-md rounded-xl border border-border-default bg-surface-raised p-5 shadow-xl dark:border-border-default dark:bg-surface-raised"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="flex items-start justify-between gap-2">
@@ -1056,7 +1048,7 @@ export default function CourseGradebook() {
                   </h2>
                   <button
                     type="button"
-                    className="absolute end-3 top-3 rounded p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+                    className="absolute end-3 top-3 rounded p-1 text-fg-muted hover:bg-surface-sunken hover:text-fg-default dark:hover:bg-surface-overlay dark:hover:text-fg-default"
                     onClick={() => setGradeHistoryOpen(null)}
                   >
                     <span className="sr-only">Close</span>✕
@@ -1071,7 +1063,7 @@ export default function CourseGradebook() {
                 <div className="mt-4 flex justify-end">
                   <button
                     type="button"
-                    className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-800 hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700/80"
+                    className="rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-sm text-fg-default hover:bg-surface-base dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700/80"
                     onClick={() => setGradeHistoryOpen(null)}
                   >
                     Close

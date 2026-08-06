@@ -26,21 +26,21 @@ export function ChecklistStatusAffordance({ status }: { status: string }) {
       )
     case 'unknown':
       return (
-        <span className="inline-flex items-center text-slate-400 dark:text-neutral-500">
+        <span className="inline-flex items-center text-fg-subtle">
           <HelpCircle className={iconClass} aria-hidden />
           <span className="sr-only">Unknown</span>
         </span>
       )
     case 'not_applicable':
       return (
-        <span className="inline-flex items-center text-slate-400 dark:text-neutral-500">
+        <span className="inline-flex items-center text-fg-subtle">
           <Circle className={`${iconClass} opacity-40`} aria-hidden />
           <span className="sr-only">Not applicable</span>
         </span>
       )
     case 'todo':
       return (
-        <span className="inline-flex items-center text-slate-500 dark:text-neutral-400">
+        <span className="inline-flex items-center text-fg-muted">
           <Circle className={iconClass} aria-hidden />
           <span className="sr-only">To do</span>
         </span>

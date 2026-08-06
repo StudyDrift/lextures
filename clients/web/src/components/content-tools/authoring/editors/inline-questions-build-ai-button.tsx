@@ -75,12 +75,12 @@ export function InlineQuestionsBuildAiButton({
   }
 
   return (
-    <div className="space-y-2 border-t border-slate-200 pt-4 dark:border-neutral-700">
+    <div className="space-y-2 border-t border-border-default pt-4 dark:border-border-default">
       <button
         type="button"
         disabled={disabled || busy}
         onClick={openConfirm}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm font-semibold text-indigo-700 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-300 hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-200 dark:hover:bg-indigo-950/70 sm:w-auto"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm font-semibold text-accent-fg shadow-sm transition-[background-color,color,border-color] hover:border-indigo-300 hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-200 dark:hover:bg-indigo-950/70 sm:w-auto"
         data-testid="inline-questions-build-with-ai"
       >
         {busy ? (
@@ -92,7 +92,7 @@ export function InlineQuestionsBuildAiButton({
           ? t('contentTools.tools.inline_questions.editor.buildWithAi.building')
           : t('contentTools.tools.inline_questions.editor.buildWithAi.button')}
       </button>
-      <p className="text-[11px] leading-relaxed text-slate-500 dark:text-neutral-400">
+      <p className="text-[11px] leading-relaxed text-fg-muted">
         {t('contentTools.tools.inline_questions.editor.buildWithAi.help')}
       </p>
       {error && !confirmOpen ? (

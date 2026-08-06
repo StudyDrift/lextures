@@ -22,7 +22,7 @@ The debt is **not sloppiness. It is structure.** Growth went into a small number
 | Repos cannot be tested without a database | **2,199** `*pgxpool.Pool` params, **0** interface abstractions |
 | HTTP layer reaches past the repo layer into SQL | **58** files, **130** call sites |
 | Proven-unreachable Go functions | **197** after TD.4 (was 223; golang.org/x/tools `deadcode`) |
-| Unreachable in-handler method dispatch | **261** `MethodOptions` checks, **776** `StatusMethodNotAllowed` sites, vs **3** method-agnostic routes |
+| Unreachable in-handler method dispatch | **fixed in TD.5** — residual **7** `MethodOptions` / **40** `StatusMethodNotAllowed` (multi-method + cors/chi only); see [`docs/completed/tech_debt/TD.5-remove-unreachable-method-dispatch.md`](../../completed/tech_debt/TD.5-remove-unreachable-method-dispatch.md) |
 | `/api/openapi.json` serves **invalid JSON** | **fixed in TD.3** — see [`docs/completed/tech_debt/TD.3-repair-and-verify-openapi-contract.md`](../../completed/tech_debt/TD.3-repair-and-verify-openapi-contract.md) |
 | API documented vs implemented | **252** documented paths vs **1,260** unique patterns (**20%**) post-TD.3; ratchet `scripts/allowlists/openapi-coverage.txt` |
 | `courses-api.ts` is a god-module | **8,631** LOC, **521** exports, imported by **215** files |
@@ -50,7 +50,7 @@ Phases are ordered by dependency, not by appeal. **Phase 0 is not optional** —
 |---|---|---|---|
 | TD.3 | [Repair and verify the OpenAPI contract](../../completed/tech_debt/TD.3-repair-and-verify-openapi-contract.md) → **done** | S | TD.1 |
 | TD.4 | [Delete confirmed dead code](../../completed/tech_debt/TD.4-delete-confirmed-dead-code.md) → **done** | S | TD.1, TD.2 |
-| TD.5 | [Remove unreachable in-handler method dispatch](TD.5-remove-unreachable-method-dispatch.md) | S | TD.1 |
+| TD.5 | [Remove unreachable in-handler method dispatch](../../completed/tech_debt/TD.5-remove-unreachable-method-dispatch.md) → **done** | S | TD.1 |
 
 ### Phase 2 — Backend architecture
 

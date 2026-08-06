@@ -1,5 +1,13 @@
 @import "tailwindcss";
+/* UX.1 — semantic design token system (primitive → semantic → component). */
+@import "./styles/tokens/primitives.css";
+@import "./styles/tokens/semantic.css";
+@import "./styles/tokens/surface-tints.css";
+@import "./styles/tokens/component.css";
+@import "./styles/tokens/motion.css";
+@import "./styles/tokens/theme.css";
 @import "./styles/scrollbars.css";
+/* high-contrast.css retained for legacy class overrides during migration; themes cover HC. */
 @import "./styles/high-contrast.css";
 @import "./styles/ui-modes/k2.css";
 @import "./styles/ui-modes/elementary.css";
@@ -35,35 +43,6 @@
   font-display: swap;
 }
 
-@theme {
-  --font-sans: 'Lextures', ui-sans-serif, system-ui, sans-serif;
-
-  /* AN.1 — motion tokens (durations, easings, stagger). */
-  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
-  --ease-exit: cubic-bezier(0.3, 0, 1, 1);
-  --ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
-  /* Bubble spring (response ≈ 0.5s, damping ≈ 0.72). Fallback when linear() unsupported. */
-  --ease-bubble: var(--ease-standard);
-  --dur-instant: 100ms;
-  --dur-fast: 150ms;
-  --dur-base: 220ms;
-  --dur-slow: 320ms;
-  --dur-deliberate: 480ms;
-  --stagger-step: 40ms;
-  --motion-enter-translate: 12px;
-  --motion-enter-scale: 0.97;
-  --motion-press-scale: 0.97;
-
-  --ease-lx-standard: var(--ease-standard);
-  --ease-lx-exit: var(--ease-exit);
-  --ease-lx-bubble: var(--ease-bubble);
-  --duration-instant: 100ms;
-  --duration-fast: 150ms;
-  --duration-base: 220ms;
-  --duration-slow: 320ms;
-  --duration-deliberate: 480ms;
-}
-
 @utility font-lextures {
   font-family: 'Lextures', ui-sans-serif, system-ui, sans-serif;
 }
@@ -77,18 +56,21 @@
 
 /* Read-aloud sentence highlight (plan 12.8 — WCAG SC 1.4.1: not color-only) */
 .tts-sentence-highlight {
-  background-color: rgb(254 240 138 / 0.85);
+  background-color: color-mix(in srgb, var(--lx-warning-200) 85%, transparent);
   text-decoration: underline;
   text-decoration-thickness: 2px;
   text-underline-offset: 2px;
-  border-radius: 0.125rem;
+  border-radius: var(--lx-radius-sm);
 }
-.dark .tts-sentence-highlight {
-  background-color: rgb(202 138 4 / 0.35);
-  text-decoration-color: rgb(250 204 21);
+[data-theme='dark'] .tts-sentence-highlight,
+.dark .tts-sentence-highlight,
+[data-theme='high-contrast-dark'] .tts-sentence-highlight {
+  background-color: color-mix(in srgb, var(--lx-warning-700) 35%, transparent);
+  text-decoration-color: var(--lx-warning-400);
 }
 
-@custom-variant dark (&:where(.dark, .dark *));
+/* Legacy dark: variant — prefer semantic tokens; kept for unmigrated call sites. */
+@custom-variant dark (&:where(.dark, .dark *, [data-theme='dark'], [data-theme='dark'] *, [data-theme='high-contrast-dark'], [data-theme='high-contrast-dark'] *));
 
 @layer base {
   a[href],
@@ -139,22 +121,7 @@
   }
 }
 
-/* Plan 22.1 — layered card elevation (rule 3): pure black/white rgba, never tinted neutrals. */
-:root {
-  --shadow-card:
-    0 0 0 1px rgb(0 0 0 / 0.06),
-    0 1px 2px -1px rgb(0 0 0 / 0.06),
-    0 2px 4px 0 rgb(0 0 0 / 0.04);
-  --shadow-card-hover:
-    0 0 0 1px rgb(0 0 0 / 0.08),
-    0 1px 2px -1px rgb(0 0 0 / 0.08),
-    0 2px 4px 0 rgb(0 0 0 / 0.06);
-}
-.dark {
-  --shadow-card: 0 0 0 1px rgb(255 255 255 / 0.08);
-  --shadow-card-hover: 0 0 0 1px rgb(255 255 255 / 0.13);
-}
-
+/* Plan 22.1 / UX.1 — card elevation from semantic elevation tokens. */
 @utility shadow-card {
   box-shadow: var(--shadow-card);
 }
@@ -166,8 +133,8 @@
 @utility lex-surface {
   box-shadow: var(--shadow-card);
   transition-property: box-shadow;
-  transition-duration: 150ms;
-  transition-timing-function: ease-out;
+  transition-duration: var(--dur-fast);
+  transition-timing-function: var(--ease-standard);
 }
 
 @utility hover-shadow-card {
@@ -176,14 +143,10 @@
   }
 }
 
-/* Plan 22.1 — content image outlines (rule 11): pure black/white, never tinted. */
+/* Plan 22.1 — content image outlines from border tokens. */
 @utility lex-content-img {
-  outline: 1px solid rgb(0 0 0 / 0.1);
+  outline: 1px solid color-mix(in srgb, var(--lx-fg-default) 10%, transparent);
   outline-offset: -1px;
-}
-.dark .lex-content-img,
-.dark.lex-content-img {
-  outline-color: rgb(255 255 255 / 0.1);
 }
 
 /* Plan 22.1 — tabular numbers for live-updating numerics (rule 9). */
@@ -225,9 +188,17 @@ html {
   --reading-letter-spacing: normal;
   --reading-word-spacing: normal;
   --reading-line-height: 1.5;
+  background-color: var(--lx-surface-base);
+  color: var(--lx-fg-default);
 }
-html.dark {
+html.dark,
+html[data-theme='dark'],
+html[data-theme='high-contrast-dark'] {
   color-scheme: dark;
+}
+html[data-theme='light'],
+html[data-theme='high-contrast-light'] {
+  color-scheme: light;
 }
 
 /* Apply reading preferences to main content only (not nav/chrome). */
@@ -265,42 +236,9 @@ html.dark {
 }
 
 /*
- * AN.1 — motion foundation. Feature-detect linear() for --ease-bubble;
- * fall back to --ease-standard when unsupported (see @supports below).
+ * UX.1 FR-12 — k2 / elementary UI modes as token overrides (not separate colour sheets).
+ * Size/spacing/touch targets remain in styles/ui-modes/*.css; motion scales here.
  */
-@supports (animation-timing-function: linear(0, 1)) {
-  :root {
-    --ease-bubble: linear(
-      0,
-      0.044,
-      0.15,
-      0.2862,
-      0.4304,
-      0.5678,
-      0.6897,
-      0.7919,
-      0.8733,
-      0.9349,
-      0.979,
-      1.0086,
-      1.0265,
-      1.0356,
-      1.0384,
-      1.037,
-      1.0331,
-      1.028,
-      1.0225,
-      1.0171,
-      1.0124,
-      1.0084,
-      1.0052,
-      1.0027,
-      1
-    );
-  }
-}
-
-/* K-2 / elementary: slightly longer durations (FR-10). */
 html.ui-mode-k2 {
   --dur-instant: 120ms;
   --dur-fast: 180ms;
@@ -312,6 +250,9 @@ html.ui-mode-k2 {
   --duration-base: 260ms;
   --duration-slow: 380ms;
   --duration-deliberate: 560ms;
+  --lx-radius-md: 0.75rem;
+  --lx-radius-lg: 1rem;
+  --lx-space-4: 1.25rem;
 }
 html.ui-mode-elementary {
   --dur-instant: 110ms;
@@ -324,6 +265,8 @@ html.ui-mode-elementary {
   --duration-base: 240ms;
   --duration-slow: 350ms;
   --duration-deliberate: 520ms;
+  --lx-radius-md: 0.625rem;
+  --lx-radius-lg: 0.875rem;
 }
 
 @keyframes sidenav-item-in {

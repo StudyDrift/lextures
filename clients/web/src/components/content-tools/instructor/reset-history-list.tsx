@@ -54,7 +54,7 @@ export function ResetHistoryList({
 
   if (items.length === 0 && !error) {
     return (
-      <p className="text-xs text-slate-500 dark:text-neutral-400">
+      <p className="text-xs text-fg-muted">
         {t('contentTools.reset.historyEmpty')}
       </p>
     )
@@ -62,7 +62,7 @@ export function ResetHistoryList({
 
   return (
     <div className="space-y-2" data-testid="reset-history-list">
-      <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+      <h3 className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
         {t('contentTools.reset.historyTitle')}
       </h3>
       {error ? (
@@ -74,14 +74,14 @@ export function ResetHistoryList({
         {items.map((item) => (
           <li
             key={item.id}
-            className="rounded-md border border-slate-200 px-3 py-2 text-xs dark:border-neutral-700"
+            className="rounded-md border border-border-default px-3 py-2 text-xs dark:border-border-default"
           >
             <div className="flex items-start justify-between gap-2">
               <div>
-                <p className="font-medium text-slate-800 dark:text-neutral-200">
+                <p className="font-medium text-fg-default">
                   {item.scope.replace(/_/g, ' ')} · {new Date(item.resetAt).toLocaleString()}
                 </p>
-                <p className="text-slate-500 dark:text-neutral-400">
+                <p className="text-fg-muted">
                   {item.priorStatus}
                   {item.restoredAt
                     ? ` · ${t('contentTools.reset.restored')}`

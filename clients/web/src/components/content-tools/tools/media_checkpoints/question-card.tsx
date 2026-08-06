@@ -54,23 +54,23 @@ export function QuestionCard({
     <div
       ref={rootRef}
       tabIndex={-1}
-      className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-sky-500 dark:border-neutral-700 dark:bg-neutral-900"
+      className="rounded-lg border border-border-default bg-surface-raised p-4 shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-sky-500 dark:border-border-default dark:bg-surface-raised"
       data-testid="media-checkpoint-question"
       aria-labelledby={headingId}
     >
-      <p id={headingId} className="text-sm font-semibold text-slate-800 dark:text-neutral-100">
+      <p id={headingId} className="text-sm font-semibold text-fg-default">
         {t('contentTools.tools.media_checkpoints.questionHeading', {
           n: index + 1,
           total,
           time: formatShort(checkpoint.atSec),
         })}
       </p>
-      <p className="mt-2 text-sm text-slate-700 dark:text-neutral-200">{q.prompt}</p>
+      <p className="mt-2 text-sm text-fg-default">{q.prompt}</p>
 
       <div className="mt-3 space-y-2">{renderInput(q, value, setValue, multi, setMulti, disabled || busy || canContinue)}</div>
 
       {lastResult?.feedback ? (
-        <p className="mt-3 text-sm text-slate-600 dark:text-neutral-300" role="status">
+        <p className="mt-3 text-sm text-fg-muted" role="status">
           {lastResult.feedback}
         </p>
       ) : null}
@@ -108,7 +108,7 @@ export function QuestionCard({
           </button>
         )}
         {typeof lastResult?.attemptsRemaining === 'number' ? (
-          <span className="self-center text-xs text-slate-500">
+          <span className="self-center text-xs text-fg-muted">
             {t('contentTools.tools.media_checkpoints.attemptsLeft', {
               count: lastResult.attemptsRemaining,
             })}
@@ -187,7 +187,7 @@ function renderInput(
         disabled={disabled}
         value={String(value ?? '')}
         onChange={(e) => setValue(e.target.value)}
-        className="w-full min-h-11 rounded-md border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+        className="w-full min-h-11 rounded-md border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
       />
     )
   }
@@ -197,7 +197,7 @@ function renderInput(
       disabled={disabled}
       value={String(value ?? '')}
       onChange={(e) => setValue(e.target.value)}
-      className="w-full min-h-11 rounded-md border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+      className="w-full min-h-11 rounded-md border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
     />
   )
 }

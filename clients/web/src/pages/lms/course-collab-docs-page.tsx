@@ -87,23 +87,23 @@ export default function CourseCollabDocsPage() {
     return (
       <LmsPage title={activeDoc?.title ?? 'Document'} fillHeight omitHeader>
         {error ? (
-          <div className="rounded-md bg-red-50 p-4 text-sm text-red-700 dark:bg-red-950/30 dark:text-red-400">
+          <div className="rounded-md bg-red-50 p-4 text-sm text-danger-fg dark:bg-red-950/30 dark:text-red-400">
             {error}
           </div>
         ) : showEditorLoading ? (
           <div className="flex min-h-48 flex-1 items-center justify-center">
-            <span className="text-sm text-slate-500 dark:text-neutral-400">Loading…</span>
+            <span className="text-sm text-fg-muted">Loading…</span>
           </div>
         ) : activeDoc.docType === 'whiteboard' ? (
           <div className="space-y-4">
             <Link
               to={listBase}
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-accent-fg hover:text-accent-fg dark:text-indigo-400 dark:hover:text-indigo-300"
             >
               <ArrowLeft className="size-4" aria-hidden />
               Back to documents
             </Link>
-            <p className="text-sm text-slate-600 dark:text-neutral-300">
+            <p className="text-sm text-fg-muted">
               Whiteboard editing for &ldquo;{activeDoc.title}&rdquo; is not available in this view yet.
             </p>
           </div>
@@ -112,12 +112,12 @@ export default function CourseCollabDocsPage() {
             <Link
               to={listBase}
               data-testid="collab-doc-back-link"
-              className="inline-flex shrink-0 items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+              className="inline-flex shrink-0 items-center gap-1.5 text-sm font-medium text-accent-fg hover:text-accent-fg dark:text-indigo-400 dark:hover:text-indigo-300"
             >
               <ArrowLeft className="size-4" aria-hidden />
               Back to documents
             </Link>
-            <div className="min-h-48 flex-1 overflow-hidden rounded-lg border border-slate-200 dark:border-neutral-700">
+            <div className="min-h-48 flex-1 overflow-hidden rounded-lg border border-border-default">
               <CollabEditor courseCode={courseCode} docId={docId} />
             </div>
           </div>
@@ -130,10 +130,10 @@ export default function CourseCollabDocsPage() {
     <LmsPage title="Collaborative Documents">
       {listLoading ? (
         <div className="flex items-center justify-center py-16">
-          <span className="text-sm text-slate-500 dark:text-neutral-400">Loading…</span>
+          <span className="text-sm text-fg-muted">Loading…</span>
         </div>
       ) : error ? (
-        <div className="rounded-md bg-red-50 p-4 text-sm text-red-700 dark:bg-red-950/30 dark:text-red-400">
+        <div className="rounded-md bg-red-50 p-4 text-sm text-danger-fg dark:bg-red-950/30 dark:text-red-400">
           {error}
         </div>
       ) : (

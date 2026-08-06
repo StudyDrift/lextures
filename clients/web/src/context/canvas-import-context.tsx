@@ -652,7 +652,7 @@ function CanvasImportOverlay({
       <div className="pointer-events-none fixed inset-0 z-[400]" aria-hidden>
         <div
           ref={panelRef}
-          className="pointer-events-none fixed overflow-hidden border border-slate-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-900"
+          className="pointer-events-none fixed overflow-hidden border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-raised"
           style={{
             left: collapseFrame.left,
             top: collapseFrame.top,
@@ -737,11 +737,7 @@ export function CanvasImportHeaderWidget() {
         aria-expanded={popoverOpen}
         aria-haspopup="dialog"
         onClick={togglePopover}
-        className={`relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-[background-color,color,border-color] focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30 ${
-          popoverOpen
-            ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300'
-            : 'text-slate-600 hover:bg-slate-100 dark:text-neutral-300 dark:hover:bg-neutral-800'
-        }`}
+        className={`relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-[background-color,color,border-color] focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30 ${ popoverOpen ? 'bg-indigo-100 text-accent-fg dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay' }`}
       >
         {importComplete ? (
           <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-[11px] font-bold text-white">
@@ -760,7 +756,7 @@ export function CanvasImportHeaderWidget() {
           aria-modal="true"
           aria-label="Canvas import"
           data-testid="canvas-import-popover"
-          className="absolute end-0 top-full z-50 mt-1 flex w-[min(36rem,calc(100vw-2rem))] max-h-[min(85vh,720px)] flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-900 dark:shadow-black/40"
+          className="absolute end-0 top-full z-50 mt-1 flex w-[min(36rem,calc(100vw-2rem))] max-h-[min(85vh,720px)] flex-col overflow-hidden rounded-xl border border-border-default bg-surface-raised shadow-lg shadow-slate-900/10 dark:border-border-default dark:bg-surface-raised dark:shadow-black/40"
         >
           <CanvasImportCoursesPanel {...panelProps} compact className="max-h-[min(85vh,720px)]" />
         </div>

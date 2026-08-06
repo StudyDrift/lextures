@@ -144,11 +144,11 @@ export function IntegrationsAccessKeysPanel() {
     <section className="mt-8">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-neutral-100">
+          <h3 className="flex items-center gap-2 text-sm font-semibold text-fg-default">
             <KeyRound className="h-4 w-4" aria-hidden />
             Access keys
           </h3>
-          <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+          <p className="mt-1 text-sm text-fg-muted">
             Long-lived credentials for API tools and MCP agents. Each key starts with{' '}
             <code className="font-mono text-xs">ltk_</code>.
           </p>
@@ -156,7 +156,7 @@ export function IntegrationsAccessKeysPanel() {
         <button
           type="button"
           onClick={() => setCreateOpen(true)}
-          className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-white"
+          className="inline-flex items-center gap-2 rounded-xl bg-accent-solid px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-surface-raised"
         >
           <Plus className="h-4 w-4" aria-hidden />
           New key
@@ -170,17 +170,17 @@ export function IntegrationsAccessKeysPanel() {
       )}
 
       {loading ? (
-        <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">Loading access keys…</p>
+        <p className="mt-4 text-sm text-fg-muted">Loading access keys…</p>
       ) : activeKeys.length === 0 && revokedKeys.length === 0 ? (
-        <div className="mt-4 rounded-xl border border-dashed border-slate-200 bg-slate-50/50 px-4 py-8 text-center dark:border-neutral-600 dark:bg-neutral-800/30">
-          <p className="text-sm text-slate-600 dark:text-neutral-300">No access keys yet.</p>
-          <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+        <div className="mt-4 rounded-xl border border-dashed border-border-default bg-slate-50/50 px-4 py-8 text-center dark:border-border-default/30">
+          <p className="text-sm text-fg-muted">No access keys yet.</p>
+          <p className="mt-1 text-xs text-fg-muted">
             Create one to connect scripts, automation, or an AI agent via MCP.
           </p>
           <button
             type="button"
             onClick={() => setCreateOpen(true)}
-            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500 dark:bg-neutral-100 dark:text-neutral-950"
+            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-accent-solid px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500 dark:bg-neutral-100 dark:text-neutral-950"
           >
             <Plus className="h-4 w-4" aria-hidden />
             Create your first key
@@ -189,23 +189,23 @@ export function IntegrationsAccessKeysPanel() {
       ) : (
         <div className="mt-4 space-y-6">
           {activeKeys.length > 0 && (
-            <ul className="divide-y divide-slate-200 rounded-xl border border-slate-200 dark:divide-neutral-700 dark:border-neutral-600">
+            <ul className="divide-y divide-slate-200 rounded-xl border border-border-default dark:divide-neutral-700 dark:border-border-default">
               {activeKeys.map((t) => (
                 <li key={t.id} className="flex flex-wrap items-start justify-between gap-3 px-4 py-3">
                   <div className="min-w-0">
-                    <p className="font-medium text-slate-900 dark:text-neutral-100">{t.label}</p>
-                    <p className="mt-0.5 font-mono text-xs text-slate-500 dark:text-neutral-400">{t.tokenMask}</p>
-                    <dl className="mt-2 grid gap-1 text-xs text-slate-500 dark:text-neutral-400 sm:grid-cols-2 sm:gap-x-4">
+                    <p className="font-medium text-fg-default">{t.label}</p>
+                    <p className="mt-0.5 font-mono text-xs text-fg-muted">{t.tokenMask}</p>
+                    <dl className="mt-2 grid gap-1 text-xs text-fg-muted sm:grid-cols-2 sm:gap-x-4">
                       <div>
-                        <dt className="inline font-medium text-slate-600 dark:text-neutral-300">Permissions: </dt>
+                        <dt className="inline font-medium text-fg-muted">Permissions: </dt>
                         <dd className="inline">{t.scopes.join(', ')}</dd>
                       </div>
                       <div>
-                        <dt className="inline font-medium text-slate-600 dark:text-neutral-300">Courses: </dt>
+                        <dt className="inline font-medium text-fg-muted">Courses: </dt>
                         <dd className="inline">{courseSummary(t)}</dd>
                       </div>
                       <div className="sm:col-span-2">
-                        <dt className="inline font-medium text-slate-600 dark:text-neutral-300">Created: </dt>
+                        <dt className="inline font-medium text-fg-muted">Created: </dt>
                         <dd className="inline">
                           {formatDateTime(t.createdAt)}
                           {t.lastUsedAt ? ` · Last used ${formatDateTime(t.lastUsedAt)}` : ' · Never used'}
@@ -214,7 +214,7 @@ export function IntegrationsAccessKeysPanel() {
                       </div>
                     </dl>
                     {t.unusedDays != null && t.unusedDays >= 90 && (
-                      <p className="mt-2 text-xs font-medium text-amber-700 dark:text-amber-300">
+                      <p className="mt-2 text-xs font-medium text-warning-fg">
                         Unused {t.unusedDays} days — consider revoking
                       </p>
                     )}
@@ -223,7 +223,7 @@ export function IntegrationsAccessKeysPanel() {
                     <button
                       type="button"
                       onClick={() => void rotate(t.id)}
-                      className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                      className="inline-flex items-center gap-1 rounded-lg border border-border-default px-3 py-1.5 text-sm text-fg-muted hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
                     >
                       <RefreshCw className="h-4 w-4" aria-hidden />
                       Rotate
@@ -244,14 +244,14 @@ export function IntegrationsAccessKeysPanel() {
 
           {revokedKeys.length > 0 && (
             <div>
-              <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+              <h4 className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
                 Revoked
               </h4>
-              <ul className="mt-2 divide-y divide-slate-200 rounded-xl border border-slate-200 opacity-75 dark:divide-neutral-700 dark:border-neutral-600">
+              <ul className="mt-2 divide-y divide-slate-200 rounded-xl border border-border-default opacity-75 dark:divide-neutral-700 dark:border-border-default">
                 {revokedKeys.map((t) => (
                   <li key={t.id} className="px-4 py-3">
-                    <p className="text-sm text-slate-600 line-through dark:text-neutral-400">{t.label}</p>
-                    <p className="mt-0.5 font-mono text-xs text-slate-400 dark:text-neutral-500">{t.tokenMask}</p>
+                    <p className="text-sm text-fg-muted line-through dark:text-fg-muted">{t.label}</p>
+                    <p className="mt-0.5 font-mono text-xs text-fg-subtle">{t.tokenMask}</p>
                   </li>
                 ))}
               </ul>

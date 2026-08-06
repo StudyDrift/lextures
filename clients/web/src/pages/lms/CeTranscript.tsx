@@ -68,10 +68,10 @@ export default function CeTranscript() {
     <LmsPage title="CE Transcript">
       <div className="mx-auto max-w-3xl space-y-6">
         <header>
-          <h1 id={titleId} className="text-2xl font-semibold text-slate-900 dark:text-neutral-100">
+          <h1 id={titleId} className="text-2xl font-semibold text-fg-default">
             Continuing education transcript
           </h1>
-          <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
+          <p className="mt-2 text-sm text-fg-muted">
             Download a record of CEU-bearing courses you have completed.
           </p>
         </header>
@@ -95,15 +95,15 @@ export default function CeTranscript() {
         </div>
 
         {loading ? (
-          <p className="text-sm text-slate-500">Loading awards…</p>
+          <p className="text-sm text-fg-muted">Loading awards…</p>
         ) : awards.length === 0 ? (
-          <p className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-600 dark:border-neutral-700 dark:bg-neutral-900/50 dark:text-neutral-300">
+          <p className="rounded-xl border border-border-default bg-surface-base px-4 py-6 text-sm text-fg-muted dark:border-border-default/50 dark:text-fg-muted">
             No CEU awards yet. Complete contact-hour requirements in your CE courses to earn credits.
           </p>
         ) : (
-          <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-700">
+          <div className="overflow-x-auto rounded-xl border border-border-default">
             <table className="min-w-full text-left text-sm">
-              <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-neutral-900 dark:text-neutral-400">
+              <thead className="bg-surface-base text-xs uppercase tracking-wide text-fg-muted dark:bg-surface-raised dark:text-fg-muted">
                 <tr>
                   <th className="px-4 py-3 font-semibold">Course</th>
                   <th className="px-4 py-3 font-semibold">CEU</th>
@@ -113,8 +113,8 @@ export default function CeTranscript() {
               </thead>
               <tbody>
                 {awards.map((a) => (
-                  <tr key={`${a.courseTitle}-${a.completedAt}`} className="border-t border-slate-100 dark:border-neutral-800">
-                    <td className="px-4 py-3 font-medium text-slate-900 dark:text-neutral-100">{a.courseTitle}</td>
+                  <tr key={`${a.courseTitle}-${a.completedAt}`} className="border-t border-border-subtle">
+                    <td className="px-4 py-3 font-medium text-fg-default">{a.courseTitle}</td>
                     <td className="px-4 py-3">{a.ceuCredit.toFixed(2)}</td>
                     <td className="px-4 py-3">{a.contactHours.toFixed(1)}</td>
                     <td className="px-4 py-3">{new Date(a.completedAt).toLocaleDateString()}</td>

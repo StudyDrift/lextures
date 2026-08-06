@@ -30,7 +30,7 @@ export function ListModeView({
 
   return (
     <div className="space-y-3" data-testid="diagram-list-mode">
-      <p className="text-xs text-slate-600 dark:text-neutral-300">
+      <p className="text-xs text-fg-muted">
         {t('contentTools.tools.diagram_hotspot.listModeHelp')}
       </p>
       <ul className="space-y-3">
@@ -39,21 +39,21 @@ export function ListModeView({
           return (
             <li
               key={item.id}
-              className="grid gap-2 rounded border border-slate-200 p-3 sm:grid-cols-2 dark:border-neutral-700"
+              className="grid gap-2 rounded border border-border-default p-3 sm:grid-cols-2 dark:border-border-default"
             >
               <div>
-                <p className="text-sm font-medium text-slate-800 dark:text-neutral-100">{item.text}</p>
+                <p className="text-sm font-medium text-fg-default">{item.text}</p>
                 {locked ? (
-                  <p className="text-xs text-slate-500">{t('contentTools.tools.diagram_hotspot.locked')}</p>
+                  <p className="text-xs text-fg-muted">{t('contentTools.tools.diagram_hotspot.locked')}</p>
                 ) : null}
               </div>
               <label className="block space-y-1 text-xs">
-                <span className="font-medium text-slate-600 dark:text-neutral-300">
+                <span className="font-medium text-fg-muted">
                   {t('contentTools.tools.diagram_hotspot.assignRegion')}
                 </span>
                 <select
                   data-testid={`diagram-list-select-${item.id}`}
-                  className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                  className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
                   disabled={readOnly || locked}
                   value={assignments[item.id] ?? ''}
                   onChange={(e) => onAssign(item.id, e.target.value || null)}

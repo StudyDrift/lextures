@@ -455,7 +455,7 @@ export default function Settings() {
   if (permLoading && isSystemSettingsPath(location.pathname)) {
     return (
       <LmsPage title="Settings" description="Account and learning preferences.">
-        <p className="mt-8 text-sm text-slate-500 dark:text-neutral-400">Loading…</p>
+        <p className="mt-8 text-sm text-fg-muted">Loading…</p>
       </LmsPage>
     )
   }
@@ -473,7 +473,7 @@ export default function Settings() {
   if (activeView === 'scim-provisioning' && canManageRbac && platformScimFlagLoading) {
     return (
       <LmsPage title="Settings" description="Account and learning preferences.">
-        <p className="mt-8 text-sm text-slate-500 dark:text-neutral-400">Loading…</p>
+        <p className="mt-8 text-sm text-fg-muted">Loading…</p>
       </LmsPage>
     )
   }
@@ -493,53 +493,18 @@ export default function Settings() {
   return (
     <LmsPage title="Settings" description="Account and learning preferences.">
       <div
-        className={`mt-8 ${
-          activeView === 'email-templates'
-            ? 'max-w-none w-full'
-            : activeView === 'roles' ||
-                activeView === 'lti-tools' ||
-                activeView === 'platform' ||
-                activeView === 'organizations' ||
-                activeView === 'org-units' ||
-                activeView === 'terms' ||
-                activeView === 'org-branding' ||
-                activeView === 'scim-provisioning' ||
-                activeView === 'cloud-providers' ||
-                activeView === 'lrs-integrations' ||
-                activeView === 'oer-providers' ||
-                activeView === 'transcripts' ||
-                activeView === 'advising' ||
-                activeView === 'archive' ||
-                activeView === 'people' ||
-                activeView === 'courses' ||
-                activeView === 'intro-course' ||
-                activeView === 'feedback'
-              ? 'max-w-4xl'
-              : activeView === 'integrations'
-                ? 'max-w-3xl'
-                : activeView === 'ai-prompts'
-                  ? 'max-w-3xl'
-                  : activeView === 'ai-models' ||
-                      activeView === 'ai-reports' ||
-                      activeView === 'ai-governance'
-                    ? 'max-w-4xl'
-                    : activeView === 'account'
-                      ? 'max-w-3xl'
-                      : activeView === 'learner-profile'
-                        ? 'max-w-3xl'
-                        : 'max-w-xl'
-        }`}
+        className={`mt-8 ${ activeView === 'email-templates' ? 'max-w-none w-full' : activeView === 'roles' || activeView === 'lti-tools' || activeView === 'platform' || activeView === 'organizations' || activeView === 'org-units' || activeView === 'terms' || activeView === 'org-branding' || activeView === 'scim-provisioning' || activeView === 'cloud-providers' || activeView === 'lrs-integrations' || activeView === 'oer-providers' || activeView === 'transcripts' || activeView === 'advising' || activeView === 'archive' || activeView === 'people' || activeView === 'courses' || activeView === 'intro-course' || activeView === 'feedback' ? 'max-w-4xl' : activeView === 'integrations' ? 'max-w-3xl' : activeView === 'ai-prompts' ? 'max-w-3xl' : activeView === 'ai-models' || activeView === 'ai-reports' || activeView === 'ai-governance' ? 'max-w-4xl' : activeView === 'account' ? 'max-w-3xl' : activeView === 'learner-profile' ? 'max-w-3xl' : 'max-w-xl' }`}
       >
         {activeView === 'ai-models' && (
           <div>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Models</h2>
-            <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+            <h2 className="text-base font-semibold text-fg-default">Models</h2>
+            <p className="mt-1 text-sm text-fg-muted">
               Configure AI providers and choose models for course setup, flashcards, vibe activities,
               grading, and course hero images. Catalogs follow the active provider
               {activeProvider ? ` (${providerLabel(activeProvider)})` : ''}.
             </p>
 
-            {aiLoading && <p className="mt-4 text-sm text-slate-500">Loading…</p>}
+            {aiLoading && <p className="mt-4 text-sm text-fg-muted">Loading…</p>}
             {aiError && (
               <p className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800" role="alert">
                 {aiError}
@@ -578,13 +543,13 @@ export default function Settings() {
             )}
 
             {!imageModelsFromApi && modelsConfigured && !aiLoading && !modelsError && (
-              <p className="mt-4 text-sm text-slate-500">
+              <p className="mt-4 text-sm text-fg-muted">
                 No image models returned from the provider catalog; using fallback IDs.
               </p>
             )}
 
             {!textModelsFromApi && modelsConfigured && !aiLoading && !modelsError && (
-              <p className="mt-4 text-sm text-slate-500">
+              <p className="mt-4 text-sm text-fg-muted">
                 No text models returned from the provider catalog; using fallback IDs.
               </p>
             )}
@@ -595,7 +560,7 @@ export default function Settings() {
                   <div>
                     <label
                       htmlFor="openrouter-api-key"
-                      className="block text-sm font-medium text-slate-700 dark:text-neutral-200"
+                      className="block text-sm font-medium text-fg-default"
                     >
                       OpenRouter API key
                     </label>
@@ -607,9 +572,9 @@ export default function Settings() {
                       onChange={(e) => setOpenRouterApiKey(e.target.value)}
                       placeholder={PLATFORM_SECRET_PLACEHOLDER}
                       disabled={aiSaving}
-                      className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 font-mono text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                      className="mt-1.5 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 font-mono text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 disabled:opacity-60 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
                     />
-                    <p className="mt-1.5 text-xs text-slate-500 dark:text-neutral-400">
+                    <p className="mt-1.5 text-xs text-fg-muted">
                       Platform-wide key for AI generation. Leave unchanged to keep the current key; clear
                       the field and save to remove it.
                     </p>
@@ -627,7 +592,7 @@ export default function Settings() {
                     onRefresh={refreshModels}
                     refreshing={modelsRefreshing}
                   />
-                  <p className="mt-1.5 text-xs text-slate-500">
+                  <p className="mt-1.5 text-xs text-fg-muted">
                     Text-to-text model used when setting up course structure and content. Each option
                     shows the display name, model id, then modalities, context window, and
                     input/output price per 1M tokens (USD). Use{' '}
@@ -646,7 +611,7 @@ export default function Settings() {
                     onRefresh={refreshModels}
                     refreshing={modelsRefreshing}
                   />
-                  <p className="mt-1.5 text-xs text-slate-500">
+                  <p className="mt-1.5 text-xs text-fg-muted">
                     Text-to-text model used when generating AI study flashcards from notebook notes.
                   </p>
                 </div>
@@ -662,7 +627,7 @@ export default function Settings() {
                     onRefresh={refreshModels}
                     refreshing={modelsRefreshing}
                   />
-                  <p className="mt-1.5 text-xs text-slate-500">
+                  <p className="mt-1.5 text-xs text-fg-muted">
                     Text-to-text model used when generating interactive HTML vibe activities for courses.
                   </p>
                 </div>
@@ -678,7 +643,7 @@ export default function Settings() {
                     onRefresh={refreshModels}
                     refreshing={modelsRefreshing}
                   />
-                  <p className="mt-1.5 text-xs text-slate-500">
+                  <p className="mt-1.5 text-xs text-fg-muted">
                     Text-to-text model used when instructors dry-run or batch-run the SpeedGrader grading agent.
                   </p>
                 </div>
@@ -694,7 +659,7 @@ export default function Settings() {
                     onRefresh={refreshModels}
                     refreshing={modelsRefreshing}
                   />
-                  <p className="mt-1.5 text-xs text-slate-500">
+                  <p className="mt-1.5 text-xs text-fg-muted">
                     Used when you generate course images. Each option shows the display name, model id,
                     then modalities, context window, and input/output price per 1M tokens (USD). Use{' '}
                     <span className="font-medium">Refresh list</span> to reload the catalog.
@@ -710,7 +675,7 @@ export default function Settings() {
                 <button
                   type="submit"
                   disabled={saveDisabled}
-                  className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-white dark:shadow-none"
+                  className="rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-surface-raised dark:shadow-none"
                 >
                   {aiSaving ? 'Saving…' : 'Save'}
                 </button>
@@ -721,21 +686,21 @@ export default function Settings() {
 
         {activeView === 'ai-prompts' && (
           <div>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">System Prompts</h2>
-            <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+            <h2 className="text-base font-semibold text-fg-default">System Prompts</h2>
+            <p className="mt-1 text-sm text-fg-muted">
               Edit platform system prompts used by AI features. Changes are audited.
             </p>
             <RequirePermission
               permission={PERM_RBAC_MANAGE}
               fallback={
-                <p className="mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-neutral-600 dark:bg-neutral-800/50 dark:text-neutral-300">
+                <p className="mt-6 rounded-xl border border-border-default bg-surface-base px-4 py-3 text-sm text-fg-muted dark:border-border-default/50 dark:text-fg-muted">
                   You need permission to manage system prompts (
                   <code className="font-mono text-xs">{PERM_RBAC_MANAGE}</code>).
                 </p>
               }
             >
               {systemPromptsLoading && (
-                <p className="mt-4 text-sm text-slate-500">Loading…</p>
+                <p className="mt-4 text-sm text-fg-muted">Loading…</p>
               )}
               {systemPromptsError && (
                 <p className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-200">
@@ -745,14 +710,14 @@ export default function Settings() {
               {!systemPromptsLoading && systemPrompts.length > 0 && (
                 <form className="mt-6 space-y-4" onSubmit={onSaveSystemPrompt}>
                   <div>
-                    <label htmlFor="system-prompt-select" className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-neutral-200">
+                    <label htmlFor="system-prompt-select" className="mb-1.5 block text-sm font-medium text-fg-default">
                       Prompt
                     </label>
                     <select
                       id="system-prompt-select"
                       value={systemPromptKey}
                       onChange={(e) => onSystemPromptKeyChange(e.target.value)}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                      className="w-full rounded-xl border border-border-default bg-surface-raised px-2 py-1.5 text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
                     >
                       {systemPrompts.map((p) => (
                         <option key={p.key} value={p.key}>
@@ -762,7 +727,7 @@ export default function Settings() {
                     </select>
                   </div>
                   <div>
-                    <label htmlFor="system-prompt-body" className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-neutral-200">
+                    <label htmlFor="system-prompt-body" className="mb-1.5 block text-sm font-medium text-fg-default">
                       Content
                     </label>
                     <textarea
@@ -771,7 +736,7 @@ export default function Settings() {
                       onChange={(e) => setSystemPromptDraft(e.target.value)}
                       rows={12}
                       spellCheck={false}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 font-mono text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                      className="w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 font-mono text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
                     />
                   </div>
                   {systemPromptsMessage && (
@@ -782,14 +747,14 @@ export default function Settings() {
                   <button
                     type="submit"
                     disabled={systemPromptsSaving || !systemPromptKey}
-                    className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-white dark:shadow-none"
+                    className="rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-surface-raised dark:shadow-none"
                   >
                     {systemPromptsSaving ? 'Saving…' : 'Save'}
                   </button>
                 </form>
               )}
               {!systemPromptsLoading && systemPrompts.length === 0 && !systemPromptsError && (
-                <p className="mt-4 text-sm text-slate-500">No system prompts are registered.</p>
+                <p className="mt-4 text-sm text-fg-muted">No system prompts are registered.</p>
               )}
             </RequirePermission>
           </div>
@@ -799,7 +764,7 @@ export default function Settings() {
           <RequirePermission
             permission={PERM_RBAC_MANAGE}
             fallback={
-              <p className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-neutral-600 dark:bg-neutral-800/50 dark:text-neutral-300">
+              <p className="rounded-xl border border-border-default bg-surface-base px-4 py-3 text-sm text-fg-muted dark:border-border-default/50 dark:text-fg-muted">
                 You need permission to view AI reports (
                 <code className="font-mono text-xs">{PERM_RBAC_MANAGE}</code>).
               </p>
@@ -813,7 +778,7 @@ export default function Settings() {
           <RequirePermission
             permission={PERM_RBAC_MANAGE}
             fallback={
-              <p className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-neutral-600 dark:bg-neutral-800/50 dark:text-neutral-300">
+              <p className="rounded-xl border border-border-default bg-surface-base px-4 py-3 text-sm text-fg-muted dark:border-border-default/50 dark:text-fg-muted">
                 You need permission to manage AI governance (
                 <code className="font-mono text-xs">{PERM_RBAC_MANAGE}</code>).
               </p>
@@ -827,8 +792,8 @@ export default function Settings() {
 
         {activeView === 'notifications' && (
           <div>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Notifications</h2>
-            <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+            <h2 className="text-base font-semibold text-fg-default">Notifications</h2>
+            <p className="mt-1 text-sm text-fg-muted">
               Control which events send you email and whether they arrive instantly or in a daily digest.
             </p>
             <NotificationPreferencesPanel />
@@ -838,8 +803,8 @@ export default function Settings() {
 
         {activeView === 'integrations' && (
           <div>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Integrations</h2>
-            <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+            <h2 className="text-base font-semibold text-fg-default">Integrations</h2>
+            <p className="mt-1 text-sm text-fg-muted">
               Create access keys for API tools and configure MCP so AI agents can work with your Lextures data.
             </p>
             <IntegrationsAccessKeysPanel />
@@ -853,15 +818,15 @@ export default function Settings() {
 
         {activeView === 'roles' && (
           <div>
-            <h2 className="text-base font-semibold text-slate-900">Roles and Permissions</h2>
-            <p className="mt-1 text-sm text-slate-500">
+            <h2 className="text-base font-semibold text-fg-default">Roles and Permissions</h2>
+            <p className="mt-1 text-sm text-fg-muted">
               Define permission strings and assign them to roles. Route and UI checks use the same
               matching rules as the server.
             </p>
             <RequirePermission
               permission={PERM_RBAC_MANAGE}
               fallback={
-                <p className="mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                <p className="mt-6 rounded-xl border border-border-default bg-surface-base px-4 py-3 text-sm text-fg-muted">
                   You do not have permission to manage roles and permissions (
                   <code className="font-mono text-xs">{PERM_RBAC_MANAGE}</code>).
                 </p>
@@ -877,8 +842,8 @@ export default function Settings() {
             permission={PERM_RBAC_MANAGE}
             fallback={
               <div>
-                <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">LTI tools</h2>
-                <p className="mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
+                <h2 className="text-base font-semibold text-fg-default">LTI tools</h2>
+                <p className="mt-6 rounded-xl border border-border-default bg-surface-base px-4 py-3 text-sm text-fg-muted dark:border-border-default dark:bg-surface-overlay dark:text-fg-muted">
                   You do not have permission to manage LTI registrations (
                   <code className="font-mono text-xs">{PERM_RBAC_MANAGE}</code>).
                 </p>
@@ -891,11 +856,11 @@ export default function Settings() {
 
         {activeView === 'scim-provisioning' && (
           <div>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">SCIM provisioning</h2>
+            <h2 className="text-base font-semibold text-fg-default">SCIM provisioning</h2>
             <RequirePermission
               permission={PERM_RBAC_MANAGE}
               fallback={
-                <p className="mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
+                <p className="mt-6 rounded-xl border border-border-default bg-surface-base px-4 py-3 text-sm text-fg-muted dark:border-border-default dark:bg-surface-overlay dark:text-fg-muted">
                   You need permission to manage SCIM provisioning (
                   <code className="font-mono text-xs">{PERM_RBAC_MANAGE}</code>).
                 </p>
@@ -911,7 +876,7 @@ export default function Settings() {
             <RequirePermission
               permission={PERM_RBAC_MANAGE}
               fallback={
-                <p className="mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
+                <p className="mt-6 rounded-xl border border-border-default bg-surface-base px-4 py-3 text-sm text-fg-muted dark:border-border-default dark:bg-surface-overlay dark:text-fg-muted">
                   You need permission to manage cloud provider settings (
                   <code className="font-mono text-xs">{PERM_RBAC_MANAGE}</code>).
                 </p>
@@ -927,7 +892,7 @@ export default function Settings() {
             <RequirePermission
               permission={PERM_RBAC_MANAGE}
               fallback={
-                <p className="mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
+                <p className="mt-6 rounded-xl border border-border-default bg-surface-base px-4 py-3 text-sm text-fg-muted dark:border-border-default dark:bg-surface-overlay dark:text-fg-muted">
                   You need permission to manage LRS integrations (
                   <code className="font-mono text-xs">{PERM_RBAC_MANAGE}</code>).
                 </p>
@@ -943,7 +908,7 @@ export default function Settings() {
             <RequirePermission
               permission={PERM_RBAC_MANAGE}
               fallback={
-                <p className="mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
+                <p className="mt-6 rounded-xl border border-border-default bg-surface-base px-4 py-3 text-sm text-fg-muted dark:border-border-default dark:bg-surface-overlay dark:text-fg-muted">
                   You need permission to manage OER provider settings (
                   <code className="font-mono text-xs">{PERM_RBAC_MANAGE}</code>).
                 </p>
@@ -959,7 +924,7 @@ export default function Settings() {
             <RequirePermission
               permission={PERM_RBAC_MANAGE}
               fallback={
-                <p className="mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
+                <p className="mt-6 rounded-xl border border-border-default bg-surface-base px-4 py-3 text-sm text-fg-muted dark:border-border-default dark:bg-surface-overlay dark:text-fg-muted">
                   You need permission to manage transcript settings (
                   <code className="font-mono text-xs">{PERM_RBAC_MANAGE}</code>).
                 </p>
@@ -975,7 +940,7 @@ export default function Settings() {
             <RequirePermission
               permission={PERM_RBAC_MANAGE}
               fallback={
-                <p className="mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
+                <p className="mt-6 rounded-xl border border-border-default bg-surface-base px-4 py-3 text-sm text-fg-muted dark:border-border-default dark:bg-surface-overlay dark:text-fg-muted">
                   You need permission to manage advising settings (
                   <code className="font-mono text-xs">{PERM_RBAC_MANAGE}</code>).
                 </p>
@@ -988,11 +953,11 @@ export default function Settings() {
 
         {activeView === 'platform' && (
           <div>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Global platform</h2>
+            <h2 className="text-base font-semibold text-fg-default">Global platform</h2>
             <RequirePermission
               permission={PERM_RBAC_MANAGE}
               fallback={
-                <p className="mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
+                <p className="mt-6 rounded-xl border border-border-default bg-surface-base px-4 py-3 text-sm text-fg-muted dark:border-border-default dark:bg-surface-overlay dark:text-fg-muted">
                   You need permission to edit platform configuration (
                   <code className="font-mono text-xs">{PERM_RBAC_MANAGE}</code>).
                 </p>
@@ -1005,11 +970,11 @@ export default function Settings() {
 
         {activeView === 'email-templates' && emailTemplateEditorEnabled && (
           <div>
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-neutral-100">Email templates</h2>
+            <h2 className="text-lg font-semibold text-fg-default">Email templates</h2>
             <RequirePermission
               permission={PERM_RBAC_MANAGE}
               fallback={
-                <p className="mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
+                <p className="mt-6 rounded-xl border border-border-default bg-surface-base px-4 py-3 text-sm text-fg-muted dark:border-border-default dark:bg-surface-overlay dark:text-fg-muted">
                   You need permission to edit system email templates (
                   <code className="font-mono text-xs">{PERM_RBAC_MANAGE}</code>).
                 </p>
@@ -1022,8 +987,8 @@ export default function Settings() {
 
         {activeView === 'org-units' && (
           <div>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Org structure</h2>
-            <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+            <h2 className="text-base font-semibold text-fg-default">Org structure</h2>
+            <p className="mt-1 text-sm text-fg-muted">
               Schools, colleges, and departments within your organization.
             </p>
             <OrgUnitsPanel />
@@ -1038,10 +1003,10 @@ export default function Settings() {
 
         {activeView === 'org-branding' && (
           <div>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">
+            <h2 className="text-base font-semibold text-fg-default">
               Organization branding
             </h2>
-            <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+            <p className="mt-1 text-sm text-fg-muted">
               Logo, colors, optional custom domain, and email sender display name.
             </p>
             <OrgBranding />
@@ -1051,14 +1016,14 @@ export default function Settings() {
 
         {activeView === 'archive' && (
           <div>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Archive</h2>
-            <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+            <h2 className="text-base font-semibold text-fg-default">Archive</h2>
+            <p className="mt-1 text-sm text-fg-muted">
               Review archived courses, restore them to the catalog, or permanently delete them.
             </p>
             <RequirePermission
               permission={PERM_RBAC_MANAGE}
               fallback={
-                <p className="mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-neutral-600 dark:bg-neutral-800/50 dark:text-neutral-300">
+                <p className="mt-6 rounded-xl border border-border-default bg-surface-base px-4 py-3 text-sm text-fg-muted dark:border-border-default/50 dark:text-fg-muted">
                   You need permission to manage archived courses (
                   <code className="font-mono text-xs">{PERM_RBAC_MANAGE}</code>).
                 </p>
@@ -1073,10 +1038,10 @@ export default function Settings() {
           <div>
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
-                <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-neutral-100">
+                <h2 className="text-xl font-semibold tracking-tight text-fg-default">
                   People
                 </h2>
-                <p className="mt-1 max-w-2xl text-sm leading-relaxed text-slate-500 dark:text-neutral-400">
+                <p className="mt-1 max-w-2xl text-sm leading-relaxed text-fg-muted">
                   Search, invite, suspend, and manage user accounts across the platform.
                 </p>
               </div>
@@ -1084,7 +1049,7 @@ export default function Settings() {
             <RequirePermission
               permission={PERM_RBAC_MANAGE}
               fallback={
-                <p className="mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-neutral-600 dark:bg-neutral-800/50 dark:text-neutral-300">
+                <p className="mt-6 rounded-xl border border-border-default bg-surface-base px-4 py-3 text-sm text-fg-muted dark:border-border-default/50 dark:text-fg-muted">
                   You need permission to manage people (
                   <code className="font-mono text-xs">{PERM_RBAC_MANAGE}</code>).
                 </p>
@@ -1097,14 +1062,14 @@ export default function Settings() {
 
         {activeView === 'courses' && (
           <div>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Courses</h2>
-            <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+            <h2 className="text-base font-semibold text-fg-default">Courses</h2>
+            <p className="mt-1 text-sm text-fg-muted">
               Search courses across the platform and open them with instructor access to manage content and enrollments.
             </p>
             <RequirePermission
               permission={PERM_RBAC_MANAGE}
               fallback={
-                <p className="mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-neutral-600 dark:bg-neutral-800/50 dark:text-neutral-300">
+                <p className="mt-6 rounded-xl border border-border-default bg-surface-base px-4 py-3 text-sm text-fg-muted dark:border-border-default/50 dark:text-fg-muted">
                   You need permission to manage courses (
                   <code className="font-mono text-xs">{PERM_RBAC_MANAGE}</code>).
                 </p>
@@ -1117,15 +1082,15 @@ export default function Settings() {
 
         {activeView === 'intro-course' && (
           <div>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Intro course</h2>
-            <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+            <h2 className="text-base font-semibold text-fg-default">Intro course</h2>
+            <p className="mt-1 text-sm text-fg-muted">
               Govern the platform-wide Welcome to Lextures onboarding course: enable/disable, re-sync content, backfill
               enrollments, and read completion analytics.
             </p>
             <RequirePermission
               permission={PERM_RBAC_MANAGE}
               fallback={
-                <p className="mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-neutral-600 dark:bg-neutral-800/50 dark:text-neutral-300">
+                <p className="mt-6 rounded-xl border border-border-default bg-surface-base px-4 py-3 text-sm text-fg-muted dark:border-border-default/50 dark:text-fg-muted">
                   You need permission to manage the intro course (
                   <code className="font-mono text-xs">{PERM_RBAC_MANAGE}</code>).
                 </p>
@@ -1141,8 +1106,8 @@ export default function Settings() {
             permission={PERM_RBAC_MANAGE}
             fallback={
               <div>
-                <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Feedback</h2>
-                <p className="mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-neutral-600 dark:bg-neutral-800/50 dark:text-neutral-300">
+                <h2 className="text-base font-semibold text-fg-default">Feedback</h2>
+                <p className="mt-6 rounded-xl border border-border-default bg-surface-base px-4 py-3 text-sm text-fg-muted dark:border-border-default/50 dark:text-fg-muted">
                   You need permission to review feedback (
                   <code className="font-mono text-xs">{PERM_RBAC_MANAGE}</code>).
                 </p>
@@ -1155,11 +1120,11 @@ export default function Settings() {
 
         {activeView === 'organizations' && (
           <div>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Organizations</h2>
+            <h2 className="text-base font-semibold text-fg-default">Organizations</h2>
             <RequirePermission
               permission={PERM_RBAC_MANAGE}
               fallback={
-                <p className="mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
+                <p className="mt-6 rounded-xl border border-border-default bg-surface-base px-4 py-3 text-sm text-fg-muted dark:border-border-default dark:bg-surface-overlay dark:text-fg-muted">
                   You need permission to manage organizations (
                   <code className="font-mono text-xs">{PERM_RBAC_MANAGE}</code>).
                 </p>

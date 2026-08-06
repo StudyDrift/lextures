@@ -115,11 +115,6 @@ func writeQuizJoinError(w http.ResponseWriter, err error) bool {
 // handleKickQuizPlayer is POST .../players/{player_id}/kick
 func (d Deps) handleKickQuizPlayer() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		_, viewer, sess, ok := d.requireQuizGameHost(w, r)
 		if !ok {
 			return
@@ -146,11 +141,6 @@ func (d Deps) handleKickQuizPlayer() http.HandlerFunc {
 // handleBanQuizPlayer is POST .../players/{player_id}/ban (alias of kick+ban).
 func (d Deps) handleBanQuizPlayer() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		_, viewer, sess, ok := d.requireQuizGameHost(w, r)
 		if !ok {
 			return
@@ -180,11 +170,6 @@ func (d Deps) handleRenameQuizPlayer() http.HandlerFunc {
 		Nickname string `json:"nickname"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		_, viewer, sess, ok := d.requireQuizGameHost(w, r)
 		if !ok {
 			return
@@ -234,11 +219,6 @@ func (d Deps) handlePatchQuizGameSafety() http.HandlerFunc {
 		NamesMuted     *bool   `json:"namesMuted"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		_, viewer, sess, ok := d.requireQuizGameHost(w, r)
 		if !ok {
 			return
@@ -306,11 +286,6 @@ func (d Deps) handleFlagQuizGameContent() http.HandlerFunc {
 		Reason        string  `json:"reason"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		_, viewer, sess, ok := d.requireQuizGameHost(w, r)
 		if !ok {
 			return
@@ -345,11 +320,6 @@ func (d Deps) handleFlagQuizGameContent() http.HandlerFunc {
 // handleListQuizGameSafetyEvents is GET .../games/{game_id}/safety-events
 func (d Deps) handleListQuizGameSafetyEvents() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		_, _, sess, ok := d.requireQuizGameHost(w, r)
 		if !ok {
 			return
@@ -375,11 +345,6 @@ func (d Deps) handleJoinQuizGuest() http.HandlerFunc {
 		ClientMeta json.RawMessage `json:"clientMeta"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.iqLiveHostingOff(w) {
 			return
 		}

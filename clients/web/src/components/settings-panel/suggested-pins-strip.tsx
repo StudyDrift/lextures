@@ -29,18 +29,18 @@ export function SuggestedPinsStrip({ pins }: SuggestedPinsStripProps) {
         <div className="min-w-0 space-y-1">
           <h3
             id={headingId}
-            className="text-[12px] font-medium leading-snug text-slate-700 dark:text-neutral-200"
+            className="text-[12px] font-medium leading-snug text-fg-default"
           >
             {pinnedSettingsCopy.suggestions.heading}
           </h3>
-          <p className="text-[11px] leading-relaxed text-slate-500 dark:text-neutral-400">
+          <p className="text-[11px] leading-relaxed text-fg-muted">
             {pinnedSettingsCopy.suggestions.intro}
           </p>
         </div>
         <button
           type="button"
           onClick={pins.dismissSuggestions}
-          className="shrink-0 rounded-md px-2 py-1 text-[12px] font-medium text-slate-500 outline-none hover:bg-white/80 hover:text-slate-700 focus-visible:ring-2 focus-visible:ring-indigo-400 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+          className="shrink-0 rounded-md px-2 py-1 text-[12px] font-medium text-fg-muted outline-none hover:bg-white/80 hover:text-fg-muted focus-visible:ring-2 focus-visible:ring-indigo-400 dark:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-fg-default"
           aria-label={pinnedSettingsCopy.suggestions.dismissAria}
         >
           {pinnedSettingsCopy.suggestions.dismiss}
@@ -52,7 +52,7 @@ export function SuggestedPinsStrip({ pins }: SuggestedPinsStripProps) {
             <button
               type="button"
               onClick={() => pins.pin(d.id, { fromSuggestion: true })}
-              className="inline-flex max-w-full items-center rounded-full border border-indigo-200/90 bg-white px-2.5 py-1 text-[12px] font-medium text-indigo-700 outline-none hover:border-indigo-300 hover:bg-indigo-50 focus-visible:ring-2 focus-visible:ring-indigo-400 dark:border-indigo-800 dark:bg-neutral-900 dark:text-indigo-300 dark:hover:border-indigo-700 dark:hover:bg-indigo-950/40"
+              className="inline-flex max-w-full items-center rounded-full border border-indigo-200/90 bg-surface-raised px-2.5 py-1 text-[12px] font-medium text-accent-fg outline-none hover:border-indigo-300 hover:bg-indigo-50 focus-visible:ring-2 focus-visible:ring-indigo-400 dark:border-indigo-800 dark:bg-surface-raised dark:text-indigo-300 dark:hover:border-indigo-700 dark:hover:bg-indigo-950/40"
               aria-label={pinnedSettingsCopy.suggestions.pinAction(d.label)}
             >
               <span className="truncate">{d.label}</span>

@@ -150,11 +150,6 @@ func (d Deps) handleCreateQuizGame() http.HandlerFunc {
 		MaxJoinsPerIP      int                 `json:"maxJoinsPerIp"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -261,11 +256,6 @@ func (d Deps) handleCreateQuizGame() http.HandlerFunc {
 // handleGetQuizGame is GET /api/v1/courses/{course_code}/live-quizzes/games/{game_id}.
 func (d Deps) handleGetQuizGame() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -328,11 +318,6 @@ func (d Deps) handleGetQuizGame() http.HandlerFunc {
 // handleGetQuizGameLeaderboard is GET .../games/{game_id}/leaderboard (IQ.5).
 func (d Deps) handleGetQuizGameLeaderboard() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, _, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -363,11 +348,6 @@ func (d Deps) handleGetQuizGameLeaderboard() http.HandlerFunc {
 // handleGetQuizGamePlayerResponses is GET .../games/{game_id}/responses/{player_id} (IQ.5 / IQ.7).
 func (d Deps) handleGetQuizGamePlayerResponses() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -433,11 +413,6 @@ func (d Deps) handleGetQuizGamePlayerResponses() http.HandlerFunc {
 // handleEndQuizGame is POST /api/v1/courses/{course_code}/live-quizzes/games/{game_id}/end.
 func (d Deps) handleEndQuizGame() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -484,11 +459,6 @@ func (d Deps) handleEndQuizGame() http.HandlerFunc {
 // handleJoinQuizLookup is GET /api/v1/live-quizzes/join/{code} (public, rate-limited).
 func (d Deps) handleJoinQuizLookup() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.iqLiveHostingOff(w) {
 			return
 		}
@@ -543,11 +513,6 @@ func (d Deps) handleJoinQuizPlayer() http.HandlerFunc {
 		ClientMeta json.RawMessage `json:"clientMeta"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if quizJoinRateLimited("join:" + r.RemoteAddr) {
 			apierr.WriteJSON(w, http.StatusTooManyRequests, apierr.CodeRateLimited, "Too many join attempts. Please try again later.")
 			return

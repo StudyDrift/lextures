@@ -260,7 +260,7 @@ export function GraderAgentWorkflowModal({
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-[520] flex flex-col bg-white dark:bg-neutral-950" role="presentation">
+    <div className="fixed inset-0 z-[520] flex flex-col bg-surface-raised" role="presentation">
       <div
         ref={modalRef}
         role="dialog"
@@ -268,28 +268,24 @@ export function GraderAgentWorkflowModal({
         aria-labelledby={titleId}
         className="flex h-full flex-col"
       >
-        <header className="flex shrink-0 flex-wrap items-center gap-3 border-b border-slate-200 px-4 py-3 dark:border-neutral-700">
+        <header className="flex shrink-0 flex-wrap items-center gap-3 border-b border-border-default px-4 py-3 dark:border-border-default">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-3">
               <div className="min-w-0">
-                <h2 id={titleId} className="text-lg font-semibold text-slate-900 dark:text-neutral-50">
+                <h2 id={titleId} className="text-lg font-semibold text-fg-default">
                   {isTemplateMode
                     ? t('gradingAgent.settings.create.templateEditorTitle')
                     : t('gradingAgent.canvas.modal.title')}
                 </h2>
                 {isTemplateMode ? (
-                  <p className="truncate text-sm text-slate-500 dark:text-neutral-400">{templateMode.name}</p>
+                  <p className="truncate text-sm text-fg-muted">{templateMode.name}</p>
                 ) : assignmentTitle ? (
-                  <p className="truncate text-sm text-slate-500 dark:text-neutral-400">{assignmentTitle}</p>
+                  <p className="truncate text-sm text-fg-muted">{assignmentTitle}</p>
                 ) : null}
               </div>
               {!isTemplateMode && config ? (
                 <span
-                  className={`inline-flex shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${
-                    accepted
-                      ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200'
-                      : 'bg-amber-100 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200'
-                  }`}
+                  className={`inline-flex shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${ accepted ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200' : 'bg-amber-100 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200' }`}
                 >
                   {accepted
                     ? t('gradingAgent.settings.status.accepted')
@@ -308,7 +304,7 @@ export function GraderAgentWorkflowModal({
                 onIndexChange={setSubmissionIndex}
               />
               {submissions.length > 0 ? (
-                <span className="w-10 shrink-0 text-end text-xs tabular-nums text-slate-500 dark:text-neutral-400">
+                <span className="w-10 shrink-0 text-end text-xs tabular-nums text-fg-muted">
                   {submissionIndex + 1}/{submissions.length}
                 </span>
               ) : null}
@@ -327,7 +323,7 @@ export function GraderAgentWorkflowModal({
                 type="button"
                 disabled={saving || !runnable}
                 onClick={() => void handleSave()}
-                className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-lg bg-accent-solid px-3 py-2 text-sm font-semibold text-white hover:bg-accent disabled:opacity-50"
               >
                 {saving ? (
                   <>
@@ -345,7 +341,7 @@ export function GraderAgentWorkflowModal({
                 type="button"
                 disabled={dryRunDisabled}
                 onClick={() => void handleDryRun()}
-                className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-lg bg-accent-solid px-3 py-2 text-sm font-semibold text-white hover:bg-accent disabled:opacity-50"
               >
                 {dryRunning ? (
                   <>
@@ -406,7 +402,7 @@ export function GraderAgentWorkflowModal({
                 type="button"
                 disabled={acceptDisabled}
                 onClick={() => void handleAccept()}
-                className="rounded-lg border border-indigo-300 px-3 py-2 text-sm font-semibold text-indigo-700 dark:border-indigo-800 dark:text-indigo-300 disabled:opacity-50"
+                className="rounded-lg border border-indigo-300 px-3 py-2 text-sm font-semibold text-accent-fg dark:border-indigo-800 dark:text-indigo-300 disabled:opacity-50"
               >
                 {t('gradingAgent.accept')}
               </button>
@@ -428,7 +424,7 @@ export function GraderAgentWorkflowModal({
             ref={closeRef}
             type="button"
             onClick={onClose}
-            className="rounded-lg px-2 py-1 text-sm text-slate-600 hover:bg-slate-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+            className="rounded-lg px-2 py-1 text-sm text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay"
           >
             {t('gradingAgent.close')}
           </button>
@@ -451,7 +447,7 @@ export function GraderAgentWorkflowModal({
         ) : null}
 
         <div className="relative z-0 flex min-h-0 flex-1 flex-col overflow-hidden lg:flex-row">
-          <aside className="flex min-h-0 w-full shrink-0 flex-col border-b border-slate-200 px-3 py-3 lg:w-60 lg:border-b-0 lg:border-e lg:px-3.5 dark:border-neutral-700">
+          <aside className="flex min-h-0 w-full shrink-0 flex-col border-b border-border-default px-3 py-3 lg:w-60 lg:border-b-0 lg:border-e lg:px-3.5 dark:border-border-default">
             <NodePalette
               codeExecutionEnabled={codeExecutionEnabled}
               itemKind={itemKind}
@@ -460,7 +456,7 @@ export function GraderAgentWorkflowModal({
           </aside>
           <main className="relative z-0 min-h-0 flex-1 overflow-hidden p-3">
             <div className="h-full min-h-0">
-              <Suspense fallback={<div className="h-full motion-safe:animate-pulse rounded-xl bg-slate-100 dark:bg-neutral-800" />}>
+              <Suspense fallback={<div className="h-full motion-safe:animate-pulse rounded-xl bg-surface-sunken" />}>
                 <CanvasView workflow={workflow} />
               </Suspense>
             </div>
@@ -469,7 +465,7 @@ export function GraderAgentWorkflowModal({
             ) : null}
           </main>
           <aside
-            className="relative flex min-h-0 w-full shrink-0 flex-col border-t border-slate-200 p-3 pl-4 lg:w-[var(--inspector-width)] lg:shrink-0 lg:border-t-0 lg:border-s dark:border-neutral-700"
+            className="relative flex min-h-0 w-full shrink-0 flex-col border-t border-border-default p-3 pl-4 lg:w-[var(--inspector-width)] lg:shrink-0 lg:border-t-0 lg:border-s dark:border-border-default"
             style={{ ['--inspector-width' as string]: `${inspectorWidth}px` }}
           >
             <div
@@ -477,15 +473,15 @@ export function GraderAgentWorkflowModal({
               aria-orientation="vertical"
               aria-label={t('gradingAgent.canvas.inspector.resize')}
               tabIndex={0}
-              className="group absolute inset-y-0 left-0 z-10 hidden w-3 -translate-x-1/2 cursor-ew-resize touch-none items-center justify-center rounded-sm border border-slate-200 bg-slate-100 shadow-sm transition-colors hover:border-indigo-300 hover:bg-indigo-50 active:bg-indigo-100 dark:border-neutral-600 dark:bg-neutral-900 dark:hover:border-indigo-700 dark:hover:bg-indigo-950/60 dark:active:bg-indigo-950 lg:flex"
+              className="group absolute inset-y-0 left-0 z-10 hidden w-3 -translate-x-1/2 cursor-ew-resize touch-none items-center justify-center rounded-sm border border-border-default bg-surface-sunken shadow-sm transition-colors hover:border-indigo-300 hover:bg-indigo-50 active:bg-indigo-100 dark:border-border-default dark:bg-surface-raised dark:hover:border-indigo-700 dark:hover:bg-indigo-950/60 dark:active:bg-indigo-950 lg:flex"
               {...resizeHandleProps}
             >
               <GripVertical
-                className="h-4 w-4 text-slate-400 transition-colors group-hover:text-indigo-500 dark:text-neutral-500 dark:group-hover:text-indigo-400"
+                className="h-4 w-4 text-fg-subtle transition-colors group-hover:text-indigo-500 dark:group-hover:text-indigo-400"
                 aria-hidden
               />
             </div>
-            <p className="mb-2 shrink-0 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <p className="mb-2 shrink-0 text-xs font-semibold uppercase tracking-wide text-fg-muted">
               {t('gradingAgent.canvas.inspector.title')}
             </p>
             <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
@@ -525,7 +521,7 @@ export function GraderAgentWorkflowModal({
         </div>
 
         {!isTemplateMode ? (
-          <footer className="relative z-10 shrink-0 border-t border-slate-200 bg-white dark:border-neutral-700 dark:bg-neutral-950">
+          <footer className="relative z-10 shrink-0 border-t border-border-default bg-surface-raised dark:border-border-default dark:bg-surface-base">
             <DryRunDock
               workflow={workflow}
               rubric={rubric}

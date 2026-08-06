@@ -120,8 +120,8 @@ export function MediaCheckpointsEditor({
 
   return (
     <div className="space-y-4" data-testid="media-checkpoints-editor">
-      <fieldset className="space-y-2 rounded-md border border-slate-200 p-3 dark:border-neutral-700">
-        <legend className="px-1 text-xs font-semibold text-slate-700 dark:text-neutral-200">
+      <fieldset className="space-y-2 rounded-md border border-border-default p-3 dark:border-border-default">
+        <legend className="px-1 text-xs font-semibold text-fg-default">
           {t('contentTools.tools.media_checkpoints.editor.media')}
         </legend>
         <div className="grid gap-2 sm:grid-cols-2">
@@ -132,7 +132,7 @@ export function MediaCheckpointsEditor({
               disabled={disabled}
               value={media.fileId}
               onChange={(e) => setMedia({ ...media, fileId: e.target.value })}
-              className="w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+              className="w-full rounded-md border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
             />
           </label>
           <label className="block space-y-1 text-xs">
@@ -141,7 +141,7 @@ export function MediaCheckpointsEditor({
               disabled={disabled}
               value={media.kind}
               onChange={(e) => setMedia({ ...media, kind: e.target.value })}
-              className="w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+              className="w-full rounded-md border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
             >
               <option value="video">video</option>
               <option value="audio">audio</option>
@@ -153,7 +153,7 @@ export function MediaCheckpointsEditor({
               disabled={disabled}
               value={media.url}
               onChange={(e) => setMedia({ ...media, url: e.target.value })}
-              className="w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+              className="w-full rounded-md border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
             />
           </label>
           <label className="block space-y-1 text-xs">
@@ -166,7 +166,7 @@ export function MediaCheckpointsEditor({
               disabled={disabled}
               value={media.durationSec}
               onChange={(e) => setMedia({ ...media, durationSec: Number(e.target.value) || 1 })}
-              className="w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+              className="w-full rounded-md border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
             />
           </label>
           <label className="block space-y-1 text-xs">
@@ -177,19 +177,19 @@ export function MediaCheckpointsEditor({
               disabled={disabled}
               value={media.captionUrl}
               onChange={(e) => setMedia({ ...media, captionUrl: e.target.value })}
-              className="w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+              className="w-full rounded-md border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
             />
           </label>
         </div>
         {missingCaptions ? (
-          <p className="text-xs text-amber-700 dark:text-amber-300" role="status">
+          <p className="text-xs text-warning-fg" role="status">
             {t('contentTools.tools.media_checkpoints.editor.captionsWarning')}
           </p>
         ) : null}
       </fieldset>
 
       <label className="block space-y-1 text-xs">
-        <span className="font-medium text-slate-700 dark:text-neutral-300">
+        <span className="font-medium text-fg-muted">
           {t('contentTools.tools.media_checkpoints.editor.transcript')}
         </span>
         <textarea
@@ -200,10 +200,10 @@ export function MediaCheckpointsEditor({
             patch({ transcriptMarkdown: e.target.value, transcriptSource: 'inline' })
           }
           placeholder={'0:00 Intro\n0:30 Concept'}
-          className="w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+          className="w-full rounded-md border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
         />
         {missingTranscript ? (
-          <span className="text-amber-700 dark:text-amber-300">
+          <span className="text-warning-fg">
             {t('contentTools.tools.media_checkpoints.editor.transcriptWarning')}
           </span>
         ) : null}
@@ -232,14 +232,14 @@ export function MediaCheckpointsEditor({
 
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-xs font-semibold text-slate-700 dark:text-neutral-200">
+          <h3 className="text-xs font-semibold text-fg-default">
             {t('contentTools.tools.media_checkpoints.editor.checkpoints')}
           </h3>
           <button
             type="button"
             disabled={disabled || checkpoints.length >= 40}
             onClick={addCheckpoint}
-            className="rounded-md border border-slate-300 px-2 py-1 text-xs dark:border-neutral-600"
+            className="rounded-md border border-border-strong px-2 py-1 text-xs dark:border-border-default"
           >
             {t('contentTools.tools.media_checkpoints.editor.addCheckpoint')}
           </button>
@@ -248,7 +248,7 @@ export function MediaCheckpointsEditor({
         {checkpoints.map((cp, idx) => (
           <div
             key={cp.id}
-            className="space-y-2 rounded-md border border-slate-200 p-3 dark:border-neutral-700"
+            className="space-y-2 rounded-md border border-border-default p-3 dark:border-border-default"
           >
             <div className="flex items-center justify-between gap-2">
               <span className="text-xs font-medium">
@@ -275,7 +275,7 @@ export function MediaCheckpointsEditor({
                   onChange={(e) =>
                     updateCheckpoint(idx, { ...cp, atSec: Number(e.target.value) || 0 })
                   }
-                  className="w-full rounded-md border border-slate-200 px-2 py-1.5 dark:border-neutral-600 dark:bg-neutral-950"
+                  className="w-full rounded-md border border-border-default px-2 py-1.5 dark:border-border-default dark:bg-surface-base"
                 />
               </label>
               <label className="space-y-1 text-xs">
@@ -289,7 +289,7 @@ export function MediaCheckpointsEditor({
                   onChange={(e) =>
                     updateCheckpoint(idx, { ...cp, attempts: Number(e.target.value) || 2 })
                   }
-                  className="w-full rounded-md border border-slate-200 px-2 py-1.5 dark:border-neutral-600 dark:bg-neutral-950"
+                  className="w-full rounded-md border border-border-default px-2 py-1.5 dark:border-border-default dark:bg-surface-base"
                 />
               </label>
               <label className="space-y-1 text-xs">
@@ -311,7 +311,7 @@ export function MediaCheckpointsEditor({
                       },
                     })
                   }}
-                  className="w-full rounded-md border border-slate-200 px-2 py-1.5 dark:border-neutral-600 dark:bg-neutral-950"
+                  className="w-full rounded-md border border-border-default px-2 py-1.5 dark:border-border-default dark:bg-surface-base"
                 >
                   {QUESTION_TYPES.map((qt) => (
                     <option key={qt} value={qt}>
@@ -333,7 +333,7 @@ export function MediaCheckpointsEditor({
                     question: { ...cp.question, prompt: e.target.value },
                   })
                 }
-                className="w-full rounded-md border border-slate-200 px-2 py-1.5 dark:border-neutral-600 dark:bg-neutral-950"
+                className="w-full rounded-md border border-border-default px-2 py-1.5 dark:border-border-default dark:bg-surface-base"
               />
             </label>
             {(cp.question.type === 'single' ||
@@ -354,7 +354,7 @@ export function MediaCheckpointsEditor({
                           question: { ...cp.question, options },
                         })
                       }}
-                      className="rounded-md border border-slate-200 px-2 py-1.5 dark:border-neutral-600 dark:bg-neutral-950"
+                      className="rounded-md border border-border-default px-2 py-1.5 dark:border-border-default dark:bg-surface-base"
                     />
                     <label className="flex items-center gap-1">
                       <input
@@ -400,7 +400,7 @@ export function MediaCheckpointsEditor({
                       },
                     })
                   }
-                  className="w-full rounded-md border border-slate-200 px-2 py-1.5 dark:border-neutral-600 dark:bg-neutral-950"
+                  className="w-full rounded-md border border-border-default px-2 py-1.5 dark:border-border-default dark:bg-surface-base"
                 />
               </label>
             ) : null}
@@ -421,7 +421,7 @@ export function MediaCheckpointsEditor({
                       },
                     })
                   }
-                  className="w-full rounded-md border border-slate-200 px-2 py-1.5 dark:border-neutral-600 dark:bg-neutral-950"
+                  className="w-full rounded-md border border-border-default px-2 py-1.5 dark:border-border-default dark:bg-surface-base"
                 />
               </label>
             ) : null}

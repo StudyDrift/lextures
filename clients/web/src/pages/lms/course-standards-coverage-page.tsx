@@ -129,32 +129,32 @@ export default function CourseStandardsCoveragePage() {
   return (
     <div data-focus-anchor="standards.coverage.grid" className="mx-auto max-w-6xl px-4 py-6">
       <header className="mb-6">
-        <h1 className="text-xl font-semibold text-slate-900 dark:text-neutral-100">
+        <h1 className="text-xl font-semibold text-fg-default">
           Standards coverage
         </h1>
         {course && (
-          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">{course.title}</p>
+          <p className="mt-1 text-sm text-fg-muted">{course.title}</p>
         )}
-        <p className="mt-2 max-w-3xl text-sm text-slate-600 dark:text-neutral-400">
+        <p className="mt-2 max-w-3xl text-sm text-fg-muted">
           Per-standard question counts and class-average mastery (from tagged concepts). Enable the
           feature under Settings if this page is unavailable.
         </p>
       </header>
 
       <div className="mb-4 flex flex-wrap items-end gap-3">
-        <label className="flex flex-col text-xs font-medium text-slate-700 dark:text-neutral-300">
+        <label className="flex flex-col text-xs font-medium text-fg-muted">
           Framework code
           <input
-            className="mt-1 rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+            className="mt-1 rounded-md border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised"
             value={framework}
             onChange={(e) => setFramework(e.target.value)}
             aria-label="Framework code"
           />
         </label>
-        <label className="flex flex-col text-xs font-medium text-slate-700 dark:text-neutral-300">
+        <label className="flex flex-col text-xs font-medium text-fg-muted">
           Grade band
           <input
-            className="mt-1 rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+            className="mt-1 rounded-md border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised"
             value={grade}
             onChange={(e) => setGrade(e.target.value)}
             aria-label="Grade band filter"
@@ -162,14 +162,14 @@ export default function CourseStandardsCoveragePage() {
         </label>
         <button
           type="button"
-          className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+          className="rounded-md bg-accent-solid px-3 py-2 text-sm font-medium text-white hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
           onClick={() => void load()}
         >
           Refresh
         </button>
         <button
           type="button"
-          className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-neutral-600 dark:text-neutral-100 dark:hover:bg-neutral-900"
+          className="rounded-md border border-border-strong px-3 py-2 text-sm font-medium text-fg-default hover:bg-surface-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-border-default dark:text-fg-default dark:hover:bg-surface-raised"
           onClick={exportCsv}
           disabled={sorted.length === 0}
         >
@@ -177,7 +177,7 @@ export default function CourseStandardsCoveragePage() {
         </button>
       </div>
 
-      {loading && <p className="text-sm text-slate-600 dark:text-neutral-400">Loading…</p>}
+      {loading && <p className="text-sm text-fg-muted">Loading…</p>}
       {error && (
         <p className="text-sm text-rose-700 dark:text-rose-400" role="alert">
           {error}
@@ -185,17 +185,17 @@ export default function CourseStandardsCoveragePage() {
       )}
 
       {!loading && !error && sorted.length === 0 && (
-        <p className="text-sm text-slate-600 dark:text-neutral-400">
+        <p className="text-sm text-fg-muted">
           No standards aligned yet. Tag your concepts to standards to enable coverage reporting.
         </p>
       )}
 
       {!loading && sorted.length > 0 && (
-        <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-800">
+        <div className="overflow-x-auto rounded-xl border border-border-default dark:border-border-subtle">
           <table className="min-w-full divide-y divide-slate-200 text-start text-sm dark:divide-neutral-800">
-            <thead className="bg-slate-50 dark:bg-neutral-900">
+            <thead className="bg-surface-base">
               <tr>
-                <th scope="col" className="px-3 py-2 font-semibold text-slate-900 dark:text-neutral-100">
+                <th scope="col" className="px-3 py-2 font-semibold text-fg-default">
                   <button
                     type="button"
                     className="rounded px-1 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
@@ -205,10 +205,10 @@ export default function CourseStandardsCoveragePage() {
                     Code
                   </button>
                 </th>
-                <th scope="col" className="px-3 py-2 font-semibold text-slate-900 dark:text-neutral-100">
+                <th scope="col" className="px-3 py-2 font-semibold text-fg-default">
                   Description
                 </th>
-                <th scope="col" className="px-3 py-2 font-semibold text-slate-900 dark:text-neutral-100">
+                <th scope="col" className="px-3 py-2 font-semibold text-fg-default">
                   <button
                     type="button"
                     className="rounded px-1 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
@@ -218,7 +218,7 @@ export default function CourseStandardsCoveragePage() {
                     Questions
                   </button>
                 </th>
-                <th scope="col" className="px-3 py-2 font-semibold text-slate-900 dark:text-neutral-100">
+                <th scope="col" className="px-3 py-2 font-semibold text-fg-default">
                   <button
                     type="button"
                     className="rounded px-1 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
@@ -228,7 +228,7 @@ export default function CourseStandardsCoveragePage() {
                     Avg mastery
                   </button>
                 </th>
-                <th scope="col" className="px-3 py-2 font-semibold text-slate-900 dark:text-neutral-100">
+                <th scope="col" className="px-3 py-2 font-semibold text-fg-default">
                   <button
                     type="button"
                     className="rounded px-1 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
@@ -242,8 +242,8 @@ export default function CourseStandardsCoveragePage() {
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-neutral-800">
               {sorted.map((r) => (
-                <tr key={r.standardCodeId} tabIndex={0} className="focus-within:bg-slate-50 dark:focus-within:bg-neutral-900/60">
-                  <td className="whitespace-nowrap px-3 py-2 font-mono text-xs text-slate-900 dark:text-neutral-100">
+                <tr key={r.standardCodeId} tabIndex={0} className="focus-within:bg-surface-base dark:focus-within:bg-neutral-900/60">
+                  <td className="whitespace-nowrap px-3 py-2 font-mono text-xs text-fg-default">
                     <span aria-label={`Standard code ${r.code}`}>{r.shortCode ?? r.code}</span>
                     {r.superseded ? (
                       <span className="ms-2 rounded bg-amber-100 px-1.5 text-xs text-amber-900 dark:bg-amber-900/40 dark:text-amber-100">
@@ -251,16 +251,16 @@ export default function CourseStandardsCoveragePage() {
                       </span>
                     ) : null}
                   </td>
-                  <td className="max-w-md px-3 py-2 text-slate-700 dark:text-neutral-300">
+                  <td className="max-w-md px-3 py-2 text-fg-muted">
                     {r.description}
                   </td>
-                  <td className="px-3 py-2 tabular-nums text-slate-800 dark:text-neutral-200">
+                  <td className="px-3 py-2 tabular-nums text-fg-default">
                     {r.questionCount}
                   </td>
-                  <td className="px-3 py-2 tabular-nums text-slate-800 dark:text-neutral-200">
+                  <td className="px-3 py-2 tabular-nums text-fg-default">
                     {r.averageMastery == null ? '—' : `${Math.round(r.averageMastery * 100)}%`}
                   </td>
-                  <td className="px-3 py-2 text-slate-800 dark:text-neutral-200">{r.coverageStatus}</td>
+                  <td className="px-3 py-2 text-fg-default">{r.coverageStatus}</td>
                 </tr>
               ))}
             </tbody>

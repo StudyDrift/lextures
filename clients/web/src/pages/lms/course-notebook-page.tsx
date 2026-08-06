@@ -346,7 +346,7 @@ export default function CourseNotebookPage() {
   if (!data) {
     return (
       <LmsPage title="Notebook" description="Loading…">
-        <p className="mt-6 text-sm text-slate-500 dark:text-neutral-400">Loading notebook…</p>
+        <p className="mt-6 text-sm text-fg-muted">Loading notebook…</p>
       </LmsPage>
     )
   }
@@ -365,7 +365,7 @@ export default function CourseNotebookPage() {
         </p>
       )}
 
-      <div className="mt-4 flex min-h-[min(560px,calc(100dvh-11rem))] flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950 md:mt-6 md:min-h-[min(640px,calc(100dvh-10rem))]">
+      <div className="mt-4 flex min-h-[min(560px,calc(100dvh-11rem))] flex-col overflow-hidden rounded-xl border border-border-default bg-surface-raised shadow-sm dark:border-border-subtle dark:bg-surface-base md:mt-6 md:min-h-[min(640px,calc(100dvh-10rem))]">
         <div className="flex min-h-0 min-w-0 flex-1 flex-col md:flex-row">
           <CourseNotebookSidebar
             pages={data.pages}
@@ -379,10 +379,10 @@ export default function CourseNotebookPage() {
             onRenamePage={onRenamePage}
             onDeletePage={onDeletePage}
           />
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col border-t border-slate-200 dark:border-neutral-800 md:border-s md:border-t-0">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col border-t border-border-default dark:border-border-subtle md:border-s md:border-t-0">
             {activePage ? (
               <>
-                <div className="shrink-0 flex items-center gap-2 border-b border-slate-100 px-4 py-3 dark:border-neutral-800/80 md:px-6">
+                <div className="shrink-0 flex items-center gap-2 border-b border-border-subtle px-4 py-3/80 md:px-6">
                   <label htmlFor="notebook-page-title" className="sr-only">
                     Page title
                   </label>
@@ -397,7 +397,7 @@ export default function CourseNotebookPage() {
                         ;(e.target as HTMLInputElement).blur()
                       }
                     }}
-                    className="flex-1 min-w-0 border-0 bg-transparent text-lg font-semibold tracking-tight text-slate-900 outline-none ring-indigo-500/25 placeholder:text-slate-400 focus:ring-2 dark:text-neutral-100 dark:placeholder:text-neutral-500"
+                    className="flex-1 min-w-0 border-0 bg-transparent text-lg font-semibold tracking-tight text-fg-default outline-none ring-indigo-500/25 placeholder:text-fg-subtle focus:ring-2 dark:text-fg-default dark:placeholder:text-neutral-500"
                     placeholder="Untitled page"
                   />
                   <NotebookPageActionsMenu
@@ -440,7 +440,7 @@ export default function CourseNotebookPage() {
                 </div>
               </>
             ) : (
-              <p className="p-6 text-sm text-slate-500 dark:text-neutral-400">Select a page from the sidebar.</p>
+              <p className="p-6 text-sm text-fg-muted">Select a page from the sidebar.</p>
             )}
           </div>
         </div>

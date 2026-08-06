@@ -59,11 +59,6 @@ func parsePlatformPeopleListParams(r *http.Request) platformpeople.ListParams {
 
 func (d Deps) handleAdminPeopleStats() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -78,11 +73,6 @@ func (d Deps) handleAdminPeopleStats() http.HandlerFunc {
 
 func (d Deps) handleAdminPeopleSearch() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -119,11 +109,6 @@ func (d Deps) handleAdminPeopleSearch() http.HandlerFunc {
 
 func (d Deps) handleAdminPeopleInvite() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		actor, ok := d.adminRbacUser(w, r)
 		if !ok {
 			return
@@ -241,11 +226,6 @@ func (d Deps) resolveInviteOrgID(ctx context.Context, actor uuid.UUID, orgIDRaw 
 
 func (d Deps) handleAdminPeopleReport() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -269,11 +249,6 @@ func (d Deps) handleAdminPeopleReport() http.HandlerFunc {
 
 func (d Deps) handleAdminPeoplePatch() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		actor, ok := d.adminRbacUser(w, r)
 		if !ok {
 			return
@@ -345,11 +320,6 @@ func (d Deps) handleAdminPeoplePatch() http.HandlerFunc {
 
 func (d Deps) handleAdminPeopleDelete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodDelete {
-			w.Header().Set("Allow", http.MethodDelete)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		actor, ok := d.adminRbacUser(w, r)
 		if !ok {
 			return

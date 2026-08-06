@@ -43,7 +43,7 @@ export function SubmissionFileDetailsPanel({
   return (
     <div className="flex flex-col gap-5 p-5" aria-label="Submission files">
       <div>
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
           Submission files
         </h3>
         {hasFiles ? (
@@ -55,20 +55,12 @@ export function SubmissionFileDetailsPanel({
               return (
                 <li key={file.fileId}>
                   <div
-                    className={`flex items-center gap-2 rounded-lg border px-3 py-2 ${
-                      selected
-                        ? 'border-indigo-300 bg-indigo-50/80 dark:border-indigo-800 dark:bg-indigo-950/40'
-                        : 'border-slate-200 bg-white dark:border-neutral-600 dark:bg-neutral-950'
-                    }`}
+                    className={`flex items-center gap-2 rounded-lg border px-3 py-2 ${ selected ? 'border-indigo-300 bg-indigo-50/80 dark:border-indigo-800 dark:bg-indigo-950/40' : 'border-border-default bg-surface-raised dark:border-border-default dark:bg-surface-base' }`}
                   >
                     <button
                       type="button"
                       onClick={() => onSelectFile(file.fileId)}
-                      className={`min-w-0 flex-1 text-left text-sm font-medium leading-snug ${
-                        selected
-                          ? 'text-indigo-900 dark:text-indigo-100'
-                          : 'text-slate-800 hover:text-indigo-700 dark:text-neutral-100 dark:hover:text-indigo-300'
-                      }`}
+                      className={`min-w-0 flex-1 text-left text-sm font-medium leading-snug ${ selected ? 'text-indigo-900 dark:text-indigo-100' : 'text-fg-default hover:text-accent-fg dark:text-fg-default dark:hover:text-indigo-300' }`}
                       aria-current={selected ? 'true' : undefined}
                     >
                       <span className="break-words">{label}</span>
@@ -79,7 +71,7 @@ export function SubmissionFileDetailsPanel({
                     <button
                       type="button"
                       onClick={() => void handleDownload(file)}
-                      className="inline-flex shrink-0 items-center justify-center rounded-lg border border-slate-300 p-2 text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-900"
+                      className="inline-flex shrink-0 items-center justify-center rounded-lg border border-border-strong p-2 text-fg-muted hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-raised"
                       aria-label={`Download ${label}`}
                     >
                       <Download className="h-4 w-4" aria-hidden="true" />
@@ -90,7 +82,7 @@ export function SubmissionFileDetailsPanel({
             })}
           </ul>
         ) : (
-          <p className="mt-3 text-sm text-slate-600 dark:text-neutral-400">No files attached to this submission.</p>
+          <p className="mt-3 text-sm text-fg-muted">No files attached to this submission.</p>
         )}
       </div>
 
@@ -102,8 +94,8 @@ export function SubmissionFileDetailsPanel({
 
       {submittedAt ? (
         <div className="text-sm">
-          <p className="text-xs font-medium text-slate-500 dark:text-neutral-400">Submitted</p>
-          <p className="mt-1 text-slate-800 dark:text-neutral-200">
+          <p className="text-xs font-medium text-fg-muted">Submitted</p>
+          <p className="mt-1 text-fg-default">
             {formatDateTime(submittedAt, { dateStyle: 'medium', timeStyle: 'short' })}
           </p>
         </div>
@@ -114,7 +106,7 @@ export function SubmissionFileDetailsPanel({
           type="button"
           onClick={() => void onDownloadAll()}
           disabled={downloadAllBusy}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:hover:bg-neutral-900"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border-strong bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm hover:bg-surface-base disabled:opacity-60 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:hover:bg-surface-raised"
         >
           <Download className="h-4 w-4" aria-hidden="true" />
           Download all files
@@ -124,7 +116,7 @@ export function SubmissionFileDetailsPanel({
         <button
           type="button"
           onClick={() => void handleDownload(files[0]!)}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:hover:bg-neutral-900"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border-strong bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm hover:bg-surface-base dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:hover:bg-surface-raised"
         >
           <Download className="h-4 w-4" aria-hidden="true" />
           Download file

@@ -15,10 +15,10 @@ export function SetScoreInspector({ data, onChange, onDelete, fieldClass }: SetS
 
   return (
     <div className="space-y-3">
-      <p className="text-sm text-slate-700 dark:text-neutral-200">
+      <p className="text-sm text-fg-default">
         {t('gradingAgent.canvas.inspector.setScoreHelp')}
       </p>
-      <label className="block text-sm text-slate-700 dark:text-neutral-200">
+      <label className="block text-sm text-fg-default">
         <span className="mb-1.5 block font-medium">{t('gradingAgent.canvas.inspector.setScoreValue')}</span>
         <input
           type="number"
@@ -31,11 +31,11 @@ export function SetScoreInspector({ data, onChange, onDelete, fieldClass }: SetS
           }}
           className={fieldClass}
         />
-        <p className="mt-1.5 text-xs text-slate-500 dark:text-neutral-400">
+        <p className="mt-1.5 text-xs text-fg-muted">
           {t('gradingAgent.canvas.inspector.setScoreValueHelp')}
         </p>
       </label>
-      <label className="block text-sm text-slate-700 dark:text-neutral-200">
+      <label className="block text-sm text-fg-default">
         <span className="mb-1.5 block font-medium">{t('gradingAgent.canvas.inspector.setScoreComment')}</span>
         <input
           type="text"

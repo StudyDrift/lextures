@@ -47,10 +47,6 @@ func (d Deps) orgForAdmin(w http.ResponseWriter, r *http.Request, userID uuid.UU
 // handleListIntegrations is GET /api/v1/integrations.
 func (d Deps) handleListIntegrations() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		svc, ok := d.integrationsEnabled(w)
 		if !ok {
 			return
@@ -75,10 +71,6 @@ func (d Deps) handleListIntegrations() http.HandlerFunc {
 // handleDisconnectIntegration is DELETE /api/v1/integrations/{id}.
 func (d Deps) handleDisconnectIntegration() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		svc, ok := d.integrationsEnabled(w)
 		if !ok {
 			return
@@ -112,10 +104,6 @@ func (d Deps) handleDisconnectIntegration() http.HandlerFunc {
 // handleIntegrationConnect is GET /integrations/oauth/{provider}/connect.
 func (d Deps) handleIntegrationConnect() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		svc, ok := d.integrationsEnabled(w)
 		if !ok {
 			return
@@ -190,10 +178,6 @@ type googleImportRequest struct {
 // handleGoogleImport is POST /api/v1/integrations/google/import.
 func (d Deps) handleGoogleImport() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		svc, ok := d.integrationsEnabled(w)
 		if !ok {
 			return
@@ -259,10 +243,6 @@ func (d Deps) handleGoogleImport() http.HandlerFunc {
 // handleIntegrationSyncStatus is GET /api/v1/integrations/{id}/sync-status.
 func (d Deps) handleIntegrationSyncStatus() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		svc, ok := d.integrationsEnabled(w)
 		if !ok {
 			return

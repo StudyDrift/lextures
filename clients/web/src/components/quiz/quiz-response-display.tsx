@@ -19,23 +19,23 @@ function QuizResponseAttachments({ files }: { files: QuizResponseFile[] }) {
       {files.map((file, i) => (
         <li
           key={file.fileId || `${file.contentPath}-${i}`}
-          className="overflow-hidden rounded-lg border border-slate-200 bg-white dark:border-neutral-700 dark:bg-neutral-900/60"
+          className="overflow-hidden rounded-lg border border-border-default bg-surface-raised dark:border-border-default/60"
         >
-          <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-3 py-2 dark:border-neutral-800">
-            <span className="min-w-0 truncate text-sm font-medium text-slate-700 dark:text-neutral-200">
+          <div className="flex items-center justify-between gap-3 border-b border-border-subtle px-3 py-2 dark:border-border-subtle">
+            <span className="min-w-0 truncate text-sm font-medium text-fg-default">
               {file.filename}
             </span>
             <a
               href={file.contentPath}
               target="_blank"
               rel="noreferrer"
-              className="shrink-0 text-xs font-medium text-indigo-700 hover:text-indigo-600 dark:text-indigo-300 dark:hover:text-indigo-200"
+              className="shrink-0 text-xs font-medium text-accent-fg hover:text-accent-fg dark:text-indigo-300 dark:hover:text-indigo-200"
             >
               Open
             </a>
           </div>
           {isImageFile(file) ? (
-            <div className="bg-slate-50 dark:bg-neutral-950/60">
+            <div className="bg-surface-base/60">
               <FilePreviewBody
                 filePath={file.contentPath}
                 filename={file.filename}
@@ -63,18 +63,18 @@ export function QuizResponseDisplay({
   const files = extractQuizResponseFiles(responseJson)
 
   if (!text && files.length === 0) {
-    return <p className="text-sm italic text-slate-500 dark:text-neutral-400">No answer recorded.</p>
+    return <p className="text-sm italic text-fg-muted">No answer recorded.</p>
   }
 
   return (
     <div>
       {text ? (
         MARKDOWN_ANSWER_TYPES.has(questionType) ? (
-          <div className="text-sm text-slate-800 dark:text-neutral-100">
+          <div className="text-sm text-fg-default">
             <MarkdownArticleView markdown={text} />
           </div>
         ) : (
-          <p className="whitespace-pre-wrap text-sm text-slate-800 dark:text-neutral-100">
+          <p className="whitespace-pre-wrap text-sm text-fg-default">
             <MathPlainText text={text} />
           </p>
         )

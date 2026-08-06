@@ -42,7 +42,7 @@ governed asset rather than a directory of hopeful files.
 
 ## 3. Non-Goals
 
-- Building components — that is [UX.2](UX.2-core-component-library-and-adoption-ratchet.md).
+- Building components — that is [UX.2](../../completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md).
 - Reorganising teams or reporting lines.
 - Open-sourcing the design system.
 - Design tooling procurement beyond what the token pipeline needs.
@@ -261,7 +261,7 @@ generated code conforms by default rather than being corrected in review.
 ## 13. Dependencies & Sequencing
 
 - **Must ship after** — [UX.1](UX.1-semantic-design-token-system.md) and
-  [UX.2](UX.2-core-component-library-and-adoption-ratchet.md) exist enough to
+  [UX.2](../../completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md) exist enough to
   measure.
 - **Must ship before the programme completes** — governance that arrives after the
   work is finished is an autopsy. **The metrics and ratchets should land as each

@@ -104,12 +104,12 @@ export function SortSequenceEditor({
   return (
     <div className="space-y-4" data-testid="sort-sequence-editor">
       <label className="block space-y-1 text-xs">
-        <span className="font-medium text-slate-700 dark:text-neutral-300">
+        <span className="font-medium text-fg-muted">
           {t('contentTools.tools.sort_sequence.editor.prompt')}
         </span>
         <textarea
           id={`${idPrefix}-${baseId}-prompt`}
-          className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+          className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
           rows={2}
           disabled={disabled}
           value={typeof value.prompt === 'string' ? value.prompt : ''}
@@ -118,11 +118,11 @@ export function SortSequenceEditor({
       </label>
 
       <label className="block space-y-1 text-xs">
-        <span className="font-medium text-slate-700 dark:text-neutral-300">
+        <span className="font-medium text-fg-muted">
           {t('contentTools.tools.sort_sequence.editor.mode')}
         </span>
         <select
-          className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+          className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
           disabled={disabled}
           value={mode}
           onChange={(e) => {
@@ -148,7 +148,7 @@ export function SortSequenceEditor({
 
       <div className="space-y-2">
         <div className="flex items-center justify-between gap-2">
-          <span className="text-xs font-medium text-slate-700 dark:text-neutral-300">
+          <span className="text-xs font-medium text-fg-muted">
             {t('contentTools.tools.sort_sequence.editor.items')}
           </span>
           <button
@@ -161,11 +161,11 @@ export function SortSequenceEditor({
           </button>
         </div>
         <label className="block space-y-1 text-xs">
-          <span className="font-medium text-slate-700 dark:text-neutral-300">
+          <span className="font-medium text-fg-muted">
             {t('contentTools.tools.sort_sequence.editor.pasteList')}
           </span>
           <textarea
-            className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+            className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
             rows={3}
             disabled={disabled}
             placeholder={t('contentTools.tools.sort_sequence.editor.pastePlaceholder')}
@@ -181,11 +181,11 @@ export function SortSequenceEditor({
           {items.map((item, idx) => (
             <li
               key={item.id}
-              className="rounded border border-slate-200 p-2 dark:border-neutral-700"
+              className="rounded border border-border-default p-2 dark:border-border-default"
             >
               <div className="flex gap-2">
                 <input
-                  className="min-w-0 flex-1 rounded border border-slate-300 bg-white px-2 py-1 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                  className="min-w-0 flex-1 rounded border border-border-strong bg-surface-raised px-2 py-1 text-sm dark:border-border-default dark:bg-surface-base"
                   disabled={disabled}
                   value={item.text}
                   placeholder={t('contentTools.tools.sort_sequence.editor.itemText')}
@@ -206,11 +206,11 @@ export function SortSequenceEditor({
               </div>
               {mode === 'categorize' ? (
                 <label className="mt-1 block text-xs">
-                  <span className="text-slate-600 dark:text-neutral-400">
+                  <span className="text-fg-muted">
                     {t('contentTools.tools.sort_sequence.editor.correctBucket')}
                   </span>
                   <select
-                    className="mt-0.5 w-full rounded border border-slate-300 bg-white px-2 py-1 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                    className="mt-0.5 w-full rounded border border-border-strong bg-surface-raised px-2 py-1 text-sm dark:border-border-default dark:bg-surface-base"
                     disabled={disabled}
                     value={
                       typeof correctBucket[item.id] === 'string'
@@ -238,11 +238,11 @@ export function SortSequenceEditor({
                 </label>
               ) : null}
               <label className="mt-1 block text-xs">
-                <span className="text-slate-600 dark:text-neutral-400">
+                <span className="text-fg-muted">
                   {t('contentTools.tools.sort_sequence.editor.feedback')}
                 </span>
                 <input
-                  className="mt-0.5 w-full rounded border border-slate-300 bg-white px-2 py-1 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                  className="mt-0.5 w-full rounded border border-border-strong bg-surface-raised px-2 py-1 text-sm dark:border-border-default dark:bg-surface-base"
                   disabled={disabled}
                   value={feedback[item.id] ?? ''}
                   onChange={(e) =>
@@ -260,7 +260,7 @@ export function SortSequenceEditor({
       {mode === 'categorize' ? (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-700 dark:text-neutral-300">
+            <span className="text-xs font-medium text-fg-muted">
               {t('contentTools.tools.sort_sequence.editor.buckets')}
             </span>
             <button
@@ -279,7 +279,7 @@ export function SortSequenceEditor({
           {buckets.map((b, idx) => (
             <div key={b.id} className="flex gap-2">
               <input
-                className="min-w-0 flex-1 rounded border border-slate-300 bg-white px-2 py-1 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                className="min-w-0 flex-1 rounded border border-border-strong bg-surface-raised px-2 py-1 text-sm dark:border-border-default dark:bg-surface-base"
                 disabled={disabled}
                 value={b.label}
                 onChange={(e) => {
@@ -301,7 +301,7 @@ export function SortSequenceEditor({
         </div>
       ) : (
         <div className="space-y-2">
-          <span className="text-xs font-medium text-slate-700 dark:text-neutral-300">
+          <span className="text-xs font-medium text-fg-muted">
             {t('contentTools.tools.sort_sequence.editor.correctOrder')}
           </span>
           <ol className="list-decimal space-y-1 ps-5 text-sm">
@@ -310,15 +310,15 @@ export function SortSequenceEditor({
               return <li key={id}>{item?.text ?? id}</li>
             })}
           </ol>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-fg-muted">
             {t('contentTools.tools.sort_sequence.editor.correctOrderHelp')}
           </p>
           <label className="block space-y-1 text-xs">
-            <span className="font-medium text-slate-700 dark:text-neutral-300">
+            <span className="font-medium text-fg-muted">
               {t('contentTools.tools.sort_sequence.editor.tieGroups')}
             </span>
             <textarea
-              className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+              className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
               rows={2}
               disabled={disabled}
               placeholder={t('contentTools.tools.sort_sequence.editor.tieGroupsPlaceholder')}
@@ -342,11 +342,11 @@ export function SortSequenceEditor({
 
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="block space-y-1 text-xs">
-          <span className="font-medium text-slate-700 dark:text-neutral-300">
+          <span className="font-medium text-fg-muted">
             {t('contentTools.tools.sort_sequence.editor.attempts')}
           </span>
           <select
-            className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+            className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
             disabled={disabled}
             value={value.attempts === 'unlimited' ? 'unlimited' : String(value.attempts ?? 3)}
             onChange={(e) =>
@@ -367,11 +367,11 @@ export function SortSequenceEditor({
           </select>
         </label>
         <label className="block space-y-1 text-xs">
-          <span className="font-medium text-slate-700 dark:text-neutral-300">
+          <span className="font-medium text-fg-muted">
             {t('contentTools.tools.sort_sequence.editor.scoreMode')}
           </span>
           <select
-            className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+            className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
             disabled={disabled}
             value={value.scoreMode === 'all_or_nothing' ? 'all_or_nothing' : 'per_item'}
             onChange={(e) => patch({ scoreMode: e.target.value })}

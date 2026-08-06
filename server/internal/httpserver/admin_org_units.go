@@ -211,11 +211,6 @@ func (d Deps) handleAdminOrgUnitsCollection() http.HandlerFunc {
 
 func (d Deps) handleAdminOrgUnitsTree() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		orgIDStr := strings.TrimSpace(chi.URLParam(r, "orgId"))
 		orgID, err := uuid.Parse(orgIDStr)
 		if err != nil {
@@ -360,11 +355,6 @@ type postOrgUnitChildBody struct {
 
 func (d Deps) handleAdminOrgUnitChildren() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		orgIDStr := strings.TrimSpace(chi.URLParam(r, "orgId"))
 		orgID, err := uuid.Parse(orgIDStr)
 		if err != nil {
@@ -433,11 +423,6 @@ type postOrgUnitAdminBody struct {
 
 func (d Deps) handleAdminOrgUnitAssignAdmin() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -499,11 +484,6 @@ type patchCourseOrgUnitBody struct {
 
 func (d Deps) handleAdminOrgCourseOrgUnit() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}

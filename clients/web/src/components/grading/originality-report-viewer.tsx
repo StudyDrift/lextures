@@ -51,14 +51,14 @@ export function OriginalityReportViewer({
       aria-modal="true"
       aria-label={title}
     >
-      <div className="flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-950">
-        <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3 dark:border-neutral-800">
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-50">{title}</h3>
+      <div className="flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-xl border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-base">
+        <div className="flex items-center justify-between gap-3 border-b border-border-subtle px-4 py-3 dark:border-border-subtle">
+          <h3 className="text-sm font-semibold text-fg-default">{title}</h3>
           <div className="flex items-center gap-2">
             {!viewStoredSummaryOnly && storedSummary && embedUrl ? (
               <button
                 type="button"
-                className="rounded-md border border-slate-200 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-900"
+                className="rounded-md border border-border-default px-2 py-1 text-xs font-medium text-fg-muted hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-raised"
                 onClick={() => setTab((t) => (t === 'embed' ? 'new' : 'embed'))}
               >
                 {tab === 'embed' ? 'Stored summary' : isProbablyHttp ? 'Show embedded' : 'Back'}
@@ -69,7 +69,7 @@ export function OriginalityReportViewer({
                 href={embedUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2 py-1 text-xs font-medium text-indigo-700 hover:bg-indigo-50 dark:border-neutral-600 dark:text-indigo-300 dark:hover:bg-neutral-900"
+                className="inline-flex items-center gap-1 rounded-md border border-border-default px-2 py-1 text-xs font-medium text-accent-fg hover:bg-indigo-50 dark:border-border-default dark:text-indigo-300 dark:hover:bg-surface-raised"
               >
                 <ExternalLink className="h-3.5 w-3.5" aria-hidden />
                 Link
@@ -78,7 +78,7 @@ export function OriginalityReportViewer({
             <button
               type="button"
               onClick={handleClose}
-              className="rounded-md p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-neutral-400 dark:hover:bg-neutral-900 dark:hover:text-neutral-100"
+              className="rounded-md p-1 text-fg-muted hover:bg-surface-sunken hover:text-fg-default dark:text-fg-muted dark:hover:bg-surface-raised dark:hover:text-fg-default"
               aria-label="Close originality viewer"
             >
               <X className="h-5 w-5" />
@@ -89,12 +89,12 @@ export function OriginalityReportViewer({
           <div
             role="region"
             aria-label="Stored originality report summary"
-            className="min-h-[50vh] flex-1 overflow-y-auto bg-slate-50 p-6 text-sm text-slate-800 dark:bg-neutral-900/40 dark:text-neutral-100"
+            className="min-h-[50vh] flex-1 overflow-y-auto bg-surface-base p-6 text-sm text-fg-default/40 dark:text-fg-default"
           >
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+            <p className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
               {storedSummary.provider} · stored report
             </p>
-            <ul className="mt-3 list-inside list-disc space-y-1.5 text-slate-700 dark:text-neutral-200">
+            <ul className="mt-3 list-inside list-disc space-y-1.5 text-fg-default">
               {pctLine('Similarity', storedSummary.similarityPct)}
               {pctLine('AI authorship', storedSummary.aiProbability)}
               {storedSummary.detectedAt ? (
@@ -106,18 +106,18 @@ export function OriginalityReportViewer({
                 {storedSummary.fullReportUnavailableMessage}
               </p>
             ) : storedSummary.fullReportUnavailable ? (
-              <p className="mt-4 text-slate-600 dark:text-neutral-400">
+              <p className="mt-4 text-fg-muted">
                 Full report is unavailable in an embedded view. Use the scores above, or the link
                 (when available) to open the provider.
               </p>
             ) : null}
           </div>
         ) : (
-          <div className="min-h-[50vh] flex-1 bg-slate-50 dark:bg-neutral-900/40">
+          <div className="min-h-[50vh] flex-1 bg-surface-base/40">
             {tab === 'embed' && isProbablyHttp ? (
               <iframe title={title} src={embedUrl} className="h-[70vh] w-full border-0" />
             ) : (
-              <div className="flex h-[70vh] flex-col items-center justify-center gap-3 p-6 text-center text-sm text-slate-600 dark:text-neutral-300">
+              <div className="flex h-[70vh] flex-col items-center justify-center gap-3 p-6 text-center text-sm text-fg-muted">
                 {storedSummary && !viewStoredSummaryOnly ? (
                   <p>Switch to &ldquo;Stored summary&rdquo; for the archived similarity and AI scores.</p>
                 ) : (
@@ -128,7 +128,7 @@ export function OriginalityReportViewer({
                         href={embedUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
+                        className="rounded-lg bg-accent-solid px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
                       >
                         Open report
                       </a>

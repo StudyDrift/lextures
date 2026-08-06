@@ -1,7 +1,5 @@
-import { useEffect, useId, useRef, type CSSProperties, type ReactNode } from 'react'
-import { usePlatformFeatures } from '../context/platform-features-context'
-import { overlayClassNames } from '../lib/overlay-motion'
-import { useOverlayPresence } from '../lib/use-overlay-presence'
+import { type ReactNode } from 'react'
+import { AlertDialog } from './ui/alert-dialog'
 
 export type ConfirmDialogProps = {
   open: boolean
@@ -24,6 +22,10 @@ export type ConfirmDialogProps = {
   onExited?: () => void
 }
 
+/**
+ * Product confirm dialog — thin wrapper over UX.2 {@link AlertDialog}.
+ * Keeps the historical prop surface for existing `useConfirm` call sites.
+ */
 export function ConfirmDialog({
   open,
   title,
@@ -40,140 +42,22 @@ export function ConfirmDialog({
   onClose,
   onExited,
 }: ConfirmDialogProps) {
-  const titleId = useId()
-  const descId = useId()
-  const cancelRef = useRef<HTMLButtonElement>(null)
-  const { ffMotionOverlays } = usePlatformFeatures()
-  const presence = useOverlayPresence({
-    open,
-    kind: 'dialog',
-    enabled: ffMotionOverlays !== false,
-    onExitStart: undefined,
-  })
-  const exitedRef = useRef(false)
-
-  useEffect(() => {
-    if (presence.phase === 'closed' && !open && !exitedRef.current) {
-      exitedRef.current = true
-      onExited?.()
-    }
-    if (open) exitedRef.current = false
-  }, [presence.phase, open, onExited])
-
-  useEffect(() => {
-    if (!presence.entered) return
-    const t = window.setTimeout(() => cancelRef.current?.focus(), 0)
-    return () => window.clearTimeout(t)
-  }, [presence.entered])
-
-  useEffect(() => {
-    if (!presence.mounted) return
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape' && !busy) {
-        e.preventDefault()
-        onClose()
-      }
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [presence.mounted, busy, onClose])
-
-  if (!presence.mounted) return null
-
-  const classes = overlayClassNames({
-    kind: 'dialog',
-    phase: presence.phase,
-    enabled: presence.enabled,
-    reduceMotion: presence.reducedMotion,
-  })
-  const durationStyle = {
-    '--lx-overlay-duration': `${classes.durationMs}ms`,
-  } as CSSProperties
-
-  const phraseOk =
-    requireTypedPhrase == null || typedPhrase.trim() === requireTypedPhrase.trim()
-  const disableConfirm = Boolean(busy || confirmDisabled || !phraseOk)
-
-  // While exiting, opacity goes to 0 but the layer stays mounted for the animation.
-  // Disable pointer events so an invisible scrim cannot swallow nav Link clicks.
-  const exiting = presence.phase === 'closing'
-
   return (
-    <div
-      className={`fixed inset-0 z-[400] flex items-center justify-center p-4 ${exiting ? 'pointer-events-none' : ''}`}
-      role="presentation"
-      style={durationStyle}
-      data-overlay-phase={presence.phase}
-      data-testid="confirm-dialog-root"
-    >
-      <button
-        type="button"
-        aria-label="Close dialog"
-        disabled={busy || exiting}
-        className={`lex-btn-static absolute inset-0 cursor-default border-0 bg-black/45 p-0 disabled:cursor-not-allowed ${classes.scrim}`}
-        onClick={() => {
-          if (!busy && !exiting) onClose()
-        }}
-      />
-      <div
-        role="dialog"
-        aria-modal={!exiting}
-        aria-labelledby={titleId}
-        aria-describedby={description ? descId : undefined}
-        className={`relative z-10 w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-xl dark:border-neutral-700 dark:bg-neutral-900 ${classes.panel}`}
-      >
-        <h2 id={titleId} className="text-lg font-semibold text-slate-950 dark:text-neutral-100">
-          {title}
-        </h2>
-        {description ? (
-          <div id={descId} className="mt-2 text-sm text-slate-600 dark:text-neutral-300">
-            {description}
-          </div>
-        ) : null}
-        {requireTypedPhrase != null ? (
-          <div className="mt-4">
-            <label htmlFor="confirm-dialog-phrase" className="text-xs font-medium text-slate-700 dark:text-neutral-200">
-              Type <span className="font-mono text-rose-700 dark:text-rose-300">{requireTypedPhrase}</span> to
-              confirm
-            </label>
-            <input
-              id="confirm-dialog-phrase"
-              key={requireTypedPhrase}
-              autoComplete="off"
-              value={typedPhrase}
-              onChange={(e) => onTypedPhraseChange?.(e.target.value)}
-              disabled={busy}
-              className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
-            />
-          </div>
-        ) : null}
-        <div className="mt-6 flex flex-wrap justify-end gap-2">
-          <button
-            ref={cancelRef}
-            type="button"
-            disabled={busy}
-            onClick={onClose}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out motion-safe:active:scale-[0.96] hover:bg-slate-50 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
-          >
-            {cancelLabel}
-          </button>
-          <button
-            type="button"
-            disabled={disableConfirm}
-            onClick={() => {
-              if (disableConfirm) return
-              onConfirm()
-            }}
-            className={
-              variant === 'danger'
-                ? 'rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out motion-safe:active:scale-[0.96] hover:bg-rose-500 disabled:cursor-not-allowed disabled:opacity-50'
-                : 'rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out motion-safe:active:scale-[0.96] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50'
-            }
-          >
-            {busy ? 'Working…' : confirmLabel}
-          </button>
-        </div>
-      </div>
-    </div>
+    <AlertDialog
+      open={open}
+      title={title}
+      description={description}
+      confirmLabel={confirmLabel}
+      cancelLabel={cancelLabel}
+      variant={variant}
+      requireTypedPhrase={requireTypedPhrase}
+      typedPhrase={typedPhrase}
+      onTypedPhraseChange={onTypedPhraseChange}
+      confirmDisabled={confirmDisabled}
+      busy={busy}
+      onConfirm={onConfirm}
+      onClose={onClose}
+      onExited={onExited}
+    />
   )
 }

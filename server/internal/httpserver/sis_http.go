@@ -121,11 +121,6 @@ func (d Deps) handleAdminSISConnection() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "SIS integration is not enabled.")
 			return
 		}
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		orgID, err := uuid.Parse(strings.TrimSpace(chi.URLParam(r, "orgId")))
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid org id.")
@@ -188,11 +183,6 @@ func (d Deps) handleAdminSISSync() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "SIS integration is not enabled.")
 			return
 		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		orgID, err := uuid.Parse(strings.TrimSpace(chi.URLParam(r, "orgId")))
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid org id.")
@@ -237,11 +227,6 @@ func (d Deps) handleAdminSISSyncLogs() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "SIS integration is not enabled.")
 			return
 		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		orgID, err := uuid.Parse(strings.TrimSpace(chi.URLParam(r, "orgId")))
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid org id.")
@@ -281,11 +266,6 @@ func (d Deps) handleAdminSISGradePassback() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !d.effectiveConfig().FFSISIntegration {
 			apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "SIS integration is not enabled.")
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
 		orgID, err := uuid.Parse(strings.TrimSpace(chi.URLParam(r, "orgId")))
@@ -361,11 +341,6 @@ func (d Deps) handleAdminSISTestConnection() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !d.effectiveConfig().FFSISIntegration {
 			apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "SIS integration is not enabled.")
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
 		orgID, err := uuid.Parse(strings.TrimSpace(chi.URLParam(r, "orgId")))

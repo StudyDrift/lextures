@@ -87,11 +87,6 @@ func (d Deps) handleAdminBehaviorCategories() http.HandlerFunc {
 // handleAdminBehaviorCategoryDelete is DELETE /api/v1/admin/orgs/:orgId/behavior/categories/:categoryId
 func (d Deps) handleAdminBehaviorCategoryDelete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodDelete {
-			w.Header().Set("Allow", http.MethodDelete)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		orgID, err := uuid.Parse(strings.TrimSpace(chi.URLParam(r, "orgId")))
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid org id.")
@@ -121,11 +116,6 @@ func (d Deps) handleAdminBehaviorCategoryDelete() http.HandlerFunc {
 // handlePBISAwards is POST /api/v1/pbis/awards
 func (d Deps) handlePBISAwards() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		actorID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -211,11 +201,6 @@ SELECT EXISTS(
 // handleBehaviorReferrals is POST /api/v1/behavior/referrals
 func (d Deps) handleBehaviorReferrals() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		actorID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -313,11 +298,6 @@ SELECT EXISTS(
 // handleStudentBehavior is GET /api/v1/students/:studentId/behavior
 func (d Deps) handleStudentBehavior() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		actorID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -382,11 +362,6 @@ SELECT EXISTS(
 // handleOrgBehaviorDashboard is GET /api/v1/admin/orgs/:orgId/behavior/dashboard
 func (d Deps) handleOrgBehaviorDashboard() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		orgID, err := uuid.Parse(strings.TrimSpace(chi.URLParam(r, "orgId")))
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid org id.")
@@ -443,11 +418,6 @@ func (d Deps) handleOrgBehaviorDashboard() http.HandlerFunc {
 // handleParentStudentBehavior is GET /api/v1/parent/students/:sid/behavior
 func (d Deps) handleParentStudentBehavior() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		parentID, orgID, ok := d.requireParentViewer(w, r)
 		if !ok {
 			return

@@ -17,7 +17,7 @@ export function QuestionBankStatusChip({ status }: { status: string }) {
   if (s === 'draft') {
     return (
       <span
-        className={`${chipBase} border-slate-300 bg-slate-50 text-slate-800 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100`}
+        className={`${chipBase} border-border-strong bg-surface-base text-fg-default dark:border-border-default dark:bg-surface-raised dark:text-fg-default`}
         title="Status: draft (not used in live assessments)"
       >
         <FilePenLine className="h-3 w-3 shrink-0" strokeWidth={2.5} aria-hidden />
@@ -51,7 +51,7 @@ export function QuestionBankStatusChip({ status }: { status: string }) {
     )
   }
   return (
-    <span className={`${chipBase} border-slate-200 bg-white text-slate-700 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-200`}>
+    <span className={`${chipBase} border-border-default bg-surface-raised text-fg-muted dark:border-border-default dark:bg-surface-base dark:text-fg-default`}>
       <HelpCircle className="h-3 w-3 shrink-0" aria-hidden />
       {status}
     </span>
@@ -68,11 +68,7 @@ export function CourseVisibilityPill({
   const sm = size === 'sm'
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full border font-semibold ${
-        published
-          ? 'border-emerald-300/80 bg-emerald-50 text-emerald-950 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-50'
-          : 'border-slate-300 bg-slate-100 text-slate-800 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100'
-      } ${sm ? 'px-1.5 py-px text-[0.65rem]' : 'px-2 py-0.5 text-xs'}`}
+      className={`inline-flex items-center gap-1 rounded-full border font-semibold ${ published ? 'border-emerald-300/80 bg-emerald-50 text-emerald-950 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-50' : 'border-border-strong bg-surface-sunken text-fg-default dark:border-border-default dark:bg-surface-overlay dark:text-fg-default' } ${sm ? 'px-1.5 py-px text-[0.65rem]' : 'px-2 py-0.5 text-xs'}`}
       title={published ? 'Published — learners can see when released' : 'Unpublished — staff only'}
     >
       {published ? (

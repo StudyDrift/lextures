@@ -90,11 +90,7 @@ export function WhatIfGradesPanel({
         <button
           type="button"
           aria-pressed={whatIfMode}
-          className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-[background-color,color,border-color] ${
-            whatIfMode
-              ? 'border-indigo-300 bg-indigo-50 text-indigo-900 dark:border-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-100'
-              : 'border-slate-200 bg-white text-slate-800 hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800'
-          }`}
+          className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-[background-color,color,border-color] ${ whatIfMode ? 'border-indigo-300 bg-indigo-50 text-indigo-900 dark:border-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-100' : 'border-border-default bg-surface-raised text-fg-default hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay' }`}
           onClick={onToggleMode}
         >
           <FlaskConical className="h-4 w-4" aria-hidden />
@@ -103,7 +99,7 @@ export function WhatIfGradesPanel({
         {whatIfMode && hasOverrides ? (
           <button
             type="button"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm font-medium text-fg-default hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
             onClick={onReset}
           >
             <RotateCcw className="h-4 w-4" aria-hidden />
@@ -125,9 +121,9 @@ export function WhatIfGradesPanel({
         </div>
       ) : null}
 
-      <div className="rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
+      <div className="rounded-xl border border-border-default bg-surface-raised px-4 py-4 shadow-sm dark:border-border-default dark:bg-surface-raised">
         <div className="flex flex-wrap items-baseline gap-2">
-          <p className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-neutral-100">
+          <p className="text-2xl font-semibold tracking-tight text-fg-default">
             {showHypothetical ? 'Projected course grade' : 'Course grade'}:{' '}
             {formatFinalPercent(showHypothetical ? projectedPercent : actualPercent)}
           </p>
@@ -141,17 +137,17 @@ export function WhatIfGradesPanel({
             </span>
           ) : null}
           {projectedLetter ? (
-            <span className="text-lg font-medium text-slate-700 dark:text-neutral-300">
+            <span className="text-lg font-medium text-fg-muted">
               ({projectedLetter})
             </span>
           ) : null}
         </div>
         {showHypothetical && actualPercent != null ? (
-          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+          <p className="mt-1 text-sm text-fg-muted">
             Actual course grade: {formatFinalPercent(actualPercent)}
           </p>
         ) : (
-          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+          <p className="mt-1 text-sm text-fg-muted">
             Weighted from assignment groups when your instructor has configured weights; otherwise
             by points earned vs points possible.
           </p>
@@ -161,22 +157,22 @@ export function WhatIfGradesPanel({
       {whatIfMode ? (
         <section
           aria-labelledby={targetPanelId}
-          className="rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-900"
+          className="rounded-xl border border-border-default bg-surface-raised px-4 py-4 shadow-sm dark:border-border-default dark:bg-surface-raised"
         >
           <div className="flex items-center gap-2">
-            <Calculator className="h-4 w-4 text-slate-600 dark:text-neutral-400" aria-hidden />
-            <h2 id={targetPanelId} className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+            <Calculator className="h-4 w-4 text-fg-muted" aria-hidden />
+            <h2 id={targetPanelId} className="text-sm font-semibold text-fg-default">
               What score do I need?
             </h2>
           </div>
-          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+          <p className="mt-1 text-sm text-fg-muted">
             Estimate the equal score needed on each remaining ungraded item to reach your target.
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-3">
-            <label className="flex items-center gap-2 text-sm text-slate-800 dark:text-neutral-200">
+            <label className="flex items-center gap-2 text-sm text-fg-default">
               Target grade
               <select
-                className="rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+                className="rounded-md border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-overlay"
                 value={targetLetter}
                 onChange={(e) => onTargetLetterChange(e.target.value)}
               >
@@ -189,7 +185,7 @@ export function WhatIfGradesPanel({
             </label>
           </div>
           {scoreNeeded ? (
-            <p className="mt-3 text-sm text-slate-800 dark:text-neutral-200" role="status">
+            <p className="mt-3 text-sm text-fg-default" role="status">
               {scoreNeeded.achievable ? (
                 <>
                   You need about{' '}

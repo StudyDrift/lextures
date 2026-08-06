@@ -204,20 +204,20 @@ export function CreateBoardDialog({ open, onClose, courseCode, onCreated }: Prop
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="flex max-h-[100dvh] w-full max-w-2xl flex-col rounded-none bg-white shadow-xl dark:bg-neutral-900 sm:max-h-[90vh] sm:rounded-lg"
+        className="flex max-h-[100dvh] w-full max-w-2xl flex-col rounded-none bg-surface-raised shadow-xl dark:bg-surface-raised sm:max-h-[90vh] sm:rounded-lg"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="border-b border-slate-200 px-4 py-3 dark:border-neutral-700">
-          <h2 id={titleId} className="text-lg font-semibold text-slate-900 dark:text-neutral-100">
+        <div className="border-b border-border-default px-4 py-3 dark:border-border-default">
+          <h2 id={titleId} className="text-lg font-semibold text-fg-default">
             {t('boards.create.dialogTitle')}
           </h2>
-          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-300">
+          <p className="mt-1 text-sm text-fg-muted">
             {t('boards.create.dialogSubtitle')}
           </p>
         </div>
 
         <div
-          className="flex gap-1 border-b border-slate-200 px-2 dark:border-neutral-700"
+          className="flex gap-1 border-b border-border-default px-2 dark:border-border-default"
           role="tablist"
           aria-label={t('boards.create.tabsAria')}
         >
@@ -236,11 +236,7 @@ export function CreateBoardDialog({ open, onClose, courseCode, onCreated }: Prop
               id={`create-board-tab-${id}`}
               aria-controls={`create-board-panel-${id}`}
               onClick={() => setTab(id)}
-              className={`px-3 py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
-                tab === id
-                  ? 'border-b-2 border-indigo-600 text-indigo-700 dark:text-indigo-300'
-                  : 'text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-neutral-100'
-              }`}
+              className={`px-3 py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${ tab === id ? 'border-b-2 border-indigo-600 text-accent-fg' : 'text-fg-muted hover:text-fg-default dark:text-fg-muted dark:hover:text-fg-default' }`}
             >
               {t(labelKey)}
             </button>
@@ -274,11 +270,7 @@ export function CreateBoardDialog({ open, onClose, courseCode, onCreated }: Prop
                       key={value || 'all'}
                       type="button"
                       onClick={() => setScopeFilter(value)}
-                      className={`rounded-md px-2.5 py-1 text-xs font-medium ${
-                        scopeFilter === value
-                          ? 'bg-indigo-600 text-white'
-                          : 'bg-slate-100 text-slate-700 dark:bg-neutral-800 dark:text-neutral-200'
-                      }`}
+                      className={`rounded-md px-2.5 py-1 text-xs font-medium ${ scopeFilter === value ? 'bg-accent-solid text-white' : 'bg-surface-sunken text-fg-muted dark:bg-surface-overlay dark:text-fg-default' }`}
                     >
                       {t(labelKey)}
                     </button>
@@ -291,13 +283,13 @@ export function CreateBoardDialog({ open, onClose, courseCode, onCreated }: Prop
                     value={templateQuery}
                     onChange={(e) => setTemplateQuery(e.target.value)}
                     placeholder={t('boards.template.search')}
-                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+                    className="w-full rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
                   />
                 </label>
                 {templatesLoading ? (
-                  <p className="text-sm text-slate-500">{t('common.loading')}</p>
+                  <p className="text-sm text-fg-muted">{t('common.loading')}</p>
                 ) : templates.length === 0 ? (
-                  <p className="text-sm text-slate-600 dark:text-neutral-300">{t('boards.template.empty')}</p>
+                  <p className="text-sm text-fg-muted">{t('boards.template.empty')}</p>
                 ) : (
                   <ul className="grid gap-2 sm:grid-cols-2" role="listbox" aria-label={t('boards.template.galleryAria')}>
                     {templates.map((tmpl) => {
@@ -312,16 +304,12 @@ export function CreateBoardDialog({ open, onClose, courseCode, onCreated }: Prop
                               setSelectedTemplateId(tmpl.id)
                               if (!title.trim()) setTitle(tmpl.title)
                             }}
-                            className={`w-full rounded-md border p-3 text-start transition-[background-color,color,border-color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
-                              selected
-                                ? 'border-indigo-500 bg-indigo-50 dark:border-indigo-400 dark:bg-indigo-950/40'
-                                : 'border-slate-200 hover:border-indigo-300 dark:border-neutral-700'
-                            }`}
+                            className={`w-full rounded-md border p-3 text-start transition-[background-color,color,border-color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${ selected ? 'border-indigo-500 bg-indigo-50 dark:border-indigo-400 dark:bg-indigo-950/40' : 'border-border-default hover:border-indigo-300 dark:border-border-default' }`}
                           >
-                            <span className="block font-medium text-slate-900 dark:text-neutral-100">
+                            <span className="block font-medium text-fg-default">
                               {tmpl.title}
                             </span>
-                            <span className="mt-1 block text-xs text-slate-600 dark:text-neutral-300">
+                            <span className="mt-1 block text-xs text-fg-muted">
                               {tmpl.description}
                             </span>
                             {tmpl.tags.length > 0 ? (
@@ -329,7 +317,7 @@ export function CreateBoardDialog({ open, onClose, courseCode, onCreated }: Prop
                                 {tmpl.tags.slice(0, 4).map((tag) => (
                                   <span
                                     key={tag}
-                                    className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-slate-600 dark:bg-neutral-800 dark:text-neutral-300"
+                                    className="rounded bg-surface-sunken px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-fg-muted dark:bg-surface-overlay dark:text-fg-muted"
                                   >
                                     {tag}
                                   </span>
@@ -348,20 +336,20 @@ export function CreateBoardDialog({ open, onClose, courseCode, onCreated }: Prop
             {tab === 'duplicate' ? (
               <>
                 {boardsLoading ? (
-                  <p className="text-sm text-slate-500">{t('common.loading')}</p>
+                  <p className="text-sm text-fg-muted">{t('common.loading')}</p>
                 ) : boards.length === 0 ? (
-                  <p className="text-sm text-slate-600 dark:text-neutral-300">
+                  <p className="text-sm text-fg-muted">
                     {t('boards.create.duplicateEmpty')}
                   </p>
                 ) : (
                   <label className="block text-sm">
-                    <span className="font-medium text-slate-700 dark:text-neutral-200">
+                    <span className="font-medium text-fg-default">
                       {t('boards.create.sourceBoard')}
                     </span>
                     <select
                       value={sourceBoardId}
                       onChange={(e) => setSourceBoardId(e.target.value)}
-                      className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+                      className="mt-1 w-full rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
                       required
                     >
                       <option value="">{t('boards.create.sourceBoardPlaceholder')}</option>
@@ -374,7 +362,7 @@ export function CreateBoardDialog({ open, onClose, courseCode, onCreated }: Prop
                   </label>
                 )}
                 <fieldset className="space-y-2">
-                  <legend className="text-sm font-medium text-slate-700 dark:text-neutral-200">
+                  <legend className="text-sm font-medium text-fg-default">
                     {t('boards.create.copyMode')}
                   </legend>
                   <label className="flex items-start gap-2 text-sm">
@@ -387,7 +375,7 @@ export function CreateBoardDialog({ open, onClose, courseCode, onCreated }: Prop
                     />
                     <span>
                       <span className="font-medium">{t('boards.create.modeStructure')}</span>
-                      <span className="block text-xs text-slate-500 dark:text-neutral-400">
+                      <span className="block text-xs text-fg-muted">
                         {t('boards.create.modeStructureHint')}
                       </span>
                     </span>
@@ -402,27 +390,27 @@ export function CreateBoardDialog({ open, onClose, courseCode, onCreated }: Prop
                     />
                     <span>
                       <span className="font-medium">{t('boards.create.modeFull')}</span>
-                      <span className="block text-xs text-slate-500 dark:text-neutral-400">
+                      <span className="block text-xs text-fg-muted">
                         {t('boards.create.modeFullHint')}
                       </span>
                     </span>
                   </label>
                 </fieldset>
                 {copyJob ? (
-                  <div className="rounded-md border border-slate-200 p-3 dark:border-neutral-700" role="status">
-                    <p className="text-sm font-medium text-slate-800 dark:text-neutral-100">
+                  <div className="rounded-md border border-border-default p-3 dark:border-border-default" role="status">
+                    <p className="text-sm font-medium text-fg-default">
                       {copyJob.status === 'failed'
                         ? t('boards.create.copyFailed')
                         : t('boards.create.copyProgress', { progress: copyJob.progress })}
                     </p>
-                    <div className="mt-2 h-2 overflow-hidden rounded bg-slate-100 dark:bg-neutral-800">
+                    <div className="mt-2 h-2 overflow-hidden rounded bg-surface-sunken">
                       <div
-                        className="h-full bg-indigo-600 motion-safe:transition-all"
+                        className="h-full bg-accent-solid motion-safe:transition-all"
                         style={{ width: `${Math.min(100, Math.max(0, copyJob.progress))}%` }}
                       />
                     </div>
                     {copyJob.status === 'failed' && copyJob.error ? (
-                      <p className="mt-2 text-xs text-red-600 dark:text-red-400">{copyJob.error}</p>
+                      <p className="mt-2 text-xs text-danger-fg">{copyJob.error}</p>
                     ) : null}
                   </div>
                 ) : null}
@@ -431,12 +419,12 @@ export function CreateBoardDialog({ open, onClose, courseCode, onCreated }: Prop
 
             <div>
               <label
-                className="block text-sm font-medium text-slate-700 dark:text-neutral-300"
+                className="block text-sm font-medium text-fg-muted"
                 htmlFor="create-board-title"
               >
                 {t('boards.create.titleLabel')}
                 {tab !== 'blank' ? (
-                  <span className="font-normal text-slate-500"> ({t('boards.create.titleOptional')})</span>
+                  <span className="font-normal text-fg-muted"> ({t('boards.create.titleOptional')})</span>
                 ) : null}
               </label>
               <input
@@ -446,12 +434,12 @@ export function CreateBoardDialog({ open, onClose, courseCode, onCreated }: Prop
                 onChange={(e) => setTitle(e.target.value)}
                 maxLength={200}
                 required={tab === 'blank'}
-                className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                className="mt-1 w-full rounded-md border border-border-strong px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
               />
             </div>
             <div>
               <label
-                className="block text-sm font-medium text-slate-700 dark:text-neutral-300"
+                className="block text-sm font-medium text-fg-muted"
                 htmlFor="create-board-description"
               >
                 {t('boards.create.descriptionLabel')}
@@ -461,23 +449,23 @@ export function CreateBoardDialog({ open, onClose, courseCode, onCreated }: Prop
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={2}
-                className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                className="mt-1 w-full rounded-md border border-border-strong px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
               />
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 border-t border-slate-200 px-4 py-3 dark:border-neutral-700">
+          <div className="flex justify-end gap-2 border-t border-border-default px-4 py-3 dark:border-border-default">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-md px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:text-neutral-200 dark:hover:bg-neutral-800"
+              className="rounded-md px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-sunken dark:text-fg-default dark:hover:bg-surface-overlay"
             >
               {t('dialogs.cancel')}
             </button>
             <button
               type="submit"
               disabled={submitting || !canSubmit || (!!copyJob && copyJob.status !== 'failed')}
-              className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+              className="rounded-md bg-accent-solid px-3 py-2 text-sm font-medium text-white hover:bg-accent disabled:opacity-50"
             >
               {submitting ? t('common.loading') : t('boards.create.submit')}
             </button>

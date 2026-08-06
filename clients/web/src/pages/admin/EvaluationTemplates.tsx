@@ -34,22 +34,22 @@ function QuestionEditor({
   onRemove: () => void
 }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-neutral-700 dark:bg-neutral-800/50">
+    <div className="rounded-xl border border-border-default bg-surface-base p-4 dark:border-border-default/50">
       <div className="mb-3 flex items-center justify-between">
-        <span className="text-xs font-semibold text-slate-500 dark:text-neutral-400">
+        <span className="text-xs font-semibold text-fg-muted">
           Question {index + 1}
         </span>
         <button
           type="button"
           onClick={onRemove}
-          className="text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+          className="text-xs text-red-500 hover:text-danger-fg dark:text-red-400 dark:hover:text-red-300"
         >
           Remove
         </button>
       </div>
 
       <div className="mb-3">
-        <label className="mb-1 block text-xs font-medium text-slate-700 dark:text-neutral-300">
+        <label className="mb-1 block text-xs font-medium text-fg-muted">
           Type
         </label>
         <select
@@ -57,7 +57,7 @@ function QuestionEditor({
           onChange={(e) =>
             onChange({ ...question, type: e.target.value as EvaluationQuestion['type'], options: undefined })
           }
-          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+          className="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
         >
           {QUESTION_TYPES.map((t) => (
             <option key={t.value} value={t.value}>
@@ -68,7 +68,7 @@ function QuestionEditor({
       </div>
 
       <div className="mb-3">
-        <label className="mb-1 block text-xs font-medium text-slate-700 dark:text-neutral-300">
+        <label className="mb-1 block text-xs font-medium text-fg-muted">
           Question text
         </label>
         <input
@@ -76,13 +76,13 @@ function QuestionEditor({
           value={question.text}
           onChange={(e) => onChange({ ...question, text: e.target.value })}
           placeholder="Enter your question…"
-          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+          className="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
         />
       </div>
 
       {question.type === 'multiple_choice' && (
         <div className="mb-3">
-          <label className="mb-1 block text-xs font-medium text-slate-700 dark:text-neutral-300">
+          <label className="mb-1 block text-xs font-medium text-fg-muted">
             Options (one per line)
           </label>
           <textarea
@@ -95,12 +95,12 @@ function QuestionEditor({
             }
             rows={3}
             placeholder="Option A&#10;Option B&#10;Option C"
-            className="w-full resize-y rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+            className="w-full resize-y rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
           />
         </div>
       )}
 
-      <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-neutral-400">
+      <label className="flex items-center gap-2 text-xs text-fg-muted">
         <input
           type="checkbox"
           checked={question.required ?? false}
@@ -149,7 +149,7 @@ function TemplateForm({
   return (
     <form onSubmit={handleSave} className="space-y-4">
       <div>
-        <label className="mb-1 block text-sm font-medium text-slate-900 dark:text-neutral-100">
+        <label className="mb-1 block text-sm font-medium text-fg-default">
           Template name
         </label>
         <input
@@ -157,12 +157,12 @@ function TemplateForm({
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="e.g. Fall 2025 Standard Evaluation"
-          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+          className="w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
         />
       </div>
 
       <div className="space-y-3">
-        <p className="text-sm font-medium text-slate-900 dark:text-neutral-100">Questions</p>
+        <p className="text-sm font-medium text-fg-default">Questions</p>
         {questions.map((q, i) => (
           <QuestionEditor
             key={i}
@@ -179,28 +179,28 @@ function TemplateForm({
         <button
           type="button"
           onClick={() => setQuestions([...questions, emptyQuestion()])}
-          className="text-sm text-indigo-600 hover:underline dark:text-indigo-400"
+          className="text-sm text-accent-fg hover:underline dark:text-indigo-400"
         >
           + Add question
         </button>
       </div>
 
       {error && (
-        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        <p className="text-sm text-danger-fg">{error}</p>
       )}
 
       <div className="flex gap-3">
         <button
           type="submit"
           disabled={saving}
-          className="rounded-xl bg-indigo-600 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-60 dark:bg-indigo-500"
+          className="rounded-xl bg-accent-solid px-5 py-2 text-sm font-semibold text-white hover:bg-accent disabled:opacity-60 dark:bg-indigo-500"
         >
           {saving ? 'Saving…' : 'Save template'}
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-xl border border-slate-200 px-5 py-2 text-sm text-slate-700 hover:bg-slate-50 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
+          className="rounded-xl border border-border-default px-5 py-2 text-sm text-fg-muted hover:bg-surface-base dark:border-border-default dark:text-fg-muted dark:hover:bg-surface-overlay"
         >
           Cancel
         </button>
@@ -267,7 +267,7 @@ export default function EvaluationTemplates() {
   if (editing !== null) {
     return (
       <main className="mx-auto max-w-2xl px-4 py-8">
-        <h1 className="mb-6 text-xl font-bold text-slate-900 dark:text-neutral-100">
+        <h1 className="mb-6 text-xl font-bold text-fg-default">
           {editing === 'new' ? 'New evaluation template' : 'Edit template'}
         </h1>
         <TemplateForm
@@ -283,20 +283,20 @@ export default function EvaluationTemplates() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-xl font-bold text-slate-900 dark:text-neutral-100">
+        <h1 className="text-xl font-bold text-fg-default">
           Evaluation Templates
         </h1>
         <button
           type="button"
           onClick={() => setEditing('new')}
-          className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 dark:bg-indigo-500"
+          className="rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white hover:bg-accent dark:bg-indigo-500"
         >
           New template
         </button>
       </div>
 
       {error && (
-        <p className="mb-4 text-sm text-red-600 dark:text-red-400">{error}</p>
+        <p className="mb-4 text-sm text-danger-fg">{error}</p>
       )}
 
       {loading ? (
@@ -304,7 +304,7 @@ export default function EvaluationTemplates() {
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
         </div>
       ) : templates.length === 0 ? (
-        <p className="py-12 text-center text-slate-500 dark:text-neutral-400">
+        <p className="py-12 text-center text-fg-muted">
           No templates yet. Create one to get started.
         </p>
       ) : (
@@ -312,11 +312,11 @@ export default function EvaluationTemplates() {
           {templates.map((t) => (
             <li
               key={t.id}
-              className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-neutral-700 dark:bg-neutral-900"
+              className="flex items-center justify-between rounded-xl border border-border-default bg-surface-raised px-4 py-3 dark:border-border-default dark:bg-surface-raised"
             >
               <div>
-                <p className="text-sm font-medium text-slate-900 dark:text-neutral-100">{t.name}</p>
-                <p className="text-xs text-slate-500 dark:text-neutral-400">
+                <p className="text-sm font-medium text-fg-default">{t.name}</p>
+                <p className="text-xs text-fg-muted">
                   {t.questions.length} {t.questions.length === 1 ? 'question' : 'questions'}
                 </p>
               </div>
@@ -324,7 +324,7 @@ export default function EvaluationTemplates() {
                 <button
                   type="button"
                   onClick={() => setEditing(t)}
-                  className="text-xs text-indigo-600 hover:underline dark:text-indigo-400"
+                  className="text-xs text-accent-fg hover:underline dark:text-indigo-400"
                 >
                   Edit
                 </button>

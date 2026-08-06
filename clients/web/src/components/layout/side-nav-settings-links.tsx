@@ -88,7 +88,7 @@ export function SideNavSettingsLinks() {
         Back
       </SideNavLink>
       {!sideNavCollapsed && (
-        <p className="px-3 pb-1 pt-3 text-sm font-bold tracking-tight text-slate-900 dark:text-neutral-100">
+        <p className="px-3 pb-1 pt-3 text-sm font-bold tracking-tight text-fg-default">
           User Settings
         </p>
       )}
@@ -134,7 +134,7 @@ export function SideNavSettingsLinks() {
       {(canOrgUnits || canOrgRoles || canManageRbac) && (
         <>
           {!sideNavCollapsed && (
-            <p className="px-3 pb-1 pt-4 text-sm font-bold tracking-tight text-slate-900 dark:text-neutral-100">
+            <p className="px-3 pb-1 pt-4 text-sm font-bold tracking-tight text-fg-default">
               System Settings
             </p>
           )}
@@ -257,13 +257,7 @@ export function SideNavSettingsLinks() {
               <button
                 type="button"
                 onClick={() => setAiOpen((o) => !o)}
-                className={`${sideNavLinkClass} ${
-                  sideNavCollapsed ? 'justify-center' : ''
-                } ${
-                  aiOpen || aiSectionActive
-                    ? 'text-slate-900 dark:text-neutral-50'
-                    : 'text-slate-500 dark:text-neutral-400'
-                }`}
+                className={`${sideNavLinkClass} ${ sideNavCollapsed ? 'justify-center' : '' } ${ aiOpen || aiSectionActive ? 'text-fg-default' : 'text-fg-muted' }`}
                 aria-expanded={aiOpen}
                 title={sideNavCollapsed ? 'Intelligence' : undefined}
               >
@@ -274,9 +268,7 @@ export function SideNavSettingsLinks() {
                   <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
                     <span className="truncate">Intelligence</span>
                     <ChevronDown
-                      className={`h-4 w-4 shrink-0 text-current opacity-70 transition-transform duration-200 ease-out ${
-                        aiOpen ? 'rotate-180' : 'rotate-0'
-                      }`}
+                      className={`h-4 w-4 shrink-0 text-current opacity-70 transition-transform duration-200 ease-out ${ aiOpen ? 'rotate-180' : 'rotate-0' }`}
                       aria-hidden
                     />
                   </span>
@@ -284,9 +276,7 @@ export function SideNavSettingsLinks() {
               </button>
               {!sideNavCollapsed && (
                 <div
-                  className={`grid transition-[grid-template-rows] duration-200 ease-out ${
-                    aiOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
-                  }`}
+                  className={`grid transition-[grid-template-rows] duration-200 ease-out ${ aiOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]' }`}
                 >
                   <div className="min-h-0 overflow-hidden">
                     <div className="flex flex-col gap-0.5 pb-0.5">

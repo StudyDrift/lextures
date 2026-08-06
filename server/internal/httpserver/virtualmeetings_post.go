@@ -28,11 +28,6 @@ type createMeetingBody struct {
 // handleCreateMeeting is POST /api/v1/courses/{course_code}/meetings.
 func (d Deps) handleCreateMeeting() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode := chi.URLParam(r, "course_code")
 		if courseCode == "" {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Missing course code.")

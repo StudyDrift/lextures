@@ -136,7 +136,7 @@ export default function StudyInsightsPage() {
   if (featuresLoading) {
     return (
       <LmsPage title="Study insights">
-        <p className="text-sm text-slate-600">Loading…</p>
+        <p className="text-sm text-fg-muted">Loading…</p>
       </LmsPage>
     )
   }
@@ -144,8 +144,8 @@ export default function StudyInsightsPage() {
   if (!selfReflectionEnabled) {
     return (
       <LmsPage title="Study insights">
-        <p className="text-sm text-slate-600">Study insights are not enabled on this platform.</p>
-        <Link to="/" className="mt-4 inline-block text-sm font-medium text-indigo-600">
+        <p className="text-sm text-fg-muted">Study insights are not enabled on this platform.</p>
+        <Link to="/" className="mt-4 inline-block text-sm font-medium text-accent-fg">
           Back to dashboard
         </Link>
       </LmsPage>
@@ -158,10 +158,10 @@ export default function StudyInsightsPage() {
 
   return (
     <LmsPage title="Study insights">
-      {error ? <p className="mb-4 text-sm text-red-600">{error}</p> : null}
+      {error ? <p className="mb-4 text-sm text-danger-fg">{error}</p> : null}
 
-      <section className="rounded-2xl border border-slate-200 p-5 dark:border-neutral-700" aria-label="My goals">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-neutral-50">My goals</h2>
+      <section className="rounded-2xl border border-border-default p-5 dark:border-border-default" aria-label="My goals">
+        <h2 className="text-lg font-semibold text-fg-default">My goals</h2>
         <label className="mt-4 flex items-center gap-2 text-sm">
           <input
             type="checkbox"
@@ -171,7 +171,7 @@ export default function StudyInsightsPage() {
           Enable study stats, coaching tips, and private journal
         </label>
         <div className="mt-4">
-          <label htmlFor="weekly-hours" className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+          <label htmlFor="weekly-hours" className="block text-sm font-medium text-fg-muted">
             Weekly study goal: {weeklyHours} hours
           </label>
           <input
@@ -190,7 +190,7 @@ export default function StudyInsightsPage() {
           type="button"
           disabled={saving}
           onClick={() => void saveGoals()}
-          className="mt-4 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+          className="mt-4 rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
         >
           {saving ? 'Saving…' : 'Save goals'}
         </button>
@@ -201,7 +201,7 @@ export default function StudyInsightsPage() {
           {stats ? (
             <>
               <section
-                className="mt-8 rounded-2xl border border-slate-200 p-5 dark:border-neutral-700"
+                className="mt-8 rounded-2xl border border-border-default p-5 dark:border-border-default"
                 aria-label="This week"
               >
                 <h2 className="text-lg font-semibold">This week</h2>
@@ -218,7 +218,7 @@ export default function StudyInsightsPage() {
 
               {timeAllocation.length > 0 ? (
                 <section
-                  className="mt-8 rounded-2xl border border-slate-200 p-5 dark:border-neutral-700"
+                  className="mt-8 rounded-2xl border border-border-default p-5 dark:border-border-default"
                   aria-label="Time allocation"
                 >
                   <h2 className="text-lg font-semibold">Time by module (last 14 days)</h2>
@@ -227,9 +227,9 @@ export default function StudyInsightsPage() {
                       <li key={row.moduleId}>
                         <div className="flex justify-between text-sm">
                           <span className="truncate pe-2">{row.moduleTitle}</span>
-                          <span className="shrink-0 text-slate-600">{Math.round(row.minutes)} min</span>
+                          <span className="shrink-0 text-fg-muted">{Math.round(row.minutes)} min</span>
                         </div>
-                        <div className="mt-1 h-2 rounded-full bg-slate-100 dark:bg-neutral-800">
+                        <div className="mt-1 h-2 rounded-full bg-surface-sunken">
                           <div
                             className="h-full rounded-full bg-indigo-500"
                             style={{ width: `${Math.round((row.minutes / maxAlloc) * 100)}%` }}
@@ -244,17 +244,17 @@ export default function StudyInsightsPage() {
           ) : null}
 
           <section
-            className="mt-8 rounded-2xl border border-slate-200 p-5 dark:border-neutral-700"
+            className="mt-8 rounded-2xl border border-border-default p-5 dark:border-border-default"
             aria-label="Private journal"
           >
             <h2 className="text-lg font-semibold">Private journal</h2>
-            <p className="mt-1 text-xs text-slate-500">Only you can see these entries.</p>
+            <p className="mt-1 text-xs text-fg-muted">Only you can see these entries.</p>
             <textarea
               rows={3}
               maxLength={280}
               value={journalDraft}
               onChange={(e) => setJournalDraft(e.target.value)}
-              className="mt-3 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+              className="mt-3 w-full rounded-xl border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-raised"
               aria-label="New journal entry"
               placeholder="How did studying feel today?"
             />
@@ -271,13 +271,13 @@ export default function StudyInsightsPage() {
                 <li
                   key={e.id}
                   data-testid="journal-entry"
-                  className="rounded-xl bg-slate-50 px-4 py-3 text-sm dark:bg-neutral-900/60"
+                  className="rounded-xl bg-surface-base px-4 py-3 text-sm/60"
                 >
-                  <p className="text-xs text-slate-500">{formatDateTime(e.createdAt)}</p>
+                  <p className="text-xs text-fg-muted">{formatDateTime(e.createdAt)}</p>
                   <p className="mt-1">{e.entryText}</p>
                   <button
                     type="button"
-                    className="mt-2 text-xs text-red-600"
+                    className="mt-2 text-xs text-danger-fg"
                     onClick={() =>
                       void deleteReflectionJournalEntry(e.id)
                         .then(reload)
@@ -292,7 +292,7 @@ export default function StudyInsightsPage() {
           </section>
 
           <section
-            className="mt-8 rounded-2xl border border-slate-200 p-5 dark:border-neutral-700"
+            className="mt-8 rounded-2xl border border-border-default p-5 dark:border-border-default"
             aria-label="Coaching tips"
           >
             <h2 className="text-lg font-semibold">Coaching tip history</h2>
@@ -302,7 +302,7 @@ export default function StudyInsightsPage() {
                   key={tip.id}
                   className="rounded-xl border border-amber-100 bg-amber-50/50 px-4 py-3 text-sm dark:border-amber-900/40 dark:bg-amber-950/20"
                 >
-                  <p className="text-xs text-slate-500">Week of {tip.weekOf}</p>
+                  <p className="text-xs text-fg-muted">Week of {tip.weekOf}</p>
                   <p className="mt-1">{tip.tipText}</p>
                   <div className="mt-2 flex gap-2">
                     <button

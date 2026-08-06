@@ -404,11 +404,6 @@ func (d Deps) effectiveAIStudyBuddyEnabled(ctx context.Context, userID uuid.UUID
 // handleGetPlatformFeatures is GET /api/v1/platform/features (authenticated; read-only effective flags).
 func (d Deps) handleGetPlatformFeatures() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return

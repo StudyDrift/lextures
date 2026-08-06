@@ -2,9 +2,11 @@ import { registerServiceWorker } from './lib/push-notifications'
 import './i18n'
 import { applyPlatformToDocument } from './lib/platform'
 import { applyUiTheme, readStoredUiTheme } from './lib/ui-theme'
+import { applyUiSurfaceTint, readStoredUiSurfaceTint } from './lib/ui-surface-tint'
 
 applyPlatformToDocument()
 applyUiTheme(readStoredUiTheme())
+applyUiSurfaceTint(readStoredUiSurfaceTint())
 
 // Async so recovery helpers stay out of the entry gzip budget.
 void import('./lib/chunk-load-recovery').then((m) => m.installChunkLoadRecovery())

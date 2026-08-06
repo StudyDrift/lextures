@@ -300,14 +300,14 @@ export function TranscriptOrderBuilder({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white p-5 shadow-xl dark:bg-neutral-900"
+        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-surface-raised p-5 shadow-xl dark:bg-surface-raised"
       >
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 id={titleId} className="text-lg font-semibold text-slate-900 dark:text-neutral-50">
+            <h2 id={titleId} className="text-lg font-semibold text-fg-default">
               {t('transcripts.order.title')}
             </h2>
-            <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+            <p className="mt-1 text-sm text-fg-muted">
               {t(
                 step === 5
                   ? 'transcripts.order.stepLabelPayment'
@@ -322,7 +322,7 @@ export function TranscriptOrderBuilder({
             type="button"
             onClick={onClose}
             disabled={busy || submitting}
-            className="rounded p-1 text-slate-500 hover:bg-slate-100 dark:hover:bg-neutral-800"
+            className="rounded p-1 text-fg-muted hover:bg-surface-sunken dark:hover:bg-surface-overlay"
             aria-label={t('transcripts.order.close')}
           >
             <X className="h-5 w-5" />
@@ -330,18 +330,18 @@ export function TranscriptOrderBuilder({
         </div>
 
         {formError ? (
-          <p role="alert" className="mt-3 text-sm text-red-600 dark:text-red-400">
+          <p role="alert" className="mt-3 text-sm text-danger-fg">
             {formError}
           </p>
         ) : null}
 
         {step === 1 ? (
           <div className="mt-5 space-y-3">
-            <p className="text-sm text-slate-600 dark:text-neutral-400">{t('transcripts.order.step1Help')}</p>
-            <label className="block text-sm font-medium text-slate-800 dark:text-neutral-100">
+            <p className="text-sm text-fg-muted">{t('transcripts.order.step1Help')}</p>
+            <label className="block text-sm font-medium text-fg-default">
               {t('transcripts.order.document')}
               <select
-                className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                className="mt-1 w-full rounded-md border border-border-strong bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
                 value={active.documentId}
                 onChange={(e) => updateActive({ documentId: e.target.value })}
               >
@@ -378,11 +378,7 @@ export function TranscriptOrderBuilder({
                       <button
                         type="button"
                         onClick={() => setActiveIdx(idx)}
-                        className={`rounded-full px-3 py-1 text-xs font-medium ${
-                          idx === activeIdx
-                            ? 'bg-indigo-600 text-white'
-                            : 'bg-slate-100 text-slate-700 dark:bg-neutral-800 dark:text-neutral-200'
-                        }`}
+                        className={`rounded-full px-3 py-1 text-xs font-medium ${ idx === activeIdx ? 'bg-accent-solid text-white' : 'bg-surface-sunken text-fg-muted dark:bg-surface-overlay dark:text-fg-default' }`}
                       >
                         {label}
                       </button>
@@ -397,7 +393,7 @@ export function TranscriptOrderBuilder({
                               return next
                             })
                           }}
-                          className="inline-flex h-6 w-6 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-neutral-800"
+                          className="inline-flex h-6 w-6 items-center justify-center rounded-full text-fg-muted hover:bg-surface-sunken dark:hover:bg-surface-overlay"
                         >
                           <X className="h-3.5 w-3.5" aria-hidden />
                         </button>
@@ -413,7 +409,7 @@ export function TranscriptOrderBuilder({
                   setActiveIdx(items.length)
                   setQuery('')
                 }}
-                className="rounded-full border border-dashed border-slate-300 px-3 py-1 text-xs font-medium text-slate-600 dark:border-neutral-600 dark:text-neutral-300"
+                className="rounded-full border border-dashed border-border-strong px-3 py-1 text-xs font-medium text-fg-muted dark:border-border-default dark:text-fg-muted"
               >
                 {t('transcripts.order.addRecipient')}
               </button>
@@ -423,7 +419,7 @@ export function TranscriptOrderBuilder({
               <button
                 type="button"
                 onClick={() => sendToMyself()}
-                className="rounded-md border border-slate-300 px-3 py-1.5 text-sm dark:border-neutral-700"
+                className="rounded-md border border-border-strong px-3 py-1.5 text-sm dark:border-border-default"
               >
                 {t('transcripts.order.sendToMyself')}
               </button>
@@ -432,7 +428,7 @@ export function TranscriptOrderBuilder({
                 <select
                   value={typeFilter}
                   onChange={(e) => setTypeFilter(e.target.value as TranscriptRecipientType | '')}
-                  className="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                  className="rounded-md border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
                 >
                   {RECIPIENT_TYPES.map((ty) => (
                     <option key={ty || 'all'} value={ty}>
@@ -444,7 +440,7 @@ export function TranscriptOrderBuilder({
             </div>
 
             <div className="relative">
-              <label htmlFor={searchId} className="block text-sm font-medium text-slate-800 dark:text-neutral-100">
+              <label htmlFor={searchId} className="block text-sm font-medium text-fg-default">
                 {t('transcripts.order.searchLabel')}
               </label>
               <input
@@ -475,31 +471,29 @@ export function TranscriptOrderBuilder({
                   }
                 }}
                 placeholder={t('transcripts.order.searchPlaceholder')}
-                className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                className="mt-1 w-full rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
               />
               {searchOpen ? (
                 <ul
                   id={listboxId}
                   role="listbox"
-                  className="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-md border border-slate-200 bg-white shadow-lg dark:border-neutral-700 dark:bg-neutral-900"
+                  className="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-md border border-border-default bg-surface-raised shadow-lg dark:border-border-default dark:bg-surface-raised"
                 >
                   {searching ? (
-                    <li className="px-3 py-2 text-sm text-slate-500">{t('common.loading')}</li>
+                    <li className="px-3 py-2 text-sm text-fg-muted">{t('common.loading')}</li>
                   ) : results.length === 0 ? (
-                    <li className="px-3 py-2 text-sm text-slate-500">{t('transcripts.order.noResults')}</li>
+                    <li className="px-3 py-2 text-sm text-fg-muted">{t('transcripts.order.noResults')}</li>
                   ) : (
                     results.map((rec, i) => (
                       <li key={rec.id} role="option" id={`${listboxId}-opt-${i}`} aria-selected={i === cursor}>
                         <button
                           type="button"
-                          className={`flex w-full flex-col items-start px-3 py-2 text-start text-sm ${
-                            i === cursor ? 'bg-indigo-50 dark:bg-indigo-950' : ''
-                          }`}
+                          className={`flex w-full flex-col items-start px-3 py-2 text-start text-sm ${ i === cursor ? 'bg-indigo-50 dark:bg-indigo-950' : '' }`}
                           onMouseEnter={() => setCursor(i)}
                           onClick={() => pickRecipient(rec)}
                         >
-                          <span className="font-medium text-slate-900 dark:text-neutral-50">{rec.name}</span>
-                          <span className="text-xs text-slate-500">
+                          <span className="font-medium text-fg-default">{rec.name}</span>
+                          <span className="text-xs text-fg-muted">
                             {t(typeLabelKey(rec.type))}
                             {rec.verified ? ` · ${t('transcripts.order.verified')}` : ''}
                             {' · '}
@@ -514,14 +508,14 @@ export function TranscriptOrderBuilder({
             </div>
 
             {!active.recipient ? (
-              <fieldset className="space-y-2 rounded-md border border-slate-200 p-3 dark:border-neutral-700">
+              <fieldset className="space-y-2 rounded-md border border-border-default p-3 dark:border-border-default">
                 <legend className="px-1 text-sm font-medium">{t('transcripts.order.adHocLegend')}</legend>
                 <label className="block text-sm">
                   {t('transcripts.order.adHocName')}
                   <input
                     value={active.adHocName}
                     onChange={(e) => updateActive({ adHocName: e.target.value })}
-                    className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                    className="mt-1 w-full rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
                   />
                 </label>
                 <label className="block text-sm">
@@ -530,7 +524,7 @@ export function TranscriptOrderBuilder({
                     type="email"
                     value={active.adHocEmail}
                     onChange={(e) => updateActive({ adHocEmail: e.target.value })}
-                    className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                    className="mt-1 w-full rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
                   />
                 </label>
                 <label className="block text-sm">
@@ -539,7 +533,7 @@ export function TranscriptOrderBuilder({
                     value={active.adHocAddress}
                     onChange={(e) => updateActive({ adHocAddress: e.target.value })}
                     rows={3}
-                    className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                    className="mt-1 w-full rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
                   />
                 </label>
               </fieldset>
@@ -551,7 +545,7 @@ export function TranscriptOrderBuilder({
                 <select
                   value={active.deliveryMethod}
                   onChange={(e) => updateActive({ deliveryMethod: e.target.value as TranscriptDeliveryMethod })}
-                  className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                  className="mt-1 w-full rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
                 >
                   {allowedMethods(active).map((m) => (
                     <option key={m} value={m}>
@@ -565,7 +559,7 @@ export function TranscriptOrderBuilder({
                 <select
                   value={active.urgency}
                   onChange={(e) => updateActive({ urgency: e.target.value as TranscriptOrderUrgency })}
-                  className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                  className="mt-1 w-full rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
                 >
                   <option value="standard">{t('transcripts.order.urgencyStandard')}</option>
                   <option value="rush">{t('transcripts.order.urgencyRush')}</option>
@@ -577,20 +571,20 @@ export function TranscriptOrderBuilder({
 
         {step === 3 ? (
           <div className="mt-5 space-y-3">
-            <p className="text-sm text-slate-600 dark:text-neutral-400">{t('transcripts.order.reviewHelp')}</p>
+            <p className="text-sm text-fg-muted">{t('transcripts.order.reviewHelp')}</p>
             <AnimatedList
               items={items}
               getKey={(it) => it.key}
               enabled={ffMotionLists}
-              className="divide-y divide-slate-200 rounded-md border border-slate-200 dark:divide-neutral-800 dark:border-neutral-800"
+              className="divide-y divide-slate-200 rounded-md border border-border-default dark:divide-neutral-800 dark:border-border-subtle"
               aria-label={t('transcripts.order.reviewHelp')}
             >
               {(it) => (
                 <div className="px-3 py-2 text-sm">
-                  <p className="font-medium text-slate-900 dark:text-neutral-50">
+                  <p className="font-medium text-fg-default">
                     {it.recipient?.name || it.adHocName || t('transcripts.order.unnamed')}
                   </p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-fg-muted">
                     {t(methodLabelKey(it.deliveryMethod))} · {t(`transcripts.order.urgency${it.urgency === 'rush' ? 'Rush' : 'Standard'}`)}
                   </p>
                 </div>
@@ -621,7 +615,7 @@ export function TranscriptOrderBuilder({
               type="button"
               onClick={() => (step === 1 ? onClose() : setStep((s) => (s === 3 ? 2 : 1)))}
               disabled={busy || submitting}
-              className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium dark:border-neutral-700"
+              className="rounded-md border border-border-strong px-4 py-2 text-sm font-medium dark:border-border-default"
             >
               {step === 1 ? t('transcripts.order.cancel') : t('transcripts.order.back')}
             </button>
@@ -639,7 +633,7 @@ export function TranscriptOrderBuilder({
                   setFormError(null)
                   setStep((s) => (s === 1 ? 2 : 3))
                 }}
-                className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
+                className="rounded-md bg-accent-solid px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
               >
                 {t('transcripts.order.next')}
               </button>
@@ -648,7 +642,7 @@ export function TranscriptOrderBuilder({
                 type="button"
                 onClick={() => void handleSubmit()}
                 disabled={busy || submitting}
-                className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
+                className="rounded-md bg-accent-solid px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
               >
                 {busy || submitting ? t('transcripts.order.submitting') : t('transcripts.order.submit')}
               </button>

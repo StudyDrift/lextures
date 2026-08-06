@@ -45,15 +45,15 @@ export function PinToggle({
       }}
       className={[
         'inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md',
-        'text-slate-400 outline-none motion-safe:transition-opacity',
-        'hover:bg-slate-100 hover:text-indigo-600',
+        'text-fg-subtle outline-none motion-safe:transition-opacity',
+        'hover:bg-surface-sunken hover:text-accent-fg',
         'focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-indigo-400',
-        'dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-indigo-400',
+        ' dark:hover:bg-surface-overlay dark:hover:text-indigo-400',
         'disabled:cursor-not-allowed disabled:opacity-40',
         pinned || alwaysVisible
           ? 'opacity-100'
           : 'opacity-0 group-hover/setting-row:opacity-100 group-focus-within/setting-row:opacity-100',
-        pinned ? 'text-indigo-600 dark:text-indigo-400' : '',
+        pinned ? 'text-accent-fg' : '',
         className,
       ]
         .filter(Boolean)

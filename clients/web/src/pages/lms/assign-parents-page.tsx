@@ -128,7 +128,7 @@ export default function AssignParentsPage() {
   if (permLoading) {
     return (
       <LmsPage title={t('parentAssign.title')}>
-        <p className="text-sm text-stone-600 dark:text-neutral-400">{t('parentAssign.loading')}</p>
+        <p className="text-sm text-stone-600 dark:text-fg-muted">{t('parentAssign.loading')}</p>
       </LmsPage>
     )
   }
@@ -257,7 +257,7 @@ export default function AssignParentsPage() {
           <div className="min-w-0 flex-1">
             <label
               htmlFor="parent-assign-search"
-              className="mb-1.5 block text-sm font-medium text-stone-800 dark:text-neutral-200"
+              className="mb-1.5 block text-sm font-medium text-stone-800 dark:text-fg-default"
             >
               {t('parentAssign.searchLabel')}
             </label>
@@ -266,7 +266,7 @@ export default function AssignParentsPage() {
               type="search"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/30 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+              className="w-full rounded-lg border border-stone-300 bg-surface-raised px-3 py-2 text-sm text-stone-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/30 dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
               placeholder={t('parentAssign.searchPlaceholder')}
               autoComplete="off"
             />
@@ -281,26 +281,24 @@ export default function AssignParentsPage() {
         </form>
 
         {searchError ? (
-          <p className="text-sm text-stone-600 dark:text-neutral-400" role="status">
+          <p className="text-sm text-stone-600 dark:text-fg-muted" role="status">
             {searchError}
           </p>
         ) : null}
 
         {hits.length > 0 ? (
-          <ul className="divide-y divide-stone-200 rounded-lg border border-stone-200 dark:divide-neutral-700 dark:border-neutral-700">
+          <ul className="divide-y divide-stone-200 rounded-lg border border-stone-200 dark:divide-neutral-700 dark:border-border-default">
             {hits.map((s) => (
               <li key={s.id}>
                 <button
                   type="button"
                   onClick={() => void selectStudent(s)}
-                  className={`flex w-full flex-col items-start gap-0.5 px-4 py-3 text-start text-sm hover:bg-stone-50 dark:hover:bg-neutral-800/80 ${
-                    selected?.id === s.id ? 'bg-sky-50 dark:bg-sky-950/40' : ''
-                  }`}
+                  className={`flex w-full flex-col items-start gap-0.5 px-4 py-3 text-start text-sm hover:bg-stone-50 dark:hover:bg-neutral-800/80 ${ selected?.id === s.id ? 'bg-sky-50 dark:bg-sky-950/40' : '' }`}
                 >
-                  <span className="font-medium text-stone-900 dark:text-neutral-100">
+                  <span className="font-medium text-stone-900 dark:text-fg-default">
                     {studentLabel(s)}
                   </span>
-                  <span className="text-stone-600 dark:text-neutral-400">
+                  <span className="text-stone-600 dark:text-fg-muted">
                     {s.email}
                     {s.sid ? ` · SID ${s.sid}` : ''}
                   </span>
@@ -316,11 +314,11 @@ export default function AssignParentsPage() {
               <div>
                 <h2
                   id="selected-student-heading"
-                  className="text-lg font-semibold text-stone-900 dark:text-neutral-100"
+                  className="text-lg font-semibold text-stone-900 dark:text-fg-default"
                 >
                   {studentLabel(selected)}
                 </h2>
-                <p className="text-sm text-stone-600 dark:text-neutral-400">
+                <p className="text-sm text-stone-600 dark:text-fg-muted">
                   {selected.email}
                   {selected.sid ? ` · SID ${selected.sid}` : ''}
                 </p>
@@ -340,27 +338,27 @@ export default function AssignParentsPage() {
               <p className="text-sm text-stone-500">{t('parentAssign.linksLoading')}</p>
             ) : null}
             {linksError ? (
-              <p className="text-sm text-red-700 dark:text-red-300" role="alert">
+              <p className="text-sm text-danger-fg" role="alert">
                 {linksError}
               </p>
             ) : null}
             {!linksBusy && links.length === 0 ? (
-              <p className="text-sm text-stone-600 dark:text-neutral-400">
+              <p className="text-sm text-stone-600 dark:text-fg-muted">
                 {t('parentAssign.noLinks')}
               </p>
             ) : null}
             {links.length > 0 ? (
-              <ul className="divide-y divide-stone-200 rounded-lg border border-stone-200 dark:divide-neutral-700 dark:border-neutral-700">
+              <ul className="divide-y divide-stone-200 rounded-lg border border-stone-200 dark:divide-neutral-700 dark:border-border-default">
                 {links.map((ln) => (
                   <li
                     key={ln.id}
                     className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div>
-                      <p className="text-sm font-medium text-stone-900 dark:text-neutral-100">
+                      <p className="text-sm font-medium text-stone-900 dark:text-fg-default">
                         {ln.parentDisplayName?.trim() || ln.parentEmail}
                       </p>
-                      <p className="text-xs text-stone-600 dark:text-neutral-400">
+                      <p className="text-xs text-stone-600 dark:text-fg-muted">
                         {ln.parentEmail} · {ln.relationship} · {ln.status}
                       </p>
                     </div>
@@ -368,7 +366,7 @@ export default function AssignParentsPage() {
                       {ln.status === 'pending' ? (
                         <button
                           type="button"
-                          className="rounded-md border border-stone-300 px-3 py-1.5 text-xs font-medium text-stone-800 hover:bg-stone-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                          className="rounded-md border border-stone-300 px-3 py-1.5 text-xs font-medium text-stone-800 hover:bg-stone-50 dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
                           onClick={() => void onResend(ln.id)}
                         >
                           {t('parentAssign.resend')}
@@ -401,16 +399,16 @@ export default function AssignParentsPage() {
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
-            className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white p-5 shadow-xl dark:bg-neutral-900"
+            className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-surface-raised p-5 shadow-xl dark:bg-surface-raised"
           >
             <div className="mb-4 flex items-start justify-between gap-3">
-              <h2 id={titleId} className="text-lg font-semibold text-stone-900 dark:text-neutral-100">
+              <h2 id={titleId} className="text-lg font-semibold text-stone-900 dark:text-fg-default">
                 {t('parentAssign.modalTitle')}
               </h2>
               <button
                 type="button"
                 onClick={closeModal}
-                className="rounded-md p-1 text-stone-500 hover:bg-stone-100 dark:hover:bg-neutral-800"
+                className="rounded-md p-1 text-stone-500 hover:bg-stone-100 dark:hover:bg-surface-overlay"
                 aria-label={t('parentAssign.close')}
               >
                 <X className="h-5 w-5" />
@@ -420,15 +418,15 @@ export default function AssignParentsPage() {
               {rows.map((row, idx) => (
                 <fieldset
                   key={row.key}
-                  className="space-y-3 rounded-lg border border-stone-200 p-3 dark:border-neutral-700"
+                  className="space-y-3 rounded-lg border border-stone-200 p-3 dark:border-border-default"
                 >
-                  <legend className="px-1 text-sm font-medium text-stone-800 dark:text-neutral-200">
+                  <legend className="px-1 text-sm font-medium text-stone-800 dark:text-fg-default">
                     {t('parentAssign.guardianN', { n: idx + 1 })}
                   </legend>
                   <div>
                     <label
                       htmlFor={`g-name-${row.key}`}
-                      className="mb-1 block text-xs font-medium text-stone-700 dark:text-neutral-300"
+                      className="mb-1 block text-xs font-medium text-stone-700 dark:text-fg-muted"
                     >
                       {t('parentAssign.nameLabel')}
                     </label>
@@ -441,12 +439,12 @@ export default function AssignParentsPage() {
                           prev.map((r) => (r.key === row.key ? { ...r, name: e.target.value } : r)),
                         )
                       }
-                      className="w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                      className="w-full rounded-md border border-stone-300 bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
                       required
                       aria-invalid={Boolean(fieldErrors[`${row.key}:name`])}
                     />
                     {fieldErrors[`${row.key}:name`] ? (
-                      <p className="mt-1 text-xs text-red-700" role="alert">
+                      <p className="mt-1 text-xs text-danger-fg" role="alert">
                         {fieldErrors[`${row.key}:name`]}
                       </p>
                     ) : null}
@@ -454,7 +452,7 @@ export default function AssignParentsPage() {
                   <div>
                     <label
                       htmlFor={`g-email-${row.key}`}
-                      className="mb-1 block text-xs font-medium text-stone-700 dark:text-neutral-300"
+                      className="mb-1 block text-xs font-medium text-stone-700 dark:text-fg-muted"
                     >
                       {t('parentAssign.emailLabel')}
                     </label>
@@ -467,12 +465,12 @@ export default function AssignParentsPage() {
                           prev.map((r) => (r.key === row.key ? { ...r, email: e.target.value } : r)),
                         )
                       }
-                      className="w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                      className="w-full rounded-md border border-stone-300 bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
                       required
                       aria-invalid={Boolean(fieldErrors[`${row.key}:email`])}
                     />
                     {fieldErrors[`${row.key}:email`] ? (
-                      <p className="mt-1 text-xs text-red-700" role="alert">
+                      <p className="mt-1 text-xs text-danger-fg" role="alert">
                         {fieldErrors[`${row.key}:email`]}
                       </p>
                     ) : null}
@@ -480,7 +478,7 @@ export default function AssignParentsPage() {
                   <div>
                     <label
                       htmlFor={`g-rel-${row.key}`}
-                      className="mb-1 block text-xs font-medium text-stone-700 dark:text-neutral-300"
+                      className="mb-1 block text-xs font-medium text-stone-700 dark:text-fg-muted"
                     >
                       {t('parentAssign.relationshipLabel')}
                     </label>
@@ -499,7 +497,7 @@ export default function AssignParentsPage() {
                           ),
                         )
                       }
-                      className="w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                      className="w-full rounded-md border border-stone-300 bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
                     >
                       <option value="parent">{t('parentAssign.relParent')}</option>
                       <option value="guardian">{t('parentAssign.relGuardian')}</option>
@@ -509,7 +507,7 @@ export default function AssignParentsPage() {
                   {rows.length > 1 ? (
                     <button
                       type="button"
-                      className="inline-flex items-center gap-1 text-xs text-red-700 dark:text-red-300"
+                      className="inline-flex items-center gap-1 text-xs text-danger-fg"
                       onClick={() => setRows((prev) => prev.filter((r) => r.key !== row.key))}
                     >
                       <Trash2 className="h-3.5 w-3.5" aria-hidden />
@@ -529,7 +527,7 @@ export default function AssignParentsPage() {
                 </button>
               ) : null}
               {saveError ? (
-                <p className="text-sm text-red-700 dark:text-red-300" role="alert">
+                <p className="text-sm text-danger-fg" role="alert">
                   {saveError}
                 </p>
               ) : null}
@@ -537,7 +535,7 @@ export default function AssignParentsPage() {
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="rounded-lg border border-stone-300 px-4 py-2 text-sm dark:border-neutral-600"
+                  className="rounded-lg border border-stone-300 px-4 py-2 text-sm dark:border-border-default"
                 >
                   {t('parentAssign.cancel')}
                 </button>

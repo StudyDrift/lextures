@@ -259,7 +259,7 @@ surfaces.)*
 
 ## 13. Dependencies & Sequencing
 
-- **Must ship after** — [UX.2](UX.2-core-component-library-and-adoption-ratchet.md)
+- **Must ship after** — [UX.2](../../completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md)
   (form controls are library components).
 - **Should ship alongside** — [UX.4](UX.4-aria-widget-and-focus-management-remediation.md)
   (comboboxes and selects share ARIA contracts).
@@ -363,7 +363,7 @@ surfaces.)*
 - Audit: [audit.md](audit.md) G-8, G-13
 - External: [WCAG 2.2 SC 3.3.1–3.3.4, 1.3.5](https://www.w3.org/TR/WCAG22/),
   [WAI Forms Tutorial](https://www.w3.org/WAI/tutorials/forms/)
-- Related plans: [UX.2](UX.2-core-component-library-and-adoption-ratchet.md),
+- Related plans: [UX.2](../../completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md),
   [UX.4](UX.4-aria-widget-and-focus-management-remediation.md),
   [UX.5](UX.5-wcag-2.2-aa-conformance-uplift.md),
   [UX.8](UX.8-settings-and-admin-ia-unification.md),

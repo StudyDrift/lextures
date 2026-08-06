@@ -144,15 +144,15 @@ export function IncompleteGradeModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="w-full max-w-lg rounded-xl border border-slate-200 bg-white p-5 shadow-xl dark:border-neutral-700 dark:bg-neutral-900"
+        className="w-full max-w-lg rounded-xl border border-border-default bg-surface-raised p-5 shadow-xl dark:border-border-default dark:bg-surface-raised"
       >
-        <h2 id={titleId} className="text-lg font-semibold text-slate-900 dark:text-neutral-100">
+        <h2 id={titleId} className="text-lg font-semibold text-fg-default">
           {isOpen ? 'Incomplete grade' : 'Grant Incomplete'}
         </h2>
-        <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">{studentName}</p>
+        <p className="mt-1 text-sm text-fg-muted">{studentName}</p>
 
         {loading ? (
-          <p className="mt-4 text-sm text-slate-500">Loading…</p>
+          <p className="mt-4 text-sm text-fg-muted">Loading…</p>
         ) : (
           <>
             {isOpen && record ? (
@@ -165,7 +165,7 @@ export function IncompleteGradeModal({
                   </span>
                 </p>
                 {record.outstandingItemIds.length > 0 ? (
-                  <p className="text-slate-600 dark:text-neutral-400">
+                  <p className="text-fg-muted">
                     Outstanding assignments selected when granted.
                   </p>
                 ) : null}
@@ -179,7 +179,7 @@ export function IncompleteGradeModal({
                       type="text"
                       value={resolvedGrade}
                       onChange={(e) => setResolvedGrade(e.target.value)}
-                      className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+                      className="w-full rounded-lg border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
                       placeholder="e.g. B+"
                     />
                   </div>
@@ -187,7 +187,7 @@ export function IncompleteGradeModal({
                     <button
                       type="button"
                       onClick={onClose}
-                      className="rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                      className="rounded-lg px-3 py-2 text-sm text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay"
                     >
                       Cancel
                     </button>
@@ -214,14 +214,14 @@ export function IncompleteGradeModal({
                     value={extensionDeadline}
                     min={new Date().toISOString().slice(0, 10)}
                     onChange={(e) => setExtensionDeadline(e.target.value)}
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+                    className="w-full rounded-lg border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
                   />
                 </div>
                 <fieldset>
                   <legend className="text-sm font-medium mb-2">Outstanding assignments</legend>
-                  <div className="max-h-40 overflow-y-auto space-y-1 rounded-lg border border-slate-200 p-2 dark:border-neutral-700">
+                  <div className="max-h-40 overflow-y-auto space-y-1 rounded-lg border border-border-default p-2 dark:border-border-default">
                     {assignmentOptions.length === 0 ? (
-                      <p className="text-sm text-slate-500">No assignment columns in this gradebook.</p>
+                      <p className="text-sm text-fg-muted">No assignment columns in this gradebook.</p>
                     ) : (
                       assignmentOptions.map((col) => (
                         <label key={col.id} className="flex items-center gap-2 text-sm">
@@ -245,14 +245,14 @@ export function IncompleteGradeModal({
                     rows={2}
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+                    className="w-full rounded-lg border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
                   />
                 </div>
                 <div className="flex justify-end gap-2">
                   <button
                     type="button"
                     onClick={onClose}
-                    className="rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                    className="rounded-lg px-3 py-2 text-sm text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay"
                   >
                     Cancel
                   </button>
@@ -270,7 +270,7 @@ export function IncompleteGradeModal({
         )}
 
         {error ? (
-          <div role="alert" className="mt-3 text-sm text-red-600">
+          <div role="alert" className="mt-3 text-sm text-danger-fg">
             {error}
           </div>
         ) : null}

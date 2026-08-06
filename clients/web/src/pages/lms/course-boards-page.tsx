@@ -50,22 +50,22 @@ export default function CourseBoardsPage() {
     <LmsPage title={t('boards.list.title')}>
       {loading ? (
         <div className="flex items-center justify-center py-16">
-          <span className="text-sm text-slate-500 dark:text-neutral-400">{t('common.loading')}</span>
+          <span className="text-sm text-fg-muted">{t('common.loading')}</span>
         </div>
       ) : error ? (
-        <div className="rounded-md bg-red-50 p-4 text-sm text-red-700 dark:bg-red-950/30 dark:text-red-400">
+        <div className="rounded-md bg-red-50 p-4 text-sm text-danger-fg dark:bg-red-950/30 dark:text-red-400">
           {error}
         </div>
       ) : (
         <div className="space-y-4">
           <div className="flex items-center justify-between gap-3">
-            <p className="text-sm text-slate-600 dark:text-neutral-300">{t('boards.list.subtitle')}</p>
+            <p className="text-sm text-fg-muted">{t('boards.list.subtitle')}</p>
             {canCreate ? (
               <button
                 type="button"
                 onClick={() => setCreating(true)}
                 aria-label={t('boards.create.aria')}
-                className="inline-flex items-center gap-1.5 rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                className="inline-flex items-center gap-1.5 rounded-md bg-accent-solid px-3 py-2 text-sm font-medium text-white hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
               >
                 <Plus className="h-4 w-4" aria-hidden="true" />
                 {t('boards.create.button')}
@@ -85,8 +85,8 @@ export default function CourseBoardsPage() {
 
           {boards.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-              <LayoutGrid className="h-10 w-10 text-slate-400 dark:text-neutral-500" aria-hidden />
-              <p className="text-sm text-slate-600 dark:text-neutral-300">{t('boards.list.empty')}</p>
+              <LayoutGrid className="h-10 w-10 text-fg-subtle" aria-hidden />
+              <p className="text-sm text-fg-muted">{t('boards.list.empty')}</p>
             </div>
           ) : (
             <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -94,18 +94,18 @@ export default function CourseBoardsPage() {
                 <li key={board.id}>
                   <Link
                     to={`${base}/${encodeURIComponent(board.id)}`}
-                    className="block rounded-lg border border-slate-200 p-4 transition-[background-color,color,border-color] hover:border-indigo-300 hover:bg-indigo-50/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-neutral-700 dark:hover:border-indigo-700 dark:hover:bg-indigo-950/20"
+                    className="block rounded-lg border border-border-default p-4 transition-[background-color,color,border-color] hover:border-indigo-300 hover:bg-indigo-50/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-border-default dark:hover:border-indigo-700 dark:hover:bg-indigo-950/20"
                   >
-                    <h3 className="font-medium text-slate-900 dark:text-neutral-100">{board.title}</h3>
+                    <h3 className="font-medium text-fg-default">{board.title}</h3>
                     {board.description ? (
-                      <p className="mt-1 line-clamp-2 text-sm text-slate-600 dark:text-neutral-300">
+                      <p className="mt-1 line-clamp-2 text-sm text-fg-muted">
                         {board.description}
                       </p>
                     ) : null}
-                    <p className="mt-3 text-xs text-slate-500 dark:text-neutral-400">
+                    <p className="mt-3 text-xs text-fg-muted">
                       {t('boards.list.updated', { date: formatDate(board.updatedAt) })}
                     </p>
-                    <p className="mt-1 text-xs text-slate-400 dark:text-neutral-500">
+                    <p className="mt-1 text-xs text-fg-subtle">
                       {t('boards.list.contributorsPlaceholder')}
                     </p>
                   </Link>

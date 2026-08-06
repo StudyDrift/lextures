@@ -38,7 +38,7 @@ function heatMapCellClass(t: number): string {
   const u = Math.max(0, Math.min(1, t))
   if (u <= 0.17) return 'bg-sky-100/90 dark:bg-sky-950/35'
   if (u <= 0.33) return 'bg-sky-50/80 dark:bg-sky-950/20'
-  if (u <= 0.5) return 'bg-slate-50 dark:bg-neutral-800/70'
+  if (u <= 0.5) return 'bg-surface-sunken/70'
   if (u <= 0.67) return 'bg-amber-50/90 dark:bg-amber-950/25'
   if (u <= 0.83) return 'bg-amber-100/85 dark:bg-amber-950/40'
   return 'bg-orange-100/80 dark:bg-orange-950/45'
@@ -90,7 +90,7 @@ function readStoredAssignmentColWidth(defaultPx: number): number {
 
 function assignmentColSurfaceClass(extra = ''): string {
   return [
-    'sticky start-0 border-e border-slate-200 dark:border-neutral-700',
+    'sticky start-0 border-e border-border-default',
     extra,
   ].join(' ')
 }
@@ -289,7 +289,7 @@ export function GradebookTransposedTable({
   return (
     <>
     <div
-      className={`overflow-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900 ${resizing ? 'cursor-col-resize select-none' : ''}`}
+      className={`overflow-auto rounded-xl border border-border-default bg-surface-raised shadow-sm dark:border-border-default dark:bg-surface-raised ${resizing ? 'cursor-col-resize select-none' : ''}`}
     >
       <table
         role="grid"
@@ -307,14 +307,14 @@ export function GradebookTransposedTable({
         <thead>
           <tr
             aria-rowindex={1}
-            className="border-b border-slate-200 bg-slate-50 dark:border-neutral-700 dark:bg-neutral-800"
+            className="border-b border-border-default bg-surface-base dark:border-border-default dark:bg-surface-overlay"
           >
             <th
               scope="col"
               style={assignmentColStyle}
-              className={`relative ${assignmentColSurfaceClass('top-0 z-30 border-b bg-slate-50 align-bottom dark:bg-neutral-800')} ${pad}`}
+              className={`relative ${assignmentColSurfaceClass('top-0 z-30 border-b bg-surface-base align-bottom dark:bg-surface-overlay')} ${pad}`}
             >
-              <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+              <span className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
                 Assignment
               </span>
               <button
@@ -334,17 +334,13 @@ export function GradebookTransposedTable({
                 key={student.id}
                 scope="col"
                 title={student.name}
-                className={`sticky top-0 z-20 ${pad} ${studentColMin} border-b border-slate-200 bg-slate-50 align-bottom dark:border-neutral-700 dark:bg-neutral-800 ${
-                  highlightStudentId === student.id
-                    ? 'bg-amber-50/90 ring-2 ring-inset ring-amber-300/90 dark:bg-amber-950/25 dark:ring-amber-500/50'
-                    : ''
-                }`}
+                className={`sticky top-0 z-20 ${pad} ${studentColMin} border-b border-border-default bg-surface-base align-bottom dark:border-border-default dark:bg-surface-overlay ${ highlightStudentId === student.id ? 'bg-amber-50/90 ring-2 ring-inset ring-amber-300/90 dark:bg-amber-950/25 dark:ring-amber-500/50' : '' }`}
               >
-                <span className="block max-w-[9rem] truncate text-xs font-semibold text-slate-800 dark:text-neutral-200">
+                <span className="block max-w-[9rem] truncate text-xs font-semibold text-fg-default">
                   {studentProgressFeatureEnabled() && courseCode && student.enrollmentId ? (
                     <Link
                       to={`/courses/${encodeURIComponent(courseCode)}/students/${encodeURIComponent(student.enrollmentId)}/progress`}
-                      className="text-indigo-700 hover:underline dark:text-indigo-300"
+                      className="text-accent-fg hover:underline dark:text-indigo-300"
                     >
                       {student.name}
                     </Link>
@@ -357,14 +353,14 @@ export function GradebookTransposedTable({
           </tr>
           <tr
             aria-rowindex={2}
-            className="border-b border-slate-200 bg-slate-100 text-slate-800 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200"
+            className="border-b border-border-default bg-surface-sunken text-fg-default dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
           >
             <th
               scope="row"
               style={assignmentColStyle}
-              className={`${assignmentColSurfaceClass('z-[28] border-b bg-slate-100 text-start font-medium dark:bg-neutral-800')} ${pad}`}
+              className={`${assignmentColSurfaceClass('z-[28] border-b bg-surface-sunken text-start font-medium dark:bg-surface-overlay')} ${pad}`}
             >
-              <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-fg-muted">
                 Final
               </span>
             </th>
@@ -372,7 +368,7 @@ export function GradebookTransposedTable({
               <th
                 key={`final-${student.id}`}
                 scope="col"
-                className={`${pad} ${studentColMin} border-b border-slate-200 bg-slate-100 text-end font-normal tabular-nums dark:border-neutral-700 dark:bg-neutral-800`}
+                className={`${pad} ${studentColMin} border-b border-border-default bg-surface-sunken text-end font-normal tabular-nums dark:border-border-default dark:bg-surface-overlay`}
               >
                 {formatFinalPercent(finalPercentByStudentId[student.id] ?? null)}
               </th>
@@ -386,20 +382,20 @@ export function GradebookTransposedTable({
               <tr
                 key={col.id}
                 aria-rowindex={rowIndex + 3}
-                className="border-b border-slate-100 last:border-b-0 dark:border-neutral-700/80"
+                className="border-b border-border-subtle last:border-b-0/80"
               >
                 <th
                   scope="row"
                   title={col.title}
                   style={assignmentColStyle}
-                  className={`${assignmentColSurfaceClass('z-10 bg-slate-100 text-start font-medium text-slate-950 dark:bg-neutral-800 dark:text-neutral-100')} ${pad}`}
+                  className={`${assignmentColSurfaceClass('z-10 bg-surface-sunken text-start font-medium text-slate-950 dark:bg-surface-overlay dark:text-fg-default')} ${pad}`}
                 >
                   <span className="block truncate text-sm">{col.title}</span>
-                  <span className="mt-0.5 block text-[0.65rem] font-normal text-slate-500 dark:text-neutral-400">
+                  <span className="mt-0.5 block text-[0.65rem] font-normal text-fg-muted">
                     {col.maxPoints != null ? `Out of ${col.maxPoints}` : 'Max points not set'}
                   </span>
                   {stats ? (
-                    <span className="mt-1 block text-[11px] tabular-nums leading-snug text-slate-600 dark:text-neutral-300">
+                    <span className="mt-1 block text-[11px] tabular-nums leading-snug text-fg-muted">
                       Avg {stats.avg != null ? formatStat(stats.avg) : '—'} · Med{' '}
                       {stats.med != null ? formatStat(stats.med) : '—'}
                     </span>
@@ -410,7 +406,7 @@ export function GradebookTransposedTable({
                   !readOnly ? (
                     <button
                       type="button"
-                      className="mt-1 inline-flex max-w-full items-center justify-center rounded-md border border-slate-200 bg-white px-1.5 py-0.5 text-[0.65rem] font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                      className="mt-1 inline-flex max-w-full items-center justify-center rounded-md border border-border-default bg-surface-raised px-1.5 py-0.5 text-[0.65rem] font-medium text-fg-muted shadow-sm hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
                       aria-label={`Post grades for ${col.title}`}
                       disabled={postGradesPending === col.id}
                       onClick={() => onPostAssignmentGrades(col.id)}
@@ -442,15 +438,13 @@ export function GradebookTransposedTable({
                       ? heatPercentForCell(col, val === 'EX' ? '' : val)
                       : null
                   const heatSurface =
-                    heatT != null && !isEditing ? heatMapCellClass(heatT) : 'bg-white dark:bg-neutral-900/80'
+                    heatT != null && !isEditing ? heatMapCellClass(heatT) : 'bg-surface-raised/80'
 
                   return (
                     <td
                       key={`${col.id}-${student.id}`}
                       role="gridcell"
-                      className={`relative ${pad} ${studentColMin} border-s border-slate-100 text-end tabular-nums dark:border-neutral-700/80 ${heatSurface} ${
-                        cellDropped ? 'opacity-65 dark:opacity-70' : ''
-                      }`}
+                      className={`relative ${pad} ${studentColMin} border-s border-border-subtle text-end tabular-nums/80 ${heatSurface} ${ cellDropped ? 'opacity-65 dark:opacity-70' : '' }`}
                       onDoubleClick={() => beginEdit(student.id, col.id)}
                       onContextMenu={
                         hasCellMenu
@@ -463,7 +457,7 @@ export function GradebookTransposedTable({
                           <select
                             autoFocus
                             aria-label={`Grade for ${student.name}, ${col.title}`}
-                            className="m-0 w-full min-w-0 border-0 bg-transparent p-0 text-end text-sm text-slate-950 shadow-none outline-none ring-0 focus:ring-0 dark:text-neutral-100"
+                            className="m-0 w-full min-w-0 border-0 bg-transparent p-0 text-end text-sm text-slate-950 shadow-none outline-none ring-0 focus:ring-0 dark:text-fg-default"
                             value={draft}
                             onChange={(e) => setDraft(e.target.value)}
                             onBlur={commitEdit}
@@ -486,7 +480,7 @@ export function GradebookTransposedTable({
                             inputMode="decimal"
                             autoComplete="off"
                             aria-label={`Grade for ${student.name}, ${col.title}`}
-                            className="m-0 w-full min-w-0 border-0 bg-transparent p-0 text-end text-sm tabular-nums text-slate-950 shadow-none outline-none ring-0 focus:ring-0 dark:text-neutral-100"
+                            className="m-0 w-full min-w-0 border-0 bg-transparent p-0 text-end text-sm tabular-nums text-slate-950 shadow-none outline-none ring-0 focus:ring-0 dark:text-fg-default"
                             value={draft}
                             onChange={(e) => setDraft(e.target.value)}
                             onBlur={commitEdit}
@@ -518,9 +512,9 @@ export function GradebookTransposedTable({
                               className={
                                 val
                                   ? isExcused
-                                    ? 'font-semibold text-slate-700 dark:text-neutral-200'
-                                    : 'text-slate-950 dark:text-neutral-100'
-                                  : 'text-neutral-400 dark:text-neutral-500'
+                                    ? 'font-semibold text-fg-default'
+                                    : 'text-slate-950 dark:text-fg-default'
+                                  : 'text-fg-muted'
                               }
                             >
                               {val || '—'}

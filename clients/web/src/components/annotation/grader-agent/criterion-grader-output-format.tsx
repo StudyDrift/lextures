@@ -29,17 +29,17 @@ export function CriterionGraderOutputFormat({
   }, [assignmentItemId, criterionId, graph, nodeId, rubric])
 
   return (
-    <div className="space-y-2 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm dark:border-neutral-700 dark:bg-neutral-900/60">
-      <p className="font-medium text-slate-800 dark:text-neutral-100">
+    <div className="space-y-2 rounded-lg border border-border-default bg-surface-base p-3 text-sm dark:border-border-default/60">
+      <p className="font-medium text-fg-default">
         {t('gradingAgent.canvas.inspector.criterionOutputFormat.title')}
       </p>
-      <p className="text-xs text-slate-600 dark:text-neutral-400">
+      <p className="text-xs text-fg-muted">
         {t('gradingAgent.canvas.inspector.criterionOutputFormat.help')}
       </p>
-      <pre className="max-h-48 overflow-auto whitespace-pre-wrap rounded-md border border-slate-200 bg-white p-2 text-xs text-slate-700 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-200">
+      <pre className="max-h-48 overflow-auto whitespace-pre-wrap rounded-md border border-border-default bg-surface-raised p-2 text-xs text-fg-muted dark:border-border-default dark:bg-surface-base dark:text-fg-default">
         {systemPrompt}
       </pre>
-      <p className="text-xs text-slate-500 dark:text-neutral-500">
+      <p className="text-xs text-fg-subtle">
         {t('gradingAgent.canvas.inspector.aiOutputFormat.locked')}
       </p>
     </div>

@@ -1,0 +1,192 @@
+/*
+ * Personal surface tint (data-surface-tint on <html>).
+ * Default is neutral (true gray / near-black). Other tints recolour surface-* only;
+ * text/status/accent tokens stay semantic for contrast.
+ */
+
+/* ── Neutral (default) — true gray, no blue cast ─────────────────────────── */
+:root,
+[data-theme='light'],
+html[data-surface-tint='neutral'][data-theme='light'],
+html[data-surface-tint='neutral']:not([data-theme]) {
+  --lx-surface-base: #fafafa;
+  --lx-surface-raised: #ffffff;
+  --lx-surface-overlay: #ffffff;
+  --lx-surface-sunken: #f4f4f5;
+  --lx-surface-inverse: #18181b;
+}
+
+html[data-surface-tint='neutral'][data-theme='dark'],
+html[data-surface-tint='neutral'].dark,
+html.dark:not([data-surface-tint]),
+html[data-theme='dark']:not([data-surface-tint]) {
+  --lx-surface-base: #0a0a0a;
+  --lx-surface-raised: #141414;
+  --lx-surface-overlay: #1c1c1c;
+  --lx-surface-sunken: #050505;
+  --lx-surface-inverse: #f4f4f5;
+  --lx-border-default: #2a2a2a;
+  --lx-border-subtle: #1f1f1f;
+}
+
+/* Explicit neutral when attribute is set with dark class only */
+html[data-surface-tint='neutral'][data-theme='dark'],
+html[data-surface-tint='neutral'].dark {
+  --lx-surface-base: #0a0a0a;
+  --lx-surface-raised: #141414;
+  --lx-surface-overlay: #1c1c1c;
+  --lx-surface-sunken: #050505;
+}
+
+/* ── Slate (cool blue-gray — previous product look) ──────────────────────── */
+html[data-surface-tint='slate'][data-theme='light'],
+html[data-surface-tint='slate']:not(.dark):not([data-theme='dark']):not([data-theme='high-contrast-dark']) {
+  --lx-surface-base: #f8fafc;
+  --lx-surface-raised: #ffffff;
+  --lx-surface-overlay: #ffffff;
+  --lx-surface-sunken: #f1f5f9;
+  --lx-surface-inverse: #0f172a;
+}
+
+html[data-surface-tint='slate'][data-theme='dark'],
+html[data-surface-tint='slate'].dark {
+  --lx-surface-base: #020617;
+  --lx-surface-raised: #0f172a;
+  --lx-surface-overlay: #1e293b;
+  --lx-surface-sunken: #0a0f1a;
+  --lx-surface-inverse: #f1f5f9;
+  --lx-border-default: #334155;
+  --lx-border-subtle: #1e293b;
+}
+
+/* ── Blue ────────────────────────────────────────────────────────────────── */
+html[data-surface-tint='blue'][data-theme='light'],
+html[data-surface-tint='blue']:not(.dark):not([data-theme='dark']):not([data-theme='high-contrast-dark']) {
+  --lx-surface-base: #eef3fb;
+  --lx-surface-raised: #f7f9fd;
+  --lx-surface-overlay: #ffffff;
+  --lx-surface-sunken: #e4ecf8;
+  --lx-surface-inverse: #0c1929;
+}
+
+html[data-surface-tint='blue'][data-theme='dark'],
+html[data-surface-tint='blue'].dark {
+  --lx-surface-base: #070d18;
+  --lx-surface-raised: #0c1524;
+  --lx-surface-overlay: #152238;
+  --lx-surface-sunken: #050910;
+  --lx-surface-inverse: #e8eef8;
+  --lx-border-default: #243049;
+  --lx-border-subtle: #152238;
+}
+
+/* ── Teal ────────────────────────────────────────────────────────────────── */
+html[data-surface-tint='teal'][data-theme='light'],
+html[data-surface-tint='teal']:not(.dark):not([data-theme='dark']):not([data-theme='high-contrast-dark']) {
+  --lx-surface-base: #f0faf8;
+  --lx-surface-raised: #f7fcfb;
+  --lx-surface-overlay: #ffffff;
+  --lx-surface-sunken: #e3f5f1;
+  --lx-surface-inverse: #0a1f1c;
+}
+
+html[data-surface-tint='teal'][data-theme='dark'],
+html[data-surface-tint='teal'].dark {
+  --lx-surface-base: #060f0e;
+  --lx-surface-raised: #0c1917;
+  --lx-surface-overlay: #142826;
+  --lx-surface-sunken: #040a09;
+  --lx-surface-inverse: #e6f5f2;
+  --lx-border-default: #1f3532;
+  --lx-border-subtle: #142826;
+}
+
+/* ── Green ───────────────────────────────────────────────────────────────── */
+html[data-surface-tint='green'][data-theme='light'],
+html[data-surface-tint='green']:not(.dark):not([data-theme='dark']):not([data-theme='high-contrast-dark']) {
+  --lx-surface-base: #f3faf5;
+  --lx-surface-raised: #f8fcf9;
+  --lx-surface-overlay: #ffffff;
+  --lx-surface-sunken: #e7f4eb;
+  --lx-surface-inverse: #0c1a12;
+}
+
+html[data-surface-tint='green'][data-theme='dark'],
+html[data-surface-tint='green'].dark {
+  --lx-surface-base: #070f0a;
+  --lx-surface-raised: #0d1711;
+  --lx-surface-overlay: #16261c;
+  --lx-surface-sunken: #040805;
+  --lx-surface-inverse: #e8f5ec;
+  --lx-border-default: #223528;
+  --lx-border-subtle: #16261c;
+}
+
+/* ── Purple ──────────────────────────────────────────────────────────────── */
+html[data-surface-tint='purple'][data-theme='light'],
+html[data-surface-tint='purple']:not(.dark):not([data-theme='dark']):not([data-theme='high-contrast-dark']) {
+  --lx-surface-base: #f6f3fb;
+  --lx-surface-raised: #faf8fd;
+  --lx-surface-overlay: #ffffff;
+  --lx-surface-sunken: #eee8f7;
+  --lx-surface-inverse: #150f22;
+}
+
+html[data-surface-tint='purple'][data-theme='dark'],
+html[data-surface-tint='purple'].dark {
+  --lx-surface-base: #0c0914;
+  --lx-surface-raised: #14101f;
+  --lx-surface-overlay: #1e1830;
+  --lx-surface-sunken: #08060e;
+  --lx-surface-inverse: #f0ebf8;
+  --lx-border-default: #2e2645;
+  --lx-border-subtle: #1e1830;
+}
+
+/* ── Red ─────────────────────────────────────────────────────────────────── */
+html[data-surface-tint='red'][data-theme='light'],
+html[data-surface-tint='red']:not(.dark):not([data-theme='dark']):not([data-theme='high-contrast-dark']) {
+  --lx-surface-base: #fbf3f3;
+  --lx-surface-raised: #fdf8f8;
+  --lx-surface-overlay: #ffffff;
+  --lx-surface-sunken: #f5e8e8;
+  --lx-surface-inverse: #1f0d0d;
+}
+
+html[data-surface-tint='red'][data-theme='dark'],
+html[data-surface-tint='red'].dark {
+  --lx-surface-base: #110808;
+  --lx-surface-raised: #1a0e0e;
+  --lx-surface-overlay: #281515;
+  --lx-surface-sunken: #0a0505;
+  --lx-surface-inverse: #f8ecec;
+  --lx-border-default: #3a2222;
+  --lx-border-subtle: #281515;
+}
+
+/* ── Amber ───────────────────────────────────────────────────────────────── */
+html[data-surface-tint='amber'][data-theme='light'],
+html[data-surface-tint='amber']:not(.dark):not([data-theme='dark']):not([data-theme='high-contrast-dark']) {
+  --lx-surface-base: #fbf7ef;
+  --lx-surface-raised: #fdfaf4;
+  --lx-surface-overlay: #ffffff;
+  --lx-surface-sunken: #f5edd9;
+  --lx-surface-inverse: #1c1508;
+}
+
+html[data-surface-tint='amber'][data-theme='dark'],
+html[data-surface-tint='amber'].dark {
+  --lx-surface-base: #100d07;
+  --lx-surface-raised: #19140c;
+  --lx-surface-overlay: #261e12;
+  --lx-surface-sunken: #0a0804;
+  --lx-surface-inverse: #f7f0e2;
+  --lx-border-default: #3a3020;
+  --lx-border-subtle: #261e12;
+}
+
+/* High-contrast themes keep forced black/white surfaces (accessibility). */
+html[data-theme='high-contrast-light'],
+html[data-theme='high-contrast-dark'] {
+  /* semantic.css HC values win for surfaces; tint does not override HC. */
+}

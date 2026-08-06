@@ -41,8 +41,8 @@ export function PassagePanel({
     <div
       ref={passageRef}
       className={[
-        'rounded-xl border p-4 text-base leading-relaxed text-slate-900 dark:text-neutral-100',
-        'border-slate-200 bg-white dark:border-neutral-700 dark:bg-neutral-950',
+        'rounded-xl border p-4 text-base leading-relaxed text-fg-default',
+        'border-border-default bg-surface-raised dark:border-border-default dark:bg-surface-base',
         !readOnly && unitMode
           ? 'border-dashed border-indigo-200 dark:border-indigo-900/60'
           : '',

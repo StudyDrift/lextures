@@ -48,7 +48,7 @@ export function ResetJobProgress({ courseCode, jobId, onDone }: ResetJobProgress
 
   return (
     <div className="space-y-2" data-testid="reset-job-progress">
-      <p className="text-sm text-slate-700 dark:text-neutral-300">
+      <p className="text-sm text-fg-muted">
         {t('contentTools.reset.jobProgress', {
           processed,
           total,

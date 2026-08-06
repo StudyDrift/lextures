@@ -20,15 +20,6 @@ import (
 // handleGetCourseFileContent is GET /api/v1/courses/{course_code}/course-files/{file_id}/content
 func (d Deps) handleGetCourseFileContent() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.Pool == nil {
 			_, _, _ = d.requireCourseAccess(w, r)
 			return

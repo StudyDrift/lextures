@@ -313,11 +313,6 @@ func (d Deps) handleAdminCustomFieldsReorder() http.HandlerFunc {
 
 func (d Deps) handleAdminConsoleUserGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.adminConsoleEnabled(w) {
 			return
 		}
@@ -407,11 +402,6 @@ ORDER BY u.email
 
 func (d Deps) handleAdminConsoleCoursePatch() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.customFieldsEnabled(w) {
 			return
 		}
@@ -456,11 +446,6 @@ func (d Deps) handleAdminConsoleCoursePatch() http.HandlerFunc {
 
 func (d Deps) handleAdminConsoleEnrollmentPatch() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.customFieldsEnabled(w) {
 			return
 		}

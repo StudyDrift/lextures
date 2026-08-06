@@ -32,7 +32,7 @@ function EvaluationReminderBanner({ courseCode }: { courseCode: string }) {
     <div
       role="alert"
       aria-live="polite"
-      className="flex items-center justify-between gap-3 bg-indigo-600 px-4 py-2 text-sm text-white dark:bg-indigo-700"
+      className="flex items-center justify-between gap-3 bg-accent-solid px-4 py-2 text-sm text-white dark:bg-accent"
     >
       <span>
         Your course evaluation is open. Your feedback is anonymous and helps improve this course.

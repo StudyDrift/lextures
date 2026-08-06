@@ -114,15 +114,6 @@ func chiCourseCode(w http.ResponseWriter, r *http.Request) (string, bool) {
 
 func (d Deps) handleCourseEnrollmentsPost() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		viewer, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -360,15 +351,6 @@ LIMIT 1
 
 func (d Deps) handleCourseEnrollmentsSelfStudent() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		viewer, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -425,15 +407,6 @@ ON CONFLICT (course_id, user_id, role) DO NOTHING
 
 func (d Deps) handleCourseEnrollmentsPatch() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		viewer, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -545,15 +518,6 @@ WHERE ce.id = $1 AND c.course_code = $2 AND (ce.active OR ce.invitation_pending)
 
 func (d Deps) handleCourseEnrollmentsDelete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodDelete {
-			w.Header().Set("Allow", http.MethodDelete+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		viewer, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -627,11 +591,6 @@ func (d Deps) handleCourseEnrollmentMessagePost() http.HandlerFunc {
 		ID string `json:"id"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		viewer, ok := d.meUserID(w, r)
 		if !ok {
 			return

@@ -56,7 +56,7 @@ export function TranslateButton({ contentType, contentId, text, targetLang = 'en
           type="button"
           aria-label="Translate this message"
           onClick={() => void handleTranslate()}
-          className="inline-flex items-center gap-1 text-xs text-slate-400 transition-colors hover:text-indigo-600 dark:text-neutral-500 dark:hover:text-indigo-400"
+          className="inline-flex items-center gap-1 text-xs text-fg-subtle transition-colors hover:text-accent-fg dark:hover:text-indigo-400"
         >
           <Languages className="h-3.5 w-3.5" strokeWidth={1.75} />
           Translate
@@ -64,7 +64,7 @@ export function TranslateButton({ contentType, contentId, text, targetLang = 'en
       )}
 
       {state === 'loading' && (
-        <span className="inline-flex items-center gap-1 text-xs text-slate-400 dark:text-neutral-500">
+        <span className="inline-flex items-center gap-1 text-xs text-fg-subtle">
           <Languages className="h-3.5 w-3.5 animate-pulse" strokeWidth={1.75} />
           Translating…
         </span>
@@ -74,11 +74,11 @@ export function TranslateButton({ contentType, contentId, text, targetLang = 'en
         <div>
           <p
             lang={targetLang}
-            className="mt-1.5 rounded-md bg-slate-50 px-3 py-2 text-[0.9375rem] leading-relaxed text-slate-700 ring-1 ring-inset ring-slate-200 dark:bg-neutral-900 dark:text-neutral-300 dark:ring-neutral-700"
+            className="mt-1.5 rounded-md bg-surface-base px-3 py-2 text-[0.9375rem] leading-relaxed text-fg-muted ring-1 ring-inset ring-slate-200 dark:bg-surface-raised dark:text-fg-muted dark:ring-neutral-700"
           >
             {translated}
           </p>
-          <p className="mt-1 text-xs text-slate-400 dark:text-neutral-500">
+          <p className="mt-1 text-xs text-fg-subtle">
             {sourceLang && sourceLang !== 'und' ? (
               <>Translated from {langName(sourceLang)} · </>
             ) : (
@@ -86,7 +86,7 @@ export function TranslateButton({ contentType, contentId, text, targetLang = 'en
             )}
             <button
               type="button"
-              className="underline hover:text-slate-600 dark:hover:text-neutral-300"
+              className="underline hover:text-fg-muted dark:hover:text-fg-muted"
               onClick={() => setShowOriginal(true)}
             >
               Show original
@@ -96,10 +96,10 @@ export function TranslateButton({ contentType, contentId, text, targetLang = 'en
       )}
 
       {state === 'done' && showOriginal && (
-        <p className="mt-1 text-xs text-slate-400 dark:text-neutral-500">
+        <p className="mt-1 text-xs text-fg-subtle">
           <button
             type="button"
-            className="inline-flex items-center gap-1 underline hover:text-indigo-600 dark:hover:text-indigo-400"
+            className="inline-flex items-center gap-1 underline hover:text-accent-fg dark:hover:text-indigo-400"
             onClick={() => setShowOriginal(false)}
           >
             Show translation

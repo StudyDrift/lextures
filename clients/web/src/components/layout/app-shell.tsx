@@ -46,7 +46,7 @@ function AppShellLayout() {
   const { focus } = useQuizShellFocus()
   const { readingFocus, setReadingFocus } = useReadingShellFocus()
   const hideChrome = Boolean(focus || readingFocus)
-  const shellClassName = `flex h-dvh min-h-0 overflow-hidden bg-slate-50 dark:bg-neutral-950 ${
+  const shellClassName = `flex h-dvh min-h-0 overflow-hidden bg-surface-base ${
     focus ? 'ring-2 ring-inset ring-indigo-900/35 dark:ring-amber-400/25' : ''
   }`
 
@@ -67,7 +67,7 @@ function AppShellLayout() {
       <Suspense fallback={null}>
         <ImpersonationChrome shellClassName={shellClassName}>
         {!hideChrome ? <SideNav /> : null}
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white dark:bg-neutral-900">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-surface-raised">
           {focus ? (
             <QuizFocusTopBar model={focus} />
           ) : readingFocus ? (
@@ -86,7 +86,7 @@ function AppShellLayout() {
           <main
             id="main-content"
             tabIndex={-1}
-            className="lms-scope lms-print-root flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto outline-none dark:bg-neutral-900"
+            className="lms-scope lms-print-root flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto outline-none dark:bg-surface-raised"
           >
             <RouteTransition preferCrossfade>
               <Outlet />

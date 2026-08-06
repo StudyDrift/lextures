@@ -30,12 +30,12 @@ function statusChipClass(status: string): string {
     case 'in_progress':
       return 'bg-amber-100 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200'
     default:
-      return 'bg-slate-100 text-slate-700 dark:bg-neutral-800 dark:text-neutral-300'
+      return 'bg-surface-sunken text-fg-muted dark:bg-surface-overlay dark:text-fg-muted'
   }
 }
 
 const actionBtnClass =
-  'rounded-md px-2 py-1 text-xs font-medium text-indigo-700 hover:bg-indigo-50 dark:text-indigo-300 dark:hover:bg-indigo-950/40'
+  'rounded-md px-2 py-1 text-xs font-medium text-accent-fg hover:bg-indigo-50 dark:text-indigo-300 dark:hover:bg-indigo-950/40'
 
 export function ToolFrame({
   label,
@@ -69,10 +69,10 @@ export function ToolFrame({
       aria-busy={busy || syncStatus === 'saving' ? true : undefined}
       data-content-tool-frame=""
       onBlurCapture={onBlurCapture}
-      className="not-prose my-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900/80"
+      className="not-prose my-4 overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-sm dark:border-border-default/80"
     >
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 bg-slate-50/80 px-3.5 py-2.5 dark:border-neutral-700 dark:bg-neutral-900">
-        <p className="truncate text-sm font-semibold text-slate-900 dark:text-neutral-100">{label}</p>
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border-default bg-slate-50/80 px-3.5 py-2.5 dark:border-border-default dark:bg-surface-raised">
+        <p className="truncate text-sm font-semibold text-fg-default">{label}</p>
         <div className="flex flex-wrap items-center gap-1">
           {insightsLabel && onInsightsClick ? (
             <button
@@ -113,7 +113,7 @@ export function ToolFrame({
               className={
                 syncStatus === 'unsynced'
                   ? 'rounded-md px-1.5 py-0.5 text-[11px] font-medium text-amber-800 dark:text-amber-200'
-                  : 'rounded-md px-1.5 py-0.5 text-[11px] font-medium text-slate-500 dark:text-neutral-400'
+                  : 'rounded-md px-1.5 py-0.5 text-[11px] font-medium text-fg-muted'
               }
             >
               {syncLabel}

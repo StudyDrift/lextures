@@ -62,11 +62,6 @@ func (d Deps) impersonationWriteBlockMiddleware() func(http.Handler) http.Handle
 
 func (d Deps) handleAdminConsoleImpersonateStart() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.impersonationEnabled(w) {
 			return
 		}
@@ -149,11 +144,6 @@ func (d Deps) handleAdminConsoleImpersonateStart() http.HandlerFunc {
 
 func (d Deps) handleAdminConsoleImpersonateEnd() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodDelete {
-			w.Header().Set("Allow", http.MethodDelete)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.impersonationEnabled(w) {
 			return
 		}
@@ -209,11 +199,6 @@ func (d Deps) handleAdminConsoleImpersonateEnd() http.HandlerFunc {
 
 func (d Deps) handleAdminConsoleImpersonateLog() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.impersonationEnabled(w) {
 			return
 		}

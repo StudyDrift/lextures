@@ -159,7 +159,7 @@ export function RunAgentPopover({
           aria-controls={open ? panelId : undefined}
           aria-describedby={costEstimateEnabled && open ? costEstimateId : undefined}
           onClick={() => setOpen((prev) => !prev)}
-          className={`rounded-xl bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 disabled:opacity-50 ${pressScale}`}
+          className={`rounded-xl bg-accent-solid px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-accent disabled:opacity-50 ${pressScale}`}
         >
           {t('gradingAgent.run.start')}
         </button>
@@ -170,32 +170,26 @@ export function RunAgentPopover({
         role="dialog"
         aria-labelledby={buttonId}
         hidden={!open}
-        className="absolute end-0 top-full z-50 mt-2 w-80 rounded-3xl bg-white p-4 shadow-[0_8px_30px_-4px_rgba(15,23,42,0.14),0_4px_12px_-6px_rgba(15,23,42,0.08)] ring-1 ring-black/5 dark:bg-neutral-900 dark:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.55),0_4px_12px_-6px_rgba(0,0,0,0.35)] dark:ring-white/10"
+        className="absolute end-0 top-full z-50 mt-2 w-80 rounded-3xl bg-surface-raised p-4 shadow-[0_8px_30px_-4px_rgba(15,23,42,0.14),0_4px_12px_-6px_rgba(15,23,42,0.08)] ring-1 ring-black/5 dark:bg-surface-raised dark:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.55),0_4px_12px_-6px_rgba(0,0,0,0.35)] dark:ring-white/10"
       >
-        <p className="text-sm font-medium text-balance text-slate-900 dark:text-neutral-50">
+        <p className="text-sm font-medium text-balance text-fg-default">
           {t('gradingAgent.run.title')}
         </p>
         <fieldset className="mt-3">
-          <legend className="mb-2 text-xs font-medium text-slate-500 dark:text-neutral-400">
+          <legend className="mb-2 text-xs font-medium text-fg-muted">
             {t('gradingAgent.run.scopeLabel')}
           </legend>
           <div
             role="radiogroup"
             aria-label={t('gradingAgent.run.scopeLabel')}
-            className="overflow-hidden rounded-xl bg-slate-50 ring-1 ring-black/5 dark:bg-neutral-800/60 dark:ring-white/10"
+            className="overflow-hidden rounded-xl bg-surface-base ring-1 ring-black/5/60 dark:ring-white/10"
           >
             {RUN_SCOPES.map((scope, index) => {
               const selected = runScope === scope
               return (
                 <label
                   key={scope}
-                  className={`flex min-h-10 cursor-pointer items-center gap-3 px-3 py-2.5 text-sm transition-colors ${
-                    index > 0 ? 'border-t border-slate-200/80 dark:border-neutral-700/80' : ''
-                  } ${
-                    selected
-                      ? 'bg-white text-indigo-900 dark:bg-neutral-900 dark:text-indigo-100'
-                      : 'text-slate-700 hover:bg-white/70 dark:text-neutral-300 dark:hover:bg-neutral-900/50'
-                  }`}
+                  className={`flex min-h-10 cursor-pointer items-center gap-3 px-3 py-2.5 text-sm transition-colors ${ index > 0 ? 'border-t border-slate-200/80/80' : '' } ${ selected ? 'bg-surface-raised text-indigo-900 dark:bg-surface-raised dark:text-indigo-100' : 'text-fg-muted hover:bg-white/70 dark:text-fg-muted dark:hover:bg-neutral-900/50' }`}
                 >
                   <input
                     type="radio"
@@ -210,9 +204,7 @@ export function RunAgentPopover({
                   />
                   <span className="min-w-0 flex-1 leading-snug">{t(`gradingAgent.run.scope.${scope}`)}</span>
                   <Check
-                    className={`h-4 w-4 shrink-0 text-indigo-600 motion-safe:transition-[opacity,transform,filter] motion-safe:duration-150 dark:text-indigo-400 ${
-                      selected ? 'scale-100 opacity-100 blur-0' : 'scale-[0.25] opacity-0 blur-[4px]'
-                    }`}
+                    className={`h-4 w-4 shrink-0 text-accent-fg motion-safe:transition-[opacity,transform,filter] motion-safe:duration-150 dark:text-indigo-400 ${ selected ? 'scale-100 opacity-100 blur-0' : 'scale-[0.25] opacity-0 blur-[4px]' }`}
                     aria-hidden
                   />
                 </label>
@@ -235,26 +227,20 @@ export function RunAgentPopover({
         ) : null}
         {suggestModeEnabled ? (
           <fieldset className="mt-3">
-            <legend className="mb-2 text-xs font-medium text-slate-500 dark:text-neutral-400">
+            <legend className="mb-2 text-xs font-medium text-fg-muted">
               {t('gradingAgent.run.modeLabel')}
             </legend>
             <div
               role="radiogroup"
               aria-label={t('gradingAgent.run.modeLabel')}
-              className="overflow-hidden rounded-xl bg-slate-50 ring-1 ring-black/5 dark:bg-neutral-800/60 dark:ring-white/10"
+              className="overflow-hidden rounded-xl bg-surface-base ring-1 ring-black/5/60 dark:ring-white/10"
             >
               {RUN_MODES.map((mode, index) => {
                 const selected = runMode === mode
                 return (
                   <label
                     key={mode}
-                    className={`flex min-h-10 cursor-pointer items-center gap-3 px-3 py-2.5 text-sm transition-colors ${
-                      index > 0 ? 'border-t border-slate-200/80 dark:border-neutral-700/80' : ''
-                    } ${
-                      selected
-                        ? 'bg-white text-indigo-900 dark:bg-neutral-900 dark:text-indigo-100'
-                        : 'text-slate-700 hover:bg-white/70 dark:text-neutral-300 dark:hover:bg-neutral-900/50'
-                    }`}
+                    className={`flex min-h-10 cursor-pointer items-center gap-3 px-3 py-2.5 text-sm transition-colors ${ index > 0 ? 'border-t border-slate-200/80/80' : '' } ${ selected ? 'bg-surface-raised text-indigo-900 dark:bg-surface-raised dark:text-indigo-100' : 'text-fg-muted hover:bg-white/70 dark:text-fg-muted dark:hover:bg-neutral-900/50' }`}
                   >
                     <input
                       type="radio"
@@ -266,16 +252,14 @@ export function RunAgentPopover({
                     />
                     <span className="min-w-0 flex-1 leading-snug">{t(`gradingAgent.run.mode.${mode}`)}</span>
                     <Check
-                      className={`h-4 w-4 shrink-0 text-indigo-600 motion-safe:transition-[opacity,transform,filter] motion-safe:duration-150 dark:text-indigo-400 ${
-                        selected ? 'scale-100 opacity-100 blur-0' : 'scale-[0.25] opacity-0 blur-[4px]'
-                      }`}
+                      className={`h-4 w-4 shrink-0 text-accent-fg motion-safe:transition-[opacity,transform,filter] motion-safe:duration-150 dark:text-indigo-400 ${ selected ? 'scale-100 opacity-100 blur-0' : 'scale-[0.25] opacity-0 blur-[4px]' }`}
                       aria-hidden
                     />
                   </label>
                 )
               })}
             </div>
-            <p className="mt-2 text-xs text-slate-500 dark:text-neutral-400">
+            <p className="mt-2 text-xs text-fg-muted">
               {runMode === 'suggest'
                 ? t('gradingAgent.run.mode.suggestNote')
                 : t('gradingAgent.run.mode.applyNote')}
@@ -283,7 +267,7 @@ export function RunAgentPopover({
           </fieldset>
         ) : null}
         {costEstimateEnabled ? (
-          <div id={costEstimateId} className="mt-3 rounded-xl bg-slate-50 px-3 py-2 text-xs text-slate-600 ring-1 ring-black/5 dark:bg-neutral-800/60 dark:text-neutral-300 dark:ring-white/10">
+          <div id={costEstimateId} className="mt-3 rounded-xl bg-surface-base px-3 py-2 text-xs text-fg-muted ring-1 ring-black/5/60 dark:text-fg-muted dark:ring-white/10">
             {runCostEstimateLoading ? (
               <p>{t('gradingAgent.run.cost.loading')}</p>
             ) : runCostEstimate && runCostEstimate.submissionCount > 0 ? (
@@ -313,7 +297,7 @@ export function RunAgentPopover({
                     {onRequestDryRunEstimate ? (
                       <button
                         type="button"
-                        className="font-medium text-indigo-700 underline-offset-2 hover:underline dark:text-indigo-300"
+                        className="font-medium text-accent-fg underline-offset-2 hover:underline dark:text-indigo-300"
                         onClick={() => void onRequestDryRunEstimate()}
                       >
                         {t('gradingAgent.run.cost.dryRunCta')}
@@ -321,7 +305,7 @@ export function RunAgentPopover({
                     ) : null}
                   </div>
                 )}
-                <p className="mt-1 text-slate-500 dark:text-neutral-400">{t('gradingAgent.run.cost.disclaimer')}</p>
+                <p className="mt-1 text-fg-muted">{t('gradingAgent.run.cost.disclaimer')}</p>
               </>
             ) : (
               <p>{t('gradingAgent.run.cost.noTarget')}</p>
@@ -330,7 +314,7 @@ export function RunAgentPopover({
         ) : null}
         {costEstimateEnabled && setBudgetUsd ? (
           <div className="mt-3">
-            <label className="block text-xs font-medium text-slate-500 dark:text-neutral-400" htmlFor={`${panelId}-budget`}>
+            <label className="block text-xs font-medium text-fg-muted" htmlFor={`${panelId}-budget`}>
               {t('gradingAgent.run.cost.budgetLabel')}
             </label>
             <input
@@ -350,9 +334,9 @@ export function RunAgentPopover({
                 setBudgetUsd(Number.isFinite(parsed) && parsed > 0 ? parsed : null)
               }}
               placeholder={t('gradingAgent.run.cost.budgetPlaceholder')}
-              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-50"
+              className="mt-1 w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-fg-default dark:border-border-default dark:bg-surface-raised"
             />
-            <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">{t('gradingAgent.run.cost.budgetHelp')}</p>
+            <p className="mt-1 text-xs text-fg-muted">{t('gradingAgent.run.cost.budgetHelp')}</p>
           </div>
         ) : null}
         {confirmOverwrite ? (
@@ -361,7 +345,7 @@ export function RunAgentPopover({
           </p>
         ) : null}
         {runProgress ? (
-          <p className="mt-3 text-sm tabular-nums text-slate-600 dark:text-neutral-400">
+          <p className="mt-3 text-sm tabular-nums text-fg-muted">
             {t('gradingAgent.run.progress', {
               completed: runProgress.completed,
               failed: runProgress.failed,
@@ -369,7 +353,7 @@ export function RunAgentPopover({
             })}
           </p>
         ) : null}
-        <label className="mt-3 flex min-h-10 cursor-pointer items-center gap-2 text-sm text-slate-700 dark:text-neutral-200">
+        <label className="mt-3 flex min-h-10 cursor-pointer items-center gap-2 text-sm text-fg-default">
           <input
             type="checkbox"
             className="size-4"
@@ -378,7 +362,7 @@ export function RunAgentPopover({
           />
           {t('gradingAgent.autoGradeNew')}
         </label>
-        <label className="mt-1 flex min-h-10 cursor-pointer items-center gap-2 text-sm text-slate-700 dark:text-neutral-200">
+        <label className="mt-1 flex min-h-10 cursor-pointer items-center gap-2 text-sm text-fg-default">
           <input
             type="checkbox"
             className="size-4"
@@ -387,13 +371,13 @@ export function RunAgentPopover({
           />
           {t('gradingAgent.posting.autoPost')}
         </label>
-        <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+        <p className="mt-1 text-xs text-fg-muted">
           {postPolicy === 'auto_post'
             ? t('gradingAgent.posting.autoPostNote')
             : t('gradingAgent.posting.draftNote')}
         </p>
-        <div className="mt-3 border-t border-slate-200/80 pt-3 dark:border-neutral-700/80">
-          <p className="mb-2 text-xs font-medium text-slate-500 dark:text-neutral-400">
+        <div className="mt-3 border-t border-slate-200/80 pt-3/80">
+          <p className="mb-2 text-xs font-medium text-fg-muted">
             {t('gradingAgent.settings.confidenceFloor.title')}
           </p>
           <AgentConfidenceFloorSettings

@@ -58,10 +58,10 @@ function CreateStudyForm({ onCreated }: { onCreated: () => void }) {
   }
 
   return (
-    <form onSubmit={submit} className="space-y-3 rounded-xl border border-slate-200 p-4 dark:border-neutral-800">
-      <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Create a consent study</h2>
+    <form onSubmit={submit} className="space-y-3 rounded-xl border border-border-default p-4 dark:border-border-subtle">
+      <h2 className="text-sm font-semibold text-fg-default">Create a consent study</h2>
       {error && (
-        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+        <p role="alert" className="text-sm text-danger-fg">
           {error}
         </p>
       )}
@@ -74,7 +74,7 @@ function CreateStudyForm({ onCreated }: { onCreated: () => void }) {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
-          className="mt-1 w-full rounded-lg border px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+          className="mt-1 w-full rounded-lg border px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
         />
       </div>
       <div>
@@ -86,7 +86,7 @@ function CreateStudyForm({ onCreated }: { onCreated: () => void }) {
           value={irbProtocol}
           onChange={(e) => setIrbProtocol(e.target.value)}
           required
-          className="mt-1 w-full rounded-lg border px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+          className="mt-1 w-full rounded-lg border px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
         />
       </div>
       <div>
@@ -99,7 +99,7 @@ function CreateStudyForm({ onCreated }: { onCreated: () => void }) {
           onChange={(e) => setConsentText(e.target.value)}
           required
           rows={5}
-          className="mt-1 w-full rounded-lg border px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+          className="mt-1 w-full rounded-lg border px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
         />
       </div>
       <div>
@@ -112,18 +112,18 @@ function CreateStudyForm({ onCreated }: { onCreated: () => void }) {
           onChange={(e) => setDataUseDescription(e.target.value)}
           required
           rows={2}
-          className="mt-1 w-full rounded-lg border px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+          className="mt-1 w-full rounded-lg border px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
         />
       </div>
       <div>
         <label htmlFor="study-courses" className="block text-sm font-medium">
-          Target course IDs <span className="text-slate-400">(comma-separated; blank = whole institution)</span>
+          Target course IDs <span className="text-fg-subtle">(comma-separated; blank = whole institution)</span>
         </label>
         <input
           id="study-courses"
           value={courseIds}
           onChange={(e) => setCourseIds(e.target.value)}
-          className="mt-1 w-full rounded-lg border px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+          className="mt-1 w-full rounded-lg border px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
         />
       </div>
       <button
@@ -177,11 +177,11 @@ function StudyRow({ item, onChanged }: { item: ConsentStudyWithRate; onChanged: 
   }
 
   return (
-    <li className="rounded-xl border border-slate-200 p-4 dark:border-neutral-800">
+    <li className="rounded-xl border border-border-default p-4 dark:border-border-subtle">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">{study.title}</p>
-          <p className="text-xs text-slate-500">
+          <p className="text-sm font-semibold text-fg-default">{study.title}</p>
+          <p className="text-xs text-fg-muted">
             IRB {study.irbProtocol} · <span className="uppercase">{study.status}</span> ·{' '}
             {consentPercent(consentRate)}% consent ({consentRate.granted} granted, {consentRate.declined} declined,{' '}
             {consentRate.withdrawn} withdrawn)
@@ -203,7 +203,7 @@ function StudyRow({ item, onChanged }: { item: ConsentStudyWithRate; onChanged: 
               type="button"
               disabled={busy}
               onClick={() => void setStatus('closed')}
-              className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium dark:border-neutral-700"
+              className="rounded-lg border border-border-strong px-3 py-1.5 text-xs font-medium dark:border-border-default"
             >
               Close
             </button>
@@ -211,14 +211,14 @@ function StudyRow({ item, onChanged }: { item: ConsentStudyWithRate; onChanged: 
           <button
             type="button"
             onClick={() => void loadRecords()}
-            className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium dark:border-neutral-700"
+            className="rounded-lg border border-border-strong px-3 py-1.5 text-xs font-medium dark:border-border-default"
           >
             Audit log
           </button>
           <button
             type="button"
             onClick={() => void loadExport()}
-            className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium dark:border-neutral-700"
+            className="rounded-lg border border-border-strong px-3 py-1.5 text-xs font-medium dark:border-border-default"
           >
             Export consenting
           </button>
@@ -226,17 +226,17 @@ function StudyRow({ item, onChanged }: { item: ConsentStudyWithRate; onChanged: 
       </div>
 
       {error && (
-        <p role="alert" className="mt-2 text-xs text-red-600 dark:text-red-400">
+        <p role="alert" className="mt-2 text-xs text-danger-fg">
           {error}
         </p>
       )}
 
       {records && (
         <div className="mt-3 overflow-x-auto">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Consent audit log</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-fg-muted">Consent audit log</p>
           <table className="mt-1 w-full text-start text-xs">
             <thead>
-              <tr className="text-slate-400">
+              <tr className="text-fg-subtle">
                 <th className="py-1 pe-3">Decision</th>
                 <th className="py-1 pe-3">User</th>
                 <th className="py-1 pe-3">IP address</th>
@@ -245,7 +245,7 @@ function StudyRow({ item, onChanged }: { item: ConsentStudyWithRate; onChanged: 
             </thead>
             <tbody>
               {records.map((r) => (
-                <tr key={r.id} className="border-t border-slate-100 dark:border-neutral-800">
+                <tr key={r.id} className="border-t border-border-subtle">
                   <td className="py-1 pe-3">{r.decision}</td>
                   <td className="py-1 pe-3 font-mono">{r.userId.slice(0, 8)}</td>
                   <td className="py-1 pe-3">{r.ipAddress ?? '—'}</td>
@@ -259,7 +259,7 @@ function StudyRow({ item, onChanged }: { item: ConsentStudyWithRate; onChanged: 
 
       {participants && (
         <div className="mt-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <p className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
             Consenting participants ({participants.length})
           </p>
           <ul className="mt-1 space-y-0.5 text-xs">
@@ -304,7 +304,7 @@ export default function ConsentStudiesAdminPage() {
     return (
       <div className="mx-auto max-w-4xl p-6">
         <h1 className="mb-2 text-xl font-semibold">Research consent studies</h1>
-        <p className="text-sm text-slate-600">Research consent is not enabled for this platform.</p>
+        <p className="text-sm text-fg-muted">Research consent is not enabled for this platform.</p>
       </div>
     )
   }
@@ -313,7 +313,7 @@ export default function ConsentStudiesAdminPage() {
     <div className="mx-auto max-w-4xl space-y-6 p-6">
       <div>
         <h1 className="text-xl font-semibold">Research consent studies</h1>
-        <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+        <p className="mt-1 text-sm text-fg-muted">
           Create IRB consent studies, monitor consent rates, and export data for consenting participants only.
         </p>
       </div>
@@ -321,15 +321,15 @@ export default function ConsentStudiesAdminPage() {
       <CreateStudyForm onCreated={() => void load()} />
 
       {error && (
-        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+        <p role="alert" className="text-sm text-danger-fg">
           {error}
         </p>
       )}
 
       {loading ? (
-        <p className="text-sm text-slate-500">Loading…</p>
+        <p className="text-sm text-fg-muted">Loading…</p>
       ) : studies.length === 0 ? (
-        <p className="text-sm text-slate-500">No studies yet.</p>
+        <p className="text-sm text-fg-muted">No studies yet.</p>
       ) : (
         <ul className="space-y-3">
           {studies.map((item) => (

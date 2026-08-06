@@ -101,11 +101,11 @@ export function ReadingPreferencesPanel({ open, onClose }: Props) {
         aria-modal="true"
         aria-labelledby={titleId}
         aria-label="Reading Preferences"
-        className="fixed end-4 top-16 z-50 w-80 max-h-[calc(100dvh-5rem)] overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-900/10 dark:border-neutral-700 dark:bg-neutral-900 dark:shadow-black/40 sm:w-96"
+        className="fixed end-4 top-16 z-50 w-80 max-h-[calc(100dvh-5rem)] overflow-y-auto rounded-2xl border border-border-default bg-surface-raised shadow-xl shadow-slate-900/10 dark:border-border-default dark:bg-surface-raised dark:shadow-black/40 sm:w-96"
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 dark:border-neutral-800">
-          <h2 id={titleId} className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+        <div className="flex items-center justify-between border-b border-border-subtle px-4 py-3 dark:border-border-subtle">
+          <h2 id={titleId} className="text-sm font-semibold text-fg-default">
             Reading Preferences
           </h2>
           <button
@@ -113,7 +113,7 @@ export function ReadingPreferencesPanel({ open, onClose }: Props) {
             type="button"
             aria-label="Close Reading Preferences panel"
             onClick={onClose}
-            className="rounded-lg p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+            className="rounded-lg p-1 text-fg-muted hover:bg-surface-sunken hover:text-fg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40 dark:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-fg-default"
           >
             <X className="h-4 w-4" aria-hidden />
           </button>
@@ -122,21 +122,21 @@ export function ReadingPreferencesPanel({ open, onClose }: Props) {
         {loading ? (
           <div className="space-y-4 p-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-8 motion-safe:animate-pulse rounded-lg bg-slate-100 dark:bg-neutral-800" />
+              <div key={i} className="h-8 motion-safe:animate-pulse rounded-lg bg-surface-sunken" />
             ))}
           </div>
         ) : (
           <div className="space-y-5 p-4">
             {/* Font face */}
             <fieldset>
-              <legend className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+              <legend className="mb-2 text-xs font-medium uppercase tracking-wide text-fg-muted">
                 Font
               </legend>
               <div className="space-y-1.5">
                 {fontOptions.map((opt) => (
                   <label
                     key={opt.value}
-                    className="flex cursor-pointer items-center gap-3 rounded-lg border border-transparent px-3 py-2 hover:bg-slate-50 has-[:checked]:border-indigo-200 has-[:checked]:bg-indigo-50 dark:hover:bg-neutral-800 dark:has-[:checked]:border-indigo-800 dark:has-[:checked]:bg-indigo-950/30"
+                    className="flex cursor-pointer items-center gap-3 rounded-lg border border-transparent px-3 py-2 hover:bg-surface-base has-[:checked]:border-indigo-200 has-[:checked]:bg-indigo-50 dark:hover:bg-surface-overlay dark:has-[:checked]:border-indigo-800 dark:has-[:checked]:bg-indigo-950/30"
                   >
                     <input
                       type="radio"
@@ -144,14 +144,14 @@ export function ReadingPreferencesPanel({ open, onClose }: Props) {
                       value={opt.value}
                       checked={prefs.fontFace === opt.value}
                       onChange={() => update({ fontFace: opt.value })}
-                      className="h-4 w-4 border-slate-300 text-indigo-600 focus:ring-indigo-500/30"
+                      className="h-4 w-4 border-border-strong text-accent-fg focus:ring-indigo-500/30"
                       aria-label={`Font: ${opt.label} — ${opt.description}`}
                     />
                     <span className="min-w-0">
-                      <span className="block text-sm font-medium text-slate-900 dark:text-neutral-100">
+                      <span className="block text-sm font-medium text-fg-default">
                         {opt.label}
                       </span>
-                      <span className="block text-xs text-slate-500 dark:text-neutral-400">
+                      <span className="block text-xs text-fg-muted">
                         {opt.description}
                       </span>
                     </span>
@@ -190,7 +190,7 @@ export function ReadingPreferencesPanel({ open, onClose }: Props) {
             {/* Reading ruler */}
             <div>
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                <span className="text-xs font-medium uppercase tracking-wide text-fg-muted">
                   Reading Ruler
                 </span>
                 <button
@@ -199,22 +199,16 @@ export function ReadingPreferencesPanel({ open, onClose }: Props) {
                   aria-checked={prefs.rulerEnabled}
                   aria-label={`Reading ruler: ${prefs.rulerEnabled ? 'on' : 'off'}`}
                   onClick={() => update({ rulerEnabled: !prefs.rulerEnabled })}
-                  className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40 ${
-                    prefs.rulerEnabled
-                      ? 'bg-indigo-600 dark:bg-indigo-500'
-                      : 'bg-slate-200 dark:bg-neutral-700'
-                  }`}
+                  className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40 ${ prefs.rulerEnabled ? 'bg-accent-solid dark:bg-indigo-500' : 'bg-slate-200 dark:bg-neutral-700' }`}
                 >
                   <span
-                    className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow-sm ${
-                      prefs.rulerEnabled ? 'translate-x-4' : 'translate-x-0.5'
-                    }`}
+                    className={`inline-block h-3.5 w-3.5 rounded-full bg-surface-raised shadow-sm ${ prefs.rulerEnabled ? 'translate-x-4' : 'translate-x-0.5' }`}
                   />
                 </button>
               </div>
               {prefs.rulerEnabled && (
                 <div className="mt-2.5">
-                  <p className="mb-1.5 text-xs text-slate-500 dark:text-neutral-400">Ruler colour</p>
+                  <p className="mb-1.5 text-xs text-fg-muted">Ruler colour</p>
                   <div className="flex gap-2">
                     {rulerColorOptions.map((opt) => (
                       <label key={opt.value} className="flex cursor-pointer items-center gap-1.5">
@@ -230,13 +224,9 @@ export function ReadingPreferencesPanel({ open, onClose }: Props) {
                         <span
                           aria-hidden="true"
                           style={{ background: opt.bg }}
-                          className={`h-5 w-8 rounded border-2 ${
-                            prefs.rulerColor === opt.value
-                              ? 'border-indigo-500'
-                              : 'border-slate-200 dark:border-neutral-600'
-                          }`}
+                          className={`h-5 w-8 rounded border-2 ${ prefs.rulerColor === opt.value ? 'border-indigo-500' : 'border-border-default' }`}
                         />
-                        <span className="text-xs text-slate-600 dark:text-neutral-300">{opt.label}</span>
+                        <span className="text-xs text-fg-muted">{opt.label}</span>
                       </label>
                     ))}
                   </div>
@@ -245,8 +235,8 @@ export function ReadingPreferencesPanel({ open, onClose }: Props) {
             </div>
 
             {/* Accessibility display — plan 12.7 */}
-            <div className="border-t border-slate-100 pt-4 dark:border-neutral-800">
-              <p className="mb-3 text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+            <div className="border-t border-border-subtle pt-4 dark:border-border-subtle">
+              <p className="mb-3 text-xs font-medium uppercase tracking-wide text-fg-muted">
                 Display
               </p>
               <LiveRegion politeness="polite">{liveAnnouncement}</LiveRegion>
@@ -303,14 +293,14 @@ function AccessibilityToggle({ id, label, description, checked, onChange }: Acce
         <span className="sr-only">{label}</span>
         <span
           aria-hidden="true"
-          className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow-sm motion-safe:transition-transform ${checked ? 'translate-x-4' : 'translate-x-0.5'}`}
+          className={`inline-block h-3.5 w-3.5 rounded-full bg-surface-raised shadow-sm motion-safe:transition-transform ${checked ? 'translate-x-4' : 'translate-x-0.5'}`}
         />
       </button>
       <div className="min-w-0 flex-1">
-        <label htmlFor={id} className="cursor-pointer select-none text-sm font-medium text-slate-900 dark:text-neutral-100">
+        <label htmlFor={id} className="cursor-pointer select-none text-sm font-medium text-fg-default">
           {label}
         </label>
-        <p id={`${id}-desc`} className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
+        <p id={`${id}-desc`} className="mt-0.5 text-xs text-fg-muted">
           {description}
         </p>
       </div>
@@ -329,18 +319,14 @@ interface SpacingControlProps {
 function SpacingControl({ legend, name, options, value, onChange }: SpacingControlProps) {
   return (
     <fieldset>
-      <legend className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+      <legend className="mb-2 text-xs font-medium uppercase tracking-wide text-fg-muted">
         {legend}
       </legend>
       <div className="flex gap-1.5">
         {options.map((opt) => (
           <label
             key={opt.value}
-            className={`flex flex-1 cursor-pointer items-center justify-center rounded-lg border px-2 py-1.5 text-xs font-medium ${
-              value === opt.value
-                ? 'border-indigo-300 bg-indigo-50 text-indigo-700 dark:border-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300'
-                : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:border-neutral-600 dark:hover:bg-neutral-700'
-            }`}
+            className={`flex flex-1 cursor-pointer items-center justify-center rounded-lg border px-2 py-1.5 text-xs font-medium ${ value === opt.value ? 'border-indigo-300 bg-indigo-50 text-accent-fg dark:border-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300' : 'border-border-default bg-surface-raised text-fg-muted hover:border-border-strong hover:bg-surface-base dark:border-border-default dark:bg-surface-overlay dark:text-fg-muted dark:hover:border-border-default dark:hover:bg-neutral-700' }`}
           >
             <input
               type="radio"

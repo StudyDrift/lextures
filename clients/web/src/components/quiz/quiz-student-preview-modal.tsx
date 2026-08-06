@@ -67,7 +67,7 @@ function QuestionMeta({ q }: { q: QuizQuestion }) {
   if (q.estimatedMinutes > 0) {
     parts.push(`~${q.estimatedMinutes} min`)
   }
-  return <p className="text-xs text-slate-500">{parts.join(' · ')}</p>
+  return <p className="text-xs text-fg-muted">{parts.join(' · ')}</p>
 }
 
 function orderingItemsForPreview(q: QuizQuestion): string[] {
@@ -118,18 +118,18 @@ function StudentQuestionBlock({ q, index }: { q: QuizQuestion; index: number }) 
 
   return (
     <section
-      className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-sm shadow-slate-900/[0.03]"
+      className="rounded-xl border border-slate-200/90 bg-surface-raised p-5 shadow-sm shadow-slate-900/[0.03]"
       aria-labelledby={`preview-q-${q.id}-heading`}
     >
       <div className="flex flex-wrap items-start justify-between gap-2">
         <h2
           id={`preview-q-${q.id}-heading`}
-          className="text-xs font-semibold uppercase tracking-wide text-slate-500"
+          className="text-xs font-semibold uppercase tracking-wide text-fg-muted"
         >
           Question {index + 1}
         </h2>
       </div>
-      <p className="mt-2 text-sm font-medium text-slate-900">
+      <p className="mt-2 text-sm font-medium text-fg-default">
         <MathPlainText text={q.prompt || '—'} />
       </p>
       <div className="mt-2">
@@ -139,18 +139,18 @@ function StudentQuestionBlock({ q, index }: { q: QuizQuestion; index: number }) 
       {showChoices && (
         <div className="mt-4 space-y-2">
           {choices.length === 0 ? (
-            <p className="text-sm italic text-slate-500">No answer choices are set for this question.</p>
+            <p className="text-sm italic text-fg-muted">No answer choices are set for this question.</p>
           ) : q.multipleAnswer ? (
             choices.map((label, i) => (
               <label
                 key={`${q.id}-c-${i}`}
-                className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm text-slate-800 transition-[background-color,color,border-color] hover:border-slate-300"
+                className="flex cursor-pointer items-start gap-3 rounded-lg border border-border-default bg-slate-50/50 px-3 py-2.5 text-sm text-fg-default transition-[background-color,color,border-color] hover:border-border-strong"
               >
                 <input
                   type="checkbox"
                   name={`preview-${q.id}`}
                   value={String(i)}
-                  className="mt-0.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500/30"
+                  className="mt-0.5 rounded border-border-strong text-accent-fg focus:ring-indigo-500/30"
                 />
                 <span className="min-w-0 flex-1">
                   <MathPlainText text={label} />
@@ -161,13 +161,13 @@ function StudentQuestionBlock({ q, index }: { q: QuizQuestion; index: number }) 
             choices.map((label, i) => (
               <label
                 key={`${q.id}-c-${i}`}
-                className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm text-slate-800 transition-[background-color,color,border-color] hover:border-slate-300"
+                className="flex cursor-pointer items-start gap-3 rounded-lg border border-border-default bg-slate-50/50 px-3 py-2.5 text-sm text-fg-default transition-[background-color,color,border-color] hover:border-border-strong"
               >
                 <input
                   type="radio"
                   name={`preview-${q.id}`}
                   value={String(i)}
-                  className="mt-0.5 border-slate-300 text-indigo-600 focus:ring-indigo-500/30"
+                  className="mt-0.5 border-border-strong text-accent-fg focus:ring-indigo-500/30"
                 />
                 <span className="min-w-0 flex-1">
                   <MathPlainText text={label} />
@@ -190,7 +190,7 @@ function StudentQuestionBlock({ q, index }: { q: QuizQuestion; index: number }) 
             id={`preview-fib-${q.id}`}
             type="text"
             placeholder="Type your answer"
-            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
+            className="w-full rounded-lg border border-border-default px-3 py-2.5 text-sm text-fg-default placeholder:text-fg-subtle focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
           />
           <MathKeyboard
             className="mt-2"
@@ -224,7 +224,7 @@ function StudentQuestionBlock({ q, index }: { q: QuizQuestion; index: number }) 
             id={`preview-sa-${q.id}`}
             rows={3}
             placeholder="Type your answer"
-            className="w-full resize-y rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
+            className="w-full resize-y rounded-lg border border-border-default px-3 py-2.5 text-sm text-fg-default placeholder:text-fg-subtle focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
           />
           <MathKeyboard
             className="mt-2"
@@ -258,7 +258,7 @@ function StudentQuestionBlock({ q, index }: { q: QuizQuestion; index: number }) 
             id={`preview-essay-${q.id}`}
             rows={8}
             placeholder="Write your response"
-            className="w-full resize-y rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
+            className="w-full resize-y rounded-lg border border-border-default px-3 py-2.5 text-sm text-fg-default placeholder:text-fg-subtle focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
           />
           <MathKeyboard
             className="mt-2"
@@ -283,7 +283,7 @@ function StudentQuestionBlock({ q, index }: { q: QuizQuestion; index: number }) 
       {q.questionType === 'ordering' && (
         <div className="mt-4 space-y-2">
           {ordering.length === 0 ? (
-            <p className="text-sm italic text-slate-500">Add ordering items in the question editor.</p>
+            <p className="text-sm italic text-fg-muted">Add ordering items in the question editor.</p>
           ) : (
             ordering.map((item, i) => (
               <div
@@ -305,12 +305,12 @@ function StudentQuestionBlock({ q, index }: { q: QuizQuestion; index: number }) 
                     return next
                   })
                 }}
-                className="flex cursor-grab items-center justify-between rounded-lg border border-slate-200 bg-slate-50/70 px-3 py-2 text-sm text-slate-800"
+                className="flex cursor-grab items-center justify-between rounded-lg border border-border-default bg-slate-50/70 px-3 py-2 text-sm text-fg-default"
               >
                 <span className="truncate">
                   {(baseOrdering.findIndex((x) => x === item) + 1 || i + 1)}. <MathPlainText text={item} />
                 </span>
-                <span className="text-xs text-slate-400">Drag</span>
+                <span className="text-xs text-fg-subtle">Drag</span>
               </div>
             ))
           )}
@@ -327,7 +327,7 @@ function StudentQuestionBlock({ q, index }: { q: QuizQuestion; index: number }) 
             type="number"
             step="any"
             placeholder="Enter a number"
-            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
+            className="w-full rounded-lg border border-border-default px-3 py-2.5 text-sm text-fg-default placeholder:text-fg-subtle focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
           />
         </div>
       )}
@@ -341,7 +341,7 @@ function StudentQuestionBlock({ q, index }: { q: QuizQuestion; index: number }) 
             id={`preview-code-${q.id}`}
             rows={8}
             placeholder="Write your code here"
-            className="w-full resize-y rounded-lg border border-slate-200 bg-slate-950 px-3 py-2.5 font-mono text-sm text-slate-100 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
+            className="w-full resize-y rounded-lg border border-border-default bg-slate-950 px-3 py-2.5 font-mono text-sm text-slate-100 placeholder:text-fg-subtle focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
           />
         </div>
       )}
@@ -349,7 +349,7 @@ function StudentQuestionBlock({ q, index }: { q: QuizQuestion; index: number }) 
       {q.questionType === 'matching' && (
         <div className="mt-4 space-y-2">
           {matchingPairsForPreview(q).length === 0 ? (
-            <p className="text-sm italic text-slate-500">Add matching pairs in the question editor.</p>
+            <p className="text-sm italic text-fg-muted">Add matching pairs in the question editor.</p>
           ) : (
             matchingPairsForPreview(q).map((pair, i) => {
               const leftLabel = pair.left ?? ''
@@ -357,7 +357,7 @@ function StudentQuestionBlock({ q, index }: { q: QuizQuestion; index: number }) 
               const options = shuffleArray(matchingPairsForPreview(q).map((p, idx) => p.right ?? `Option ${idx + 1}`))
               return (
                 <div key={`${q.id}-matching-${i}`} className="grid gap-2 md:grid-cols-2">
-                  <p className="rounded-lg border border-slate-200 bg-slate-50/70 px-3 py-2 text-sm text-slate-800">
+                  <p className="rounded-lg border border-border-default bg-slate-50/70 px-3 py-2 text-sm text-fg-default">
                     <MathPlainText text={leftLabel} />
                   </p>
                   <select
@@ -368,7 +368,7 @@ function StudentQuestionBlock({ q, index }: { q: QuizQuestion; index: number }) 
                         [key]: e.target.value,
                       }))
                     }
-                    className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900"
+                    className="rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm text-fg-default"
                   >
                     <option value="">Select match...</option>
                     {options.map((opt, optIdx) => (
@@ -396,7 +396,7 @@ function StudentQuestionBlock({ q, index }: { q: QuizQuestion; index: number }) 
             id={`preview-formula-${q.id}`}
             type="text"
             placeholder="Enter LaTeX, e.g. x^2+2x+1"
-            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
+            className="w-full rounded-lg border border-border-default px-3 py-2.5 text-sm text-fg-default placeholder:text-fg-subtle focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
           />
           <MathKeyboard
             className="mt-2"
@@ -422,7 +422,7 @@ function StudentQuestionBlock({ q, index }: { q: QuizQuestion; index: number }) 
         <div className="mt-4 space-y-2">
           {typeof q.typeConfig?.imageUrl === 'string' && q.typeConfig.imageUrl.trim().length > 0 ? (
             <div
-              className="relative overflow-hidden rounded-lg border border-slate-200 bg-slate-50"
+              className="relative overflow-hidden rounded-lg border border-border-default bg-surface-base"
               onClick={(e) => {
                 const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect()
                 const x = Math.round(e.clientX - rect.left)
@@ -437,15 +437,15 @@ function StudentQuestionBlock({ q, index }: { q: QuizQuestion; index: number }) 
               />
               {hotspotClick ? (
                 <span
-                  className="pointer-events-none absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-600 ring-2 ring-white"
+                  className="pointer-events-none absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent-solid ring-2 ring-white"
                   style={{ left: hotspotClick.x, top: hotspotClick.y }}
                 />
               ) : null}
             </div>
           ) : (
-            <p className="text-sm italic text-slate-500">Set an image URL in the question editor.</p>
+            <p className="text-sm italic text-fg-muted">Set an image URL in the question editor.</p>
           )}
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-fg-muted">
             {hotspotClick ? `Selected point: (${hotspotClick.x}, ${hotspotClick.y})` : 'Click the image to choose a point.'}
           </p>
         </div>
@@ -455,7 +455,7 @@ function StudentQuestionBlock({ q, index }: { q: QuizQuestion; index: number }) 
         <div className="mt-4">
           <input
             type="file"
-            className="block w-full text-sm text-slate-600 file:me-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-indigo-700 hover:file:bg-indigo-100"
+            className="block w-full text-sm text-fg-muted file:me-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-accent-fg hover:file:bg-indigo-100"
           />
         </div>
       )}
@@ -465,7 +465,7 @@ function StudentQuestionBlock({ q, index }: { q: QuizQuestion; index: number }) 
           <input
             type="file"
             accept="audio/*"
-            className="block w-full text-sm text-slate-600 file:me-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-indigo-700 hover:file:bg-indigo-100"
+            className="block w-full text-sm text-fg-muted file:me-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-accent-fg hover:file:bg-indigo-100"
           />
         </div>
       )}
@@ -475,21 +475,21 @@ function StudentQuestionBlock({ q, index }: { q: QuizQuestion; index: number }) 
           <input
             type="file"
             accept="video/*"
-            className="block w-full text-sm text-slate-600 file:me-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-indigo-700 hover:file:bg-indigo-100"
+            className="block w-full text-sm text-fg-muted file:me-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-accent-fg hover:file:bg-indigo-100"
           />
         </div>
       )}
 
       {q.answerWithImage && (
         <div className="mt-4">
-          <label className="block text-sm font-medium text-slate-700" htmlFor={`preview-img-${q.id}`}>
+          <label className="block text-sm font-medium text-fg-muted" htmlFor={`preview-img-${q.id}`}>
             Image upload
           </label>
           <input
             id={`preview-img-${q.id}`}
             type="file"
             accept="image/*"
-            className="mt-1 block w-full text-sm text-slate-600 file:me-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-indigo-700 hover:file:bg-indigo-100"
+            className="mt-1 block w-full text-sm text-fg-muted file:me-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-accent-fg hover:file:bg-indigo-100"
           />
         </div>
       )}
@@ -537,20 +537,20 @@ function StaticQuizPreviewBody({
   return (
     <div className="space-y-4">
       {secondsLeft != null && (
-        <p className="text-sm font-medium text-slate-800">
+        <p className="text-sm font-medium text-fg-default">
           Time remaining: {Math.floor(secondsLeft / 60)}:
           {(secondsLeft % 60).toString().padStart(2, '0')}
           {paused ? ' (paused)' : ''}
         </p>
       )}
-      <p className="text-xs text-slate-500">{reviewNote}</p>
+      <p className="text-xs text-fg-muted">{reviewNote}</p>
       {!oneQuestionAtATime ? (
         prepared.map((q, index) => (
           <StudentQuestionBlock key={`${index}-${previewQuestionResetKey(q)}`} q={q} index={index} />
         ))
       ) : !atEnd && current ? (
         <div className="space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <p className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
             Question {step + 1} of {prepared.length}
           </p>
           <StudentQuestionBlock key={previewQuestionResetKey(current)} q={current} index={step} />
@@ -559,7 +559,7 @@ function StaticQuizPreviewBody({
               <button
                 type="button"
                 onClick={() => setStep((s) => Math.max(0, s - 1))}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                className="rounded-xl border border-border-default bg-surface-raised px-4 py-2 text-sm font-medium text-fg-muted hover:bg-surface-base"
               >
                 Back
               </button>
@@ -567,14 +567,14 @@ function StaticQuizPreviewBody({
             <button
               type="button"
               onClick={() => setStep((s) => s + 1)}
-              className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+              className="rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
             >
               {step + 1 >= prepared.length ? 'Finish' : 'Next'}
             </button>
           </div>
         </div>
       ) : (
-        <p className="text-sm text-slate-600">End of preview for one-question-at-a-time flow.</p>
+        <p className="text-sm text-fg-muted">End of preview for one-question-at-a-time flow.</p>
       )}
     </div>
   )
@@ -620,7 +620,7 @@ function StaticQuizPreview({
 
   if (prepared.length === 0) {
     return (
-      <p className="rounded-xl border border-dashed border-slate-200 bg-white px-4 py-6 text-center text-sm text-slate-600">
+      <p className="rounded-xl border border-dashed border-border-default bg-surface-raised px-4 py-6 text-center text-sm text-fg-muted">
         No questions to display (check pool size and question bank).
       </p>
     )
@@ -674,20 +674,20 @@ function AccessCodeGate({
   }
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-      <p className="text-sm font-medium text-slate-800">Enter access code</p>
+    <div className="rounded-xl border border-border-default bg-surface-raised p-4 shadow-sm">
+      <p className="text-sm font-medium text-fg-default">Enter access code</p>
       <div className="mt-2 flex flex-wrap gap-2">
         <input
           type="password"
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          className="min-w-[12rem] flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"
+          className="min-w-[12rem] flex-1 rounded-lg border border-border-default px-3 py-2 text-sm"
           placeholder="Access code"
         />
         <button
           type="button"
           onClick={tryUnlock}
-          className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+          className="rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
         >
           Continue
         </button>
@@ -810,15 +810,15 @@ function AdaptivePreviewPanel({
   }
 
   return (
-    <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-sm">
-      <p className="text-sm font-medium text-slate-800">Adaptive quiz preview</p>
-      <p className="mt-1 text-xs text-slate-600">
+    <div className="rounded-xl border border-slate-200/90 bg-surface-raised p-4 shadow-sm">
+      <p className="text-sm font-medium text-fg-default">Adaptive quiz preview</p>
+      <p className="mt-1 text-xs text-fg-muted">
         Questions are generated in pairs and kept one step ahead when possible (up to {maxQuestions} steps). Each
         answer informs the next batch. Nothing here is saved.
       </p>
       {phase === 'loading' && (
         <div
-          className="mt-4 flex items-center gap-4 ps-2.5 text-sm leading-snug text-slate-600"
+          className="mt-4 flex items-center gap-4 ps-2.5 text-sm leading-snug text-fg-muted"
           role="status"
           aria-busy="true"
           aria-live="polite"
@@ -837,21 +837,21 @@ function AdaptivePreviewPanel({
         </p>
       )}
       {phase === 'done' && (
-        <p className="mt-4 text-sm text-slate-600">End of preview — you have reached the configured question count.</p>
+        <p className="mt-4 text-sm text-fg-muted">End of preview — you have reached the configured question count.</p>
       )}
       {phase === 'question' && current && (
         <div className="mt-4 flex flex-col space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <p className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
             Question {Math.min(history.length + 1, maxQuestions)} of {maxQuestions}
           </p>
-          <p className="text-sm font-medium text-slate-900">
+          <p className="text-sm font-medium text-fg-default">
             <MathPlainText text={current.prompt} />
           </p>
           <div className="space-y-2">
             {current.choices.map((label, i) => (
               <label
                 key={`ad-c-${i}`}
-                className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm text-slate-800 transition-[background-color,color,border-color] hover:border-slate-300"
+                className="flex cursor-pointer items-start gap-3 rounded-lg border border-border-default bg-slate-50/50 px-3 py-2.5 text-sm text-fg-default transition-[background-color,color,border-color] hover:border-border-strong"
               >
                 <input
                   type="radio"
@@ -861,7 +861,7 @@ function AdaptivePreviewPanel({
                     setSelectedIdx(i)
                     setErrorMessage(null)
                   }}
-                  className="mt-0.5 border-slate-300 text-indigo-600 focus:ring-indigo-500/30"
+                  className="mt-0.5 border-border-strong text-accent-fg focus:ring-indigo-500/30"
                 />
                 <span className="min-w-0 flex-1">{label}</span>
               </label>
@@ -870,7 +870,7 @@ function AdaptivePreviewPanel({
           <button
             type="button"
             onClick={() => void submitAndContinue()}
-            className="self-end rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+            className="self-end rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
           >
             Submit answer
           </button>
@@ -911,23 +911,23 @@ function QuizStudentPreviewModalContent({
         if (e.target === e.currentTarget) onClose()
       }}
     >
-      <div className="flex h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
-        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-slate-200 px-4 py-3">
+      <div className="flex h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-xl">
+        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-border-default px-4 py-3">
           <div className="min-w-0">
-            <h2 id="quiz-preview-title" className="text-sm font-semibold text-slate-900">
+            <h2 id="quiz-preview-title" className="text-sm font-semibold text-fg-default">
               Student preview
             </h2>
-            <p className="mt-0.5 truncate text-xs text-slate-500" title={quizTitle}>
+            <p className="mt-0.5 truncate text-xs text-fg-muted" title={quizTitle}>
               {quizTitle}
             </p>
-            <p className="mt-2 text-xs text-slate-600">
+            <p className="mt-2 text-xs text-fg-muted">
               This is how the quiz appears to learners. Nothing you enter here is saved.
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="shrink-0 rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+            className="shrink-0 rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken hover:text-fg-default"
             aria-label="Close preview"
           >
             <X className="h-5 w-5" aria-hidden />
@@ -936,12 +936,12 @@ function QuizStudentPreviewModalContent({
         <div className="min-h-0 flex-1 overflow-y-auto bg-slate-50/60 p-4">
           <div className="mx-auto max-w-2xl space-y-6">
             {dueAt && (
-              <p className="text-sm text-slate-600">
-                <span className="font-medium text-slate-800">Due:</span>{' '}
+              <p className="text-sm text-fg-muted">
+                <span className="font-medium text-fg-default">Due:</span>{' '}
                 <DeadlineDateTime iso={dueAt} courseTimezone={courseTimezone} />
               </p>
             )}
-            <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-sm">
+            <div className="rounded-xl border border-slate-200/90 bg-surface-raised p-4 shadow-sm">
               <MarkdownArticleView
                 markdown={markdown}
                 emptyMessage="This quiz does not include an introduction."
@@ -961,14 +961,14 @@ function QuizStudentPreviewModalContent({
                   maxQuestions={Math.min(30, Math.max(1, adaptiveQuestionCount))}
                 />
               ) : questions.length === 0 ? (
-                <p className="rounded-xl border border-dashed border-slate-200 bg-white px-4 py-6 text-center text-sm text-slate-600">
+                <p className="rounded-xl border border-dashed border-border-default bg-surface-raised px-4 py-6 text-center text-sm text-fg-muted">
                   There are no questions in this quiz yet.
                 </p>
               ) : (
                 <StaticQuizPreview questions={questions} advanced={advanced} oneQuestionAtATime={oneQuestionAtATime} />
               )
             ) : (
-              <p className="text-center text-sm text-slate-500">Enter the code above to preview questions.</p>
+              <p className="text-center text-sm text-fg-muted">Enter the code above to preview questions.</p>
             )}
           </div>
         </div>

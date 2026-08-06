@@ -34,14 +34,14 @@ function DrillDownPanel({ concept, students, onClose }: DrillDownPanelProps) {
       role="dialog"
       aria-modal="true"
       aria-label={`Students for concept: ${concept.name}`}
-      className="fixed inset-y-0 end-0 z-50 flex w-full max-w-md flex-col border-s border-slate-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-950"
+      className="fixed inset-y-0 end-0 z-50 flex w-full max-w-md flex-col border-s border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-base"
     >
-      <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-neutral-700">
+      <div className="flex items-center justify-between border-b border-border-default px-4 py-3 dark:border-border-default">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+          <p className="text-xs font-medium uppercase tracking-wide text-fg-muted">
             Concept drill-down
           </p>
-          <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">
+          <h2 className="text-base font-semibold text-fg-default">
             {concept.name}
           </h2>
         </div>
@@ -49,22 +49,22 @@ function DrillDownPanel({ concept, students, onClose }: DrillDownPanelProps) {
           type="button"
           onClick={onClose}
           aria-label="Close drill-down panel"
-          className="rounded-lg p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
+          className="rounded-lg p-1 text-fg-muted hover:bg-surface-sunken hover:text-fg-muted dark:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-fg-default"
         >
           ✕
         </button>
       </div>
       <div className="flex-1 overflow-y-auto px-4 py-3">
         {students.length === 0 ? (
-          <p className="text-sm text-slate-500 dark:text-neutral-400">No students enrolled.</p>
+          <p className="text-sm text-fg-muted">No students enrolled.</p>
         ) : (
           <ul className="space-y-2">
             {students.map((s) => (
               <li
                 key={s.enrollmentId}
-                className="flex items-center justify-between gap-4 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 dark:border-neutral-800 dark:bg-neutral-900"
+                className="flex items-center justify-between gap-4 rounded-xl border border-border-subtle bg-surface-base px-3 py-2 dark:border-border-subtle dark:bg-surface-raised"
               >
-                <span className="text-sm text-slate-900 dark:text-neutral-100">
+                <span className="text-sm text-fg-default">
                   {studentName(s.displayName)}
                 </span>
                 <span
@@ -150,7 +150,7 @@ export default function CourseMasteryHeatmap() {
           onClick={() => void handleRefresh()}
           disabled={refreshing}
           aria-label="Refresh heatmap data"
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50/60 disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:border-indigo-500/40 dark:hover:bg-indigo-950/40"
+          className="inline-flex items-center gap-2 rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm font-semibold text-fg-muted shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50/60 disabled:opacity-50 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:border-indigo-500/40 dark:hover:bg-indigo-950/40"
         >
           <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} aria-hidden />
           {refreshing ? 'Refreshing…' : 'Refresh'}
@@ -158,7 +158,7 @@ export default function CourseMasteryHeatmap() {
       }
     >
       {loading && (
-        <p className="mt-8 text-sm text-slate-500 dark:text-neutral-400" aria-live="polite">
+        <p className="mt-8 text-sm text-fg-muted" aria-live="polite">
           Loading heatmap…
         </p>
       )}
@@ -173,11 +173,11 @@ export default function CourseMasteryHeatmap() {
       )}
 
       {!loading && !error && result && !hasData && (
-        <div className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 px-6 py-10 text-center dark:border-neutral-700 dark:bg-neutral-900">
-          <p className="text-base font-semibold text-slate-800 dark:text-neutral-100">
+        <div className="mt-8 rounded-2xl border border-border-default bg-surface-base px-6 py-10 text-center dark:border-border-default dark:bg-surface-raised">
+          <p className="text-base font-semibold text-fg-default">
             No skill data yet
           </p>
-          <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+          <p className="mt-1 text-sm text-fg-muted">
             This view requires adaptive quiz data. Once students attempt quizzes mapped to
             concepts, their mastery will appear here.
           </p>
@@ -187,7 +187,7 @@ export default function CourseMasteryHeatmap() {
       {!loading && !error && hasData && result && (
         <div className="mt-8 space-y-8">
           {result.refreshedAt && (
-            <p className="text-xs text-slate-500 dark:text-neutral-400">
+            <p className="text-xs text-fg-muted">
               Last updated:{' '}
               {formatDateTime(result.refreshedAt, {
                 dateStyle: 'medium',
@@ -197,7 +197,7 @@ export default function CourseMasteryHeatmap() {
           )}
 
           {/* Legend */}
-          <div className="flex flex-wrap gap-4 text-xs text-slate-600 dark:text-neutral-400">
+          <div className="flex flex-wrap gap-4 text-xs text-fg-muted">
             {[
               { label: 'Mastered (≥80%)', cls: 'bg-emerald-500' },
               { label: 'Developing (60–79%)', cls: 'bg-lime-400' },
@@ -213,13 +213,13 @@ export default function CourseMasteryHeatmap() {
           </div>
 
           {/* Heatmap table */}
-          <div className="overflow-x-auto rounded-2xl border border-slate-200 shadow-sm dark:border-neutral-800">
+          <div className="overflow-x-auto rounded-2xl border border-border-default shadow-sm dark:border-border-subtle">
             <table className="min-w-full border-collapse text-sm" aria-label="Mastery heatmap">
               <thead>
-                <tr className="bg-slate-50 dark:bg-neutral-800/80">
+                <tr className="bg-surface-sunken/80">
                   <th
                     scope="col"
-                    className="sticky start-0 z-10 min-w-[160px] border-b border-e border-slate-200 bg-slate-50 px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-slate-600 dark:border-neutral-700 dark:bg-neutral-800/80 dark:text-neutral-300"
+                    className="sticky start-0 z-10 min-w-[160px] border-b border-e border-border-default bg-surface-base px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-fg-muted dark:border-border-default/80 dark:text-fg-muted"
                   >
                     Student
                   </th>
@@ -227,7 +227,7 @@ export default function CourseMasteryHeatmap() {
                     <th
                       key={c.id}
                       scope="col"
-                      className="border-b border-slate-200 px-2 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-600 dark:border-neutral-700 dark:text-neutral-300"
+                      className="border-b border-border-default px-2 py-3 text-center text-xs font-semibold uppercase tracking-wide text-fg-muted dark:border-border-default dark:text-fg-muted"
                     >
                       <span title={c.name} className="block max-w-[80px] truncate">
                         {c.name}
@@ -244,7 +244,7 @@ export default function CourseMasteryHeatmap() {
                   >
                     <th
                       scope="row"
-                      className="sticky start-0 z-10 border-e border-slate-200 bg-white px-4 py-2 font-medium text-slate-900 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+                      className="sticky start-0 z-10 border-e border-border-default bg-surface-raised px-4 py-2 font-medium text-fg-default dark:border-border-default dark:bg-surface-base dark:text-fg-default"
                     >
                       {studentName(row.displayName)}
                     </th>
@@ -280,14 +280,14 @@ export default function CourseMasteryHeatmap() {
                 ))}
 
                 {/* Summary row */}
-                <tr className="bg-slate-50 dark:bg-neutral-800/50">
-                  <td className="sticky start-0 z-10 border-e border-t border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold text-slate-600 dark:border-neutral-700 dark:bg-neutral-800/50 dark:text-neutral-300">
+                <tr className="bg-surface-sunken/50">
+                  <td className="sticky start-0 z-10 border-e border-t border-border-default bg-surface-base px-4 py-2 text-xs font-semibold text-fg-muted dark:border-border-default/50 dark:text-fg-muted">
                     Class avg
                   </td>
                   {result.summary.map((s) => (
                     <td
                       key={s.conceptId}
-                      className="border-t border-slate-200 px-1 py-2 text-center dark:border-neutral-700"
+                      className="border-t border-border-default px-1 py-2 text-center dark:border-border-default"
                     >
                       <span
                         className={`inline-flex h-8 w-14 items-center justify-center rounded-md text-xs font-semibold text-white ${masteryColorClass(true, s.meanMastery)}`}

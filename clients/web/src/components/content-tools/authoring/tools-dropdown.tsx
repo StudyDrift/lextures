@@ -107,15 +107,15 @@ export function ToolsDropdown({
               width: menuPos.width,
               zIndex: 80,
             }}
-            className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-900"
+            className="overflow-hidden rounded-lg border border-border-default bg-surface-raised shadow-lg shadow-slate-900/10 dark:border-border-default dark:bg-surface-raised"
           >
             {emptyCatalog && !loading ? (
-              <div className="space-y-2 p-3 text-xs text-slate-600 dark:text-neutral-300">
+              <div className="space-y-2 p-3 text-xs text-fg-muted">
                 <p>{t('contentTools.authoring.noToolsEnabled')}</p>
                 {settingsHref ? (
                   <a
                     href={settingsHref}
-                    className="font-medium text-slate-800 underline dark:text-neutral-100"
+                    className="font-medium text-fg-default underline dark:text-fg-default"
                   >
                     {t('contentTools.authoring.openSettings')}
                   </a>
@@ -152,7 +152,7 @@ export function ToolsDropdown({
         title={disabledReason}
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex shrink-0 items-center gap-0.5 rounded px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:text-neutral-200 dark:hover:bg-neutral-700"
+        className="inline-flex shrink-0 items-center gap-0.5 rounded px-2 py-1 text-xs font-medium text-fg-muted hover:bg-surface-sunken disabled:cursor-not-allowed disabled:opacity-40 dark:text-fg-default dark:hover:bg-neutral-700"
       >
         {t('contentTools.authoring.tools')}
         <ChevronDown className="h-3.5 w-3.5 opacity-70" aria-hidden />

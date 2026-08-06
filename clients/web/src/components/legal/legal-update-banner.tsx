@@ -65,7 +65,7 @@ export function LegalUpdateBanner() {
           )}
         </p>
         <div className="flex items-center gap-2">
-          {error ? <span className="text-red-700 dark:text-red-300">{error}</span> : null}
+          {error ? <span className="text-danger-fg">{error}</span> : null}
           <button
             type="button"
             onClick={() => void handleAcknowledge()}

@@ -130,7 +130,7 @@ export default function MarketplaceCoursePage() {
     <LmsPage title={course?.title ?? t('marketplace.title')}>
       <Link
         to="/marketplace"
-        className="mb-6 inline-flex items-center gap-1 text-sm text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+        className="mb-6 inline-flex items-center gap-1 text-sm text-fg-muted hover:text-fg-default dark:text-fg-muted dark:hover:text-fg-default"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         {t('marketplace.back')}
@@ -138,7 +138,7 @@ export default function MarketplaceCoursePage() {
 
       {loading ? (
         <div
-          className="h-64 motion-safe:animate-pulse rounded-2xl bg-slate-100 dark:bg-neutral-800"
+          className="h-64 motion-safe:animate-pulse rounded-2xl bg-surface-sunken"
           aria-hidden
         />
       ) : error ? (
@@ -151,7 +151,7 @@ export default function MarketplaceCoursePage() {
         </div>
       ) : course ? (
         <article data-testid="marketplace-course-detail" className="max-w-3xl">
-          <header className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
+          <header className="overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-sm dark:border-border-default dark:bg-surface-raised">
             {course.heroImageUrl ? (
               <CourseHeroImage
                 src={course.heroImageUrl}
@@ -162,10 +162,10 @@ export default function MarketplaceCoursePage() {
               <div className="h-40 w-full bg-gradient-to-br from-indigo-100 to-sky-100 dark:from-indigo-950 dark:to-sky-950" />
             )}
             <div className="p-6">
-              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-neutral-400">
+              <div className="flex flex-wrap items-center gap-2 text-xs text-fg-muted">
                 {course.category ? <span>{course.category}</span> : null}
                 {course.level ? (
-                  <span className="rounded-full bg-slate-100 px-2 py-0.5 capitalize dark:bg-neutral-800">
+                  <span className="rounded-full bg-surface-sunken px-2 py-0.5 capitalize dark:bg-surface-overlay">
                     {course.level}
                   </span>
                 ) : null}
@@ -179,11 +179,11 @@ export default function MarketplaceCoursePage() {
                   </span>
                 ) : null}
               </div>
-              <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900 dark:text-neutral-100 sm:text-3xl">
+              <h1 className="mt-2 text-2xl font-semibold tracking-tight text-fg-default sm:text-3xl">
                 {course.title}
               </h1>
               {course.instructorName ? (
-                <p className="mt-1 text-sm text-slate-600 dark:text-neutral-300">
+                <p className="mt-1 text-sm text-fg-muted">
                   {t('marketplace.detail.taughtBy', { name: course.instructorName })}
                 </p>
               ) : null}
@@ -193,38 +193,38 @@ export default function MarketplaceCoursePage() {
                     <>
                       <Star className="h-4 w-4 fill-current" aria-hidden="true" />
                       {detail.rating.average.toFixed(1)}
-                      <span className="text-slate-500 dark:text-neutral-400">
+                      <span className="text-fg-muted">
                         ({detail.rating.count.toLocaleString()})
                       </span>
                     </>
                   ) : (
-                    <span className="text-slate-400 dark:text-neutral-500">
+                    <span className="text-fg-subtle">
                       {t('marketplace.detail.notRated')}
                     </span>
                   )}
                 </span>
-                <span className="text-slate-500 dark:text-neutral-400">
+                <span className="text-fg-muted">
                   {t('marketplace.detail.enrolled', { count: course.enrollmentCount })}
                 </span>
               </div>
             </div>
           </header>
 
-          <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-neutral-100">
+          <section className="mt-6 rounded-2xl border border-border-default bg-surface-raised p-6 shadow-sm dark:border-border-default dark:bg-surface-raised">
+            <h2 className="text-lg font-semibold text-fg-default">
               {t('marketplace.detail.about')}
             </h2>
-            <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-slate-700 dark:text-neutral-300">
+            <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-fg-muted">
               {course.description || t('marketplace.detail.noDescription')}
             </p>
           </section>
 
           {detail?.whatsIncluded ? (
-            <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-neutral-100">
+            <section className="mt-6 rounded-2xl border border-border-default bg-surface-raised p-6 shadow-sm dark:border-border-default dark:bg-surface-raised">
+              <h2 className="text-lg font-semibold text-fg-default">
                 {t('marketplace.detail.whatsIncluded')}
               </h2>
-              <ul className="mt-3 list-disc space-y-1 ps-5 text-sm text-slate-600 dark:text-neutral-300">
+              <ul className="mt-3 list-disc space-y-1 ps-5 text-sm text-fg-muted">
                 <li>
                   {t('marketplace.detail.modules', { count: detail.whatsIncluded.moduleCount })}
                 </li>
@@ -240,7 +240,7 @@ export default function MarketplaceCoursePage() {
             </section>
           ) : null}
 
-          <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border-default bg-surface-raised p-6 shadow-sm dark:border-border-default dark:bg-surface-raised">
             <span id={priceId}>
               <MarketplacePriceBadge
                 priceCents={priceCents}
@@ -258,7 +258,7 @@ export default function MarketplaceCoursePage() {
                 aria-busy={ctaPending}
                 disabled={ctaPending}
                 onClick={() => void onCtaClick()}
-                className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-wait disabled:opacity-70"
+                className="inline-flex items-center justify-center rounded-xl bg-accent-solid px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-wait disabled:opacity-70"
                 data-testid="marketplace-cta"
               >
                 {ctaLabel}

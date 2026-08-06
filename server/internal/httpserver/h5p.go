@@ -124,15 +124,6 @@ func (d Deps) guardH5PAccess(w http.ResponseWriter, r *http.Request, courseCode 
 // handleCreateModuleH5P is POST .../structure/modules/{module_id}/h5p (multipart .h5p upload).
 func (d Deps) handleCreateModuleH5P() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.meUserID(w, r); !ok {
 			return
 		}
@@ -307,10 +298,6 @@ func (d Deps) writeH5PPackageJSON(w http.ResponseWriter, r *http.Request, course
 // handleGetH5PRender is GET /api/v1/courses/{course_code}/h5p/{package_id}/render — sandboxed HTML bootstrap.
 func (d Deps) handleGetH5PRender() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		if !d.guardH5PFeature(w) {
 			return
 		}

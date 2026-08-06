@@ -45,39 +45,39 @@ import type { ContentToolsCatalogTool } from '../../../lib/courses-api'
 
 const editorShellClass = [
   'tiptap',
-  'min-h-[100px] w-full px-0 py-1 text-[15px] leading-[1.65] text-slate-800 dark:text-neutral-200',
+  'min-h-[100px] w-full px-0 py-1 text-[15px] leading-[1.65] text-fg-default',
   'focus:outline-none',
   '[&_p]:mt-3 [&_p:first-child]:mt-0',
-  '[&_h1]:mt-6 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-slate-900 [&_h1]:first:mt-0',
-  'dark:[&_h1]:text-neutral-100',
-  '[&_h2]:mt-8 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-slate-900 [&_h2]:first:mt-0',
-  'dark:[&_h2]:text-neutral-100',
-  '[&_h3]:mt-6 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-slate-900 [&_h3]:first:mt-0',
-  'dark:[&_h3]:text-neutral-100',
-  '[&_h4]:mt-4 [&_h4]:text-base [&_h4]:font-semibold [&_h4]:text-slate-900',
-  'dark:[&_h4]:text-neutral-100',
-  '[&_ul]:mt-3 [&_ul]:list-disc [&_ul]:ps-5 [&_ul]:text-slate-700',
-  'dark:[&_ul]:text-neutral-300',
-  '[&_ol]:mt-3 [&_ol]:list-decimal [&_ol]:ps-5 [&_ol]:text-slate-700',
-  'dark:[&_ol]:text-neutral-300',
-  '[&_li]:marker:text-slate-500',
+  '[&_h1]:mt-6 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-fg-default [&_h1]:first:mt-0',
+  'dark:[&_h1]:text-fg-default',
+  '[&_h2]:mt-8 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-fg-default [&_h2]:first:mt-0',
+  'dark:[&_h2]:text-fg-default',
+  '[&_h3]:mt-6 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-fg-default [&_h3]:first:mt-0',
+  'dark:[&_h3]:text-fg-default',
+  '[&_h4]:mt-4 [&_h4]:text-base [&_h4]:font-semibold [&_h4]:text-fg-default',
+  'dark:[&_h4]:text-fg-default',
+  '[&_ul]:mt-3 [&_ul]:list-disc [&_ul]:ps-5 [&_ul]:text-fg-muted',
+  'dark:[&_ul]:text-fg-muted',
+  '[&_ol]:mt-3 [&_ol]:list-decimal [&_ol]:ps-5 [&_ol]:text-fg-muted',
+  'dark:[&_ol]:text-fg-muted',
+  '[&_li]:marker:text-fg-muted',
   'dark:[&_li]:marker:text-neutral-500',
-  '[&_li]:text-slate-700',
-  'dark:[&_li]:text-neutral-300',
-  '[&_a]:font-medium [&_a]:text-indigo-600 [&_a]:underline [&_a]:decoration-indigo-200 [&_a]:underline-offset-2',
-  '[&_a]:dark:text-neutral-200 [&_a]:dark:decoration-neutral-500/60',
-  '[&_code]:rounded [&_code]:bg-slate-100 [&_code]:px-1 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[13px] [&_code]:text-slate-900',
-  '[&_code]:dark:bg-neutral-800 [&_code]:dark:text-neutral-100',
+  '[&_li]:text-fg-muted',
+  'dark:[&_li]:text-fg-muted',
+  '[&_a]:font-medium [&_a]:text-accent-fg [&_a]:underline [&_a]:decoration-indigo-200 [&_a]:underline-offset-2',
+  '[&_a]:dark:text-fg-default [&_a]:dark:decoration-neutral-500/60',
+  '[&_code]:rounded [&_code]:bg-surface-sunken [&_code]:px-1 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[13px] [&_code]:text-fg-default',
+  '[&_code]:dark:bg-surface-overlay [&_code]:dark:text-fg-default',
   '[&_pre]:mt-3 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:bg-slate-900 [&_pre]:p-3 [&_pre]:font-mono [&_pre]:text-[13px] [&_pre]:text-slate-100',
-  '[&_blockquote]:mt-3 [&_blockquote]:border-s-4 [&_blockquote]:border-slate-300 [&_blockquote]:ps-4 [&_blockquote]:italic [&_blockquote]:text-slate-600',
-  '[&_blockquote]:dark:border-neutral-600 [&_blockquote]:dark:text-neutral-400',
-  '[&_.tableWrapper]:mt-3 [&_.tableWrapper]:overflow-x-auto [&_.tableWrapper]:rounded-lg [&_.tableWrapper]:border [&_.tableWrapper]:border-slate-200',
-  'dark:[&_.tableWrapper]:border-neutral-600',
+  '[&_blockquote]:mt-3 [&_blockquote]:border-s-4 [&_blockquote]:border-border-strong [&_blockquote]:ps-4 [&_blockquote]:italic [&_blockquote]:text-fg-muted',
+  '[&_blockquote]:dark:border-border-default [&_blockquote]:dark:text-fg-muted',
+  '[&_.tableWrapper]:mt-3 [&_.tableWrapper]:overflow-x-auto [&_.tableWrapper]:rounded-lg [&_.tableWrapper]:border [&_.tableWrapper]:border-border-default',
+  'dark:[&_.tableWrapper]:border-border-default',
   '[&_table]:w-full [&_table]:min-w-[20rem] [&_table]:border-collapse [&_table]:text-start [&_table]:text-sm',
-  '[&_th]:border-b [&_th]:border-slate-200 [&_th]:bg-slate-50 [&_th]:px-3 [&_th]:py-2 [&_th]:text-start [&_th]:text-xs [&_th]:font-semibold [&_th]:uppercase [&_th]:tracking-wide [&_th]:text-slate-900',
-  'dark:[&_th]:border-neutral-600 dark:[&_th]:bg-neutral-800 dark:[&_th]:text-neutral-100',
-  '[&_td]:border-b [&_td]:border-slate-100 [&_td]:px-3 [&_td]:py-2 [&_td]:align-top [&_td]:text-slate-700',
-  'dark:[&_td]:border-neutral-700 dark:[&_td]:text-neutral-300',
+  '[&_th]:border-b [&_th]:border-border-default [&_th]:bg-surface-base [&_th]:px-3 [&_th]:py-2 [&_th]:text-start [&_th]:text-xs [&_th]:font-semibold [&_th]:uppercase [&_th]:tracking-wide [&_th]:text-fg-default',
+  'dark:[&_th]:border-border-default dark:[&_th]:bg-surface-overlay dark:[&_th]:text-fg-default',
+  '[&_td]:border-b [&_td]:border-border-subtle [&_td]:px-3 [&_td]:py-2 [&_td]:align-top [&_td]:text-fg-muted',
+  'dark:[&_td]:border-border-default dark:[&_td]:text-fg-muted',
   '[&_figure]:my-3',
   '[&_.katex]:text-inherit',
   '[&_.lex-math-block-root]:my-2 [&_.lex-math-block-root]:w-full',
@@ -551,7 +551,7 @@ export function MarkdownBodyEditor({
           autolink: true,
           HTMLAttributes: {
             class:
-              'font-medium text-indigo-600 underline decoration-indigo-200 underline-offset-2 hover:text-indigo-500 dark:text-indigo-400 dark:decoration-indigo-500/50 dark:hover:text-indigo-300',
+              'font-medium text-accent-fg underline decoration-indigo-200 underline-offset-2 hover:text-indigo-500 dark:text-indigo-400 dark:decoration-indigo-500/50 dark:hover:text-indigo-300',
           },
         }),
         CourseAwareTipTapImage.configure({
@@ -991,7 +991,7 @@ export function MarkdownBodyEditor({
   if (!editor) {
     return (
       <div
-        className="min-h-[100px] w-full rounded-sm bg-slate-50/80 dark:bg-neutral-900/60"
+        className="min-h-[100px] w-full rounded-sm bg-slate-50/80/60"
         aria-busy="true"
         aria-label={placeholder ?? 'Loading editor'}
       />
@@ -1019,12 +1019,12 @@ export function MarkdownBodyEditor({
               if (!files.length) return
               openImageModal(files)
             }}
-            className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
+            className="inline-flex items-center gap-1.5 rounded-md border border-border-default bg-surface-raised px-2.5 py-1.5 text-xs font-medium text-fg-muted shadow-sm hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-50 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700"
           >
             <ImageIcon className="h-3.5 w-3.5 shrink-0" aria-hidden />
             Image
           </button>
-          <span className="text-xs text-slate-500 dark:text-neutral-400">
+          <span className="text-xs text-fg-muted">
             Drop or paste images in the editor, or open the insert dialog.
           </span>
         </div>
@@ -1046,10 +1046,10 @@ export function MarkdownBodyEditor({
                 zIndex: 60,
                 width: 'min(20rem, calc(100vw - 2rem))',
               }}
-              className="max-h-56 overflow-auto rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/15 dark:border-neutral-600 dark:bg-neutral-900"
+              className="max-h-56 overflow-auto rounded-xl border border-border-default bg-surface-raised py-1 shadow-lg shadow-slate-900/15 dark:border-border-default dark:bg-surface-raised"
             >
               {filteredSlashCommands.length === 0 ? (
-                <p className="px-3 py-2 text-sm text-slate-500 dark:text-neutral-400">
+                <p className="px-3 py-2 text-sm text-fg-muted">
                   No matching blocks. Keep typing to filter.
                 </p>
               ) : (
@@ -1060,11 +1060,7 @@ export function MarkdownBodyEditor({
                     role="option"
                     id={`${slashListId}-opt-${idx}`}
                     aria-selected={idx === slashActiveIndex}
-                    className={`flex w-full flex-col items-start gap-0.5 px-3 py-2 text-start text-sm transition-[background-color,color,border-color] ${
-                      idx === slashActiveIndex
-                        ? 'bg-indigo-50 text-indigo-950 dark:bg-indigo-950/50 dark:text-indigo-50'
-                        : 'text-slate-800 hover:bg-slate-50 dark:text-neutral-100 dark:hover:bg-neutral-800'
-                    }`}
+                    className={`flex w-full flex-col items-start gap-0.5 px-3 py-2 text-start text-sm transition-[background-color,color,border-color] ${ idx === slashActiveIndex ? 'bg-indigo-50 text-indigo-950 dark:bg-indigo-950/50 dark:text-indigo-50' : 'text-fg-default hover:bg-surface-base dark:text-fg-default dark:hover:bg-surface-overlay' }`}
                     onMouseDown={(e) => {
                       e.preventDefault()
                       applySlashPick(command)
@@ -1072,7 +1068,7 @@ export function MarkdownBodyEditor({
                     onMouseEnter={() => setSlashActiveIndex(idx)}
                   >
                     <span className="font-medium">{command.label}</span>
-                    <span className="text-xs text-slate-500 dark:text-neutral-400">{command.description}</span>
+                    <span className="text-xs text-fg-muted">{command.description}</span>
                   </button>
                 ))
               )}
@@ -1093,10 +1089,10 @@ export function MarkdownBodyEditor({
                 zIndex: 60,
                 width: 'min(20rem, calc(100vw - 2rem))',
               }}
-              className="max-h-56 overflow-auto rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/15 dark:border-neutral-600 dark:bg-neutral-900"
+              className="max-h-56 overflow-auto rounded-xl border border-border-default bg-surface-raised py-1 shadow-lg shadow-slate-900/15 dark:border-border-default dark:bg-surface-raised"
             >
               {structureLoading ? (
-                <p className="px-3 py-2 text-sm text-slate-500 dark:text-neutral-400">
+                <p className="px-3 py-2 text-sm text-fg-muted">
                   Loading course items…
                 </p>
               ) : structureError ? (
@@ -1104,7 +1100,7 @@ export function MarkdownBodyEditor({
                   Could not load course structure.
                 </p>
               ) : filtered.length === 0 ? (
-                <p className="px-3 py-2 text-sm text-slate-500 dark:text-neutral-400">
+                <p className="px-3 py-2 text-sm text-fg-muted">
                   No matching content pages or assignments. Keep typing to filter.
                 </p>
               ) : (
@@ -1115,18 +1111,14 @@ export function MarkdownBodyEditor({
                     role="option"
                     id={`${listId}-opt-${idx}`}
                     aria-selected={idx === activeIndex}
-                    className={`flex w-full flex-col items-start gap-0.5 px-3 py-2 text-start text-sm transition-[background-color,color,border-color] ${
-                      idx === activeIndex
-                        ? 'bg-indigo-50 text-indigo-950 dark:bg-indigo-950/50 dark:text-indigo-50'
-                        : 'text-slate-800 hover:bg-slate-50 dark:text-neutral-100 dark:hover:bg-neutral-800'
-                    }`}
+                    className={`flex w-full flex-col items-start gap-0.5 px-3 py-2 text-start text-sm transition-[background-color,color,border-color] ${ idx === activeIndex ? 'bg-indigo-50 text-indigo-950 dark:bg-indigo-950/50 dark:text-indigo-50' : 'text-fg-default hover:bg-surface-base dark:text-fg-default dark:hover:bg-surface-overlay' }`}
                     onMouseDown={(e) => {
                       e.preventDefault()
                       applyPick(item)
                     }}
                     onMouseEnter={() => setActiveIndex(idx)}
                   >
-                    <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                    <span className="text-xs font-medium uppercase tracking-wide text-fg-muted">
                       {kindLabel(item.kind)}
                     </span>
                     <span className="font-medium">{item.title}</span>
@@ -1149,17 +1141,17 @@ export function MarkdownBodyEditor({
                 zIndex: 60,
                 width: 'min(20rem, calc(100vw - 2rem))',
               }}
-              className="rounded-xl border border-slate-200 bg-white p-3 shadow-lg shadow-slate-900/15 dark:border-neutral-600 dark:bg-neutral-900"
+              className="rounded-xl border border-border-default bg-surface-raised p-3 shadow-lg shadow-slate-900/15 dark:border-border-default dark:bg-surface-raised"
               onMouseDown={(e) => e.stopPropagation()}
             >
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                <span className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
                   Edit link
                 </span>
                 <button
                   type="button"
                   onClick={() => setLinkPopover(null)}
-                  className="rounded p-0.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
+                  className="rounded p-0.5 text-fg-subtle hover:bg-surface-sunken hover:text-fg-muted dark:hover:bg-neutral-700 dark:hover:text-fg-default"
                   aria-label="Close link editor"
                 >
                   <X className="h-3.5 w-3.5" />
@@ -1167,7 +1159,7 @@ export function MarkdownBodyEditor({
               </div>
               <div className="flex flex-col gap-2">
                 <div>
-                  <label className="mb-1 block text-xs text-slate-600 dark:text-neutral-300">URL</label>
+                  <label className="mb-1 block text-xs text-fg-muted">URL</label>
                   <input
                     type="url"
                     value={linkPopover.editHref}
@@ -1177,12 +1169,12 @@ export function MarkdownBodyEditor({
                       if (e.key === 'Escape') { e.preventDefault(); setLinkPopover(null) }
                     }}
                     placeholder="https://"
-                    className="w-full rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500"
+                    className="w-full rounded-md border border-border-default bg-surface-raised px-2.5 py-1.5 text-sm text-fg-default focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:focus:border-indigo-500"
                     autoFocus
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs text-slate-600 dark:text-neutral-300">Display text</label>
+                  <label className="mb-1 block text-xs text-fg-muted">Display text</label>
                   <input
                     type="text"
                     value={linkPopover.editText}
@@ -1192,7 +1184,7 @@ export function MarkdownBodyEditor({
                       if (e.key === 'Escape') { e.preventDefault(); setLinkPopover(null) }
                     }}
                     placeholder="Link text"
-                    className="w-full rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500"
+                    className="w-full rounded-md border border-border-default bg-surface-raised px-2.5 py-1.5 text-sm text-fg-default focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:focus:border-indigo-500"
                   />
                 </div>
                 <div className="flex items-center justify-between gap-2">
@@ -1210,7 +1202,7 @@ export function MarkdownBodyEditor({
                         href={linkPopover.editHref.trim()}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs text-slate-600 hover:bg-slate-100 dark:text-neutral-300 dark:hover:bg-neutral-700"
+                        className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-neutral-700"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <ExternalLink className="h-3.5 w-3.5" />
@@ -1220,7 +1212,7 @@ export function MarkdownBodyEditor({
                     <button
                       type="button"
                       onClick={applyLinkEdit}
-                      className="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+                      className="rounded-md bg-accent-solid px-3 py-1.5 text-xs font-medium text-white hover:bg-accent dark:bg-indigo-500 dark:hover:bg-indigo-400"
                     >
                       Save
                     </button>

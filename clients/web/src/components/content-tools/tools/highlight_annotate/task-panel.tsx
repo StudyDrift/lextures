@@ -60,15 +60,15 @@ export function TaskPanel({
 }: TaskPanelProps) {
   return (
     <div
-      className="rounded-xl border border-slate-200 bg-gradient-to-b from-slate-50 to-white p-4 dark:border-neutral-700 dark:from-neutral-900/80 dark:to-neutral-950"
+      className="rounded-xl border border-border-default bg-gradient-to-b from-slate-50 to-white p-4 dark:border-border-default dark:from-neutral-900/80 dark:to-neutral-950"
       data-testid="ha-prompt"
     >
-      <p className="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">
+      <p className="text-xs font-semibold uppercase tracking-wide text-accent-fg">
         {t('contentTools.tools.highlight_annotate.yourTask')}
       </p>
       <p
         id={promptId}
-        className="mt-1 text-sm leading-relaxed text-slate-900 dark:text-neutral-100 sm:text-[15px]"
+        className="mt-1 text-sm leading-relaxed text-fg-default sm:text-[15px]"
       >
         <PromptText text={prompt} />
       </p>
@@ -80,7 +80,7 @@ export function TaskPanel({
             className={
               complete
                 ? 'font-medium text-emerald-700 dark:text-emerald-400'
-                : 'font-medium text-slate-700 dark:text-neutral-200'
+                : 'font-medium text-fg-default'
             }
           >
             {complete
@@ -94,13 +94,13 @@ export function TaskPanel({
                 })}
           </p>
           {!complete && remaining > 0 ? (
-            <span className="text-slate-500 dark:text-neutral-400">
+            <span className="text-fg-muted">
               {t('contentTools.tools.highlight_annotate.remaining', { count: remaining })}
             </span>
           ) : null}
         </div>
         <div
-          className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-neutral-800"
+          className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-surface-overlay"
           role="progressbar"
           aria-valuenow={progress}
           aria-valuemin={0}
@@ -121,7 +121,7 @@ export function TaskPanel({
       </div>
 
       <div className="mt-3">
-        <p className="mb-1.5 text-xs font-medium text-slate-600 dark:text-neutral-400">
+        <p className="mb-1.5 text-xs font-medium text-fg-muted">
           {t('contentTools.tools.highlight_annotate.labelsTitle')}
         </p>
         <ul
@@ -131,19 +131,19 @@ export function TaskPanel({
           {tags.map((tag) => (
             <li
               key={tag.id}
-              className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs shadow-sm dark:border-neutral-600 dark:bg-neutral-900"
+              className="inline-flex items-center gap-1.5 rounded-full border border-border-default bg-surface-raised px-2.5 py-1 text-xs shadow-sm dark:border-border-default dark:bg-surface-raised"
             >
               <span
                 aria-hidden
                 className="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
                 style={{ backgroundColor: tag.color }}
               />
-              <span className="font-medium text-slate-800 dark:text-neutral-100">{tag.label}</span>
+              <span className="font-medium text-fg-default">{tag.label}</span>
               {tag.description ? (
-                <span className="text-slate-500 dark:text-neutral-400">— {tag.description}</span>
+                <span className="text-fg-muted">— {tag.description}</span>
               ) : null}
               {(countsByTag.get(tag.id) ?? 0) > 0 ? (
-                <span className="rounded-full bg-slate-100 px-1.5 py-px text-[10px] font-semibold text-slate-600 dark:bg-neutral-800 dark:text-neutral-300">
+                <span className="rounded-full bg-surface-sunken px-1.5 py-px text-[10px] font-semibold text-fg-muted dark:bg-surface-overlay dark:text-fg-muted">
                   {countsByTag.get(tag.id)}
                 </span>
               ) : null}
@@ -171,7 +171,7 @@ export function HowToCoach({ unitWord, requireNote, t }: HowToCoachProps) {
     >
       <li className="flex gap-2 rounded-lg border border-indigo-100 bg-indigo-50/70 px-3 py-2 text-xs text-indigo-950 dark:border-indigo-900/50 dark:bg-indigo-950/30 dark:text-indigo-100">
         <span
-          className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-[11px] font-bold text-white"
+          className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent-solid text-[11px] font-bold text-white"
           aria-hidden
         >
           1
@@ -182,7 +182,7 @@ export function HowToCoach({ unitWord, requireNote, t }: HowToCoachProps) {
       </li>
       <li className="flex gap-2 rounded-lg border border-indigo-100 bg-indigo-50/70 px-3 py-2 text-xs text-indigo-950 dark:border-indigo-900/50 dark:bg-indigo-950/30 dark:text-indigo-100">
         <span
-          className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-[11px] font-bold text-white"
+          className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent-solid text-[11px] font-bold text-white"
           aria-hidden
         >
           2
@@ -191,7 +191,7 @@ export function HowToCoach({ unitWord, requireNote, t }: HowToCoachProps) {
       </li>
       <li className="flex gap-2 rounded-lg border border-indigo-100 bg-indigo-50/70 px-3 py-2 text-xs text-indigo-950 dark:border-indigo-900/50 dark:bg-indigo-950/30 dark:text-indigo-100">
         <span
-          className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-[11px] font-bold text-white"
+          className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent-solid text-[11px] font-bold text-white"
           aria-hidden
         >
           3

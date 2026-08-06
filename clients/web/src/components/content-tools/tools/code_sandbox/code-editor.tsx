@@ -151,7 +151,7 @@ export function CodeEditor({
 
   return (
     <div
-      className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50 shadow-sm focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-500/30 dark:border-neutral-600 dark:bg-neutral-950 dark:focus-within:border-indigo-500 dark:focus-within:ring-indigo-400/25"
+      className="overflow-hidden rounded-xl border border-border-default bg-surface-base shadow-sm focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-500/30 dark:border-border-default dark:bg-surface-base dark:focus-within:border-indigo-500 dark:focus-within:ring-indigo-400/25"
       data-testid="code-sandbox-editor"
       data-editor-mode="rich"
       data-language={language}
@@ -234,7 +234,7 @@ function PlainTextareaEditor({
       data-testid="code-sandbox-editor"
       data-editor-mode="plain"
       data-language={language}
-      className="min-h-[12rem] w-full resize-y rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 font-mono text-[13px] leading-6 text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus-visible:border-indigo-400 focus-visible:ring-2 focus-visible:ring-indigo-500/30 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus-visible:border-indigo-500 dark:focus-visible:ring-indigo-400/25"
+      className="min-h-[12rem] w-full resize-y rounded-xl border border-border-default bg-surface-base px-3.5 py-3 font-mono text-[13px] leading-6 text-fg-default shadow-sm outline-none placeholder:text-fg-subtle focus-visible:border-indigo-400 focus-visible:ring-2 focus-visible:ring-indigo-500/30 disabled:opacity-60 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:placeholder:text-neutral-500 dark:focus-visible:border-indigo-500 dark:focus-visible:ring-indigo-400/25"
       spellCheck={false}
       autoCapitalize="off"
       autoCorrect="off"

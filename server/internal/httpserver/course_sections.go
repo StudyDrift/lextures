@@ -45,6 +45,7 @@ func sectionJSON(s *coursesections.Section) map[string]any {
 	return out
 }
 
+// handleCourseSectionsCollection is GET+POST on the same path. TD.5 FR-6: multi-method.
 func (d Deps) handleCourseSectionsCollection() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodOptions {
@@ -302,15 +303,6 @@ func (d Deps) handleCourseSectionItem() http.HandlerFunc {
 
 func (d Deps) handleEnrollmentSectionTransfer() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		viewer, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -378,15 +370,6 @@ WHERE ce.id = $1
 
 func (d Deps) handleSectionAssignmentOverride() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPut {
-			w.Header().Set("Allow", http.MethodPut+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		viewer, ok := d.meUserID(w, r)
 		if !ok {
 			return

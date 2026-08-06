@@ -40,7 +40,7 @@ export default function ToolReviewsPage() {
       <h1 id={titleId} className="text-2xl font-semibold">
         {t('contentTools.review.title')}
       </h1>
-      <p className="mt-1 text-sm text-slate-600">{t('contentTools.review.help')}</p>
+      <p className="mt-1 text-sm text-fg-muted">{t('contentTools.review.help')}</p>
       {error ? (
         <p className="mt-4 text-sm text-rose-700" role="alert">
           {error}
@@ -50,7 +50,7 @@ export default function ToolReviewsPage() {
         {reviews.map((r) => (
           <li key={r.id} className="border-b pb-4" data-testid={`tool-review-${r.id}`}>
             <div className="font-medium">
-              {r.displayName || r.toolId} <span className="text-sm text-slate-500">v{r.version}</span>
+              {r.displayName || r.toolId} <span className="text-sm text-fg-muted">v{r.version}</span>
             </div>
             <label className="mt-2 block text-sm">
               {t('contentTools.review.notes')}
@@ -101,7 +101,7 @@ export default function ToolReviewsPage() {
         ))}
       </ul>
       {reviews.length === 0 ? (
-        <p className="mt-4 text-sm text-slate-600">{t('contentTools.review.empty')}</p>
+        <p className="mt-4 text-sm text-fg-muted">{t('contentTools.review.empty')}</p>
       ) : null}
     </div>
   )

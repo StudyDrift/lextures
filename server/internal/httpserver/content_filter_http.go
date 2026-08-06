@@ -28,11 +28,6 @@ func (d Deps) contentFilterEnabled(w http.ResponseWriter) bool {
 
 func (d Deps) handleContentFilterAllowlist() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.Header().Set("Cache-Control", "public, max-age=3600")
 		_, _ = w.Write(serverdata.ContentFilterAllowlistJSON)
@@ -171,11 +166,6 @@ type contentFilterActivityBody struct {
 func (d Deps) handleContentFilterActivity() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !d.contentFilterEnabled(w) {
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
 		userID, ok := d.meUserID(w, r)

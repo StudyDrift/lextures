@@ -3,7 +3,7 @@ import { InspectorExpandableTextarea } from './inspector-expandable-textarea'
 import type { CodeTestRunnerMappingType, CodeTestRunnerNodeData, CodeTestRunnerTestCase } from './types'
 
 const fieldClass =
-  'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100'
+  'w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base dark:text-fg-default'
 
 type CodeTestRunnerInspectorProps = {
   data: Record<string, unknown>
@@ -69,8 +69,8 @@ export function CodeTestRunnerInspector({
   }
 
   return (
-    <div className="space-y-3 text-sm text-slate-700 dark:text-neutral-200">
-      <p className="font-medium text-slate-800 dark:text-neutral-100">{title}</p>
+    <div className="space-y-3 text-sm text-fg-default">
+      <p className="font-medium text-fg-default">{title}</p>
       <p>{t('gradingAgent.canvas.inspector.codeTestsHelp')}</p>
 
       <label className="block">
@@ -161,16 +161,16 @@ export function CodeTestRunnerInspector({
             {t('gradingAgent.canvas.inspector.codeTestsAddCase')}
           </button>
         </div>
-        <div className="max-h-64 space-y-3 overflow-y-auto rounded-lg border border-slate-200 p-2 dark:border-neutral-700">
+        <div className="max-h-64 space-y-3 overflow-y-auto rounded-lg border border-border-default p-2 dark:border-border-default">
           {testCases.length === 0 ? (
-            <p className="text-xs text-slate-500 dark:text-neutral-400">
+            <p className="text-xs text-fg-muted">
               {t('gradingAgent.canvas.inspector.codeTestsNoCases')}
             </p>
           ) : (
             testCases.map((testCase, index) => (
-              <div key={`${testCase.id}-${index}`} className="space-y-2 rounded-md border border-slate-100 p-2 dark:border-neutral-800">
+              <div key={`${testCase.id}-${index}`} className="space-y-2 rounded-md border border-border-subtle p-2 dark:border-border-subtle">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
                     {testCase.id}
                   </span>
                   <button

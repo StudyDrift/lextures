@@ -128,14 +128,14 @@ export function CommentThread({
   const nested = nestComments(visible)
 
   return (
-    <div className="mt-2 space-y-2 border-t border-slate-100 pt-2 dark:border-neutral-800">
-      <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+    <div className="mt-2 space-y-2 border-t border-border-subtle pt-2 dark:border-border-subtle">
+      <h4 className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
         {t('boards.comment.threadHeading')}
       </h4>
       {loading ? (
-        <p className="text-xs text-slate-500">{t('common.loading')}</p>
+        <p className="text-xs text-fg-muted">{t('common.loading')}</p>
       ) : nested.length === 0 ? (
-        <p className="text-xs text-slate-500 dark:text-neutral-400">{t('boards.comment.empty')}</p>
+        <p className="text-xs text-fg-muted">{t('boards.comment.empty')}</p>
       ) : (
         <ul className="space-y-2" aria-label={t('boards.comment.threadAria')}>
           {nested.map(({ comment, children }) => (
@@ -149,7 +149,7 @@ export function CommentThread({
                 onDelete={() => void removeComment(comment.id)}
               />
               {children.length > 0 ? (
-                <ul className="ms-4 mt-2 space-y-2 border-s border-slate-200 ps-3 dark:border-neutral-700">
+                <ul className="ms-4 mt-2 space-y-2 border-s border-border-default ps-3 dark:border-border-default">
                   {children.map((child) => (
                     <li key={child.id}>
                       <CommentRow
@@ -172,11 +172,11 @@ export function CommentThread({
       {canInteract ? (
         <div className="space-y-1">
           {replyTo ? (
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-fg-muted">
               {t('boards.comment.replying')}{' '}
               <button
                 type="button"
-                className="text-indigo-600 underline dark:text-indigo-400"
+                className="text-accent-fg underline dark:text-indigo-400"
                 onClick={() => setReplyTo(null)}
               >
                 {t('boards.comment.cancelReply')}
@@ -189,14 +189,14 @@ export function CommentThread({
             rows={2}
             maxLength={4000}
             placeholder={t('boards.comment.placeholder')}
-            className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+            className="w-full rounded-md border border-border-strong px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
             aria-label={t('boards.comment.add')}
           />
           <button
             type="button"
             disabled={busy || !draft.trim()}
             onClick={() => void submit()}
-            className="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white disabled:opacity-50"
+            className="rounded-md bg-accent-solid px-3 py-1.5 text-xs font-medium text-white disabled:opacity-50"
           >
             {t('boards.comment.submit')}
           </button>
@@ -227,26 +227,26 @@ function CommentRow({
 
   if (comment.hidden && canManageBoard) {
     return (
-      <article className="rounded bg-slate-50 px-2 py-1.5 text-xs italic text-slate-500 dark:bg-neutral-800/60 dark:text-neutral-400">
+      <article className="rounded bg-surface-base px-2 py-1.5 text-xs italic text-fg-muted/60 dark:text-fg-muted">
         {t('boards.comment.hiddenPlaceholder')}
       </article>
     )
   }
 
   return (
-    <article className="rounded-md bg-slate-50 px-2 py-1.5 text-sm dark:bg-neutral-800/50">
-      <p className="whitespace-pre-wrap text-slate-700 dark:text-neutral-200">{bodyText(comment)}</p>
+    <article className="rounded-md bg-surface-base px-2 py-1.5 text-sm/50">
+      <p className="whitespace-pre-wrap text-fg-default">{bodyText(comment)}</p>
       <div className="mt-1 flex flex-wrap gap-2 text-xs">
-        <button type="button" className="text-indigo-600 dark:text-indigo-400" onClick={onReply}>
+        <button type="button" className="text-accent-fg" onClick={onReply}>
           {t('boards.comment.reply')}
         </button>
         {isAuthor ? (
-          <button type="button" className="text-red-600 dark:text-red-400" onClick={onDelete}>
+          <button type="button" className="text-danger-fg" onClick={onDelete}>
             {t('boards.comment.delete')}
           </button>
         ) : null}
         {canManageBoard ? (
-          <button type="button" className="text-amber-700 dark:text-amber-400" onClick={onHide}>
+          <button type="button" className="text-warning-fg dark:text-amber-400" onClick={onHide}>
             {t('boards.comment.hide')}
           </button>
         ) : null}

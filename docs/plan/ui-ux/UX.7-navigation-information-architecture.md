@@ -325,7 +325,7 @@ opt-in and explainability treatment.)*
 
 ## 13. Dependencies & Sequencing
 
-- **Must ship after** — [UX.2](UX.2-core-component-library-and-adoption-ratchet.md)
+- **Must ship after** — [UX.2](../../completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md)
   (disclosure/tooltip components), [UX.15](UX.15-i18n-coverage-and-rtl-completion.md)
   (labels must be i18n keys before they are centralised — or the two land
   together).

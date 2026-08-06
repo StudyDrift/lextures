@@ -54,15 +54,6 @@ func bearerToken(r *http.Request) (string, bool) {
 
 func (d Deps) handleLtiProviderLogin() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.requireLtiHandler(w) {
 			return
 		}
@@ -141,15 +132,6 @@ func (d Deps) handleLtiProviderLogin() http.HandlerFunc {
 
 func (d Deps) handleLtiProviderLaunch() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.requireLtiHandler(w) {
 			return
 		}
@@ -298,15 +280,6 @@ func resolveOrProvisionPlatformUser(ctx context.Context, pool *pgxpool.Pool, iss
 
 func (d Deps) handleLtiNRPSMemberships() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.requireLtiHandler(w) {
 			return
 		}
@@ -439,15 +412,6 @@ type agsBody struct {
 
 func (d Deps) handleLtiAGSScores() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.requireLtiHandler(w) {
 			return
 		}
@@ -523,15 +487,6 @@ func (d Deps) handleLtiAGSScores() http.HandlerFunc {
 
 func (d Deps) handleLtiConsumerFrame() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.requireLtiHandler(w) {
 			return
 		}
@@ -615,5 +570,4 @@ func (d Deps) handleLtiConsumerFrame() http.HandlerFunc {
 		_, _ = w.Write([]byte(h))
 	}
 }
-
 

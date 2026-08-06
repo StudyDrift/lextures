@@ -135,14 +135,14 @@ export default function AdminUsers() {
 
   return (
     <div>
-      <h1 id={titleId} className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+      <h1 id={titleId} className="text-xl font-semibold text-fg-default dark:text-slate-100">
         Users
       </h1>
 
       <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
         <div className="flex flex-wrap gap-3">
         <label className="flex flex-col text-sm">
-          <span className="mb-1 text-slate-600 dark:text-slate-400">Search</span>
+          <span className="mb-1 text-fg-muted dark:text-fg-subtle">Search</span>
           <input
             type="search"
             value={q}
@@ -151,18 +151,18 @@ export default function AdminUsers() {
               setPage(1)
             }}
             placeholder="Email or name"
-            className="rounded-lg border border-slate-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+            className="rounded-lg border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-raised"
           />
         </label>
         <label className="flex flex-col text-sm">
-          <span className="mb-1 text-slate-600 dark:text-slate-400">Role</span>
+          <span className="mb-1 text-fg-muted dark:text-fg-subtle">Role</span>
           <select
             value={role}
             onChange={(e) => {
               setRole(e.target.value)
               setPage(1)
             }}
-            className="rounded-lg border border-slate-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+            className="rounded-lg border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-raised"
           >
             {ROLES.map((r) => (
               <option key={r || 'all'} value={r}>
@@ -172,14 +172,14 @@ export default function AdminUsers() {
           </select>
         </label>
         <label className="flex flex-col text-sm">
-          <span className="mb-1 text-slate-600 dark:text-slate-400">Page size</span>
+          <span className="mb-1 text-fg-muted dark:text-fg-subtle">Page size</span>
           <select
             value={perPage}
             onChange={(e) => {
               setPerPage(Number(e.target.value))
               setPage(1)
             }}
-            className="rounded-lg border border-slate-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+            className="rounded-lg border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-raised"
           >
             {PAGE_SIZES.map((n) => (
               <option key={n} value={n}>
@@ -192,7 +192,7 @@ export default function AdminUsers() {
         {customFieldsEnabled && canManage && (
           <a
             href={usersExportUrl(orgId)}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-700 dark:text-slate-200"
+            className="rounded-lg border border-border-strong px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-base dark:border-border-default dark:text-slate-200"
           >
             Export CSV
           </a>
@@ -200,17 +200,17 @@ export default function AdminUsers() {
       </div>
 
       {error ? (
-        <p role="alert" className="mt-4 text-sm text-red-600 dark:text-red-400">
+        <p role="alert" className="mt-4 text-sm text-danger-fg">
           {error}
         </p>
       ) : null}
 
-      <div className="mt-4 overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-800">
+      <div className="mt-4 overflow-x-auto rounded-xl border border-border-default dark:border-border-subtle">
         <table className="min-w-full text-left text-sm">
           <caption className="sr-only">Organization users</caption>
-          <thead className="bg-slate-50 text-slate-600 dark:bg-neutral-950 dark:text-slate-400">
+          <thead className="bg-surface-base text-fg-muted dark:bg-surface-base dark:text-fg-subtle">
             <tr>
-              <th scope="col" className="sticky left-0 bg-slate-50 px-4 py-2 font-medium dark:bg-neutral-950">
+              <th scope="col" className="sticky left-0 bg-surface-base px-4 py-2 font-medium dark:bg-surface-base">
                 Email
               </th>
               <th scope="col" className="px-4 py-2 font-medium">
@@ -233,21 +233,21 @@ export default function AdminUsers() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
+                <td colSpan={6} className="px-4 py-8 text-center text-fg-muted">
                   Loading…
                 </td>
               </tr>
             ) : !data?.items.length ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
+                <td colSpan={6} className="px-4 py-8 text-center text-fg-muted">
                   No users found.
                 </td>
               </tr>
             ) : (
               data.items.map((user) => (
                 <>
-                <tr key={user.id} className="border-t border-slate-100 dark:border-neutral-800">
-                  <td className="sticky left-0 bg-white px-4 py-2 dark:bg-neutral-900">{user.email}</td>
+                <tr key={user.id} className="border-t border-border-subtle">
+                  <td className="sticky left-0 bg-surface-raised px-4 py-2 dark:bg-surface-raised">{user.email}</td>
                   <td className="px-4 py-2">{user.displayName ?? '—'}</td>
                   <td className="px-4 py-2">{user.role || '—'}</td>
                   <td className="px-4 py-2">{user.orgRole ?? '—'}</td>
@@ -258,7 +258,7 @@ export default function AdminUsers() {
                         <button
                           type="button"
                           onClick={() => openCustomFields(user)}
-                          className="text-sm text-slate-600 hover:underline dark:text-slate-300"
+                          className="text-sm text-fg-muted hover:underline dark:text-slate-300"
                         >
                           Custom fields
                         </button>
@@ -268,7 +268,7 @@ export default function AdminUsers() {
                           type="button"
                           disabled={busy === user.id}
                           onClick={() => void viewAs(user)}
-                          className="text-sm text-indigo-600 hover:underline disabled:opacity-50 dark:text-indigo-400"
+                          className="text-sm text-accent-fg hover:underline disabled:opacity-50 dark:text-indigo-400"
                         >
                           {t('impersonation.viewAs', { defaultValue: 'View as' })}
                         </button>
@@ -278,7 +278,7 @@ export default function AdminUsers() {
                           type="button"
                           disabled={busy === user.id}
                           onClick={() => void deactivate(user)}
-                          className="text-sm text-red-600 hover:underline disabled:opacity-50 dark:text-red-400"
+                          className="text-sm text-danger-fg hover:underline disabled:opacity-50 dark:text-red-400"
                         >
                           Deactivate
                         </button>
@@ -287,9 +287,9 @@ export default function AdminUsers() {
                   </td>
                 </tr>
                 {expandedUserId === user.id ? (
-                  <tr key={`${user.id}-fields`} className="border-t border-slate-100 bg-slate-50 dark:border-neutral-800 dark:bg-neutral-950">
+                  <tr key={`${user.id}-fields`} className="border-t border-border-subtle bg-surface-base dark:border-border-subtle dark:bg-surface-base">
                     <td colSpan={6} className="px-4 py-4">
-                      <Suspense fallback={<p className="text-sm text-slate-500">Loading custom fields…</p>}>
+                      <Suspense fallback={<p className="text-sm text-fg-muted">Loading custom fields…</p>}>
                         <AdminUserCustomFieldsPanel
                           userId={user.id}
                           orgId={orgId}
@@ -316,7 +316,7 @@ export default function AdminUsers() {
           >
             Previous
           </button>
-          <span className="text-sm text-slate-600 dark:text-slate-400">
+          <span className="text-sm text-fg-muted dark:text-fg-subtle">
             Page {data.page} of {data.totalPages}
           </span>
           <button

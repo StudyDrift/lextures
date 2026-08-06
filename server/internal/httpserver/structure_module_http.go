@@ -67,15 +67,6 @@ func (d Deps) handlePatchCourseModule() http.HandlerFunc {
 		VisibleFrom   *string `json:"visibleFrom"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -201,15 +192,6 @@ func (d Deps) handleCourseModuleDeletePreview() http.HandlerFunc {
 		GradedItems []gradedChildJSON `json:"gradedItems"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		cid, moduleID, ok := d.resolveCourseModuleForMutation(w, r)
 		if !ok {
 			return
@@ -255,15 +237,6 @@ func (d Deps) handleDeleteCourseModule() http.HandlerFunc {
 		ArchivedItems  []gradedChildJSON `json:"archivedItems,omitempty"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodDelete {
-			w.Header().Set("Allow", http.MethodDelete+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		cid, moduleID, ok := d.resolveCourseModuleForMutation(w, r)
 		if !ok {
 			return
@@ -320,15 +293,6 @@ func (d Deps) handleDeleteCourseModule() http.HandlerFunc {
 // handleCourseLtiExternalTools is GET /api/v1/courses/{course_code}/lti-external-tools.
 func (d Deps) handleCourseLtiExternalTools() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -407,15 +371,6 @@ func (d Deps) writeCreatedStructureItem(w http.ResponseWriter, r *http.Request, 
 // handleCreateModuleHeading is POST /api/v1/courses/{course_code}/structure/modules/{module_id}/headings.
 func (d Deps) handleCreateModuleHeading() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		_, _, cid, moduleID, ok := d.beginCreateUnderModule(w, r)
 		if !ok {
 			return
@@ -445,15 +400,6 @@ func (d Deps) handleCreateModuleHeading() http.HandlerFunc {
 // handleCreateModuleContentPage is POST .../content-pages.
 func (d Deps) handleCreateModuleContentPage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		_, _, cid, moduleID, ok := d.beginCreateUnderModule(w, r)
 		if !ok {
 			return
@@ -483,15 +429,6 @@ func (d Deps) handleCreateModuleContentPage() http.HandlerFunc {
 // handleCreateModuleAssignment is POST .../assignments.
 func (d Deps) handleCreateModuleAssignment() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		_, _, cid, moduleID, ok := d.beginCreateUnderModule(w, r)
 		if !ok {
 			return
@@ -524,15 +461,6 @@ func (d Deps) handleCreateModuleAssignment() http.HandlerFunc {
 // handleCreateModuleQuiz is POST .../quizzes.
 func (d Deps) handleCreateModuleQuiz() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		_, _, cid, moduleID, ok := d.beginCreateUnderModule(w, r)
 		if !ok {
 			return
@@ -567,15 +495,6 @@ type createExternalLinkBody struct {
 // handleCreateModuleExternalLink is POST .../external-links.
 func (d Deps) handleCreateModuleExternalLink() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		_, _, cid, moduleID, ok := d.beginCreateUnderModule(w, r)
 		if !ok {
 			return
@@ -612,15 +531,6 @@ type createLTILinkBody struct {
 // handleCreateModuleLTILink is POST .../lti-links.
 func (d Deps) handleCreateModuleLTILink() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		_, _, cid, moduleID, ok := d.beginCreateUnderModule(w, r)
 		if !ok {
 			return
@@ -673,15 +583,6 @@ type createVibeActivityBody struct {
 // handleCreateModuleVibeActivity is POST .../vibe-activities
 func (d Deps) handleCreateModuleVibeActivity() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		_, _, cid, moduleID, ok := d.beginCreateUnderModule(w, r)
 		if !ok {
 			return
@@ -711,15 +612,6 @@ func (d Deps) handleCreateModuleVibeActivity() http.HandlerFunc {
 // handleGetModuleVibeActivity is GET /vibe-activities/{item_id}
 func (d Deps) handleGetModuleVibeActivity() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -781,15 +673,6 @@ type patchVibeActivityBody struct {
 // handlePatchModuleVibeActivity is PATCH /vibe-activities/{item_id}
 func (d Deps) handlePatchModuleVibeActivity() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -876,15 +759,6 @@ func (d Deps) handleGenerateVibeActivityHTML() http.HandlerFunc {
 		HTML string `json:"html"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return

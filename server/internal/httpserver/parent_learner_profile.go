@@ -20,11 +20,6 @@ func (d Deps) parentLearnerProfileEnabled(w http.ResponseWriter) bool {
 
 func (d Deps) handleParentStudentLearnerProfile() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.parentLearnerProfileEnabled(w) {
 			return
 		}
@@ -59,11 +54,6 @@ func (d Deps) handleParentStudentLearnerProfile() http.HandlerFunc {
 
 func (d Deps) handleParentStudentLearnerProfileControl(action string, fn func(*lpsvc.Service, uuid.UUID, *http.Request) error, responseStatus string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.parentLearnerProfileEnabled(w) {
 			return
 		}
@@ -120,11 +110,6 @@ func (d Deps) handleParentStudentLearnerProfileReset() http.HandlerFunc {
 
 func (d Deps) handleParentStudentLearnerProfileExport() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.parentLearnerProfileEnabled(w) {
 			return
 		}

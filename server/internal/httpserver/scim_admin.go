@@ -32,11 +32,6 @@ type postScimTokenBody struct {
 // handleAdminScimTokenPost is POST /api/v1/admin/provisioning/scim/tokens
 func (d Deps) handleAdminScimTokenPost() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.effectiveConfig().ScimEnabled {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeInvalidInput, "SCIM is not enabled.")
 			return
@@ -82,11 +77,6 @@ func (d Deps) handleAdminScimTokenPost() http.HandlerFunc {
 // handleAdminScimTokenDelete is DELETE /api/v1/admin/provisioning/scim/tokens/{id}
 func (d Deps) handleAdminScimTokenDelete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodDelete {
-			w.Header().Set("Allow", http.MethodDelete)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.effectiveConfig().ScimEnabled {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeInvalidInput, "SCIM is not enabled.")
 			return
@@ -125,11 +115,6 @@ type scimTokenRow struct {
 // handleAdminScimTokensList is GET /api/v1/admin/provisioning/scim/tokens?institutionId=
 func (d Deps) handleAdminScimTokensList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.effectiveConfig().ScimEnabled {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeInvalidInput, "SCIM is not enabled.")
 			return
@@ -189,11 +174,6 @@ type scimEventRow struct {
 // handleAdminScimEventsList is GET /api/v1/admin/provisioning/scim/events
 func (d Deps) handleAdminScimEventsList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.effectiveConfig().ScimEnabled {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeInvalidInput, "SCIM is not enabled.")
 			return

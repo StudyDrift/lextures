@@ -58,9 +58,9 @@ const TONE_STYLES: Record<
     card: 'border-indigo-100/80 bg-gradient-to-br from-indigo-50/90 via-white to-white dark:border-indigo-900/40 dark:from-indigo-950/40 dark:via-neutral-900 dark:to-neutral-900',
     cardSelected:
       'border-indigo-400 ring-2 ring-indigo-500/30 dark:border-indigo-500 dark:ring-indigo-400/30',
-    iconWrap: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-950/80 dark:text-indigo-300',
-    icon: 'text-indigo-600 dark:text-indigo-300',
-    value: 'text-slate-900 dark:text-neutral-50',
+    iconWrap: 'bg-indigo-100 text-accent-fg dark:bg-indigo-950/80 dark:text-indigo-300',
+    icon: 'text-accent-fg dark:text-indigo-300',
+    value: 'text-fg-default',
   },
   emerald: {
     card: 'border-emerald-100/80 bg-gradient-to-br from-emerald-50/90 via-white to-white dark:border-emerald-900/40 dark:from-emerald-950/40 dark:via-neutral-900 dark:to-neutral-900',
@@ -68,7 +68,7 @@ const TONE_STYLES: Record<
       'border-emerald-400 ring-2 ring-emerald-500/30 dark:border-emerald-500 dark:ring-emerald-400/30',
     iconWrap: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-950/80 dark:text-emerald-300',
     icon: 'text-emerald-600 dark:text-emerald-300',
-    value: 'text-slate-900 dark:text-neutral-50',
+    value: 'text-fg-default',
   },
   sky: {
     card: 'border-sky-100/80 bg-gradient-to-br from-sky-50/90 via-white to-white dark:border-sky-900/40 dark:from-sky-950/40 dark:via-neutral-900 dark:to-neutral-900',
@@ -76,15 +76,15 @@ const TONE_STYLES: Record<
       'border-sky-400 ring-2 ring-sky-500/30 dark:border-sky-500 dark:ring-sky-400/30',
     iconWrap: 'bg-sky-100 text-sky-600 dark:bg-sky-950/80 dark:text-sky-300',
     icon: 'text-sky-600 dark:text-sky-300',
-    value: 'text-slate-900 dark:text-neutral-50',
+    value: 'text-fg-default',
   },
   slate: {
-    card: 'border-slate-200/90 bg-gradient-to-br from-slate-50/90 via-white to-white dark:border-neutral-700 dark:from-neutral-800/60 dark:via-neutral-900 dark:to-neutral-900',
+    card: 'border-slate-200/90 bg-gradient-to-br from-slate-50/90 via-white to-white dark:border-border-default dark:from-neutral-800/60 dark:via-neutral-900 dark:to-neutral-900',
     cardSelected:
       'border-slate-400 ring-2 ring-slate-400/40 dark:border-neutral-500 dark:ring-neutral-400/30',
-    iconWrap: 'bg-slate-100 text-slate-600 dark:bg-neutral-800 dark:text-neutral-300',
-    icon: 'text-slate-600 dark:text-neutral-300',
-    value: 'text-slate-900 dark:text-neutral-50',
+    iconWrap: 'bg-surface-sunken text-fg-muted dark:bg-surface-overlay dark:text-fg-muted',
+    icon: 'text-fg-muted',
+    value: 'text-fg-default',
   },
   rose: {
     card: 'border-rose-100/80 bg-gradient-to-br from-rose-50/90 via-white to-white dark:border-rose-900/40 dark:from-rose-950/40 dark:via-neutral-900 dark:to-neutral-900',
@@ -92,7 +92,7 @@ const TONE_STYLES: Record<
       'border-rose-400 ring-2 ring-rose-500/30 dark:border-rose-500 dark:ring-rose-400/30',
     iconWrap: 'bg-rose-100 text-rose-600 dark:bg-rose-950/80 dark:text-rose-300',
     icon: 'text-rose-600 dark:text-rose-300',
-    value: 'text-slate-900 dark:text-neutral-50',
+    value: 'text-fg-default',
   },
 }
 
@@ -184,13 +184,11 @@ function PeopleStatsCard({
       onClick={onSelect}
       aria-pressed={selected}
       aria-label={`${selected ? 'Hide' : 'Show'} ${label}: ${countLabel}`}
-      className={`relative flex h-full w-full flex-col overflow-hidden rounded-2xl border px-4 py-4 text-left shadow-sm transition-all hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40 ${styles.card} ${
-        selected ? styles.cardSelected : ''
-      }`}
+      className={`relative flex h-full w-full flex-col overflow-hidden rounded-2xl border px-4 py-4 text-left shadow-sm transition-all hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40 ${styles.card} ${ selected ? styles.cardSelected : '' }`}
     >
       <div className="flex items-start justify-between gap-3">
         {/* Fixed 2-line label band so values line up across cards */}
-        <p className="min-h-[2.5rem] min-w-0 flex-1 text-[11px] font-semibold uppercase leading-tight tracking-wider text-slate-500 dark:text-neutral-400">
+        <p className="min-h-[2.5rem] min-w-0 flex-1 text-[11px] font-semibold uppercase leading-tight tracking-wider text-fg-muted">
           {label}
         </p>
         <span
@@ -213,10 +211,10 @@ function PeopleStatsCard({
         </p>
       )}
       {/* Fixed 2-line hint band (empty when no hint) keeps footers aligned */}
-      <p className="mt-1.5 min-h-[2rem] text-xs leading-snug text-slate-500 dark:text-neutral-500">
+      <p className="mt-1.5 min-h-[2rem] text-xs leading-snug text-fg-subtle">
         {hint ?? '\u00a0'}
       </p>
-      <p className="mt-auto pt-2 inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 dark:text-neutral-400">
+      <p className="mt-auto pt-2 inline-flex items-center gap-1 text-[11px] font-medium text-fg-muted">
         {selected ? 'Hide list' : 'View list'}
         <ChevronDown
           className={`h-3.5 w-3.5 transition-transform ${selected ? 'rotate-180' : ''}`}
@@ -244,7 +242,7 @@ function PeopleDashboardCards({
     return (
       <p
         role="alert"
-        className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300"
+        className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-danger-fg dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300"
       >
         {error}
       </p>
@@ -260,7 +258,7 @@ function PeopleDashboardCards({
         <h3 id="people-dashboard-heading" className="sr-only">
           People overview
         </h3>
-        <p className="text-xs text-slate-500 dark:text-neutral-500">
+        <p className="text-xs text-fg-subtle">
           Click a metric to inspect matching accounts.
         </p>
       </div>
@@ -333,7 +331,7 @@ function PeopleResultsTable({
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full text-left text-sm">
-        <thead className="bg-slate-50/80 text-slate-500 dark:bg-neutral-950/60 dark:text-neutral-400">
+        <thead className="bg-slate-50/80 text-fg-muted/60 dark:text-fg-muted">
           <tr>
             <th scope="col" className="px-5 py-2.5 text-xs font-semibold uppercase tracking-wide">
               Name
@@ -365,17 +363,17 @@ function PeopleResultsTable({
             <tr>
               <td colSpan={colSpan} className="px-5 py-12 text-center">
                 <Loader2 className="mx-auto h-5 w-5 animate-spin text-indigo-500" aria-hidden />
-                <p className="mt-2 text-sm text-slate-500">{loadingLabel}</p>
+                <p className="mt-2 text-sm text-fg-muted">{loadingLabel}</p>
               </td>
             </tr>
           ) : !data?.items.length ? (
             <tr>
               <td colSpan={colSpan} className="px-5 py-12 text-center">
                 <Users className="mx-auto h-8 w-8 text-slate-300 dark:text-neutral-600" aria-hidden />
-                <p className="mt-2 text-sm font-medium text-slate-700 dark:text-neutral-300">
+                <p className="mt-2 text-sm font-medium text-fg-muted">
                   {emptyTitle}
                 </p>
-                <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">{emptyHint}</p>
+                <p className="mt-1 text-sm text-fg-muted">{emptyHint}</p>
               </td>
             </tr>
           ) : (
@@ -398,27 +396,27 @@ function PeopleResultsTable({
                         size="sm"
                         showPreview={false}
                       />
-                      <span className="font-medium text-slate-900 group-hover:text-indigo-600 dark:text-neutral-100 dark:group-hover:text-indigo-400">
+                      <span className="font-medium text-fg-default group-hover:text-accent-fg dark:text-fg-default dark:group-hover:text-indigo-400">
                         {displayName}
                       </span>
                     </button>
                   </td>
-                  <td className="px-5 py-3 text-slate-600 dark:text-neutral-400">{user.email}</td>
-                  <td className="px-5 py-3 text-slate-700 dark:text-neutral-300">{user.orgName}</td>
+                  <td className="px-5 py-3 text-fg-muted">{user.email}</td>
+                  <td className="px-5 py-3 text-fg-muted">{user.orgName}</td>
                   <td className="px-5 py-3">
                     {user.role ? (
-                      <span className="inline-flex rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700 dark:bg-neutral-800 dark:text-neutral-300">
+                      <span className="inline-flex rounded-md bg-surface-sunken px-2 py-0.5 text-xs font-medium text-fg-muted dark:bg-surface-overlay dark:text-fg-muted">
                         {user.role}
                       </span>
                     ) : (
-                      <span className="text-slate-400">—</span>
+                      <span className="text-fg-subtle">—</span>
                     )}
                   </td>
                   <td className="px-5 py-3">
                     <StatusBadge active={user.active} />
                   </td>
                   {showJoined ? (
-                    <td className="px-5 py-3 whitespace-nowrap text-slate-600 dark:text-neutral-400">
+                    <td className="px-5 py-3 whitespace-nowrap text-fg-muted">
                       {formatDateTime(user.createdAt)}
                     </td>
                   ) : null}
@@ -429,7 +427,7 @@ function PeopleResultsTable({
                           type="button"
                           disabled={busyId === user.id}
                           onClick={() => onSuspend(user)}
-                          className="rounded-lg px-2 py-1 text-xs font-medium text-amber-700 transition-colors hover:bg-amber-50 disabled:opacity-50 dark:text-amber-400 dark:hover:bg-amber-950/40"
+                          className="rounded-lg px-2 py-1 text-xs font-medium text-warning-fg transition-colors hover:bg-amber-50 disabled:opacity-50 dark:text-amber-400 dark:hover:bg-amber-950/40"
                         >
                           Suspend
                         </button>
@@ -447,7 +445,7 @@ function PeopleResultsTable({
                         type="button"
                         disabled={busyId === user.id}
                         onClick={() => onDelete(user)}
-                        className="rounded-lg px-2 py-1 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50 dark:text-red-400 dark:hover:bg-red-950/40"
+                        className="rounded-lg px-2 py-1 text-xs font-medium text-danger-fg transition-colors hover:bg-red-50 disabled:opacity-50 dark:text-red-400 dark:hover:bg-red-950/40"
                       >
                         Delete
                       </button>
@@ -480,24 +478,24 @@ function PaginationNav({
   return (
     <nav
       aria-label={label}
-      className="flex items-center justify-between gap-3 border-t border-slate-100 px-5 py-3 dark:border-neutral-800"
+      className="flex items-center justify-between gap-3 border-t border-border-subtle px-5 py-3 dark:border-border-subtle"
     >
       <button
         type="button"
         disabled={page <= 1}
         onClick={onPrev}
-        className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800"
+        className="rounded-lg border border-border-default px-3 py-1.5 text-sm font-medium text-fg-muted transition-colors hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
       >
         Previous
       </button>
-      <span className="text-sm text-slate-600 dark:text-neutral-400">
+      <span className="text-sm text-fg-muted">
         Page {page} of {totalPages}
       </span>
       <button
         type="button"
         disabled={page >= totalPages}
         onClick={onNext}
-        className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800"
+        className="rounded-lg border border-border-default px-3 py-1.5 text-sm font-medium text-fg-muted transition-colors hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
       >
         Next
       </button>
@@ -526,9 +524,9 @@ function PersonReportView({
 }) {
   if (loading) {
     return (
-      <div className="mt-6 flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-8 dark:border-neutral-800 dark:bg-neutral-900">
+      <div className="mt-6 flex items-center gap-3 rounded-2xl border border-border-default bg-surface-raised px-5 py-8 dark:border-border-subtle dark:bg-surface-raised">
         <Loader2 className="h-5 w-5 animate-spin text-indigo-500" aria-hidden />
-        <p className="text-sm text-slate-500 dark:text-neutral-400">Loading report…</p>
+        <p className="text-sm text-fg-muted">Loading report…</p>
       </div>
     )
   }
@@ -536,7 +534,7 @@ function PersonReportView({
     return (
       <p
         role="alert"
-        className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300"
+        className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-danger-fg dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300"
       >
         {error}
       </p>
@@ -552,28 +550,28 @@ function PersonReportView({
       <button
         type="button"
         onClick={onBack}
-        className="inline-flex items-center gap-2 rounded-lg px-1 py-0.5 text-sm font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+        className="inline-flex items-center gap-2 rounded-lg px-1 py-0.5 text-sm font-medium text-fg-muted transition-colors hover:text-fg-default dark:text-fg-muted dark:hover:text-fg-default"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden />
         Back to search
       </button>
 
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-        <div className="border-b border-slate-100 bg-gradient-to-r from-slate-50/80 to-white px-5 py-5 dark:border-neutral-800 dark:from-neutral-950/50 dark:to-neutral-900">
+      <div className="overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-sm dark:border-border-subtle dark:bg-surface-raised">
+        <div className="border-b border-border-subtle bg-gradient-to-r from-slate-50/80 to-white px-5 py-5 dark:border-border-subtle dark:from-neutral-950/50 dark:to-neutral-900">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="flex min-w-0 items-start gap-4">
               <EnrollmentAvatar userId={report.id} name={name} size="md" showPreview={false} />
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="truncate text-lg font-semibold text-slate-900 dark:text-neutral-100">
+                  <h3 className="truncate text-lg font-semibold text-fg-default">
                     {name}
                   </h3>
                   <StatusBadge active={report.active} />
                 </div>
-                <p className="mt-0.5 truncate text-sm text-slate-600 dark:text-neutral-400">
+                <p className="mt-0.5 truncate text-sm text-fg-muted">
                   {report.email}
                 </p>
-                <p className="mt-1 text-xs text-slate-500 dark:text-neutral-500">
+                <p className="mt-1 text-xs text-fg-subtle">
                   {report.orgName}
                   {report.role ? ` · ${report.role}` : ''}
                 </p>
@@ -606,7 +604,7 @@ function PersonReportView({
                   type="button"
                   disabled={busy}
                   onClick={onDelete}
-                  className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-white px-3.5 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-50 disabled:opacity-50 dark:border-red-900/60 dark:bg-neutral-900 dark:text-red-300 dark:hover:bg-red-950/40"
+                  className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-surface-raised px-3.5 py-2 text-sm font-medium text-danger-fg transition-colors hover:bg-red-50 disabled:opacity-50 dark:border-red-900/60 dark:bg-surface-raised dark:text-red-300 dark:hover:bg-red-950/40"
                 >
                   <Trash2 className="h-4 w-4" aria-hidden />
                   Delete account
@@ -616,7 +614,7 @@ function PersonReportView({
           </div>
         </div>
 
-        <dl className="grid gap-px bg-slate-100 sm:grid-cols-2 lg:grid-cols-4 dark:bg-neutral-800">
+        <dl className="grid gap-px bg-surface-sunken sm:grid-cols-2 lg:grid-cols-4 dark:bg-surface-overlay">
           {[
             { label: 'Joined', value: formatDateTime(report.createdAt) },
             {
@@ -626,11 +624,11 @@ function PersonReportView({
             { label: 'Enrollments', value: String(report.enrollmentCount) },
             { label: 'Status', value: statusLabel(report.active) },
           ].map((item) => (
-            <div key={item.label} className="bg-white px-5 py-4 dark:bg-neutral-900">
-              <dt className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-500">
+            <div key={item.label} className="bg-surface-raised px-5 py-4 dark:bg-surface-raised">
+              <dt className="text-xs font-medium uppercase tracking-wide text-fg-subtle">
                 {item.label}
               </dt>
-              <dd className="mt-1 text-sm font-medium text-slate-900 dark:text-neutral-100">
+              <dd className="mt-1 text-sm font-medium text-fg-default">
                 {item.value}
               </dd>
             </div>
@@ -638,18 +636,18 @@ function PersonReportView({
         </dl>
       </div>
 
-      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-        <div className="border-b border-slate-100 px-5 py-3 dark:border-neutral-800">
-          <h4 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Enrollments</h4>
+      <section className="overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-sm dark:border-border-subtle dark:bg-surface-raised">
+        <div className="border-b border-border-subtle px-5 py-3 dark:border-border-subtle">
+          <h4 className="text-sm font-semibold text-fg-default">Enrollments</h4>
         </div>
         {report.enrollments.length === 0 ? (
-          <p className="px-5 py-8 text-center text-sm text-slate-500 dark:text-neutral-400">
+          <p className="px-5 py-8 text-center text-sm text-fg-muted">
             No enrollments.
           </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full text-left text-sm">
-              <thead className="bg-slate-50/80 text-slate-500 dark:bg-neutral-950/60 dark:text-neutral-400">
+              <thead className="bg-slate-50/80 text-fg-muted/60 dark:text-fg-muted">
                 <tr>
                   <th scope="col" className="px-5 py-2.5 text-xs font-semibold uppercase tracking-wide">
                     Course
@@ -672,16 +670,16 @@ function PersonReportView({
                     className="transition-colors hover:bg-slate-50/70 dark:hover:bg-neutral-800/40"
                   >
                     <td className="px-5 py-3">
-                      <span className="font-medium text-slate-900 dark:text-neutral-100">
+                      <span className="font-medium text-fg-default">
                         {e.courseTitle}
                       </span>
-                      <span className="ml-2 font-mono text-xs text-slate-500 dark:text-neutral-500">
+                      <span className="ml-2 font-mono text-xs text-fg-subtle">
                         {e.courseCode}
                       </span>
                     </td>
-                    <td className="px-5 py-3 text-slate-700 dark:text-neutral-300">{e.role}</td>
-                    <td className="px-5 py-3 text-slate-700 dark:text-neutral-300">{e.state}</td>
-                    <td className="px-5 py-3 whitespace-nowrap text-slate-600 dark:text-neutral-400">
+                    <td className="px-5 py-3 text-fg-muted">{e.role}</td>
+                    <td className="px-5 py-3 text-fg-muted">{e.state}</td>
+                    <td className="px-5 py-3 whitespace-nowrap text-fg-muted">
                       {formatDateTime(e.enrolledAt)}
                     </td>
                   </tr>
@@ -692,20 +690,20 @@ function PersonReportView({
         )}
       </section>
 
-      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-        <div className="border-b border-slate-100 px-5 py-3 dark:border-neutral-800">
-          <h4 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+      <section className="overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-sm dark:border-border-subtle dark:bg-surface-raised">
+        <div className="border-b border-border-subtle px-5 py-3 dark:border-border-subtle">
+          <h4 className="text-sm font-semibold text-fg-default">
             Recent activity
           </h4>
         </div>
         {report.recentActivity.length === 0 ? (
-          <p className="px-5 py-8 text-center text-sm text-slate-500 dark:text-neutral-400">
+          <p className="px-5 py-8 text-center text-sm text-fg-muted">
             No recorded activity.
           </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full text-left text-sm">
-              <thead className="bg-slate-50/80 text-slate-500 dark:bg-neutral-950/60 dark:text-neutral-400">
+              <thead className="bg-slate-50/80 text-fg-muted/60 dark:text-fg-muted">
                 <tr>
                   <th scope="col" className="px-5 py-2.5 text-xs font-semibold uppercase tracking-wide">
                     When
@@ -724,15 +722,15 @@ function PersonReportView({
                     key={`${a.occurredAt}-${i}`}
                     className="transition-colors hover:bg-slate-50/70 dark:hover:bg-neutral-800/40"
                   >
-                    <td className="px-5 py-3 whitespace-nowrap text-slate-600 dark:text-neutral-400">
+                    <td className="px-5 py-3 whitespace-nowrap text-fg-muted">
                       {formatDateTime(a.occurredAt)}
                     </td>
-                    <td className="px-5 py-3 capitalize text-slate-800 dark:text-neutral-200">
+                    <td className="px-5 py-3 capitalize text-fg-default">
                       {a.eventKind.replaceAll('_', ' ')}
                     </td>
                     <td className="px-5 py-3">
-                      <span className="text-slate-800 dark:text-neutral-200">{a.courseTitle}</span>
-                      <span className="ml-2 font-mono text-xs text-slate-500">{a.courseCode}</span>
+                      <span className="text-fg-default">{a.courseTitle}</span>
+                      <span className="ml-2 font-mono text-xs text-fg-muted">{a.courseCode}</span>
                     </td>
                   </tr>
                 ))}
@@ -1005,19 +1003,19 @@ export function PeoplePanel() {
         <section
           id={filterPanelId}
           aria-label={activeStat.tableTitle}
-          className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900"
+          className="overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-sm dark:border-border-subtle dark:bg-surface-raised"
         >
-          <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-100 px-5 py-4 dark:border-neutral-800">
+          <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border-subtle px-5 py-4 dark:border-border-subtle">
             <div>
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+              <h3 className="text-sm font-semibold text-fg-default">
                 {activeStat.tableTitle}
               </h3>
-              <p className="mt-0.5 text-sm text-slate-500 dark:text-neutral-400">
+              <p className="mt-0.5 text-sm text-fg-muted">
                 {activeStat.tableDescription}
                 {filterCount != null && !filterLoading ? (
                   <>
                     {' '}
-                    <span className="font-medium text-slate-700 dark:text-neutral-300">
+                    <span className="font-medium text-fg-muted">
                       {formatCount(filterCount)}
                     </span>{' '}
                     {filterCount === 1 ? 'account' : 'accounts'}.
@@ -1026,7 +1024,7 @@ export function PeoplePanel() {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-neutral-400">
+              <label className="flex items-center gap-2 text-sm text-fg-muted">
                 <span className="text-xs font-medium uppercase tracking-wide">Page size</span>
                 <select
                   value={filterPerPage}
@@ -1034,7 +1032,7 @@ export function PeoplePanel() {
                     setFilterPerPage(Number(e.target.value))
                     setFilterPage(1)
                   }}
-                  className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                  className="rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
                 >
                   {PAGE_SIZES.map((n) => (
                     <option key={n} value={n}>
@@ -1046,7 +1044,7 @@ export function PeoplePanel() {
               <button
                 type="button"
                 onClick={() => toggleFilter(selectedFilter)}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border-default px-3 py-1.5 text-sm font-medium text-fg-muted transition-colors hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
               >
                 <X className="h-4 w-4" aria-hidden />
                 Close
@@ -1055,10 +1053,10 @@ export function PeoplePanel() {
           </div>
 
           {filterError ? (
-            <div className="border-b border-slate-100 px-5 py-3 dark:border-neutral-800">
+            <div className="border-b border-border-subtle px-5 py-3 dark:border-border-subtle">
               <p
                 role="alert"
-                className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300"
+                className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-danger-fg dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300"
               >
                 {filterError}
               </p>
@@ -1091,18 +1089,18 @@ export function PeoplePanel() {
         </section>
       ) : null}
 
-      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-4 dark:border-neutral-800">
+      <section className="overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-sm dark:border-border-subtle dark:bg-surface-raised">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-subtle px-5 py-4 dark:border-border-subtle">
           <div>
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Find people</h3>
-            <p className="mt-0.5 text-sm text-slate-500 dark:text-neutral-400">
+            <h3 className="text-sm font-semibold text-fg-default">Find people</h3>
+            <p className="mt-0.5 text-sm text-fg-muted">
               Search by first name, last name, or email. Results appear after you search.
             </p>
           </div>
           <button
             type="button"
             onClick={() => setInviteOpen(true)}
-            className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm shadow-indigo-600/20 transition-colors hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:text-white"
+            className="inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-medium text-white shadow-sm shadow-indigo-600/20 transition-colors hover:bg-accent dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:text-white"
           >
             <MailPlus className="h-4 w-4" aria-hidden />
             Invite user
@@ -1111,12 +1109,12 @@ export function PeoplePanel() {
 
         <form onSubmit={onSearchSubmit} className="flex flex-wrap items-end gap-3 px-5 py-4">
           <label className="flex min-w-[16rem] flex-1 flex-col text-sm">
-            <span className="mb-1.5 text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+            <span className="mb-1.5 text-xs font-medium uppercase tracking-wide text-fg-muted">
               Search
             </span>
             <div className="relative">
               <Search
-                className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+                className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-subtle"
                 aria-hidden
               />
               <input
@@ -1124,12 +1122,12 @@ export function PeoplePanel() {
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="First name, last name, or email"
-                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-2.5 pl-10 pr-3 text-sm text-slate-900 shadow-inner transition-colors placeholder:text-slate-400 focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-indigo-500/50 dark:focus:bg-neutral-950"
+                className="w-full rounded-xl border border-border-default bg-slate-50/50 py-2.5 pl-10 pr-3 text-sm text-fg-default shadow-inner transition-colors placeholder:text-fg-subtle focus:border-indigo-300 focus:bg-surface-raised focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:placeholder:text-neutral-500 dark:focus:border-indigo-500/50 dark:focus:bg-surface-base"
               />
             </div>
           </label>
           <label className="flex flex-col text-sm">
-            <span className="mb-1.5 text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+            <span className="mb-1.5 text-xs font-medium uppercase tracking-wide text-fg-muted">
               Page size
             </span>
             <select
@@ -1138,7 +1136,7 @@ export function PeoplePanel() {
                 setPerPage(Number(e.target.value))
                 setPage(1)
               }}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+              className="rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm dark:border-border-default dark:bg-surface-base"
             >
               {PAGE_SIZES.map((n) => (
                 <option key={n} value={n}>
@@ -1150,7 +1148,7 @@ export function PeoplePanel() {
           <button
             type="submit"
             disabled={!q.trim() || loading}
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            className="inline-flex items-center gap-2 rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm font-medium text-fg-muted shadow-sm transition-colors hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
           >
             {loading ? (
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
@@ -1162,10 +1160,10 @@ export function PeoplePanel() {
         </form>
 
         {error ? (
-          <div className="border-t border-slate-100 px-5 py-3 dark:border-neutral-800">
+          <div className="border-t border-border-subtle px-5 py-3 dark:border-border-subtle">
             <p
               role="alert"
-              className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300"
+              className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-danger-fg dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300"
             >
               {error}
             </p>
@@ -1173,21 +1171,21 @@ export function PeoplePanel() {
         ) : null}
 
         {!submittedQ.trim() ? (
-          <div className="border-t border-slate-100 px-5 py-12 dark:border-neutral-800">
+          <div className="border-t border-border-subtle px-5 py-12 dark:border-border-subtle">
             <div className="mx-auto flex max-w-sm flex-col items-center text-center">
-              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 ring-1 ring-indigo-100 dark:bg-indigo-950/50 dark:text-indigo-300 dark:ring-indigo-900/50">
+              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-accent-fg ring-1 ring-indigo-100 dark:bg-indigo-950/50 dark:text-indigo-300 dark:ring-indigo-900/50">
                 <Sparkles className="h-6 w-6" aria-hidden />
               </span>
-              <p className="mt-4 text-sm font-medium text-slate-900 dark:text-neutral-100">
+              <p className="mt-4 text-sm font-medium text-fg-default">
                 Search to manage accounts
               </p>
-              <p className="mt-1.5 text-sm leading-relaxed text-slate-500 dark:text-neutral-400">
+              <p className="mt-1.5 text-sm leading-relaxed text-fg-muted">
                 Enter a name or email above, click a metric card above, or invite someone new.
               </p>
               <button
                 type="button"
                 onClick={() => setInviteOpen(true)}
-                className="mt-5 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                className="mt-5 inline-flex items-center gap-2 rounded-xl border border-border-default bg-surface-raised px-3.5 py-2 text-sm font-medium text-fg-muted transition-colors hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
               >
                 <MailPlus className="h-4 w-4" aria-hidden />
                 Invite user
@@ -1195,24 +1193,24 @@ export function PeoplePanel() {
             </div>
           </div>
         ) : (
-          <div className="border-t border-slate-100 dark:border-neutral-800">
+          <div className="border-t border-border-subtle">
             {data && !loading ? (
-              <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-2.5 dark:border-neutral-800">
-                <p className="text-xs text-slate-500 dark:text-neutral-400">
+              <div className="flex items-center justify-between gap-3 border-b border-border-subtle px-5 py-2.5 dark:border-border-subtle">
+                <p className="text-xs text-fg-muted">
                   {resultCount != null ? (
                     <>
-                      <span className="font-medium text-slate-700 dark:text-neutral-300">
+                      <span className="font-medium text-fg-muted">
                         {formatCount(resultCount)}
                       </span>{' '}
                       {resultCount === 1 ? 'result' : 'results'} for{' '}
-                      <span className="font-medium text-slate-700 dark:text-neutral-300">
+                      <span className="font-medium text-fg-muted">
                         “{submittedQ}”
                       </span>
                     </>
                   ) : (
                     <>
                       Results for{' '}
-                      <span className="font-medium text-slate-700 dark:text-neutral-300">
+                      <span className="font-medium text-fg-muted">
                         “{submittedQ}”
                       </span>
                     </>
@@ -1255,21 +1253,21 @@ export function PeoplePanel() {
         >
           <form
             onSubmit={(e) => void onInvite(e)}
-            className="w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/15 dark:border-neutral-700 dark:bg-neutral-900"
+            className="w-full max-w-md overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-2xl shadow-slate-900/15 dark:border-border-default dark:bg-surface-raised"
           >
-            <div className="border-b border-slate-100 bg-gradient-to-r from-indigo-50/80 to-white px-6 py-5 dark:border-neutral-800 dark:from-indigo-950/40 dark:to-neutral-900">
+            <div className="border-b border-border-subtle bg-gradient-to-r from-indigo-50/80 to-white px-6 py-5 dark:border-border-subtle dark:from-indigo-950/40 dark:to-neutral-900">
               <div className="flex items-start gap-3">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-300">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-accent-fg dark:bg-indigo-950 dark:text-indigo-300">
                   <MailPlus className="h-5 w-5" aria-hidden />
                 </span>
                 <div>
                   <h3
                     id="invite-user-title"
-                    className="text-base font-semibold text-slate-900 dark:text-neutral-100"
+                    className="text-base font-semibold text-fg-default"
                   >
                     Invite user
                   </h3>
-                  <p className="mt-0.5 text-sm text-slate-500 dark:text-neutral-400">
+                  <p className="mt-0.5 text-sm text-fg-muted">
                     Creates an account and emails a link to set their password.
                   </p>
                 </div>
@@ -1277,7 +1275,7 @@ export function PeoplePanel() {
             </div>
             <div className="space-y-3 px-6 py-5">
               <label className="block text-sm">
-                <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                <span className="text-xs font-medium uppercase tracking-wide text-fg-muted">
                   Email
                 </span>
                 <input
@@ -1285,44 +1283,44 @@ export function PeoplePanel() {
                   required
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
-                  className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-neutral-700 dark:bg-neutral-950"
+                  className="mt-1.5 w-full rounded-xl border border-border-default px-3 py-2.5 text-sm focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-border-default dark:bg-surface-base"
                 />
               </label>
               <div className="grid gap-3 sm:grid-cols-2">
                 <label className="block text-sm">
-                  <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                  <span className="text-xs font-medium uppercase tracking-wide text-fg-muted">
                     First name
                   </span>
                   <input
                     value={inviteFirst}
                     onChange={(e) => setInviteFirst(e.target.value)}
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-neutral-700 dark:bg-neutral-950"
+                    className="mt-1.5 w-full rounded-xl border border-border-default px-3 py-2.5 text-sm focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-border-default dark:bg-surface-base"
                   />
                 </label>
                 <label className="block text-sm">
-                  <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                  <span className="text-xs font-medium uppercase tracking-wide text-fg-muted">
                     Last name
                   </span>
                   <input
                     value={inviteLast}
                     onChange={(e) => setInviteLast(e.target.value)}
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-neutral-700 dark:bg-neutral-950"
+                    className="mt-1.5 w-full rounded-xl border border-border-default px-3 py-2.5 text-sm focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-border-default dark:bg-surface-base"
                   />
                 </label>
               </div>
             </div>
-            <div className="flex justify-end gap-2 border-t border-slate-100 bg-slate-50/50 px-6 py-4 dark:border-neutral-800 dark:bg-neutral-950/40">
+            <div className="flex justify-end gap-2 border-t border-border-subtle bg-slate-50/50 px-6 py-4 dark:border-border-subtle/40">
               <button
                 type="button"
                 onClick={() => setInviteOpen(false)}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200"
+                className="rounded-xl border border-border-default bg-surface-raised px-4 py-2 text-sm font-medium text-fg-muted transition-colors hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={inviting}
-                className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm shadow-indigo-600/20 transition-colors hover:bg-indigo-700 disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2 text-sm font-medium text-white shadow-sm shadow-indigo-600/20 transition-colors hover:bg-accent disabled:opacity-50"
               >
                 {inviting ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null}
                 Send invite

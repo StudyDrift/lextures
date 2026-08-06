@@ -77,7 +77,7 @@ export function EquationEditorDialog({
       return { html: `<code>${latex}</code>`, failed: false }
     }
     if (!katex) {
-      return { html: `<span class="text-slate-400">${equationI18n.loadingPreview}</span>`, failed: false }
+      return { html: `<span class="text-fg-subtle">${equationI18n.loadingPreview}</span>`, failed: false }
     }
     return renderKatexSafe(katex, latex, display)
   }, [katex, latex, display, enabled])
@@ -160,20 +160,20 @@ export function EquationEditorDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="flex max-h-[min(92vh,720px)] w-full max-w-3xl flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl dark:border-neutral-600 dark:bg-neutral-900"
+        className="flex max-h-[min(92vh,720px)] w-full max-w-3xl flex-col overflow-hidden rounded-xl border border-border-default bg-surface-raised shadow-2xl dark:border-border-default dark:bg-surface-raised"
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <header className="border-b border-slate-100 px-4 py-3 dark:border-neutral-700">
-          <h2 id={titleId} className="text-base font-semibold text-slate-900 dark:text-neutral-100">
+        <header className="border-b border-border-subtle px-4 py-3 dark:border-border-default">
+          <h2 id={titleId} className="text-base font-semibold text-fg-default">
             {isEdit ? equationI18n.editMath : equationI18n.editorTitle}
           </h2>
-          <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
+          <p className="mt-0.5 text-xs text-fg-muted">
             LaTeX with live preview ·{' '}
             <a
               href="https://katex.org/docs/supported.html"
               target="_blank"
               rel="noreferrer noopener"
-              className="text-indigo-600 underline dark:text-indigo-400"
+              className="text-accent-fg underline dark:text-indigo-400"
             >
               {equationI18n.helpLink}
             </a>
@@ -181,8 +181,8 @@ export function EquationEditorDialog({
         </header>
 
         <div className="grid min-h-0 flex-1 gap-0 sm:grid-cols-2">
-          <div className="flex min-h-0 flex-col border-b border-slate-100 p-4 sm:border-b-0 sm:border-e dark:border-neutral-700">
-            <label htmlFor={`${titleId}-latex`} className="text-xs font-medium text-slate-600 dark:text-neutral-300">
+          <div className="flex min-h-0 flex-col border-b border-border-subtle p-4 sm:border-b-0 sm:border-e dark:border-border-default">
+            <label htmlFor={`${titleId}-latex`} className="text-xs font-medium text-fg-muted">
               {equationI18n.latexInput}
             </label>
             <textarea
@@ -191,7 +191,7 @@ export function EquationEditorDialog({
               value={latex}
               onChange={(e) => onLatexChange(e.target.value)}
               rows={6}
-              className="mt-1.5 min-h-[8rem] w-full flex-1 resize-y rounded-lg border border-slate-200 px-2.5 py-2 font-mono text-[13px] text-slate-900 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+              className="mt-1.5 min-h-[8rem] w-full flex-1 resize-y rounded-lg border border-border-default px-2.5 py-2 font-mono text-[13px] text-fg-default dark:border-border-default dark:bg-surface-base dark:text-fg-default"
               spellCheck={false}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
@@ -201,7 +201,7 @@ export function EquationEditorDialog({
               }}
             />
             <div className="mt-3 flex gap-3">
-              <label className="flex cursor-pointer items-center gap-2 text-xs text-slate-700 dark:text-neutral-200">
+              <label className="flex cursor-pointer items-center gap-2 text-xs text-fg-default">
                 <input
                   type="radio"
                   name={`${titleId}-mode`}
@@ -210,7 +210,7 @@ export function EquationEditorDialog({
                 />
                 {equationI18n.inline}
               </label>
-              <label className="flex cursor-pointer items-center gap-2 text-xs text-slate-700 dark:text-neutral-200">
+              <label className="flex cursor-pointer items-center gap-2 text-xs text-fg-default">
                 <input
                   type="radio"
                   name={`${titleId}-mode`}
@@ -223,13 +223,9 @@ export function EquationEditorDialog({
           </div>
 
           <div className="flex min-h-0 flex-col p-4">
-            <p className="text-xs font-medium text-slate-600 dark:text-neutral-300">{equationI18n.preview}</p>
+            <p className="text-xs font-medium text-fg-muted">{equationI18n.preview}</p>
             <div
-              className={`mt-1.5 min-h-[8rem] flex-1 overflow-x-auto rounded-lg border px-3 py-3 ${
-                preview.failed
-                  ? 'border-rose-300 bg-rose-50/80 dark:border-rose-800 dark:bg-rose-950/30'
-                  : 'border-slate-100 bg-slate-50 dark:border-neutral-700 dark:bg-neutral-950'
-              }`}
+              className={`mt-1.5 min-h-[8rem] flex-1 overflow-x-auto rounded-lg border px-3 py-3 ${ preview.failed ? 'border-rose-300 bg-rose-50/80 dark:border-rose-800 dark:bg-rose-950/30' : 'border-border-subtle bg-surface-base dark:border-border-default dark:bg-surface-base' }`}
               aria-live="polite"
               role="math"
               aria-label={latex.trim() || 'Equation preview'}
@@ -244,12 +240,12 @@ export function EquationEditorDialog({
           </div>
         </div>
 
-        <div className="border-t border-slate-100 px-4 py-3 dark:border-neutral-700">
-          <p className="mb-2 text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+        <div className="border-t border-border-subtle px-4 py-3 dark:border-border-default">
+          <p className="mb-2 text-[11px] font-medium uppercase tracking-wide text-fg-muted">
             {equationI18n.symbols}
           </p>
           <div
-            className="flex flex-wrap gap-1 border-b border-slate-100 pb-2 dark:border-neutral-700"
+            className="flex flex-wrap gap-1 border-b border-border-subtle pb-2 dark:border-border-default"
             role="tablist"
             aria-label={equationI18n.symbols}
           >
@@ -259,11 +255,7 @@ export function EquationEditorDialog({
                 type="button"
                 role="tab"
                 aria-selected={activeCategory === cat}
-                className={`min-h-[36px] rounded-lg px-2.5 text-xs font-medium ${
-                  activeCategory === cat
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-slate-100 text-slate-700 dark:bg-neutral-800 dark:text-neutral-200'
-                }`}
+                className={`min-h-[36px] rounded-lg px-2.5 text-xs font-medium ${ activeCategory === cat ? 'bg-accent-solid text-white' : 'bg-surface-sunken text-fg-muted dark:bg-surface-overlay dark:text-fg-default' }`}
                 onClick={() => setActiveCategory(cat)}
               >
                 {equationI18n.categories[cat]}
@@ -275,7 +267,7 @@ export function EquationEditorDialog({
               <button
                 key={`${activeCategory}-${sym.latex}`}
                 type="button"
-                className="min-h-[40px] min-w-[40px] rounded-lg border border-slate-200 bg-white px-2 font-mono text-sm text-slate-800 hover:border-indigo-300 hover:bg-indigo-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:border-indigo-500"
+                className="min-h-[40px] min-w-[40px] rounded-lg border border-border-default bg-surface-raised px-2 font-mono text-sm text-fg-default hover:border-indigo-300 hover:bg-indigo-50 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:border-indigo-500"
                 aria-label={sym.ariaLabel}
                 title={sym.latex}
                 onClick={() => insertSymbol(sym.latex)}
@@ -286,17 +278,17 @@ export function EquationEditorDialog({
           </div>
         </div>
 
-        <footer className="flex justify-end gap-2 border-t border-slate-100 px-4 py-3 dark:border-neutral-700">
+        <footer className="flex justify-end gap-2 border-t border-border-subtle px-4 py-3 dark:border-border-default">
           <button
             type="button"
-            className="rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-700 dark:border-neutral-600 dark:text-neutral-200"
+            className="rounded-lg border border-border-default px-4 py-2 text-sm text-fg-muted dark:border-border-default dark:text-fg-default"
             onClick={onClose}
           >
             {equationI18n.cancel}
           </button>
           <button
             type="button"
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500"
+            className="rounded-lg bg-accent-solid px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500"
             onClick={handleConfirm}
           >
             {isEdit ? equationI18n.update : equationI18n.insert}

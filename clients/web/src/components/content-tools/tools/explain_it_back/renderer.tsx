@@ -157,11 +157,11 @@ export default function ExplainItBackRenderer({
       data-content-tool="explain_it_back"
       data-testid="explain-it-back"
     >
-      <div className="prose prose-sm dark:prose-invert max-w-none text-slate-800 dark:text-neutral-200">
+      <div className="prose prose-sm dark:prose-invert max-w-none text-fg-default">
         <p id={promptId} className="whitespace-pre-wrap text-sm font-medium">
           {prompt || t('contentTools.tools.explain_it_back.defaultPrompt')}
         </p>
-        <p className="text-xs text-slate-600 dark:text-neutral-400">
+        <p className="text-xs text-fg-muted">
           {t('contentTools.tools.explain_it_back.lengthGuide', {
             min: minWords,
             max: maxWords,
@@ -186,12 +186,12 @@ export default function ExplainItBackRenderer({
           id={feedbackId}
           role="region"
           aria-labelledby={`${feedbackId}-heading`}
-          className="space-y-2 rounded border border-slate-200 bg-slate-50 px-3 py-3 dark:border-neutral-700 dark:bg-neutral-900/60"
+          className="space-y-2 rounded border border-border-default bg-surface-base px-3 py-3 dark:border-border-default/60"
           data-testid="explain-it-back-feedback"
         >
           <h3
             id={`${feedbackId}-heading`}
-            className="text-sm font-semibold text-slate-800 dark:text-neutral-100"
+            className="text-sm font-semibold text-fg-default"
           >
             {latest.feedback.mode === 'review'
               ? t('contentTools.tools.explain_it_back.reviewTitle')
@@ -200,7 +200,7 @@ export default function ExplainItBackRenderer({
 
           {latest.feedback.mode === 'ai' && revealKeyPoints ? (
             <div className="space-y-1">
-              <div className="text-xs font-medium text-slate-700 dark:text-neutral-300">
+              <div className="text-xs font-medium text-fg-muted">
                 {t('contentTools.tools.explain_it_back.whatYouGot')}
               </div>
               <div className="flex flex-wrap gap-1.5">
@@ -213,14 +213,14 @@ export default function ExplainItBackRenderer({
                   </span>
                 ))}
                 {(latest.feedback.covered ?? []).length === 0 ? (
-                  <span className="text-xs text-slate-500">
+                  <span className="text-xs text-fg-muted">
                     {t('contentTools.tools.explain_it_back.noneYet')}
                   </span>
                 ) : null}
               </div>
               {attempts.length > 1 && (latest.feedback.missing ?? []).length > 0 ? (
                 <>
-                  <div className="pt-1 text-xs font-medium text-slate-700 dark:text-neutral-300">
+                  <div className="pt-1 text-xs font-medium text-fg-muted">
                     {t('contentTools.tools.explain_it_back.whatsMissing')}
                   </div>
                   <div className="flex flex-wrap gap-1.5">
@@ -279,7 +279,7 @@ export default function ExplainItBackRenderer({
             <textarea
               id={`${promptId}-input`}
               ref={textareaRef}
-              className="min-h-[8rem] w-full rounded border border-slate-300 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+              className="min-h-[8rem] w-full rounded border border-border-strong bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
               disabled={readOnly || busy}
               value={draft}
               aria-describedby={`${promptId} ${promptId}-count`}
@@ -290,7 +290,7 @@ export default function ExplainItBackRenderer({
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p
               id={`${promptId}-count`}
-              className="text-xs text-slate-600 dark:text-neutral-400"
+              className="text-xs text-fg-muted"
               aria-live="polite"
               data-testid="explain-it-back-word-count"
             >
@@ -300,7 +300,7 @@ export default function ExplainItBackRenderer({
                 max: maxWords,
               })}
             </p>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-fg-muted">
               {t('contentTools.tools.explain_it_back.attemptsLeft', { count: attemptsLeft })}
             </p>
           </div>
@@ -328,7 +328,7 @@ export default function ExplainItBackRenderer({
         </p>
       ) : null}
 
-      <p className="text-xs text-slate-500 dark:text-neutral-500">
+      <p className="text-xs text-fg-subtle">
         {t('contentTools.tools.explain_it_back.practiceNote')}
       </p>
     </div>

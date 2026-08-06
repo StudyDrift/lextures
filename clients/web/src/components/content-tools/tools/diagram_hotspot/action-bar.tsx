@@ -43,7 +43,7 @@ export function DiagramActionBar({
           <button
             type="button"
             data-testid="diagram-try-again"
-            className="rounded border border-slate-300 px-3 py-1.5 text-sm dark:border-neutral-600"
+            className="rounded border border-border-strong px-3 py-1.5 text-sm dark:border-border-default"
             disabled={busy || readOnly}
             onClick={onTryAgain}
           >
@@ -51,14 +51,14 @@ export function DiagramActionBar({
           </button>
         ) : null}
         {typeof checkResult?.scorePct === 'number' ? (
-          <span className="text-sm text-slate-700 dark:text-neutral-200" data-testid="diagram-score">
+          <span className="text-sm text-fg-default" data-testid="diagram-score">
             {t('contentTools.tools.diagram_hotspot.score', {
               score: Math.round(checkResult.scorePct),
             })}
           </span>
         ) : null}
         {attemptsLeft != null && attemptsLeft >= 0 ? (
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-fg-muted">
             {t('contentTools.tools.diagram_hotspot.attemptsLeft', { count: attemptsLeft })}
           </span>
         ) : null}

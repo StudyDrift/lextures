@@ -36,7 +36,7 @@ function statusBadge(status: MeetingStatus) {
       )
     case 'ended':
       return (
-        <span className="inline-flex rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400">
+        <span className="inline-flex rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-neutral-600 dark:bg-surface-overlay dark:text-fg-muted">
           Ended
         </span>
       )
@@ -69,7 +69,7 @@ function MeetingCountdown({ scheduledStart }: { scheduledStart: string }) {
     <span
       role="timer"
       aria-live="polite"
-      className="text-xs text-amber-700 dark:text-amber-400"
+      className="text-xs text-warning-fg dark:text-amber-400"
     >
       Starting in {m}m {String(s).padStart(2, '0')}s
     </span>
@@ -89,16 +89,12 @@ function MeetingCard({ meeting, isStaff, onJoin, onCancel }: MeetingCardProps) {
 
   return (
     <div
-      className={`rounded-xl border p-4 transition-colors ${
-        isActive
-          ? 'border-emerald-300 bg-emerald-50/60 dark:border-emerald-700 dark:bg-emerald-950/30'
-          : 'border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800/50'
-      }`}
+      className={`rounded-xl border p-4 transition-colors ${ isActive ? 'border-emerald-300 bg-emerald-50/60 dark:border-emerald-700 dark:bg-emerald-950/30' : 'border-neutral-200 bg-surface-raised dark:border-border-default/50' }`}
     >
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="truncate text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+            <h3 className="truncate text-sm font-semibold text-neutral-900 dark:text-fg-default">
               {meeting.title}
             </h3>
             {statusBadge(meeting.status)}
@@ -106,10 +102,10 @@ function MeetingCard({ meeting, isStaff, onJoin, onCancel }: MeetingCardProps) {
               <MeetingCountdown scheduledStart={meeting.scheduledStart} />
             )}
           </div>
-          <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+          <p className="mt-1 text-xs text-neutral-500 dark:text-fg-muted">
             {formatMeetingTime(meeting)}
           </p>
-          <p className="mt-0.5 text-xs text-neutral-400 dark:text-neutral-500 capitalize">
+          <p className="mt-0.5 text-xs text-fg-muted capitalize">
             {meeting.provider}
           </p>
         </div>
@@ -119,11 +115,7 @@ function MeetingCard({ meeting, isStaff, onJoin, onCancel }: MeetingCardProps) {
               type="button"
               onClick={() => onJoin(meeting)}
               aria-label={`Join live session: ${meeting.title}`}
-              className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-[background-color,color,border-color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
-                isActive || isComingSoon
-                  ? 'bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600'
-                  : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200 dark:bg-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-600'
-              }`}
+              className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-[background-color,color,border-color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${ isActive || isComingSoon ? 'bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600' : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200 dark:bg-neutral-700 dark:text-fg-default dark:hover:bg-neutral-600' }`}
             >
               {isActive ? 'Join Now' : 'Join'}
             </button>
@@ -131,7 +123,7 @@ function MeetingCard({ meeting, isStaff, onJoin, onCancel }: MeetingCardProps) {
           <a
             href={getMeetingIcalUrl(meeting.id)}
             aria-label={`Add ${meeting.title} to calendar`}
-            className="rounded-lg px-2 py-1.5 text-xs text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
+            className="rounded-lg px-2 py-1.5 text-xs text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:text-fg-muted dark:hover:bg-neutral-700 dark:hover:text-fg-default"
           >
             📅
           </a>
@@ -208,15 +200,15 @@ function CreateMeetingModal({ onClose, onCreated, courseCode }: CreateMeetingMod
       aria-label="Schedule live session"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-neutral-900">
-        <h2 className="mb-4 text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+      <div className="w-full max-w-md rounded-2xl bg-surface-raised p-6 shadow-xl dark:bg-surface-raised">
+        <h2 className="mb-4 text-lg font-semibold text-neutral-900 dark:text-fg-default">
           Schedule Live Session
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label
               htmlFor="meeting-title"
-              className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+              className="mb-1 block text-sm font-medium text-neutral-700 dark:text-fg-muted"
             >
               Title
             </label>
@@ -228,17 +220,17 @@ function CreateMeetingModal({ onClose, onCreated, courseCode }: CreateMeetingMod
               onChange={(e) => setTitle(e.target.value)}
               required
               placeholder="e.g. Monday Lecture"
-              className="w-full rounded-lg border border-neutral-300 px-2 py-1.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+              className="w-full rounded-lg border border-neutral-300 px-2 py-1.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+            <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-fg-muted">
               Provider
             </label>
             <select
               value={provider}
               onChange={(e) => { setProvider(e.target.value as MeetingProvider); setJoinUrl('') }}
-              className="w-full rounded-lg border border-neutral-300 px-2 py-1.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+              className="w-full rounded-lg border border-neutral-300 px-2 py-1.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
             >
               <option value="jitsi">Jitsi Meet</option>
               <option value="bbb">BigBlueButton</option>
@@ -251,7 +243,7 @@ function CreateMeetingModal({ onClose, onCreated, courseCode }: CreateMeetingMod
             <div>
               <label
                 htmlFor="meeting-join-url"
-                className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+                className="mb-1 block text-sm font-medium text-neutral-700 dark:text-fg-muted"
               >
                 Meeting Link
               </label>
@@ -267,31 +259,31 @@ function CreateMeetingModal({ onClose, onCreated, courseCode }: CreateMeetingMod
                       ? 'https://meet.google.com/...'
                       : 'https://...'
                 }
-                className="w-full rounded-lg border border-neutral-300 px-2 py-1.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                className="w-full rounded-lg border border-neutral-300 px-2 py-1.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
               />
             </div>
           )}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-fg-muted">
                 Start
               </label>
               <input
                 type="datetime-local"
                 value={scheduledStart}
                 onChange={(e) => setScheduledStart(e.target.value)}
-                className="w-full rounded-lg border border-neutral-300 px-2 py-1.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                className="w-full rounded-lg border border-neutral-300 px-2 py-1.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-fg-muted">
                 End
               </label>
               <input
                 type="datetime-local"
                 value={scheduledEnd}
                 onChange={(e) => setScheduledEnd(e.target.value)}
-                className="w-full rounded-lg border border-neutral-300 px-2 py-1.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                className="w-full rounded-lg border border-neutral-300 px-2 py-1.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
               />
             </div>
           </div>
@@ -300,7 +292,7 @@ function CreateMeetingModal({ onClose, onCreated, courseCode }: CreateMeetingMod
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg px-4 py-2 text-sm text-neutral-600 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+              className="rounded-lg px-4 py-2 text-sm text-neutral-600 hover:bg-neutral-100 dark:text-fg-muted dark:hover:bg-surface-overlay"
             >
               Cancel
             </button>
@@ -432,7 +424,7 @@ export default function CourseLivePage() {
           {[0, 1].map((i) => (
             <div
               key={i}
-              className="h-20 animate-pulse rounded-xl bg-neutral-100 dark:bg-neutral-800"
+              className="h-20 animate-pulse rounded-xl bg-neutral-100 dark:bg-surface-overlay"
             />
           ))}
         </div>
@@ -445,8 +437,8 @@ export default function CourseLivePage() {
       )}
 
       {!loading && !error && meetings.length === 0 && (
-        <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-neutral-300 py-12 text-center dark:border-neutral-700">
-          <p className="text-sm text-neutral-500 dark:text-neutral-400">
+        <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-neutral-300 py-12 text-center dark:border-border-default">
+          <p className="text-sm text-neutral-500 dark:text-fg-muted">
             No upcoming live sessions.
           </p>
           {!rolesLoading && isStaff && (
@@ -501,7 +493,7 @@ export default function CourseLivePage() {
           )}
           {pastMeetings.length > 0 && (
             <section>
-              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">
+              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-fg-muted">
                 Past Sessions
               </h3>
               <div className="space-y-2">

@@ -160,7 +160,7 @@ export function CanvasImportCoursesPanel({
       ref={panelRef}
       className={[
         'flex flex-col overflow-hidden',
-        compact ? '' : 'rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-900',
+        compact ? '' : 'rounded-2xl border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-raised',
         !compact && isExpandedStep ? 'max-h-[min(92vh,880px)]' : '',
         step === 'importing' && !compact ? 'min-h-[32rem]' : '',
         className,
@@ -168,15 +168,15 @@ export function CanvasImportCoursesPanel({
         .filter(Boolean)
         .join(' ')}
     >
-      <div className="flex shrink-0 items-start justify-between gap-3 border-b border-slate-200 px-5 py-4 dark:border-neutral-700">
+      <div className="flex shrink-0 items-start justify-between gap-3 border-b border-border-default px-5 py-4 dark:border-border-default">
         <div className="min-w-0">
           <h2
             id={titleId}
-            className="text-balance text-lg font-semibold text-slate-900 dark:text-neutral-100"
+            className="text-balance text-lg font-semibold text-fg-default"
           >
             Import from Canvas
           </h2>
-          <p className="mt-0.5 text-pretty text-sm text-slate-500 dark:text-neutral-400">
+          <p className="mt-0.5 text-pretty text-sm text-fg-muted">
             {importComplete
               ? 'Import finished. Review the log below.'
               : step === 'credentials'
@@ -192,7 +192,7 @@ export function CanvasImportCoursesPanel({
             disabled={!canDismiss}
             onClick={onDismiss}
             className={[
-              'relative -me-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-800',
+              'relative -me-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-fg-muted hover:bg-surface-sunken disabled:opacity-50 dark:text-fg-muted dark:hover:bg-surface-overlay',
               pressableButtonClassName,
             ].join(' ')}
             aria-label="Close"
@@ -218,13 +218,13 @@ export function CanvasImportCoursesPanel({
         {step === 'credentials' ? (
           <div className="space-y-3">
             <CanvasReadOnlyNotice variant="compact" />
-            <p className="text-pretty text-sm text-slate-600 dark:text-neutral-400">
+            <p className="text-pretty text-sm text-fg-muted">
               Create a token in Canvas under Account → Settings → New Access Token (read-only
               scopes are sufficient). The token is sent to our server only for this session and is
               not stored on the server.
             </p>
             <label className="block">
-              <span className="text-xs font-medium text-slate-600 dark:text-neutral-400">
+              <span className="text-xs font-medium text-fg-muted">
                 Canvas base URL
               </span>
               <input
@@ -234,12 +234,12 @@ export function CanvasImportCoursesPanel({
                 placeholder="https://yourschool.instructure.com"
                 autoComplete="off"
                 disabled={busy}
-                className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                className="mt-1 w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-fg-default shadow-inner outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
               />
               <CanvasAccessTokenSettingsLink canvasBaseUrl={canvasBaseUrl} className="mt-1.5" />
             </label>
             <label className="block">
-              <span className="text-xs font-medium text-slate-600 dark:text-neutral-400">
+              <span className="text-xs font-medium text-fg-muted">
                 Access token
               </span>
               <input
@@ -249,7 +249,7 @@ export function CanvasImportCoursesPanel({
                 placeholder="Canvas API token"
                 autoComplete="off"
                 disabled={busy}
-                className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                className="mt-1 w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-fg-default shadow-inner outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
               />
             </label>
             <label className="flex cursor-pointer items-start gap-2 rounded-lg p-3 shadow-[inset_0_0_0_1px_rgba(15,23,42,0.08)] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]">
@@ -260,7 +260,7 @@ export function CanvasImportCoursesPanel({
                 disabled={busy}
                 onChange={(e) => onRememberCredentialsChange(e.target.checked)}
               />
-              <span className="text-sm text-slate-700 dark:text-neutral-300">
+              <span className="text-sm text-fg-muted">
                 Remember URL and token in this browser
               </span>
             </label>
@@ -273,7 +273,7 @@ export function CanvasImportCoursesPanel({
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                 <span className="relative flex min-w-0 flex-1">
                   <Search
-                    className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-neutral-500"
+                    className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-subtle"
                     aria-hidden
                   />
                   <input
@@ -283,7 +283,7 @@ export function CanvasImportCoursesPanel({
                     placeholder="Filter courses…"
                     aria-label="Filter courses by name"
                     autoComplete="off"
-                    className="w-full rounded-lg border border-slate-200 bg-white py-2 ps-9 pe-3 text-sm text-slate-900 shadow-inner outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+                    className="w-full rounded-lg border border-border-default bg-surface-raised py-2 ps-9 pe-3 text-sm text-fg-default shadow-inner outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
                   />
                 </span>
                 <label className="flex min-h-10 shrink-0 cursor-pointer items-center gap-2 px-1 sm:px-2">
@@ -292,13 +292,13 @@ export function CanvasImportCoursesPanel({
                     checked={hideUnpublished}
                     onChange={(e) => onHideUnpublishedChange(e.target.checked)}
                   />
-                  <span className="text-sm whitespace-nowrap text-slate-700 dark:text-neutral-300">
+                  <span className="text-sm whitespace-nowrap text-fg-muted">
                     Hide unpublished
                   </span>
                 </label>
               </div>
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-sm text-slate-600 dark:text-neutral-400">
+                <p className="text-sm text-fg-muted">
                   <span className="tabular-nums">
                     {courseCountLabel(filteredCourses.length, courses.length)}
                   </span>
@@ -317,7 +317,7 @@ export function CanvasImportCoursesPanel({
                     type="button"
                     disabled={filteredCourses.length === 0}
                     className={[
-                      'min-h-10 rounded-lg px-2 font-medium text-indigo-600 hover:bg-indigo-50 hover:text-indigo-500 disabled:opacity-50 dark:text-indigo-400 dark:hover:bg-indigo-950/40',
+                      'min-h-10 rounded-lg px-2 font-medium text-accent-fg hover:bg-indigo-50 hover:text-indigo-500 disabled:opacity-50 dark:text-indigo-400 dark:hover:bg-indigo-950/40',
                       pressableButtonClassName,
                     ].join(' ')}
                     onClick={onSelectAllVisible}
@@ -328,7 +328,7 @@ export function CanvasImportCoursesPanel({
                     type="button"
                     disabled={coursesToImport.length === 0}
                     className={[
-                      'min-h-10 rounded-lg px-2 font-medium text-indigo-600 hover:bg-indigo-50 hover:text-indigo-500 disabled:opacity-50 dark:text-indigo-400 dark:hover:bg-indigo-950/40',
+                      'min-h-10 rounded-lg px-2 font-medium text-accent-fg hover:bg-indigo-50 hover:text-indigo-500 disabled:opacity-50 dark:text-indigo-400 dark:hover:bg-indigo-950/40',
                       pressableButtonClassName,
                     ].join(' ')}
                     onClick={onClearSelection}
@@ -347,9 +347,9 @@ export function CanvasImportCoursesPanel({
               ) : null}
             </div>
 
-            <ul className="min-h-0 flex-1 space-y-0.5 overflow-y-auto rounded-lg bg-slate-50/70 p-1.5 shadow-[inset_0_0_0_1px_rgba(15,23,42,0.08)] dark:bg-neutral-800/40 dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]">
+            <ul className="min-h-0 flex-1 space-y-0.5 overflow-y-auto rounded-lg bg-slate-50/70 p-1.5 shadow-[inset_0_0_0_1px_rgba(15,23,42,0.08)]/40 dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]">
               {filteredCourses.length === 0 ? (
-                <li className="px-2 py-10 text-center text-sm text-slate-500 dark:text-neutral-400">
+                <li className="px-2 py-10 text-center text-sm text-fg-muted">
                   No courses match your filters.
                 </li>
               ) : (
@@ -364,7 +364,7 @@ export function CanvasImportCoursesPanel({
                       />
                       <span className="min-w-0 flex-1">
                         <span className="flex flex-wrap items-center gap-2">
-                          <span className="text-sm font-medium text-slate-900 dark:text-neutral-100">
+                          <span className="text-sm font-medium text-fg-default">
                             {c.name}
                           </span>
                           {isCanvasCourseUnpublished(c.workflowState) ? (
@@ -373,7 +373,7 @@ export function CanvasImportCoursesPanel({
                             </span>
                           ) : null}
                         </span>
-                        <span className="mt-0.5 block text-xs text-slate-500 dark:text-neutral-500">
+                        <span className="mt-0.5 block text-xs text-fg-subtle">
                           <span className="tabular-nums">ID {c.id}</span>
                           {c.courseCode ? ` · ${c.courseCode}` : ''}
                           {c.termName ? ` · ${c.termName}` : ''}
@@ -390,7 +390,7 @@ export function CanvasImportCoursesPanel({
 
             <div className="mt-auto grid shrink-0 gap-3 lg:grid-cols-2 lg:gap-4">
               <CanvasReadOnlyNotice variant="compact" />
-              <label className="flex h-full cursor-pointer items-start gap-2 rounded-lg bg-slate-50/80 px-3 py-2.5 shadow-[inset_0_0_0_1px_rgba(15,23,42,0.08)] dark:bg-neutral-800/40 dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]">
+              <label className="flex h-full cursor-pointer items-start gap-2 rounded-lg bg-slate-50/80 px-3 py-2.5 shadow-[inset_0_0_0_1px_rgba(15,23,42,0.08)]/40 dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]">
                 <input
                   type="checkbox"
                   className="mt-0.5"
@@ -398,10 +398,10 @@ export function CanvasImportCoursesPanel({
                   onChange={(e) => onEnableCanvasGradeSyncChange(e.target.checked)}
                 />
                 <span className="min-w-0">
-                  <span className="block text-sm font-medium text-slate-900 dark:text-neutral-100">
+                  <span className="block text-sm font-medium text-fg-default">
                     Sync grades back to Canvas
                   </span>
-                  <span className="mt-0.5 block text-pretty text-xs leading-relaxed text-slate-600 dark:text-neutral-400">
+                  <span className="mt-0.5 block text-pretty text-xs leading-relaxed text-fg-muted">
                     Push grades to Canvas when you save in Lextures. Requires a token with
                     grade-update permission.
                   </span>
@@ -423,7 +423,7 @@ export function CanvasImportCoursesPanel({
         ) : null}
       </div>
 
-      <div className="flex shrink-0 flex-wrap justify-end gap-2 border-t border-slate-200 px-5 py-4 dark:border-neutral-700">
+      <div className="flex shrink-0 flex-wrap justify-end gap-2 border-t border-border-default px-5 py-4 dark:border-border-default">
         {step === 'credentials' ? (
           <>
             {onDismiss ? (
@@ -432,7 +432,7 @@ export function CanvasImportCoursesPanel({
                 disabled={busy}
                 onClick={onDismiss}
                 className={[
-                  'rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800',
+                  'rounded-xl border border-border-default px-4 py-2 text-sm font-medium text-fg-muted hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay',
                   pressableButtonClassName,
                 ].join(' ')}
               >
@@ -444,7 +444,7 @@ export function CanvasImportCoursesPanel({
               disabled={busy}
               onClick={onConnect}
               className={[
-                'inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-60',
+                'inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-60',
                 pressableButtonClassName,
               ].join(' ')}
             >
@@ -459,7 +459,7 @@ export function CanvasImportCoursesPanel({
               disabled={busy}
               onClick={onBackToCredentials}
               className={[
-                'rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800',
+                'rounded-xl border border-border-default px-4 py-2 text-sm font-medium text-fg-muted hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay',
                 pressableButtonClassName,
               ].join(' ')}
             >
@@ -470,7 +470,7 @@ export function CanvasImportCoursesPanel({
               disabled={busy || coursesToImport.length === 0}
               onClick={onImport}
               className={[
-                'rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-60',
+                'rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-60',
                 pressableButtonClassName,
               ].join(' ')}
             >
@@ -484,7 +484,7 @@ export function CanvasImportCoursesPanel({
             type="button"
             onClick={onCancelImport}
             className={[
-              'rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800',
+              'rounded-xl border border-border-default px-4 py-2 text-sm font-medium text-fg-muted hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay',
               pressableButtonClassName,
             ].join(' ')}
           >
@@ -496,7 +496,7 @@ export function CanvasImportCoursesPanel({
             type="button"
             onClick={onDismiss}
             className={[
-              'rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500',
+              'rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500',
               pressableButtonClassName,
             ].join(' ')}
           >

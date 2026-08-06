@@ -75,17 +75,17 @@ export default function SecurityDisclosureAdminPage() {
     <div className="mx-auto max-w-5xl px-4 py-8">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900 dark:text-neutral-50">Security reports</h1>
-          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+          <h1 className="text-2xl font-semibold text-fg-default">Security reports</h1>
+          <p className="mt-1 text-sm text-fg-muted">
             Public policy:{' '}
-            <a href={MARKETING_SITE_URLS.security} className="text-indigo-700 underline dark:text-indigo-300">
+            <a href={MARKETING_SITE_URLS.security} className="text-accent-fg underline dark:text-indigo-300">
               {MARKETING_SITE_URLS.security}
             </a>
           </p>
         </div>
         <button
           type="button"
-          className="text-sm text-indigo-700 underline dark:text-indigo-300"
+          className="text-sm text-accent-fg underline dark:text-indigo-300"
           onClick={() => {
             void authorizedFetch(`${API}/export`).then(async (res) => {
               if (!res.ok) return
@@ -103,8 +103,8 @@ export default function SecurityDisclosureAdminPage() {
         </button>
       </div>
 
-      <form onSubmit={handleCreate} className="mb-8 rounded-lg border border-slate-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
-        <label htmlFor="summary" className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+      <form onSubmit={handleCreate} className="mb-8 rounded-lg border border-border-default bg-surface-raised p-4 dark:border-border-subtle dark:bg-surface-raised">
+        <label htmlFor="summary" className="block text-sm font-medium text-fg-muted">
           Log incoming report (summary)
         </label>
         <textarea
@@ -113,25 +113,25 @@ export default function SecurityDisclosureAdminPage() {
           value={summary}
           onChange={(e) => setSummary(e.target.value)}
           rows={3}
-          className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+          className="mt-1 w-full rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
         />
         <button
           type="submit"
-          className="mt-3 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
+          className="mt-3 rounded-md bg-accent-solid px-4 py-2 text-sm font-semibold text-white hover:bg-accent"
         >
           Add report
         </button>
         {message ? <p className="mt-2 text-sm text-emerald-700 dark:text-emerald-300">{message}</p> : null}
       </form>
 
-      {loading ? <p className="text-sm text-slate-500">Loading…</p> : null}
-      {error ? <p className="text-sm text-red-600 dark:text-red-400">{error}</p> : null}
+      {loading ? <p className="text-sm text-fg-muted">Loading…</p> : null}
+      {error ? <p className="text-sm text-danger-fg">{error}</p> : null}
 
       {!loading && !error ? (
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm border-collapse" aria-label="Security vulnerability reports">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-neutral-700">
+              <tr className="border-b border-border-default">
                 <th scope="col" className="py-2 pe-3 text-start font-semibold">Date</th>
                 <th scope="col" className="py-2 pe-3 text-start font-semibold">Severity</th>
                 <th scope="col" className="py-2 pe-3 text-start font-semibold">Summary</th>
@@ -142,7 +142,7 @@ export default function SecurityDisclosureAdminPage() {
             <tbody className="divide-y divide-slate-100 dark:divide-neutral-800">
               {reports.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-4 text-slate-500">No reports on file.</td>
+                  <td colSpan={5} className="py-4 text-fg-muted">No reports on file.</td>
                 </tr>
               ) : (
                 reports.map((r) => (

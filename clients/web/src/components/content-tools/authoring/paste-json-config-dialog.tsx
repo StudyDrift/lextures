@@ -101,15 +101,15 @@ export function PasteJsonConfigDialog({
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={descId}
-        className="relative z-10 flex max-h-[min(90vh,40rem)] w-full max-w-xl flex-col rounded-lg border border-slate-200 bg-white p-4 shadow-xl dark:border-neutral-700 dark:bg-neutral-900"
+        className="relative z-10 flex max-h-[min(90vh,40rem)] w-full max-w-xl flex-col rounded-lg border border-border-default bg-surface-raised p-4 shadow-xl dark:border-border-default dark:bg-surface-raised"
       >
         <h2
           id={titleId}
-          className="text-sm font-semibold text-slate-900 dark:text-neutral-100"
+          className="text-sm font-semibold text-fg-default"
         >
           {t('contentTools.authoring.pasteJsonTitle')}
         </h2>
-        <p id={descId} className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-neutral-400">
+        <p id={descId} className="mt-1 text-xs leading-relaxed text-fg-muted">
           {t('contentTools.authoring.pasteJsonHelp')}
         </p>
 
@@ -126,7 +126,7 @@ export function PasteJsonConfigDialog({
             setText(e.target.value)
             if (localErrors.length > 0) setLocalErrors([])
           }}
-          className="mt-3 min-h-[14rem] flex-1 resize-y rounded-md border border-slate-200 bg-white px-3 py-2 font-mono text-xs leading-relaxed text-slate-900 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-neutral-500 dark:focus:ring-neutral-700"
+          className="mt-3 min-h-[14rem] flex-1 resize-y rounded-md border border-border-default bg-surface-raised px-3 py-2 font-mono text-xs leading-relaxed text-fg-default focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300 disabled:opacity-60 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:focus:border-neutral-500 dark:focus:ring-neutral-700"
           placeholder="{}"
           aria-invalid={displayErrors.length > 0 || Boolean(submitError)}
         />
@@ -161,7 +161,7 @@ export function PasteJsonConfigDialog({
             type="button"
             disabled={busy}
             onClick={onClose}
-            className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            className="rounded-md border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-fg-muted hover:bg-surface-base disabled:opacity-40 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
           >
             {t('contentTools.authoring.cancel')}
           </button>
@@ -169,7 +169,7 @@ export function PasteJsonConfigDialog({
             type="button"
             disabled={busy || !text.trim()}
             onClick={handleApply}
-            className="rounded-md bg-slate-800 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-700 disabled:opacity-40 dark:bg-neutral-200 dark:text-neutral-900 dark:hover:bg-white"
+            className="rounded-md bg-slate-800 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-700 disabled:opacity-40 dark:bg-neutral-200 dark:text-neutral-900 dark:hover:bg-surface-raised"
           >
             {busy
               ? t('contentTools.authoring.saving')

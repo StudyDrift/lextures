@@ -50,10 +50,10 @@ function ConnectionStatusBar({
   trailing?: ReactNode
 }) {
   return (
-    <div className="flex items-center justify-between border-b border-slate-200 px-4 py-2 dark:border-neutral-700">
+    <div className="flex items-center justify-between border-b border-border-default px-4 py-2 dark:border-border-default">
       <span
         data-testid="collab-connection-status"
-        className="text-sm text-slate-500 dark:text-neutral-400"
+        className="text-sm text-fg-muted"
       >
         {connState === 'connected' ? (
           <span className="flex items-center gap-1">

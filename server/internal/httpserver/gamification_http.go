@@ -72,11 +72,6 @@ func (d Deps) handleGetMyBadges() http.HandlerFunc {
 
 func (d Deps) handlePostFreezeStreak() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.gamificationEnabled(w) {
 			return
 		}

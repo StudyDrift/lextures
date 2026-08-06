@@ -59,32 +59,32 @@ export function ToolStateDetailDrawer({
       data-testid="tool-state-detail-drawer"
     >
       <button type="button" className="flex-1" aria-label={t('contentTools.instructor.close')} onClick={onClose} />
-      <aside className="flex h-full w-full max-w-md flex-col border-l border-slate-200 bg-white p-4 shadow-xl dark:border-neutral-700 dark:bg-neutral-900">
+      <aside className="flex h-full w-full max-w-md flex-col border-l border-border-default bg-surface-raised p-4 shadow-xl dark:border-border-default dark:bg-surface-raised">
         <div className="flex items-start justify-between gap-2">
           <h2
             id="tool-state-detail-title"
-            className="text-sm font-semibold text-slate-900 dark:text-neutral-100"
+            className="text-sm font-semibold text-fg-default"
           >
             {detail?.displayName ?? t('contentTools.instructor.learnerDetail')}
           </h2>
           <button
             type="button"
-            className="text-xs text-slate-500 underline dark:text-neutral-400"
+            className="text-xs text-fg-muted underline dark:text-fg-muted"
             onClick={onClose}
           >
             {t('contentTools.instructor.close')}
           </button>
         </div>
         {loading ? (
-          <p className="mt-3 text-sm text-slate-500">{t('contentTools.instructor.loadingDetail')}</p>
+          <p className="mt-3 text-sm text-fg-muted">{t('contentTools.instructor.loadingDetail')}</p>
         ) : error ? (
           <p className="mt-3 text-sm text-rose-600" role="alert">
             {error}
           </p>
         ) : detail ? (
           <div className="mt-3 space-y-3 overflow-y-auto text-sm">
-            <p className="text-slate-700 dark:text-neutral-300">{detail.summary}</p>
-            <pre className="overflow-x-auto rounded-md bg-slate-50 p-2 text-xs dark:bg-neutral-950">
+            <p className="text-fg-muted">{detail.summary}</p>
+            <pre className="overflow-x-auto rounded-md bg-surface-base p-2 text-xs dark:bg-surface-base">
               {JSON.stringify(detail.state.state ?? detail.state.stateJson ?? {}, null, 2)}
             </pre>
             <button

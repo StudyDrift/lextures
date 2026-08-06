@@ -60,7 +60,7 @@ export default function ConferenceAvailabilitySetup() {
   if (!ffConferenceScheduling) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-10">
-        <p className="text-sm text-neutral-600 dark:text-neutral-400">
+        <p className="text-sm text-neutral-600 dark:text-fg-muted">
           Conference scheduling is not enabled on this platform.
         </p>
       </div>
@@ -69,15 +69,15 @@ export default function ConferenceAvailabilitySetup() {
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-4 py-8 md:px-8">
-      <header className="flex flex-col gap-2 border-b border-slate-200 pb-6 dark:border-neutral-800">
-        <div className="flex items-center gap-2 text-sm font-medium text-indigo-700 dark:text-indigo-300">
+      <header className="flex flex-col gap-2 border-b border-border-default pb-6 dark:border-border-subtle">
+        <div className="flex items-center gap-2 text-sm font-medium text-accent-fg">
           <CalendarDays className="h-4 w-4" aria-hidden />
           Conference availability
         </div>
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-neutral-50">
+        <h1 className="text-2xl font-semibold tracking-tight text-fg-default">
           Set parent-teacher conference slots
         </h1>
-        <p className="text-sm text-slate-600 dark:text-neutral-400">
+        <p className="text-sm text-fg-muted">
           Define your available window; the system generates bookable slots for parents in the portal.
         </p>
       </header>
@@ -106,7 +106,7 @@ export default function ConferenceAvailabilitySetup() {
             type="text"
             value={schoolId}
             onChange={(e) => setSchoolId(e.target.value)}
-            className="rounded-lg border border-neutral-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-900"
+            className="rounded-lg border border-neutral-300 px-3 py-2 dark:border-border-default dark:bg-surface-raised"
             placeholder="UUID of your school org unit"
             required
           />
@@ -118,7 +118,7 @@ export default function ConferenceAvailabilitySetup() {
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="rounded-lg border border-neutral-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-900"
+            className="rounded-lg border border-neutral-300 px-3 py-2 dark:border-border-default dark:bg-surface-raised"
             required
           />
         </label>
@@ -130,7 +130,7 @@ export default function ConferenceAvailabilitySetup() {
               type="time"
               value={windowStart}
               onChange={(e) => setWindowStart(e.target.value)}
-              className="rounded-lg border border-neutral-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-900"
+              className="rounded-lg border border-neutral-300 px-3 py-2 dark:border-border-default dark:bg-surface-raised"
               required
             />
           </label>
@@ -140,7 +140,7 @@ export default function ConferenceAvailabilitySetup() {
               type="time"
               value={windowEnd}
               onChange={(e) => setWindowEnd(e.target.value)}
-              className="rounded-lg border border-neutral-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-900"
+              className="rounded-lg border border-neutral-300 px-3 py-2 dark:border-border-default dark:bg-surface-raised"
               required
             />
           </label>
@@ -152,7 +152,7 @@ export default function ConferenceAvailabilitySetup() {
             <select
               value={slotDuration}
               onChange={(e) => setSlotDuration(Number(e.target.value))}
-              className="rounded-lg border border-neutral-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-900"
+              className="rounded-lg border border-neutral-300 px-3 py-2 dark:border-border-default dark:bg-surface-raised"
             >
               {SLOT_DURATIONS.map((d) => (
                 <option key={d} value={d}>
@@ -169,7 +169,7 @@ export default function ConferenceAvailabilitySetup() {
               max={30}
               value={gapDuration}
               onChange={(e) => setGapDuration(Number(e.target.value))}
-              className="rounded-lg border border-neutral-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-900"
+              className="rounded-lg border border-neutral-300 px-3 py-2 dark:border-border-default dark:bg-surface-raised"
             />
           </label>
         </div>
@@ -193,7 +193,7 @@ export default function ConferenceAvailabilitySetup() {
               type="text"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              className="rounded-lg border border-neutral-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-900"
+              className="rounded-lg border border-neutral-300 px-3 py-2 dark:border-border-default dark:bg-surface-raised"
               placeholder="Room 204"
             />
           </label>
@@ -204,7 +204,7 @@ export default function ConferenceAvailabilitySetup() {
               type="url"
               value={videoLink}
               onChange={(e) => setVideoLink(e.target.value)}
-              className="rounded-lg border border-neutral-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-900"
+              className="rounded-lg border border-neutral-300 px-3 py-2 dark:border-border-default dark:bg-surface-raised"
               placeholder="https://meet.example.com/abc-defg-hij"
             />
           </label>
@@ -213,7 +213,7 @@ export default function ConferenceAvailabilitySetup() {
         <button
           type="submit"
           disabled={saving}
-          className="mt-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:opacity-60"
+          className="mt-2 rounded-lg bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:opacity-60"
         >
           {saving ? 'Saving…' : 'Generate slots'}
         </button>

@@ -435,7 +435,7 @@ export function TopBarBreadcrumbs() {
 
   return (
     <nav aria-label="Breadcrumb" className="min-w-0 flex-1 basis-0 overflow-hidden ps-1 sm:ps-0">
-      <ol className="m-0 flex list-none items-center gap-0.5 p-0 text-xs text-slate-600 sm:text-sm dark:text-neutral-400">
+      <ol className="m-0 flex list-none items-center gap-0.5 p-0 text-xs text-fg-muted sm:text-sm dark:text-fg-muted">
         {crumbs.map((c, i) => {
           const last = i === crumbs.length - 1
           return (
@@ -448,7 +448,7 @@ export function TopBarBreadcrumbs() {
               ) : null}
               {last || !c.to ? (
                 <span
-                  className={`truncate ${last ? 'font-medium text-slate-900 dark:text-neutral-100' : ''}`}
+                  className={`truncate ${last ? 'font-medium text-fg-default' : ''}`}
                   aria-current={last ? 'page' : undefined}
                 >
                   {c.label}
@@ -456,7 +456,7 @@ export function TopBarBreadcrumbs() {
               ) : (
                 <Link
                   to={c.to}
-                  className="truncate transition-[background-color,color,border-color] hover:text-indigo-600 dark:hover:text-indigo-400"
+                  className="truncate transition-[background-color,color,border-color] hover:text-accent-fg dark:hover:text-indigo-400"
                 >
                   {c.label}
                 </Link>

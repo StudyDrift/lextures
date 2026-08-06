@@ -18,7 +18,7 @@ export function SortConfusionView({ rows }: SortConfusionViewProps) {
 
   return (
     <div className="space-y-3" data-testid="sort-confusion-view">
-      <h3 className="text-sm font-medium text-slate-800 dark:text-neutral-100">
+      <h3 className="text-sm font-medium text-fg-default">
         {t('contentTools.tools.sort_sequence.confusion.title')}
       </h3>
       <ul className="space-y-3">
@@ -27,10 +27,10 @@ export function SortConfusionView({ rows }: SortConfusionViewProps) {
           return (
             <li
               key={row.itemId}
-              className="rounded border border-slate-200 p-3 dark:border-neutral-700"
+              className="rounded border border-border-default p-3 dark:border-border-default"
               data-testid={`confusion-item-${row.itemId}`}
             >
-              <div className="mb-2 text-sm font-medium text-slate-900 dark:text-neutral-100">
+              <div className="mb-2 text-sm font-medium text-fg-default">
                 {row.itemLabel}
               </div>
               {row.mostCommonError ? (
@@ -44,18 +44,12 @@ export function SortConfusionView({ rows }: SortConfusionViewProps) {
               <div className="space-y-1.5" role="img" aria-label={row.itemLabel}>
                 {row.distributions.map((d) => (
                   <div key={d.placedIn} className="flex items-center gap-2 text-sm">
-                    <span className="w-28 shrink-0 truncate text-slate-600 dark:text-neutral-300">
+                    <span className="w-28 shrink-0 truncate text-fg-muted">
                       {d.placedIn}
                     </span>
-                    <div className="h-2 flex-1 rounded bg-slate-100 dark:bg-neutral-800">
+                    <div className="h-2 flex-1 rounded bg-surface-sunken">
                       <div
-                        className={`h-2 rounded ${
-                          d.isCorrect === false
-                            ? 'bg-amber-600'
-                            : d.isCorrect
-                              ? 'bg-emerald-600'
-                              : 'bg-sky-600'
-                        }`}
+                        className={`h-2 rounded ${ d.isCorrect === false ? 'bg-amber-600' : d.isCorrect ? 'bg-emerald-600' : 'bg-sky-600' }`}
                         style={{ width: `${(d.count / max) * 100}%` }}
                       />
                     </div>

@@ -18,15 +18,6 @@ type cloudProviderPublicRow struct {
 // handleGetCloudProviders is GET /api/v1/cloud-providers (authenticated; enabled + configured only).
 func (d Deps) handleGetCloudProviders() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.meUserID(w, r); !ok {
 			return
 		}

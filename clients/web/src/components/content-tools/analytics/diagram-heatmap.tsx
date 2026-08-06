@@ -38,7 +38,7 @@ export function DiagramHeatmap({ cells, regions, swaps }: DiagramHeatmapProps) {
 
   return (
     <div className="space-y-3" data-testid="diagram-heatmap">
-      <h3 className="text-sm font-medium text-slate-800 dark:text-neutral-100">
+      <h3 className="text-sm font-medium text-fg-default">
         {t('contentTools.tools.diagram_hotspot.heatmap.title')}
       </h3>
       <div
@@ -62,11 +62,11 @@ export function DiagramHeatmap({ cells, regions, swaps }: DiagramHeatmapProps) {
 
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse text-sm" role="table">
-          <caption className="mb-1 text-start text-xs text-slate-600 dark:text-neutral-300">
+          <caption className="mb-1 text-start text-xs text-fg-muted">
             {t('contentTools.tools.diagram_hotspot.heatmap.tableCaption')}
           </caption>
           <thead>
-            <tr className="border-b border-slate-200 text-start dark:border-neutral-700">
+            <tr className="border-b border-border-default text-start dark:border-border-default">
               <th scope="col" className="px-2 py-1 font-medium">
                 {t('contentTools.tools.diagram_hotspot.heatmap.colRegion')}
               </th>
@@ -77,7 +77,7 @@ export function DiagramHeatmap({ cells, regions, swaps }: DiagramHeatmapProps) {
           </thead>
           <tbody>
             {regions.map((r) => (
-              <tr key={r.regionId} className="border-b border-slate-100 dark:border-neutral-800">
+              <tr key={r.regionId} className="border-b border-border-subtle">
                 <td className="px-2 py-1">{r.label || r.regionId}</td>
                 <td className="px-2 py-1 tabular-nums">{r.count}</td>
               </tr>
@@ -88,10 +88,10 @@ export function DiagramHeatmap({ cells, regions, swaps }: DiagramHeatmapProps) {
 
       {swaps && swaps.length > 0 ? (
         <div>
-          <h4 className="mb-1 text-xs font-medium text-slate-700 dark:text-neutral-200">
+          <h4 className="mb-1 text-xs font-medium text-fg-default">
             {t('contentTools.tools.diagram_hotspot.heatmap.swaps')}
           </h4>
-          <ul className="space-y-1 text-xs text-slate-600 dark:text-neutral-300">
+          <ul className="space-y-1 text-xs text-fg-muted">
             {swaps.slice(0, 5).map((s) => (
               <li key={s.pair}>
                 {t('contentTools.tools.diagram_hotspot.heatmap.swapRow', {

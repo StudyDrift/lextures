@@ -67,7 +67,7 @@ export default function CourseStudentReportsPage() {
   if (featuresLoading || permLoading) {
     return (
       <LmsPage title="Reports">
-        <p className="mt-6 text-sm text-slate-500 dark:text-neutral-400">Loading…</p>
+        <p className="mt-6 text-sm text-fg-muted">Loading…</p>
       </LmsPage>
     )
   }
@@ -85,10 +85,10 @@ export default function CourseStudentReportsPage() {
       title="Reports"
       titleContent={
         <div className="min-w-0 flex-1">
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-neutral-100">
+          <h1 className="text-2xl font-semibold tracking-tight text-fg-default">
             Reports
           </h1>
-          <p className="mt-2 max-w-2xl text-xs text-slate-500 dark:text-neutral-400">
+          <p className="mt-2 max-w-2xl text-xs text-fg-muted">
             Student progress reports for course {courseCode}. Select a student to view their report.
           </p>
         </div>
@@ -101,18 +101,18 @@ export default function CourseStudentReportsPage() {
       ) : null}
 
       {students === null && !error ? (
-        <p className="mt-8 text-sm text-slate-500 dark:text-neutral-400">Loading students…</p>
+        <p className="mt-8 text-sm text-fg-muted">Loading students…</p>
       ) : null}
 
       {students && students.length === 0 && !error ? (
-        <p className="mt-8 text-sm text-slate-500 dark:text-neutral-400">No students enrolled yet.</p>
+        <p className="mt-8 text-sm text-fg-muted">No students enrolled yet.</p>
       ) : null}
 
       {students && students.length > 0 ? (
-        <div className="mt-8 overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
+        <div className="mt-8 overflow-x-auto rounded-xl border border-border-default bg-surface-raised shadow-sm dark:border-border-default dark:bg-surface-raised">
           <table className="w-full min-w-[16rem] text-start text-sm">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-neutral-700 dark:bg-neutral-800/60 dark:text-neutral-400">
+              <tr className="border-b border-border-default bg-surface-base text-xs font-semibold uppercase tracking-wide text-fg-muted dark:border-border-default/60 dark:text-fg-muted">
                 <th className="px-4 py-3">Student</th>
                 {sectionsEnabled ? <th className="px-4 py-3">Section</th> : null}
                 <th className="px-2 py-3 text-end font-normal" aria-label="Actions" />
@@ -125,18 +125,18 @@ export default function CourseStudentReportsPage() {
                 return (
                   <tr
                     key={student.id}
-                    className="group border-b border-slate-100 last:border-0 dark:border-neutral-800"
+                    className="group border-b border-border-subtle last:border-0 dark:border-border-subtle"
                   >
-                    <td className="px-4 py-3 font-medium text-slate-900 dark:text-neutral-100">
+                    <td className="px-4 py-3 font-medium text-fg-default">
                       <Link
                         to={reportPath}
-                        className="text-indigo-700 hover:underline dark:text-indigo-300"
+                        className="text-accent-fg hover:underline dark:text-indigo-300"
                       >
                         {name}
                       </Link>
                     </td>
                     {sectionsEnabled ? (
-                      <td className="px-4 py-3 text-slate-600 dark:text-neutral-400">
+                      <td className="px-4 py-3 text-fg-muted">
                         {student.sectionCode?.trim()
                           ? student.sectionName?.trim()
                             ? `${student.sectionCode} (${student.sectionName})`
@@ -147,7 +147,7 @@ export default function CourseStudentReportsPage() {
                     <td className="px-2 py-3 text-end align-middle">
                       <Link
                         to={reportPath}
-                        className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm font-medium text-indigo-700 opacity-0 transition-[opacity,background-color,color,border-color] hover:bg-indigo-50 group-hover:opacity-100 focus-visible:opacity-100 dark:text-indigo-300 dark:hover:bg-indigo-950/40"
+                        className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm font-medium text-accent-fg opacity-0 transition-[opacity,background-color,color,border-color] hover:bg-indigo-50 group-hover:opacity-100 focus-visible:opacity-100 dark:text-indigo-300 dark:hover:bg-indigo-950/40"
                         aria-label={`View report for ${name}`}
                       >
                         <BarChart3 className="h-4 w-4" aria-hidden />

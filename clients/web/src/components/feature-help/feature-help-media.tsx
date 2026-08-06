@@ -29,7 +29,7 @@ export function FeatureHelpMediaRegion({
   if (loadState === 'error') return null
 
   return (
-    <figure className="relative mb-4 aspect-video w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-100 dark:border-neutral-700 dark:bg-neutral-800/80">
+    <figure className="relative mb-4 aspect-video w-full overflow-hidden rounded-xl border border-border-default bg-surface-sunken dark:border-border-default/80">
       {loadState === 'loading' ? (
         <div
           className="absolute inset-0 animate-pulse bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100 dark:from-neutral-800 dark:via-neutral-900 dark:to-neutral-800"

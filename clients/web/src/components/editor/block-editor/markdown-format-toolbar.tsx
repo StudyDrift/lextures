@@ -48,7 +48,7 @@ export function MarkdownFormatToolbar({ disabled, onApply, dictation, courseImag
         disabled={disabled}
         onMouseDown={preventBlur}
         onClick={() => onApply('bulletList')}
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:text-neutral-300 dark:hover:bg-neutral-700"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-fg-muted hover:bg-surface-sunken disabled:cursor-not-allowed disabled:opacity-40 dark:text-fg-muted dark:hover:bg-neutral-700"
         aria-label="Bullet list"
         title="Bullet list"
       >
@@ -59,7 +59,7 @@ export function MarkdownFormatToolbar({ disabled, onApply, dictation, courseImag
         disabled={disabled}
         onMouseDown={preventBlur}
         onClick={() => onApply('orderedList')}
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:text-neutral-300 dark:hover:bg-neutral-700"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-fg-muted hover:bg-surface-sunken disabled:cursor-not-allowed disabled:opacity-40 dark:text-fg-muted dark:hover:bg-neutral-700"
         aria-label="Numbered list"
         title="Numbered list"
       >
@@ -70,7 +70,7 @@ export function MarkdownFormatToolbar({ disabled, onApply, dictation, courseImag
         disabled={disabled}
         onMouseDown={preventBlur}
         onClick={() => onApply('bold')}
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded font-bold text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:text-neutral-200 dark:hover:bg-neutral-700"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded font-bold text-fg-muted hover:bg-surface-sunken disabled:cursor-not-allowed disabled:opacity-40 dark:text-fg-default dark:hover:bg-neutral-700"
         aria-label="Bold"
         title="Bold"
       >
@@ -81,7 +81,7 @@ export function MarkdownFormatToolbar({ disabled, onApply, dictation, courseImag
         disabled={disabled}
         onMouseDown={preventBlur}
         onClick={() => onApply('italic')}
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:text-neutral-200 dark:hover:bg-neutral-700"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-fg-muted hover:bg-surface-sunken disabled:cursor-not-allowed disabled:opacity-40 dark:text-fg-default dark:hover:bg-neutral-700"
         aria-label="Italic"
         title="Italic"
       >
@@ -92,7 +92,7 @@ export function MarkdownFormatToolbar({ disabled, onApply, dictation, courseImag
         disabled={disabled}
         onMouseDown={preventBlur}
         onClick={() => onApply('inlineCode')}
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:text-neutral-300 dark:hover:bg-neutral-700"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-fg-muted hover:bg-surface-sunken disabled:cursor-not-allowed disabled:opacity-40 dark:text-fg-muted dark:hover:bg-neutral-700"
         aria-label="Inline code"
         title="Inline code"
       >
@@ -103,7 +103,7 @@ export function MarkdownFormatToolbar({ disabled, onApply, dictation, courseImag
         disabled={disabled}
         onMouseDown={preventBlur}
         onClick={() => onApply('codeBlock')}
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:text-neutral-300 dark:hover:bg-neutral-700"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-fg-muted hover:bg-surface-sunken disabled:cursor-not-allowed disabled:opacity-40 dark:text-fg-muted dark:hover:bg-neutral-700"
         aria-label="Code block"
         title="Code block"
       >
@@ -114,7 +114,7 @@ export function MarkdownFormatToolbar({ disabled, onApply, dictation, courseImag
         disabled={disabled}
         onMouseDown={preventBlur}
         onClick={() => onApply('link')}
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:text-neutral-300 dark:hover:bg-neutral-700"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-fg-muted hover:bg-surface-sunken disabled:cursor-not-allowed disabled:opacity-40 dark:text-fg-muted dark:hover:bg-neutral-700"
         aria-label="Link"
         title="Link"
       >
@@ -125,7 +125,7 @@ export function MarkdownFormatToolbar({ disabled, onApply, dictation, courseImag
         disabled={disabled}
         onMouseDown={preventBlur}
         onClick={() => onApply('table')}
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:text-neutral-300 dark:hover:bg-neutral-700"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-fg-muted hover:bg-surface-sunken disabled:cursor-not-allowed disabled:opacity-40 dark:text-fg-muted dark:hover:bg-neutral-700"
         aria-label="Insert table"
         title="Insert table"
       >
@@ -140,7 +140,7 @@ export function MarkdownFormatToolbar({ disabled, onApply, dictation, courseImag
           disabled={disabled}
           onMouseDown={preventBlur}
           onClick={() => mathInsert.onOpen()}
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:text-neutral-300 dark:hover:bg-neutral-700"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-fg-muted hover:bg-surface-sunken disabled:cursor-not-allowed disabled:opacity-40 dark:text-fg-muted dark:hover:bg-neutral-700"
           aria-label="Insert math"
           title="Insert math (LaTeX)"
         >
@@ -166,7 +166,7 @@ export function MarkdownFormatToolbar({ disabled, onApply, dictation, courseImag
               const files = [...e.dataTransfer.files]
               if (files.length) courseImage.onFiles(files)
             }}
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:text-neutral-300 dark:hover:bg-neutral-700"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-fg-muted hover:bg-surface-sunken disabled:cursor-not-allowed disabled:opacity-40 dark:text-fg-muted dark:hover:bg-neutral-700"
             aria-label="Insert image"
             title="Insert file or image"
           >

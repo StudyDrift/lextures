@@ -77,23 +77,23 @@ export function InsightRow({ facetKey, insight }: Props) {
         })
 
   return (
-    <article className="rounded-xl border border-slate-100 bg-slate-50/80 p-4 dark:border-neutral-800 dark:bg-neutral-800/40">
+    <article className="rounded-xl border border-border-subtle bg-slate-50/80 p-4 dark:border-border-subtle/40">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <h4 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+          <h4 className="text-sm font-semibold text-fg-default">
             {t(insightLabelKey(insight.insightKey))}
           </h4>
-          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-300">
+          <p className="mt-1 text-sm text-fg-muted">
             {formatInsightValue(t, insight, facetKey)}
           </p>
-          <p className="mt-2 text-xs text-slate-500 dark:text-neutral-400">{summaryLine}</p>
+          <p className="mt-2 text-xs text-fg-muted">{summaryLine}</p>
         </div>
         <ConfidenceIndicator score={insight.confidence} />
       </div>
 
       <button
         type="button"
-        className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-300 dark:hover:text-indigo-200"
+        className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-accent-fg hover:text-indigo-500 dark:text-indigo-300 dark:hover:text-indigo-200"
         aria-expanded={expanded}
         aria-controls={panelId}
         onClick={toggle}
@@ -106,9 +106,9 @@ export function InsightRow({ facetKey, insight }: Props) {
       </button>
 
       {expanded ? (
-        <div id={panelId} className="mt-3 border-t border-slate-200 pt-3 dark:border-neutral-700">
+        <div id={panelId} className="mt-3 border-t border-border-default pt-3 dark:border-border-default">
           {loadingEvidence ? (
-            <p className="text-sm text-slate-500 dark:text-neutral-400">
+            <p className="text-sm text-fg-muted">
               {t('learnerProfile.evidence.loading')}
             </p>
           ) : null}
@@ -118,16 +118,16 @@ export function InsightRow({ facetKey, insight }: Props) {
             </p>
           ) : null}
           {!loadingEvidence && !evidenceError && evidence && evidence.length === 0 ? (
-            <p className="text-sm text-slate-500 dark:text-neutral-400">
+            <p className="text-sm text-fg-muted">
               {t('learnerProfile.evidence.empty')}
             </p>
           ) : null}
           {!loadingEvidence && evidence && evidence.length > 0 ? (
             <div className="overflow-x-auto">
-              <table className="min-w-full text-start text-xs text-slate-700 dark:text-neutral-200">
+              <table className="min-w-full text-start text-xs text-fg-default">
                 <caption className="sr-only">{t('learnerProfile.evidence.table.caption')}</caption>
                 <thead>
-                  <tr className="border-b border-slate-200 dark:border-neutral-700">
+                  <tr className="border-b border-border-default">
                     <th scope="col" className="px-2 py-1.5 font-semibold">
                       {t('learnerProfile.evidence.table.source')}
                     </th>
@@ -146,7 +146,7 @@ export function InsightRow({ facetKey, insight }: Props) {
                   {evidence.map((row, index) => (
                     <tr
                       key={`${row.sourceKind}-${row.sourceTable}-${index}`}
-                      className="border-b border-slate-100 dark:border-neutral-800"
+                      className="border-b border-border-subtle"
                     >
                       <td className="px-2 py-1.5">{sourceLabel(t, row.sourceKind)}</td>
                       <td className="px-2 py-1.5">{row.observationCount}</td>

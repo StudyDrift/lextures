@@ -49,15 +49,6 @@ type putCourseBody struct {
 // handlePutCourse is PUT /api/v1/courses/{course_code} (parity: server `update_handler`).
 func (d Deps) handlePutCourse() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPut {
-			w.Header().Set("Allow", http.MethodPut+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode := chi.URLParam(r, "course_code")
 		if courseCode == "" {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Missing course code.")

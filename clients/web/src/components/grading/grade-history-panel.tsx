@@ -46,28 +46,28 @@ export function GradeHistoryPanel({
     [title],
   )
   if (loading) {
-    return <p className="text-sm text-slate-600 dark:text-neutral-400">Loading history…</p>
+    return <p className="text-sm text-fg-muted">Loading history…</p>
   }
   if (error) {
     return (
-      <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+      <p className="text-sm text-danger-fg" role="alert">
         {error}
       </p>
     )
   }
   if (!events || events.length === 0) {
     return (
-      <p className="text-sm text-slate-600 dark:text-neutral-400">
+      <p className="text-sm text-fg-muted">
         No changes recorded for this cell yet.
       </p>
     )
   }
   return (
     <div>
-      <h3 className="text-base font-semibold text-slate-900 dark:text-neutral-100" id={id}>
+      <h3 className="text-base font-semibold text-fg-default" id={id}>
         {title}
       </h3>
-      <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-500">
+      <p className="mt-0.5 text-xs text-fg-subtle">
         Who changed the score, when, and (if your instructor provided one) why. Older backfill rows
         may not show a grader.
       </p>
@@ -82,29 +82,29 @@ export function GradeHistoryPanel({
             role="listitem"
             className="border-s-2 border-indigo-200 ps-3 dark:border-indigo-800/80"
           >
-            <div className="text-xs text-slate-500 dark:text-neutral-500">
+            <div className="text-xs text-fg-subtle">
               <LocaleTime date={e.changedAt} dateOnly={false} />
             </div>
-            <div className="text-sm font-medium text-slate-900 dark:text-neutral-100">
+            <div className="text-sm font-medium text-fg-default">
               {actionLabel(e.action)}
             </div>
             {e.previousScore != null || e.newScore != null ? (
-              <div className="text-sm text-slate-700 dark:text-neutral-300">
+              <div className="text-sm text-fg-muted">
                 {e.previousScore != null ? e.previousScore : '—'}
                 {' → '}
                 {e.newScore != null ? e.newScore : '—'}
               </div>
             ) : null}
             {e.previousStatus && e.newStatus && e.action !== 'deleted' ? (
-              <div className="text-xs text-slate-600 dark:text-neutral-500">
+              <div className="text-xs text-fg-muted">
                 Visibility: {e.previousStatus} → {e.newStatus}
               </div>
             ) : null}
             {e.reason ? (
-              <p className="mt-0.5 text-sm text-slate-700 dark:text-neutral-300">{e.reason}</p>
+              <p className="mt-0.5 text-sm text-fg-muted">{e.reason}</p>
             ) : null}
             {e.changedBy ? (
-              <div className="mt-0.5 text-xs text-slate-500 dark:text-neutral-500">
+              <div className="mt-0.5 text-xs text-fg-subtle">
                 Changed by <span className="font-mono text-[0.7rem]">{e.changedBy}</span>
               </div>
             ) : null}

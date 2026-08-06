@@ -71,16 +71,16 @@ export function AssignmentRubricViewerDialog({
         if (e.target === e.currentTarget) onClose()
       }}
     >
-      <div className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl dark:border-neutral-600 dark:bg-neutral-900">
-        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-slate-100 px-5 py-4 dark:border-neutral-700">
+      <div className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-xl border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-raised">
+        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-border-subtle px-5 py-4 dark:border-border-default">
           <div className="min-w-0">
             <h2
               id={titleId}
-              className="text-lg font-semibold text-slate-950 dark:text-neutral-100"
+              className="text-lg font-semibold text-slate-950 dark:text-fg-default"
             >
               {heading}
             </h2>
-            <p className="mt-0.5 text-sm text-slate-500 dark:text-neutral-400">
+            <p className="mt-0.5 text-sm text-fg-muted">
               {rubric.criteria.length}{' '}
               {rubric.criteria.length === 1 ? 'criterion' : 'criteria'}
               {totalMax > 0 ? (
@@ -95,7 +95,7 @@ export function AssignmentRubricViewerDialog({
             ref={closeRef}
             type="button"
             onClick={onClose}
-            className="shrink-0 rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-800 hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-100 dark:hover:bg-neutral-800"
+            className="shrink-0 rounded-lg border border-border-default px-3 py-1.5 text-sm font-medium text-fg-default hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
           >
             Close
           </button>
@@ -107,24 +107,24 @@ export function AssignmentRubricViewerDialog({
             return (
               <div
                 key={criterion.id}
-                className="rounded-lg border border-slate-200 dark:border-neutral-700"
+                className="rounded-lg border border-border-default"
               >
-                <div className="border-b border-slate-100 px-3.5 py-3 dark:border-neutral-700">
+                <div className="border-b border-border-subtle px-3.5 py-3 dark:border-border-default">
                   <div className="flex items-start justify-between gap-3">
-                    <p className="text-sm font-medium leading-snug text-slate-900 dark:text-neutral-100">
-                      <span className="me-1.5 font-semibold tabular-nums text-slate-400 dark:text-neutral-500">
+                    <p className="text-sm font-medium leading-snug text-fg-default">
+                      <span className="me-1.5 font-semibold tabular-nums text-fg-subtle">
                         {index + 1}.
                       </span>
                       {criterion.title}
                     </p>
                     {maxPts > 0 ? (
-                      <span className="shrink-0 text-xs font-medium tabular-nums text-slate-500 dark:text-neutral-400">
+                      <span className="shrink-0 text-xs font-medium tabular-nums text-fg-muted">
                         {formatPointsCell(maxPts)} pts
                       </span>
                     ) : null}
                   </div>
                   {criterion.description?.trim() ? (
-                    <p className="mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-neutral-400">
+                    <p className="mt-1.5 text-xs leading-relaxed text-fg-muted">
                       {criterion.description}
                     </p>
                   ) : null}
@@ -137,16 +137,16 @@ export function AssignmentRubricViewerDialog({
                         className="flex items-start justify-between gap-3 px-3.5 py-2.5"
                       >
                         <div className="min-w-0">
-                          <p className="text-sm font-medium text-slate-800 dark:text-neutral-200">
+                          <p className="text-sm font-medium text-fg-default">
                             {level.label}
                           </p>
                           {level.description?.trim() ? (
-                            <p className="mt-0.5 text-xs leading-relaxed text-slate-500 dark:text-neutral-400">
+                            <p className="mt-0.5 text-xs leading-relaxed text-fg-muted">
                               {level.description}
                             </p>
                           ) : null}
                         </div>
-                        <span className="shrink-0 text-xs font-semibold tabular-nums text-slate-600 dark:text-neutral-300">
+                        <span className="shrink-0 text-xs font-semibold tabular-nums text-fg-muted">
                           {formatPointsCell(level.points)} pts
                         </span>
                       </li>

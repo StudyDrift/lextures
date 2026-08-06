@@ -96,13 +96,13 @@ export default function BackupOpsAdminPage() {
   }
 
   if (loading) {
-    return <p className="p-6 text-slate-600 dark:text-neutral-400">Loading backup status…</p>
+    return <p className="p-6 text-fg-muted">Loading backup status…</p>
   }
 
   if (error) {
     return (
       <div className="p-6 max-w-3xl">
-        <p role="alert" className="text-red-700 dark:text-red-300">{error}</p>
+        <p role="alert" className="text-danger-fg">{error}</p>
         <Link to="/settings/account" className="mt-4 inline-block text-sm underline">Back to settings</Link>
       </div>
     )
@@ -111,14 +111,14 @@ export default function BackupOpsAdminPage() {
   return (
     <div className="p-6 max-w-4xl space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold text-slate-900 dark:text-neutral-50">Backup &amp; restore</h1>
-        <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+        <h1 className="text-2xl font-semibold text-fg-default">Backup &amp; restore</h1>
+        <p className="mt-1 text-sm text-fg-muted">
           RPO/RTO ops dashboard. Targets: Postgres RPO ≤ {status?.targets.postgresRpoMinutes} min, RTO ≤ {status?.targets.postgresRtoMinutes} min.
         </p>
       </div>
 
       {status && status.alerts.length > 0 && (
-        <div role="alert" className="rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-950/40 p-4 text-sm">
+        <div role="alert" className="rounded-lg border border-amber-300 bg-warning-surface p-4 text-sm">
           <p className="font-medium text-amber-900 dark:text-amber-200">Active alerts</p>
           <ul className="mt-2 list-disc ps-5 space-y-1">
             {status.alerts.map((a) => (
@@ -131,15 +131,15 @@ export default function BackupOpsAdminPage() {
       {status && (
         <section className="grid gap-4 sm:grid-cols-2">
           {status.tiers.map((t) => (
-            <div key={t.tier} className="rounded-lg border border-slate-200 dark:border-neutral-800 p-4">
+            <div key={t.tier} className="rounded-lg border border-border-default dark:border-border-subtle p-4">
               <h2 className="font-medium capitalize">{t.tier.replace('_', ' ')}</h2>
               <dl className="mt-2 text-sm space-y-1">
-                <div><dt className="inline text-slate-500">Last success: </dt><dd className="inline">{t.lastSuccessAt ?? '—'}</dd></div>
+                <div><dt className="inline text-fg-muted">Last success: </dt><dd className="inline">{t.lastSuccessAt ?? '—'}</dd></div>
                 {t.walLagSeconds != null && (
-                  <div><dt className="inline text-slate-500">WAL lag (s): </dt><dd className="inline">{t.walLagSeconds}</dd></div>
+                  <div><dt className="inline text-fg-muted">WAL lag (s): </dt><dd className="inline">{t.walLagSeconds}</dd></div>
                 )}
-                <div><dt className="inline text-slate-500">Next scheduled: </dt><dd className="inline">{t.nextScheduledAt ?? '—'}</dd></div>
-                <div><dt className="inline text-slate-500">Healthy: </dt><dd className="inline">{t.healthy ? 'yes' : 'no'}</dd></div>
+                <div><dt className="inline text-fg-muted">Next scheduled: </dt><dd className="inline">{t.nextScheduledAt ?? '—'}</dd></div>
+                <div><dt className="inline text-fg-muted">Healthy: </dt><dd className="inline">{t.healthy ? 'yes' : 'no'}</dd></div>
               </dl>
             </div>
           ))}
@@ -151,7 +151,7 @@ export default function BackupOpsAdminPage() {
           <h2 className="text-lg font-medium">Restore drill history</h2>
           <ul className="mt-2 text-sm space-y-2">
             {status.restoreDrills.map((d) => (
-              <li key={d.id} className="border-b border-slate-100 dark:border-neutral-800 pb-2">
+              <li key={d.id} className="border-b border-border-subtle pb-2">
                 {d.drillDate} — {d.pass ? 'PASS' : d.pass === false ? 'FAIL' : 'pending'}
                 {d.rpoAchievedMinutes != null && ` · RPO ${d.rpoAchievedMinutes}m`}
                 {d.rtoAchievedMinutes != null && ` · RTO ${d.rtoAchievedMinutes}m`}
@@ -166,7 +166,7 @@ export default function BackupOpsAdminPage() {
         <form onSubmit={(e) => void recordDrill(e)} className="mt-3 space-y-3 text-sm max-w-md">
           <label className="flex flex-col gap-1">
             Drill date
-            <input name="drillDate" type="date" className="border rounded px-2 py-1 dark:bg-neutral-900" />
+            <input name="drillDate" type="date" className="border rounded px-2 py-1 dark:bg-surface-raised" />
           </label>
           <label className="flex items-center gap-2">
             <input name="pass" type="checkbox" defaultChecked />
@@ -174,19 +174,19 @@ export default function BackupOpsAdminPage() {
           </label>
           <label className="flex flex-col gap-1">
             RPO achieved (minutes)
-            <input name="rpoMinutes" type="number" min={0} defaultValue={45} className="border rounded px-2 py-1 dark:bg-neutral-900" />
+            <input name="rpoMinutes" type="number" min={0} defaultValue={45} className="border rounded px-2 py-1 dark:bg-surface-raised" />
           </label>
           <label className="flex flex-col gap-1">
             RTO achieved (minutes)
-            <input name="rtoMinutes" type="number" min={0} defaultValue={90} className="border rounded px-2 py-1 dark:bg-neutral-900" />
+            <input name="rtoMinutes" type="number" min={0} defaultValue={90} className="border rounded px-2 py-1 dark:bg-surface-raised" />
           </label>
           <label className="flex flex-col gap-1">
             Smoke test output
-            <textarea name="smokeOutput" rows={2} className="border rounded px-2 py-1 dark:bg-neutral-900" placeholder="grade reads, quiz attempts, auth: ok" />
+            <textarea name="smokeOutput" rows={2} className="border rounded px-2 py-1 dark:bg-surface-raised" placeholder="grade reads, quiz attempts, auth: ok" />
           </label>
           <label className="flex flex-col gap-1">
             Notes
-            <textarea name="notes" rows={2} className="border rounded px-2 py-1 dark:bg-neutral-900" />
+            <textarea name="notes" rows={2} className="border rounded px-2 py-1 dark:bg-surface-raised" />
           </label>
           <button type="submit" className="rounded bg-slate-900 text-white px-3 py-1.5 dark:bg-neutral-100 dark:text-neutral-900">
             Save drill

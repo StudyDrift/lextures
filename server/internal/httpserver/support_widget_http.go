@@ -170,11 +170,6 @@ func toWidgetJSON(orgID uuid.UUID, row *supportwidget.Row) map[string]any {
 // (plan 20.3) is not yet built, this serves a static mapping keyed by route prefix.
 func (d Deps) handleHelpContextualArticles() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.meUserID(w, r); !ok {
 			return
 		}

@@ -17,11 +17,6 @@ import (
 // handlePostCourseContext records LMS navigation in user.user_audit (Rust: post_course_context_handler).
 func (d Deps) handlePostCourseContext() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return

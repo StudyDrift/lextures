@@ -55,15 +55,6 @@ func (d Deps) quizMarkupsRequireAccess(w http.ResponseWriter, r *http.Request, i
 // handleListQuizMarkups is GET /api/v1/courses/{course_code}/quizzes/{item_id}/markups.
 func (d Deps) handleListQuizMarkups() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		itemID, err := uuid.Parse(chi.URLParam(r, "item_id"))
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid item id.")
@@ -87,15 +78,6 @@ func (d Deps) handleListQuizMarkups() http.HandlerFunc {
 // handleCreateQuizMarkup is POST /api/v1/courses/{course_code}/quizzes/{item_id}/markups.
 func (d Deps) handleCreateQuizMarkup() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		itemID, err := uuid.Parse(chi.URLParam(r, "item_id"))
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid item id.")
@@ -132,15 +114,6 @@ func (d Deps) handleCreateQuizMarkup() http.HandlerFunc {
 // handleDeleteQuizMarkup is DELETE /api/v1/courses/{course_code}/quizzes/{item_id}/markups/{markup_id}.
 func (d Deps) handleDeleteQuizMarkup() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodDelete {
-			w.Header().Set("Allow", http.MethodDelete+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		itemID, err := uuid.Parse(chi.URLParam(r, "item_id"))
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid item id.")

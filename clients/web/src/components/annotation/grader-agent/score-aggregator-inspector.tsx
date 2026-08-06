@@ -62,10 +62,10 @@ export function ScoreAggregatorInspector({
   }
 
   return (
-    <div className="space-y-3 text-sm text-slate-700 dark:text-neutral-200">
+    <div className="space-y-3 text-sm text-fg-default">
       <p>{t('gradingAgent.canvas.inspector.aggregatorHelp')}</p>
       <label className="block">
-        <span className="mb-1.5 block font-medium text-slate-800 dark:text-neutral-100">
+        <span className="mb-1.5 block font-medium text-fg-default">
           {t('gradingAgent.canvas.inspector.aggregatorMode')}
         </span>
         <select
@@ -82,18 +82,18 @@ export function ScoreAggregatorInspector({
       </label>
       {mode === 'weightedSum' ? (
         <div className="space-y-2">
-          <p className="font-medium text-slate-800 dark:text-neutral-100">
+          <p className="font-medium text-fg-default">
             {t('gradingAgent.canvas.inspector.aggregatorWeights')}
           </p>
           {wiredSources.length === 0 ? (
-            <p className="text-xs text-slate-500 dark:text-neutral-400">
+            <p className="text-xs text-fg-muted">
               {t('gradingAgent.canvas.inspector.aggregatorNoInputs')}
             </p>
           ) : (
             <div className="-mx-1 overflow-x-auto px-1">
               <table className="w-full min-w-[240px] text-left text-sm">
                 <thead>
-                  <tr className="text-xs uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                  <tr className="text-xs uppercase tracking-wide text-fg-muted">
                     <th className="pb-1 pe-2 font-semibold">{t('gradingAgent.canvas.inspector.aggregatorSource')}</th>
                     <th className="pb-1 font-semibold">{t('gradingAgent.canvas.inspector.aggregatorWeight')}</th>
                   </tr>
@@ -124,7 +124,7 @@ export function ScoreAggregatorInspector({
             </div>
           )}
           {showWeightWarning ? (
-            <div className="flex flex-wrap items-center gap-2 text-xs text-amber-700 dark:text-amber-300">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-warning-fg">
               <span>{t('gradingAgent.canvas.inspector.aggregatorWeightWarning', { sum: weightSum.toFixed(2) })}</span>
               <button
                 type="button"
@@ -138,7 +138,7 @@ export function ScoreAggregatorInspector({
         </div>
       ) : null}
       <label className="block">
-        <span className="mb-1.5 block font-medium text-slate-800 dark:text-neutral-100">
+        <span className="mb-1.5 block font-medium text-fg-default">
           {t('gradingAgent.canvas.inspector.aggregatorConfidence')}
         </span>
         <select
@@ -154,7 +154,7 @@ export function ScoreAggregatorInspector({
         </select>
       </label>
       <label className="block">
-        <span className="mb-1.5 block font-medium text-slate-800 dark:text-neutral-100">
+        <span className="mb-1.5 block font-medium text-fg-default">
           {t('gradingAgent.canvas.inspector.aggregatorOnMissing')}
         </span>
         <select
@@ -174,7 +174,7 @@ export function ScoreAggregatorInspector({
           type="checkbox"
           checked={mergeComments}
           onChange={(e) => onChange({ mergeComments: e.target.checked })}
-          className="rounded border-slate-300 dark:border-neutral-600"
+          className="rounded border-border-strong"
         />
         <span>{t('gradingAgent.canvas.inspector.aggregatorMergeComments')}</span>
       </label>

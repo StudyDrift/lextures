@@ -123,24 +123,24 @@ function TodoDraggableCard({ item, overlay = false, isDragActive = false, weekBa
 
   const cardBody = (
     <>
-      <p className="line-clamp-2 text-[13px] font-medium leading-snug text-slate-900 group-hover:text-indigo-700 dark:text-neutral-100 dark:group-hover:text-indigo-300">
+      <p className="line-clamp-2 text-[13px] font-medium leading-snug text-fg-default group-hover:text-accent-fg dark:text-fg-default dark:group-hover:text-indigo-300">
         {item.title}
       </p>
       <div className="mt-1 flex min-w-0 items-center gap-1.5">
-        <p className="min-w-0 truncate text-[11px] text-slate-500 dark:text-neutral-400">{item.courseTitle}</p>
+        <p className="min-w-0 truncate text-[11px] text-fg-muted">{item.courseTitle}</p>
         {weekBadge ? (
-          <span className="shrink-0 rounded bg-slate-100 px-1 py-px text-[10px] font-medium text-slate-500 dark:bg-neutral-800 dark:text-neutral-400">
+          <span className="shrink-0 rounded bg-surface-sunken px-1 py-px text-[10px] font-medium text-fg-muted dark:bg-surface-overlay dark:text-fg-muted">
             {weekBadge}
           </span>
         ) : null}
       </div>
       {item.dueAt ? (
-        <p className="mt-1.5 flex items-center gap-1 text-[11px] text-slate-400 dark:text-neutral-500">
+        <p className="mt-1.5 flex items-center gap-1 text-[11px] text-fg-subtle">
           <CalendarDays className="h-3 w-3 shrink-0 opacity-70" aria-hidden />
           <span className="truncate">{formatDueShort(item.dueAt)}</span>
         </p>
       ) : item.kind === 'notebook_task' ? (
-        <p className="mt-1.5 text-[11px] text-slate-400 dark:text-neutral-500">Notebook task</p>
+        <p className="mt-1.5 text-[11px] text-fg-subtle">Notebook task</p>
       ) : null}
     </>
   )
@@ -149,7 +149,7 @@ function TodoDraggableCard({ item, overlay = false, isDragActive = false, weekBa
     <article
       ref={overlay ? undefined : setNodeRef}
       className={[
-        'group touch-manipulation rounded-lg bg-white transition-[box-shadow,opacity,transform] duration-150 ease-out dark:bg-neutral-900',
+        'group touch-manipulation rounded-lg bg-surface-raised transition-[box-shadow,opacity,transform] duration-150 ease-out dark:bg-surface-raised',
         CARD_SHADOW,
         isDragging && !overlay ? 'opacity-30' : '',
         overlay
@@ -231,7 +231,7 @@ function TodoKanbanColumn({
             'flex h-full flex-col items-center gap-2 rounded-xl py-2.5',
             isToday
               ? 'bg-indigo-600/90 text-white dark:bg-indigo-600/90'
-              : 'bg-slate-100/95 text-slate-500 dark:bg-neutral-800/95 dark:text-neutral-400',
+              : 'bg-slate-100/95 text-fg-muted/95 dark:text-fg-muted',
           ].join(' ')}
         >
           <span className="text-xs font-semibold uppercase">{shortTitle.charAt(0)}</span>
@@ -261,7 +261,7 @@ function TodoKanbanColumn({
             ? 'bg-emerald-600/90 text-white dark:bg-emerald-700/90'
             : isToday
               ? 'bg-indigo-600/90 text-white dark:bg-indigo-600/90'
-              : 'bg-slate-100/95 text-slate-600 dark:bg-neutral-800/95 dark:text-neutral-300',
+              : 'bg-slate-100/95 text-fg-muted/95 dark:text-fg-muted',
         ].join(' ')}
       >
         <div className="min-w-0">
@@ -284,7 +284,7 @@ function TodoKanbanColumn({
             'shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-semibold tabular-nums',
             isDone || isToday
               ? 'bg-white/20 text-white'
-              : 'bg-white/70 text-slate-700 dark:bg-neutral-900/50 dark:text-neutral-200',
+              : 'bg-white/70 text-fg-muted/50 dark:text-fg-default',
           ].join(' ')}
         >
           {items.length}
@@ -297,8 +297,8 @@ function TodoKanbanColumn({
           isDone
             ? 'bg-emerald-50/60 dark:bg-emerald-950/20'
             : isEmpty
-              ? 'bg-slate-50/50 dark:bg-neutral-900/30'
-              : 'bg-white/80 dark:bg-neutral-900/50',
+              ? 'bg-slate-50/50/30'
+              : 'bg-white/80/50',
           isOver ? 'bg-indigo-50/50 dark:bg-indigo-950/15' : '',
         ]
           .filter(Boolean)
@@ -306,7 +306,7 @@ function TodoKanbanColumn({
       >
         {isEmpty ? (
           <div className="flex flex-1 items-center justify-center px-1 py-8 text-center">
-            <p className="text-[11px] font-medium text-slate-400 dark:text-neutral-500">
+            <p className="text-[11px] font-medium text-fg-subtle">
               {isDragActive ? 'Drop here' : '—'}
             </p>
           </div>
@@ -447,11 +447,11 @@ export function StudentTodoKanban({ items, placements, weekOffsets, now, collaps
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-balance text-sm text-slate-600 dark:text-neutral-300">
-            <span className="text-2xl font-semibold tracking-tight text-slate-950 tabular-nums dark:text-neutral-50">
+          <p className="text-balance text-sm text-fg-muted">
+            <span className="text-2xl font-semibold tracking-tight text-slate-950 tabular-nums">
               {totalOpen}
             </span>{' '}
-            <span className="text-slate-500 dark:text-neutral-400">{openCountLabelForWeeks(normalizedWeekOffsets)}</span>
+            <span className="text-fg-muted">{openCountLabelForWeeks(normalizedWeekOffsets)}</span>
           </p>
           {doneCount > 0 ? (
             <p className="mt-0.5 text-xs text-emerald-700 tabular-nums dark:text-emerald-400">
@@ -459,7 +459,7 @@ export function StudentTodoKanban({ items, placements, weekOffsets, now, collaps
             </p>
           ) : null}
         </div>
-        <p className="max-w-xs text-pretty text-xs leading-relaxed text-slate-500 dark:text-neutral-400">
+        <p className="max-w-xs text-pretty text-xs leading-relaxed text-fg-muted">
           Drag cards between days. Drop notebook tasks on Done to mark them complete.
         </p>
       </div>
@@ -470,7 +470,7 @@ export function StudentTodoKanban({ items, placements, weekOffsets, now, collaps
         </p>
       ) : null}
       {savingBoard ? (
-        <p className="mb-3 text-xs text-slate-500 dark:text-neutral-400" role="status">
+        <p className="mb-3 text-xs text-fg-muted" role="status">
           Saving…
         </p>
       ) : null}
@@ -485,7 +485,7 @@ export function StudentTodoKanban({ items, placements, weekOffsets, now, collaps
       >
         <div
           className={[
-            'flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl bg-slate-100/70 p-2 dark:bg-neutral-950/40',
+            'flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl bg-slate-100/70 p-2/40',
             BOARD_SHELL_SHADOW,
           ].join(' ')}
         >

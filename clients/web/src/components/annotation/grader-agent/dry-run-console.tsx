@@ -18,7 +18,7 @@ export function DryRunConsole({ logs }: DryRunConsoleProps) {
   }, [logs])
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-slate-800 bg-slate-950 text-slate-100 dark:border-neutral-700">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-slate-800 bg-slate-950 text-slate-100 dark:border-border-default">
       <div
         ref={scrollRef}
         role="log"
@@ -27,7 +27,7 @@ export function DryRunConsole({ logs }: DryRunConsoleProps) {
         className="min-h-0 flex-1 overflow-y-auto px-3 py-2 font-mono text-xs leading-relaxed"
       >
         {logs.length === 0 ? (
-          <p className="text-slate-500">{t('gradingAgent.dryRun.console.empty')}</p>
+          <p className="text-fg-muted">{t('gradingAgent.dryRun.console.empty')}</p>
         ) : (
           logs.map((entry, index) => (
             <p

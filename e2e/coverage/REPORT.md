@@ -1,17 +1,17 @@
 # Completed feature E2E coverage report
 
-Total stories: **560**
+Total stories: **573**
 
 ## Coverage levels
 
 | Level | Count |
 |---|---:|
-| journey | 108 |
-| smoke | 182 |
-| api-contract | 1 |
+| journey | 109 |
+| smoke | 185 |
+| api-contract | 2 |
 | covered-by-parent | 11 |
 | manual | 8 |
-| not-applicable | 182 |
+| not-applicable | 190 |
 | missing | 68 |
 
 ## By client
@@ -19,19 +19,20 @@ Total stories: **560**
 | Client | Count |
 |---|---:|
 | cli | 48 |
-| docs | 18 |
-| mobile | 102 |
-| ops | 21 |
-| web | 371 |
+| docs | 21 |
+| mobile | 103 |
+| multi | 1 |
+| ops | 25 |
+| web | 375 |
 
 ## By market tag
 
 | Market | Count |
 |---|---:|
-| ALL | 508 |
-| HE | 20 |
-| HS | 24 |
-| K12 | 18 |
+| ALL | 516 |
+| HE | 25 |
+| HS | 29 |
+| K12 | 23 |
 
 ## Missing journeys (severity / owner / milestone)
 
@@ -118,10 +119,15 @@ Total stories: **560**
 | AC.7 | rollback | [docs/completed/adaptive/AC.7-post-assessment-and-effectiveness.md](../../docs/completed/adaptive/AC.7-post-assessment-and-effectiveness.md) |
 | AC.9 | rollback | [docs/completed/adaptive/AC.9-analytics-reporting-and-operability.md](../../docs/completed/adaptive/AC.9-analytics-reporting-and-operability.md) |
 | CC.1 | settingsToggle | [docs/completed/checklist/CC.1-checklist-registry-and-evaluation-engine.md](../../docs/completed/checklist/CC.1-checklist-registry-and-evaluation-engine.md) |
+| CC.10 | settingsToggle | [docs/completed/checklist/CC.10-analytics-guidance-and-rollout.md](../../docs/completed/checklist/CC.10-analytics-guidance-and-rollout.md) |
 | CC.2 | settingsToggle | [docs/completed/checklist/CC.2-checklist-state-api-and-dismissals.md](../../docs/completed/checklist/CC.2-checklist-state-api-and-dismissals.md) |
 | CC.3 | settingsToggle | [docs/completed/checklist/CC.3-rule-pack-foundations-and-orientation.md](../../docs/completed/checklist/CC.3-rule-pack-foundations-and-orientation.md) |
 | CC.4 | settingsToggle | [docs/completed/checklist/CC.4-rule-pack-structure-outcomes-alignment.md](../../docs/completed/checklist/CC.4-rule-pack-structure-outcomes-alignment.md) |
 | CC.5 | settingsToggle | [docs/completed/checklist/CC.5-rule-pack-assessment-feedback-interaction.md](../../docs/completed/checklist/CC.5-rule-pack-assessment-feedback-interaction.md) |
+| CC.6 | settingsToggle | [docs/completed/checklist/CC.6-rule-pack-accessibility-and-launch-readiness.md](../../docs/completed/checklist/CC.6-rule-pack-accessibility-and-launch-readiness.md) |
+| CC.7 | settingsToggle | [docs/completed/checklist/CC.7-web-checklist-page-and-nav-badge.md](../../docs/completed/checklist/CC.7-web-checklist-page-and-nav-badge.md) |
+| CC.8 | settingsToggle | [docs/completed/checklist/CC.8-deep-link-and-highlight-targeting.md](../../docs/completed/checklist/CC.8-deep-link-and-highlight-targeting.md) |
+| CC.9 | settingsToggle | [docs/completed/checklist/CC.9-mobile-checklist-ios-and-android.md](../../docs/completed/checklist/CC.9-mobile-checklist-ios-and-android.md) |
 | CT.1 | enabledJourney, rollback | [docs/completed/content_tools/CT.1-foundations-registry-and-data-model.md](../../docs/completed/content_tools/CT.1-foundations-registry-and-data-model.md) |
 | CT.2 | rollback | [docs/completed/content_tools/CT.2-authoring-tools-dropdown-and-config.md](../../docs/completed/content_tools/CT.2-authoring-tools-dropdown-and-config.md) |
 | ct-m9-mobile-tools-governance-a11y-telemetry | settingsToggle | [docs/completed/content_tools/CT.M9-mobile-tools-governance-a11y-telemetry.md](../../docs/completed/content_tools/CT.M9-mobile-tools-governance-a11y-telemetry.md) |
@@ -162,7 +168,7 @@ Total stories: **560**
 | ai-providers | 0 | 8 | 0 | 0 | 0 | 0 | 1 |
 | animations | 0 | 4 | 0 | 0 | 0 | 0 | 3 |
 | badges | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
-| checklist | 0 | 4 | 0 | 0 | 0 | 1 | 0 |
+| checklist | 1 | 7 | 0 | 0 | 0 | 7 | 0 |
 | cli | 0 | 0 | 0 | 0 | 0 | 40 | 0 |
 | content_tools | 22 | 1 | 0 | 0 | 0 | 9 | 0 |
 | e2e | 3 | 0 | 1 | 0 | 0 | 0 | 0 |
@@ -180,7 +186,8 @@ Total stories: **560**
 | parent-portal | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
 | screenshare | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
 | settings | 0 | 0 | 0 | 0 | 0 | 3 | 4 |
-| tech_debt | 0 | 1 | 0 | 0 | 0 | 3 | 0 |
+| tech_debt | 0 | 1 | 1 | 0 | 0 | 3 | 0 |
 | transcripts | 2 | 7 | 0 | 3 | 0 | 0 | 0 |
+| ui-ux | 0 | 0 | 0 | 0 | 0 | 2 | 0 |
 | visual-collaboration | 0 | 7 | 0 | 3 | 0 | 7 | 0 |
 | web | 6 | 2 | 0 | 0 | 0 | 0 | 1 |

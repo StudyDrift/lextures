@@ -205,7 +205,7 @@ export default function InlineDiscussionRenderer({
 
   return (
     <section
-      className="space-y-4 rounded-lg border border-slate-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-900"
+      className="space-y-4 rounded-lg border border-border-default bg-surface-raised p-4 dark:border-border-default dark:bg-surface-raised"
       data-testid="inline-discussion"
       data-content-tool="inline_discussion"
       aria-labelledby={promptId}
@@ -213,18 +213,18 @@ export default function InlineDiscussionRenderer({
       <header className="space-y-1">
         <h2
           id={promptId}
-          className="text-base font-semibold text-slate-900 dark:text-neutral-100"
+          className="text-base font-semibold text-fg-default"
         >
           {t('contentTools.tools.inline_discussion.label')}
         </h2>
-        <p className="text-sm text-slate-700 dark:text-neutral-200 whitespace-pre-wrap">{prompt}</p>
-        <p className="text-xs text-slate-500 dark:text-neutral-400">
+        <p className="text-sm text-fg-default whitespace-pre-wrap">{prompt}</p>
+        <p className="text-xs text-fg-muted">
           {t('contentTools.tools.inline_discussion.requirements', {
             posts: String(requiredPosts),
             replies: String(requiredReplies),
           })}
         </p>
-        <p className="text-xs text-slate-500 dark:text-neutral-400" data-testid="inline-discussion-progress">
+        <p className="text-xs text-fg-muted" data-testid="inline-discussion-progress">
           {t('contentTools.tools.inline_discussion.progress', {
             posts: String(myPosts),
             replies: String(myReplies),
@@ -234,7 +234,7 @@ export default function InlineDiscussionRenderer({
 
       {!readOnly ? (
         <div className="space-y-2">
-          <label htmlFor={composerId} className="block text-sm font-medium text-slate-800 dark:text-neutral-200">
+          <label htmlFor={composerId} className="block text-sm font-medium text-fg-default">
             {replyTo
               ? t('contentTools.tools.inline_discussion.replyLabel')
               : editingId
@@ -246,14 +246,14 @@ export default function InlineDiscussionRenderer({
               {t('contentTools.tools.inline_discussion.anonymityNote')}
             </p>
           ) : null}
-          <p className="text-xs text-slate-500 dark:text-neutral-400">
+          <p className="text-xs text-fg-muted">
             {t('contentTools.tools.inline_discussion.moderationNote')}
           </p>
           <textarea
             id={composerId}
             ref={composerRef}
             data-testid="inline-discussion-composer"
-            className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+            className="w-full rounded-md border border-border-default bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
             rows={3}
             value={draft}
             disabled={busy}
@@ -278,7 +278,7 @@ export default function InlineDiscussionRenderer({
             {replyTo || editingId ? (
               <button
                 type="button"
-                className="text-sm text-slate-600 underline dark:text-neutral-300"
+                className="text-sm text-fg-muted underline dark:text-fg-muted"
                 onClick={() => {
                   setReplyTo(null)
                   setEditingId(null)
@@ -290,7 +290,7 @@ export default function InlineDiscussionRenderer({
           </div>
         </div>
       ) : (
-        <p className="text-sm text-slate-600 dark:text-neutral-300">
+        <p className="text-sm text-fg-muted">
           {t('contentTools.tools.inline_discussion.readOnly')}
         </p>
       )}
@@ -305,7 +305,7 @@ export default function InlineDiscussionRenderer({
 
       {locked && postBeforeYouSee ? (
         <p
-          className="rounded-md bg-slate-50 px-3 py-2 text-sm text-slate-700 dark:bg-neutral-800 dark:text-neutral-200"
+          className="rounded-md bg-surface-base px-3 py-2 text-sm text-fg-muted dark:bg-surface-overlay dark:text-fg-default"
           data-testid="inline-discussion-locked"
         >
           {t('contentTools.tools.inline_discussion.lockedHint')}
@@ -313,7 +313,7 @@ export default function InlineDiscussionRenderer({
       ) : null}
 
       {!locked && posts.length === 0 ? (
-        <p className="text-sm text-slate-600 dark:text-neutral-300" data-testid="inline-discussion-empty">
+        <p className="text-sm text-fg-muted" data-testid="inline-discussion-empty">
           {t('contentTools.tools.inline_discussion.empty')}
         </p>
       ) : null}
@@ -383,17 +383,17 @@ function PostArticle({
       : t('contentTools.tools.inline_discussion.classmate'))
 
   return (
-    <li className={depth > 0 ? 'ms-4 border-s border-slate-200 ps-3 dark:border-neutral-700' : ''}>
+    <li className={depth > 0 ? 'ms-4 border-s border-border-default ps-3 dark:border-border-default' : ''}>
       <article
-        className="space-y-1 rounded-md bg-slate-50 p-3 dark:bg-neutral-800/60"
+        className="space-y-1 rounded-md bg-surface-base p-3/60"
         data-testid={`inline-discussion-post-${post.id}`}
         aria-label={t('contentTools.tools.inline_discussion.postAria', {
           author: name,
           when: post.createdAt || '',
         })}
       >
-        <header className="flex flex-wrap items-baseline gap-2 text-xs text-slate-500 dark:text-neutral-400">
-          <span className="font-medium text-slate-800 dark:text-neutral-200">{name}</span>
+        <header className="flex flex-wrap items-baseline gap-2 text-xs text-fg-muted">
+          <span className="font-medium text-fg-default">{name}</span>
           {post.endorsed ? (
             <span
               className="rounded bg-emerald-100 px-1.5 py-0.5 text-emerald-900 dark:bg-emerald-900/40 dark:text-emerald-100"
@@ -405,11 +405,11 @@ function PostArticle({
           {post.editedAt ? <span>{t('contentTools.tools.inline_discussion.edited')}</span> : null}
         </header>
         {post.tombstone || post.removed ? (
-          <p className="text-sm italic text-slate-500 dark:text-neutral-400">
+          <p className="text-sm italic text-fg-muted">
             {t('contentTools.tools.inline_discussion.tombstone')}
           </p>
         ) : (
-          <p className="text-sm text-slate-800 dark:text-neutral-100 whitespace-pre-wrap">{post.text}</p>
+          <p className="text-sm text-fg-default whitespace-pre-wrap">{post.text}</p>
         )}
         {!readOnly && !post.removed ? (
           <div className="flex flex-wrap gap-2 pt-1 text-xs">
@@ -463,7 +463,7 @@ function PostArticle({
       {extra > 0 && !showAll ? (
         <button
           type="button"
-          className="mt-1 text-xs underline text-slate-600 dark:text-neutral-300"
+          className="mt-1 text-xs underline text-fg-muted"
           onClick={() => setShowAll(true)}
         >
           {t('contentTools.tools.inline_discussion.showMore', { count: String(extra) })}

@@ -30,7 +30,7 @@ export function DataSheetsPanel() {
       <h2 id="ct-datasheets-title" className="text-lg font-semibold">
         {t('contentTools.governance.dataSheetsTitle')}
       </h2>
-      <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+      <p className="mt-1 text-sm text-fg-muted dark:text-fg-subtle">
         {t('contentTools.governance.dataSheetsHelp')}
       </p>
       {error ? (
@@ -42,13 +42,13 @@ export function DataSheetsPanel() {
         {sheets.map((s) => (
           <li
             key={s.toolId}
-            className="rounded border border-slate-200 p-3 text-sm dark:border-neutral-700"
+            className="rounded border border-border-default p-3 text-sm dark:border-border-default"
             data-tool-id={s.toolId}
           >
             <p className="font-medium">
-              {s.toolId} <span className="text-slate-500">v{s.version}</span>
+              {s.toolId} <span className="text-fg-muted">v{s.version}</span>
             </p>
-            <p className="mt-1 text-slate-600 dark:text-slate-300">
+            <p className="mt-1 text-fg-muted dark:text-slate-300">
               {t('contentTools.governance.visibility')}: {s.visibility} · WCAG {s.wcagLevel}
               {s.leavesPlatform ? ` · ${t('contentTools.governance.leavesPlatform')}` : ''}
             </p>
@@ -58,7 +58,7 @@ export function DataSheetsPanel() {
               </p>
             ) : null}
             {s.aiTransparency ? (
-              <p className="mt-1 text-slate-600 dark:text-slate-300">
+              <p className="mt-1 text-fg-muted dark:text-slate-300">
                 {t('contentTools.governance.aiPurpose')}: {s.aiTransparency.purpose} (
                 {s.aiTransparency.modelFamily})
               </p>

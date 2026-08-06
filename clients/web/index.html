@@ -21,13 +21,30 @@
     rel="stylesheet" />
   <script>
     ; (() => {
+      /* UX.1 — apply data-theme before first paint (no FOUC). */
       try {
         const key = 'lextures.uiTheme'
-        const theme = (localStorage.getItem(key) || '').trim().toLowerCase()
-        const isDark = theme === 'dark'
-        document.documentElement.classList.toggle('dark', isDark)
-        document.documentElement.style.colorScheme = isDark ? 'dark' : 'light'
+        const base = (localStorage.getItem(key) || '').trim().toLowerCase() === 'dark' ? 'dark' : 'light'
+        let hc = false
+        try {
+          hc = localStorage.getItem('lextures.highContrast') === '1'
+        } catch { /* ignore */ }
+        try {
+          if (!hc && window.matchMedia && window.matchMedia('(prefers-contrast: more)').matches) {
+            hc = true
+          }
+        } catch { /* ignore */ }
+        const theme = hc
+          ? (base === 'dark' ? 'high-contrast-dark' : 'high-contrast-light')
+          : base
+        const root = document.documentElement
+        root.setAttribute('data-theme', theme)
+        const isDark = theme === 'dark' || theme === 'high-contrast-dark'
+        root.classList.toggle('dark', isDark)
+        root.classList.toggle('high-contrast', hc)
+        root.style.colorScheme = isDark ? 'dark' : 'light'
       } catch {
+        document.documentElement.setAttribute('data-theme', 'light')
         document.documentElement.classList.remove('dark')
         document.documentElement.style.colorScheme = 'light'
       }
@@ -37,6 +54,14 @@
         document.documentElement.dataset.lmsDensity = density === 'compact' ? 'compact' : 'comfortable'
       } catch {
         document.documentElement.dataset.lmsDensity = 'comfortable'
+      }
+      try {
+        const tintKey = 'lextures.uiSurfaceTint'
+        const allowed = new Set(['neutral', 'blue', 'slate', 'red', 'green', 'purple', 'amber', 'teal'])
+        const tint = (localStorage.getItem(tintKey) || 'neutral').trim().toLowerCase()
+        document.documentElement.dataset.surfaceTint = allowed.has(tint) ? tint : 'neutral'
+      } catch {
+        document.documentElement.dataset.surfaceTint = 'neutral'
       }
       try {
         const rtlLocales = new Set(['ar', 'he', 'fa', 'ur', 'ps'])
@@ -50,9 +75,6 @@
         document.documentElement.dir = 'ltr'
       }
       try {
-        if (localStorage.getItem('lextures.highContrast') === '1') {
-          document.documentElement.classList.add('high-contrast')
-        }
         if (localStorage.getItem('lextures.reduceMotion') === '1') {
           document.documentElement.classList.add('reduced-motion')
         }

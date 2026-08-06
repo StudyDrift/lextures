@@ -73,14 +73,14 @@ function SortablePinSlot({
     <div
       ref={setNodeRef}
       style={style}
-      className="group/pin-slot relative rounded-md border border-transparent px-0.5 py-1 hover:border-slate-100 dark:hover:border-neutral-800"
+      className="group/pin-slot relative rounded-md border border-transparent px-0.5 py-1 hover:border-border-subtle dark:hover:border-border-subtle"
       data-pinned-setting-id={id}
     >
       <div className="flex items-start gap-1">
         <button
           ref={setActivatorNodeRef}
           type="button"
-          className="mt-1 inline-flex h-6 w-6 shrink-0 cursor-grab items-center justify-center rounded-md text-slate-400 outline-none hover:bg-slate-100 hover:text-slate-600 focus-visible:ring-2 focus-visible:ring-indigo-400 active:cursor-grabbing dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
+          className="mt-1 inline-flex h-6 w-6 shrink-0 cursor-grab items-center justify-center rounded-md text-fg-subtle outline-none hover:bg-surface-sunken hover:text-fg-muted focus-visible:ring-2 focus-visible:ring-indigo-400 active:cursor-grabbing dark:hover:bg-surface-overlay dark:hover:text-fg-muted"
           {...attributes}
           {...listeners}
           aria-label={pinnedSettingsCopy.reorderHandle(label)}
@@ -194,13 +194,13 @@ export function PinnedSettingsGroup({ pins, visiblePinned }: PinnedSettingsGroup
     return (
       <div className="rounded-lg border border-dashed border-indigo-200/80 bg-indigo-50/40 px-3 py-2.5 dark:border-indigo-800/50 dark:bg-indigo-950/20">
         <div className="flex items-start justify-between gap-2">
-          <p className="text-[12px] leading-relaxed text-slate-600 dark:text-neutral-300">
+          <p className="text-[12px] leading-relaxed text-fg-muted">
             {pinnedSettingsCopy.hint}
           </p>
           <button
             type="button"
             onClick={pins.dismissFirstRunHint}
-            className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-slate-400 hover:bg-white/80 hover:text-slate-600 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+            className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-fg-subtle hover:bg-white/80 hover:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-fg-default"
             aria-label={pinnedSettingsCopy.dismissHint}
           >
             <X className="h-3.5 w-3.5" aria-hidden />
@@ -226,16 +226,16 @@ export function PinnedSettingsGroup({ pins, visiblePinned }: PinnedSettingsGroup
   return (
     <section
       aria-labelledby={headingId}
-      className="overflow-hidden rounded-lg border border-indigo-200/70 bg-white motion-safe:animate-in motion-safe:fade-in motion-safe:duration-200 dark:border-indigo-900/40 dark:bg-neutral-950/20"
+      className="overflow-hidden rounded-lg border border-indigo-200/70 bg-surface-raised motion-safe:animate-in motion-safe:fade-in motion-safe:duration-200 dark:border-indigo-900/40/20"
     >
       <div className="flex items-center justify-between gap-2 border-b border-indigo-100/80 px-3 py-2 dark:border-indigo-900/30">
         <h3
           id={headingId}
-          className="inline-flex items-center gap-2 text-[13px] font-medium text-slate-700 dark:text-neutral-200"
+          className="inline-flex items-center gap-2 text-[13px] font-medium text-fg-default"
         >
           {pinnedSettingsCopy.title}
           <span
-            className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-indigo-50 px-1.5 text-[11px] font-semibold text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300"
+            className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-indigo-50 px-1.5 text-[11px] font-semibold text-accent-fg dark:bg-indigo-950/60 dark:text-indigo-300"
             aria-label={`${items.length}`}
           >
             {items.length}
@@ -277,7 +277,7 @@ export function PinnedSettingsGroup({ pins, visiblePinned }: PinnedSettingsGroup
 export function PinnedSectionHint({ count }: { count: number }) {
   if (count <= 0) return null
   return (
-    <p className="pb-1 text-[11px] leading-snug text-slate-400 dark:text-neutral-500">
+    <p className="pb-1 text-[11px] leading-snug text-fg-subtle">
       {pinnedSettingsCopy.sectionHint(count)}
     </p>
   )

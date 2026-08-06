@@ -5,7 +5,7 @@
  * animates presence and keeps the layer mounted through exit (FR-6, FR-9).
  */
 
-import { useEffect, type CSSProperties, type ReactNode } from 'react'
+import { useEffect, useRef, type CSSProperties, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import {
   overlayClassNames,
@@ -36,12 +36,16 @@ export type OverlaySurfaceProps = {
   lockScroll?: boolean
   /** Called when exit animation begins (focus return). */
   onExitStart?: () => void
+  /** Called when exit animation finishes and the layer unmounts. */
+  onExited?: () => void
   children: ReactNode
   /**
    * When false, children are not wrapped in an animated panel — caller applies
    * `panelClassName` / motion classes themselves (e.g. custom drawer markup).
    */
   wrapPanel?: boolean
+  /** Optional test id on the fixed root (e.g. confirm-dialog-root). */
+  rootTestId?: string
 }
 
 export function OverlaySurface({
@@ -57,13 +61,24 @@ export function OverlaySurface({
   zClassName = 'z-[400]',
   lockScroll = true,
   onExitStart,
+  onExited,
   children,
   wrapPanel = true,
+  rootTestId,
 }: OverlaySurfaceProps) {
   const { ffMotionOverlays } = usePlatformFeatures()
   const enabled = enabledProp ?? ffMotionOverlays !== false
 
   const presence = useOverlayPresence({ open, kind, enabled, onExitStart })
+  const hadOpenRef = useRef(false)
+
+  useEffect(() => {
+    if (open) hadOpenRef.current = true
+    if (hadOpenRef.current && presence.phase === 'closed' && !open) {
+      hadOpenRef.current = false
+      onExited?.()
+    }
+  }, [presence.phase, open, onExited])
   const { panel, scrim, durationMs } = overlayClassNames({
     kind,
     phase: presence.phase,
@@ -97,6 +112,7 @@ export function OverlaySurface({
       style={durationStyle}
       data-overlay-phase={presence.phase}
       data-overlay-kind={kind}
+      data-testid={rootTestId}
     >
       {onClose ? (
         <button

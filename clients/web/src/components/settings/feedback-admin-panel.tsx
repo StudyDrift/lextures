@@ -80,10 +80,10 @@ function FeedbackFiltersBar({
   const searchId = useId()
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50/80 p-4 dark:border-neutral-800 dark:bg-neutral-900/50">
+    <div className="flex flex-col gap-3 rounded-xl border border-border-default bg-slate-50/80 p-4 dark:border-border-subtle/50">
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <label className="block text-sm">
-          <span className="mb-1 block font-medium text-slate-700 dark:text-neutral-300">
+          <span className="mb-1 block font-medium text-fg-muted">
             {t('settings.feedback.filters.status')}
           </span>
           <select
@@ -92,7 +92,7 @@ function FeedbackFiltersBar({
               onChange({ ...filters, status: e.target.value as FeedbackStatus | '' })
             }
             disabled={disabled}
-            className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+            className="w-full rounded-lg border border-border-default bg-surface-raised px-2.5 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
           >
             <option value="">{t('settings.feedback.filters.allStatuses')}</option>
             {FEEDBACK_STATUSES.map((s) => (
@@ -103,7 +103,7 @@ function FeedbackFiltersBar({
           </select>
         </label>
         <label className="block text-sm">
-          <span className="mb-1 block font-medium text-slate-700 dark:text-neutral-300">
+          <span className="mb-1 block font-medium text-fg-muted">
             {t('settings.feedback.filters.category')}
           </span>
           <select
@@ -112,7 +112,7 @@ function FeedbackFiltersBar({
               onChange({ ...filters, category: e.target.value as FeedbackCategory | '' })
             }
             disabled={disabled}
-            className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+            className="w-full rounded-lg border border-border-default bg-surface-raised px-2.5 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
           >
             <option value="">{t('settings.feedback.filters.allCategories')}</option>
             {FEEDBACK_CATEGORIES.map((c) => (
@@ -123,7 +123,7 @@ function FeedbackFiltersBar({
           </select>
         </label>
         <label className="block text-sm">
-          <span className="mb-1 block font-medium text-slate-700 dark:text-neutral-300">
+          <span className="mb-1 block font-medium text-fg-muted">
             {t('settings.feedback.filters.source')}
           </span>
           <select
@@ -135,7 +135,7 @@ function FeedbackFiltersBar({
               })
             }
             disabled={disabled}
-            className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+            className="w-full rounded-lg border border-border-default bg-surface-raised px-2.5 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
           >
             <option value="">{t('settings.feedback.filters.allSources')}</option>
             {FEEDBACK_SOURCES.map((s) => (
@@ -146,12 +146,12 @@ function FeedbackFiltersBar({
           </select>
         </label>
         <label className="block text-sm" htmlFor={searchId}>
-          <span className="mb-1 block font-medium text-slate-700 dark:text-neutral-300">
+          <span className="mb-1 block font-medium text-fg-muted">
             {t('settings.feedback.filters.search')}
           </span>
           <div className="relative">
             <Search
-              className="pointer-events-none absolute start-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+              className="pointer-events-none absolute start-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-subtle"
               aria-hidden
             />
             <input
@@ -161,14 +161,14 @@ function FeedbackFiltersBar({
               onChange={(e) => onChange({ ...filters, q: e.target.value })}
               disabled={disabled}
               placeholder={t('settings.feedback.filters.searchPlaceholder')}
-              className="w-full rounded-lg border border-slate-200 bg-white py-2 ps-9 pe-3 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+              className="w-full rounded-lg border border-border-default bg-surface-raised py-2 ps-9 pe-3 text-sm dark:border-border-default dark:bg-surface-overlay"
             />
           </div>
         </label>
       </div>
       <div className="flex flex-wrap items-end gap-3">
         <label className="block text-sm">
-          <span className="mb-1 block font-medium text-slate-700 dark:text-neutral-300">
+          <span className="mb-1 block font-medium text-fg-muted">
             {t('settings.feedback.filters.from')}
           </span>
           <input
@@ -176,11 +176,11 @@ function FeedbackFiltersBar({
             value={filters.fromDate}
             onChange={(e) => onChange({ ...filters, fromDate: e.target.value })}
             disabled={disabled}
-            className="rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+            className="rounded-lg border border-border-default bg-surface-raised px-2.5 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
           />
         </label>
         <label className="block text-sm">
-          <span className="mb-1 block font-medium text-slate-700 dark:text-neutral-300">
+          <span className="mb-1 block font-medium text-fg-muted">
             {t('settings.feedback.filters.to')}
           </span>
           <input
@@ -188,14 +188,14 @@ function FeedbackFiltersBar({
             value={filters.toDate}
             onChange={(e) => onChange({ ...filters, toDate: e.target.value })}
             disabled={disabled}
-            className="rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+            className="rounded-lg border border-border-default bg-surface-raised px-2.5 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
           />
         </label>
         <button
           type="button"
           onClick={onApply}
           disabled={disabled}
-          className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200"
+          className="rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
         >
           {t('settings.feedback.filters.apply')}
         </button>
@@ -203,7 +203,7 @@ function FeedbackFiltersBar({
           type="button"
           onClick={onClear}
           disabled={disabled}
-          className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 disabled:opacity-50 dark:text-neutral-400 dark:hover:text-neutral-100"
+          className="rounded-lg px-3 py-2 text-sm font-medium text-fg-muted hover:text-fg-default disabled:opacity-50 dark:text-fg-muted dark:hover:text-fg-default"
         >
           {t('settings.feedback.filters.clear')}
         </button>
@@ -238,26 +238,26 @@ function FeedbackListRow({
       tabIndex={0}
       onClick={(e) => activate(e.currentTarget)}
       onKeyDown={onKeyDown}
-      className="cursor-pointer border-t border-slate-100 hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-indigo-500 dark:border-neutral-800 dark:hover:bg-neutral-800/60"
+      className="cursor-pointer border-t border-border-subtle hover:bg-surface-base focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-indigo-500 dark:border-border-subtle dark:hover:bg-neutral-800/60"
     >
-      <td className="px-4 py-3 whitespace-nowrap text-slate-600 dark:text-neutral-400">
+      <td className="px-4 py-3 whitespace-nowrap text-fg-muted">
         <time dateTime={item.created_at} title={formatAbsolute(item.created_at)}>
           {formatRelativeCompact(item.created_at)}
         </time>
       </td>
-      <td className="px-4 py-3 text-slate-900 dark:text-neutral-100">
+      <td className="px-4 py-3 text-fg-default">
         {feedbackPersonLabel(item.submitter)}
       </td>
-      <td className="px-4 py-3 text-slate-700 dark:text-neutral-300">
+      <td className="px-4 py-3 text-fg-muted">
         {t(`feedback.category.${item.category}`)}
       </td>
-      <td className="px-4 py-3 text-slate-700 dark:text-neutral-300">
+      <td className="px-4 py-3 text-fg-muted">
         {t(`settings.feedback.source.${item.source}`)}
       </td>
       <td className="px-4 py-3">
         <FeedbackAdminStatusBadge status={item.status} />
       </td>
-      <td className="max-w-xs truncate px-4 py-3 text-slate-600 dark:text-neutral-400">
+      <td className="max-w-xs truncate px-4 py-3 text-fg-muted">
         {item.message_preview}
       </td>
     </tr>
@@ -277,25 +277,25 @@ function FeedbackListCard({
     <button
       type="button"
       onClick={() => onOpen(item.id)}
-      className="w-full rounded-xl border border-slate-200 bg-white p-4 text-start hover:border-indigo-200 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-indigo-800/50"
+      className="w-full rounded-xl border border-border-default bg-surface-raised p-4 text-start hover:border-indigo-200 dark:border-border-subtle dark:bg-surface-raised dark:hover:border-indigo-800/50"
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <time
           dateTime={item.created_at}
           title={formatAbsolute(item.created_at)}
-          className="text-xs text-slate-500 dark:text-neutral-500"
+          className="text-xs text-fg-subtle"
         >
           {formatRelativeCompact(item.created_at)}
         </time>
         <FeedbackAdminStatusBadge status={item.status} />
       </div>
-      <p className="mt-2 text-sm font-medium text-slate-900 dark:text-neutral-100">
+      <p className="mt-2 text-sm font-medium text-fg-default">
         {feedbackPersonLabel(item.submitter)}
       </p>
-      <p className="mt-1 text-xs text-slate-500 dark:text-neutral-500">
+      <p className="mt-1 text-xs text-fg-subtle">
         {t(`feedback.category.${item.category}`)} · {t(`settings.feedback.source.${item.source}`)}
       </p>
-      <p className="mt-2 line-clamp-2 text-sm text-slate-600 dark:text-neutral-400">
+      <p className="mt-2 line-clamp-2 text-sm text-fg-muted">
         {item.message_preview}
       </p>
     </button>
@@ -364,18 +364,18 @@ function FeedbackDetailView({
   }
 
   if (loading) {
-    return <p className="mt-6 text-sm text-slate-500 dark:text-neutral-400">{t('settings.feedback.loading')}</p>
+    return <p className="mt-6 text-sm text-fg-muted">{t('settings.feedback.loading')}</p>
   }
   if (error) {
     return (
       <div className="mt-6 space-y-3">
-        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+        <p role="alert" className="text-sm text-danger-fg">
           {error}
         </p>
         <button
           type="button"
           onClick={onBack}
-          className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-neutral-400"
+          className="inline-flex items-center gap-2 text-sm font-medium text-fg-muted"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden />
           {t('settings.feedback.backToList')}
@@ -391,64 +391,64 @@ function FeedbackDetailView({
         ref={backRef}
         type="button"
         onClick={onBack}
-        className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+        className="inline-flex items-center gap-2 text-sm font-medium text-fg-muted hover:text-fg-default dark:text-fg-muted dark:hover:text-fg-default"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden />
         {t('settings.feedback.backToList')}
       </button>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
+      <div className="rounded-xl border border-border-default bg-surface-raised p-5 dark:border-border-subtle dark:bg-surface-raised">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-neutral-100">
+            <h3 className="text-lg font-semibold text-fg-default">
               {feedbackPersonLabel(detail.submitter)}
             </h3>
-            <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">{detail.submitter.email}</p>
+            <p className="mt-1 text-sm text-fg-muted">{detail.submitter.email}</p>
           </div>
           <FeedbackAdminStatusBadge status={detail.status} />
         </div>
 
         <section className="mt-6" aria-labelledby="feedback-message-heading">
-          <h4 id="feedback-message-heading" className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+          <h4 id="feedback-message-heading" className="text-sm font-semibold text-fg-default">
             {t('settings.feedback.detail.message')}
           </h4>
-          <p className="mt-2 whitespace-pre-wrap break-words text-sm text-slate-800 dark:text-neutral-200">
+          <p className="mt-2 whitespace-pre-wrap break-words text-sm text-fg-default">
             {detail.message}
           </p>
         </section>
 
         <section className="mt-6" aria-labelledby="feedback-context-heading">
-          <h4 id="feedback-context-heading" className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+          <h4 id="feedback-context-heading" className="text-sm font-semibold text-fg-default">
             {t('settings.feedback.detail.context')}
           </h4>
           <dl className="mt-2 grid gap-2 text-sm sm:grid-cols-2">
             <div>
-              <dt className="text-slate-500 dark:text-neutral-500">{t('settings.feedback.detail.route')}</dt>
-              <dd className="break-all text-slate-900 dark:text-neutral-100">
+              <dt className="text-fg-subtle">{t('settings.feedback.detail.route')}</dt>
+              <dd className="break-all text-fg-default">
                 {detail.context.route || '—'}
               </dd>
             </div>
             <div>
-              <dt className="text-slate-500 dark:text-neutral-500">{t('settings.feedback.detail.platform')}</dt>
-              <dd className="text-slate-900 dark:text-neutral-100">
+              <dt className="text-fg-subtle">{t('settings.feedback.detail.platform')}</dt>
+              <dd className="text-fg-default">
                 {t(`settings.feedback.source.${detail.source}`)}
               </dd>
             </div>
             <div>
-              <dt className="text-slate-500 dark:text-neutral-500">{t('settings.feedback.detail.appVersion')}</dt>
-              <dd className="text-slate-900 dark:text-neutral-100">{detail.app_version || '—'}</dd>
+              <dt className="text-fg-subtle">{t('settings.feedback.detail.appVersion')}</dt>
+              <dd className="text-fg-default">{detail.app_version || '—'}</dd>
             </div>
             <div>
-              <dt className="text-slate-500 dark:text-neutral-500">{t('settings.feedback.detail.locale')}</dt>
-              <dd className="text-slate-900 dark:text-neutral-100">{detail.context.locale || '—'}</dd>
+              <dt className="text-fg-subtle">{t('settings.feedback.detail.locale')}</dt>
+              <dd className="text-fg-default">{detail.context.locale || '—'}</dd>
             </div>
             <div>
-              <dt className="text-slate-500 dark:text-neutral-500">{t('settings.feedback.detail.submittedAt')}</dt>
-              <dd className="text-slate-900 dark:text-neutral-100">{formatAbsolute(detail.created_at)}</dd>
+              <dt className="text-fg-subtle">{t('settings.feedback.detail.submittedAt')}</dt>
+              <dd className="text-fg-default">{formatAbsolute(detail.created_at)}</dd>
             </div>
             <div>
-              <dt className="text-slate-500 dark:text-neutral-500">{t('settings.feedback.detail.category')}</dt>
-              <dd className="text-slate-900 dark:text-neutral-100">
+              <dt className="text-fg-subtle">{t('settings.feedback.detail.category')}</dt>
+              <dd className="text-fg-default">
                 {t(`feedback.category.${detail.category}`)}
               </dd>
             </div>
@@ -456,7 +456,7 @@ function FeedbackDetailView({
         </section>
 
         {detail.resolved_at && detail.resolved_by ? (
-          <p className="mt-4 text-sm text-slate-600 dark:text-neutral-400">
+          <p className="mt-4 text-sm text-fg-muted">
             {t('settings.feedback.detail.resolved', {
               name: feedbackPersonLabel(detail.resolved_by),
               when: formatAbsolute(detail.resolved_at),
@@ -464,12 +464,12 @@ function FeedbackDetailView({
           </p>
         ) : null}
 
-        <form className="mt-6 space-y-4 border-t border-slate-100 pt-6 dark:border-neutral-800" onSubmit={onSave}>
-          <h4 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+        <form className="mt-6 space-y-4 border-t border-border-subtle pt-6 dark:border-border-subtle" onSubmit={onSave}>
+          <h4 className="text-sm font-semibold text-fg-default">
             {t('settings.feedback.detail.admin')}
           </h4>
           <label className="block text-sm" htmlFor="feedback-admin-status">
-            <span className="mb-1 block font-medium text-slate-700 dark:text-neutral-300">
+            <span className="mb-1 block font-medium text-fg-muted">
               {t('settings.feedback.detail.status')}
             </span>
             <select
@@ -477,7 +477,7 @@ function FeedbackDetailView({
               value={status}
               onChange={(e) => setStatus(e.target.value as FeedbackStatus)}
               disabled={saving}
-              className="w-full max-w-xs rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+              className="w-full max-w-xs rounded-lg border border-border-default bg-surface-raised px-2.5 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
             >
               {FEEDBACK_STATUSES.map((s) => (
                 <option key={s} value={s}>
@@ -487,7 +487,7 @@ function FeedbackDetailView({
             </select>
           </label>
           <label className="block text-sm">
-            <span className="mb-1 block font-medium text-slate-700 dark:text-neutral-300">
+            <span className="mb-1 block font-medium text-fg-muted">
               {t('settings.feedback.detail.internalNote')}
             </span>
             <textarea
@@ -495,13 +495,13 @@ function FeedbackDetailView({
               onChange={(e) => setAdminNote(e.target.value)}
               rows={4}
               disabled={saving}
-              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+              className="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
             />
           </label>
           <button
             type="submit"
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-white"
+            className="inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-surface-raised"
           >
             {saving ? (
               <>
@@ -685,11 +685,11 @@ export function FeedbackAdminPanel() {
       <h2
         ref={listHeadingRef}
         tabIndex={-1}
-        className="text-base font-semibold text-slate-900 dark:text-neutral-100"
+        className="text-base font-semibold text-fg-default"
       >
         {t('settings.feedback.title')}
       </h2>
-      <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+      <p className="mt-1 text-sm text-fg-muted">
         {t('settings.feedback.description')}
       </p>
 
@@ -704,7 +704,7 @@ export function FeedbackAdminPanel() {
       </div>
 
       {listLoading && (
-        <p className="mt-6 text-sm text-slate-500 dark:text-neutral-400">{t('settings.feedback.loading')}</p>
+        <p className="mt-6 text-sm text-fg-muted">{t('settings.feedback.loading')}</p>
       )}
 
       {listError && !listLoading && (
@@ -715,7 +715,7 @@ export function FeedbackAdminPanel() {
           <button
             type="button"
             onClick={() => void loadList()}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium dark:border-neutral-600"
+            className="inline-flex items-center gap-2 rounded-lg border border-border-default px-3 py-2 text-sm font-medium dark:border-border-default"
           >
             <RefreshCw className="h-4 w-4" aria-hidden />
             {t('settings.feedback.retry')}
@@ -724,16 +724,16 @@ export function FeedbackAdminPanel() {
       )}
 
       {!listLoading && !listError && items.length === 0 && (
-        <p className="mt-8 text-center text-sm text-slate-500 dark:text-neutral-400">
+        <p className="mt-8 text-center text-sm text-fg-muted">
           {t('settings.feedback.empty')}
         </p>
       )}
 
       {!listLoading && !listError && items.length > 0 && (
         <>
-          <div className="mt-6 hidden overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-800 md:block">
+          <div className="mt-6 hidden overflow-x-auto rounded-xl border border-border-default dark:border-border-subtle md:block">
             <table className="min-w-full text-start text-sm">
-              <thead className="sticky top-0 z-10 bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-neutral-950 dark:text-neutral-400">
+              <thead className="sticky top-0 z-10 bg-surface-base text-xs uppercase tracking-wide text-fg-muted dark:bg-surface-base dark:text-fg-muted">
                 <tr>
                   <th scope="col" className="px-4 py-2.5 font-semibold">
                     {t('settings.feedback.columns.when')}
@@ -773,7 +773,7 @@ export function FeedbackAdminPanel() {
             ))}
           </div>
 
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-slate-600 dark:text-neutral-400">
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-fg-muted">
             <p>
               {t('settings.feedback.pagination.summary', {
                 start: pageStart,
@@ -786,7 +786,7 @@ export function FeedbackAdminPanel() {
                 type="button"
                 disabled={!hasPrev || listLoading}
                 onClick={() => setPageIndex((p) => Math.max(0, p - 1))}
-                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 disabled:opacity-50 dark:border-neutral-600"
+                className="inline-flex items-center gap-1 rounded-lg border border-border-default px-3 py-1.5 disabled:opacity-50 dark:border-border-default"
               >
                 <ChevronLeft className="h-4 w-4" aria-hidden />
                 {t('settings.feedback.pagination.prev')}
@@ -795,7 +795,7 @@ export function FeedbackAdminPanel() {
                 type="button"
                 disabled={!hasNext || listLoading}
                 onClick={() => setPageIndex((p) => p + 1)}
-                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 disabled:opacity-50 dark:border-neutral-600"
+                className="inline-flex items-center gap-1 rounded-lg border border-border-default px-3 py-1.5 disabled:opacity-50 dark:border-border-default"
               >
                 {t('settings.feedback.pagination.next')}
                 <ChevronRight className="h-4 w-4" aria-hidden />

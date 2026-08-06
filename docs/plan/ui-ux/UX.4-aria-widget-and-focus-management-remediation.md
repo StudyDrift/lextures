@@ -227,7 +227,7 @@ focus.
 
 ## 13. Dependencies & Sequencing
 
-- **Must ship after** — [UX.2](UX.2-core-component-library-and-adoption-ratchet.md).
+- **Must ship after** — [UX.2](../../completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md).
   UX.4 is largely *delivered by* the UX.2 migration; this plan owns the
   verification, the removal of wrong roles, the tooltip replacement, and the CI
   gates.
@@ -339,7 +339,7 @@ focus.
 - External: [WAI-ARIA Authoring Practices Guide](https://www.w3.org/WAI/ARIA/apg/),
   [WCAG 2.2](https://www.w3.org/TR/WCAG22/),
   [EN 301 549](https://www.deque.com/en-301-549-compliance/)
-- Related plans: [UX.2](UX.2-core-component-library-and-adoption-ratchet.md),
+- Related plans: [UX.2](../../completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md),
   [UX.5](UX.5-wcag-2.2-aa-conformance-uplift.md),
   [UX.6](UX.6-form-and-validation-system.md),
   [UX.15](UX.15-i18n-coverage-and-rtl-completion.md),

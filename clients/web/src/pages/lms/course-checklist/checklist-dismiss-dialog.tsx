@@ -116,18 +116,18 @@ export function ChecklistDismissDialog({
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={descId}
-        className={`relative z-10 w-full max-w-md rounded-xl border border-slate-200 bg-white p-5 shadow-xl dark:border-neutral-700 dark:bg-neutral-900 ${classes.panel}`}
+        className={`relative z-10 w-full max-w-md rounded-xl border border-border-default bg-surface-raised p-5 shadow-xl dark:border-border-default dark:bg-surface-raised ${classes.panel}`}
       >
-        <h2 id={titleId} className="text-lg font-semibold text-slate-900 dark:text-neutral-50">
+        <h2 id={titleId} className="text-lg font-semibold text-fg-default">
           {courseChecklistI18n.dismissDialogTitle}
         </h2>
-        <p id={descId} className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+        <p id={descId} className="mt-1 text-sm text-fg-muted">
           {courseChecklistI18n.dismissDialogHelp}
         </p>
-        <p className="mt-2 text-sm font-medium text-slate-800 dark:text-neutral-200">{itemTitle}</p>
+        <p className="mt-2 text-sm font-medium text-fg-default">{itemTitle}</p>
         <form className="mt-4 space-y-4" onSubmit={submit}>
           <div>
-            <label htmlFor={reasonId} className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+            <label htmlFor={reasonId} className="block text-sm font-medium text-fg-muted">
               {courseChecklistI18n.dismissReasonLabel}
             </label>
             <select
@@ -136,7 +136,7 @@ export function ChecklistDismissDialog({
               value={reason}
               disabled={busy}
               onChange={(e) => setReason(e.target.value as DismissReason)}
-              className="mt-1 w-full min-h-11 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+              className="mt-1 w-full min-h-11 rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base dark:text-fg-default"
             >
               {REASONS.map((r) => (
                 <option key={r} value={r}>
@@ -146,7 +146,7 @@ export function ChecklistDismissDialog({
             </select>
           </div>
           <div>
-            <label htmlFor={noteId} className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+            <label htmlFor={noteId} className="block text-sm font-medium text-fg-muted">
               {courseChecklistI18n.dismissNoteLabel}
             </label>
             <textarea
@@ -157,12 +157,12 @@ export function ChecklistDismissDialog({
               rows={3}
               placeholder={courseChecklistI18n.dismissNotePlaceholder}
               onChange={(e) => setNote(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+              className="mt-1 w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base dark:text-fg-default"
             />
-            <p className="mt-1 text-xs text-slate-500">{note.length}/500</p>
+            <p className="mt-1 text-xs text-fg-muted">{note.length}/500</p>
           </div>
           {error ? (
-            <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+            <p className="text-sm text-danger-fg" role="alert">
               {error}
             </p>
           ) : null}
@@ -171,7 +171,7 @@ export function ChecklistDismissDialog({
               type="button"
               disabled={busy}
               onClick={onClose}
-              className="inline-flex min-h-11 items-center rounded-lg border border-slate-300 px-4 text-sm font-semibold text-slate-800 dark:border-neutral-600 dark:text-neutral-100"
+              className="inline-flex min-h-11 items-center rounded-lg border border-border-strong px-4 text-sm font-semibold text-fg-default dark:border-border-default dark:text-fg-default"
             >
               {courseChecklistI18n.dismissCancel}
             </button>

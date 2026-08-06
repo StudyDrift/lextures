@@ -12,9 +12,7 @@ export function SideNavSectionLabel({ children, first }: SideNavSectionLabelProp
   if (sideNavCollapsed) return null
   return (
     <p
-      className={`px-3 pb-1 text-sm font-bold tracking-tight text-slate-900 dark:text-neutral-100 ${
-        first ? 'pt-3' : 'pt-4'
-      }`}
+      className={`px-3 pb-1 text-sm font-bold tracking-tight text-fg-default ${ first ? 'pt-3' : 'pt-4' }`}
     >
       {children}
     </p>

@@ -15,11 +15,6 @@ const notificationUpdatedJSON = `{"type":"notification_updated"}`
 // handleNotificationsWS is GET /api/v1/ws/notifications — first text message: {"authToken":"…"}.
 func (d Deps) handleNotificationsWS() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.JWTSigner == nil {
 			http.Error(w, "auth not configured", http.StatusServiceUnavailable)
 			return

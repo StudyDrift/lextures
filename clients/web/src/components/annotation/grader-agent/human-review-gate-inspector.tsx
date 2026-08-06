@@ -26,10 +26,10 @@ export function HumanReviewGateInspector({
       : 0.7
 
   return (
-    <div className="space-y-3 text-sm text-slate-700 dark:text-neutral-200">
+    <div className="space-y-3 text-sm text-fg-default">
       <p>{t('gradingAgent.canvas.inspector.reviewGateHelp')}</p>
       <label className="block">
-        <span className="mb-1.5 block font-medium text-slate-800 dark:text-neutral-100">
+        <span className="mb-1.5 block font-medium text-fg-default">
           {t('gradingAgent.canvas.inspector.reviewGateMode')}
         </span>
         <select
@@ -46,7 +46,7 @@ export function HumanReviewGateInspector({
       </label>
       {mode === 'belowConfidence' ? (
         <label className="block">
-          <span className="mb-1.5 block font-medium text-slate-800 dark:text-neutral-100">
+          <span className="mb-1.5 block font-medium text-fg-default">
             {t('gradingAgent.canvas.inspector.reviewGateFloor')}
           </span>
           <input
@@ -61,7 +61,7 @@ export function HumanReviewGateInspector({
         </label>
       ) : null}
       <label className="block">
-        <span className="mb-1.5 block font-medium text-slate-800 dark:text-neutral-100">
+        <span className="mb-1.5 block font-medium text-fg-default">
           {t('gradingAgent.canvas.inspector.reviewGateQueue')}
         </span>
         <select value={queue} onChange={(e) => onChange({ queue: e.target.value })} className={fieldClass}>

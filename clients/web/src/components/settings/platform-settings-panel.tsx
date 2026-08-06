@@ -275,13 +275,13 @@ function sourceBadge(src: FieldSource) {
   }
   if (src === 'default') {
     return (
-      <span className="ms-2 rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600 dark:bg-neutral-700 dark:text-neutral-300">
+      <span className="ms-2 rounded-md bg-surface-sunken px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-fg-muted dark:bg-neutral-700 dark:text-fg-muted">
         Default
       </span>
     )
   }
   return (
-    <span className="ms-2 rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600 dark:bg-neutral-700 dark:text-neutral-300">
+    <span className="ms-2 rounded-md bg-surface-sunken px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-fg-muted dark:bg-neutral-700 dark:text-fg-muted">
       Environment
     </span>
   )
@@ -529,17 +529,17 @@ export function PlatformSettingsPanel() {
   }
 
   const chk =
-    'rounded border border-slate-200 bg-white text-indigo-600 focus:ring-indigo-500 dark:border-neutral-600 dark:bg-neutral-800'
+    'rounded border border-border-default bg-surface-raised text-accent-fg focus:ring-indigo-500 dark:border-border-default dark:bg-surface-overlay'
 
   if (loading) {
-    return <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">Loading platform settings…</p>
+    return <p className="mt-4 text-sm text-fg-muted">Loading platform settings…</p>
   }
 
   return (
     <div>
-      <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+      <p className="mt-1 text-sm text-fg-muted">
         Values stored here override the server process environment when set. Requires{' '}
-        <code className="rounded bg-slate-100 px-1 font-mono text-xs dark:bg-neutral-800">global:app:rbac:manage</code>.
+        <code className="rounded bg-surface-sunken px-1 font-mono text-xs dark:bg-surface-overlay">global:app:rbac:manage</code>.
         Secrets are never returned in plain text after save.
       </p>
 
@@ -551,28 +551,28 @@ export function PlatformSettingsPanel() {
 
       <form className="mt-8 space-y-10" onSubmit={onSubmit}>
         <section>
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Outgoing email</h3>
-          <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+          <h3 className="text-sm font-semibold text-fg-default">Outgoing email</h3>
+          <p className="mt-1 text-xs text-fg-muted">
             Transactional email uses a pluggable provider. SMTP is the default; Amazon SES can be selected when the SES
             feature flag is enabled. Additional providers can be added on the API without changing notification call
             sites. SMTP passwords are encrypted with{' '}
-            <code className="rounded bg-slate-100 px-1 font-mono dark:bg-neutral-900">PLATFORM_SECRETS_KEY</code>. Process{' '}
-            <code className="rounded bg-slate-100 px-1 font-mono dark:bg-neutral-900">SMTP_*</code> /{' '}
-            <code className="rounded bg-slate-100 px-1 font-mono dark:bg-neutral-900">SES_*</code> /{' '}
-            <code className="rounded bg-slate-100 px-1 font-mono dark:bg-neutral-900">EMAIL_PROVIDER</code> env vars apply
+            <code className="rounded bg-surface-sunken px-1 font-mono dark:bg-surface-raised">PLATFORM_SECRETS_KEY</code>. Process{' '}
+            <code className="rounded bg-surface-sunken px-1 font-mono dark:bg-surface-raised">SMTP_*</code> /{' '}
+            <code className="rounded bg-surface-sunken px-1 font-mono dark:bg-surface-raised">SES_*</code> /{' '}
+            <code className="rounded bg-surface-sunken px-1 font-mono dark:bg-surface-raised">EMAIL_PROVIDER</code> env vars apply
             when a field is not set here. SES credentials use the default AWS chain (IAM role or{' '}
-            <code className="rounded bg-slate-100 px-1 font-mono dark:bg-neutral-900">SES_ACCESS_KEY_ID</code>) and are not
+            <code className="rounded bg-surface-sunken px-1 font-mono dark:bg-surface-raised">SES_ACCESS_KEY_ID</code>) and are not
             stored in the database.
           </p>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
+              <label className="block text-sm font-medium text-fg-default">
                 Email provider {sourceBadge(form.sources.emailProvider)}
               </label>
               <select
                 value={form.emailProvider}
                 onChange={(e) => update('emailProvider', e.target.value === 'ses' ? 'ses' : 'smtp')}
-                className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                className="mt-1.5 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
               >
                 <option value="smtp">SMTP</option>
                 <option value="ses" disabled={!form.ffEmailSes}>
@@ -584,7 +584,7 @@ export function PlatformSettingsPanel() {
             {form.emailProvider === 'ses' ? (
               <>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
+                  <label className="block text-sm font-medium text-fg-default">
                     SES region {sourceBadge(form.sources.sesRegion)}
                   </label>
                   <input
@@ -593,11 +593,11 @@ export function PlatformSettingsPanel() {
                     value={form.sesRegion}
                     onChange={(e) => update('sesRegion', e.target.value)}
                     placeholder="e.g. us-east-1"
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 font-mono text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                    className="mt-1.5 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 font-mono text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
+                  <label className="block text-sm font-medium text-fg-default">
                     SES from address {sourceBadge(form.sources.sesFrom)}
                   </label>
                   <input
@@ -605,11 +605,11 @@ export function PlatformSettingsPanel() {
                     value={form.sesFrom}
                     onChange={(e) => update('sesFrom', e.target.value)}
                     placeholder="no-reply@school.edu (verified in SES)"
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                    className="mt-1.5 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
+                  <label className="block text-sm font-medium text-fg-default">
                     SES configuration set (optional) {sourceBadge(form.sources.sesConfigurationSet)}
                   </label>
                   <input
@@ -618,14 +618,14 @@ export function PlatformSettingsPanel() {
                     value={form.sesConfigurationSet}
                     onChange={(e) => update('sesConfigurationSet', e.target.value)}
                     placeholder="optional"
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 font-mono text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                    className="mt-1.5 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 font-mono text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
                   />
                 </div>
               </>
             ) : (
               <>
                 <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
+                  <label className="block text-sm font-medium text-fg-default">
                     SMTP host {sourceBadge(form.sources.smtpHost)}
                   </label>
                   <input
@@ -634,11 +634,11 @@ export function PlatformSettingsPanel() {
                     value={form.smtpHost}
                     onChange={(e) => update('smtpHost', e.target.value)}
                     placeholder="e.g. smtp.sendgrid.net"
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 font-mono text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                    className="mt-1.5 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 font-mono text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
+                  <label className="block text-sm font-medium text-fg-default">
                     Port {sourceBadge(form.sources.smtpPort)}
                   </label>
                   <input
@@ -650,11 +650,11 @@ export function PlatformSettingsPanel() {
                       const n = parseInt(e.target.value, 10)
                       update('smtpPort', Number.isFinite(n) ? n : 587)
                     }}
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 font-mono text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                    className="mt-1.5 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 font-mono text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
+                  <label className="block text-sm font-medium text-fg-default">
                     From address {sourceBadge(form.sources.smtpFrom)}
                   </label>
                   <input
@@ -662,11 +662,11 @@ export function PlatformSettingsPanel() {
                     value={form.smtpFrom}
                     onChange={(e) => update('smtpFrom', e.target.value)}
                     placeholder="no-reply@school.edu"
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                    className="mt-1.5 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
+                  <label className="block text-sm font-medium text-fg-default">
                     Username (optional) {sourceBadge(form.sources.smtpUser)}
                   </label>
                   <input
@@ -674,11 +674,11 @@ export function PlatformSettingsPanel() {
                     autoComplete="off"
                     value={form.smtpUser}
                     onChange={(e) => update('smtpUser', e.target.value)}
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 font-mono text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                    className="mt-1.5 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 font-mono text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
+                  <label className="block text-sm font-medium text-fg-default">
                     Password (optional) {sourceBadge(form.sources.smtpPassword)}
                   </label>
                   <input
@@ -687,7 +687,7 @@ export function PlatformSettingsPanel() {
                     placeholder={PLATFORM_SECRET_PLACEHOLDER}
                     value={form.smtpPassword}
                     onChange={(e) => update('smtpPassword', e.target.value)}
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 font-mono text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                    className="mt-1.5 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 font-mono text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
                   />
                 </div>
               </>
@@ -696,12 +696,12 @@ export function PlatformSettingsPanel() {
         </section>
 
         <section>
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">SAML service provider</h3>
-          <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+          <h3 className="text-sm font-semibold text-fg-default">SAML service provider</h3>
+          <p className="mt-1 text-xs text-fg-muted">
             Browser SSO endpoints use these SP settings (IdP metadata remains under Admin SAML).
           </p>
           <div className="mt-4 space-y-4">
-            <label className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-neutral-200">
+            <label className="flex items-center gap-2 text-sm font-medium text-fg-default">
               <input
                 type="checkbox"
                 checked={form.samlSsoEnabled}
@@ -711,29 +711,29 @@ export function PlatformSettingsPanel() {
               Enable SAML SSO {sourceBadge(form.sources.samlSsoEnabled)}
             </label>
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
+              <label className="block text-sm font-medium text-fg-default">
                 Public base URL {sourceBadge(form.sources.samlPublicBaseUrl)}
               </label>
               <input
                 type="url"
                 value={form.samlPublicBaseUrl}
                 onChange={(e) => update('samlPublicBaseUrl', e.target.value)}
-                className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                className="mt-1.5 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
+              <label className="block text-sm font-medium text-fg-default">
                 SP entity ID {sourceBadge(form.sources.samlSpEntityId)}
               </label>
               <input
                 type="text"
                 value={form.samlSpEntityId}
                 onChange={(e) => update('samlSpEntityId', e.target.value)}
-                className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                className="mt-1.5 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
+              <label className="block text-sm font-medium text-fg-default">
                 SP X.509 certificate (PEM) {sourceBadge(form.sources.samlSpX509Pem)}
               </label>
               <textarea
@@ -741,11 +741,11 @@ export function PlatformSettingsPanel() {
                 spellCheck={false}
                 value={form.samlSpX509Pem}
                 onChange={(e) => update('samlSpX509Pem', e.target.value)}
-                className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 font-mono text-xs dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                className="mt-1.5 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 font-mono text-xs dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
+              <label className="block text-sm font-medium text-fg-default">
                 SP private key (PEM) {sourceBadge(form.sources.samlSpPrivateKeyPem)}
               </label>
               <textarea
@@ -754,15 +754,15 @@ export function PlatformSettingsPanel() {
                 placeholder={PLATFORM_SECRET_PLACEHOLDER}
                 value={form.samlSpPrivateKeyPem}
                 onChange={(e) => update('samlSpPrivateKeyPem', e.target.value)}
-                className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 font-mono text-xs dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                className="mt-1.5 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 font-mono text-xs dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
               />
             </div>
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-800 dark:bg-neutral-950">
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Platform features</h3>
-          <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+        <section className="rounded-2xl border border-border-default bg-surface-raised p-5 shadow-sm shadow-slate-900/5 dark:border-border-subtle dark:bg-surface-base">
+          <h3 className="text-sm font-semibold text-fg-default">Platform features</h3>
+          <p className="mt-1 text-sm text-fg-muted">
             Turn platform-wide capabilities on or off. Changes save immediately. Database values override environment
             defaults.
           </p>
@@ -773,19 +773,19 @@ export function PlatformSettingsPanel() {
               placeholder="Search features…"
               value={featureQuery}
               onChange={(e) => setFeatureQuery(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-indigo-500"
+              className="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-fg-default placeholder:text-fg-subtle focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:placeholder:text-neutral-500 dark:focus:border-indigo-500"
             />
           </div>
 
           <div className="mt-1">
             {visiblePlatformFeatures.length === 0 ? (
-              <p className="py-6 text-center text-sm text-slate-400 dark:text-neutral-500">
+              <p className="py-6 text-center text-sm text-fg-subtle">
                 No features match &ldquo;{featureQuery}&rdquo;
               </p>
             ) : (
               visiblePlatformFeaturePacks.map(({ pack, label, features }) => (
-                <div key={pack} className="border-t border-slate-100 first:border-t-0 dark:border-neutral-800">
-                  <h4 className="pt-5 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-neutral-500">
+                <div key={pack} className="border-t border-border-subtle first:border-t-0 dark:border-border-subtle">
+                  <h4 className="pt-5 text-xs font-semibold uppercase tracking-wide text-fg-subtle">
                     {label}
                   </h4>
                   <div className="divide-y divide-slate-100 dark:divide-neutral-800">
@@ -820,11 +820,11 @@ export function PlatformSettingsPanel() {
             )}
           </div>
 
-          <div className="mt-4 border-t border-slate-100 pt-4 dark:border-neutral-800">
-            <label className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+          <div className="mt-4 border-t border-border-subtle pt-4 dark:border-border-subtle">
+            <label className="text-sm font-semibold text-fg-default">
               MFA requirement {sourceBadge(form.sources.mfaEnforcement)}
             </label>
-            <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+            <p className="mt-1 text-sm text-fg-muted">
               Require two-factor authentication for some or all users after password sign-in.
             </p>
             <select
@@ -838,15 +838,15 @@ export function PlatformSettingsPanel() {
               onChange={(e) =>
                 void persistMfaEnforcement(e.target.value as PlatformSettingsPayload['mfaEnforcement'])
               }
-              className="mt-3 w-full max-w-md rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:focus:border-indigo-500"
+              className="mt-3 w-full max-w-md rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-fg-default focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 disabled:cursor-not-allowed disabled:opacity-60 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:focus:border-indigo-500"
             >
               <option value="none">Optional (users choose)</option>
               <option value="staff">Required for teachers, TAs, and global admins</option>
               <option value="all">Required for everyone</option>
             </select>
-            <p className="mt-2 text-xs text-slate-500 dark:text-neutral-400">
+            <p className="mt-2 text-xs text-fg-muted">
               Set{' '}
-              <code className="rounded bg-slate-100 px-1 font-mono dark:bg-neutral-900">PUBLIC_WEB_ORIGIN</code> on the
+              <code className="rounded bg-surface-sunken px-1 font-mono dark:bg-surface-raised">PUBLIC_WEB_ORIGIN</code> on the
               API for passkey registration.
             </p>
           </div>
@@ -867,7 +867,7 @@ export function PlatformSettingsPanel() {
           <button
             type="submit"
             disabled={saving}
-            className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-white"
+            className="rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-surface-raised"
           >
             {saving ? 'Saving…' : 'Save changes'}
           </button>
@@ -875,7 +875,7 @@ export function PlatformSettingsPanel() {
             type="button"
             onClick={() => void load()}
             disabled={saving || loading}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
+            className="rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm font-medium text-fg-muted hover:bg-surface-base dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700"
           >
             Reload
           </button>

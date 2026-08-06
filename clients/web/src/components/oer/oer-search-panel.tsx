@@ -144,22 +144,22 @@ export function OERSearchPanel({ open, courseCode, moduleId, onClose, onImported
       className="fixed inset-0 z-50 m-0 flex h-full max-h-none w-full max-w-none items-stretch justify-end bg-transparent p-0 backdrop:bg-slate-900/40"
       onClose={() => onClose()}
     >
-      <div className="ml-auto flex h-full w-full max-w-lg flex-col border-s border-slate-200 bg-white shadow-xl dark:border-neutral-600 dark:bg-neutral-900">
-        <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-neutral-600">
-          <h2 id={titleId} className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+      <div className="ml-auto flex h-full w-full max-w-lg flex-col border-s border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-raised">
+        <div className="flex items-center justify-between border-b border-border-default px-4 py-3 dark:border-border-default">
+          <h2 id={titleId} className="text-sm font-semibold text-fg-default">
             Find open resources
           </h2>
           <button
             type="button"
             onClick={() => onClose()}
-            className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-neutral-700"
+            className="rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken dark:hover:bg-neutral-700"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="border-b border-slate-100 px-4 py-3 dark:border-neutral-700">
+        <div className="border-b border-border-subtle px-4 py-3 dark:border-border-default">
           <div role="tablist" aria-label="OER providers" className="flex flex-wrap gap-1">
             {visibleTabs.map((tab) => (
               <button
@@ -168,11 +168,7 @@ export function OERSearchPanel({ open, courseCode, moduleId, onClose, onImported
                 role="tab"
                 aria-selected={activeTab === tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-[background-color,color,border-color] ${
-                  activeTab === tab.id
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-neutral-800 dark:text-neutral-200'
-                }`}
+                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-[background-color,color,border-color] ${ activeTab === tab.id ? 'bg-accent-solid text-white' : 'bg-surface-sunken text-fg-muted hover:bg-slate-200 dark:bg-surface-overlay dark:text-fg-default' }`}
               >
                 {tab.label}
               </button>
@@ -189,24 +185,24 @@ export function OERSearchPanel({ open, courseCode, moduleId, onClose, onImported
               Search keywords
             </label>
             <div className="relative">
-              <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden />
+              <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-subtle" aria-hidden />
               <input
                 id="oer-search-q"
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search by keyword…"
-                className="w-full rounded-xl border border-slate-200 bg-white py-2.5 ps-9 pe-3 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+                className="w-full rounded-xl border border-border-default bg-surface-raised py-2.5 ps-9 pe-3 text-sm dark:border-border-default dark:bg-surface-overlay"
               />
             </div>
-            <label className="text-xs font-medium text-slate-600 dark:text-neutral-400" htmlFor="oer-license-filter">
+            <label className="text-xs font-medium text-fg-muted" htmlFor="oer-license-filter">
               License
             </label>
             <select
               id="oer-license-filter"
               value={license}
               onChange={(e) => setLicense(e.target.value)}
-              className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+              className="rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-overlay"
             >
               {LICENSE_OPTIONS.map((o) => (
                 <option key={o.value || 'any'} value={o.value}>
@@ -223,33 +219,33 @@ export function OERSearchPanel({ open, courseCode, moduleId, onClose, onImported
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 py-3">
-          {loading && <p className="text-sm text-slate-500">Searching…</p>}
+          {loading && <p className="text-sm text-fg-muted">Searching…</p>}
           {error && (
             <p className="text-sm text-rose-700 dark:text-rose-300" role="alert">
               {error}
             </p>
           )}
           {!loading && !error && results.length === 0 && (
-            <p className="text-sm text-slate-500">No results. Try another keyword or provider.</p>
+            <p className="text-sm text-fg-muted">No results. Try another keyword or provider.</p>
           )}
           <ul role="list" className="space-y-3">
             {results.map((r) => (
               <li
                 key={r.id}
-                className="rounded-xl border border-slate-200 p-3 dark:border-neutral-600"
+                className="rounded-xl border border-border-default p-3 dark:border-border-default"
               >
                 <div className="flex items-start gap-2">
                   <BookOpen className="mt-0.5 h-4 w-4 shrink-0 text-indigo-500" aria-hidden />
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">{r.title}</p>
+                    <p className="text-sm font-semibold text-fg-default">{r.title}</p>
                     <div className="mt-1 flex flex-wrap items-center gap-2">
                       <LicenseBadge spdx={r.licenseSpdx} label={r.licenseLabel} />
                       {r.gradeLevel && (
-                        <span className="text-xs text-slate-500 dark:text-neutral-400">{r.gradeLevel}</span>
+                        <span className="text-xs text-fg-muted">{r.gradeLevel}</span>
                       )}
                     </div>
                     {r.description && (
-                      <p className="mt-1 line-clamp-2 text-xs text-slate-600 dark:text-neutral-400">
+                      <p className="mt-1 line-clamp-2 text-xs text-fg-muted">
                         {r.description}
                       </p>
                     )}
@@ -258,7 +254,7 @@ export function OERSearchPanel({ open, courseCode, moduleId, onClose, onImported
                         href={r.previewUrl || r.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200"
+                        className="inline-flex items-center gap-1 rounded-lg border border-border-default px-2.5 py-1 text-xs font-medium text-fg-muted hover:bg-surface-base dark:border-border-default dark:text-fg-default"
                       >
                         <ExternalLink className="h-3.5 w-3.5" aria-hidden />
                         Preview
@@ -267,7 +263,7 @@ export function OERSearchPanel({ open, courseCode, moduleId, onClose, onImported
                         type="button"
                         disabled={importingId === r.id}
                         onClick={() => void handleAdd(r)}
-                        className="inline-flex items-center gap-1 rounded-lg bg-indigo-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+                        className="inline-flex items-center gap-1 rounded-lg bg-accent-solid px-2.5 py-1 text-xs font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
                       >
                         <Plus className="h-3.5 w-3.5" aria-hidden />
                         {importingId === r.id ? 'Adding…' : 'Add to module'}

@@ -20,15 +20,6 @@ func (d Deps) handlePutCourseGradebookGrades() http.HandlerFunc {
 		ChangeReason *string                                  `json:"changeReason"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPut {
-			w.Header().Set("Allow", http.MethodPut+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {

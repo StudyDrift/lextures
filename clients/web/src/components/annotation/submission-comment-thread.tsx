@@ -48,7 +48,7 @@ export function SubmissionCommentThread({
 }: SubmissionCommentThreadProps) {
   if (comments.length === 0) {
     return (
-      <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50/80 px-4 py-6 text-center text-sm text-slate-500 dark:border-neutral-700 dark:bg-neutral-900/30 dark:text-neutral-400">
+      <p className="rounded-xl border border-dashed border-border-default bg-slate-50/80 px-4 py-6 text-center text-sm text-fg-muted dark:border-border-default/30 dark:text-fg-muted">
         {emptyLabel}
       </p>
     )
@@ -56,7 +56,7 @@ export function SubmissionCommentThread({
 
   return (
     <div
-      className="space-y-1 rounded-xl border border-slate-200 bg-white p-3 dark:border-neutral-600 dark:bg-neutral-950/40"
+      className="space-y-1 rounded-xl border border-border-default bg-surface-raised p-3 dark:border-border-default/40"
       role="log"
       aria-label="Grade feedback conversation"
     >
@@ -71,9 +71,7 @@ export function SubmissionCommentThread({
         return (
           <article
             key={c.id ?? `${userId}-${index}`}
-            className={`group/commentrow flex gap-2.5 rounded-lg px-1 py-1.5 hover:bg-slate-50/90 dark:hover:bg-neutral-900/50 ${
-              isCompact ? 'mt-0.5' : ''
-            }`}
+            className={`group/commentrow flex gap-2.5 rounded-lg px-1 py-1.5 hover:bg-slate-50/90 dark:hover:bg-neutral-900/50 ${ isCompact ? 'mt-0.5' : '' }`}
           >
             <EnrollmentAvatar
               userId={userId}
@@ -83,12 +81,12 @@ export function SubmissionCommentThread({
             />
             <div className="min-w-0 flex-1 pt-0.5">
               <div className="flex items-baseline gap-x-1.5 leading-none">
-                <span className="truncate text-[13px] font-semibold text-slate-900 dark:text-neutral-100">
+                <span className="truncate text-[13px] font-semibold text-fg-default">
                   {name}
                 </span>
                 {showTimestamp ? (
                   <time
-                    className="shrink-0 text-[10px] font-medium text-neutral-500 dark:text-neutral-400"
+                    className="shrink-0 text-[10px] font-medium text-neutral-500 dark:text-fg-muted"
                     dateTime={createdAt}
                     title={formatAbsolute(createdAt)}
                   >
@@ -101,7 +99,7 @@ export function SubmissionCommentThread({
                   </span>
                 ) : null}
               </div>
-              <p className="mt-1 whitespace-pre-wrap break-words text-[0.8125rem] leading-relaxed text-slate-700 dark:text-neutral-200">
+              <p className="mt-1 whitespace-pre-wrap break-words text-[0.8125rem] leading-relaxed text-fg-default">
                 {c.body}
               </p>
             </div>

@@ -150,7 +150,7 @@ export default function LiveQuizHostPage() {
           <p className="text-sm text-muted-foreground">{kitTitle}</p>
           <h1 className="text-2xl font-semibold">{t('liveQuiz.host.title')}</h1>
           {(game.conn === 'reconnecting' || phase === 'waiting_for_host') && (
-            <p className="mt-1 text-amber-700 dark:text-amber-300" role="status">
+            <p className="mt-1 text-warning-fg" role="status">
               {game.conn === 'reconnecting'
                 ? t('liveQuiz.state.reconnecting')
                 : t('liveQuiz.state.waitingForHost')}

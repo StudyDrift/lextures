@@ -33,7 +33,7 @@ export default function CaptionComplianceReportPage() {
   if (featuresLoading) {
     return (
       <main className="mx-auto max-w-4xl p-6">
-        <h1 className="text-xl font-bold text-slate-900 dark:text-neutral-100">
+        <h1 className="text-xl font-bold text-fg-default">
           Caption compliance report
         </h1>
         <p className="mt-6 text-sm" role="status">
@@ -46,7 +46,7 @@ export default function CaptionComplianceReportPage() {
   if (!captionsEnabled) {
     return (
       <main className="mx-auto max-w-3xl p-6">
-        <p className="text-sm text-slate-600 dark:text-neutral-400">
+        <p className="text-sm text-fg-muted">
           Video captions are not enabled on this platform. Enable{' '}
           <strong>Video captions</strong> in Settings → Global platform.
         </p>
@@ -56,10 +56,10 @@ export default function CaptionComplianceReportPage() {
 
   return (
     <main className="mx-auto max-w-4xl p-6">
-      <h1 id={titleId} className="text-xl font-bold text-slate-900 dark:text-neutral-100">
+      <h1 id={titleId} className="text-xl font-bold text-fg-default">
         Caption compliance report
       </h1>
-      <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
+      <p className="mt-2 text-sm text-fg-muted">
         Videos missing reviewed captions across all courses ({rows.length} shown, max 500).
       </p>
 
@@ -78,7 +78,7 @@ export default function CaptionComplianceReportPage() {
         <table className="mt-6 w-full border-collapse text-sm" aria-labelledby={titleId}>
           <caption className="sr-only">Uncaptioned platform videos</caption>
           <thead>
-            <tr className="border-b border-slate-200 text-left dark:border-neutral-600">
+            <tr className="border-b border-border-default text-left dark:border-border-default">
               <th scope="col" className="py-2 pe-4">
                 Object
               </th>
@@ -93,13 +93,13 @@ export default function CaptionComplianceReportPage() {
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={3} className="py-4 text-slate-500 dark:text-neutral-400">
+                <td colSpan={3} className="py-4 text-fg-muted">
                   All videos have captions — great job.
                 </td>
               </tr>
             ) : (
               rows.map((r) => (
-                <tr key={r.object_id} className="border-b border-slate-100 dark:border-neutral-800">
+                <tr key={r.object_id} className="border-b border-border-subtle">
                   <td className="py-2 pe-4 font-mono text-xs">{r.object_key}</td>
                   <td className="py-2 pe-4">{r.mime_type}</td>
                   <td className="py-2">
@@ -109,7 +109,7 @@ export default function CaptionComplianceReportPage() {
                         {' '}
                         <Link
                           to={`/admin/caption-compliance?object=${r.object_id}`}
-                          className="text-indigo-600 underline dark:text-indigo-300"
+                          className="text-accent-fg underline dark:text-indigo-300"
                         >
                           Edit
                         </Link>

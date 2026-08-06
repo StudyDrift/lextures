@@ -246,7 +246,7 @@ export default function MediaCheckpointsRenderer({
         t={t}
       />
 
-      <footer className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600 dark:text-neutral-300">
+      <footer className="flex flex-wrap items-center justify-between gap-2 text-xs text-fg-muted">
         <span>
           {t('contentTools.tools.media_checkpoints.progress', {
             done: answeredCount,
@@ -258,7 +258,7 @@ export default function MediaCheckpointsRenderer({
             time: formatTimestamp(furthestRef.current || st.furthestSec || 0),
           })}
         </span>
-        <span className="text-slate-500">
+        <span className="text-fg-muted">
           {t('contentTools.tools.media_checkpoints.watchDisclaimer')}
         </span>
       </footer>

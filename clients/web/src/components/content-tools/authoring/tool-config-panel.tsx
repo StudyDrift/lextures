@@ -235,10 +235,10 @@ export function ToolConfigPanel({
     <div className="space-y-5" data-content-tool-config={instance.id}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 space-y-1">
-          <h3 className="text-base font-semibold text-slate-900 dark:text-neutral-100">
+          <h3 className="text-base font-semibold text-fg-default">
             {t('contentTools.authoring.configureTitle', { name: title })}
           </h3>
-          <p className="text-xs leading-relaxed text-slate-500 dark:text-neutral-400">
+          <p className="text-xs leading-relaxed text-fg-muted">
             {t('contentTools.authoring.configureHelp')}
           </p>
         </div>
@@ -246,7 +246,7 @@ export function ToolConfigPanel({
           <button
             type="button"
             onClick={onClose}
-            className="shrink-0 rounded-md px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+            className="shrink-0 rounded-md px-2.5 py-1.5 text-xs font-medium text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay"
           >
             {t('contentTools.authoring.close')}
           </button>
@@ -254,7 +254,7 @@ export function ToolConfigPanel({
       </div>
 
       {loading ? (
-        <p className="text-xs text-slate-500 dark:text-neutral-400">{t('contentTools.authoring.loadingManifest')}</p>
+        <p className="text-xs text-fg-muted">{t('contentTools.authoring.loadingManifest')}</p>
       ) : loadError ? (
         <p className="text-xs text-rose-600 dark:text-rose-400" role="alert">
           {loadError}
@@ -300,11 +300,11 @@ export function ToolConfigPanel({
               {saveError}
             </p>
           ) : null}
-          <div className="flex flex-wrap items-center gap-2 border-t border-slate-200 pt-4 dark:border-neutral-700">
+          <div className="flex flex-wrap items-center gap-2 border-t border-border-default pt-4 dark:border-border-default">
             <button
               type="submit"
               disabled={disabled || saving}
-              className="rounded-md bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-40 dark:bg-neutral-200 dark:text-neutral-900 dark:hover:bg-white"
+              className="rounded-md bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-40 dark:bg-neutral-200 dark:text-neutral-900 dark:hover:bg-surface-raised"
             >
               {saving ? t('contentTools.authoring.saving') : t('contentTools.authoring.save')}
             </button>
@@ -312,7 +312,7 @@ export function ToolConfigPanel({
               type="button"
               disabled={disabled || saving}
               onClick={openPasteDialog}
-              className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+              className="rounded-md border border-border-default bg-surface-raised px-4 py-2 text-sm font-medium text-fg-muted hover:bg-surface-base disabled:opacity-40 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
             >
               {t('contentTools.authoring.pasteJson')}
             </button>

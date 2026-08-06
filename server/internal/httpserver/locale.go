@@ -23,11 +23,6 @@ func detectBrowserLocale(acceptLanguage string) string {
 
 func (d Deps) handleGetPublicLocaleDefaults() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		locale := detectBrowserLocale(r.Header.Get("Accept-Language"))
 		writeJSON(w, http.StatusOK, map[string]string{
 			"locale": locale,

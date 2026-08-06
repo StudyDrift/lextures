@@ -53,18 +53,16 @@ export function CategorizeBoard({
             onClick={() => {
               if (grabbedId) onBucketActivate(bucket.id)
             }}
-            className={`sticky top-0 min-h-24 rounded border border-slate-200 bg-slate-50/80 p-2 dark:border-neutral-700 dark:bg-neutral-900/60 ${
-              focused ? 'ring-2 ring-sky-500' : ''
-            }`}
+            className={`sticky top-0 min-h-24 rounded border border-border-default bg-slate-50/80 p-2 dark:border-border-default/60 ${ focused ? 'ring-2 ring-sky-500' : '' }`}
           >
             <header className="mb-2">
-              <h3 className="text-sm font-semibold text-slate-800 dark:text-neutral-100">
+              <h3 className="text-sm font-semibold text-fg-default">
                 {bucket.label}
               </h3>
               {bucket.description ? (
-                <p className="text-xs text-slate-500">{bucket.description}</p>
+                <p className="text-xs text-fg-muted">{bucket.description}</p>
               ) : null}
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-fg-muted">
                 {t('contentTools.tools.sort_sequence.bucketCount', {
                   count: inBucket.length,
                   index: bi + 1,

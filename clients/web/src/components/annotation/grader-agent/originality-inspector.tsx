@@ -26,10 +26,10 @@ export function OriginalityInspector({
       : 0.4
 
   return (
-    <div className="space-y-3 text-sm text-slate-700 dark:text-neutral-200">
+    <div className="space-y-3 text-sm text-fg-default">
       <p>{t('gradingAgent.canvas.inspector.originalityHelp')}</p>
       <label className="block">
-        <span className="mb-1.5 block font-medium text-slate-800 dark:text-neutral-100">
+        <span className="mb-1.5 block font-medium text-fg-default">
           {t('gradingAgent.canvas.inspector.originalityMetric')}
         </span>
         <select
@@ -44,17 +44,17 @@ export function OriginalityInspector({
           ))}
         </select>
         {!aiLikelihoodAllowed ? (
-          <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+          <p className="mt-1 text-xs text-fg-muted">
             {t('gradingAgent.canvas.inspector.originalityAiLikelihoodDisabled')}
           </p>
         ) : (
-          <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">
+          <p className="mt-1 text-xs text-warning-fg">
             {t('gradingAgent.canvas.inspector.originalityAiLikelihoodWarning')}
           </p>
         )}
       </label>
       <label className="block">
-        <span className="mb-1.5 block font-medium text-slate-800 dark:text-neutral-100">
+        <span className="mb-1.5 block font-medium text-fg-default">
           {t('gradingAgent.canvas.inspector.originalityFlagThreshold')}
         </span>
         <input
@@ -66,7 +66,7 @@ export function OriginalityInspector({
           onChange={(e) => onChange({ flagThreshold: Number(e.target.value) })}
           className="w-full"
         />
-        <span className="text-xs text-slate-500 dark:text-neutral-400">
+        <span className="text-xs text-fg-muted">
           {Math.round(flagThreshold * 100)}%
         </span>
       </label>

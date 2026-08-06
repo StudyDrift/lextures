@@ -163,7 +163,7 @@ export function ScreenShareConsole({ courseCode, canHost }: Props) {
               {announcement}
             </p>
           )}
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-danger-fg">{error}</p>}
 
           <div className="flex flex-wrap gap-2">
             {captureOk ? (

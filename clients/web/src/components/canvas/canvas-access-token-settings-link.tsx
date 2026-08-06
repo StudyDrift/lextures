@@ -16,7 +16,7 @@ export function CanvasAccessTokenSettingsLink({ canvasBaseUrl, className = '' }:
       target="_blank"
       rel="noopener noreferrer"
       className={[
-        'inline-flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-700 hover:underline dark:text-indigo-400 dark:hover:text-indigo-300',
+        'inline-flex items-center gap-1 text-xs text-accent-fg hover:text-accent-fg hover:underline dark:text-indigo-400 dark:hover:text-indigo-300',
         className,
       ]
         .filter(Boolean)

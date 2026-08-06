@@ -54,7 +54,7 @@ export function InclusiveAccessBanner({ status, storageKey }: Props) {
     >
       <div className="flex items-start gap-3">
         <span
-          className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-amber-300/90 bg-white text-amber-700 dark:border-amber-500/40 dark:bg-amber-900/40 dark:text-amber-200"
+          className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-amber-300/90 bg-surface-raised text-warning-fg dark:border-amber-500/40 dark:bg-amber-900/40 dark:text-amber-200"
           aria-hidden
         >
           <BookCopy className="h-5 w-5" strokeWidth={2} />
@@ -88,7 +88,7 @@ export function InclusiveAccessBanner({ status, storageKey }: Props) {
                 <button
                   type="button"
                   onClick={() => setConfirmingOptOut(true)}
-                  className="rounded-xl border border-amber-400 bg-white px-3.5 py-2 text-sm font-semibold text-amber-800 transition-[background-color,color,border-color] hover:bg-amber-100 dark:border-amber-500/50 dark:bg-amber-900/30 dark:text-amber-100"
+                  className="rounded-xl border border-amber-400 bg-surface-raised px-3.5 py-2 text-sm font-semibold text-amber-800 transition-[background-color,color,border-color] hover:bg-amber-100 dark:border-amber-500/50 dark:bg-amber-900/30 dark:text-amber-100"
                 >
                   Opt out…
                 </button>
@@ -113,7 +113,7 @@ export function InclusiveAccessBanner({ status, storageKey }: Props) {
                 <button
                   type="button"
                   onClick={() => setConfirmingOptOut(false)}
-                  className="rounded-xl border border-amber-400 bg-white px-3.5 py-2 text-sm font-semibold text-amber-800 transition-[background-color,color,border-color] hover:bg-amber-100 dark:border-amber-500/50 dark:bg-amber-900/30 dark:text-amber-100"
+                  className="rounded-xl border border-amber-400 bg-surface-raised px-3.5 py-2 text-sm font-semibold text-amber-800 transition-[background-color,color,border-color] hover:bg-amber-100 dark:border-amber-500/50 dark:bg-amber-900/30 dark:text-amber-100"
                 >
                   Cancel
                 </button>

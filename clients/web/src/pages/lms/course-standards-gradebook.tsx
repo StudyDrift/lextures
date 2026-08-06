@@ -98,12 +98,12 @@ export default function CourseStandardsGradebook() {
   return (
     <LmsPage title="Standards gradebook">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm text-slate-600 dark:text-neutral-400">
+        <p className="text-sm text-fg-muted">
           Per-student proficiency labels on each course standard. Columns are standards; rows are
           students.
         </p>
         {canManage && (
-          <label className="text-sm text-indigo-600 dark:text-indigo-300">
+          <label className="text-sm text-accent-fg dark:text-indigo-300">
             <span className="sr-only">Import standards CSV</span>
             <input
               type="file"
@@ -114,39 +114,39 @@ export default function CourseStandardsGradebook() {
           </label>
         )}
       </div>
-      {importMsg && <p className="mb-2 text-sm text-slate-600 dark:text-neutral-400">{importMsg}</p>}
+      {importMsg && <p className="mb-2 text-sm text-fg-muted">{importMsg}</p>}
       {!canView && !permsLoading && (
         <p className="text-sm text-amber-800 dark:text-amber-200">You don&apos;t have access to this page.</p>
       )}
       {err && <p className="text-sm text-rose-700 dark:text-rose-300">{err}</p>}
       {loading && <GradebookLoadingSkeleton />}
       {data && canView && (
-        <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-neutral-600 dark:bg-neutral-900">
+        <div className="overflow-x-auto rounded-2xl border border-border-default bg-surface-raised shadow-sm dark:border-border-default dark:bg-surface-raised">
           <table className="w-full min-w-[32rem] border-collapse text-start text-sm">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-neutral-600">
-                <th className="sticky start-0 z-10 bg-white px-2 py-2 font-medium dark:bg-neutral-900">
+              <tr className="border-b border-border-default">
+                <th className="sticky start-0 z-10 bg-surface-raised px-2 py-2 font-medium dark:bg-surface-raised">
                   Student
                 </th>
                 {data.standards.map((s) => (
                   <th
                     key={s.id}
-                    className="min-w-[6rem] px-1 py-2 text-center text-xs font-medium text-slate-600 dark:text-neutral-400"
+                    className="min-w-[6rem] px-1 py-2 text-center text-xs font-medium text-fg-muted"
                     title={s.description}
                   >
                     {s.externalId || s.id.slice(0, 6)}
                   </th>
                 ))}
-                <th className="px-2 py-2 text-end text-xs font-medium text-slate-500">Transcript</th>
+                <th className="px-2 py-2 text-end text-xs font-medium text-fg-muted">Transcript</th>
               </tr>
             </thead>
             <tbody>
               {data.students.map((stu) => (
                 <tr
                   key={stu.userId}
-                  className="border-b border-slate-100 dark:border-neutral-800"
+                  className="border-b border-border-subtle"
                 >
-                  <td className="sticky start-0 z-10 bg-white px-2 py-1 text-slate-900 dark:bg-neutral-900 dark:text-neutral-100">
+                  <td className="sticky start-0 z-10 bg-surface-raised px-2 py-1 text-fg-default dark:bg-surface-raised dark:text-fg-default">
                     {stu.displayLabel}
                   </td>
                   {data.standards.map((s) => (
@@ -160,7 +160,7 @@ export default function CourseStandardsGradebook() {
                   <td className="px-2 text-end">
                     <button
                       type="button"
-                      className="text-xs text-indigo-600 underline dark:text-indigo-300"
+                      className="text-xs text-accent-fg underline dark:text-indigo-300"
                       onClick={() => void downloadTranscriptPdf(stu.userId)}
                     >
                       PDF

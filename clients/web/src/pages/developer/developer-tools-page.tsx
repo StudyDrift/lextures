@@ -43,7 +43,7 @@ export default function DeveloperToolsPage() {
       <h1 id={titleId} className="text-2xl font-semibold">
         {t('contentTools.developer.title')}
       </h1>
-      <p className="mt-1 text-sm text-slate-600">{t('contentTools.developer.help')}</p>
+      <p className="mt-1 text-sm text-fg-muted">{t('contentTools.developer.help')}</p>
       {error ? (
         <p className="mt-4 text-sm text-rose-700" role="alert">
           {error}
@@ -106,10 +106,10 @@ export default function DeveloperToolsPage() {
         {tools.map((tool) => (
           <li key={tool.id} className="border-b pb-3" data-testid={`developer-tool-${tool.toolId}`}>
             <div className="font-medium">{tool.displayName}</div>
-            <div className="text-xs text-slate-500">
+            <div className="text-xs text-fg-muted">
               {tool.toolId} · {tool.status} · {tool.visibility}
             </div>
-            <p className="text-sm text-slate-600">{tool.summary}</p>
+            <p className="text-sm text-fg-muted">{tool.summary}</p>
           </li>
         ))}
       </ul>

@@ -40,11 +40,6 @@ type onboardingStatusResponse struct {
 
 func (d Deps) handleGetOnboardingStatus() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.onboardingFlowEnabled(w) {
 			return
 		}
@@ -85,11 +80,6 @@ type postOnboardingBody struct {
 
 func (d Deps) handlePostOnboarding() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.onboardingFlowEnabled(w) {
 			return
 		}
@@ -234,11 +224,6 @@ func (d Deps) completeOnboarding(ctx context.Context, userID uuid.UUID, row *lea
 
 func (d Deps) handleGetOnboardingDiagnosticQuestions() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.onboardingFlowEnabled(w) {
 			return
 		}
@@ -266,11 +251,6 @@ func (d Deps) handleGetOnboardingDiagnosticQuestions() http.HandlerFunc {
 
 func (d Deps) handleGetMyGoals() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -300,11 +280,6 @@ func (d Deps) handlePatchMyGoals() http.HandlerFunc {
 		ReminderTime        *string `json:"reminderTime"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return

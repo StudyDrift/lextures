@@ -268,11 +268,7 @@ export default function WorkedExampleRenderer({
           return (
             <li key={step.id}>
               <fieldset
-                className={`space-y-2 rounded-md border px-3 py-3 ${
-                  isCurrent
-                    ? 'border-[color:var(--lex-accent,#2563eb)]'
-                    : 'border-[color:var(--lex-border)]'
-                }`}
+                className={`space-y-2 rounded-md border px-3 py-3 ${ isCurrent ? 'border-[color:var(--lex-accent,#2563eb)]' : 'border-[color:var(--lex-border)]' }`}
                 disabled={readOnly || (isBlanked && !isCurrent && !done)}
               >
                 <legend className="px-1 text-sm font-medium text-[color:var(--lex-fg)]">
@@ -287,12 +283,12 @@ export default function WorkedExampleRenderer({
                         {t('contentTools.tools.worked_example.yourAnswer')}:{' '}
                         <code>{lastAttempt.value}</code>
                         {lastAttempt.result === 'correct' && (
-                          <span className="ms-2 text-green-700 dark:text-green-400">
+                          <span className="ms-2 text-success-fg">
                             {t('contentTools.tools.worked_example.correct')}
                           </span>
                         )}
                         {lastAttempt.result === 'needs_review' && (
-                          <span className="ms-2 text-amber-700 dark:text-amber-400">
+                          <span className="ms-2 text-warning-fg dark:text-amber-400">
                             {t('contentTools.tools.worked_example.needsReview')}
                           </span>
                         )}
@@ -459,7 +455,7 @@ export default function WorkedExampleRenderer({
       </footer>
 
       {error && (
-        <p className="text-sm text-red-700 dark:text-red-400" role="alert">
+        <p className="text-sm text-danger-fg dark:text-red-400" role="alert">
           {error}
         </p>
       )}

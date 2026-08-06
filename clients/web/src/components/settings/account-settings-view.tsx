@@ -28,6 +28,12 @@ import { passwordStrengthEnglish, passwordStrengthKey, type PasswordStrengthKey 
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
 import { clearSessionTokens, getRefreshToken } from '../../lib/session-tokens'
 import { applyUiTheme, parseUiTheme, type UiTheme } from '../../lib/ui-theme'
+import {
+  applyUiSurfaceTint,
+  readStoredUiSurfaceTint,
+  UI_SURFACE_TINT_OPTIONS,
+  type UiSurfaceTint,
+} from '../../lib/ui-surface-tint'
 import { useUiDensityControls } from '../../context/ui-density-context'
 import { useLocaleFormatContext } from '../../context/locale-format-context'
 import { detectBrowserLocale, detectBrowserTimeZone, formatDateTime } from '../../lib/format'
@@ -80,19 +86,19 @@ function SettingsField({
 }) {
   return (
     <div>
-      <label htmlFor={htmlFor} className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-neutral-200">
+      <label htmlFor={htmlFor} className="mb-1.5 block text-sm font-medium text-fg-default">
         {label}
       </label>
       {children}
-      {hint ? <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">{hint}</p> : null}
+      {hint ? <p className="mt-1 text-xs text-fg-muted">{hint}</p> : null}
     </div>
   )
 }
 
 const inputClass =
-  'w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100'
+  'w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-border-default dark:bg-surface-raised dark:text-fg-default'
 const disabledInputClass =
-  'w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-500 dark:border-neutral-600 dark:bg-neutral-800/50 dark:text-neutral-400'
+  'w-full rounded-xl border border-border-default bg-surface-base px-3 py-2.5 text-sm text-fg-muted dark:border-border-default/50 dark:text-fg-muted'
 
 export function AccountSettingsView() {
   const { t } = useTranslation('common')
@@ -120,6 +126,7 @@ export function AccountSettingsView() {
   const [avatarGenStatus, setAvatarGenStatus] = useState<'idle' | 'loading' | 'error'>('idle')
   const [avatarGenMessage, setAvatarGenMessage] = useState<string | null>(null)
   const [uiTheme, setUiTheme] = useState<UiTheme>('light')
+  const [surfaceTint, setSurfaceTint] = useState<UiSurfaceTint>(() => readStoredUiSurfaceTint())
   const [showHelpPopover, setShowHelpPopover] = useState(true)
   const [localeTag, setLocaleTag] = useState('en')
   const [studentId, setStudentId] = useState<string | null>(null)
@@ -596,14 +603,14 @@ export function AccountSettingsView() {
   }
 
   if (accountLoading) {
-    return <p className="text-sm text-slate-500 dark:text-neutral-400">Loading…</p>
+    return <p className="text-sm text-fg-muted">Loading…</p>
   }
 
   return (
     <div className="space-y-6">
       <header>
-        <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Account</h2>
-        <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+        <h2 className="text-base font-semibold text-fg-default">Account</h2>
+        <p className="mt-1 text-sm text-fg-muted">
           Manage your profile, security, and personal preferences.
         </p>
       </header>
@@ -622,23 +629,23 @@ export function AccountSettingsView() {
         <form id={accountFormId} className="space-y-5" onSubmit={onSaveAccount}>
           <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
             <div className="flex shrink-0 flex-col items-center gap-3">
-              <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-slate-100 dark:border-neutral-600 dark:bg-neutral-800">
+              <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-border-default bg-surface-sunken dark:border-border-default dark:bg-surface-overlay">
                 {avatarPreviewUrl ? (
                   <img src={avatarPreviewUrl} alt="" className="h-full w-full object-cover" />
                 ) : (
-                  <ImageIcon className="h-7 w-7 text-slate-400" aria-hidden />
+                  <ImageIcon className="h-7 w-7 text-fg-subtle" aria-hidden />
                 )}
               </div>
               <div className="flex flex-wrap justify-center gap-2">
                 <button
                   type="button"
                   onClick={openGenerateAvatarModal}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-900 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:border-indigo-400 dark:hover:bg-neutral-700"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-xs font-medium text-fg-muted hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-900 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:border-indigo-400 dark:hover:bg-neutral-700"
                 >
                   <ImageIcon className="h-3.5 w-3.5" aria-hidden />
                   Generate
                 </button>
-                <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-900 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:border-indigo-400 dark:hover:bg-neutral-700">
+                <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-xs font-medium text-fg-muted hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-900 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:border-indigo-400 dark:hover:bg-neutral-700">
                   <Upload className="h-3.5 w-3.5" aria-hidden />
                   Upload
                   <input type="file" accept="image/*" className="hidden" onChange={onAvatarUpload} />
@@ -703,7 +710,7 @@ export function AccountSettingsView() {
               ) : null}
 
               <details className="group">
-                <summary className="cursor-pointer text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-neutral-200">
+                <summary className="cursor-pointer text-sm font-medium text-fg-muted hover:text-fg-default dark:text-fg-muted dark:hover:text-fg-default">
                   Advanced: image URL
                 </summary>
                 <div className="mt-3">
@@ -732,7 +739,7 @@ export function AccountSettingsView() {
           <button
             type="submit"
             disabled={accountSaving}
-            className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-white dark:shadow-none"
+            className="inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-surface-raised dark:shadow-none"
           >
             <Save className="h-4 w-4" aria-hidden />
             {accountSaving ? 'Saving…' : 'Save profile'}
@@ -747,14 +754,14 @@ export function AccountSettingsView() {
       >
         <div className="space-y-8">
           <div>
-            <h4 className="text-sm font-medium text-slate-800 dark:text-neutral-200">Password</h4>
-            <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+            <h4 className="text-sm font-medium text-fg-default">Password</h4>
+            <p className="mt-1 text-xs text-fg-muted">
               Use a unique password you do not reuse on other sites.
             </p>
             <form className="mt-4 space-y-4" onSubmit={onChangePassword}>
               <ul
                 id="account-password-requirements"
-                className="list-inside list-disc text-xs text-slate-600 dark:text-neutral-400"
+                className="list-inside list-disc text-xs text-fg-muted"
               >
                 <li>At least {pwMinLen} characters</li>
                 {pwPolicy?.requireUpper ? <li>One uppercase letter</li> : null}
@@ -766,7 +773,7 @@ export function AccountSettingsView() {
                 ) : null}
               </ul>
               <label className="block">
-                <span className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-neutral-200">
+                <span className="mb-1.5 block text-sm font-medium text-fg-default">
                   Current password
                 </span>
                 <input
@@ -780,7 +787,7 @@ export function AccountSettingsView() {
                 />
               </label>
               <label className="block">
-                <span className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-neutral-200">
+                <span className="mb-1.5 block text-sm font-medium text-fg-default">
                   New password
                 </span>
                 <input
@@ -794,22 +801,16 @@ export function AccountSettingsView() {
                 />
               </label>
               <div id="account-password-strength" className="flex items-center gap-2" aria-live="polite">
-                <span className="text-xs font-medium text-slate-600 dark:text-neutral-400">Strength:</span>
-                <span className="text-xs font-semibold text-slate-800 dark:text-neutral-100">{cpStrengthLabel}</span>
+                <span className="text-xs font-medium text-fg-muted">Strength:</span>
+                <span className="text-xs font-semibold text-fg-default">{cpStrengthLabel}</span>
                 <div className="h-1.5 flex-1 rounded-full bg-slate-200 dark:bg-neutral-700" aria-hidden>
                   <div
-                    className={`h-full rounded-full ${
-                      cpStrengthKey === 'password.strength.weak'
-                        ? 'w-1/3 bg-rose-500'
-                        : cpStrengthKey === 'password.strength.fair'
-                          ? 'w-2/3 bg-amber-500'
-                          : 'w-full bg-emerald-600'
-                    }`}
+                    className={`h-full rounded-full ${ cpStrengthKey === 'password.strength.weak' ? 'w-1/3 bg-rose-500' : cpStrengthKey === 'password.strength.fair' ? 'w-2/3 bg-amber-500' : 'w-full bg-emerald-600' }`}
                   />
                 </div>
               </div>
               <label className="block">
-                <span className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-neutral-200">
+                <span className="mb-1.5 block text-sm font-medium text-fg-default">
                   Confirm new password
                 </span>
                 <input
@@ -834,7 +835,7 @@ export function AccountSettingsView() {
               <button
                 type="submit"
                 disabled={cpBusy}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-indigo-400 dark:hover:bg-neutral-800"
+                className="rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:border-indigo-400 dark:hover:bg-surface-overlay"
               >
                 {cpBusy ? 'Updating…' : 'Update password'}
               </button>
@@ -847,11 +848,11 @@ export function AccountSettingsView() {
             <div>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <h4 className="flex items-center gap-2 text-sm font-medium text-slate-800 dark:text-neutral-200">
-                    <Monitor className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
+                  <h4 className="flex items-center gap-2 text-sm font-medium text-fg-default">
+                    <Monitor className="h-4 w-4 shrink-0 text-fg-muted" aria-hidden />
                     Active sessions
                   </h4>
-                  <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+                  <p className="mt-1 text-xs text-fg-muted">
                     Where you are signed in. Location is approximate when shown.
                   </p>
                 </div>
@@ -859,7 +860,7 @@ export function AccountSettingsView() {
                   type="button"
                   onClick={() => void revokeAllOtherSessions()}
                   disabled={sessionsLoading || sessions.filter((s) => !s.isCurrent).length === 0}
-                  className="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-rose-200 hover:bg-rose-50 hover:text-rose-900 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-rose-500/50 dark:hover:bg-rose-950/40"
+                  className="shrink-0 rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm font-medium text-fg-default shadow-sm transition-[background-color,color,border-color] hover:border-rose-200 hover:bg-rose-50 hover:text-rose-900 disabled:cursor-not-allowed disabled:opacity-50 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:border-rose-500/50 dark:hover:bg-rose-950/40"
                 >
                   Sign out everywhere else
                 </button>
@@ -869,51 +870,51 @@ export function AccountSettingsView() {
                   {sessionsError}
                 </p>
               ) : null}
-              {sessionsLoading ? <p className="mt-4 text-sm text-slate-500">Loading sessions…</p> : null}
+              {sessionsLoading ? <p className="mt-4 text-sm text-fg-muted">Loading sessions…</p> : null}
               {!sessionsLoading && sessions.length === 0 ? (
-                <p className="mt-4 text-sm text-slate-500">No active sessions found.</p>
+                <p className="mt-4 text-sm text-fg-muted">No active sessions found.</p>
               ) : null}
               {!sessionsLoading && sessions.length > 0 ? (
-                <div className="mt-4 overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-600">
+                <div className="mt-4 overflow-x-auto rounded-xl border border-border-default">
                   <table
                     className="min-w-full divide-y divide-slate-200 text-start text-sm dark:divide-neutral-600"
                     aria-label="Active sessions"
                   >
-                    <thead className="bg-slate-50 dark:bg-neutral-800/80">
+                    <thead className="bg-surface-sunken/80">
                       <tr>
-                        <th scope="col" className="px-3 py-2 font-medium text-slate-700 dark:text-neutral-200">
+                        <th scope="col" className="px-3 py-2 font-medium text-fg-default">
                           Device
                         </th>
-                        <th scope="col" className="px-3 py-2 font-medium text-slate-700 dark:text-neutral-200">
+                        <th scope="col" className="px-3 py-2 font-medium text-fg-default">
                           Location
                         </th>
-                        <th scope="col" className="px-3 py-2 font-medium text-slate-700 dark:text-neutral-200">
+                        <th scope="col" className="px-3 py-2 font-medium text-fg-default">
                           Signed in
                         </th>
-                        <th scope="col" className="px-3 py-2 font-medium text-slate-700 dark:text-neutral-200">
+                        <th scope="col" className="px-3 py-2 font-medium text-fg-default">
                           Last active
                         </th>
-                        <th scope="col" className="px-3 py-2 font-medium text-slate-700 dark:text-neutral-200">
+                        <th scope="col" className="px-3 py-2 font-medium text-fg-default">
                           Method
                         </th>
-                        <th scope="col" className="px-3 py-2 font-medium text-slate-700 dark:text-neutral-200">
+                        <th scope="col" className="px-3 py-2 font-medium text-fg-default">
                           Action
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-200 bg-white dark:divide-neutral-600 dark:bg-neutral-900">
+                    <tbody className="divide-y divide-slate-200 bg-surface-raised dark:divide-neutral-600 dark:bg-surface-raised">
                       {sessions.map((s) => (
                         <tr
                           key={s.id}
                           className={
                             s.isCurrent
                               ? 'bg-indigo-50/60 dark:bg-indigo-950/25'
-                              : 'hover:bg-slate-50 dark:hover:bg-neutral-800/60'
+                              : 'hover:bg-surface-base dark:hover:bg-neutral-800/60'
                           }
                         >
                           <th
                             scope="row"
-                            className="whitespace-nowrap px-3 py-2.5 font-normal text-slate-900 dark:text-neutral-100"
+                            className="whitespace-nowrap px-3 py-2.5 font-normal text-fg-default"
                           >
                             <span className="flex flex-wrap items-center gap-2">
                               {s.deviceLabel}
@@ -924,26 +925,26 @@ export function AccountSettingsView() {
                               ) : null}
                             </span>
                           </th>
-                          <td className="whitespace-nowrap px-3 py-2.5 text-slate-600 dark:text-neutral-300">
+                          <td className="whitespace-nowrap px-3 py-2.5 text-fg-muted">
                             {s.location}
                           </td>
-                          <td className="whitespace-nowrap px-3 py-2.5 text-slate-600 dark:text-neutral-300">
+                          <td className="whitespace-nowrap px-3 py-2.5 text-fg-muted">
                             {formatDateTime(s.createdAt)}
                           </td>
-                          <td className="whitespace-nowrap px-3 py-2.5 text-slate-600 dark:text-neutral-300">
+                          <td className="whitespace-nowrap px-3 py-2.5 text-fg-muted">
                             {formatDateTime(s.lastUsedAt)}
                           </td>
-                          <td className="whitespace-nowrap px-3 py-2.5 text-slate-600 dark:text-neutral-300">
+                          <td className="whitespace-nowrap px-3 py-2.5 text-fg-muted">
                             {s.authMethod}
                           </td>
                           <td className="px-3 py-2.5">
                             {s.isCurrent ? (
-                              <span className="text-xs text-slate-400 dark:text-neutral-500">—</span>
+                              <span className="text-xs text-fg-subtle">—</span>
                             ) : (
                               <button
                                 type="button"
                                 onClick={() => void revokeSession(s.id)}
-                                className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-800 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-rose-500/50"
+                                className="rounded-lg border border-border-default bg-surface-raised px-2.5 py-1.5 text-xs font-medium text-fg-default hover:border-rose-200 hover:bg-rose-50 hover:text-rose-900 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:border-rose-500/50"
                                 aria-label={`Sign out session on ${s.deviceLabel}`}
                               >
                                 Sign out
@@ -979,8 +980,8 @@ export function AccountSettingsView() {
       >
         <div className="space-y-6">
           <div>
-            <p className="text-sm font-medium text-slate-700 dark:text-neutral-200">Theme</p>
-            <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+            <p className="text-sm font-medium text-fg-default">Theme</p>
+            <p className="mt-1 text-sm text-fg-muted">
               Saved to your account and applied when you sign in.
             </p>
             <div className="mt-3">
@@ -997,8 +998,52 @@ export function AccountSettingsView() {
           </div>
 
           <div>
-            <p className="text-sm font-medium text-slate-700 dark:text-neutral-200">Layout density</p>
-            <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+            <p className="text-sm font-medium text-fg-default">Background colour</p>
+            <p className="mt-1 text-sm text-fg-muted">
+              Tints the app chrome in light and dark mode. Light mode uses soft pastels; dark mode
+              uses deep near-black hues. Stored on this device.
+            </p>
+            <div
+              className="mt-3 flex flex-wrap gap-2"
+              role="radiogroup"
+              aria-label="Background colour"
+            >
+              {UI_SURFACE_TINT_OPTIONS.map((opt) => {
+                const selected = surfaceTint === opt.value
+                const swatch = uiTheme === 'dark' ? opt.darkSwatch : opt.lightSwatch
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    role="radio"
+                    aria-checked={selected}
+                    aria-label={opt.label}
+                    title={opt.label}
+                    onClick={() => {
+                      setSurfaceTint(opt.value)
+                      applyUiSurfaceTint(opt.value)
+                    }}
+                    className={
+                      selected
+                        ? 'flex flex-col items-center gap-1.5 rounded-xl border-2 border-accent-solid bg-surface-raised p-2 shadow-sm outline-none ring-2 ring-accent-solid/25'
+                        : 'flex flex-col items-center gap-1.5 rounded-xl border border-border-default bg-surface-raised p-2 hover:border-border-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-solid/30'
+                    }
+                  >
+                    <span
+                      className="h-8 w-10 rounded-md border border-border-subtle shadow-inner"
+                      style={{ backgroundColor: swatch }}
+                      aria-hidden
+                    />
+                    <span className="text-[11px] font-medium text-fg-muted">{opt.label}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          <div>
+            <p className="text-sm font-medium text-fg-default">Layout density</p>
+            <p className="mt-1 text-sm text-fg-muted">
               Compact tightens tables and navigation. Stored on this device only.
             </p>
             <div className="mt-3">
@@ -1032,8 +1077,8 @@ export function AccountSettingsView() {
           />
 
           <div>
-            <p className="text-sm font-medium text-slate-700 dark:text-neutral-200">Help button</p>
-            <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+            <p className="text-sm font-medium text-fg-default">Help button</p>
+            <p className="mt-1 text-sm text-fg-muted">
               Show or hide the help button in the top menu bar.
             </p>
             <div className="mt-3">
@@ -1062,12 +1107,12 @@ export function AccountSettingsView() {
         description={t('account.delete.sectionDescription')}
       >
         <div className="rounded-xl border border-red-200 bg-red-50/60 p-4 dark:border-red-900/50 dark:bg-red-950/30">
-          <p className="text-sm text-slate-700 dark:text-neutral-200">{t('account.delete.warning')}</p>
+          <p className="text-sm text-fg-default">{t('account.delete.warning')}</p>
           <button
             type="button"
             disabled={deleteAccountBusy || accountLoading}
             onClick={() => void onDeleteAccount()}
-            className="mt-4 inline-flex items-center gap-2 rounded-xl border border-red-300 bg-white px-4 py-2.5 text-sm font-semibold text-red-700 shadow-sm transition-[background-color,color,border-color] hover:border-red-400 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-red-800 dark:bg-neutral-900 dark:text-red-300 dark:hover:bg-red-950/50"
+            className="mt-4 inline-flex items-center gap-2 rounded-xl border border-red-300 bg-surface-raised px-4 py-2.5 text-sm font-semibold text-danger-fg shadow-sm transition-[background-color,color,border-color] hover:border-red-400 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-red-800 dark:bg-surface-raised dark:text-red-300 dark:hover:bg-red-950/50"
           >
             <Trash2 className="h-4 w-4" aria-hidden />
             {deleteAccountBusy ? t('account.delete.deleting') : t('account.delete.button')}
@@ -1085,15 +1130,15 @@ export function AccountSettingsView() {
             if (e.target === e.currentTarget) setAvatarModalOpen(false)
           }}
         >
-          <div className="w-full max-w-2xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-neutral-600 dark:bg-neutral-900">
-            <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-neutral-600">
-              <h3 id="generate-avatar-title" className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+          <div className="w-full max-w-2xl overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-raised">
+            <div className="flex items-center justify-between border-b border-border-default px-4 py-3 dark:border-border-default">
+              <h3 id="generate-avatar-title" className="text-sm font-semibold text-fg-default">
                 Generate avatar
               </h3>
               <button
                 type="button"
                 onClick={() => setAvatarModalOpen(false)}
-                className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
+                className="rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken hover:text-fg-default dark:hover:bg-surface-overlay dark:hover:text-fg-default"
                 aria-label="Close"
               >
                 <X className="h-5 w-5" />
@@ -1101,7 +1146,7 @@ export function AccountSettingsView() {
             </div>
             <form onSubmit={onGenerateAvatar} className="grid gap-4 p-4 md:grid-cols-[1fr,240px]">
               <div>
-                <label htmlFor="avatar-prompt" className="text-xs font-medium text-slate-600 dark:text-neutral-400">
+                <label htmlFor="avatar-prompt" className="text-xs font-medium text-fg-muted">
                   Prompt
                 </label>
                 <textarea
@@ -1127,28 +1172,28 @@ export function AccountSettingsView() {
                   <button
                     type="button"
                     onClick={() => setAvatarModalOpen(false)}
-                    className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
+                    className="rounded-xl px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay"
                   >
                     Close
                   </button>
                   <button
                     type="submit"
                     disabled={avatarGenStatus === 'loading' || !avatarPrompt.trim()}
-                    className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-white dark:shadow-none"
+                    className="rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-surface-raised dark:shadow-none"
                   >
                     {avatarGenStatus === 'loading' ? 'Generating…' : 'Generate'}
                   </button>
                 </div>
               </div>
               <div>
-                <span className="text-xs font-medium text-slate-600 dark:text-neutral-400">Preview</span>
-                <div className="mt-1 flex h-60 items-center justify-center overflow-hidden rounded-xl border border-dashed border-slate-200 bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800/50">
+                <span className="text-xs font-medium text-fg-muted">Preview</span>
+                <div className="mt-1 flex h-60 items-center justify-center overflow-hidden rounded-xl border border-dashed border-border-default bg-surface-base dark:border-border-default/50">
                   {avatarGenStatus === 'loading' ? (
-                    <span className="text-sm text-slate-500">Generating…</span>
+                    <span className="text-sm text-fg-muted">Generating…</span>
                   ) : avatarPreviewUrl ? (
                     <img src={avatarPreviewUrl} alt="" className="h-full w-full object-contain" />
                   ) : (
-                    <span className="text-sm text-slate-400">Generated image will appear here</span>
+                    <span className="text-sm text-fg-subtle">Generated image will appear here</span>
                   )}
                 </div>
               </div>

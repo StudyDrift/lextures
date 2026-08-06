@@ -205,7 +205,7 @@ export default function CourseDiagnosticPage() {
   if (!courseCode) {
     return (
       <LmsPage title="Placement" description="">
-        <p className="mt-6 text-sm text-slate-500">Invalid link.</p>
+        <p className="mt-6 text-sm text-fg-muted">Invalid link.</p>
       </LmsPage>
     )
   }
@@ -218,7 +218,7 @@ export default function CourseDiagnosticPage() {
       <div className="mt-2">
         <Link
           to={`/courses/${encodeURIComponent(courseCode)}`}
-          className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+          className="text-sm font-medium text-accent-fg hover:text-indigo-500"
         >
           ← Back to course
         </Link>
@@ -230,16 +230,16 @@ export default function CourseDiagnosticPage() {
         </p>
       )}
 
-      {phase.kind === 'loading' && <p className="mt-8 text-sm text-slate-500">Loading…</p>}
+      {phase.kind === 'loading' && <p className="mt-8 text-sm text-fg-muted">Loading…</p>}
 
       {phase.kind === 'unavailable' && (
-        <p className="mt-8 max-w-xl text-sm text-slate-600 dark:text-neutral-300">{phase.message}</p>
+        <p className="mt-8 max-w-xl text-sm text-fg-muted">{phase.message}</p>
       )}
 
       {phase.kind === 'intro' && (
-        <section className="mt-8 max-w-xl space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-neutral-50">How this works</h2>
-          <p className="text-sm text-slate-600 dark:text-neutral-300">
+        <section className="mt-8 max-w-xl space-y-4 rounded-2xl border border-border-default bg-surface-raised p-6 shadow-sm dark:border-border-subtle dark:bg-surface-base">
+          <h2 className="text-lg font-semibold text-fg-default">How this works</h2>
+          <p className="text-sm text-fg-muted">
             You will answer a series of multiple-choice or true/false questions from the course
             question bank. The set adapts as you go (typically around {estimatedMinutes} minutes).
             You can skip and start from the beginning of the course if you prefer.
@@ -249,7 +249,7 @@ export default function CourseDiagnosticPage() {
               type="button"
               disabled={submitting}
               onClick={() => void onStart()}
-              className="inline-flex rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:opacity-50"
+              className="inline-flex rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:opacity-50"
             >
               Start placement assessment
             </button>
@@ -257,15 +257,15 @@ export default function CourseDiagnosticPage() {
               type="button"
               disabled={submitting}
               onClick={() => void onSkip()}
-              className="inline-flex rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+              className="inline-flex rounded-xl border border-border-strong bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
             >
               Skip — start from the beginning
             </button>
           </div>
-          <p className="text-xs text-slate-500 dark:text-neutral-400">
+          <p className="text-xs text-fg-muted">
             <button
               type="button"
-              className="font-medium text-indigo-600 underline hover:text-indigo-500 dark:text-indigo-400"
+              className="font-medium text-accent-fg underline hover:text-indigo-500 dark:text-indigo-400"
               disabled={submitting}
               onClick={() => void onSkip()}
             >
@@ -277,12 +277,12 @@ export default function CourseDiagnosticPage() {
       )}
 
       {phase.kind === 'quiz' && (
-        <section className="mt-8 max-w-2xl space-y-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
+        <section className="mt-8 max-w-2xl space-y-6 rounded-2xl border border-border-default bg-surface-raised p-6 shadow-sm dark:border-border-subtle dark:bg-surface-base">
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+            <p className="text-xs font-medium uppercase tracking-wide text-fg-muted">
               Placement question
             </p>
-            <div className="mt-2 text-base text-slate-900 dark:text-neutral-50">
+            <div className="mt-2 text-base text-fg-default">
               <MathPlainText text={phase.question.prompt} />
             </div>
           </div>
@@ -294,11 +294,7 @@ export default function CourseDiagnosticPage() {
                   <button
                     type="button"
                     onClick={() => setChoice(i)}
-                    className={`flex w-full items-start gap-3 rounded-xl border px-4 py-3 text-start text-sm transition-[background-color,color,border-color] ${
-                      selected
-                        ? 'border-indigo-500 bg-indigo-50 dark:border-indigo-400 dark:bg-indigo-950/40'
-                        : 'border-slate-200 bg-white hover:border-slate-300 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-neutral-600'
-                    }`}
+                    className={`flex w-full items-start gap-3 rounded-xl border px-4 py-3 text-start text-sm transition-[background-color,color,border-color] ${ selected ? 'border-indigo-500 bg-indigo-50 dark:border-indigo-400 dark:bg-indigo-950/40' : 'border-border-default bg-surface-raised hover:border-border-strong dark:border-border-subtle dark:bg-surface-raised dark:hover:border-border-default' }`}
                   >
                     <span
                       className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-slate-400 text-[10px] font-bold dark:border-neutral-500"
@@ -306,7 +302,7 @@ export default function CourseDiagnosticPage() {
                     >
                       {String.fromCharCode(65 + i)}
                     </span>
-                    <span className="text-slate-800 dark:text-neutral-100">
+                    <span className="text-fg-default">
                       <MathPlainText text={c} />
                     </span>
                   </button>
@@ -314,12 +310,12 @@ export default function CourseDiagnosticPage() {
               )
             })}
           </ul>
-          <div className="flex justify-end border-t border-slate-100 pt-4 dark:border-neutral-800">
+          <div className="flex justify-end border-t border-border-subtle pt-4 dark:border-border-subtle">
             <button
               type="button"
               disabled={submitting || choice == null}
               onClick={() => void onSubmitAnswer()}
-              className="inline-flex rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:opacity-50"
+              className="inline-flex rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:opacity-50"
             >
               Submit answer
             </button>
@@ -329,10 +325,10 @@ export default function CourseDiagnosticPage() {
 
       {phase.kind === 'summary' && (
         <section className="mt-8 max-w-3xl space-y-6">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-neutral-50">Your results</h2>
-          <p className="text-sm text-slate-600 dark:text-neutral-300">
+          <h2 className="text-lg font-semibold text-fg-default">Your results</h2>
+          <p className="text-sm text-fg-muted">
             Recommended starting point:{' '}
-            <span className="font-semibold text-slate-900 dark:text-neutral-100">
+            <span className="font-semibold text-fg-default">
               {phase.summary.placementTitle}
             </span>
           </p>
@@ -340,10 +336,10 @@ export default function CourseDiagnosticPage() {
             {phase.summary.concepts.map((c) => (
               <div
                 key={c.conceptId}
-                className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-neutral-800 dark:bg-neutral-950"
+                className="rounded-2xl border border-border-default bg-surface-raised p-4 shadow-sm dark:border-border-subtle dark:bg-surface-base"
               >
-                <p className="text-sm font-semibold text-slate-900 dark:text-neutral-50">{c.name}</p>
-                <p className="mt-2 text-sm text-slate-600 dark:text-neutral-300">
+                <p className="text-sm font-semibold text-fg-default">{c.name}</p>
+                <p className="mt-2 text-sm text-fg-muted">
                   <span className="sr-only">Proficiency: </span>
                   <span className="inline-flex items-center gap-2">
                     <span aria-hidden className="text-lg">
@@ -364,7 +360,7 @@ export default function CourseDiagnosticPage() {
           {continueHref && (
             <Link
               to={continueHref}
-              className="inline-flex rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500"
+              className="inline-flex rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500"
             >
               Continue to your starting point
             </Link>

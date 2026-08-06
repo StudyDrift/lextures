@@ -27,17 +27,17 @@ function SaveDialog({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
       <div
-        className="w-80 rounded-2xl bg-white p-6 shadow-xl dark:bg-neutral-900"
+        className="w-80 rounded-2xl bg-surface-raised p-6 shadow-xl dark:bg-surface-raised"
         onClick={(e) => e.stopPropagation()}
       >
-        <p className="mb-3 text-sm font-semibold text-slate-900 dark:text-neutral-100">Save whiteboard</p>
+        <p className="mb-3 text-sm font-semibold text-fg-default">Save whiteboard</p>
         <input
           autoFocus
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Whiteboard name"
-          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100"
+          className="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
           onKeyDown={(e) => {
             if (e.key === 'Enter' && title.trim()) onSave(title.trim())
             if (e.key === 'Escape') onClose()
@@ -47,7 +47,7 @@ function SaveDialog({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
+            className="rounded-lg px-3 py-1.5 text-sm text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay"
           >
             Cancel
           </button>
@@ -55,7 +55,7 @@ function SaveDialog({
             type="button"
             disabled={!title.trim()}
             onClick={() => onSave(title.trim())}
-            className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+            className="rounded-lg bg-accent-solid px-3 py-1.5 text-sm font-medium text-white hover:bg-accent disabled:opacity-50"
           >
             Save
           </button>
@@ -79,12 +79,12 @@ function LoadPanel({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
       <div
-        className="w-96 max-h-[70vh] overflow-y-auto rounded-2xl bg-white p-6 shadow-xl dark:bg-neutral-900"
+        className="w-96 max-h-[70vh] overflow-y-auto rounded-2xl bg-surface-raised p-6 shadow-xl dark:bg-surface-raised"
         onClick={(e) => e.stopPropagation()}
       >
-        <p className="mb-3 text-sm font-semibold text-slate-900 dark:text-neutral-100">Load whiteboard</p>
+        <p className="mb-3 text-sm font-semibold text-fg-default">Load whiteboard</p>
         {boards.length === 0 ? (
-          <p className="text-sm text-slate-500 dark:text-neutral-400">No saved whiteboards yet.</p>
+          <p className="text-sm text-fg-muted">No saved whiteboards yet.</p>
         ) : (
           <ul className="divide-y divide-slate-100 dark:divide-neutral-800">
             {boards.map((b) => (
@@ -92,14 +92,14 @@ function LoadPanel({
                 <button
                   type="button"
                   onClick={() => onLoad(b)}
-                  className="flex-1 text-left text-sm text-slate-800 hover:text-indigo-600 dark:text-neutral-200 dark:hover:text-indigo-400"
+                  className="flex-1 text-left text-sm text-fg-default hover:text-accent-fg dark:text-fg-default dark:hover:text-indigo-400"
                 >
                   {b.title}
                 </button>
                 <button
                   type="button"
                   onClick={() => onDelete(b.id)}
-                  className="rounded p-1 text-slate-400 hover:text-rose-500"
+                  className="rounded p-1 text-fg-subtle hover:text-rose-500"
                   title="Delete"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -112,7 +112,7 @@ function LoadPanel({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
+            className="rounded-lg px-3 py-1.5 text-sm text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay"
           >
             Close
           </button>
@@ -212,7 +212,7 @@ export default function CourseWhiteboardPage() {
 
       <div ref={wb.containerRef} className="relative flex-1 overflow-hidden">
         {currentBoard ? (
-          <div className="pointer-events-none absolute left-4 top-3 z-10 text-xs text-slate-400 dark:text-neutral-500">
+          <div className="pointer-events-none absolute left-4 top-3 z-10 text-xs text-fg-subtle">
             {currentBoard.title}
           </div>
         ) : null}

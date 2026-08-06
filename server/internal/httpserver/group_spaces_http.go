@@ -78,11 +78,6 @@ func (d Deps) requireGroupAccess(w http.ResponseWriter, r *http.Request, courseC
 // handleListGroups is GET /api/v1/courses/{course_code}/groups — instructor view of all groups.
 func (d Deps) handleListGroups() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -112,11 +107,6 @@ func (d Deps) handleListGroups() http.HandlerFunc {
 // handleListMyGroups is GET /api/v1/courses/{course_code}/my-groups — student view of their groups.
 func (d Deps) handleListMyGroups() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -143,11 +133,6 @@ func (d Deps) handleListGroupChannels() http.HandlerFunc {
 		CreatedAt string `json:"createdAt"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -195,11 +180,6 @@ func (d Deps) handleCreateGroupChannel() http.HandlerFunc {
 		CreatedAt string `json:"createdAt"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -252,11 +232,6 @@ func (d Deps) handleListGroupMessages() http.HandlerFunc {
 		Messages []coursefeed.MessagePublic `json:"messages"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -306,11 +281,6 @@ func (d Deps) handlePostGroupMessage() http.HandlerFunc {
 		MentionsEveryone bool     `json:"mentionsEveryone"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return

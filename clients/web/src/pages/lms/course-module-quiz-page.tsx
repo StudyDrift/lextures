@@ -110,14 +110,14 @@ function QuestionTypeDropdown({
 
   return (
     <div ref={rootRef} className="relative">
-      <label className="mb-1 block text-xs font-medium text-slate-600">Question type</label>
+      <label className="mb-1 block text-xs font-medium text-fg-muted">Question type</label>
       <button
         type="button"
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex w-full items-center justify-between gap-2 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:border-slate-300 hover:bg-slate-50"
+        className="inline-flex w-full items-center justify-between gap-2 rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm font-medium text-fg-default transition-[background-color,color,border-color] hover:border-border-strong hover:bg-surface-base"
       >
         <span>{selectedLabel}</span>
         <ChevronDown className={`h-4 w-4 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden />
@@ -127,7 +127,7 @@ function QuestionTypeDropdown({
           id={menuId}
           role="menu"
           aria-label="Question type options"
-          className="absolute z-50 mt-1 w-full overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10"
+          className="absolute z-50 mt-1 w-full overflow-hidden rounded-xl border border-border-default bg-surface-raised py-1 shadow-lg shadow-slate-900/10"
         >
           {QUESTION_TYPE_OPTIONS.map((opt) => (
             <button
@@ -139,10 +139,10 @@ function QuestionTypeDropdown({
                 onChange(opt.value)
                 setOpen(false)
               }}
-              className="flex w-full items-center justify-between px-2.5 py-2 text-start text-sm text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50"
+              className="flex w-full items-center justify-between px-2.5 py-2 text-start text-sm text-fg-default transition-[background-color,color,border-color] hover:bg-surface-base"
             >
               <span>{opt.label}</span>
-              {opt.value === value ? <Check className="h-4 w-4 text-indigo-600" aria-hidden /> : null}
+              {opt.value === value ? <Check className="h-4 w-4 text-accent-fg" aria-hidden /> : null}
             </button>
           ))}
         </div>
@@ -200,7 +200,7 @@ function QuizEditorMoreMenu({
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-2 py-1.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex items-center gap-2 rounded-xl border border-border-strong bg-surface-raised px-2 py-1.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-60"
       >
         More
         <ChevronDown className={`h-4 w-4 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden />
@@ -210,7 +210,7 @@ function QuizEditorMoreMenu({
           id={menuId}
           role="menu"
           aria-label="More quiz actions"
-          className="absolute end-0 z-50 mt-1 min-w-[12rem] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-900"
+          className="absolute end-0 z-50 mt-1 min-w-[12rem] overflow-hidden rounded-xl border border-border-default bg-surface-raised py-1 shadow-lg shadow-slate-900/10 dark:border-border-default dark:bg-surface-raised"
         >
           <button
             type="button"
@@ -219,9 +219,9 @@ function QuizEditorMoreMenu({
               onEditIntro()
               setOpen(false)
             }}
-            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-fg-default transition-[background-color,color,border-color] hover:bg-surface-base dark:text-fg-default dark:hover:bg-surface-overlay"
           >
-            <Pencil className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
+            <Pencil className="h-4 w-4 shrink-0 text-fg-muted" aria-hidden />
             Edit
           </button>
           {showGradingAgent && onGradingAgent ? (
@@ -232,9 +232,9 @@ function QuizEditorMoreMenu({
                 onGradingAgent()
                 setOpen(false)
               }}
-              className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+              className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-fg-default transition-[background-color,color,border-color] hover:bg-surface-base dark:text-fg-default dark:hover:bg-surface-overlay"
             >
-              <Sparkles className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
+              <Sparkles className="h-4 w-4 shrink-0 text-fg-muted" aria-hidden />
               <span className="flex flex-1 items-center justify-between gap-2">
                 <span>{t('gradingAgent.button')}</span>
                 {reviewCount > 0 ? (
@@ -255,9 +255,9 @@ function QuizEditorMoreMenu({
               onGenerate()
               setOpen(false)
             }}
-            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-fg-default transition-[background-color,color,border-color] hover:bg-surface-base dark:text-fg-default dark:hover:bg-surface-overlay"
           >
-            <Sparkles className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
+            <Sparkles className="h-4 w-4 shrink-0 text-fg-muted" aria-hidden />
             Generate questions
           </button>
           <button
@@ -267,15 +267,15 @@ function QuizEditorMoreMenu({
               onAnalytics()
               setOpen(false)
             }}
-            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-fg-default transition-[background-color,color,border-color] hover:bg-surface-base dark:text-fg-default dark:hover:bg-surface-overlay"
           >
-            <BarChart3 className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
+            <BarChart3 className="h-4 w-4 shrink-0 text-fg-muted" aria-hidden />
             Analytics
           </button>
           <div
             role="separator"
             aria-orientation="horizontal"
-            className="my-1 border-t border-slate-200 dark:border-neutral-600"
+            className="my-1 border-t border-border-default"
           />
           <button
             type="button"
@@ -284,9 +284,9 @@ function QuizEditorMoreMenu({
               onPreview()
               setOpen(false)
             }}
-            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-fg-default transition-[background-color,color,border-color] hover:bg-surface-base dark:text-fg-default dark:hover:bg-surface-overlay"
           >
-            <Eye className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
+            <Eye className="h-4 w-4 shrink-0 text-fg-muted" aria-hidden />
             Preview
           </button>
         </div>
@@ -336,7 +336,7 @@ function ImportQuestionsMenu({
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex items-center gap-2 rounded-xl border border-border-strong bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-60"
       >
         <Plus className="h-4 w-4" aria-hidden />
         Import Questions
@@ -347,7 +347,7 @@ function ImportQuestionsMenu({
           id={menuId}
           role="menu"
           aria-label="Import questions"
-          className="absolute start-0 z-50 mt-1 min-w-[12rem] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-900"
+          className="absolute start-0 z-50 mt-1 min-w-[12rem] overflow-hidden rounded-xl border border-border-default bg-surface-raised py-1 shadow-lg shadow-slate-900/10 dark:border-border-default dark:bg-surface-raised"
         >
           <button
             type="button"
@@ -356,9 +356,9 @@ function ImportQuestionsMenu({
               onMarkdown()
               setOpen(false)
             }}
-            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-fg-default transition-[background-color,color,border-color] hover:bg-surface-base dark:text-fg-default dark:hover:bg-surface-overlay"
           >
-            <FileText className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
+            <FileText className="h-4 w-4 shrink-0 text-fg-muted" aria-hidden />
             Markdown
           </button>
           <button
@@ -368,9 +368,9 @@ function ImportQuestionsMenu({
               onQuestionBank()
               setOpen(false)
             }}
-            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-fg-default transition-[background-color,color,border-color] hover:bg-surface-base dark:text-fg-default dark:hover:bg-surface-overlay"
           >
-            <Library className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
+            <Library className="h-4 w-4 shrink-0 text-fg-muted" aria-hidden />
             Question Bank
           </button>
         </div>
@@ -1257,7 +1257,7 @@ export default function CourseModuleQuizPage() {
   if (!courseCode || !itemId) {
     return (
       <LmsPage title="Quiz" description="">
-        <p className="mt-6 text-sm text-slate-500">Invalid link.</p>
+        <p className="mt-6 text-sm text-fg-muted">Invalid link.</p>
       </LmsPage>
     )
   }
@@ -1282,7 +1282,7 @@ export default function CourseModuleQuizPage() {
       title={displayTitle}
       titleContent={
         editingContent && !loading ? (
-          <h1 className="m-0 text-2xl font-semibold tracking-tight text-slate-900 dark:text-neutral-100">
+          <h1 className="m-0 text-2xl font-semibold tracking-tight text-fg-default">
             <label htmlFor={quizTitleFieldId} className="sr-only">
               Quiz title
             </label>
@@ -1293,7 +1293,7 @@ export default function CourseModuleQuizPage() {
               onChange={(e) => setDraftTitle(e.target.value)}
               disabled={saving}
               autoComplete="off"
-              className="w-full min-w-0 border-0 border-b border-transparent bg-transparent p-0 pb-0.5 text-2xl font-semibold tracking-tight text-slate-900 outline-none ring-0 transition-[background-color,color,border-color] placeholder:text-slate-400 focus:border-indigo-500 disabled:opacity-60 dark:border-transparent dark:text-neutral-100 dark:focus:border-indigo-400"
+              className="w-full min-w-0 border-0 border-b border-transparent bg-transparent p-0 pb-0.5 text-2xl font-semibold tracking-tight text-fg-default outline-none ring-0 transition-[background-color,color,border-color] placeholder:text-fg-subtle focus:border-indigo-500 disabled:opacity-60 dark:border-transparent dark:text-fg-default dark:focus:border-indigo-400"
               placeholder="Quiz title"
             />
           </h1>
@@ -1309,7 +1309,7 @@ export default function CourseModuleQuizPage() {
                 type="button"
                 onClick={() => setBuildAiOpen(true)}
                 disabled={saving}
-                className="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3.5 py-2.5 text-sm font-semibold text-indigo-700 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-300 hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-200 dark:hover:bg-indigo-950/70"
+                className="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3.5 py-2.5 text-sm font-semibold text-accent-fg shadow-sm transition-[background-color,color,border-color] hover:border-indigo-300 hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-200 dark:hover:bg-indigo-950/70"
               >
                 <Sparkles className="h-4 w-4" aria-hidden />
                 Build with AI
@@ -1319,7 +1319,7 @@ export default function CourseModuleQuizPage() {
               type="button"
               onClick={cancelEditContent}
               disabled={saving}
-              className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-xl border border-border-strong bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-60"
             >
               Cancel
             </button>
@@ -1327,7 +1327,7 @@ export default function CourseModuleQuizPage() {
               type="button"
               onClick={() => void saveContent()}
               disabled={saving || !canSaveContent}
-              className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {saving ? 'Saving…' : 'Save'}
             </button>
@@ -1366,7 +1366,7 @@ export default function CourseModuleQuizPage() {
                   type="button"
                   onClick={openQuestionsEditor}
                   disabled={loading}
-                  className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Edit questions
                 </button>
@@ -1377,18 +1377,14 @@ export default function CourseModuleQuizPage() {
       }
     >
       <p className="mt-2 text-start text-sm">
-        <Link to={backTo} className="font-medium text-indigo-600 hover:text-indigo-500">
+        <Link to={backTo} className="font-medium text-accent-fg hover:text-indigo-500">
           ← Back to modules
         </Link>
       </p>
 
       {!canEdit && studentQuizBanner ? (
         <p
-          className={`mt-4 rounded-lg border px-4 py-3 text-sm ${
-            studentQuizBanner.kind === 'success'
-              ? 'border-emerald-200 bg-emerald-50 text-emerald-900'
-              : 'border-rose-200 bg-rose-50 text-rose-800'
-          }`}
+          className={`mt-4 rounded-lg border px-4 py-3 text-sm ${ studentQuizBanner.kind === 'success' ? 'border-emerald-200 bg-emerald-50 text-emerald-900' : 'border-rose-200 bg-rose-50 text-rose-800' }`}
           role="status"
         >
           {studentQuizBanner.text}
@@ -1423,7 +1419,7 @@ export default function CourseModuleQuizPage() {
             {loadError}
           </p>
         )}
-        {loading && <p className="mt-8 text-sm text-slate-500">Loading…</p>}
+        {loading && <p className="mt-8 text-sm text-fg-muted">Loading…</p>}
 
         {!loading && !loadError && !editingContent && (
           <div className="mt-8 flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
@@ -1461,7 +1457,7 @@ export default function CourseModuleQuizPage() {
                           ? 'Quiz saved for offline access'
                           : 'Save quiz intro for offline access'
                       }
-                      className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-border-strong bg-surface-raised px-3 py-2.5 text-sm font-semibold text-fg-muted shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-60 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
                     >
                       {offlineStatus === 'saving' ? (
                         <Loader2 className="h-4 w-4 motion-safe:animate-spin" aria-hidden />
@@ -1478,20 +1474,20 @@ export default function CourseModuleQuizPage() {
                     disabled={loading || !isOnline}
                     aria-disabled={!isOnline}
                     title={!isOnline ? 'Available when online' : undefined}
-                    className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {!isOnline && <WifiOff className="h-4 w-4" aria-hidden />}
                     Start Quiz
                   </button>
                 </div>
               ) : null}
-              <div className="rounded-2xl border border-slate-200/90 bg-slate-50/70 p-4 dark:border-neutral-600 dark:bg-neutral-900/90">
-                <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+              <div className="rounded-2xl border border-slate-200/90 bg-slate-50/70 p-4 dark:border-border-default/90">
+                <p className="text-sm font-semibold text-fg-default">
                   {isAdaptive
                     ? `Adaptive · up to ${adaptiveQuestionCount} generated questions`
                     : `${questions.length} ${questions.length === 1 ? 'question' : 'questions'}`}
                 </p>
-                <p className="mt-1 text-sm text-slate-600 dark:text-neutral-300">
+                <p className="mt-1 text-sm text-fg-muted">
                   {canEdit ? (
                     isAdaptive ? (
                       <>
@@ -1509,59 +1505,59 @@ export default function CourseModuleQuizPage() {
                     'Quiz questions for this item.'
                   )}
                 </p>
-                <dl className="mt-4 space-y-2 border-t border-slate-200/80 pt-3 text-sm dark:border-neutral-600">
+                <dl className="mt-4 space-y-2 border-t border-slate-200/80 pt-3 text-sm dark:border-border-default">
                   {quizDateTimeIsSet(dueAt) ? (
                     <div className="flex justify-between gap-4">
-                      <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Due date</dt>
-                      <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
+                      <dt className="shrink-0 text-fg-muted">Due date</dt>
+                      <dd className="min-w-0 text-end font-medium text-fg-default">
                         {formatQuizDateTime(dueAt, courseTimezone)}
                       </dd>
                     </div>
                   ) : null}
                   {quizDateTimeIsSet(availableFromAt) ? (
                     <div className="flex justify-between gap-4">
-                      <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Visibility start</dt>
-                      <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
+                      <dt className="shrink-0 text-fg-muted">Visibility start</dt>
+                      <dd className="min-w-0 text-end font-medium text-fg-default">
                         {formatQuizDateTime(availableFromAt, courseTimezone)}
                       </dd>
                     </div>
                   ) : null}
                   {quizDateTimeIsSet(availableUntilAt) ? (
                     <div className="flex justify-between gap-4">
-                      <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Visibility end</dt>
-                      <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
+                      <dt className="shrink-0 text-fg-muted">Visibility end</dt>
+                      <dd className="min-w-0 text-end font-medium text-fg-default">
                         {formatQuizDateTime(availableUntilAt, courseTimezone)}
                       </dd>
                     </div>
                   ) : null}
                   <div className="flex justify-between gap-4">
-                    <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Unlimited attempts</dt>
-                    <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
+                    <dt className="shrink-0 text-fg-muted">Unlimited attempts</dt>
+                    <dd className="min-w-0 text-end font-medium text-fg-default">
                       {unlimitedAttempts ? 'Yes' : 'No'}
                     </dd>
                   </div>
                   <div className="flex justify-between gap-4">
-                    <dt className="shrink-0 text-slate-500 dark:text-neutral-400">One question at a time</dt>
-                    <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
+                    <dt className="shrink-0 text-fg-muted">One question at a time</dt>
+                    <dd className="min-w-0 text-end font-medium text-fg-default">
                       {oneQuestionAtATime ? 'Yes' : 'No'}
                     </dd>
                   </div>
                   <div className="flex justify-between gap-4">
-                    <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Course lockdown feature</dt>
-                    <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
+                    <dt className="shrink-0 text-fg-muted">Course lockdown feature</dt>
+                    <dd className="min-w-0 text-end font-medium text-fg-default">
                       {courseLockdownEnabled ? 'On' : 'Off'}
                     </dd>
                   </div>
                   <div className="flex justify-between gap-4">
-                    <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Delivery mode</dt>
-                    <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
+                    <dt className="shrink-0 text-fg-muted">Delivery mode</dt>
+                    <dd className="min-w-0 text-end font-medium text-fg-default">
                       {formatLockdownModeLabel(lockdownMode)}
                     </dd>
                   </div>
                   {lockdownMode === 'kiosk' ? (
                     <div className="flex justify-between gap-4">
-                      <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Focus-loss threshold</dt>
-                      <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
+                      <dt className="shrink-0 text-fg-muted">Focus-loss threshold</dt>
+                      <dd className="min-w-0 text-end font-medium text-fg-default">
                         {focusLossThreshold != null ? String(focusLossThreshold) : 'None'}
                       </dd>
                     </div>
@@ -1574,66 +1570,66 @@ export default function CourseModuleQuizPage() {
                   ) : null}
                   {!unlimitedAttempts ? (
                     <div className="flex justify-between gap-4">
-                      <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Max attempts</dt>
-                      <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
+                      <dt className="shrink-0 text-fg-muted">Max attempts</dt>
+                      <dd className="min-w-0 text-end font-medium text-fg-default">
                         {quizAdvanced.maxAttempts}
                       </dd>
                     </div>
                   ) : null}
                   <div className="flex justify-between gap-4">
-                    <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Grade uses</dt>
-                    <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
+                    <dt className="shrink-0 text-fg-muted">Grade uses</dt>
+                    <dd className="min-w-0 text-end font-medium text-fg-default">
                       {formatGradePolicyShort(quizAdvanced.gradeAttemptPolicy)}
                     </dd>
                   </div>
                   {pointsWorth != null ? (
                     <div className="flex justify-between gap-4">
-                      <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Points</dt>
-                      <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
+                      <dt className="shrink-0 text-fg-muted">Points</dt>
+                      <dd className="min-w-0 text-end font-medium text-fg-default">
                         {formatItemPointsWorth(pointsWorth)}
                       </dd>
                     </div>
                   ) : null}
                   {assignmentGroupId ? (
                     <div className="flex justify-between gap-4">
-                      <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Assignment group</dt>
-                      <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
+                      <dt className="shrink-0 text-fg-muted">Assignment group</dt>
+                      <dd className="min-w-0 text-end font-medium text-fg-default">
                         {assignmentGroupDisplayName(assignmentGroupId, gradingGroups)}
                       </dd>
                     </div>
                   ) : null}
                   {quizAdvanced.passingScorePercent != null ? (
                     <div className="flex justify-between gap-4">
-                      <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Passing score</dt>
-                      <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
+                      <dt className="shrink-0 text-fg-muted">Passing score</dt>
+                      <dd className="min-w-0 text-end font-medium text-fg-default">
                         {`${quizAdvanced.passingScorePercent}%`}
                       </dd>
                     </div>
                   ) : null}
                   {quizAdvanced.timeLimitMinutes != null ? (
                     <div className="flex justify-between gap-4">
-                      <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Time limit</dt>
-                      <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
+                      <dt className="shrink-0 text-fg-muted">Time limit</dt>
+                      <dd className="min-w-0 text-end font-medium text-fg-default">
                         {`${quizAdvanced.timeLimitMinutes} min`}
                       </dd>
                     </div>
                   ) : null}
                   <div className="flex justify-between gap-4">
-                    <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Shuffle questions</dt>
-                    <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
+                    <dt className="shrink-0 text-fg-muted">Shuffle questions</dt>
+                    <dd className="min-w-0 text-end font-medium text-fg-default">
                       {quizAdvanced.shuffleQuestions ? 'Yes' : 'No'}
                     </dd>
                   </div>
                   {quizAdvanced.requiresQuizAccessCode ? (
                     <div className="flex justify-between gap-4">
-                      <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Access code</dt>
-                      <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">Required</dd>
+                      <dt className="shrink-0 text-fg-muted">Access code</dt>
+                      <dd className="min-w-0 text-end font-medium text-fg-default">Required</dd>
                     </div>
                   ) : null}
                   {isAdaptive ? (
                     <div className="flex justify-between gap-4">
-                      <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Adaptive difficulty</dt>
-                      <dd className="min-w-0 text-end font-medium capitalize text-slate-900 dark:text-neutral-100">
+                      <dt className="shrink-0 text-fg-muted">Adaptive difficulty</dt>
+                      <dd className="min-w-0 text-end font-medium capitalize text-fg-default">
                         {quizAdvanced.adaptiveDifficulty}
                       </dd>
                     </div>
@@ -1641,11 +1637,11 @@ export default function CourseModuleQuizPage() {
                 </dl>
               </div>
               {canEdit && courseLockdownEnabled && lockdownMode === 'kiosk' && !isAdaptive ? (
-                <div className="mt-4 rounded-2xl border border-slate-200/90 bg-white p-4 dark:border-neutral-600 dark:bg-neutral-950/80">
-                  <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+                <div className="mt-4 rounded-2xl border border-slate-200/90 bg-surface-raised p-4 dark:border-border-default/80">
+                  <p className="text-sm font-semibold text-fg-default">
                     Kiosk focus-loss log
                   </p>
-                  <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-neutral-400">
+                  <p className="mt-1 text-xs leading-relaxed text-fg-muted">
                     Enter a learner attempt id to list recorded tab or window events (instructors only).
                   </p>
                   <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -1654,14 +1650,14 @@ export default function CourseModuleQuizPage() {
                       value={focusInspectAttemptId}
                       onChange={(e) => setFocusInspectAttemptId(e.target.value)}
                       placeholder="Attempt UUID"
-                      className="min-w-0 flex-1 rounded-lg border border-slate-200 px-2.5 py-2 font-mono text-xs text-slate-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+                      className="min-w-0 flex-1 rounded-lg border border-border-default px-2.5 py-2 font-mono text-xs text-fg-default dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
                       spellCheck={false}
                     />
                     <button
                       type="button"
                       onClick={() => void loadFocusInspectEvents()}
                       disabled={focusInspectLoading}
-                      className="shrink-0 rounded-lg bg-slate-800 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-700 disabled:opacity-50 dark:bg-neutral-200 dark:text-neutral-900 dark:hover:bg-white"
+                      className="shrink-0 rounded-lg bg-slate-800 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-700 disabled:opacity-50 dark:bg-neutral-200 dark:text-neutral-900 dark:hover:bg-surface-raised"
                     >
                       {focusInspectLoading ? 'Loading…' : 'Load events'}
                     </button>
@@ -1671,21 +1667,21 @@ export default function CourseModuleQuizPage() {
                   ) : null}
                   {focusInspectData ? (
                     <div className="mt-3">
-                      <p className="text-xs font-medium text-slate-600 dark:text-neutral-300">
+                      <p className="text-xs font-medium text-fg-muted">
                         {focusInspectData.total} event{focusInspectData.total === 1 ? '' : 's'}
                       </p>
-                      <ul className="mt-2 max-h-48 space-y-1.5 overflow-y-auto text-[11px] leading-snug text-slate-700 dark:text-neutral-300">
+                      <ul className="mt-2 max-h-48 space-y-1.5 overflow-y-auto text-[11px] leading-snug text-fg-muted">
                         {focusInspectData.events.map((ev) => (
                           <li
                             key={ev.id}
-                            className="rounded border border-slate-100 bg-slate-50/80 px-2 py-1.5 dark:border-neutral-800 dark:bg-neutral-900/60"
+                            className="rounded border border-border-subtle bg-slate-50/80 px-2 py-1.5 dark:border-border-subtle/60"
                           >
-                            <span className="font-mono text-slate-500 dark:text-neutral-500">
+                            <span className="font-mono text-fg-subtle">
                               {formatDateTime(ev.createdAt)}
                             </span>{' '}
                             <span className="font-medium">{ev.eventType}</span>
                             {ev.durationMs != null ? (
-                              <span className="text-slate-500 dark:text-neutral-500">
+                              <span className="text-fg-subtle">
                                 {' '}
                                 ({ev.durationMs} ms)
                               </span>
@@ -1814,29 +1810,29 @@ export default function CourseModuleQuizPage() {
             if (e.target === e.currentTarget && !generateBusy) setGenerateModalOpen(false)
           }}
         >
-          <div className="w-full max-w-lg overflow-visible rounded-2xl border border-slate-200 bg-white shadow-xl">
-            <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
-              <h3 id="quiz-generate-title" className="text-sm font-semibold text-slate-900">
+          <div className="w-full max-w-lg overflow-visible rounded-2xl border border-border-default bg-surface-raised shadow-xl">
+            <div className="flex items-center justify-between border-b border-border-default px-4 py-3">
+              <h3 id="quiz-generate-title" className="text-sm font-semibold text-fg-default">
                 Generate questions
               </h3>
               <button
                 type="button"
                 onClick={() => setGenerateModalOpen(false)}
                 disabled={generateBusy}
-                className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:opacity-50"
+                className="rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken hover:text-fg-default disabled:opacity-50"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
             <div className="space-y-4 p-4">
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-fg-muted">
                 Describe the topic or learning goals. The model will create the requested number of
                 questions using the quiz question types (multiple choice, true/false, fill-in-the-blank,
                 short answer, and essay). Type @ to tag a content page or assignment — it appears as a
                 highlighted @name; the item’s body is pulled in when you click Generate.
               </p>
               <div>
-                <label className="mb-1 block text-xs font-medium text-slate-600" htmlFor="quiz-generate-prompt">
+                <label className="mb-1 block text-xs font-medium text-fg-muted" htmlFor="quiz-generate-prompt">
                   Prompt
                 </label>
                 <CourseItemPromptEditor
@@ -1850,7 +1846,7 @@ export default function CourseModuleQuizPage() {
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-slate-600" htmlFor="quiz-generate-count">
+                <label className="mb-1 block text-xs font-medium text-fg-muted" htmlFor="quiz-generate-count">
                   Number of questions
                 </label>
                 <input
@@ -1861,9 +1857,9 @@ export default function CourseModuleQuizPage() {
                   value={generateCount}
                   onChange={(e) => setGenerateCount(Number(e.target.value))}
                   disabled={generateBusy}
-                  className="w-full max-w-[8rem] rounded-xl border border-slate-200 px-2 py-1.5 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60"
+                  className="w-full max-w-[8rem] rounded-xl border border-border-default px-2 py-1.5 text-sm text-fg-default focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60"
                 />
-                <p className="mt-1 text-xs text-slate-500">Between 1 and 30.</p>
+                <p className="mt-1 text-xs text-fg-muted">Between 1 and 30.</p>
               </div>
               {generateError && (
                 <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
@@ -1871,12 +1867,12 @@ export default function CourseModuleQuizPage() {
                 </p>
               )}
             </div>
-            <div className="flex items-center justify-end gap-2 border-t border-slate-200 bg-slate-50/80 px-4 py-3">
+            <div className="flex items-center justify-end gap-2 border-t border-border-default bg-slate-50/80 px-4 py-3">
               <button
                 type="button"
                 onClick={() => setGenerateModalOpen(false)}
                 disabled={generateBusy}
-                className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-50"
+                className="rounded-xl px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-sunken disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -1884,7 +1880,7 @@ export default function CourseModuleQuizPage() {
                 type="button"
                 onClick={() => void runGenerateQuestions()}
                 disabled={generateBusy}
-                className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-60"
+                className="inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-60"
               >
                 {generateBusy ? 'Generating…' : 'Generate'}
               </button>
@@ -1903,28 +1899,28 @@ export default function CourseModuleQuizPage() {
             if (e.target === e.currentTarget && !importMarkdownBusy) setImportMarkdownOpen(false)
           }}
         >
-          <div className="w-full max-w-2xl overflow-visible rounded-2xl border border-slate-200 bg-white shadow-xl">
-            <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
-              <h3 id="quiz-import-markdown-title" className="text-sm font-semibold text-slate-900">
+          <div className="w-full max-w-2xl overflow-visible rounded-2xl border border-border-default bg-surface-raised shadow-xl">
+            <div className="flex items-center justify-between border-b border-border-default px-4 py-3">
+              <h3 id="quiz-import-markdown-title" className="text-sm font-semibold text-fg-default">
                 Import from Markdown
               </h3>
               <button
                 type="button"
                 onClick={() => setImportMarkdownOpen(false)}
                 disabled={importMarkdownBusy}
-                className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:opacity-50"
+                className="rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken hover:text-fg-default disabled:opacity-50"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
             <div className="space-y-4 p-4">
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-fg-muted">
                 Paste quiz questions written in Markdown. AI converts them into Lextures question types
                 (multiple choice, true/false, short answer, and more) so you can review before saving.
               </p>
               <div>
                 <label
-                  className="mb-1 block text-xs font-medium text-slate-600"
+                  className="mb-1 block text-xs font-medium text-fg-muted"
                   htmlFor="quiz-import-markdown"
                 >
                   Markdown
@@ -1937,7 +1933,7 @@ export default function CourseModuleQuizPage() {
                   autoFocus
                   rows={14}
                   placeholder={`## Question 1\nWhat is photosynthesis?\n- A) A chemical reaction in animals\n- B) How plants make food from light\n- C) A type of cell division\n\nCorrect: B`}
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2 font-mono text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60"
+                  className="w-full rounded-xl border border-border-default px-3 py-2 font-mono text-sm text-fg-default focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60"
                 />
               </div>
               {importMarkdownError && (
@@ -1946,12 +1942,12 @@ export default function CourseModuleQuizPage() {
                 </p>
               )}
             </div>
-            <div className="flex items-center justify-end gap-2 border-t border-slate-200 bg-slate-50/80 px-4 py-3">
+            <div className="flex items-center justify-end gap-2 border-t border-border-default bg-slate-50/80 px-4 py-3">
               <button
                 type="button"
                 onClick={() => setImportMarkdownOpen(false)}
                 disabled={importMarkdownBusy}
-                className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-50"
+                className="rounded-xl px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-sunken disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -1959,7 +1955,7 @@ export default function CourseModuleQuizPage() {
                 type="button"
                 onClick={() => void runImportFromMarkdown()}
                 disabled={importMarkdownBusy}
-                className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-60"
+                className="inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-60"
               >
                 {importMarkdownBusy ? 'Importing…' : 'Import'}
               </button>
@@ -2045,37 +2041,31 @@ export default function CourseModuleQuizPage() {
           }}
         >
           <div
-            className={`w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-neutral-600 dark:bg-neutral-900 ${
-              qeAdaptiveOn
-                ? 'max-h-[min(36rem,92vh)] max-w-xl'
-                : 'h-[88vh] max-w-6xl'
-            }`}
+            className={`w-full overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-raised ${ qeAdaptiveOn ? 'max-h-[min(36rem,92vh)] max-w-xl' : 'h-[88vh] max-w-6xl' }`}
           >
-            <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-neutral-700">
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Edit questions</h3>
+            <div className="flex items-center justify-between border-b border-border-default px-4 py-3 dark:border-border-default">
+              <h3 className="text-sm font-semibold text-fg-default">Edit questions</h3>
               <button
                 type="button"
                 onClick={() => setQuestionsOpen(false)}
                 disabled={questionsSaving}
-                className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
+                className="rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken hover:text-fg-default disabled:opacity-50 dark:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-fg-default"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
             <div
-              className={`overflow-y-auto bg-slate-50/60 p-4 dark:bg-neutral-950/40 ${
-                qeAdaptiveOn ? 'max-h-[calc(min(36rem,92vh)-7.5rem)]' : 'h-[calc(88vh-7.5rem)]'
-              }`}
+              className={`overflow-y-auto bg-slate-50/60 p-4/40 ${ qeAdaptiveOn ? 'max-h-[calc(min(36rem,92vh)-7.5rem)]' : 'h-[calc(88vh-7.5rem)]' }`}
             >
               <div className="space-y-3">
                 {courseCode && itemId && qeOutcomes.length > 0 ? (
-                  <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-sm shadow-slate-900/[0.03] dark:border-neutral-700 dark:bg-neutral-900">
+                  <div className="rounded-xl border border-slate-200/90 bg-surface-raised p-4 shadow-sm shadow-slate-900/[0.03] dark:border-border-default dark:bg-surface-raised">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+                        <p className="text-sm font-semibold text-fg-default">
                           Quiz outcomes
                         </p>
-                        <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">
+                        <p className="mt-1 text-xs text-fg-muted">
                           Tie this quiz and its questions to course learning outcomes.
                         </p>
                       </div>
@@ -2084,7 +2074,7 @@ export default function CourseModuleQuizPage() {
                           type="button"
                           onClick={() => void onSuggestOutcomeLinks()}
                           disabled={qeSuggestOutcomesBusy || questionsSaving}
-                          className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3.5 py-2 text-sm font-semibold text-indigo-700 shadow-sm motion-safe:transition-[background-color,color,border-color] hover:border-indigo-300 hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-200 dark:hover:bg-indigo-950/70"
+                          className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3.5 py-2 text-sm font-semibold text-accent-fg shadow-sm motion-safe:transition-[background-color,color,border-color] hover:border-indigo-300 hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-200 dark:hover:bg-indigo-950/70"
                         >
                           {qeSuggestOutcomesBusy ? (
                             <Loader2 className="h-4 w-4 motion-safe:animate-spin" aria-hidden />
@@ -2100,8 +2090,8 @@ export default function CourseModuleQuizPage() {
                         {qeSuggestOutcomesError}
                       </p>
                     ) : null}
-                    <div className="mt-3 border-t border-slate-100 pt-3 dark:border-neutral-800">
-                      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                    <div className="mt-3 border-t border-border-subtle pt-3 dark:border-border-subtle">
+                      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-fg-muted">
                         Whole quiz
                       </p>
                       <OutcomeLinksEditor
@@ -2121,11 +2111,11 @@ export default function CourseModuleQuizPage() {
                   </div>
                 ) : null}
 
-                <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-sm shadow-slate-900/[0.03] dark:border-neutral-700 dark:bg-neutral-900">
+                <div className="rounded-xl border border-slate-200/90 bg-surface-raised p-4 shadow-sm shadow-slate-900/[0.03] dark:border-border-default dark:bg-surface-raised">
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Is adaptive</p>
-                      <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">
+                      <p className="text-sm font-semibold text-fg-default">Is adaptive</p>
+                      <p className="mt-1 text-xs text-fg-muted">
                         When on, the quiz does not use a fixed question list. The model reads your selected course
                         items and system prompt, then serves one question at a time and adapts from how the learner
                         answered (including per-option weights you do not show in the UI).
@@ -2145,14 +2135,10 @@ export default function CourseModuleQuizPage() {
                           setQuestionsDraft(questions.map((q) => ({ ...q, choices: [...q.choices] })))
                         }
                       }}
-                      className={`relative mt-0.5 h-6 w-11 shrink-0 rounded-full motion-safe:transition-colors disabled:opacity-50 ${
-                        qeAdaptiveOn ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-neutral-600'
-                      }`}
+                      className={`relative mt-0.5 h-6 w-11 shrink-0 rounded-full motion-safe:transition-colors disabled:opacity-50 ${ qeAdaptiveOn ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-neutral-600' }`}
                     >
                       <span
-                        className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow motion-safe:transition-colors ${
-                          qeAdaptiveOn ? 'start-5' : 'start-0.5'
-                        }`}
+                        className={`absolute top-0.5 h-5 w-5 rounded-full bg-surface-raised shadow motion-safe:transition-colors ${ qeAdaptiveOn ? 'start-5' : 'start-0.5' }`}
                       />
                     </button>
                   </div>
@@ -2161,7 +2147,7 @@ export default function CourseModuleQuizPage() {
                 {qeAdaptiveOn ? (
                   <div className="space-y-4">
                     <div>
-                      <label className="mb-1 block text-xs font-medium text-slate-600" htmlFor="adaptive-delivery-mode">
+                      <label className="mb-1 block text-xs font-medium text-fg-muted" htmlFor="adaptive-delivery-mode">
                         Adaptive delivery
                       </label>
                       <select
@@ -2169,7 +2155,7 @@ export default function CourseModuleQuizPage() {
                         value={qeAdaptiveDeliveryMode}
                         disabled={questionsSaving}
                         onChange={(e) => setQeAdaptiveDeliveryMode(e.target.value === 'cat' ? 'cat' : 'ai')}
-                        className="w-full max-w-md rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60"
+                        className="w-full max-w-md rounded-xl border border-border-default bg-surface-raised px-2 py-1.5 text-sm text-fg-default focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60"
                       >
                         <option value="ai">AI-generated</option>
                         <option value="cat" disabled={!courseQuestionBankEnabled}>
@@ -2185,18 +2171,18 @@ export default function CourseModuleQuizPage() {
                     </div>
                     {qeAdaptiveDeliveryMode === 'ai' ? (
                       <div>
-                        <p className="mb-2 text-xs font-medium text-slate-600">Reference course items</p>
-                        <p className="mb-2 text-xs text-slate-500">
+                        <p className="mb-2 text-xs font-medium text-fg-muted">Reference course items</p>
+                        <p className="mb-2 text-xs text-fg-muted">
                           Select pages, assignments, or other quizzes whose text the AI should use when generating
                           questions.
                         </p>
-                        <div className="max-h-48 space-y-1 overflow-y-auto rounded-xl border border-slate-200 bg-white p-2">
+                        <div className="max-h-48 space-y-1 overflow-y-auto rounded-xl border border-border-default bg-surface-raised p-2">
                           {structureItems.filter(
                             (it) =>
                               (it.kind === 'content_page' || it.kind === 'assignment' || it.kind === 'quiz') &&
                               it.id !== itemId,
                           ).length === 0 ? (
-                            <p className="px-2 py-3 text-xs text-slate-500">No linkable items found in this course.</p>
+                            <p className="px-2 py-3 text-xs text-fg-muted">No linkable items found in this course.</p>
                           ) : (
                             structureItems
                               .filter(
@@ -2207,7 +2193,7 @@ export default function CourseModuleQuizPage() {
                               .map((it) => (
                                 <label
                                   key={it.id}
-                                  className="flex cursor-pointer items-start gap-2 rounded-lg px-2 py-2 text-sm text-slate-800 hover:bg-slate-50"
+                                  className="flex cursor-pointer items-start gap-2 rounded-lg px-2 py-2 text-sm text-fg-default hover:bg-surface-base"
                                 >
                                   <input
                                     type="checkbox"
@@ -2217,11 +2203,11 @@ export default function CourseModuleQuizPage() {
                                         prev.includes(it.id) ? prev.filter((x) => x !== it.id) : [...prev, it.id],
                                       )
                                     }}
-                                    className="mt-0.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500/30"
+                                    className="mt-0.5 rounded border-border-strong text-accent-fg focus:ring-indigo-500/30"
                                   />
                                   <span className="min-w-0">
                                     <span className="font-medium">{it.title || 'Untitled'}</span>
-                                    <span className="ms-2 text-xs text-slate-500">({structureKindLabel(it.kind)})</span>
+                                    <span className="ms-2 text-xs text-fg-muted">({structureKindLabel(it.kind)})</span>
                                   </span>
                                 </label>
                               ))
@@ -2229,7 +2215,7 @@ export default function CourseModuleQuizPage() {
                         </div>
                       </div>
                     ) : (
-                      <p className="rounded-xl border border-slate-200 bg-white p-3 text-xs text-slate-600">
+                      <p className="rounded-xl border border-border-default bg-surface-raised p-3 text-xs text-fg-muted">
                         CAT mode serves calibrated multiple-choice or true/false items from your pool (exactly one pool
                         row on this quiz). Set <span className="font-medium">IRT_CAT_MODE_ENABLED=1</span> on the server
                         before learners can take a CAT attempt.
@@ -2239,7 +2225,7 @@ export default function CourseModuleQuizPage() {
                       <>
                         <div>
                           <label
-                            className="mb-1 block text-xs font-medium text-slate-600"
+                            className="mb-1 block text-xs font-medium text-fg-muted"
                             htmlFor="adaptive-system-prompt"
                           >
                             System prompt
@@ -2251,11 +2237,11 @@ export default function CourseModuleQuizPage() {
                             disabled={questionsSaving}
                             rows={5}
                             placeholder="Instructions for the AI (tone, difficulty, topics to emphasize or avoid)…"
-                            className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60"
+                            className="w-full rounded-xl border border-border-default px-3 py-2 text-sm text-fg-default placeholder:text-fg-subtle focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60"
                           />
                         </div>
                         <div>
-                          <label className="mb-1 block text-xs font-medium text-slate-600" htmlFor="adaptive-q-count">
+                          <label className="mb-1 block text-xs font-medium text-fg-muted" htmlFor="adaptive-q-count">
                             Number of questions
                           </label>
                           <input
@@ -2266,15 +2252,15 @@ export default function CourseModuleQuizPage() {
                             value={qeAdaptiveQuestionCount}
                             onChange={(e) => setQeAdaptiveQuestionCount(Number(e.target.value))}
                             disabled={questionsSaving}
-                            className="w-full max-w-[8rem] rounded-xl border border-slate-200 px-2 py-1.5 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60"
+                            className="w-full max-w-[8rem] rounded-xl border border-border-default px-2 py-1.5 text-sm text-fg-default focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60"
                           />
-                          <p className="mt-1 text-xs text-slate-500">Between 1 and 30 per attempt.</p>
+                          <p className="mt-1 text-xs text-fg-muted">Between 1 and 30 per attempt.</p>
                         </div>
                       </>
                     ) : (
                       <div>
                         <label
-                          className="mb-1 block text-xs font-medium text-slate-600"
+                          className="mb-1 block text-xs font-medium text-fg-muted"
                           htmlFor="adaptive-q-count-cat"
                         >
                           Number of questions
@@ -2287,9 +2273,9 @@ export default function CourseModuleQuizPage() {
                           value={qeAdaptiveQuestionCount}
                           onChange={(e) => setQeAdaptiveQuestionCount(Number(e.target.value))}
                           disabled={questionsSaving}
-                          className="w-full max-w-[8rem] rounded-xl border border-slate-200 px-2 py-1.5 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60"
+                          className="w-full max-w-[8rem] rounded-xl border border-border-default px-2 py-1.5 text-sm text-fg-default focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60"
                         />
-                        <p className="mt-1 text-xs text-slate-500">How many pool items to administer per attempt.</p>
+                        <p className="mt-1 text-xs text-fg-muted">How many pool items to administer per attempt.</p>
                       </div>
                     )}
                   </div>
@@ -2299,10 +2285,10 @@ export default function CourseModuleQuizPage() {
                   ? questionsDraft.map((q, index) => (
                   <div
                     key={q.id}
-                    className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-sm shadow-slate-900/[0.03]"
+                    className="rounded-xl border border-slate-200/90 bg-surface-raised p-5 shadow-sm shadow-slate-900/[0.03]"
                   >
                     <div className="mb-3 flex items-center justify-between gap-3">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
                         Question {index + 1}
                       </p>
                       <button
@@ -2326,7 +2312,7 @@ export default function CourseModuleQuizPage() {
                         }
                         rows={2}
                         placeholder="Enter question prompt"
-                        className="w-full rounded-xl border border-slate-200 px-2 py-1.5 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
+                        className="w-full rounded-xl border border-border-default px-2 py-1.5 text-sm text-fg-default focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
                       />
                       <div className="max-w-sm">
                         <QuestionTypeDropdown
@@ -2365,12 +2351,12 @@ export default function CourseModuleQuizPage() {
                     {(q.questionType === 'multiple_choice' || q.questionType === 'true_false') && (
                       <div className="mt-5 space-y-4">
                         <div className="space-y-1">
-                          <p className="text-sm font-medium text-slate-800">Choices</p>
-                          <p className="text-xs text-slate-500">
+                          <p className="text-sm font-medium text-fg-default">Choices</p>
+                          <p className="text-xs text-fg-muted">
                             Use the circle to mark the correct answer (optional).
                           </p>
                         </div>
-                        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 rounded-lg bg-slate-50/90 px-3 py-2.5 text-xs text-slate-600">
+                        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 rounded-lg bg-slate-50/90 px-3 py-2.5 text-xs text-fg-muted">
                           <label className="inline-flex cursor-pointer items-center gap-2">
                             <button
                               type="button"
@@ -2383,14 +2369,10 @@ export default function CourseModuleQuizPage() {
                                   ),
                                 )
                               }
-                              className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${
-                                q.multipleAnswer ? 'bg-indigo-500' : 'bg-slate-300'
-                              }`}
+                              className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${ q.multipleAnswer ? 'bg-indigo-500' : 'bg-slate-300' }`}
                             >
                               <span
-                                className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-colors ${
-                                  q.multipleAnswer ? 'start-4.5' : 'start-0.5'
-                                }`}
+                                className={`absolute top-0.5 h-4 w-4 rounded-full bg-surface-raised transition-colors ${ q.multipleAnswer ? 'start-4.5' : 'start-0.5' }`}
                               />
                             </button>
                             Multiple answer
@@ -2407,14 +2389,10 @@ export default function CourseModuleQuizPage() {
                                   ),
                                 )
                               }
-                              className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${
-                                q.answerWithImage ? 'bg-indigo-500' : 'bg-slate-300'
-                              }`}
+                              className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${ q.answerWithImage ? 'bg-indigo-500' : 'bg-slate-300' }`}
                             >
                               <span
-                                className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-colors ${
-                                  q.answerWithImage ? 'start-4.5' : 'start-0.5'
-                                }`}
+                                className={`absolute top-0.5 h-4 w-4 rounded-full bg-surface-raised transition-colors ${ q.answerWithImage ? 'start-4.5' : 'start-0.5' }`}
                               />
                             </button>
                             Answer with image
@@ -2424,7 +2402,7 @@ export default function CourseModuleQuizPage() {
                           {q.choices.map((choice, choiceIdx) => (
                             <div
                               key={`${q.id}-choice-${choiceIdx}`}
-                              className="group flex items-center gap-2 rounded-lg border border-transparent py-0.5 ps-0.5 pe-1 motion-safe:transition-colors hover:border-slate-100 hover:bg-slate-50/60"
+                              className="group flex items-center gap-2 rounded-lg border border-transparent py-0.5 ps-0.5 pe-1 motion-safe:transition-colors hover:border-border-subtle hover:bg-slate-50/60"
                             >
                               <button
                                 type="button"
@@ -2443,12 +2421,10 @@ export default function CourseModuleQuizPage() {
                                     ),
                                   )
                                 }
-                                className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition-[background-color,color,border-color] hover:border-slate-300"
+                                className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border-default bg-surface-raised text-fg-muted transition-[background-color,color,border-color] hover:border-border-strong"
                               >
                                 <span
-                                  className={`h-3 w-3 rounded-full ${
-                                    q.correctChoiceIndex === choiceIdx ? 'bg-indigo-600' : 'bg-transparent'
-                                  }`}
+                                  className={`h-3 w-3 rounded-full ${ q.correctChoiceIndex === choiceIdx ? 'bg-accent-solid' : 'bg-transparent' }`}
                                 />
                               </button>
                               <input
@@ -2469,7 +2445,7 @@ export default function CourseModuleQuizPage() {
                                   )
                                 }
                                 placeholder={`Choice ${choiceIdx + 1}`}
-                                className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
+                                className="min-w-0 flex-1 rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm text-fg-default focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
                               />
                               <button
                                 type="button"
@@ -2501,7 +2477,7 @@ export default function CourseModuleQuizPage() {
                                 title={
                                   q.choices.length <= 1 ? 'At least one choice is required' : 'Delete option'
                                 }
-                                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 opacity-0 transition-[opacity,background-color,color,border-color] hover:bg-rose-50 hover:text-rose-700 focus-visible:opacity-100 enabled:group-hover:opacity-100 enabled:group-focus-within:opacity-100 disabled:invisible disabled:pointer-events-none"
+                                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-fg-subtle opacity-0 transition-[opacity,background-color,color,border-color] hover:bg-rose-50 hover:text-rose-700 focus-visible:opacity-100 enabled:group-hover:opacity-100 enabled:group-focus-within:opacity-100 disabled:invisible disabled:pointer-events-none"
                               >
                                 <Trash2 className="h-4 w-4" aria-hidden />
                               </button>
@@ -2517,7 +2493,7 @@ export default function CourseModuleQuizPage() {
                               ),
                             )
                           }
-                          className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 transition-[background-color,color,border-color] hover:text-indigo-700"
+                          className="inline-flex items-center gap-1.5 text-sm font-medium text-accent-fg transition-[background-color,color,border-color] hover:text-accent-fg"
                         >
                           <Plus className="h-4 w-4" aria-hidden />
                           Add option
@@ -2525,18 +2501,18 @@ export default function CourseModuleQuizPage() {
                       </div>
                     )}
                     {q.questionType === 'fill_in_blank' && (
-                      <p className="mt-3 text-xs text-slate-500">
+                      <p className="mt-3 text-xs text-fg-muted">
                         Learners provide text for blanks. Add guidance in the question prompt.
                       </p>
                     )}
                     {(q.questionType === 'essay' || q.questionType === 'short_answer') && (
-                      <p className="mt-3 text-xs text-slate-500">
+                      <p className="mt-3 text-xs text-fg-muted">
                         Open-response question type. No answer choices are shown to learners.
                       </p>
                     )}
                     {q.questionType === 'ordering' && (
                       <div className="mt-4 space-y-2">
-                        <p className="text-sm font-medium text-slate-800">Ordering items</p>
+                        <p className="text-sm font-medium text-fg-default">Ordering items</p>
                         {(
                           Array.isArray(q.typeConfig?.items)
                             ? q.typeConfig.items.map((x) => String(x))
@@ -2559,7 +2535,7 @@ export default function CourseModuleQuizPage() {
                                 )
                               }
                               placeholder={`Ordering item ${itemIdx + 1}`}
-                              className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
+                              className="min-w-0 flex-1 rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm text-fg-default focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
                             />
                             <button
                               type="button"
@@ -2575,7 +2551,7 @@ export default function CourseModuleQuizPage() {
                                   }),
                                 )
                               }
-                              className="rounded-lg border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50"
+                              className="rounded-lg border border-border-default px-2 py-1 text-xs text-fg-muted hover:bg-surface-base"
                             >
                               Remove
                             </button>
@@ -2597,7 +2573,7 @@ export default function CourseModuleQuizPage() {
                               }),
                             )
                           }
-                          className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 transition-[background-color,color,border-color] hover:text-indigo-700"
+                          className="inline-flex items-center gap-1.5 text-sm font-medium text-accent-fg transition-[background-color,color,border-color] hover:text-accent-fg"
                         >
                           <Plus className="h-4 w-4" aria-hidden />
                           Add ordering item
@@ -2606,7 +2582,7 @@ export default function CourseModuleQuizPage() {
                     )}
                     {q.questionType === 'numeric' && (
                       <div className="mt-4 grid gap-3 md:grid-cols-3">
-                        <label className="text-xs text-slate-600">
+                        <label className="text-xs text-fg-muted">
                           Correct value
                           <input
                             type="number"
@@ -2628,10 +2604,10 @@ export default function CourseModuleQuizPage() {
                                 ),
                               )
                             }
-                            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                            className="mt-1 w-full rounded-lg border border-border-default px-3 py-2 text-sm"
                           />
                         </label>
-                        <label className="text-xs text-slate-600">
+                        <label className="text-xs text-fg-muted">
                           Tolerance (+/-)
                           <input
                             type="number"
@@ -2653,10 +2629,10 @@ export default function CourseModuleQuizPage() {
                                 ),
                               )
                             }
-                            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                            className="mt-1 w-full rounded-lg border border-border-default px-3 py-2 text-sm"
                           />
                         </label>
-                        <label className="text-xs text-slate-600">
+                        <label className="text-xs text-fg-muted">
                           Unit (optional)
                           <input
                             type="text"
@@ -2673,14 +2649,14 @@ export default function CourseModuleQuizPage() {
                                 ),
                               )
                             }
-                            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                            className="mt-1 w-full rounded-lg border border-border-default px-3 py-2 text-sm"
                           />
                         </label>
                       </div>
                     )}
                     {q.questionType === 'code' && (
                       <div className="mt-4 space-y-3">
-                        <label className="block text-xs text-slate-600">
+                        <label className="block text-xs text-fg-muted">
                           Language
                           <input
                             type="text"
@@ -2697,10 +2673,10 @@ export default function CourseModuleQuizPage() {
                                 ),
                               )
                             }
-                            className="mt-1 w-full max-w-xs rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                            className="mt-1 w-full max-w-xs rounded-lg border border-border-default px-3 py-2 text-sm"
                           />
                         </label>
-                        <label className="block text-xs text-slate-600">
+                        <label className="block text-xs text-fg-muted">
                           Starter code (optional)
                           <textarea
                             rows={6}
@@ -2717,11 +2693,11 @@ export default function CourseModuleQuizPage() {
                                 ),
                               )
                             }
-                            className="mt-1 w-full resize-y rounded-lg border border-slate-200 px-3 py-2 font-mono text-sm"
+                            className="mt-1 w-full resize-y rounded-lg border border-border-default px-3 py-2 font-mono text-sm"
                           />
                         </label>
-                        <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                          <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Test cases</p>
+                        <div className="rounded-lg border border-border-default bg-surface-base p-3">
+                          <p className="text-xs font-semibold uppercase tracking-wide text-fg-muted">Test cases</p>
                           <div className="mt-2 space-y-3">
                             {(Array.isArray(q.typeConfig?.testCases) ? q.typeConfig.testCases : []).map((tc, tcIdx) => {
                               const t = tc as {
@@ -2732,9 +2708,9 @@ export default function CourseModuleQuizPage() {
                                 memoryLimitKb?: number
                               }
                               return (
-                                <div key={`${q.id}-code-tc-${tcIdx}`} className="rounded-md border border-slate-200 bg-white p-2">
+                                <div key={`${q.id}-code-tc-${tcIdx}`} className="rounded-md border border-border-default bg-surface-raised p-2">
                                   <div className="grid gap-2 md:grid-cols-2">
-                                    <label className="text-xs text-slate-600">
+                                    <label className="text-xs text-fg-muted">
                                       Input
                                       <textarea
                                         rows={3}
@@ -2751,10 +2727,10 @@ export default function CourseModuleQuizPage() {
                                             }),
                                           )
                                         }
-                                        className="mt-1 w-full resize-y rounded-lg border border-slate-200 px-2 py-1.5 font-mono text-xs"
+                                        className="mt-1 w-full resize-y rounded-lg border border-border-default px-2 py-1.5 font-mono text-xs"
                                       />
                                     </label>
-                                    <label className="text-xs text-slate-600">
+                                    <label className="text-xs text-fg-muted">
                                       Expected output
                                       <textarea
                                         rows={3}
@@ -2771,12 +2747,12 @@ export default function CourseModuleQuizPage() {
                                             }),
                                           )
                                         }
-                                        className="mt-1 w-full resize-y rounded-lg border border-slate-200 px-2 py-1.5 font-mono text-xs"
+                                        className="mt-1 w-full resize-y rounded-lg border border-border-default px-2 py-1.5 font-mono text-xs"
                                       />
                                     </label>
                                   </div>
                                   <div className="mt-2 grid gap-2 md:grid-cols-3">
-                                    <label className="inline-flex items-center gap-2 text-xs text-slate-600">
+                                    <label className="inline-flex items-center gap-2 text-xs text-fg-muted">
                                       <input
                                         type="checkbox"
                                         checked={Boolean(t.isHidden)}
@@ -2795,7 +2771,7 @@ export default function CourseModuleQuizPage() {
                                       />
                                       Hidden
                                     </label>
-                                    <label className="text-xs text-slate-600">
+                                    <label className="text-xs text-fg-muted">
                                       Time limit (ms)
                                       <input
                                         type="number"
@@ -2816,10 +2792,10 @@ export default function CourseModuleQuizPage() {
                                             }),
                                           )
                                         }
-                                        className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-xs"
+                                        className="mt-1 w-full rounded-lg border border-border-default px-2 py-1.5 text-xs"
                                       />
                                     </label>
-                                    <label className="text-xs text-slate-600">
+                                    <label className="text-xs text-fg-muted">
                                       Memory (KB)
                                       <input
                                         type="number"
@@ -2840,7 +2816,7 @@ export default function CourseModuleQuizPage() {
                                             }),
                                           )
                                         }
-                                        className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-xs"
+                                        className="mt-1 w-full rounded-lg border border-border-default px-2 py-1.5 text-xs"
                                       />
                                     </label>
                                   </div>
@@ -2868,7 +2844,7 @@ export default function CourseModuleQuizPage() {
                                 }),
                               )
                             }
-                            className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100"
+                            className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-border-strong bg-surface-raised px-3 py-1.5 text-xs font-medium text-fg-muted hover:bg-surface-sunken"
                           >
                             <Plus className="h-3.5 w-3.5" aria-hidden />
                             Add test case
@@ -2878,7 +2854,7 @@ export default function CourseModuleQuizPage() {
                     )}
                     {q.questionType === 'matching' && (
                       <div className="mt-4 space-y-2">
-                        <p className="text-sm font-medium text-slate-800">Matching pairs</p>
+                        <p className="text-sm font-medium text-fg-default">Matching pairs</p>
                         {(Array.isArray(q.typeConfig?.pairs) ? q.typeConfig.pairs : []).map((pair, pairIdx) => {
                           const p = pair as { left?: string; right?: string; leftId?: string; rightId?: string }
                           return (
@@ -2900,7 +2876,7 @@ export default function CourseModuleQuizPage() {
                                   )
                                 }
                                 placeholder={`Left item ${pairIdx + 1}`}
-                                className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
+                                className="rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm"
                               />
                               <div className="flex gap-2">
                                 <input
@@ -2920,7 +2896,7 @@ export default function CourseModuleQuizPage() {
                                     )
                                   }
                                   placeholder={`Right item ${pairIdx + 1}`}
-                                  className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
+                                  className="min-w-0 flex-1 rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm"
                                 />
                                 <button
                                   type="button"
@@ -2935,7 +2911,7 @@ export default function CourseModuleQuizPage() {
                                       }),
                                     )
                                   }
-                                  className="rounded-lg border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50"
+                                  className="rounded-lg border border-border-default px-2 py-1 text-xs text-fg-muted hover:bg-surface-base"
                                 >
                                   Remove
                                 </button>
@@ -2961,7 +2937,7 @@ export default function CourseModuleQuizPage() {
                               }),
                             )
                           }
-                          className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 transition-[background-color,color,border-color] hover:text-indigo-700"
+                          className="inline-flex items-center gap-1.5 text-sm font-medium text-accent-fg transition-[background-color,color,border-color] hover:text-accent-fg"
                         >
                           <Plus className="h-4 w-4" aria-hidden />
                           Add pair
@@ -2970,7 +2946,7 @@ export default function CourseModuleQuizPage() {
                     )}
                     {q.questionType === 'formula' && (
                       <div className="mt-4 grid gap-3 md:grid-cols-2">
-                        <label className="text-xs text-slate-600">
+                        <label className="text-xs text-fg-muted">
                           Correct LaTeX answer
                           <input
                             type="text"
@@ -2987,10 +2963,10 @@ export default function CourseModuleQuizPage() {
                                 ),
                               )
                             }
-                            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                            className="mt-1 w-full rounded-lg border border-border-default px-3 py-2 text-sm"
                           />
                         </label>
-                        <label className="text-xs text-slate-600">
+                        <label className="text-xs text-fg-muted">
                           Equivalent forms (comma-separated)
                           <input
                             type="text"
@@ -3013,14 +2989,14 @@ export default function CourseModuleQuizPage() {
                                 ),
                               )
                             }
-                            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                            className="mt-1 w-full rounded-lg border border-border-default px-3 py-2 text-sm"
                           />
                         </label>
                       </div>
                     )}
                     {q.questionType === 'hotspot' && (
                       <div className="mt-4 space-y-3">
-                        <label className="block text-xs text-slate-600">
+                        <label className="block text-xs text-fg-muted">
                           Image URL
                           <input
                             type="url"
@@ -3034,17 +3010,17 @@ export default function CourseModuleQuizPage() {
                                 ),
                               )
                             }
-                            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                            className="mt-1 w-full rounded-lg border border-border-default px-3 py-2 text-sm"
                           />
                         </label>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-fg-muted">
                           Region editor is coordinate-based in this pass via JSON metadata.
                         </p>
                       </div>
                     )}
                     {q.questionType === 'file_upload' && (
                       <div className="mt-4 grid gap-3 md:grid-cols-2">
-                        <label className="text-xs text-slate-600">
+                        <label className="text-xs text-fg-muted">
                           Max file size (MB)
                           <input
                             type="number"
@@ -3062,10 +3038,10 @@ export default function CourseModuleQuizPage() {
                                 ),
                               )
                             }
-                            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                            className="mt-1 w-full rounded-lg border border-border-default px-3 py-2 text-sm"
                           />
                         </label>
-                        <label className="text-xs text-slate-600">
+                        <label className="text-xs text-fg-muted">
                           Allowed MIME types (comma-separated)
                           <input
                             type="text"
@@ -3092,14 +3068,14 @@ export default function CourseModuleQuizPage() {
                                 ),
                               )
                             }
-                            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                            className="mt-1 w-full rounded-lg border border-border-default px-3 py-2 text-sm"
                           />
                         </label>
                       </div>
                     )}
                     {q.questionType === 'audio_response' && (
                       <div className="mt-4">
-                        <label className="text-xs text-slate-600">
+                        <label className="text-xs text-fg-muted">
                           Max duration (seconds)
                           <input
                             type="number"
@@ -3120,14 +3096,14 @@ export default function CourseModuleQuizPage() {
                                 ),
                               )
                             }
-                            className="mt-1 w-full max-w-xs rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                            className="mt-1 w-full max-w-xs rounded-lg border border-border-default px-3 py-2 text-sm"
                           />
                         </label>
                       </div>
                     )}
                     {q.questionType === 'video_response' && (
                       <div className="mt-4 grid gap-3 md:grid-cols-2">
-                        <label className="text-xs text-slate-600">
+                        <label className="text-xs text-fg-muted">
                           Max duration (seconds)
                           <input
                             type="number"
@@ -3148,10 +3124,10 @@ export default function CourseModuleQuizPage() {
                                 ),
                               )
                             }
-                            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                            className="mt-1 w-full rounded-lg border border-border-default px-3 py-2 text-sm"
                           />
                         </label>
-                        <label className="text-xs text-slate-600">
+                        <label className="text-xs text-fg-muted">
                           Max upload size (MB)
                           <input
                             type="number"
@@ -3169,13 +3145,13 @@ export default function CourseModuleQuizPage() {
                                 ),
                               )
                             }
-                            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                            className="mt-1 w-full rounded-lg border border-border-default px-3 py-2 text-sm"
                           />
                         </label>
                       </div>
                     )}
-                    <div className="mt-4 flex flex-wrap items-center gap-4 border-t border-slate-100 pt-4">
-                      <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-slate-600">
+                    <div className="mt-4 flex flex-wrap items-center gap-4 border-t border-border-subtle pt-4">
+                      <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-fg-muted">
                         <input
                           type="checkbox"
                           checked={q.required}
@@ -3184,18 +3160,18 @@ export default function CourseModuleQuizPage() {
                               prev.map((it) => (it.id === q.id ? { ...it, required: e.target.checked } : it)),
                             )
                           }
-                          className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500/30"
+                          className="rounded border-border-strong text-accent-fg focus:ring-indigo-500/30"
                         />
                         Required
                       </label>
                     </div>
                     {courseCode && itemId && qeOutcomes.length > 0 ? (
-                      <div className="mt-4 space-y-2 border-t border-slate-100 pt-4 dark:border-neutral-800">
+                      <div className="mt-4 space-y-2 border-t border-border-subtle pt-4 dark:border-border-subtle">
                         <div>
-                          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                          <p className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
                             Outcomes
                           </p>
-                          <p className="mt-1 text-xs text-slate-500 dark:text-neutral-500">
+                          <p className="mt-1 text-xs text-fg-subtle">
                             Link this question to one or more learning outcomes.
                           </p>
                         </div>
@@ -3230,7 +3206,7 @@ export default function CourseModuleQuizPage() {
                     <button
                       type="button"
                       onClick={() => setQuestionsDraft((prev) => [...prev, makeQuestion()])}
-                      className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50"
+                      className="inline-flex items-center gap-2 rounded-xl border border-border-strong bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base"
                     >
                       <Plus className="h-4 w-4" />
                       Add question
@@ -3250,12 +3226,12 @@ export default function CourseModuleQuizPage() {
               )}
               </div>
             </div>
-            <div className="flex items-center justify-end gap-2 border-t border-slate-200 bg-white px-4 py-3 dark:border-neutral-700 dark:bg-neutral-900">
+            <div className="flex items-center justify-end gap-2 border-t border-border-default bg-surface-raised px-4 py-3 dark:border-border-default dark:bg-surface-raised">
               <button
                 type="button"
                 onClick={() => setQuestionsOpen(false)}
                 disabled={questionsSaving}
-                className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-800"
+                className="rounded-xl px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-sunken disabled:opacity-50 dark:text-fg-muted dark:hover:bg-surface-overlay"
               >
                 Cancel
               </button>
@@ -3263,7 +3239,7 @@ export default function CourseModuleQuizPage() {
                 type="button"
                 onClick={() => void saveQuestions()}
                 disabled={questionsSaving}
-                className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-60"
+                className="rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-60"
               >
                 {questionsSaving ? 'Saving…' : 'Save questions'}
               </button>
@@ -3296,7 +3272,7 @@ export default function CourseModuleQuizPage() {
       {questionsOpen && !qeAdaptiveOn && importQuestionsOpen && importPopoverPos && (
         <div
           ref={importDropdownRef}
-          className="fixed z-[70] space-y-3 rounded-xl border border-slate-200 bg-white p-3 shadow-xl shadow-slate-900/10"
+          className="fixed z-[70] space-y-3 rounded-xl border border-border-default bg-surface-raised p-3 shadow-xl shadow-slate-900/10"
           style={{
             top: importPopoverPos.top,
             left: importPopoverPos.left,
@@ -3310,12 +3286,12 @@ export default function CourseModuleQuizPage() {
               value={importQuestionsQuery}
               onChange={(e) => setImportQuestionsQuery(e.target.value)}
               placeholder="Search question bank..."
-              className="min-w-[14rem] flex-1 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
+              className="min-w-[14rem] flex-1 rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm text-fg-default focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
             />
             <select
               value={importQuestionsType}
               onChange={(e) => setImportQuestionsType(e.target.value)}
-              className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
+              className="rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm text-fg-default focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
             >
               <option value="all">All types</option>
               <option value="mc_single">Multiple choice (single)</option>
@@ -3336,45 +3312,41 @@ export default function CourseModuleQuizPage() {
               type="button"
               onClick={() => void loadBankQuestionsForImport(importQuestionsQuery)}
               disabled={importQuestionsLoading}
-              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition-[background-color,color,border-color] hover:bg-slate-100 disabled:opacity-60"
+              className="rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-sm font-medium text-fg-muted transition-[background-color,color,border-color] hover:bg-surface-sunken disabled:opacity-60"
             >
               {importQuestionsLoading ? 'Searching…' : 'Search'}
             </button>
           </div>
           <div className="max-h-60 space-y-2 overflow-auto pe-1">
             {!importQuestionsLoading && importRows.length === 0 ? (
-              <p className="text-sm text-slate-500">No question bank items found.</p>
+              <p className="text-sm text-fg-muted">No question bank items found.</p>
             ) : null}
             {importRows.map((row) => (
               <div
                 key={row.id}
-                className={`flex items-start gap-3 rounded-lg border px-3 py-2 transition-colors ${
-                  selectedImportQuestionId === row.id
-                    ? 'border-indigo-300 bg-indigo-50/40'
-                    : 'border-slate-200 bg-white'
-                }`}
+                className={`flex items-start gap-3 rounded-lg border px-3 py-2 transition-colors ${ selectedImportQuestionId === row.id ? 'border-indigo-300 bg-indigo-50/40' : 'border-border-default bg-surface-raised' }`}
               >
                 <input
                   type="radio"
                   name="import-question-select"
                   checked={selectedImportQuestionId === row.id}
                   onChange={() => setSelectedImportQuestionId(row.id)}
-                  className="mt-1 h-4 w-4 border-slate-300 text-indigo-600 focus:ring-indigo-500/30"
+                  className="mt-1 h-4 w-4 border-border-strong text-accent-fg focus:ring-indigo-500/30"
                 />
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-slate-900">{row.stem || 'Untitled question'}</p>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="text-sm font-medium text-fg-default">{row.stem || 'Untitled question'}</p>
+                  <p className="mt-1 text-xs text-fg-muted">
                     {row.questionType} • {row.points} pts
                   </p>
                 </div>
               </div>
             ))}
           </div>
-          <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-2">
+          <div className="flex items-center justify-end gap-2 border-t border-border-subtle pt-2">
             <button
               type="button"
               onClick={() => setImportQuestionsOpen(false)}
-              className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100"
+              className="rounded-lg px-3 py-1.5 text-sm font-medium text-fg-muted hover:bg-surface-sunken"
             >
               Close
             </button>
@@ -3386,7 +3358,7 @@ export default function CourseModuleQuizPage() {
                   : undefined
               }
               disabled={!selectedImportQuestionId || importingQuestionId != null}
-              className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+              className="rounded-lg bg-accent-solid px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
             >
               {importingQuestionId ? 'Importing…' : 'Import selected'}
             </button>

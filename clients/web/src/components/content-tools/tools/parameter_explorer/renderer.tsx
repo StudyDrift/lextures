@@ -301,14 +301,14 @@ export default function ParameterExplorerRenderer({
 
   return (
     <div
-      className="space-y-4 text-slate-900 dark:text-neutral-100"
+      className="space-y-4 text-fg-default"
       data-testid="parameter-explorer"
       data-completed={completedAt ? '1' : '0'}
     >
       <div>
         <p className="text-sm font-medium">{cfg.prompt}</p>
         {cfg.hint ? (
-          <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">{cfg.hint}</p>
+          <p className="mt-1 text-xs text-fg-muted">{cfg.hint}</p>
         ) : null}
       </div>
 
@@ -333,7 +333,7 @@ export default function ParameterExplorerRenderer({
             </button>
           ) : null}
           {trace.length > 0 ? (
-            <p className="text-xs text-slate-500" data-testid="parameter-explorer-coverage">
+            <p className="text-xs text-fg-muted" data-testid="parameter-explorer-coverage">
               {t('contentTools.tools.parameter_explorer.coverageStrip', {
                 visited: trace.length,
                 bins: coverageBins,
@@ -348,7 +348,7 @@ export default function ParameterExplorerRenderer({
               type="button"
               role="tab"
               aria-selected={view === 'plot'}
-              className={`rounded px-2 py-1 ${view === 'plot' ? 'bg-teal-800 text-white' : 'bg-slate-100 dark:bg-neutral-800'}`}
+              className={`rounded px-2 py-1 ${view === 'plot' ? 'bg-teal-800 text-white' : 'bg-surface-sunken'}`}
               onClick={() => setView('plot')}
             >
               {t('contentTools.tools.parameter_explorer.plotTab')}
@@ -357,7 +357,7 @@ export default function ParameterExplorerRenderer({
               type="button"
               role="tab"
               aria-selected={view === 'table'}
-              className={`rounded px-2 py-1 ${view === 'table' ? 'bg-teal-800 text-white' : 'bg-slate-100 dark:bg-neutral-800'}`}
+              className={`rounded px-2 py-1 ${view === 'table' ? 'bg-teal-800 text-white' : 'bg-surface-sunken'}`}
               data-testid="parameter-explorer-table-tab"
               onClick={() => setView('table')}
             >
@@ -390,7 +390,7 @@ export default function ParameterExplorerRenderer({
             >
               {readouts.map((r) => (
                 <li key={r.label}>
-                  <span className="text-slate-500">{r.label}: </span>
+                  <span className="text-fg-muted">{r.label}: </span>
                   <strong>{Number.isFinite(r.value) ? Math.round(r.value * 1000) / 1000 : '—'}</strong>
                 </li>
               ))}
@@ -403,8 +403,8 @@ export default function ParameterExplorerRenderer({
       </div>
 
       {prompts.length > 0 ? (
-        <div className="space-y-3 border-t border-slate-200 pt-3 dark:border-neutral-700">
-          <p className="text-xs text-slate-600 dark:text-neutral-400" data-testid="parameter-explorer-progress">
+        <div className="space-y-3 border-t border-border-default pt-3 dark:border-border-default">
+          <p className="text-xs text-fg-muted" data-testid="parameter-explorer-progress">
             {t('contentTools.tools.parameter_explorer.progress', {
               answered: answeredCount,
               total: prompts.length,
@@ -423,14 +423,14 @@ export default function ParameterExplorerRenderer({
               >
                 <legend className="px-1 text-sm font-medium">
                   {locked ? (
-                    <span className="mr-1 text-xs font-normal uppercase tracking-wide text-slate-500">
+                    <span className="mr-1 text-xs font-normal uppercase tracking-wide text-fg-muted">
                       [{t('contentTools.tools.parameter_explorer.locked')}]
                     </span>
                   ) : null}
                   {prompt.text}
                 </legend>
                 {locked ? (
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-fg-muted">
                     {t('contentTools.tools.parameter_explorer.lockedHint')}
                   </p>
                 ) : prompt.kind === 'choice' ? (
@@ -451,7 +451,7 @@ export default function ParameterExplorerRenderer({
                 ) : (
                   <div className="flex flex-col gap-2 sm:flex-row">
                     <textarea
-                      className="min-h-[4rem] flex-1 rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                      className="min-h-[4rem] flex-1 rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
                       defaultValue={answers[prompt.id] ?? ''}
                       id={`${baseId}-ans-${prompt.id}`}
                       onBlur={(e) => {
@@ -482,7 +482,7 @@ export default function ParameterExplorerRenderer({
       ) : null}
 
       {error ? (
-        <p className="text-sm text-red-700 dark:text-red-300" role="alert">
+        <p className="text-sm text-danger-fg" role="alert">
           {error}
         </p>
       ) : null}

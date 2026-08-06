@@ -1,0 +1,185 @@
+/*
+ * UX.1 — Primitive design tokens (raw scales only).
+ * Feature code MUST NOT reference these directly; use semantic tokens.
+ * Values: sRGB first, OKLCH override when supported.
+ */
+
+:root {
+  /* Neutral ramp (0 = white … 1000 = near-black). Unified slate/neutral. */
+  --lx-neutral-0: #ffffff;
+  --lx-neutral-50: #f8fafc;
+  --lx-neutral-100: #f1f5f9;
+  --lx-neutral-200: #e2e8f0;
+  --lx-neutral-300: #cbd5e1;
+  --lx-neutral-400: #94a3b8;
+  --lx-neutral-500: #64748b;
+  --lx-neutral-600: #475569;
+  --lx-neutral-700: #334155;
+  --lx-neutral-800: #1e293b;
+  --lx-neutral-900: #0f172a;
+  --lx-neutral-950: #0a0f1a;
+  --lx-neutral-1000: #020617;
+
+  /* Accent (product indigo-aligned) */
+  --lx-accent-50: #eef2ff;
+  --lx-accent-100: #e0e7ff;
+  --lx-accent-200: #c7d2fe;
+  --lx-accent-300: #a5b4fc;
+  --lx-accent-400: #818cf8;
+  --lx-accent-500: #6366f1;
+  --lx-accent-600: #4f46e5;
+  --lx-accent-700: #4338ca;
+  --lx-accent-800: #3730a3;
+  --lx-accent-900: #312e81;
+  --lx-accent-950: #1e1b4b;
+
+  /* Info (sky) */
+  --lx-info-50: #f0f9ff;
+  --lx-info-100: #e0f2fe;
+  --lx-info-200: #bae6fd;
+  --lx-info-300: #7dd3fc;
+  --lx-info-400: #38bdf8;
+  --lx-info-500: #0ea5e9;
+  --lx-info-600: #0284c7;
+  --lx-info-700: #0369a1;
+  --lx-info-800: #075985;
+  --lx-info-900: #0c4a6e;
+  --lx-info-950: #082f49;
+
+  /* Success (emerald/green) */
+  --lx-success-50: #ecfdf5;
+  --lx-success-100: #d1fae5;
+  --lx-success-200: #a7f3d0;
+  --lx-success-300: #6ee7b7;
+  --lx-success-400: #34d399;
+  --lx-success-500: #10b981;
+  --lx-success-600: #059669;
+  --lx-success-700: #047857;
+  --lx-success-800: #065f46;
+  --lx-success-900: #064e3b;
+  --lx-success-950: #022c22;
+
+  /* Warning (amber) */
+  --lx-warning-50: #fffbeb;
+  --lx-warning-100: #fef3c7;
+  --lx-warning-200: #fde68a;
+  --lx-warning-300: #fcd34d;
+  --lx-warning-400: #fbbf24;
+  --lx-warning-500: #f59e0b;
+  --lx-warning-600: #d97706;
+  --lx-warning-700: #b45309;
+  --lx-warning-800: #92400e;
+  --lx-warning-900: #78350f;
+  --lx-warning-950: #451a03;
+
+  /* Danger (red) */
+  --lx-danger-50: #fef2f2;
+  --lx-danger-100: #fee2e2;
+  --lx-danger-200: #fecaca;
+  --lx-danger-300: #fca5a5;
+  --lx-danger-400: #f87171;
+  --lx-danger-500: #ef4444;
+  --lx-danger-600: #dc2626;
+  --lx-danger-700: #b91c1c;
+  --lx-danger-800: #991b1b;
+  --lx-danger-900: #7f1d1d;
+  --lx-danger-950: #450a0a;
+
+  /* Space scale — 4px base */
+  --lx-space-1: 0.25rem;
+  --lx-space-2: 0.5rem;
+  --lx-space-3: 0.75rem;
+  --lx-space-4: 1rem;
+  --lx-space-5: 1.25rem;
+  --lx-space-6: 1.5rem;
+  --lx-space-7: 1.75rem;
+  --lx-space-8: 2rem;
+  --lx-space-9: 2.25rem;
+  --lx-space-10: 2.5rem;
+  --lx-space-11: 2.75rem;
+  --lx-space-12: 3rem;
+
+  /* Radius */
+  --lx-radius-sm: 0.25rem;
+  --lx-radius-md: 0.5rem;
+  --lx-radius-lg: 0.75rem;
+  --lx-radius-pill: 9999px;
+}
+
+@supports (color: oklch(0% 0 0)) {
+  :root {
+    --lx-neutral-0: oklch(1 0 0);
+    --lx-neutral-50: oklch(0.984 0.003 247.86);
+    --lx-neutral-100: oklch(0.968 0.007 247.9);
+    --lx-neutral-200: oklch(0.929 0.013 255.5);
+    --lx-neutral-300: oklch(0.869 0.02 252.9);
+    --lx-neutral-400: oklch(0.704 0.04 256.8);
+    --lx-neutral-500: oklch(0.554 0.041 257.4);
+    --lx-neutral-600: oklch(0.446 0.037 257.3);
+    --lx-neutral-700: oklch(0.372 0.039 257.3);
+    --lx-neutral-800: oklch(0.279 0.037 260);
+    --lx-neutral-900: oklch(0.208 0.04 265.8);
+    --lx-neutral-950: oklch(0.168 0.035 266);
+    --lx-neutral-1000: oklch(0.13 0.036 266);
+
+    --lx-accent-50: oklch(0.962 0.018 272.3);
+    --lx-accent-100: oklch(0.93 0.034 272.8);
+    --lx-accent-200: oklch(0.87 0.065 274);
+    --lx-accent-300: oklch(0.785 0.115 274.5);
+    --lx-accent-400: oklch(0.673 0.182 276.9);
+    --lx-accent-500: oklch(0.585 0.204 277.1);
+    --lx-accent-600: oklch(0.511 0.222 276.97);
+    --lx-accent-700: oklch(0.457 0.214 277.02);
+    --lx-accent-800: oklch(0.398 0.177 277.37);
+    --lx-accent-900: oklch(0.359 0.144 278.7);
+    --lx-accent-950: oklch(0.257 0.09 281.3);
+
+    --lx-info-50: oklch(0.977 0.013 236.6);
+    --lx-info-100: oklch(0.951 0.026 236.8);
+    --lx-info-200: oklch(0.901 0.058 230.9);
+    --lx-info-300: oklch(0.828 0.111 230.3);
+    --lx-info-400: oklch(0.746 0.16 232.7);
+    --lx-info-500: oklch(0.685 0.169 237.3);
+    --lx-info-600: oklch(0.588 0.158 241.97);
+    --lx-info-700: oklch(0.5 0.134 242.7);
+    --lx-info-800: oklch(0.443 0.11 240.8);
+    --lx-info-900: oklch(0.391 0.09 240.9);
+    --lx-info-950: oklch(0.293 0.066 243.2);
+
+    --lx-success-50: oklch(0.979 0.021 166.1);
+    --lx-success-100: oklch(0.95 0.052 163.1);
+    --lx-success-200: oklch(0.905 0.093 164.2);
+    --lx-success-300: oklch(0.845 0.143 164.98);
+    --lx-success-400: oklch(0.765 0.177 163.2);
+    --lx-success-500: oklch(0.696 0.17 162.5);
+    --lx-success-600: oklch(0.596 0.145 163.2);
+    --lx-success-700: oklch(0.508 0.118 165.6);
+    --lx-success-800: oklch(0.432 0.095 166.9);
+    --lx-success-900: oklch(0.378 0.077 168.9);
+    --lx-success-950: oklch(0.262 0.051 172.6);
+
+    --lx-warning-50: oklch(0.987 0.022 95.3);
+    --lx-warning-100: oklch(0.962 0.059 95.6);
+    --lx-warning-200: oklch(0.924 0.12 95.7);
+    --lx-warning-300: oklch(0.879 0.169 91.6);
+    --lx-warning-400: oklch(0.828 0.189 84.4);
+    --lx-warning-500: oklch(0.769 0.188 70.1);
+    --lx-warning-600: oklch(0.666 0.179 58.3);
+    --lx-warning-700: oklch(0.555 0.163 48);
+    --lx-warning-800: oklch(0.473 0.137 46.2);
+    --lx-warning-900: oklch(0.414 0.112 45.9);
+    --lx-warning-950: oklch(0.279 0.077 45.6);
+
+    --lx-danger-50: oklch(0.971 0.013 17.4);
+    --lx-danger-100: oklch(0.936 0.032 17.7);
+    --lx-danger-200: oklch(0.885 0.062 18.3);
+    --lx-danger-300: oklch(0.808 0.114 19.6);
+    --lx-danger-400: oklch(0.704 0.191 22.2);
+    --lx-danger-500: oklch(0.637 0.237 25.3);
+    --lx-danger-600: oklch(0.577 0.245 27.3);
+    --lx-danger-700: oklch(0.505 0.213 27.5);
+    --lx-danger-800: oklch(0.444 0.177 26.9);
+    --lx-danger-900: oklch(0.396 0.141 25.7);
+    --lx-danger-950: oklch(0.258 0.092 26.04);
+  }
+}

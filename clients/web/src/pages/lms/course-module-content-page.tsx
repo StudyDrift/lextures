@@ -547,7 +547,7 @@ export default function CourseModuleContentPage() {
   if (!courseCode || !itemId) {
     return (
       <LmsPage title="Content page" description="">
-        <p className="mt-6 text-sm text-slate-500">Invalid link.</p>
+        <p className="mt-6 text-sm text-fg-muted">Invalid link.</p>
       </LmsPage>
     )
   }
@@ -590,7 +590,7 @@ export default function CourseModuleContentPage() {
                 type="button"
                 onClick={() => setBuildAiOpen(true)}
                 disabled={saving}
-                className="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3.5 py-2.5 text-sm font-semibold text-indigo-700 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-300 hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-200 dark:hover:bg-indigo-950/70"
+                className="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3.5 py-2.5 text-sm font-semibold text-accent-fg shadow-sm transition-[background-color,color,border-color] hover:border-indigo-300 hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-200 dark:hover:bg-indigo-950/70"
               >
                 <Sparkles className="h-4 w-4" aria-hidden />
                 Build with AI
@@ -600,7 +600,7 @@ export default function CourseModuleContentPage() {
               type="button"
               onClick={cancelEdit}
               disabled={saving}
-              className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-xl border border-border-strong bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-60"
             >
               Cancel
             </button>
@@ -613,7 +613,7 @@ export default function CourseModuleContentPage() {
             ) : null}
             {readingLevelOn ? (
               <select
-                className="rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+                className="rounded-lg border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-overlay"
                 defaultValue=""
                 aria-label="Simplify to grade level"
                 onChange={(e) => {
@@ -635,7 +635,7 @@ export default function CourseModuleContentPage() {
               onClick={() => void save()}
               disabled={saving || saveBlockedByAltText}
               title={saveBlockedByAltText ? 'Add alt text to all images before saving' : undefined}
-              className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {saving ? 'Saving…' : 'Save'}
             </button>
@@ -648,7 +648,7 @@ export default function CourseModuleContentPage() {
               type="button"
               onClick={beginEdit}
               disabled={loading}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-xl border border-border-strong bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-60"
             >
               <Pencil className="h-4 w-4" aria-hidden />
               Edit
@@ -670,7 +670,7 @@ export default function CourseModuleContentPage() {
                     ? 'Content saved for offline access'
                     : 'Save this page for offline access'
                 }
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-xs font-medium text-fg-muted shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-60 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700"
               >
                 {offlineStatus === 'saving' ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
@@ -689,7 +689,7 @@ export default function CourseModuleContentPage() {
       }
     >
       <p className="mt-2 text-start text-sm">
-        <Link to={backTo} className="font-medium text-indigo-600 hover:text-indigo-500">
+        <Link to={backTo} className="font-medium text-accent-fg hover:text-indigo-500">
           ← Back to modules
         </Link>
       </p>
@@ -711,7 +711,7 @@ export default function CourseModuleContentPage() {
             {loadError}
           </p>
         )}
-        {loading && <p className="mt-8 text-sm text-slate-500">Loading…</p>}
+        {loading && <p className="mt-8 text-sm text-fg-muted">Loading…</p>}
         {!isOnline && offlineStatus === 'cached' && !loading && (
           <p className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-950/50 dark:text-emerald-300">
             <CheckCircle className="h-3.5 w-3.5" aria-hidden />
@@ -778,15 +778,15 @@ export default function CourseModuleContentPage() {
             {nextNav ? (
               <div
                 ref={nextNavRef}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-neutral-700 dark:bg-neutral-900/60"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border-default bg-surface-base px-4 py-3 dark:border-border-default/60"
                 aria-live="polite"
                 aria-atomic="true"
               >
                 <div className="min-w-0">
-                  <p className="text-sm text-slate-700 dark:text-neutral-200">
+                  <p className="text-sm text-fg-default">
                     <span className="font-medium">Suggested next:</span> {nextNav.title}
                     {nextNav.live && nextNav.live !== `Next: ${nextNav.title}.` ? (
-                      <span className="mt-1 block text-xs text-slate-500 dark:text-neutral-400">
+                      <span className="mt-1 block text-xs text-fg-muted">
                         {nextNav.live}
                       </span>
                     ) : null}
@@ -798,13 +798,13 @@ export default function CourseModuleContentPage() {
                       type="checkbox"
                       checked={autoAdvance}
                       onChange={(e) => setAutoAdvance(e.target.checked)}
-                      className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                      className="h-4 w-4 rounded border-border-strong text-accent-fg focus:ring-indigo-500"
                     />
-                    <span className="text-xs text-slate-500 dark:text-neutral-400">Auto-advance</span>
+                    <span className="text-xs text-fg-muted">Auto-advance</span>
                   </label>
                   <Link
                     to={nextNav.href}
-                    className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+                    className="inline-flex items-center gap-2 rounded-lg bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
                   >
                     {countdown !== null ? (
                       <>

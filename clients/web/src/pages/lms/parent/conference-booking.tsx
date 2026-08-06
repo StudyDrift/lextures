@@ -126,7 +126,7 @@ export default function ConferenceBooking() {
   if (!ffConferenceScheduling) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-10">
-        <p className="text-sm text-neutral-600 dark:text-neutral-400">
+        <p className="text-sm text-neutral-600 dark:text-fg-muted">
           Conference scheduling is not enabled on this platform.
         </p>
       </div>
@@ -135,17 +135,17 @@ export default function ConferenceBooking() {
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-8 md:px-8">
-      <header className="flex flex-col gap-2 border-b border-slate-200 pb-6 dark:border-neutral-800">
-        <div className="flex items-center gap-2 text-sm font-medium text-indigo-700 dark:text-indigo-300">
+      <header className="flex flex-col gap-2 border-b border-border-default pb-6 dark:border-border-subtle">
+        <div className="flex items-center gap-2 text-sm font-medium text-accent-fg">
           <CalendarHeart className="h-4 w-4" aria-hidden />
           Parent portal
         </div>
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-neutral-50">
+        <h1 className="text-2xl font-semibold tracking-tight text-fg-default">
           Book parent-teacher conferences
         </h1>
-        <p className="text-sm text-slate-600 dark:text-neutral-400">
+        <p className="text-sm text-fg-muted">
           Choose a time with each of your child&apos;s teachers.{' '}
-          <Link to="/parent" className="text-indigo-600 underline dark:text-indigo-400">
+          <Link to="/parent" className="text-accent-fg underline dark:text-indigo-400">
             Back to family dashboard
           </Link>
         </p>
@@ -179,11 +179,7 @@ export default function ConferenceBooking() {
                   role="option"
                   aria-selected={active}
                   onClick={() => setParams({ student: c.studentUserId })}
-                  className={`rounded-full px-4 py-2 text-sm font-medium transition-[background-color,color,border-color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
-                    active
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-neutral-100 text-neutral-800 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-100'
-                  }`}
+                  className={`rounded-full px-4 py-2 text-sm font-medium transition-[background-color,color,border-color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${ active ? 'bg-accent-solid text-white' : 'bg-neutral-100 text-neutral-800 hover:bg-neutral-200 dark:bg-surface-overlay dark:text-fg-default' }`}
                 >
                   {childLabel(c)}
                 </button>
@@ -197,7 +193,7 @@ export default function ConferenceBooking() {
               <select
                 value={selectedTeacherId}
                 onChange={(e) => setSelectedTeacherId(e.target.value)}
-                className="rounded-lg border border-neutral-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-900"
+                className="rounded-lg border border-neutral-300 px-3 py-2 dark:border-border-default dark:bg-surface-raised"
               >
                 {teachers.map((t) => (
                   <option key={t.teacherId} value={t.teacherId}>
@@ -212,14 +208,14 @@ export default function ConferenceBooking() {
                 type="date"
                 value={conferenceDate}
                 onChange={(e) => setConferenceDate(e.target.value)}
-                className="rounded-lg border border-neutral-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-900"
+                className="rounded-lg border border-neutral-300 px-3 py-2 dark:border-border-default dark:bg-surface-raised"
               />
             </label>
           </div>
 
           {selectedTeacher && conferenceDate && (
             <section aria-labelledby="slot-picker-heading">
-              <h2 id="slot-picker-heading" className="mb-3 text-lg font-semibold text-neutral-900 dark:text-neutral-50">
+              <h2 id="slot-picker-heading" className="mb-3 text-lg font-semibold text-neutral-900">
                 Slots with {teacherLabel(selectedTeacher)}
               </h2>
               <SlotPicker

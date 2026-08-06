@@ -161,9 +161,9 @@ export function CourseBlueprintSection({ courseCode, course, onCourseUpdated }: 
   if (!course.orgId || !canOrgBlueprint) {
     return (
       <>
-        <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-neutral-100">Blueprint</h2>
-          <p className="mt-2 text-sm text-slate-600 dark:text-neutral-300">
+        <section className="mt-10 rounded-2xl border border-border-default bg-surface-raised p-6 shadow-sm dark:border-border-default dark:bg-surface-raised">
+          <h2 className="text-lg font-semibold text-fg-default">Blueprint</h2>
+          <p className="mt-2 text-sm text-fg-muted">
             Org administrators manage district blueprint courses here. Ask your platform admin for access.
           </p>
         </section>
@@ -174,9 +174,9 @@ export function CourseBlueprintSection({ courseCode, course, onCourseUpdated }: 
 
   return (
     <section className="mt-10 space-y-8">
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-neutral-100">Blueprint</h2>
-        <p className="mt-2 text-sm text-slate-600 dark:text-neutral-300">
+      <div className="rounded-2xl border border-border-default bg-surface-raised p-6 shadow-sm dark:border-border-default dark:bg-surface-raised">
+        <h2 className="text-lg font-semibold text-fg-default">Blueprint</h2>
+        <p className="mt-2 text-sm text-fg-muted">
           Designate a master course and push structural updates to linked child courses. Teachers keep local
           items they add outside the blueprint copy.
         </p>
@@ -187,12 +187,12 @@ export function CourseBlueprintSection({ courseCode, course, onCourseUpdated }: 
             Last sync: {formatSyncAt(course.blueprintLastSyncAt ?? null)}.
           </p>
         ) : null}
-        <div className="mt-4 flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/60 p-4 dark:border-neutral-850 dark:bg-neutral-900/40">
+        <div className="mt-4 flex items-center justify-between rounded-xl border border-border-subtle bg-slate-50/60 p-4 dark:border-neutral-850/40">
           <div className="flex flex-col gap-0.5">
-            <span className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+            <span className="text-sm font-semibold text-fg-default">
               Enable Blueprint Designation
             </span>
-            <span className="text-xs text-slate-500 dark:text-neutral-400">
+            <span className="text-xs text-fg-muted">
               {course.blueprintParentCourseCode
                 ? 'Child courses cannot be toggled as blueprints until unlinked.'
                 : 'Turn this course into a master blueprint course.'}
@@ -204,14 +204,10 @@ export function CourseBlueprintSection({ courseCode, course, onCourseUpdated }: 
             aria-checked={isBlueprintDraft}
             disabled={busy || Boolean(course.blueprintParentCourseCode)}
             onClick={() => setIsBlueprintDraft(!isBlueprintDraft)}
-            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:cursor-not-allowed disabled:opacity-50 ${
-              isBlueprintDraft ? 'bg-indigo-600' : 'bg-slate-200 dark:bg-neutral-800'
-            }`}
+            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:cursor-not-allowed disabled:opacity-50 ${ isBlueprintDraft ? 'bg-accent-solid' : 'bg-slate-200 dark:bg-surface-overlay' }`}
           >
             <span
-              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition-transform duration-200 ease-in-out ${
-                isBlueprintDraft ? 'translate-x-5' : 'translate-x-0'
-              }`}
+              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-surface-raised shadow ring-0 transition-transform duration-200 ease-in-out ${ isBlueprintDraft ? 'translate-x-5' : 'translate-x-0' }`}
             />
           </button>
         </div>
@@ -219,19 +215,19 @@ export function CourseBlueprintSection({ courseCode, course, onCourseUpdated }: 
 
       {course.isBlueprint ? (
         <>
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-            <h3 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Linked child courses</h3>
-            <p className="mt-2 text-sm text-slate-600 dark:text-neutral-300">
+          <div className="rounded-2xl border border-border-default bg-surface-raised p-6 shadow-sm dark:border-border-default dark:bg-surface-raised">
+            <h3 className="text-base font-semibold text-fg-default">Linked child courses</h3>
+            <p className="mt-2 text-sm text-fg-muted">
               Child shells must have no modules yet. Linking copies all blueprint modules and items once.
             </p>
-            {loadErr ? <p className="mt-2 text-sm text-red-600">{loadErr}</p> : null}
+            {loadErr ? <p className="mt-2 text-sm text-danger-fg">{loadErr}</p> : null}
             <form className="mt-4 flex flex-wrap items-end gap-2" onSubmit={onLinkChild}>
               <label className="block min-w-[220px] flex-1">
-                <span className="text-xs font-medium text-slate-600 dark:text-neutral-400">Child course code</span>
+                <span className="text-xs font-medium text-fg-muted">Child course code</span>
                 <input
                   value={childPick}
                   onChange={(e) => setChildPick(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                  className="mt-1 w-full rounded-xl border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
                   placeholder="e.g. C-ABCDEF"
                   autoComplete="off"
                 />
@@ -239,13 +235,13 @@ export function CourseBlueprintSection({ courseCode, course, onCourseUpdated }: 
               <button
                 type="submit"
                 disabled={busy || !childPick.trim()}
-                className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 disabled:opacity-50 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-white"
+                className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 disabled:opacity-50 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-surface-raised"
               >
                 Link &amp; sync
               </button>
             </form>
             {children && children.length === 0 ? (
-              <p className="mt-6 text-sm text-slate-500 dark:text-neutral-400">
+              <p className="mt-6 text-sm text-fg-muted">
                 No child courses linked. Link existing courses to distribute this blueprint&apos;s content.
               </p>
             ) : null}
@@ -254,11 +250,11 @@ export function CourseBlueprintSection({ courseCode, course, onCourseUpdated }: 
                 {children.map((c) => (
                   <li key={c.courseCode} className="flex flex-wrap items-center justify-between gap-2 py-3">
                     <div>
-                      <p className="font-mono text-sm font-semibold text-slate-900 dark:text-neutral-100">
+                      <p className="font-mono text-sm font-semibold text-fg-default">
                         {c.courseCode}
                       </p>
-                      <p className="text-xs text-slate-600 dark:text-neutral-400">{c.title}</p>
-                      <p className="text-xs text-slate-500 dark:text-neutral-500">
+                      <p className="text-xs text-fg-muted">{c.title}</p>
+                      <p className="text-xs text-fg-subtle">
                         Last sync: {formatSyncAt(c.lastSyncAt ?? null)}
                       </p>
                     </div>
@@ -266,7 +262,7 @@ export function CourseBlueprintSection({ courseCode, course, onCourseUpdated }: 
                       type="button"
                       disabled={busy}
                       onClick={() => void onUnlink(c.courseCode)}
-                      className="text-sm font-medium text-red-600 hover:text-red-500 disabled:opacity-50"
+                      className="text-sm font-medium text-danger-fg hover:text-red-500 disabled:opacity-50"
                     >
                       Unlink
                     </button>
@@ -276,9 +272,9 @@ export function CourseBlueprintSection({ courseCode, course, onCourseUpdated }: 
             ) : null}
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-            <h3 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Push updates</h3>
-            <p className="mt-2 text-sm text-slate-600 dark:text-neutral-300">
+          <div className="rounded-2xl border border-border-default bg-surface-raised p-6 shadow-sm dark:border-border-default dark:bg-surface-raised">
+            <h3 className="text-base font-semibold text-fg-default">Push updates</h3>
+            <p className="mt-2 text-sm text-fg-muted">
               Applies blueprint changes to all linked children. Locally added items in children are preserved.
             </p>
             <button
@@ -290,7 +286,7 @@ export function CourseBlueprintSection({ courseCode, course, onCourseUpdated }: 
               {busy ? 'Working…' : 'Push updates to all children'}
             </button>
             {pushResult ? (
-              <div className="mt-4 rounded-xl border border-slate-100 bg-slate-50 p-3 text-sm dark:border-neutral-700 dark:bg-neutral-950">
+              <div className="mt-4 rounded-xl border border-border-subtle bg-surface-base p-3 text-sm dark:border-border-default dark:bg-surface-base">
                 <p>
                   Total {pushResult.childrenTotal}, succeeded {pushResult.childrenSuccess}, errors{' '}
                   {pushResult.childrenError}.
@@ -306,16 +302,16 @@ export function CourseBlueprintSection({ courseCode, course, onCourseUpdated }: 
             ) : null}
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-            <h3 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Sync history</h3>
+          <div className="rounded-2xl border border-border-default bg-surface-raised p-6 shadow-sm dark:border-border-default dark:bg-surface-raised">
+            <h3 className="text-base font-semibold text-fg-default">Sync history</h3>
             {logs && logs.length === 0 ? (
-              <p className="mt-2 text-sm text-slate-500 dark:text-neutral-400">No pushes recorded yet.</p>
+              <p className="mt-2 text-sm text-fg-muted">No pushes recorded yet.</p>
             ) : null}
             {logs && logs.length > 0 ? (
               <ul className="mt-3 space-y-2 text-sm">
                 {logs.map((l) => (
-                  <li key={l.id} className="rounded-lg border border-slate-100 px-3 py-2 dark:border-neutral-700">
-                    <span className="text-slate-700 dark:text-neutral-200">{formatSyncAt(l.triggeredAt)}</span>{' '}
+                  <li key={l.id} className="rounded-lg border border-border-subtle px-3 py-2 dark:border-border-default">
+                    <span className="text-fg-default">{formatSyncAt(l.triggeredAt)}</span>{' '}
                     — {l.childrenSuccess}/{l.childrenTotal} ok, {l.childrenError} errors
                   </li>
                 ))}

@@ -1,6 +1,6 @@
 # TD.5 — Remove Unreachable In-Handler Method Dispatch
 
-> Implementation plan. Source: technical-debt static analysis, 2026-07-25. Folder overview: [README](README.md).
+> Implementation plan — **completed 2026-08-05**. Source: technical-debt static analysis, 2026-07-25. Programme overview: [tech_debt README](../../plan/tech_debt/README.md).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Technical Debt Remediation |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / HS (internal) |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE (2026-08-05) |
 | **Estimated effort** | S (1w) |
 | **Owner (proposed)** | Backend platform team |
 | **Depends on** | TD.1 (safety net) |
@@ -175,3 +175,28 @@ grep -rhoE '\b[a-z]+\.(Handle|HandleFunc|Mount)\(' internal/httpserver/*.go | so
 - `chi` routing and `MethodNotAllowed` — <https://pkg.go.dev/github.com/go-chi/chi/v5>
 - RFC 9110 §15.5.6 (405 Method Not Allowed), §9.3.7 (OPTIONS)
 - Related plans: [TD.1](TD.1-refactoring-safety-net.md), [TD.6](TD.6-decompose-httpserver-package.md), [TD.7](TD.7-handler-toolkit.md)
+
+---
+
+## Residual counts (AC-7) — post completion
+
+Measured 2026-08-05 after prologue removal:
+
+| Metric | Baseline (plan) | Residual (non-test) |
+|---|---|---|
+| `r.Method == http.MethodOptions` | 261–322 | **7** |
+| `StatusMethodNotAllowed` sites | 776–786 | **40** |
+| Method-agnostic registrations (`Handle`/`HandleFunc`) | 3 | **1** live (`handleCalDAVCollection`); `http501Handler` Handle stubs empty |
+| Multi-method handlers (same func, ≥2 verbs) | — | **39** (keep `switch` / multi-or dispatch) |
+
+**Where residuals live**
+
+- **Infrastructure (keep):** `cors.go`, `not_found_response.go` (central chi 404/405), `unimplemented_v1.go` (Handle stub).
+- **Multi-method handlers (FR-6):** e.g. course sections, assignment overrides, SCIM, attendance, org settings, magic-link consume, mobile link policy (PUT+PATCH).
+- **CalDAV (FR-4):** `calendar_http.go` `HandleFunc` — OPTIONS/PROPFIND/GET dispatch is load-bearing.
+
+**Guards**
+
+- `python3 scripts/analyze-handler-methods.py --assert-single-ok`
+- `bash scripts/check-handler-method-dispatch.sh` (wired into `make lint-structure`)
+- Characterization: `TestTD5_*` in `server/internal/httpserver/method_dispatch_characterization_test.go`

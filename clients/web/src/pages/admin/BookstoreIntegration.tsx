@@ -86,8 +86,8 @@ export default function BookstoreIntegrationPage() {
   if (featuresLoading) {
     return (
       <main className="mx-auto max-w-3xl p-6">
-        <h1 className="text-xl font-bold text-slate-900 dark:text-neutral-100">Bookstore Integration</h1>
-        <p className="mt-2 text-sm text-slate-500">Loading…</p>
+        <h1 className="text-xl font-bold text-fg-default">Bookstore Integration</h1>
+        <p className="mt-2 text-sm text-fg-muted">Loading…</p>
       </main>
     )
   }
@@ -95,8 +95,8 @@ export default function BookstoreIntegrationPage() {
   if (!ffBookstoreIntegration) {
     return (
       <main className="mx-auto max-w-3xl p-6">
-        <h1 className="text-xl font-bold text-slate-900 dark:text-neutral-100">Bookstore Integration</h1>
-        <p className="mt-2 text-sm text-slate-500">
+        <h1 className="text-xl font-bold text-fg-default">Bookstore Integration</h1>
+        <p className="mt-2 text-sm text-fg-muted">
           Bookstore integration is not enabled for this platform. Contact your system administrator.
         </p>
       </main>
@@ -104,29 +104,29 @@ export default function BookstoreIntegrationPage() {
   }
 
   const fieldClasses =
-    'mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100'
+    'mt-1 block w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-sm text-fg-default placeholder:text-fg-subtle focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-border-default dark:bg-surface-raised dark:text-fg-default'
 
   return (
     <main className="mx-auto max-w-3xl p-6" aria-labelledby={titleId}>
-      <h1 id={titleId} className="text-xl font-bold text-slate-900 dark:text-neutral-100">
+      <h1 id={titleId} className="text-xl font-bold text-fg-default">
         Bookstore / Textbook Integration
       </h1>
-      <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+      <p className="mt-1 text-sm text-fg-muted">
         Configure VitalSource Bridge and RedShelf BookShelf Inclusive Access delivery. Register the
         provider LTI 1.3 tools under Settings → LTI tools, then select them here.
       </p>
 
-      {loading && <p className="mt-4 text-sm text-slate-500">Loading…</p>}
+      {loading && <p className="mt-4 text-sm text-fg-muted">Loading…</p>}
 
       {!loading && (
         <div className="mt-6 space-y-6">
-          <section className="rounded-xl border border-slate-200 bg-white p-5 dark:border-neutral-700 dark:bg-neutral-800">
-            <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Default provider</h2>
-            <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+          <section className="rounded-xl border border-border-default bg-surface-raised p-5 dark:border-border-default dark:bg-surface-overlay">
+            <h2 className="text-base font-semibold text-fg-default">Default provider</h2>
+            <p className="mt-1 text-sm text-fg-muted">
               Used as the default when an instructor adds a textbook resource.
             </p>
             <div className="mt-4">
-              <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+              <label className="block text-sm font-medium text-fg-muted">
                 Provider
               </label>
               <select
@@ -140,16 +140,16 @@ export default function BookstoreIntegrationPage() {
             </div>
           </section>
 
-          <section className="rounded-xl border border-slate-200 bg-white p-5 dark:border-neutral-700 dark:bg-neutral-800">
-            <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">
+          <section className="rounded-xl border border-border-default bg-surface-raised p-5 dark:border-border-default dark:bg-surface-overlay">
+            <h2 className="text-base font-semibold text-fg-default">
               Registered LTI tools
             </h2>
-            <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+            <p className="mt-1 text-sm text-fg-muted">
               Paste the external-tool ID (UUID) for each registered bookstore LTI 1.3 tool.
             </p>
             <div className="mt-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+                <label className="block text-sm font-medium text-fg-muted">
                   VitalSource tool ID
                 </label>
                 <input
@@ -161,7 +161,7 @@ export default function BookstoreIntegrationPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+                <label className="block text-sm font-medium text-fg-muted">
                   RedShelf tool ID
                 </label>
                 <input
@@ -176,7 +176,7 @@ export default function BookstoreIntegrationPage() {
           </section>
 
           {error && (
-            <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+            <p role="alert" className="text-sm text-danger-fg">
               {error}
             </p>
           )}
@@ -191,7 +191,7 @@ export default function BookstoreIntegrationPage() {
               type="button"
               onClick={() => void handleSave()}
               disabled={saving || loading}
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-lg bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {saving ? 'Saving…' : 'Save settings'}
             </button>

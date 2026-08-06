@@ -61,11 +61,6 @@ type submitFeedbackResponse struct {
 
 func (d Deps) handlePostFeedback() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.feedbackOff(w) {
 			return
 		}
@@ -189,11 +184,6 @@ type feedbackPersonJSON struct {
 
 func (d Deps) handleAdminFeedbackList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		adminID, ok := d.adminRbacUser(w, r)
 		if !ok {
 			return
@@ -320,11 +310,6 @@ type feedbackDetailJSON struct {
 
 func (d Deps) handleAdminFeedbackGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		adminID, ok := d.adminRbacUser(w, r)
 		if !ok {
 			return
@@ -368,11 +353,6 @@ type patchFeedbackBody struct {
 
 func (d Deps) handleAdminFeedbackPatch() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		adminID, ok := d.adminRbacUser(w, r)
 		if !ok {
 			return

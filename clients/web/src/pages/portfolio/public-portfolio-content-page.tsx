@@ -62,7 +62,7 @@ export default function PublicPortfolioContentPage() {
         </p>
         <Link
           to={`/p/${encodeURIComponent(slug)}`}
-          className="mt-4 inline-block text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
+          className="mt-4 inline-block text-sm font-medium text-accent-fg hover:text-indigo-500 dark:text-indigo-400"
         >
           Back to portfolio
         </Link>
@@ -82,16 +82,16 @@ export default function PublicPortfolioContentPage() {
   const backTo = `/p/${encodeURIComponent(slug)}`
 
   return (
-    <div className="min-h-screen bg-slate-50/50 text-slate-900 dark:bg-neutral-950 dark:text-neutral-100">
-      <header className="border-b border-slate-100 bg-white dark:border-neutral-800 dark:bg-neutral-900/50">
+    <div className="min-h-screen bg-slate-50/50 text-fg-default dark:bg-surface-base dark:text-fg-default">
+      <header className="border-b border-border-subtle bg-surface-raised dark:border-border-subtle/50">
         <div className="mx-auto max-w-3xl px-4 py-10">
           <Link
             to={backTo}
-            className="text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+            className="text-sm font-medium text-accent-fg hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
           >
             ← Back to {portfolioTitle || 'portfolio'}
           </Link>
-          <h1 className="mt-4 text-3xl font-bold tracking-tight text-slate-900 dark:text-neutral-50">{title}</h1>
+          <h1 className="mt-4 text-3xl font-bold tracking-tight text-fg-default">{title}</h1>
           {ownerName ? (
             <p className="mt-2 text-sm font-semibold text-indigo-650 dark:text-indigo-400">{ownerName}</p>
           ) : null}

@@ -67,26 +67,26 @@ function CourseFileLink({
   }
 
   return (
-    <div className="not-prose my-4 overflow-hidden rounded-xl border border-slate-200/90 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900/80">
-      <div className="flex items-center justify-between gap-3 border-b border-slate-200/80 px-3 py-2 dark:border-neutral-700">
+    <div className="not-prose my-4 overflow-hidden rounded-xl border border-slate-200/90 bg-surface-raised shadow-sm dark:border-border-default/80">
+      <div className="flex items-center justify-between gap-3 border-b border-slate-200/80 px-3 py-2 dark:border-border-default">
         <button
           type="button"
           onClick={() => setPreviewOpen(true)}
-          className="min-w-0 truncate text-left text-sm font-medium text-indigo-700 hover:text-indigo-600 dark:text-indigo-300 dark:hover:text-indigo-200"
+          className="min-w-0 truncate text-left text-sm font-medium text-accent-fg hover:text-accent-fg dark:text-indigo-300 dark:hover:text-indigo-200"
         >
           {filename}
         </button>
         <div className="flex shrink-0 items-center gap-1">
           <button
             type="button"
-            className="inline-flex items-center rounded-lg px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+            className="inline-flex items-center rounded-lg px-2 py-1 text-xs font-medium text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay"
             onClick={() => setPreviewOpen(true)}
           >
             Full screen
           </button>
           <button
             type="button"
-            className="inline-flex items-center rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+            className="inline-flex items-center rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken hover:text-fg-muted dark:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-fg-default"
             title={`Download ${filename}`}
             aria-label={`Download ${filename}`}
             onClick={() => void downloadFile()}
@@ -95,7 +95,7 @@ function CourseFileLink({
           </button>
         </div>
       </div>
-      <div className="min-h-[min(28rem,60vh)] bg-slate-50 dark:bg-neutral-950/60">
+      <div className="min-h-[min(28rem,60vh)] bg-surface-base/60">
         <FilePreviewBody filePath={filePath} filename={filename} mimeType={null} className="h-[min(28rem,60vh)]" />
       </div>
       {previewOpen ? (
@@ -246,7 +246,7 @@ export const MarkdownArticleView = forwardRef<HTMLDivElement, MarkdownArticleVie
     if (!src) {
       return (
         <div ref={ref} className={`syllabus-md ${theme.classes.article}`}>
-          <p className="text-sm leading-relaxed text-slate-500 dark:text-neutral-400">{emptyMessage}</p>
+          <p className="text-sm leading-relaxed text-fg-muted">{emptyMessage}</p>
         </div>
       )
     }
@@ -254,11 +254,11 @@ export const MarkdownArticleView = forwardRef<HTMLDivElement, MarkdownArticleVie
     const article = (
       <div ref={ref} className={`syllabus-md ${theme.classes.article}`}>
         {deferMath ? (
-          <div className="mb-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200">
+          <div className="mb-3 rounded-lg border border-border-default bg-surface-base px-3 py-2 text-sm text-fg-muted dark:border-border-default dark:bg-surface-overlay dark:text-fg-default">
             <span className="font-medium">Math formatting is paused</span> to save data.{' '}
             <button
               type="button"
-              className="ms-2 font-semibold text-indigo-600 underline decoration-indigo-300 hover:text-indigo-500 dark:text-indigo-400"
+              className="ms-2 font-semibold text-accent-fg underline decoration-indigo-300 hover:text-indigo-500 dark:text-indigo-400"
               onClick={() => setUserForcedMath(true)}
             >
               Load math
@@ -302,18 +302,18 @@ export function SyllabusMarkdownView({ sections, theme = defaultResolved, course
   const mathPlugins = useMemo(() => mathPluginsFor(!deferMath), [deferMath])
 
   if (!src.trim()) {
-    return <p className="text-sm leading-relaxed text-slate-500">No syllabus content yet.</p>
+    return <p className="text-sm leading-relaxed text-fg-muted">No syllabus content yet.</p>
   }
   const components = createMarkdownComponents(theme, { useCourseFileImages: Boolean(courseCode) })
   const normalized = normalizeMarkdownLists(src)
   return (
     <div className={`syllabus-md ${theme.classes.article}`}>
       {deferMath ? (
-        <div className="mb-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200">
+        <div className="mb-3 rounded-lg border border-border-default bg-surface-base px-3 py-2 text-sm text-fg-muted dark:border-border-default dark:bg-surface-overlay dark:text-fg-default">
           <span className="font-medium">Math formatting is paused</span> to save data.{' '}
           <button
             type="button"
-            className="ms-2 font-semibold text-indigo-600 underline decoration-indigo-300 hover:text-indigo-500 dark:text-indigo-400"
+            className="ms-2 font-semibold text-accent-fg underline decoration-indigo-300 hover:text-indigo-500 dark:text-indigo-400"
             onClick={() => setUserForcedMath(true)}
           >
             Load math

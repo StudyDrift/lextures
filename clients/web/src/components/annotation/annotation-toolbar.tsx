@@ -32,9 +32,9 @@ export function AnnotationToolbar({
       <div
         role="toolbar"
         aria-label="Annotation tools"
-        className="flex flex-wrap items-center gap-2 rounded-2xl bg-white/90 p-2 shadow-card dark:bg-neutral-900/90"
+        className="flex flex-wrap items-center gap-2 rounded-2xl bg-white/90 p-2 shadow-card/90"
       >
-        <span className="px-1 text-xs font-medium text-slate-600 dark:text-neutral-300">
+        <span className="px-1 text-xs font-medium text-fg-muted">
           Select text to highlight, then add a comment.
         </span>
         <span className="mx-1 h-6 w-px bg-slate-200 dark:bg-neutral-700" aria-hidden />
@@ -46,9 +46,7 @@ export function AnnotationToolbar({
             aria-label={`Colour ${c}`}
             title={c}
             onClick={() => onColourChange(c)}
-            className={`h-8 w-8 rounded-full border-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:opacity-50 ${
-              colour.toUpperCase() === c.toUpperCase() ? 'border-indigo-600' : 'border-slate-300 dark:border-neutral-600'
-            }`}
+            className={`h-8 w-8 rounded-full border-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:opacity-50 ${ colour.toUpperCase() === c.toUpperCase() ? 'border-indigo-600' : 'border-border-strong' }`}
             style={{ backgroundColor: c }}
           />
         ))}
@@ -68,7 +66,7 @@ export function AnnotationToolbar({
     <div
       role="toolbar"
       aria-label="Annotation tools"
-      className="flex flex-wrap items-center gap-2 rounded-2xl bg-white/90 p-2 shadow-card dark:bg-neutral-900/90"
+      className="flex flex-wrap items-center gap-2 rounded-2xl bg-white/90 p-2 shadow-card/90"
     >
       {tools.map((t) => (
         <button
@@ -78,11 +76,7 @@ export function AnnotationToolbar({
           aria-pressed={tool === t.id}
           aria-label={t.hint}
           onClick={() => onToolChange(t.id)}
-          className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-[background-color,color,border-color] focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:opacity-50 ${
-            tool === t.id
-              ? 'bg-indigo-600 text-white'
-              : 'bg-slate-100 text-slate-800 hover:bg-slate-200 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700'
-          }`}
+          className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-[background-color,color,border-color] focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:opacity-50 ${ tool === t.id ? 'bg-accent-solid text-white' : 'bg-surface-sunken text-fg-default hover:bg-slate-200 dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700' }`}
         >
           {t.label}
         </button>
@@ -96,9 +90,7 @@ export function AnnotationToolbar({
           aria-label={`Colour ${c}`}
           title={c}
           onClick={() => onColourChange(c)}
-          className={`h-8 w-8 rounded-full border-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:opacity-50 ${
-            colour.toUpperCase() === c.toUpperCase() ? 'border-indigo-600' : 'border-slate-300 dark:border-neutral-600'
-          }`}
+          className={`h-8 w-8 rounded-full border-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:opacity-50 ${ colour.toUpperCase() === c.toUpperCase() ? 'border-indigo-600' : 'border-border-strong' }`}
           style={{ backgroundColor: c }}
         />
       ))}

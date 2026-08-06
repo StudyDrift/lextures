@@ -61,10 +61,10 @@ export default function CourseContentToolsInsights() {
     <div className="mx-auto max-w-5xl p-4" data-testid="content-tools-insights">
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900 dark:text-neutral-100">
+          <h1 className="text-xl font-semibold text-fg-default">
             {t('contentTools.instructor.insightsTitle')}
           </h1>
-          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-300">
+          <p className="mt-1 text-sm text-fg-muted">
             {t('contentTools.instructor.insightsHelp')}
           </p>
         </div>
@@ -75,21 +75,21 @@ export default function CourseContentToolsInsights() {
           What&apos;s working
         </Link>
       </div>
-      {loading ? <p className="text-sm text-slate-500">Loading…</p> : null}
+      {loading ? <p className="text-sm text-fg-muted">Loading…</p> : null}
       {error ? (
         <p className="text-sm text-rose-600" role="alert">
           {error}
         </p>
       ) : null}
       {!loading && rows.length === 0 ? (
-        <p className="text-sm text-slate-600 dark:text-neutral-300">
+        <p className="text-sm text-fg-muted">
           {t('contentTools.instructor.emptyRoster')}
         </p>
       ) : null}
       {rows.length > 0 ? (
-        <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-neutral-700">
+        <div className="overflow-x-auto rounded-2xl border border-border-default">
           <table className="min-w-full text-sm">
-            <thead className="bg-slate-50 text-left dark:bg-neutral-900">
+            <thead className="bg-surface-base text-left dark:bg-surface-raised">
               <tr>
                 <th className="px-3 py-2" scope="col">
                   Tool
@@ -107,10 +107,10 @@ export default function CourseContentToolsInsights() {
             </thead>
             <tbody>
               {rows.map((row) => (
-                <tr key={row.id} className="border-t border-slate-100 dark:border-neutral-800">
+                <tr key={row.id} className="border-t border-border-subtle">
                   <td className="px-3 py-2">
                     {row.title || row.toolId}
-                    <span className="mt-0.5 block text-xs text-slate-500">{row.toolId}</span>
+                    <span className="mt-0.5 block text-xs text-fg-muted">{row.toolId}</span>
                   </td>
                   <td className="px-3 py-2">{row.learnersWithState}</td>
                   <td className="px-3 py-2">{row.learnersCompleted}</td>

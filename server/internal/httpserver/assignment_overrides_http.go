@@ -70,6 +70,7 @@ func (d Deps) requireOverridesEditableItem(w http.ResponseWriter, r *http.Reques
 	return *cid, iid, v, row.Kind, true
 }
 
+// handleAssignmentOverridesCollection is GET+PUT on the same path. TD.5 FR-6: multi-method.
 func (d Deps) handleAssignmentOverridesCollection() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodOptions {
@@ -166,15 +167,6 @@ func (d Deps) handleAssignmentOverridesCollection() http.HandlerFunc {
 
 func (d Deps) handleAssignmentOverridesBulkExtend() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		_, itemID, viewer, itemKind, ok := d.requireOverridesEditableItem(w, r)
 		if !ok {
 			return

@@ -17,7 +17,7 @@ export function NumericEditor({ value, onChange, disabled }: Props) {
   return (
     <div className="grid gap-3 sm:grid-cols-3">
       <label className="text-sm">
-        <span className="mb-1 block font-medium text-slate-700 dark:text-neutral-200">
+        <span className="mb-1 block font-medium text-fg-default">
           {t('liveQuiz.editor.numericValue')}
         </span>
         <input
@@ -26,11 +26,11 @@ export function NumericEditor({ value, onChange, disabled }: Props) {
           disabled={disabled}
           value={Number.isFinite(value.value) ? value.value : 0}
           onChange={(e) => onChange({ ...value, value: Number(e.target.value) })}
-          className="w-full min-h-11 rounded-md border border-slate-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+          className="w-full min-h-11 rounded-md border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
         />
       </label>
       <label className="text-sm">
-        <span className="mb-1 block font-medium text-slate-700 dark:text-neutral-200">
+        <span className="mb-1 block font-medium text-fg-default">
           {t('liveQuiz.editor.numericTolerance')}
         </span>
         <input
@@ -40,18 +40,18 @@ export function NumericEditor({ value, onChange, disabled }: Props) {
           disabled={disabled}
           value={Number.isFinite(value.tolerance) ? value.tolerance : 0}
           onChange={(e) => onChange({ ...value, tolerance: Number(e.target.value) })}
-          className="w-full min-h-11 rounded-md border border-slate-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+          className="w-full min-h-11 rounded-md border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
         />
       </label>
       <label className="text-sm">
-        <span className="mb-1 block font-medium text-slate-700 dark:text-neutral-200">
+        <span className="mb-1 block font-medium text-fg-default">
           {t('liveQuiz.editor.numericUnit')}
         </span>
         <input
           disabled={disabled}
           value={value.unit ?? ''}
           onChange={(e) => onChange({ ...value, unit: e.target.value })}
-          className="w-full min-h-11 rounded-md border border-slate-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+          className="w-full min-h-11 rounded-md border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
         />
       </label>
     </div>

@@ -249,8 +249,8 @@ export function CodeFilePreview({ filePath, filename, errorVariant = 'standalone
   return (
     <div className="flex h-full flex-col overflow-hidden">
       {/* Toolbar */}
-      <div className="flex shrink-0 items-center gap-2 border-b border-slate-200 bg-white px-4 py-2 dark:border-neutral-700 dark:bg-neutral-900">
-        <span className="rounded bg-slate-100 px-2 py-0.5 font-mono text-xs font-medium text-slate-600 dark:bg-neutral-800 dark:text-neutral-400">
+      <div className="flex shrink-0 items-center gap-2 border-b border-border-default bg-surface-raised px-4 py-2 dark:border-border-default dark:bg-surface-raised">
+        <span className="rounded bg-surface-sunken px-2 py-0.5 font-mono text-xs font-medium text-fg-muted dark:bg-surface-overlay dark:text-fg-muted">
           {languageLabel}
         </span>
         <div className="flex-1" />
@@ -258,7 +258,7 @@ export function CodeFilePreview({ filePath, filename, errorVariant = 'standalone
           <button
             type="button"
             onClick={() => void handleCopy()}
-            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs text-slate-500 hover:bg-slate-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
+            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay"
             aria-label="Copy code to clipboard"
           >
             {copied
@@ -270,7 +270,7 @@ export function CodeFilePreview({ filePath, filename, errorVariant = 'standalone
         <button
           type="button"
           onClick={() => void handleDownload()}
-          className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs text-slate-500 hover:bg-slate-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
+          className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay"
           aria-label={`Download ${filename}`}
         >
           <Download className="h-3.5 w-3.5" aria-hidden="true" />

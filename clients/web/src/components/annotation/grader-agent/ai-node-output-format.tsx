@@ -22,10 +22,10 @@ export function AiNodeOutputFormat({ graph, nodeId, rubric, maxPoints }: AiNodeO
   return (
     <div className="space-y-2">
       <div>
-        <p className="text-sm font-medium text-slate-800 dark:text-neutral-100">
+        <p className="text-sm font-medium text-fg-default">
           {t('gradingAgent.canvas.inspector.aiOutputFormat.title')}
         </p>
-        <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+        <p className="mt-1 text-xs text-fg-muted">
           {format === 'rubric'
             ? t('gradingAgent.canvas.inspector.aiOutputFormat.rubricHelp')
             : t('gradingAgent.canvas.inspector.aiOutputFormat.scoreHelp')}
@@ -33,11 +33,11 @@ export function AiNodeOutputFormat({ graph, nodeId, rubric, maxPoints }: AiNodeO
       </div>
       <pre
         aria-readonly="true"
-        className="max-h-56 overflow-auto whitespace-pre-wrap rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 font-mono text-xs leading-relaxed text-slate-700 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-300"
+        className="max-h-56 overflow-auto whitespace-pre-wrap rounded-lg border border-border-default bg-surface-base px-3 py-2 font-mono text-xs leading-relaxed text-fg-muted dark:border-border-default dark:bg-surface-base dark:text-fg-muted"
       >
         {systemPrompt}
       </pre>
-      <p className="text-xs text-slate-500 dark:text-neutral-400">
+      <p className="text-xs text-fg-muted">
         {t('gradingAgent.canvas.inspector.aiOutputFormat.locked')}
       </p>
     </div>

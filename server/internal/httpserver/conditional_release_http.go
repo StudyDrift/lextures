@@ -59,10 +59,6 @@ func (d Deps) registerConditionalReleaseRoutes(r chi.Router) {
 
 func (d Deps) handleGetModuleRequirements() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		if d.conditionalReleaseFeatureOff(w) {
 			return
 		}
@@ -97,10 +93,6 @@ func (d Deps) handleGetModuleRequirements() http.HandlerFunc {
 
 func (d Deps) handlePutModuleRequirements() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		if d.conditionalReleaseFeatureOff(w) {
 			return
 		}
@@ -174,10 +166,6 @@ func (d Deps) handlePutModuleRequirements() http.HandlerFunc {
 
 func (d Deps) handlePutItemCompletionRule() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		if d.conditionalReleaseFeatureOff(w) {
 			return
 		}
@@ -229,10 +217,6 @@ func (d Deps) handlePutItemCompletionRule() http.HandlerFunc {
 
 func (d Deps) handleDeleteItemCompletionRule() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		if d.conditionalReleaseFeatureOff(w) {
 			return
 		}
@@ -261,10 +245,6 @@ func (d Deps) handleDeleteItemCompletionRule() http.HandlerFunc {
 
 func (d Deps) handleGetModulesProgress() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		if d.conditionalReleaseFeatureOff(w) {
 			return
 		}
@@ -303,10 +283,6 @@ func (d Deps) handleGetModulesProgress() http.HandlerFunc {
 
 func (d Deps) handleGetRequirementsReport() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		if d.conditionalReleaseFeatureOff(w) {
 			return
 		}
@@ -337,10 +313,6 @@ func (d Deps) handleGetRequirementsReport() http.HandlerFunc {
 
 func (d Deps) handlePostModuleUnlockOverride() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		if d.conditionalReleaseFeatureOff(w) {
 			return
 		}
