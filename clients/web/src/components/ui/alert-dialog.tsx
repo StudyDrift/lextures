@@ -88,11 +88,12 @@ export function AlertDialog({
     >
       {requireTypedPhrase != null ? (
         <div>
-          <label htmlFor="ui-alert-dialog-phrase" className="text-xs font-medium text-fg-default">
+          {/* Stable id for e2e / product tests (historical ConfirmDialog). */}
+          <label htmlFor="confirm-dialog-phrase" className="text-xs font-medium text-fg-default">
             {phraseFieldLabel ?? requireTypedPhrase}
           </label>
           <Input
-            id="ui-alert-dialog-phrase"
+            id="confirm-dialog-phrase"
             key={requireTypedPhrase}
             autoComplete="off"
             value={typedPhrase}
