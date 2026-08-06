@@ -67,7 +67,7 @@ func DeriveAccentRamp(seed Oklch) map[string]string {
 	out := make(map[string]string, len(accentSteps))
 	for _, step := range accentSteps {
 		l := rampL[step]
-		cScale := 0.85
+		var cScale float64
 		if l > 0.9 {
 			cScale = 0.15
 		} else if l < 0.3 {
