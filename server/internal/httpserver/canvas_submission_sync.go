@@ -31,11 +31,6 @@ import (
 // handleGetCourseCanvasLink is GET /api/v1/courses/{course_code}/canvas-link.
 func (d Deps) handleGetCourseCanvasLink() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, _, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -70,15 +65,6 @@ func (d Deps) handlePatchCourseCanvasLink() http.HandlerFunc {
 		GradeSyncEnabled *bool `json:"gradeSyncEnabled"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -141,15 +127,6 @@ func (d Deps) handlePostSubmissionSyncCanvas() http.HandlerFunc {
 		InstructorComment *string            `json:"instructorComment"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.CanvasSubmissionSyncQueue == nil || d.CanvasSubmissionSyncJobs == nil {
 			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "Server misconfiguration.")
 			return

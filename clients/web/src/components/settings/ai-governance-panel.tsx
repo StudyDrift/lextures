@@ -88,10 +88,10 @@ export function AiGovernancePanel() {
 
   return (
     <section aria-labelledby="ai-governance-heading">
-      <h2 id="ai-governance-heading" className="text-base font-semibold text-slate-900 dark:text-neutral-100">
+      <h2 id="ai-governance-heading" className="text-base font-semibold text-fg-default">
         {aiDisclosureI18n.adminTitle}
       </h2>
-      <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">{aiDisclosureI18n.adminIntro}</p>
+      <p className="mt-1 text-sm text-fg-muted">{aiDisclosureI18n.adminIntro}</p>
       <ul className="mt-4 space-y-2">
         {FEATURE_KEYS.map((f) => (
           <li key={f.key}>
@@ -106,10 +106,10 @@ export function AiGovernancePanel() {
           </li>
         ))}
       </ul>
-      <label className="mt-4 block text-sm font-medium text-slate-700 dark:text-neutral-200">
+      <label className="mt-4 block text-sm font-medium text-fg-default">
         Allowed models (one per line; empty = all)
         <textarea
-          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs dark:border-neutral-600 dark:bg-neutral-900"
+          className="mt-1 w-full rounded-lg border border-border-default px-3 py-2 font-mono text-xs dark:border-border-default dark:bg-surface-raised"
           rows={4}
           value={allowedModels}
           onChange={(e) => setAllowedModels(e.target.value)}
@@ -119,7 +119,7 @@ export function AiGovernancePanel() {
         type="button"
         disabled={saving}
         onClick={() => void save()}
-        className="mt-4 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+        className="mt-4 rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
       >
         {saving ? 'Saving…' : aiDisclosureI18n.adminSave}
       </button>

@@ -1,0 +1,5676 @@
+{
+  "description": "UX.2 raw interactive allowlist (FR-11). Per-file counts may only decrease. Empty when migration complete (AC-2).",
+  "generatedAt": "2026-08-06T04:30:30.830Z",
+  "files": {
+    "src/components/ImpersonationBanner.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/StatusBanner.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/a11y/ReadingPreferencesPanel.tsx": {
+      "rawButton": 3,
+      "rawInput": 3,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/a11y/read-aloud-controls.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 2,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/admin/AdminSearchBar.tsx": {
+      "rawButton": 3,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/admin/EmailTemplateEditor.tsx": {
+      "rawButton": 4,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/ai-disclosure-banner.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/annotation-comment-panel.tsx": {
+      "rawButton": 4,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/annotation-toolbar.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/assignment-annotation-workbench.tsx": {
+      "rawButton": 13,
+      "rawInput": 3,
+      "rawSelect": 0,
+      "rawTextarea": 2,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 2,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/feedback-media-player.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/feedback-media-recorder.tsx": {
+      "rawButton": 6,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 1,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/agent-confidence-floor-settings.tsx": {
+      "rawButton": 1,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/ai-build-panel.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/assignment-multi-picker.tsx": {
+      "rawButton": 0,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/assignment-picker.tsx": {
+      "rawButton": 2,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 1,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/canvas-view.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/code-test-runner-inspector.tsx": {
+      "rawButton": 3,
+      "rawInput": 1,
+      "rawSelect": 4,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/conditional-router-inspector.tsx": {
+      "rawButton": 1,
+      "rawInput": 2,
+      "rawSelect": 2,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/create-grading-agent-from-template-modal.tsx": {
+      "rawButton": 2,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/create-grading-agent-modal.tsx": {
+      "rawButton": 2,
+      "rawInput": 6,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/dry-run-dock.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/flag-for-review-inspector.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 2,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/grader-agent-workflow-modal.tsx": {
+      "rawButton": 4,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/held-review-queue-panel.tsx": {
+      "rawButton": 10,
+      "rawInput": 4,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/human-review-gate-inspector.tsx": {
+      "rawButton": 1,
+      "rawInput": 1,
+      "rawSelect": 2,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/import-field-picker.tsx": {
+      "rawButton": 2,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 1,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/import-workflow-menu.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/inspector-expandable-textarea.tsx": {
+      "rawButton": 0,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 2,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/inspector-panel.tsx": {
+      "rawButton": 5,
+      "rawInput": 0,
+      "rawSelect": 3,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/inspector-textarea-expand-modal.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/node-palette.tsx": {
+      "rawButton": 0,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/originality-inspector.tsx": {
+      "rawButton": 1,
+      "rawInput": 1,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/preview-dock.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/quiz-picker.tsx": {
+      "rawButton": 0,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/reference-inspector.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 2,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/renamable-node-header.tsx": {
+      "rawButton": 0,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/review-queue-panel.tsx": {
+      "rawButton": 5,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/rubric-inspector.tsx": {
+      "rawButton": 2,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/run-agent-filter-picker.tsx": {
+      "rawButton": 0,
+      "rawInput": 2,
+      "rawSelect": 2,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/run-agent-popover.tsx": {
+      "rawButton": 2,
+      "rawInput": 5,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/save-template-dialog.tsx": {
+      "rawButton": 2,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/save-workflow-menu.tsx": {
+      "rawButton": 4,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 1,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/score-aggregator-inspector.tsx": {
+      "rawButton": 2,
+      "rawInput": 2,
+      "rawSelect": 3,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/set-score-inspector.tsx": {
+      "rawButton": 1,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/submission-inspector-section.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/workflow-canvas-context-menu.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 1,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/grader-agent/workflow-prompt-editor.tsx": {
+      "rawButton": 0,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/speed-grader-shortcuts.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
+    "src/components/annotation/submission-file-details-panel.tsx": {
+      "rawButton": 4,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/submission-grading-panel.tsx": {
+      "rawButton": 6,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 1,
+      "titleTooltip": 0
+    },
+    "src/components/annotation/submission-navigator.tsx": {
+      "rawButton": 4,
+      "rawInput": 1,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 1,
+      "roleTablist": 0,
+      "titleTooltip": 4
+    },
+    "src/components/annotation/submission-preview-sidebar.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 1,
+      "titleTooltip": 0
+    },
+    "src/components/api-error-boundary.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/assignment/assign-to-editor.tsx": {
+      "rawButton": 4,
+      "rawInput": 1,
+      "rawSelect": 4,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/assignment/assignment-page-actions-menu.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 1,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/assignment/assignment-page-settings-panel.tsx": {
+      "rawButton": 13,
+      "rawInput": 12,
+      "rawSelect": 6,
+      "rawTextarea": 3,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 13
+    },
+    "src/components/assignment/assignment-rubric-viewer-dialog.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/at-risk/at-risk-run-config-dialog.tsx": {
+      "rawButton": 4,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/auth/magic-link-request-form.tsx": {
+      "rawButton": 1,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/authoring-save-footprint.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/badges/extract-badges-from-syllabus-modal.tsx": {
+      "rawButton": 4,
+      "rawInput": 1,
+      "rawSelect": 1,
+      "rawTextarea": 1,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/boards/board-analytics.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/boards/board-picker-dialog.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/boards/card-arrange-menu.tsx": {
+      "rawButton": 6,
+      "rawInput": 3,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 1,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/boards/create-board-dialog.tsx": {
+      "rawButton": 5,
+      "rawInput": 4,
+      "rawSelect": 1,
+      "rawTextarea": 1,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 1,
+      "titleTooltip": 0
+    },
+    "src/components/boards/export-menu.tsx": {
+      "rawButton": 3,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/boards/layout-switcher.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/boards/layouts/canvas-layout.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 1,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/boards/layouts/columns-layout.tsx": {
+      "rawButton": 4,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/boards/layouts/map-layout.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/boards/moderation-queue.tsx": {
+      "rawButton": 7,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 1,
+      "titleTooltip": 0
+    },
+    "src/components/boards/post-card.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/boards/post-composer.tsx": {
+      "rawButton": 6,
+      "rawInput": 4,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 1,
+      "titleTooltip": 0
+    },
+    "src/components/boards/present-mode.tsx": {
+      "rawButton": 7,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/boards/quick-join-panel.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/boards/reactions/comment-thread.tsx": {
+      "rawButton": 5,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/boards/reactions/reaction-control.tsx": {
+      "rawButton": 4,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/boards/report-dialog.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 1,
+      "rawTextarea": 1,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/boards/save-as-template-dialog.tsx": {
+      "rawButton": 2,
+      "rawInput": 3,
+      "rawSelect": 1,
+      "rawTextarea": 1,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/boards/share-dialog.tsx": {
+      "rawButton": 7,
+      "rawInput": 6,
+      "rawSelect": 3,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/boards/sort-controls.tsx": {
+      "rawButton": 0,
+      "rawInput": 0,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/bot-channel-mappings-panel.tsx": {
+      "rawButton": 2,
+      "rawInput": 3,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/bot-connected-accounts-panel.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/canvas/canvas-import-progress-log.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/cloud-import-menu.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 1,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/cloud-picker-buttons.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/code-file-preview.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/collab/collab-docs-list.tsx": {
+      "rawButton": 4,
+      "rawInput": 3,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/command-palette/command-palette-dialog.tsx": {
+      "rawButton": 3,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/conference/slot-picker.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-page/build-content-page-with-ai-modal.tsx": {
+      "rawButton": 3,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-page/content-page-reader.tsx": {
+      "rawButton": 10,
+      "rawInput": 0,
+      "rawSelect": 1,
+      "rawTextarea": 1,
+      "roleDialog": 2,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/analytics/admin-tool-telemetry.tsx": {
+      "rawButton": 0,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/analytics/facet-distribution-chart.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/analytics/grade-link-dialog.tsx": {
+      "rawButton": 3,
+      "rawInput": 2,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/analytics/instance-analytics-panel.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/analytics/page-tools-overview.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/authoring/add-section-dropdown.tsx": {
+      "rawButton": 5,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 1,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/authoring/editors/code-sandbox-editor.tsx": {
+      "rawButton": 3,
+      "rawInput": 3,
+      "rawSelect": 3,
+      "rawTextarea": 8,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/authoring/editors/diagram-hotspot-editor.tsx": {
+      "rawButton": 5,
+      "rawInput": 8,
+      "rawSelect": 5,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/authoring/editors/diagram-hotspot-region-card.tsx": {
+      "rawButton": 1,
+      "rawInput": 4,
+      "rawSelect": 1,
+      "rawTextarea": 2,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/authoring/editors/explain-it-back-editor.tsx": {
+      "rawButton": 3,
+      "rawInput": 7,
+      "rawSelect": 1,
+      "rawTextarea": 3,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/authoring/editors/flashcards-editor.tsx": {
+      "rawButton": 4,
+      "rawInput": 8,
+      "rawSelect": 0,
+      "rawTextarea": 3,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/authoring/editors/highlight-annotate-editor.tsx": {
+      "rawButton": 4,
+      "rawInput": 7,
+      "rawSelect": 3,
+      "rawTextarea": 2,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/authoring/editors/inline-questions-build-ai-button.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/authoring/editors/inline-questions-editor.tsx": {
+      "rawButton": 1,
+      "rawInput": 3,
+      "rawSelect": 3,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/authoring/editors/inline-questions-question-card.tsx": {
+      "rawButton": 3,
+      "rawInput": 7,
+      "rawSelect": 1,
+      "rawTextarea": 2,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/authoring/editors/media-checkpoints-editor.tsx": {
+      "rawButton": 2,
+      "rawInput": 14,
+      "rawSelect": 2,
+      "rawTextarea": 2,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/authoring/editors/parameter-explorer-editor.tsx": {
+      "rawButton": 2,
+      "rawInput": 9,
+      "rawSelect": 3,
+      "rawTextarea": 2,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/authoring/editors/parameter-explorer-prompts-editor.tsx": {
+      "rawButton": 2,
+      "rawInput": 4,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/authoring/editors/predict-reveal-editor.tsx": {
+      "rawButton": 2,
+      "rawInput": 7,
+      "rawSelect": 2,
+      "rawTextarea": 2,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/authoring/editors/sort-sequence-editor.tsx": {
+      "rawButton": 4,
+      "rawInput": 6,
+      "rawSelect": 4,
+      "rawTextarea": 3,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/authoring/editors/worked-example-editor.tsx": {
+      "rawButton": 5,
+      "rawInput": 14,
+      "rawSelect": 2,
+      "rawTextarea": 3,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/authoring/paste-json-config-dialog.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/authoring/schema-form/schema-form.tsx": {
+      "rawButton": 4,
+      "rawInput": 5,
+      "rawSelect": 1,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/authoring/tool-block-card.tsx": {
+      "rawButton": 4,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/authoring/tool-config-panel.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/authoring/tool-delete-dialog.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/authoring/tool-palette-list.tsx": {
+      "rawButton": 1,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/authoring/tool-preview-modal.tsx": {
+      "rawButton": 3,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/authoring/tools-dropdown.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 1,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/governance/ai-disclosure-banner.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/governance/moderation-queue.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/host/content-tool-host.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/host/tool-error-boundary.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/host/tool-frame.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/host/tool-placeholder.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/instructor/reset-history-list.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/instructor/reset-scope-picker.tsx": {
+      "rawButton": 0,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/instructor/sources-panel.tsx": {
+      "rawButton": 4,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/instructor/tool-reset-dialog.tsx": {
+      "rawButton": 2,
+      "rawInput": 6,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/instructor/tool-responses-panel.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/instructor/tool-roster-table.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/instructor/tool-state-detail-drawer.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/tools/ask_questions/renderer.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/tools/class_pulse/renderer.tsx": {
+      "rawButton": 1,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/tools/code_sandbox/code-editor.tsx": {
+      "rawButton": 0,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/tools/code_sandbox/output-panel.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 1,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/tools/code_sandbox/renderer.tsx": {
+      "rawButton": 5,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/tools/diagram_hotspot/action-bar.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/tools/diagram_hotspot/diagram-board.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/tools/diagram_hotspot/hotspot-prompt-bar.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/tools/diagram_hotspot/label-tray.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/tools/diagram_hotspot/list-mode.tsx": {
+      "rawButton": 0,
+      "rawInput": 0,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/tools/diagram_hotspot/renderer.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/tools/diagram_hotspot/zoom-controls.tsx": {
+      "rawButton": 7,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/tools/explain_it_back/renderer.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/tools/flashcards/renderer.tsx": {
+      "rawButton": 6,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/tools/highlight_annotate/annotations-panel.tsx": {
+      "rawButton": 5,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/tools/highlight_annotate/passage-panel.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/tools/highlight_annotate/renderer.tsx": {
+      "rawButton": 0,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/tools/highlight_annotate/tag-menu.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 1,
+      "roleMenu": 1,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/tools/inline_discussion/renderer.tsx": {
+      "rawButton": 8,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/tools/inline_questions/renderer.tsx": {
+      "rawButton": 3,
+      "rawInput": 4,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/tools/media_checkpoints/media-player.tsx": {
+      "rawButton": 2,
+      "rawInput": 3,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/tools/media_checkpoints/question-card.tsx": {
+      "rawButton": 2,
+      "rawInput": 4,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/tools/media_checkpoints/transcript-panel.tsx": {
+      "rawButton": 2,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/tools/noop_probe/renderer.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/tools/parameter_explorer/parameter-controls.tsx": {
+      "rawButton": 0,
+      "rawInput": 3,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/tools/parameter_explorer/renderer.tsx": {
+      "rawButton": 4,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 1,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/tools/predict_reveal/renderer.tsx": {
+      "rawButton": 2,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 2,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/tools/sort_sequence/item-chip.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/tools/sort_sequence/order-list.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/tools/sort_sequence/renderer.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/content-tools/tools/worked_example/renderer.tsx": {
+      "rawButton": 4,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/course-item-prompt-editor.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/credentials/credential-share-actions.tsx": {
+      "rawButton": 4,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/dashboard/notebook-tasks-card.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/editor/block-editor/alt-text-panel.tsx": {
+      "rawButton": 3,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/editor/block-editor/block-frame.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/components/editor/block-editor/course-aware-tip-tap-image.tsx": {
+      "rawButton": 6,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 4
+    },
+    "src/components/editor/block-editor/dictation-button.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/editor/block-editor/editor-sidebar.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 1,
+      "titleTooltip": 0
+    },
+    "src/components/editor/block-editor/markdown-body-editor.tsx": {
+      "rawButton": 6,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/editor/block-editor/markdown-format-toolbar.tsx": {
+      "rawButton": 10,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 10
+    },
+    "src/components/editor/block-editor/markdown-image-upload-modal.tsx": {
+      "rawButton": 8,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/editor/block-editor/markdown-table-controls.tsx": {
+      "rawButton": 7,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 7
+    },
+    "src/components/editor/block-editor/sidebar-section.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/editor/equation-editor-dialog.tsx": {
+      "rawButton": 4,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 1,
+      "titleTooltip": 0
+    },
+    "src/components/editor/extensions/notebook-task-node-view.tsx": {
+      "rawButton": 3,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 1,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/enrollment/course-enrollment-invitation-actions.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/feature-help/feature-help-dock.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/feature-help/feature-help-trigger.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/feed/feed-composer.tsx": {
+      "rawButton": 21,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 8
+    },
+    "src/components/feed/translate-button.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/feedback/feedback-dialog.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 1,
+      "rawTextarea": 1,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/feedback/feedback-widget.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/file-preview-fallback.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/file-preview.tsx": {
+      "rawButton": 7,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/gamification/gamification-dashboard-card.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/grading/grade-curve-modal.tsx": {
+      "rawButton": 6,
+      "rawInput": 4,
+      "rawSelect": 2,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/grading/gradebook-import-modal.tsx": {
+      "rawButton": 3,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/grading/originality-report-viewer.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/grading/rubric-grade-picker.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/grading/what-if-grades-panel.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/image-model-picker.tsx": {
+      "rawButton": 5,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/incident-status-banner.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/input-dialog.tsx": {
+      "rawButton": 3,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/intro-course/intro-completion-celebration.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/intro-course/intro-welcome-banner.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/keyboard-shortcuts/keyboard-shortcuts-sheet.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/layout/help-widget.tsx": {
+      "rawButton": 3,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/layout/notifications-drawer.tsx": {
+      "rawButton": 5,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 1,
+      "titleTooltip": 0
+    },
+    "src/components/layout/quiz-focus-top-bar.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/layout/reading-focus-toggle.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/layout/reading-focus-top-bar.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/layout/side-nav-command-palette.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/layout/side-nav-footer.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 1,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/layout/side-nav-settings-links.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/layout/side-nav.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/layout/top-bar.tsx": {
+      "rawButton": 7,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 2,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/legal/legal-update-banner.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/live-quiz/bank-import-drawer.tsx": {
+      "rawButton": 2,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/live-quiz/generate-with-ai-panel.tsx": {
+      "rawButton": 3,
+      "rawInput": 7,
+      "rawSelect": 1,
+      "rawTextarea": 2,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/live-quiz/gradebook-link-dialog.tsx": {
+      "rawButton": 4,
+      "rawInput": 2,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/live-quiz/host-safety-panel.tsx": {
+      "rawButton": 3,
+      "rawInput": 3,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/live-quiz/mc-option-list.tsx": {
+      "rawButton": 2,
+      "rawInput": 3,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/live-quiz/media-attach.tsx": {
+      "rawButton": 0,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/live-quiz/mode-picker.tsx": {
+      "rawButton": 0,
+      "rawInput": 5,
+      "rawSelect": 2,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/live-quiz/numeric-editor.tsx": {
+      "rawButton": 0,
+      "rawInput": 3,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/live-quiz/ordering-editor.tsx": {
+      "rawButton": 4,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/live-quiz/play/answer-grid.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/live-quiz/play/answer-numeric.tsx": {
+      "rawButton": 1,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/live-quiz/play/answer-ordering.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/live-quiz/play/answer-truefalse.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/live-quiz/play/answer-type.tsx": {
+      "rawButton": 1,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/live-quiz/question-type-picker.tsx": {
+      "rawButton": 0,
+      "rawInput": 0,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/live-quiz/scoring-profile-picker.tsx": {
+      "rawButton": 0,
+      "rawInput": 6,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/live-quiz/share-kit-dialog.tsx": {
+      "rawButton": 3,
+      "rawInput": 1,
+      "rawSelect": 2,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/live-quiz/template-picker-dialog.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/live-quiz/type-answer-editor.tsx": {
+      "rawButton": 2,
+      "rawInput": 2,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/lms/adaptive-content/adapted-banner.tsx": {
+      "rawButton": 4,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/lms/adaptive-content/adaptive-content-workspace.tsx": {
+      "rawButton": 28,
+      "rawInput": 10,
+      "rawSelect": 9,
+      "rawTextarea": 1,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 1,
+      "titleTooltip": 1
+    },
+    "src/components/lms/adaptive-content/effectiveness-chip.tsx": {
+      "rawButton": 0,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
+    "src/components/lms/adaptive-content/reports/admin-report-panel.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/lms/adaptive-content/reports/course-report-panel.tsx": {
+      "rawButton": 4,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/lms/grade-level-multi-select.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/lms/schedule-datetime-field.tsx": {
+      "rawButton": 2,
+      "rawInput": 3,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/lms/transcript-analytics-panel.tsx": {
+      "rawButton": 8,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/lms/transcript-checkout-form.tsx": {
+      "rawButton": 3,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/lms/transcript-consent-form.tsx": {
+      "rawButton": 3,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/lms/transcript-delivery-timeline.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/lms/transcript-inbound-queue.tsx": {
+      "rawButton": 6,
+      "rawInput": 3,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/lms/transcript-order-builder.tsx": {
+      "rawButton": 9,
+      "rawInput": 3,
+      "rawSelect": 4,
+      "rawTextarea": 1,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/lms/transcript-order-timeline.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/lms/transcript-request-modal.tsx": {
+      "rawButton": 3,
+      "rawInput": 1,
+      "rawSelect": 3,
+      "rawTextarea": 1,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/media/caption-settings.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 3,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/modules/module-requirements-panel.tsx": {
+      "rawButton": 1,
+      "rawInput": 1,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/modules/modules-ai-panel.tsx": {
+      "rawButton": 4,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/notebook/course-notebook-sidebar.tsx": {
+      "rawButton": 8,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 3
+    },
+    "src/components/notebook/flashcards-modal.tsx": {
+      "rawButton": 8,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
+    "src/components/notebook/notebook-group-panel.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/notebook/notebook-page-actions-menu.tsx": {
+      "rawButton": 5,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 2,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/notebook/study-buddy-widget.tsx": {
+      "rawButton": 5,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/oer/oer-search-panel.tsx": {
+      "rawButton": 3,
+      "rawInput": 1,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 1,
+      "titleTooltip": 0
+    },
+    "src/components/office-html-preview.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/oidc-connected-accounts-panel.tsx": {
+      "rawButton": 5,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/onboarding/learning-goals-panel.tsx": {
+      "rawButton": 1,
+      "rawInput": 4,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/outcomes/extract-outcomes-from-syllabus-modal.tsx": {
+      "rawButton": 4,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/outcomes/module-item-outcomes-mapping-accordion.tsx": {
+      "rawButton": 0,
+      "rawInput": 0,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/outcomes/outcome-links-editor.tsx": {
+      "rawButton": 4,
+      "rawInput": 0,
+      "rawSelect": 3,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/outcomes/suggest-quiz-outcome-links-modal.tsx": {
+      "rawButton": 4,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/pdf-viewer.tsx": {
+      "rawButton": 7,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/quiz/math-keyboard.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/quiz/proctoring-pre-exam-checklist.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/quiz/quiz-analytics-modal.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/quiz/quiz-item-analysis-panel.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 3
+    },
+    "src/components/quiz/quiz-page-settings-panel.tsx": {
+      "rawButton": 1,
+      "rawInput": 10,
+      "rawSelect": 9,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 10
+    },
+    "src/components/quiz/quiz-speed-grader-branch.tsx": {
+      "rawButton": 2,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/quiz/quiz-student-preview-modal.tsx": {
+      "rawButton": 6,
+      "rawInput": 11,
+      "rawSelect": 1,
+      "rawTextarea": 3,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/quiz/quiz-student-take-panel.tsx": {
+      "rawButton": 21,
+      "rawInput": 9,
+      "rawSelect": 1,
+      "rawTextarea": 2,
+      "roleDialog": 3,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/reading-level/reading-level-badge.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/reading-level/simplified-content-banner.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/reading-level/simplify-diff-dialog.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/research/consent-prompt.tsx": {
+      "rawButton": 3,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/reviews/course-reviews-section.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/reviews/review-form.tsx": {
+      "rawButton": 3,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/reviews/review-prompt-banner.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/self-paced/self-paced-progress.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings-panel/pin-toggle.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings-panel/pinned-settings-group.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings-panel/suggested-pins-strip.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/account-settings-view.tsx": {
+      "rawButton": 10,
+      "rawInput": 10,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 4
+    },
+    "src/components/settings/adaptive-content-oversight-panel.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/admin-service-tokens-panel.tsx": {
+      "rawButton": 5,
+      "rawInput": 3,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/advising-settings-panel.tsx": {
+      "rawButton": 1,
+      "rawInput": 4,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/ai-governance-panel.tsx": {
+      "rawButton": 1,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/ai-processing-settings-panel.tsx": {
+      "rawButton": 1,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/ai-provider-settings-panel.tsx": {
+      "rawButton": 2,
+      "rawInput": 1,
+      "rawSelect": 3,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/ai-providers-panel.tsx": {
+      "rawButton": 1,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/ai-reports-panel.tsx": {
+      "rawButton": 2,
+      "rawInput": 2,
+      "rawSelect": 2,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/archived-courses-panel.tsx": {
+      "rawButton": 5,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/badge-profile-settings-panel.tsx": {
+      "rawButton": 1,
+      "rawInput": 4,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/calendar-subscriptions-panel.tsx": {
+      "rawButton": 3,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
+    "src/components/settings/cloud-providers-panel.tsx": {
+      "rawButton": 2,
+      "rawInput": 3,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/courses-panel.tsx": {
+      "rawButton": 10,
+      "rawInput": 1,
+      "rawSelect": 3,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/create-access-key-modal.tsx": {
+      "rawButton": 10,
+      "rawInput": 5,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 2,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 4
+    },
+    "src/components/settings/feature-toggle-row.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/feedback-admin-panel.tsx": {
+      "rawButton": 9,
+      "rawInput": 3,
+      "rawSelect": 4,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/integrations-access-keys-panel.tsx": {
+      "rawButton": 4,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/integrations-mcp-panel.tsx": {
+      "rawButton": 1,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/intro-course-panel.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/learner-profile-panel.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/learner-profile/facet-section.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/learner-profile/insight-row.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/locale-format-settings-panel.tsx": {
+      "rawButton": 0,
+      "rawInput": 0,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/locale-switcher.tsx": {
+      "rawButton": 0,
+      "rawInput": 0,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/lrs-settings-panel.tsx": {
+      "rawButton": 2,
+      "rawInput": 5,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/lti-tools-settings-panel.tsx": {
+      "rawButton": 1,
+      "rawInput": 6,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/markdown-email-editor.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/mfa-factors-panel.tsx": {
+      "rawButton": 5,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/notification-preferences-panel.tsx": {
+      "rawButton": 5,
+      "rawInput": 0,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/oer-providers-panel.tsx": {
+      "rawButton": 0,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/org-units-panel.tsx": {
+      "rawButton": 7,
+      "rawInput": 2,
+      "rawSelect": 3,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/organizations-panel.tsx": {
+      "rawButton": 4,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/people-panel.tsx": {
+      "rawButton": 17,
+      "rawInput": 4,
+      "rawSelect": 2,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/platform-settings-panel.tsx": {
+      "rawButton": 2,
+      "rawInput": 12,
+      "rawSelect": 2,
+      "rawTextarea": 2,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/provider-credential-form.tsx": {
+      "rawButton": 3,
+      "rawInput": 5,
+      "rawSelect": 1,
+      "rawTextarea": 2,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/roles-permissions-panel.tsx": {
+      "rawButton": 20,
+      "rawInput": 9,
+      "rawSelect": 1,
+      "rawTextarea": 1,
+      "roleDialog": 3,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/components/settings/scim-settings-panel.tsx": {
+      "rawButton": 3,
+      "rawInput": 4,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/segmented-control.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/study-reminders-settings-panel.tsx": {
+      "rawButton": 2,
+      "rawInput": 6,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/system-email-templates-panel.tsx": {
+      "rawButton": 7,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/terms-settings-panel.tsx": {
+      "rawButton": 2,
+      "rawInput": 3,
+      "rawSelect": 2,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/settings/transcripts-settings-panel.tsx": {
+      "rawButton": 4,
+      "rawInput": 14,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/study-stats/reflection-journal-prompt.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/study-stats/study-stats-card.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/syllabus/syllabus-block-editor.tsx": {
+      "rawButton": 6,
+      "rawInput": 4,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/components/syllabus/syllabus-markdown-view.tsx": {
+      "rawButton": 5,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/text-file-preview.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 1,
+      "titleTooltip": 0
+    },
+    "src/components/timezone/timezone-selector.tsx": {
+      "rawButton": 3,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/todos/student-todo-view-picker.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/todos/student-todo-week-picker.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/translation/course-content-locale-selector.tsx": {
+      "rawButton": 0,
+      "rawInput": 0,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/tutor-panel.tsx": {
+      "rawButton": 7,
+      "rawInput": 0,
+      "rawSelect": 1,
+      "rawTextarea": 1,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/video-player/video-player.tsx": {
+      "rawButton": 6,
+      "rawInput": 0,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/whiteboard/whiteboard-toolbar.tsx": {
+      "rawButton": 12,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 5
+    },
+    "src/context/canvas-import-context.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 2,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/activate-parent.tsx": {
+      "rawButton": 1,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/AdminAuditLog.tsx": {
+      "rawButton": 0,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/AdminBanners.tsx": {
+      "rawButton": 2,
+      "rawInput": 4,
+      "rawSelect": 2,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/AdminCourses.tsx": {
+      "rawButton": 4,
+      "rawInput": 1,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/AdminCustomFields.tsx": {
+      "rawButton": 6,
+      "rawInput": 4,
+      "rawSelect": 2,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 1,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/AdminDiplomas.tsx": {
+      "rawButton": 4,
+      "rawInput": 6,
+      "rawSelect": 2,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/AdminEmailTemplates.tsx": {
+      "rawButton": 7,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
+    "src/pages/admin/AdminImport.tsx": {
+      "rawButton": 3,
+      "rawInput": 1,
+      "rawSelect": 2,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/AdminSearchResults.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/AdminSettings.tsx": {
+      "rawButton": 1,
+      "rawInput": 6,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/AdminTranscripts.tsx": {
+      "rawButton": 14,
+      "rawInput": 9,
+      "rawSelect": 3,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 1,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/AdminUserCustomFieldsPanel.tsx": {
+      "rawButton": 2,
+      "rawInput": 1,
+      "rawSelect": 2,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/AdminUsers.tsx": {
+      "rawButton": 5,
+      "rawInput": 1,
+      "rawSelect": 2,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/AttendanceDashboard.tsx": {
+      "rawButton": 0,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/AttendanceExport.tsx": {
+      "rawButton": 1,
+      "rawInput": 5,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/BehaviorDashboard.tsx": {
+      "rawButton": 1,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/BookstoreIntegration.tsx": {
+      "rawButton": 1,
+      "rawInput": 2,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/BroadcastComposer.tsx": {
+      "rawButton": 3,
+      "rawInput": 2,
+      "rawSelect": 1,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/admin/EvaluationReport.tsx": {
+      "rawButton": 1,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/EvaluationTemplates.tsx": {
+      "rawButton": 7,
+      "rawInput": 3,
+      "rawSelect": 1,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/SuperAdminLicenses.tsx": {
+      "rawButton": 1,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/academic-calendar.tsx": {
+      "rawButton": 6,
+      "rawInput": 4,
+      "rawSelect": 2,
+      "rawTextarea": 1,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/accessibility-services.tsx": {
+      "rawButton": 6,
+      "rawInput": 5,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/boards-governance.tsx": {
+      "rawButton": 1,
+      "rawInput": 3,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/conference-schedule-grid.tsx": {
+      "rawButton": 1,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/consent-studies.tsx": {
+      "rawButton": 5,
+      "rawInput": 3,
+      "rawSelect": 0,
+      "rawTextarea": 2,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/consortium-agreements.tsx": {
+      "rawButton": 2,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/content-filter-settings.tsx": {
+      "rawButton": 1,
+      "rawInput": 3,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/content-tools.tsx": {
+      "rawButton": 6,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/course-reviews-moderation.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/grade-submission-status.tsx": {
+      "rawButton": 0,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/incompletes.tsx": {
+      "rawButton": 1,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/integrations.tsx": {
+      "rawButton": 4,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/live-quizzes-governance.tsx": {
+      "rawButton": 5,
+      "rawInput": 6,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/scheduled-job-actions-menu.tsx": {
+      "rawButton": 4,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 1,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/sis-integration.tsx": {
+      "rawButton": 3,
+      "rawInput": 3,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/student-demographics.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/tool-reviews-page.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/webhooks.tsx": {
+      "rawButton": 5,
+      "rawInput": 3,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/backup-ops-admin-page.tsx": {
+      "rawButton": 1,
+      "rawInput": 4,
+      "rawSelect": 0,
+      "rawTextarea": 2,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/badges/public-badge-detail-page.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/cli-auth.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/course-design-research-page.tsx": {
+      "rawButton": 0,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
+    "src/pages/developer/developer-tools-page.tsx": {
+      "rawButton": 1,
+      "rawInput": 3,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/explore-catalog-page.tsx": {
+      "rawButton": 1,
+      "rawInput": 1,
+      "rawSelect": 4,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/forgot-password.tsx": {
+      "rawButton": 1,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/help/course-checklist-help-page.tsx": {
+      "rawButton": 0,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
+    "src/pages/iso-compliance-admin-page.tsx": {
+      "rawButton": 2,
+      "rawInput": 6,
+      "rawSelect": 2,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/live-quiz-play-page.tsx": {
+      "rawButton": 2,
+      "rawInput": 3,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/CeTranscript.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/CourseAttendance.tsx": {
+      "rawButton": 9,
+      "rawInput": 2,
+      "rawSelect": 2,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/CourseBehavior.tsx": {
+      "rawButton": 6,
+      "rawInput": 4,
+      "rawSelect": 3,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 1,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/CourseEvaluation.tsx": {
+      "rawButton": 1,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 4
+    },
+    "src/pages/lms/CourseEvaluationResults.tsx": {
+      "rawButton": 0,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 4
+    },
+    "src/pages/lms/CourseReportCards.tsx": {
+      "rawButton": 8,
+      "rawInput": 1,
+      "rawSelect": 1,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/MyBadges.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/MyCCR.tsx": {
+      "rawButton": 4,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/MyCredentials.tsx": {
+      "rawButton": 0,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/MyProfile.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
+    "src/pages/lms/accommodation-audit-page.tsx": {
+      "rawButton": 1,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/add-course-item-menu.tsx": {
+      "rawButton": 4,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 1,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/add-module-item-menu.tsx": {
+      "rawButton": 13,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 1,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/admin-accommodations-page.tsx": {
+      "rawButton": 6,
+      "rawInput": 15,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 3
+    },
+    "src/pages/lms/admin-ccr-achievements-page.tsx": {
+      "rawButton": 4,
+      "rawInput": 5,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 3
+    },
+    "src/pages/lms/admin-quarantine-page.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
+    "src/pages/lms/admin/org-branding-accent-field.tsx": {
+      "rawButton": 1,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/admin/org-branding-preview.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/admin/org-branding.tsx": {
+      "rawButton": 1,
+      "rawInput": 8,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/advising-notes.tsx": {
+      "rawButton": 0,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 3
+    },
+    "src/pages/lms/ask-ai-page.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
+    "src/pages/lms/assign-parents-page.tsx": {
+      "rawButton": 10,
+      "rawInput": 3,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/billing-settings.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/calendar-actions-menu.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 1,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/calendar-courses-view-menu.tsx": {
+      "rawButton": 4,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 1,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/calendar.tsx": {
+      "rawButton": 0,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
+    "src/pages/lms/canvas-import-courses-panel.tsx": {
+      "rawButton": 9,
+      "rawInput": 7,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/conference-availability-setup.tsx": {
+      "rawButton": 1,
+      "rawInput": 9,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-archived-content-section.tsx": {
+      "rawButton": 9,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 2,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-at-risk.tsx": {
+      "rawButton": 10,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 1,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-badges-section.tsx": {
+      "rawButton": 5,
+      "rawInput": 3,
+      "rawSelect": 1,
+      "rawTextarea": 2,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-blueprint-settings.tsx": {
+      "rawButton": 4,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-board-detail-page.tsx": {
+      "rawButton": 17,
+      "rawInput": 1,
+      "rawSelect": 3,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-boards-page.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-calendar-page.tsx": {
+      "rawButton": 0,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
+    "src/pages/lms/course-calendar.tsx": {
+      "rawButton": 5,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 1,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-canvas-import-panel.tsx": {
+      "rawButton": 1,
+      "rawInput": 6,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-caption-policy-section.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-catalog-actions-menu.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 1,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-catalog-hide-button.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-catalog-import-from-course-modal.tsx": {
+      "rawButton": 3,
+      "rawInput": 2,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-catalog-import-from-json-modal.tsx": {
+      "rawButton": 5,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-catalog-import-menu.tsx": {
+      "rawButton": 4,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 1,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-catalog-kanban.tsx": {
+      "rawButton": 4,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
+    "src/pages/lms/course-catalog-nickname-editor.tsx": {
+      "rawButton": 3,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
+    "src/pages/lms/course-catalog-pin-button.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-catalog-view-menu.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 1,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-catalog.tsx": {
+      "rawButton": 9,
+      "rawInput": 3,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/course-checklist/checklist-category-section.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-checklist/checklist-dismiss-dialog.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 1,
+      "rawTextarea": 1,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-checklist/checklist-dismissed-section.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-checklist/checklist-help-popover.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-checklist/checklist-item-row.tsx": {
+      "rawButton": 8,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 1,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-checklist/checklist-mapping-assist-dialog.tsx": {
+      "rawButton": 6,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-checklist/checklist-research-dialog.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-checklist/index.tsx": {
+      "rawButton": 4,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-collab-docs-page.tsx": {
+      "rawButton": 0,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
+    "src/pages/lms/course-consortium-settings-section.tsx": {
+      "rawButton": 1,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-content-tools-insights.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-create.tsx": {
+      "rawButton": 16,
+      "rawInput": 7,
+      "rawSelect": 2,
+      "rawTextarea": 3,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
+    "src/pages/lms/course-cross-listing-settings.tsx": {
+      "rawButton": 3,
+      "rawInput": 1,
+      "rawSelect": 2,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-detail.tsx": {
+      "rawButton": 0,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 3
+    },
+    "src/pages/lms/course-diagnostic-page.tsx": {
+      "rawButton": 5,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/course-discussions-page.tsx": {
+      "rawButton": 13,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/course-enrollments.tsx": {
+      "rawButton": 27,
+      "rawInput": 1,
+      "rawSelect": 6,
+      "rawTextarea": 3,
+      "roleDialog": 6,
+      "roleMenu": 0,
+      "roleTablist": 1,
+      "titleTooltip": 3
+    },
+    "src/pages/lms/course-event-log.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/course-export-import-section.tsx": {
+      "rawButton": 2,
+      "rawInput": 4,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-features-section.tsx": {
+      "rawButton": 2,
+      "rawInput": 11,
+      "rawSelect": 2,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-feed-page.tsx": {
+      "rawButton": 22,
+      "rawInput": 5,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 2,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/course-files-page.tsx": {
+      "rawButton": 27,
+      "rawInput": 8,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 1,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/course-gradebook.tsx": {
+      "rawButton": 11,
+      "rawInput": 1,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 2,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/course-grading-agents-section.tsx": {
+      "rawButton": 9,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-grading-settings.tsx": {
+      "rawButton": 2,
+      "rawInput": 9,
+      "rawSelect": 3,
+      "rawTextarea": 2,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/course-groups-page.tsx": {
+      "rawButton": 6,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 3
+    },
+    "src/pages/lms/course-json-import-confirm-dialog.tsx": {
+      "rawButton": 0,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
+    "src/pages/lms/course-live-page.tsx": {
+      "rawButton": 7,
+      "rawInput": 4,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
+    "src/pages/lms/course-marketplace-settings-section.tsx": {
+      "rawButton": 2,
+      "rawInput": 1,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-mastery-heatmap.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
+    "src/pages/lms/course-misconception-report-page.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
+    "src/pages/lms/course-module-assignment-page.tsx": {
+      "rawButton": 4,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
+    "src/pages/lms/course-module-content-page.tsx": {
+      "rawButton": 5,
+      "rawInput": 1,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
+    "src/pages/lms/course-module-external-link-page.tsx": {
+      "rawButton": 1,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-module-quiz-page.tsx": {
+      "rawButton": 45,
+      "rawInput": 28,
+      "rawSelect": 2,
+      "rawTextarea": 6,
+      "roleDialog": 3,
+      "roleMenu": 3,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
+    "src/pages/lms/course-module-textbook-resource-page.tsx": {
+      "rawButton": 3,
+      "rawInput": 10,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-module-vibe-activity-page.tsx": {
+      "rawButton": 0,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
+    "src/pages/lms/course-modules.tsx": {
+      "rawButton": 23,
+      "rawInput": 2,
+      "rawSelect": 2,
+      "rawTextarea": 0,
+      "roleDialog": 2,
+      "roleMenu": 2,
+      "roleTablist": 0,
+      "titleTooltip": 4
+    },
+    "src/pages/lms/course-my-grades.tsx": {
+      "rawButton": 4,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 6
+    },
+    "src/pages/lms/course-notebook-page.tsx": {
+      "rawButton": 0,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/course-office-hours-page.tsx": {
+      "rawButton": 11,
+      "rawInput": 4,
+      "rawSelect": 2,
+      "rawTextarea": 1,
+      "roleDialog": 2,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
+    "src/pages/lms/course-outcomes-report.tsx": {
+      "rawButton": 2,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 3
+    },
+    "src/pages/lms/course-outcomes-section.tsx": {
+      "rawButton": 6,
+      "rawInput": 5,
+      "rawSelect": 4,
+      "rawTextarea": 3,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
+    "src/pages/lms/course-plagiarism-settings-section.tsx": {
+      "rawButton": 1,
+      "rawInput": 2,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-question-bank-page.tsx": {
+      "rawButton": 11,
+      "rawInput": 6,
+      "rawSelect": 3,
+      "rawTextarea": 5,
+      "roleDialog": 3,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 3
+    },
+    "src/pages/lms/course-sections-settings.tsx": {
+      "rawButton": 3,
+      "rawInput": 2,
+      "rawSelect": 2,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-settings.tsx": {
+      "rawButton": 16,
+      "rawInput": 12,
+      "rawSelect": 4,
+      "rawTextarea": 2,
+      "roleDialog": 2,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
+    "src/pages/lms/course-standards-coverage-page.tsx": {
+      "rawButton": 6,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-standards-gradebook.tsx": {
+      "rawButton": 1,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
+    "src/pages/lms/course-student-reports-page.tsx": {
+      "rawButton": 0,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/course-syllabus-acceptance-overlay.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-syllabus.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/course-translations-settings.tsx": {
+      "rawButton": 6,
+      "rawInput": 3,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/course-whats-working.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 3
+    },
+    "src/pages/lms/course-whiteboard-page.tsx": {
+      "rawButton": 5,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
+    "src/pages/lms/courses.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 2,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 4
+    },
+    "src/pages/lms/creator-earnings-page.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/creator-learning-paths-page.tsx": {
+      "rawButton": 4,
+      "rawInput": 5,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 3
+    },
+    "src/pages/lms/credential-wallet-page.tsx": {
+      "rawButton": 9,
+      "rawInput": 3,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/dashboard.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/enrollment-groups-panel.tsx": {
+      "rawButton": 13,
+      "rawInput": 4,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 1,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
+    "src/pages/lms/enrollments-actions-menu.tsx": {
+      "rawButton": 4,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 1,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/final-grade-submission.tsx": {
+      "rawButton": 1,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/global-notebook-page.tsx": {
+      "rawButton": 0,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 3
+    },
+    "src/pages/lms/gradebook/IncompleteGradeModal.tsx": {
+      "rawButton": 4,
+      "rawInput": 3,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/gradebook/gradebook-cell-menu.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 1,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/gradebook/gradebook-grid-transposed.tsx": {
+      "rawButton": 2,
+      "rawInput": 1,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
+    "src/pages/lms/gradebook/gradebook-grid.tsx": {
+      "rawButton": 23,
+      "rawInput": 3,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 1,
+      "roleTablist": 0,
+      "titleTooltip": 4
+    },
+    "src/pages/lms/gradebook/gradebook-submission-grading-modal.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 2,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/h5p-upload-modal.tsx": {
+      "rawButton": 2,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/inbox.tsx": {
+      "rawButton": 11,
+      "rawInput": 3,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/inclusive-access-banner.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/lesson-generator.tsx": {
+      "rawButton": 3,
+      "rawInput": 7,
+      "rawSelect": 0,
+      "rawTextarea": 2,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/library-catalog-page.tsx": {
+      "rawButton": 5,
+      "rawInput": 7,
+      "rawSelect": 2,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/live-quiz-host-page.tsx": {
+      "rawButton": 12,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/live-quiz-kit-editor-page.tsx": {
+      "rawButton": 19,
+      "rawInput": 3,
+      "rawSelect": 1,
+      "rawTextarea": 2,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/live-quiz-kits-page.tsx": {
+      "rawButton": 12,
+      "rawInput": 3,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 1,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/live-quiz-library-page.tsx": {
+      "rawButton": 3,
+      "rawInput": 5,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/live-quiz-my-results-page.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/live-quiz-present-page.tsx": {
+      "rawButton": 0,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/live-quiz-report-page.tsx": {
+      "rawButton": 4,
+      "rawInput": 1,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/moderation-dashboard.tsx": {
+      "rawButton": 4,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/module-external-link-modal.tsx": {
+      "rawButton": 3,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/module-lti-link-modal.tsx": {
+      "rawButton": 3,
+      "rawInput": 3,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/module-name-modal.tsx": {
+      "rawButton": 3,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/module-settings-modal.tsx": {
+      "rawButton": 7,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 1,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/my-accommodations.tsx": {
+      "rawButton": 0,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 3
+    },
+    "src/pages/lms/my-notebooks-page.tsx": {
+      "rawButton": 3,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/my-paths.tsx": {
+      "rawButton": 0,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 4
+    },
+    "src/pages/lms/my-portfolios-page.tsx": {
+      "rawButton": 4,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 3
+    },
+    "src/pages/lms/org-tax-settings-page.tsx": {
+      "rawButton": 2,
+      "rawInput": 6,
+      "rawSelect": 1,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/parent/conference-booking.tsx": {
+      "rawButton": 1,
+      "rawInput": 1,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/parent/parent-dashboard.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/path-landing-page.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/paths-catalog-page.tsx": {
+      "rawButton": 0,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/peer-review-summary-page.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/peer-reviews-page.tsx": {
+      "rawButton": 1,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/portfolio-artifact-content-page.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/portfolio-editor-page.tsx": {
+      "rawButton": 18,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 1,
+      "roleMenu": 2,
+      "roleTablist": 0,
+      "titleTooltip": 6
+    },
+    "src/pages/lms/reading-dashboard-page.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/reading-log-page.tsx": {
+      "rawButton": 3,
+      "rawInput": 3,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/reports.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
+    "src/pages/lms/research-studies.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 3
+    },
+    "src/pages/lms/review-session-page.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/scorm-upload-modal.tsx": {
+      "rawButton": 2,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/screen-share-console.tsx": {
+      "rawButton": 6,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/settings.tsx": {
+      "rawButton": 2,
+      "rawInput": 1,
+      "rawSelect": 1,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 3
+    },
+    "src/pages/lms/student-progress-page.tsx": {
+      "rawButton": 11,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 2,
+      "roleDialog": 1,
+      "roleMenu": 1,
+      "roleTablist": 1,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/study-insights-page.tsx": {
+      "rawButton": 5,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 3
+    },
+    "src/pages/lms/todos-page.tsx": {
+      "rawButton": 0,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
+    "src/pages/lms/transcripts-page.tsx": {
+      "rawButton": 9,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 3
+    },
+    "src/pages/lms/vibe-activity-create-modal.tsx": {
+      "rawButton": 7,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 3,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/login.tsx": {
+      "rawButton": 1,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/marketplace/marketplace-course-page.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/marketplace/marketplace-page.tsx": {
+      "rawButton": 2,
+      "rawInput": 1,
+      "rawSelect": 4,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/marketplace/marketplace-purchase-action-page.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/mfa-login.tsx": {
+      "rawButton": 6,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/onboarding/onboarding-page.tsx": {
+      "rawButton": 10,
+      "rawInput": 9,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/onboarding/onboarding-shell.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/portfolio/public-portfolio-page.tsx": {
+      "rawButton": 0,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
+    "src/pages/privacy-centre-page.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/public/board-share-page.tsx": {
+      "rawButton": 3,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/public/transcript-share-page.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/reset-password.tsx": {
+      "rawButton": 1,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/security-disclosure-admin-page.tsx": {
+      "rawButton": 2,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/signup.tsx": {
+      "rawButton": 1,
+      "rawInput": 4,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/tool-marketplace/tool-marketplace-detail-page.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/tool-marketplace/tool-marketplace-page.tsx": {
+      "rawButton": 0,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/trust-center-page.tsx": {
+      "rawButton": 2,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 5
+    },
+    "src/pages/typeface-page.tsx": {
+      "rawButton": 0,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/verify/CcrVerify.tsx": {
+      "rawButton": 1,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    }
+  }
+}

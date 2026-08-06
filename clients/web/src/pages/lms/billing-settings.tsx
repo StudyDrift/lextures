@@ -89,10 +89,10 @@ export default function BillingSettingsPage() {
     <LmsPage title="Billing">
       <div className="mx-auto max-w-3xl space-y-6">
         <header>
-          <h1 id={titleId} className="text-2xl font-semibold text-slate-900 dark:text-neutral-100">
+          <h1 id={titleId} className="text-2xl font-semibold text-fg-default">
             Billing
           </h1>
-          <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
+          <p className="mt-2 text-sm text-fg-muted">
             Manage your subscription, payment method, and purchase history.
           </p>
         </header>
@@ -106,23 +106,23 @@ export default function BillingSettingsPage() {
           </p>
         ) : null}
 
-        <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
+        <section className="rounded-xl border border-border-default bg-surface-raised p-5 shadow-sm dark:border-border-subtle dark:bg-surface-raised">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-medium text-slate-900 dark:text-neutral-100">Subscription</h2>
+              <h2 className="text-lg font-medium text-fg-default">Subscription</h2>
               {activeSubscription ? (
                 <p className="mt-1 text-sm text-emerald-700 dark:text-emerald-300">
                   Active — {entitlementLabel(activeSubscription)}
                 </p>
               ) : (
-                <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">No active subscription</p>
+                <p className="mt-1 text-sm text-fg-muted">No active subscription</p>
               )}
             </div>
             <button
               type="button"
               onClick={() => void handleManageSubscription()}
               disabled={portalLoading}
-              className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-lg bg-accent-solid px-4 py-2 text-sm font-medium text-white hover:bg-accent disabled:opacity-60"
             >
               {portalLoading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null}
               Manage subscription
@@ -131,25 +131,25 @@ export default function BillingSettingsPage() {
           </div>
         </section>
 
-        <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-          <h2 className="text-lg font-medium text-slate-900 dark:text-neutral-100">Purchase history</h2>
+        <section className="rounded-xl border border-border-default bg-surface-raised p-5 shadow-sm dark:border-border-subtle dark:bg-surface-raised">
+          <h2 className="text-lg font-medium text-fg-default">Purchase history</h2>
           {ffCourseMarketplace ? (
-            <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+            <p className="mt-1 text-sm text-fg-muted">
               <Link
                 to="/me/purchases"
-                className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-300"
+                className="font-medium text-accent-fg hover:text-indigo-500 dark:text-indigo-300"
               >
                 View marketplace purchases
               </Link>
             </p>
           ) : null}
           {loading ? (
-            <p className="mt-4 text-sm text-slate-600 dark:text-neutral-400">Loading…</p>
+            <p className="mt-4 text-sm text-fg-muted">Loading…</p>
           ) : transactions.length > 0 ? (
             <div className="mt-4 overflow-x-auto">
               <table className="min-w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-slate-200 text-slate-500 dark:border-neutral-700 dark:text-neutral-400">
+                  <tr className="border-b border-border-default text-fg-muted dark:border-border-default dark:text-fg-muted">
                     <th className="py-2 pr-4 font-medium">Provider</th>
                     <th className="py-2 pr-4 font-medium">Amount</th>
                     <th className="py-2 pr-4 font-medium">Date</th>
@@ -158,7 +158,7 @@ export default function BillingSettingsPage() {
                 </thead>
                 <tbody>
                   {transactions.map((tx) => (
-                    <tr key={tx.id} className="border-b border-slate-100 dark:border-neutral-800">
+                    <tr key={tx.id} className="border-b border-border-subtle">
                       <td className="py-3 pr-4 capitalize">{tx.provider}</td>
                       <td className="py-3 pr-4">{formatMoney(tx.amountCents, tx.currency)}</td>
                       <td className="py-3 pr-4">{new Date(tx.createdAt).toLocaleDateString()}</td>
@@ -169,12 +169,12 @@ export default function BillingSettingsPage() {
               </table>
             </div>
           ) : entitlements.length === 0 ? (
-            <p className="mt-4 text-sm text-slate-600 dark:text-neutral-400">No purchases yet.</p>
+            <p className="mt-4 text-sm text-fg-muted">No purchases yet.</p>
           ) : (
             <div className="mt-4 overflow-x-auto">
               <table className="min-w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-slate-200 text-slate-500 dark:border-neutral-700 dark:text-neutral-400">
+                  <tr className="border-b border-border-default text-fg-muted dark:border-border-default dark:text-fg-muted">
                     <th className="py-2 pr-4 font-medium">Type</th>
                     <th className="py-2 pr-4 font-medium">Amount</th>
                     <th className="py-2 pr-4 font-medium">Tax</th>
@@ -185,7 +185,7 @@ export default function BillingSettingsPage() {
                 </thead>
                 <tbody>
                   {entitlements.map((e) => (
-                    <tr key={e.id} className="border-b border-slate-100 dark:border-neutral-800">
+                    <tr key={e.id} className="border-b border-border-subtle">
                       <td className="py-3 pr-4">{entitlementLabel(e)}</td>
                       <td className="py-3 pr-4">{formatMoney(e.amountPaidCents, e.currency)}</td>
                       <td className="py-3 pr-4">
@@ -197,7 +197,7 @@ export default function BillingSettingsPage() {
                         {e.invoiceId ? (
                           <a
                             href={invoiceDownloadUrl(e.invoiceId)}
-                            className="text-sm font-medium text-indigo-600 hover:underline"
+                            className="text-sm font-medium text-accent-fg hover:underline"
                             onClick={async (ev) => {
                               ev.preventDefault()
                               const res = await authorizedFetch(`/api/v1/invoices/${e.invoiceId}`)
@@ -224,7 +224,7 @@ export default function BillingSettingsPage() {
             </div>
           )}
           {me ? (
-            <p className="mt-4 text-xs text-slate-500 dark:text-neutral-500">Signed in as {me.email}</p>
+            <p className="mt-4 text-xs text-fg-subtle">Signed in as {me.email}</p>
           ) : null}
         </section>
       </div>

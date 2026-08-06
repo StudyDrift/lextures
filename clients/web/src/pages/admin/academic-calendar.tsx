@@ -105,7 +105,7 @@ function EventModal({
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
-      <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-xl w-full max-w-md p-6">
+      <div className="bg-surface-raised rounded-xl shadow-xl w-full max-w-md p-6">
         <h2 className="text-lg font-semibold mb-4">{isEdit ? 'Edit event' : 'Add calendar event'}</h2>
         <form onSubmit={(e) => { void handleSubmit(e) }} className="space-y-4">
           <div>
@@ -114,7 +114,7 @@ function EventModal({
               id="cal-event-type"
               value={eventType}
               onChange={(e) => setEventType(e.target.value as CalendarEventType)}
-              className="w-full border rounded-lg px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+              className="w-full border rounded-lg px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
               required
             >
               {EVENT_TYPES.map((t) => (
@@ -131,7 +131,7 @@ function EventModal({
               value={eventName}
               onChange={(e) => setEventName(e.target.value)}
               placeholder="e.g. Spring Break"
-              className="w-full border rounded-lg px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+              className="w-full border rounded-lg px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
               required
             />
           </div>
@@ -143,44 +143,44 @@ function EventModal({
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full border rounded-lg px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+                className="w-full border rounded-lg px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
                 required
               />
             </div>
             <div>
-              <label htmlFor="cal-end-date" className="block text-sm font-medium mb-1">End date <span className="text-slate-400">(opt.)</span></label>
+              <label htmlFor="cal-end-date" className="block text-sm font-medium mb-1">End date <span className="text-fg-subtle">(opt.)</span></label>
               <input
                 id="cal-end-date"
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full border rounded-lg px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+                className="w-full border rounded-lg px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
               />
             </div>
           </div>
           <div>
-            <label htmlFor="cal-notes" className="block text-sm font-medium mb-1">Notes <span className="text-slate-400">(opt.)</span></label>
+            <label htmlFor="cal-notes" className="block text-sm font-medium mb-1">Notes <span className="text-fg-subtle">(opt.)</span></label>
             <textarea
               id="cal-notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={2}
-              className="w-full border rounded-lg px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+              className="w-full border rounded-lg px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
             />
           </div>
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-danger-fg">{error}</p>}
           <div className="flex justify-end gap-2 pt-1">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm rounded-lg border dark:border-neutral-600 hover:bg-slate-50 dark:hover:bg-neutral-800"
+              className="px-4 py-2 text-sm rounded-lg border dark:border-border-default hover:bg-surface-base dark:hover:bg-surface-overlay"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="px-4 py-2 text-sm rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50"
+              className="px-4 py-2 text-sm rounded-lg bg-accent-solid text-white hover:bg-accent disabled:opacity-50"
             >
               {saving ? 'Saving…' : isEdit ? 'Save changes' : 'Add event'}
             </button>
@@ -265,7 +265,7 @@ export default function AcademicCalendarAdminPage() {
     return (
       <div className="p-6 max-w-4xl mx-auto">
         <h1 className="text-xl font-semibold mb-2">Academic Calendar</h1>
-        <p className="text-sm text-slate-600">Academic calendar is not enabled for this platform.</p>
+        <p className="text-sm text-fg-muted">Academic calendar is not enabled for this platform.</p>
       </div>
     )
   }
@@ -273,7 +273,7 @@ export default function AcademicCalendarAdminPage() {
   return (
     <div className="p-6 max-w-5xl mx-auto">
       <h1 className="text-xl font-semibold mb-1">Academic Calendar</h1>
-      <p className="text-sm text-slate-600 dark:text-neutral-400 mb-6">
+      <p className="text-sm text-fg-muted mb-6">
         Manage institutional calendar events — add/drop deadlines, finals, holidays, and no-class days.
       </p>
 
@@ -289,7 +289,7 @@ export default function AcademicCalendarAdminPage() {
               loadTerms(e.target.value.trim())
             }}
             placeholder="Organization UUID"
-            className="border rounded-lg px-3 py-2 text-sm w-72 dark:border-neutral-600 dark:bg-neutral-800"
+            className="border rounded-lg px-3 py-2 text-sm w-72 dark:border-border-default dark:bg-surface-overlay"
           />
         </div>
         {terms.length > 0 && (
@@ -299,7 +299,7 @@ export default function AcademicCalendarAdminPage() {
               id="term-select"
               value={selectedTermId}
               onChange={(e) => setSelectedTermId(e.target.value)}
-              className="border rounded-lg px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+              className="border rounded-lg px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
             >
               <option value="">All terms</option>
               {terms.map((t) => (
@@ -311,21 +311,21 @@ export default function AcademicCalendarAdminPage() {
         <button
           onClick={() => setModal({ mode: 'create' })}
           disabled={!orgId.trim()}
-          className="px-4 py-2 text-sm rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-40"
+          className="px-4 py-2 text-sm rounded-lg bg-accent-solid text-white hover:bg-accent disabled:opacity-40"
         >
           Add event
         </button>
       </div>
 
-      {loading && <p className="text-sm text-slate-500">Loading…</p>}
-      {error && <p className="text-sm text-red-600 mb-3">{error}</p>}
+      {loading && <p className="text-sm text-fg-muted">Loading…</p>}
+      {error && <p className="text-sm text-danger-fg mb-3">{error}</p>}
 
       {!loading && events.length === 0 && orgId.trim() && (
-        <div className="border border-dashed rounded-xl p-8 text-center text-slate-500 dark:border-neutral-700">
+        <div className="border border-dashed rounded-xl p-8 text-center text-fg-muted dark:border-border-default">
           <p className="mb-2">No calendar events configured.</p>
           <button
             onClick={() => setModal({ mode: 'create' })}
-            className="text-indigo-600 hover:underline text-sm"
+            className="text-accent-fg hover:underline text-sm"
           >
             Add the first event
           </button>
@@ -336,11 +336,11 @@ export default function AcademicCalendarAdminPage() {
         <div
           role="grid"
           aria-label="Calendar events"
-          className="border rounded-xl overflow-hidden dark:border-neutral-700"
+          className="border rounded-xl overflow-hidden dark:border-border-default"
         >
           <div
             role="row"
-            className="grid grid-cols-[1fr_1fr_1fr_auto] gap-4 px-4 py-2 bg-slate-50 dark:bg-neutral-800 text-xs font-medium text-slate-500 uppercase tracking-wide"
+            className="grid grid-cols-[1fr_1fr_1fr_auto] gap-4 px-4 py-2 bg-surface-sunken text-xs font-medium text-fg-muted uppercase tracking-wide"
           >
             <span role="columnheader">Event</span>
             <span role="columnheader">Type</span>
@@ -351,11 +351,11 @@ export default function AcademicCalendarAdminPage() {
             <div
               key={ev.id}
               role="row"
-              className="grid grid-cols-[1fr_1fr_1fr_auto] gap-4 px-4 py-3 border-t dark:border-neutral-700 items-center text-sm"
+              className="grid grid-cols-[1fr_1fr_1fr_auto] gap-4 px-4 py-3 border-t dark:border-border-default items-center text-sm"
             >
               <span role="gridcell" className="font-medium">{ev.eventName}</span>
-              <span role="gridcell" className="text-slate-600 dark:text-neutral-400">{eventTypeLabel(ev.eventType)}</span>
-              <span role="gridcell" className="text-slate-600 dark:text-neutral-400">
+              <span role="gridcell" className="text-fg-muted">{eventTypeLabel(ev.eventType)}</span>
+              <span role="gridcell" className="text-fg-muted">
                 <time dateTime={ev.startDate}>{ev.startDate}</time>
                 {ev.endDate && (
                   <> – <time dateTime={ev.endDate}>{ev.endDate}</time></>
@@ -364,7 +364,7 @@ export default function AcademicCalendarAdminPage() {
               <span role="gridcell" className="flex gap-2">
                 <button
                   onClick={() => setModal({ mode: 'edit', event: ev })}
-                  className="text-xs text-indigo-600 hover:underline"
+                  className="text-xs text-accent-fg hover:underline"
                   aria-label={`Edit ${ev.eventName}`}
                 >
                   Edit
@@ -372,7 +372,7 @@ export default function AcademicCalendarAdminPage() {
                 <button
                   onClick={() => { void handleDelete(ev.id) }}
                   disabled={deleting === ev.id}
-                  className="text-xs text-red-600 hover:underline disabled:opacity-40"
+                  className="text-xs text-danger-fg hover:underline disabled:opacity-40"
                   aria-label={`Delete ${ev.eventName}`}
                 >
                   {deleting === ev.id ? '…' : 'Delete'}

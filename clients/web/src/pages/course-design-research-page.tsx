@@ -25,14 +25,14 @@ export default function CourseDesignResearchPage() {
       actions={
         <Link
           to="/help/course-checklist"
-          className="inline-flex min-h-11 items-center rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+          className="inline-flex min-h-11 items-center rounded-lg border border-border-default bg-surface-raised px-3 text-sm font-medium text-fg-muted hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
         >
           Checklist help hub
         </Link>
       }
     >
       <ChecklistResearchBody className="max-w-3xl" focusSource={focusSource} />
-      <p className="mt-10 max-w-3xl text-xs text-slate-500 dark:text-neutral-500">
+      <p className="mt-10 max-w-3xl text-xs text-fg-subtle">
         Canonical path: <code className="font-mono">{COURSE_DESIGN_RESEARCH_HREF}</code>
         {focusSource ? (
           <>

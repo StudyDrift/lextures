@@ -29,7 +29,7 @@ export type TimezoneSelectorProps = {
 }
 
 const fieldClass =
-  'w-full rounded-lg border border-stone-300 bg-white px-2 py-1.5 text-sm text-stone-900 shadow-sm outline-none transition-[background-color,color,border-color] placeholder:text-stone-400 focus:border-teal-700 focus:ring-2 focus:ring-teal-700/15 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-teal-500 dark:focus:ring-teal-500/20'
+  'w-full rounded-lg border border-stone-300 bg-surface-raised px-2 py-1.5 text-sm text-stone-900 shadow-sm outline-none transition-[background-color,color,border-color] placeholder:text-stone-400 focus:border-teal-700 focus:ring-2 focus:ring-teal-700/15 disabled:cursor-not-allowed disabled:opacity-60 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:placeholder:text-neutral-500 dark:focus:border-teal-500 dark:focus:ring-teal-500/20'
 
 function formatTimezoneLabel(id: string): string {
   if (id === COURSE_TIMEZONE_LOCAL) return 'Learner local time'
@@ -188,24 +188,24 @@ export function TimezoneSelector({
 
   return (
     <div className="space-y-2" data-testid={testId}>
-      <label htmlFor={listId} className="block text-sm font-medium text-stone-800 dark:text-neutral-200">
+      <label htmlFor={listId} className="block text-sm font-medium text-stone-800 dark:text-fg-default">
         {label}
       </label>
       {showDetectedHint && !courseMode && (
-        <p className="text-xs text-stone-600 dark:text-neutral-400">
+        <p className="text-xs text-stone-600 dark:text-fg-muted">
           We detected your time zone as{' '}
-          <span className="font-medium text-stone-800 dark:text-neutral-200">{detected}</span>.
+          <span className="font-medium text-stone-800 dark:text-fg-default">{detected}</span>.
           Change it below if that is not correct.
         </p>
       )}
 
       {selected && (
-        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-stone-200 bg-stone-50 px-2.5 py-2 dark:border-neutral-700 dark:bg-neutral-900/60">
+        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-stone-200 bg-stone-50 px-2.5 py-2 dark:border-border-default/60">
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-stone-900 dark:text-neutral-100">
+            <p className="truncate text-sm font-medium text-stone-900 dark:text-fg-default">
               {selectedLabel}
             </p>
-            <p className="text-xs text-stone-500 dark:text-neutral-400">
+            <p className="text-xs text-stone-500 dark:text-fg-muted">
               {isLocal
                 ? 'Due times apply in each learner’s own time zone'
                 : selectedOffset != null
@@ -220,7 +220,7 @@ export function TimezoneSelector({
               type="button"
               disabled={disabled}
               onClick={() => clearSelection()}
-              className="shrink-0 rounded-md px-2 py-1 text-xs font-medium text-stone-600 hover:bg-stone-200 hover:text-stone-900 disabled:opacity-50 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-neutral-50"
+              className="shrink-0 rounded-md px-2 py-1 text-xs font-medium text-stone-600 hover:bg-stone-200 hover:text-stone-900 disabled:opacity-50 dark:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-neutral-50"
               data-testid={testId ? `${testId}-clear` : undefined}
             >
               Clear
@@ -234,7 +234,7 @@ export function TimezoneSelector({
               setListOpen(true)
               inputRef.current?.focus()
             }}
-            className="shrink-0 rounded-md bg-white px-2 py-1 text-xs font-medium text-teal-800 ring-1 ring-stone-200 hover:bg-stone-100 disabled:opacity-50 dark:bg-neutral-950 dark:text-teal-300 dark:ring-neutral-600 dark:hover:bg-neutral-800"
+            className="shrink-0 rounded-md bg-surface-raised px-2 py-1 text-xs font-medium text-teal-800 ring-1 ring-stone-200 hover:bg-stone-100 disabled:opacity-50 dark:bg-surface-base dark:text-teal-300 dark:ring-neutral-600 dark:hover:bg-surface-overlay"
           >
             Change
           </button>
@@ -283,10 +283,10 @@ export function TimezoneSelector({
         <ul
           id={`${listId}-listbox`}
           role="listbox"
-          className="max-h-56 overflow-y-auto rounded-lg border border-stone-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-950"
+          className="max-h-56 overflow-y-auto rounded-lg border border-stone-200 bg-surface-raised shadow-sm dark:border-border-default dark:bg-surface-base"
         >
           {optionIds.length === 0 && (
-            <li className="px-2.5 py-2 text-sm text-stone-500 dark:text-neutral-400">
+            <li className="px-2.5 py-2 text-sm text-stone-500 dark:text-fg-muted">
               No time zones match “{query.trim()}”.
             </li>
           )}
@@ -300,9 +300,7 @@ export function TimezoneSelector({
                 <button
                   type="button"
                   disabled={disabled}
-                  className={`flex w-full items-start justify-between gap-3 px-2.5 py-2 text-left text-sm text-stone-900 hover:bg-stone-100 dark:text-neutral-100 dark:hover:bg-neutral-800 ${
-                    isSelected ? 'bg-teal-50 font-medium dark:bg-teal-950/50' : ''
-                  } ${isActive && !isSelected ? 'bg-stone-50 dark:bg-neutral-900' : ''}`}
+                  className={`flex w-full items-start justify-between gap-3 px-2.5 py-2 text-left text-sm text-stone-900 hover:bg-stone-100 dark:text-fg-default dark:hover:bg-surface-overlay ${ isSelected ? 'bg-teal-50 font-medium dark:bg-teal-950/50' : '' } ${isActive && !isSelected ? 'bg-stone-50 dark:bg-surface-raised' : ''}`}
                   onMouseDown={(ev) => ev.preventDefault()}
                   onMouseEnter={() => setHighlight(index)}
                   onClick={() => select(id)}
@@ -312,13 +310,13 @@ export function TimezoneSelector({
                       {preset ? preset.title : formatTimezoneLabel(id)}
                     </span>
                     {preset && (
-                      <span className="mt-0.5 block text-xs font-normal text-stone-500 dark:text-neutral-400">
+                      <span className="mt-0.5 block text-xs font-normal text-stone-500 dark:text-fg-muted">
                         {preset.subtitle}
                       </span>
                     )}
                   </span>
                   {id !== COURSE_TIMEZONE_LOCAL && (
-                    <span className="shrink-0 font-mono text-xs text-stone-500 dark:text-neutral-400">
+                    <span className="shrink-0 font-mono text-xs text-stone-500 dark:text-fg-muted">
                       {entry
                         ? formatUtcOffsetLabel(entry.offsetMinutes)
                         : id === 'UTC'
@@ -331,7 +329,7 @@ export function TimezoneSelector({
             )
           })}
           {!query.trim() && entries.length > 80 && (
-            <li className="border-t border-stone-100 px-2.5 py-1.5 text-xs text-stone-500 dark:border-neutral-800 dark:text-neutral-500">
+            <li className="border-t border-stone-100 px-2.5 py-1.5 text-xs text-stone-500 dark:border-border-subtle">
               Showing the first 80 zones — type to search the full list.
             </li>
           )}

@@ -70,12 +70,12 @@ export function CourseContentLocaleSelector({ courseCode, className }: Props) {
 
   return (
     <label
-      className={`inline-flex items-center gap-2 text-sm text-stone-700 dark:text-neutral-300 ${className ?? ''}`}
+      className={`inline-flex items-center gap-2 text-sm text-stone-700 dark:text-fg-muted ${className ?? ''}`}
     >
       <Languages className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
       <span className="sr-only">Course content language</span>
       <select
-        className="rounded-md border border-stone-300 bg-white px-2 py-1 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+        className="rounded-md border border-stone-300 bg-surface-raised px-2 py-1 text-sm dark:border-border-default dark:bg-surface-raised"
         value={value}
         disabled={saving}
         onChange={(e) => void onChange(e.target.value)}

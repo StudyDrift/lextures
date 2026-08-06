@@ -31,7 +31,7 @@ export function SelfPacedProgressBar({
         className="h-2 flex-1 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700 lx-delight-progress"
         fillClassName="h-full rounded-full bg-emerald-500"
       />
-      <span className="shrink-0 text-xs font-semibold tabular-nums text-slate-700 dark:text-slate-200">
+      <span className="shrink-0 text-xs font-semibold tabular-nums text-fg-muted dark:text-slate-200">
         {text}
       </span>
     </div>
@@ -59,12 +59,12 @@ export function CompletionCelebration({
         announcement="Course complete"
         className="w-full max-w-md"
       >
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-xl dark:bg-slate-800">
+      <div className="w-full max-w-md rounded-2xl bg-surface-raised p-8 text-center shadow-xl dark:bg-slate-800">
         <PartyPopper className="mx-auto h-12 w-12 text-emerald-500" aria-hidden />
-        <h2 className="mt-4 text-xl font-bold text-slate-900 dark:text-white">
+        <h2 className="mt-4 text-xl font-bold text-fg-default dark:text-white">
           Course complete!
         </h2>
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+        <p className="mt-2 text-sm text-fg-muted dark:text-slate-300">
           You finished every item in this course at your own pace. Nice work.
         </p>
         {credential ? (
@@ -76,7 +76,7 @@ export function CompletionCelebration({
           <button
             type="button"
             onClick={onClose}
-            className="w-full rounded-lg px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"
+            className="w-full rounded-lg px-4 py-2 text-sm font-medium text-fg-muted hover:bg-surface-sunken dark:text-slate-300 dark:hover:bg-slate-700"
           >
             Keep exploring
           </button>
@@ -145,10 +145,10 @@ export function SelfPacedProgressHeader({
   return (
     <section
       aria-label="Course progress"
-      className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800"
+      className="rounded-xl border border-border-default bg-surface-raised p-4 dark:border-slate-700 dark:bg-slate-800"
     >
       <div className="flex items-center justify-between gap-4">
-        <h2 className="text-sm font-semibold text-slate-900 dark:text-white">
+        <h2 className="text-sm font-semibold text-fg-default dark:text-white">
           Your progress
         </h2>
         {progress.resumeItemId && !progress.completed ? (

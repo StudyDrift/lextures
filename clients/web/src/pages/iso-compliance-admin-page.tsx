@@ -134,7 +134,7 @@ export default function IsoComplianceAdminPage() {
   if (loading) {
     return (
       <div className="p-6 max-w-5xl mx-auto">
-        <p className="text-slate-600 dark:text-neutral-400">Loading ISO ISMS dashboard…</p>
+        <p className="text-fg-muted">Loading ISO ISMS dashboard…</p>
       </div>
     )
   }
@@ -142,10 +142,10 @@ export default function IsoComplianceAdminPage() {
   if (error) {
     return (
       <div className="p-6 max-w-5xl mx-auto">
-        <h1 className="text-2xl font-semibold text-slate-900 dark:text-neutral-50">ISO 27001 / 27701</h1>
-        <p role="alert" className="mt-4 text-red-600 dark:text-red-400">{error}</p>
-        <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
-          See <Link to="/trust" className="text-indigo-700 underline dark:text-indigo-300">Trust Center</Link> for public program status.
+        <h1 className="text-2xl font-semibold text-fg-default">ISO 27001 / 27701</h1>
+        <p role="alert" className="mt-4 text-danger-fg">{error}</p>
+        <p className="mt-2 text-sm text-fg-muted">
+          See <Link to="/trust" className="text-accent-fg underline dark:text-indigo-300">Trust Center</Link> for public program status.
         </p>
       </div>
     )
@@ -156,10 +156,10 @@ export default function IsoComplianceAdminPage() {
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-8">
       <header>
-        <h1 className="text-2xl font-semibold text-slate-900 dark:text-neutral-50">ISO 27001 / 27701 ISMS</h1>
-        <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+        <h1 className="text-2xl font-semibold text-fg-default">ISO 27001 / 27701 ISMS</h1>
+        <p className="mt-1 text-sm text-fg-muted">
           Audit findings, risk register, and Statement of Applicability. Documentation in{' '}
-          <a href="https://github.com/lextures/lextures/tree/main/docs/isms" className="text-indigo-700 underline dark:text-indigo-300">
+          <a href="https://github.com/lextures/lextures/tree/main/docs/isms" className="text-accent-fg underline dark:text-indigo-300">
             docs/isms
           </a>
           .
@@ -181,12 +181,12 @@ export default function IsoComplianceAdminPage() {
       ) : null}
 
       {soa ? (
-        <section aria-labelledby="soa-heading" className="rounded-lg border border-slate-200 dark:border-neutral-800 p-4">
-          <h2 id="soa-heading" className="font-semibold text-slate-900 dark:text-neutral-50">Statement of Applicability</h2>
-          <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
+        <section aria-labelledby="soa-heading" className="rounded-lg border border-border-default dark:border-border-subtle p-4">
+          <h2 id="soa-heading" className="font-semibold text-fg-default">Statement of Applicability</h2>
+          <p className="mt-2 text-sm text-fg-muted">
             {soa.implemented} implemented · {soa.planned} planned · {soa.excluded} excluded · {soa.total} total (Annex A 2022)
           </p>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-fg-muted">
             ISO 27001: <span className="font-medium">{dashboard?.program.iso27001Status}</span>
             {' · '}
             ISO 27701: <span className="font-medium">{dashboard?.program.iso27701Status}</span>
@@ -195,26 +195,26 @@ export default function IsoComplianceAdminPage() {
       ) : null}
 
       <section aria-labelledby="findings-heading" className="space-y-3">
-        <h2 id="findings-heading" className="font-semibold text-slate-900 dark:text-neutral-50">Audit findings</h2>
+        <h2 id="findings-heading" className="font-semibold text-fg-default">Audit findings</h2>
         <form onSubmit={addFinding} className="flex flex-wrap gap-2 text-sm">
-          <input name="auditCycle" required placeholder="Audit cycle" className="rounded border px-2 py-1 dark:bg-neutral-900" />
-          <select name="findingType" required className="rounded border px-2 py-1 dark:bg-neutral-900">
+          <input name="auditCycle" required placeholder="Audit cycle" className="rounded border px-2 py-1 dark:bg-surface-raised" />
+          <select name="findingType" required className="rounded border px-2 py-1 dark:bg-surface-raised">
             <option value="observation">Observation</option>
             <option value="nonconformity">Nonconformity</option>
             <option value="opportunity">Opportunity</option>
           </select>
-          <input name="isoClause" required placeholder="Clause (e.g. A.8.15)" className="rounded border px-2 py-1 dark:bg-neutral-900" />
-          <input name="description" required placeholder="Description" className="min-w-[12rem] flex-1 rounded border px-2 py-1 dark:bg-neutral-900" />
-          <button type="submit" className="rounded bg-indigo-600 px-3 py-1 text-white">Add</button>
+          <input name="isoClause" required placeholder="Clause (e.g. A.8.15)" className="rounded border px-2 py-1 dark:bg-surface-raised" />
+          <input name="description" required placeholder="Description" className="min-w-[12rem] flex-1 rounded border px-2 py-1 dark:bg-surface-raised" />
+          <button type="submit" className="rounded bg-accent-solid px-3 py-1 text-white">Add</button>
         </form>
         <ul className="divide-y divide-slate-100 dark:divide-neutral-800 text-sm">
           {findings.length === 0 ? (
-            <li className="py-2 text-slate-500">No findings yet.</li>
+            <li className="py-2 text-fg-muted">No findings yet.</li>
           ) : (
             findings.map((f) => (
               <li key={f.id} className="py-2">
                 <span className="font-medium">{f.isoClause}</span> — {f.description}
-                <span className="ms-2 text-slate-500">({f.status}, {f.auditCycle})</span>
+                <span className="ms-2 text-fg-muted">({f.status}, {f.auditCycle})</span>
               </li>
             ))
           )}
@@ -222,27 +222,27 @@ export default function IsoComplianceAdminPage() {
       </section>
 
       <section aria-labelledby="risks-heading" className="space-y-3">
-        <h2 id="risks-heading" className="font-semibold text-slate-900 dark:text-neutral-50">Risk register</h2>
+        <h2 id="risks-heading" className="font-semibold text-fg-default">Risk register</h2>
         <form onSubmit={addRisk} className="flex flex-wrap gap-2 text-sm">
-          <input name="riskTitle" required placeholder="Risk title" className="min-w-[10rem] flex-1 rounded border px-2 py-1 dark:bg-neutral-900" />
-          <input name="likelihood" type="number" min={1} max={5} defaultValue={3} required className="w-16 rounded border px-2 py-1 dark:bg-neutral-900" aria-label="Likelihood" />
-          <input name="impact" type="number" min={1} max={5} defaultValue={3} required className="w-16 rounded border px-2 py-1 dark:bg-neutral-900" aria-label="Impact" />
-          <select name="treatment" required className="rounded border px-2 py-1 dark:bg-neutral-900">
+          <input name="riskTitle" required placeholder="Risk title" className="min-w-[10rem] flex-1 rounded border px-2 py-1 dark:bg-surface-raised" />
+          <input name="likelihood" type="number" min={1} max={5} defaultValue={3} required className="w-16 rounded border px-2 py-1 dark:bg-surface-raised" aria-label="Likelihood" />
+          <input name="impact" type="number" min={1} max={5} defaultValue={3} required className="w-16 rounded border px-2 py-1 dark:bg-surface-raised" aria-label="Impact" />
+          <select name="treatment" required className="rounded border px-2 py-1 dark:bg-surface-raised">
             <option value="mitigate">Mitigate</option>
             <option value="accept">Accept</option>
             <option value="transfer">Transfer</option>
             <option value="avoid">Avoid</option>
           </select>
-          <button type="submit" className="rounded bg-indigo-600 px-3 py-1 text-white">Add</button>
+          <button type="submit" className="rounded bg-accent-solid px-3 py-1 text-white">Add</button>
         </form>
         <ul className="divide-y divide-slate-100 dark:divide-neutral-800 text-sm">
           {risks.length === 0 ? (
-            <li className="py-2 text-slate-500">No risks recorded.</li>
+            <li className="py-2 text-fg-muted">No risks recorded.</li>
           ) : (
             risks.map((r) => (
               <li key={r.id} className="py-2">
                 {r.riskTitle}
-                <span className="ms-2 text-slate-500">
+                <span className="ms-2 text-fg-muted">
                   score {r.residualScore} · {r.treatment}
                 </span>
               </li>
@@ -256,9 +256,9 @@ export default function IsoComplianceAdminPage() {
 
 function MetricCard({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-lg border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4">
-      <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</p>
-      <p className="mt-1 text-2xl font-semibold text-slate-900 dark:text-neutral-50">{value}</p>
+    <div className="rounded-lg border border-border-default dark:border-border-subtle bg-surface-raised p-4">
+      <p className="text-xs font-medium uppercase tracking-wide text-fg-muted">{label}</p>
+      <p className="mt-1 text-2xl font-semibold text-fg-default">{value}</p>
     </div>
   )
 }

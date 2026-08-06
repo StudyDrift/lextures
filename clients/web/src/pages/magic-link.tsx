@@ -97,7 +97,7 @@ export default function MagicLinkPage() {
   }
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-slate-50 px-4 py-12">
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-surface-base px-4 py-12">
       <div
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(99,102,241,0.12),transparent)]"
         aria-hidden
@@ -108,8 +108,8 @@ export default function MagicLinkPage() {
         </div>
         {status === 'loading' && (
           <>
-            <p className="text-lg font-medium text-slate-900">Signing you in…</p>
-            <p className="mt-2 text-sm text-slate-500">One moment while we verify your link.</p>
+            <p className="text-lg font-medium text-fg-default">Signing you in…</p>
+            <p className="mt-2 text-sm text-fg-muted">One moment while we verify your link.</p>
             <div
               className="mx-auto mt-8 h-8 w-8 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent"
               role="status"
@@ -118,13 +118,13 @@ export default function MagicLinkPage() {
           </>
         )}
         {status === 'error' && message && (
-          <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+          <div className="rounded-2xl border border-border-default bg-surface-raised p-8 shadow-sm">
             <p className="text-sm text-rose-600" role="alert">
               {message}
             </p>
             <a
               href="/login"
-              className="mt-6 inline-block text-sm font-medium text-indigo-600 hover:text-indigo-500"
+              className="mt-6 inline-block text-sm font-medium text-accent-fg hover:text-indigo-500"
             >
               Back to sign in
             </a>

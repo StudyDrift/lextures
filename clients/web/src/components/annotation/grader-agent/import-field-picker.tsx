@@ -111,7 +111,7 @@ export function ImportFieldPicker({
 
   return (
     <div ref={rootRef} className="relative min-w-0">
-      <span id={buttonId} className="mb-1.5 block text-xs font-medium text-slate-600 dark:text-neutral-400">
+      <span id={buttonId} className="mb-1.5 block text-xs font-medium text-fg-muted">
         {label}
       </span>
       <button
@@ -122,20 +122,18 @@ export function ImportFieldPicker({
         aria-controls={menuId}
         aria-labelledby={buttonId}
         onClick={() => onOpenChange(!open)}
-        className="flex w-full min-w-0 items-center gap-2 rounded-xl border border-slate-300 bg-white px-3 py-2 text-start text-sm font-medium text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+        className="flex w-full min-w-0 items-center gap-2 rounded-xl border border-border-strong bg-surface-raised px-3 py-2 text-start text-sm font-medium text-fg-default shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-60 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
       >
         {loading ? (
           <>
-            <Loader2 className="h-4 w-4 shrink-0 motion-safe:animate-spin text-slate-500 dark:text-neutral-400" aria-hidden />
-            <span className="min-w-0 flex-1 truncate text-slate-500 dark:text-neutral-400">{loadingLabel}</span>
+            <Loader2 className="h-4 w-4 shrink-0 motion-safe:animate-spin text-fg-muted" aria-hidden />
+            <span className="min-w-0 flex-1 truncate text-fg-muted">{loadingLabel}</span>
           </>
         ) : (
           <span className="min-w-0 flex-1 truncate">{currentLabel}</span>
         )}
         <ChevronDown
-          className={`h-4 w-4 shrink-0 text-slate-500 transition-transform dark:text-neutral-400 ${
-            open ? 'rotate-180' : ''
-          }`}
+          className={`h-4 w-4 shrink-0 text-fg-muted transition-transform dark:text-fg-muted ${ open ? 'rotate-180' : '' }`}
           aria-hidden
         />
       </button>
@@ -145,10 +143,10 @@ export function ImportFieldPicker({
           id={menuId}
           role="menu"
           aria-labelledby={buttonId}
-          className="absolute start-0 top-full z-[60] mt-1 flex max-h-60 w-full min-w-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-900"
+          className="absolute start-0 top-full z-[60] mt-1 flex max-h-60 w-full min-w-0 flex-col overflow-hidden rounded-xl border border-border-default bg-surface-raised shadow-lg shadow-slate-900/10 dark:border-border-default dark:bg-surface-raised"
         >
           {searchable ? (
-            <div className="shrink-0 border-b border-slate-200 p-2 dark:border-neutral-700">
+            <div className="shrink-0 border-b border-border-default p-2 dark:border-border-default">
               <label htmlFor={filterId} className="sr-only">
                 {searchPlaceholder}
               </label>
@@ -186,16 +184,16 @@ export function ImportFieldPicker({
                     }
                   }
                 }}
-                className="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 outline-none placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-indigo-400"
+                className="w-full rounded-lg border border-border-strong bg-surface-raised px-2.5 py-1.5 text-xs text-fg-default outline-none placeholder:text-fg-subtle focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:placeholder:text-neutral-500 dark:focus:border-indigo-400"
               />
             </div>
           ) : null}
 
           <div className="min-h-0 flex-1 overflow-y-auto py-1">
             {options.length === 0 ? (
-              <p className="px-3 py-2 text-sm text-slate-500 dark:text-neutral-400">{emptyLabel}</p>
+              <p className="px-3 py-2 text-sm text-fg-muted">{emptyLabel}</p>
             ) : visibleOptions.length === 0 ? (
-              <p className="px-3 py-2 text-sm text-slate-500 dark:text-neutral-400">{noMatchLabel}</p>
+              <p className="px-3 py-2 text-sm text-fg-muted">{noMatchLabel}</p>
             ) : (
               visibleOptions.map((option, visibleIndex) => {
                 const active = option.id === value
@@ -215,13 +213,7 @@ export function ImportFieldPicker({
                       onChange(option.id)
                       onOpenChange(false)
                     }}
-                    className={`flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] ${
-                      highlighted
-                        ? 'bg-indigo-50 font-medium text-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-100'
-                        : active
-                          ? 'font-semibold text-indigo-800 dark:text-indigo-200'
-                          : 'font-medium text-slate-800 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800'
-                    }`}
+                    className={`flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] ${ highlighted ? 'bg-indigo-50 font-medium text-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-100' : active ? 'font-semibold text-indigo-800 dark:text-indigo-200' : 'font-medium text-fg-default hover:bg-surface-base dark:text-fg-default dark:hover:bg-surface-overlay' }`}
                   >
                     <span className="min-w-0 flex-1 truncate">{option.label}</span>
                   </button>

@@ -73,7 +73,7 @@ export function ArchivedCoursesPanel() {
   return (
     <div className="mt-6 space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-slate-600 dark:text-neutral-400">
+        <p className="text-sm text-fg-muted">
           Archived courses are hidden from catalogs and search. Restore a course to bring it back, or
           permanently delete it to remove all content, files, submissions, and enrollments.
         </p>
@@ -81,7 +81,7 @@ export function ArchivedCoursesPanel() {
           type="button"
           onClick={() => void load()}
           disabled={loading}
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+          className="inline-flex items-center gap-2 rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm font-medium text-fg-default shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
         >
           <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} aria-hidden />
           Refresh
@@ -100,57 +100,57 @@ export function ArchivedCoursesPanel() {
       {loading && courses.length === 0 ? (
         <div className="space-y-2" aria-busy="true" aria-label="Loading archived courses">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="h-12 motion-safe:animate-pulse rounded-xl bg-slate-100 dark:bg-neutral-800" />
+            <div key={i} className="h-12 motion-safe:animate-pulse rounded-xl bg-surface-sunken" />
           ))}
         </div>
       ) : courses.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-slate-200 px-4 py-8 text-center text-sm text-slate-600 dark:border-neutral-600 dark:text-neutral-400">
+        <p className="rounded-xl border border-dashed border-border-default px-4 py-8 text-center text-sm text-fg-muted dark:border-border-default dark:text-fg-muted">
           <Archive className="mx-auto mb-2 h-8 w-8 text-slate-300 dark:text-neutral-600" aria-hidden />
           No archived courses in this organization.
         </p>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-600">
+        <div className="overflow-x-auto rounded-xl border border-border-default">
           <table
             className="min-w-full divide-y divide-slate-200 text-start text-sm dark:divide-neutral-600"
             aria-label="Archived courses"
           >
-            <thead className="bg-slate-50 dark:bg-neutral-800/80">
+            <thead className="bg-surface-sunken/80">
               <tr>
-                <th scope="col" className="px-3 py-2 font-medium text-slate-700 dark:text-neutral-200">
+                <th scope="col" className="px-3 py-2 font-medium text-fg-default">
                   Name
                 </th>
-                <th scope="col" className="px-3 py-2 font-medium text-slate-700 dark:text-neutral-200">
+                <th scope="col" className="px-3 py-2 font-medium text-fg-default">
                   Course code
                 </th>
-                <th scope="col" className="px-3 py-2 font-medium text-slate-700 dark:text-neutral-200">
+                <th scope="col" className="px-3 py-2 font-medium text-fg-default">
                   Archived by
                 </th>
-                <th scope="col" className="px-3 py-2 font-medium text-slate-700 dark:text-neutral-200">
+                <th scope="col" className="px-3 py-2 font-medium text-fg-default">
                   Archived
                 </th>
-                <th scope="col" className="px-3 py-2 font-medium text-slate-700 dark:text-neutral-200">
+                <th scope="col" className="px-3 py-2 font-medium text-fg-default">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 bg-white dark:divide-neutral-600 dark:bg-neutral-900">
+            <tbody className="divide-y divide-slate-200 bg-surface-raised dark:divide-neutral-600 dark:bg-surface-raised">
               {courses.map((row) => {
                 const busy = busyCode === row.courseCode
                 return (
-                  <tr key={row.id} className="hover:bg-slate-50 dark:hover:bg-neutral-800/60">
+                  <tr key={row.id} className="hover:bg-surface-base dark:hover:bg-neutral-800/60">
                     <th
                       scope="row"
-                      className="max-w-[16rem] truncate px-3 py-2.5 font-normal text-slate-900 dark:text-neutral-100"
+                      className="max-w-[16rem] truncate px-3 py-2.5 font-normal text-fg-default"
                     >
                       {row.title || '—'}
                     </th>
-                    <td className="whitespace-nowrap px-3 py-2.5 font-mono text-xs text-slate-600 dark:text-neutral-300">
+                    <td className="whitespace-nowrap px-3 py-2.5 font-mono text-xs text-fg-muted">
                       {row.courseCode}
                     </td>
-                    <td className="whitespace-nowrap px-3 py-2.5 text-slate-600 dark:text-neutral-300">
+                    <td className="whitespace-nowrap px-3 py-2.5 text-fg-muted">
                       {archivedByLabel(row)}
                     </td>
-                    <td className="whitespace-nowrap px-3 py-2.5 text-slate-600 dark:text-neutral-300">
+                    <td className="whitespace-nowrap px-3 py-2.5 text-fg-muted">
                       {row.archivedAt ? formatDateTime(row.archivedAt) : '—'}
                     </td>
                     <td className="px-3 py-2.5">
@@ -159,7 +159,7 @@ export function ArchivedCoursesPanel() {
                           type="button"
                           onClick={() => void onRestore(row)}
                           disabled={busy}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-800 hover:border-indigo-200 hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-indigo-400 dark:hover:bg-indigo-950/40"
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-2.5 py-1.5 text-xs font-medium text-fg-default hover:border-indigo-200 hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:border-indigo-400 dark:hover:bg-indigo-950/40"
                         >
                           <RotateCcw className="h-3.5 w-3.5" aria-hidden />
                           {busy && !deleteTarget ? 'Restoring…' : 'Restore'}
@@ -168,7 +168,7 @@ export function ArchivedCoursesPanel() {
                           type="button"
                           onClick={() => setDeleteTarget(row)}
                           disabled={busy}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-white px-2.5 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-rose-900/60 dark:bg-neutral-900 dark:text-rose-300 dark:hover:bg-rose-950/40"
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-surface-raised px-2.5 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-rose-900/60 dark:bg-surface-raised dark:text-rose-300 dark:hover:bg-rose-950/40"
                         >
                           <Trash2 className="h-3.5 w-3.5" aria-hidden />
                           Delete permanently
@@ -197,19 +197,19 @@ export function ArchivedCoursesPanel() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="delete-archived-course-title"
-            className="w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-900"
+            className="w-full max-w-md overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-raised"
           >
-            <div className="border-b border-slate-200 px-4 py-3 dark:border-neutral-700">
+            <div className="border-b border-border-default px-4 py-3 dark:border-border-default">
               <h3
                 id="delete-archived-course-title"
-                className="text-sm font-semibold text-slate-900 dark:text-neutral-100"
+                className="text-sm font-semibold text-fg-default"
               >
                 Permanently delete course
               </h3>
             </div>
-            <div className="space-y-3 p-4 text-sm text-slate-600 dark:text-neutral-300">
+            <div className="space-y-3 p-4 text-sm text-fg-muted">
               <p>
-                Delete <span className="font-medium text-slate-900 dark:text-neutral-100">{deleteTarget.title}</span>{' '}
+                Delete <span className="font-medium text-fg-default">{deleteTarget.title}</span>{' '}
                 (<code className="font-mono text-xs">{deleteTarget.courseCode}</code>) permanently?
               </p>
               <p>
@@ -217,12 +217,12 @@ export function ArchivedCoursesPanel() {
                 files, and related data. This cannot be undone.
               </p>
             </div>
-            <div className="flex flex-wrap justify-end gap-2 border-t border-slate-200 px-4 py-3 dark:border-neutral-700">
+            <div className="flex flex-wrap justify-end gap-2 border-t border-border-default px-4 py-3 dark:border-border-default">
               <button
                 type="button"
                 onClick={() => setDeleteTarget(null)}
                 disabled={busyCode === deleteTarget.courseCode}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200"
+                className="rounded-xl border border-border-default bg-surface-raised px-4 py-2 text-sm font-medium text-fg-muted shadow-sm hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-50 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
               >
                 Cancel
               </button>

@@ -25,11 +25,6 @@ type patchMeetingBody struct {
 // handlePatchMeeting is PATCH /api/v1/meetings/{meeting_id}.
 func (d Deps) handlePatchMeeting() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		midStr := chi.URLParam(r, "meeting_id")
 		mid, err := uuid.Parse(midStr)
 		if err != nil {

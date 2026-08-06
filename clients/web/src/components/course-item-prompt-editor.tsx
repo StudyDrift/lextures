@@ -414,7 +414,7 @@ export function CourseItemPromptEditor({
         }
         suppressContentEditableWarning
         className={[
-          'min-h-[120px] w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30',
+          'min-h-[120px] w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm text-fg-default outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30',
           disabled ? 'cursor-not-allowed opacity-60' : '',
           className ?? '',
         ].join(' ')}
@@ -436,14 +436,14 @@ export function CourseItemPromptEditor({
             zIndex: 60,
             width: 'min(20rem, calc(100vw - 2rem))',
           }}
-          className="max-h-56 overflow-auto rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/15"
+          className="max-h-56 overflow-auto rounded-xl border border-border-default bg-surface-raised py-1 shadow-lg shadow-slate-900/15"
         >
           {structureLoading ? (
-            <p className="px-3 py-2 text-sm text-slate-500">Loading course items…</p>
+            <p className="px-3 py-2 text-sm text-fg-muted">Loading course items…</p>
           ) : structureError ? (
             <p className="px-3 py-2 text-sm text-rose-600">Could not load course structure.</p>
           ) : filtered.length === 0 ? (
-            <p className="px-3 py-2 text-sm text-slate-500">
+            <p className="px-3 py-2 text-sm text-fg-muted">
               No matching content pages or assignments. Keep typing to filter.
             </p>
           ) : (
@@ -454,16 +454,14 @@ export function CourseItemPromptEditor({
                 role="option"
                 id={`${listId}-opt-${idx}`}
                 aria-selected={idx === activeIndex}
-                className={`flex w-full flex-col items-start gap-0.5 px-3 py-2 text-start text-sm transition-[background-color,color,border-color] ${
-                  idx === activeIndex ? 'bg-indigo-50 text-indigo-950' : 'text-slate-800 hover:bg-slate-50'
-                }`}
+                className={`flex w-full flex-col items-start gap-0.5 px-3 py-2 text-start text-sm transition-[background-color,color,border-color] ${ idx === activeIndex ? 'bg-indigo-50 text-indigo-950' : 'text-fg-default hover:bg-surface-base' }`}
                 onMouseDown={(e) => {
                   e.preventDefault()
                   applyPick(item)
                 }}
                 onMouseEnter={() => setActiveIndex(idx)}
               >
-                <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                <span className="text-xs font-medium uppercase tracking-wide text-fg-muted">
                   {kindLabel(item.kind)}
                 </span>
                 <span className="font-medium">{item.title}</span>

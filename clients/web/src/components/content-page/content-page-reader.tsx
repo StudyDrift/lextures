@@ -688,7 +688,7 @@ export function ContentPageReader({
             <button
               type="button"
               aria-label="Adjust selection start"
-              className="pointer-events-auto fixed h-4 w-4 cursor-grab touch-none rounded-full border-2 border-indigo-600 bg-white shadow-md active:cursor-grabbing dark:border-indigo-400 dark:bg-neutral-900"
+              className="pointer-events-auto fixed h-4 w-4 cursor-grab touch-none rounded-full border-2 border-indigo-600 bg-surface-raised shadow-md active:cursor-grabbing dark:border-indigo-400 dark:bg-surface-raised"
               style={{
                 left: `${selectionOverlay.start.left}px`,
                 top: `${selectionOverlay.start.top}px`,
@@ -721,7 +721,7 @@ export function ContentPageReader({
             <button
               type="button"
               aria-label="Adjust selection end"
-              className="pointer-events-auto fixed h-4 w-4 cursor-grab touch-none rounded-full border-2 border-indigo-600 bg-white shadow-md active:cursor-grabbing dark:border-indigo-400 dark:bg-neutral-900"
+              className="pointer-events-auto fixed h-4 w-4 cursor-grab touch-none rounded-full border-2 border-indigo-600 bg-surface-raised shadow-md active:cursor-grabbing dark:border-indigo-400 dark:bg-surface-raised"
               style={{
                 left: `${selectionOverlay.end.left}px`,
                 top: `${selectionOverlay.end.top}px`,
@@ -759,7 +759,7 @@ export function ContentPageReader({
         <div
           ref={popoverRef}
           onMouseDown={(e) => e.preventDefault()}
-          className="fixed z-[60] flex -translate-x-1/2 flex-col gap-1 rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg dark:border-neutral-700 dark:bg-neutral-900"
+          className="fixed z-[60] flex -translate-x-1/2 flex-col gap-1 rounded-xl border border-border-default bg-surface-raised p-1.5 shadow-lg dark:border-border-default dark:bg-surface-raised"
           style={{ left: popover.x, top: popover.y }}
           role="dialog"
           aria-label={popover.kind === 'selection' ? 'Selection actions' : 'Highlight actions'}
@@ -811,7 +811,7 @@ export function ContentPageReader({
             <button
               type="button"
               onClick={closePopover}
-              className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-neutral-800"
+              className="rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken dark:hover:bg-surface-overlay"
               aria-label="Dismiss"
             >
               <X className="h-3.5 w-3.5" />
@@ -832,31 +832,31 @@ export function ContentPageReader({
           }}
         >
           <div
-            className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-xl dark:border-neutral-700 dark:bg-neutral-900"
+            className="w-full max-w-md rounded-2xl border border-border-default bg-surface-raised p-5 shadow-xl dark:border-border-default dark:bg-surface-raised"
             role="dialog"
             aria-modal="true"
             aria-labelledby="content-note-modal-title"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 id="content-note-modal-title" className="text-lg font-semibold text-slate-900 dark:text-neutral-100">
+            <h2 id="content-note-modal-title" className="text-lg font-semibold text-fg-default">
               Add to notebook
             </h2>
-            <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+            <p className="mt-1 text-xs text-fg-muted">
               The selection is appended as a blockquote under the page you pick.
             </p>
             {notebookOptions.length === 0 ? (
-              <p className="mt-4 text-sm text-slate-600 dark:text-neutral-300">
+              <p className="mt-4 text-sm text-fg-muted">
                 You do not have any notebook pages yet. Open{' '}
                 <span className="font-medium">Notebook</span> in the course menu and add a page first.
               </p>
             ) : (
               <>
-                <label className="mt-4 block text-sm font-medium text-slate-800 dark:text-neutral-200" htmlFor="nb-page">
+                <label className="mt-4 block text-sm font-medium text-fg-default" htmlFor="nb-page">
                   Notebook page
                 </label>
                 <select
                   id="nb-page"
-                  className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+                  className="mt-1 w-full rounded-xl border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base dark:text-fg-default"
                   value={notePageId}
                   onChange={(e) => setNotePageId(e.target.value)}
                 >
@@ -866,7 +866,7 @@ export function ContentPageReader({
                     </option>
                   ))}
                 </select>
-                <label className="mt-3 block text-sm font-medium text-slate-800 dark:text-neutral-200" htmlFor="nb-comment">
+                <label className="mt-3 block text-sm font-medium text-fg-default" htmlFor="nb-comment">
                   Your note (optional)
                 </label>
                 <textarea
@@ -874,11 +874,11 @@ export function ContentPageReader({
                   rows={3}
                   value={noteComment}
                   onChange={(e) => setNoteComment(e.target.value)}
-                  className="mt-1 w-full resize-y rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+                  className="mt-1 w-full resize-y rounded-xl border border-border-strong bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base dark:text-fg-default"
                   placeholder="Reflections, reminders, or follow-ups…"
                 />
-                <div className="mt-3 rounded-lg border border-slate-100 bg-slate-50 p-2 text-xs text-slate-600 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-400">
-                  <span className="font-semibold text-slate-700 dark:text-neutral-300">Quote</span>
+                <div className="mt-3 rounded-lg border border-border-subtle bg-surface-base p-2 text-xs text-fg-muted dark:border-border-subtle dark:bg-surface-base dark:text-fg-muted">
+                  <span className="font-semibold text-fg-muted">Quote</span>
                   <blockquote className="mt-1 border-s-2 border-amber-300 ps-2 italic dark:border-amber-600">
                     {pendingQuote}
                   </blockquote>
@@ -893,7 +893,7 @@ export function ContentPageReader({
                   setNoteModal(false)
                   setPendingQuote(null)
                 }}
-                className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-600 dark:text-neutral-100 dark:hover:bg-neutral-800"
+                className="rounded-xl border border-border-strong px-4 py-2 text-sm font-semibold text-fg-default hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
               >
                 Cancel
               </button>
@@ -901,7 +901,7 @@ export function ContentPageReader({
                 type="button"
                 disabled={busy || notebookOptions.length === 0}
                 onClick={() => void saveNote()}
-                className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {busy ? 'Saving…' : 'Save to notebook'}
               </button>
@@ -911,27 +911,27 @@ export function ContentPageReader({
       )}
 
       {markups.length > 0 && (
-        <div className="mt-8 rounded-xl border border-slate-200 bg-slate-50/80 p-4 dark:border-neutral-800 dark:bg-neutral-900/50">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+        <div className="mt-8 rounded-xl border border-border-default bg-slate-50/80 p-4 dark:border-border-subtle/50">
+          <p className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
             Your marks on this page
           </p>
           <ul className="mt-2 flex flex-col gap-2">
             {markups.map((m) => (
               <li
                 key={m.id}
-                className="flex items-start justify-between gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                className="flex items-start justify-between gap-2 rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
               >
                 <div className="min-w-0 flex-1">
-                  <span className="text-[10px] font-semibold uppercase text-slate-400 dark:text-neutral-500">
+                  <span className="text-[10px] font-semibold uppercase text-fg-subtle">
                     {m.kind === 'highlight' ? 'Highlight' : 'Note'}
                   </span>
-                  <p className="mt-0.5 line-clamp-2 text-slate-700 dark:text-neutral-200">{m.quoteText}</p>
+                  <p className="mt-0.5 line-clamp-2 text-fg-default">{m.quoteText}</p>
                 </div>
                 <button
                   type="button"
                   disabled={busy}
                   onClick={() => void onDeleteMarkup(m.id)}
-                  className="shrink-0 rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 disabled:opacity-50 dark:hover:bg-rose-950/40 dark:hover:text-rose-300"
+                  className="shrink-0 rounded-lg p-1.5 text-fg-subtle hover:bg-rose-50 hover:text-rose-600 disabled:opacity-50 dark:hover:bg-rose-950/40 dark:hover:text-rose-300"
                   aria-label="Remove"
                 >
                   <X className="h-4 w-4" />

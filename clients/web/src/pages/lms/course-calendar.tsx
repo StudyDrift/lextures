@@ -106,13 +106,13 @@ const MONTH_CHIP_PALETTE = [
 ] as const
 
 const WEEK_CARD_PALETTE = [
-  'group flex flex-col gap-0.5 rounded-xl border border-slate-200/90 bg-white px-4 py-3 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50/40 dark:border-neutral-600 dark:bg-neutral-800/80 dark:hover:border-indigo-500/50 dark:hover:bg-indigo-950/40',
-  'group flex flex-col gap-0.5 rounded-xl border border-slate-200/90 bg-white px-4 py-3 shadow-sm transition-[background-color,color,border-color] hover:border-violet-200 hover:bg-violet-50/40 dark:border-neutral-600 dark:bg-neutral-800/80 dark:hover:border-violet-500/50 dark:hover:bg-violet-950/40',
-  'group flex flex-col gap-0.5 rounded-xl border border-slate-200/90 bg-white px-4 py-3 shadow-sm transition-[background-color,color,border-color] hover:border-emerald-200 hover:bg-emerald-50/40 dark:border-neutral-600 dark:bg-neutral-800/80 dark:hover:border-emerald-500/50 dark:hover:bg-emerald-950/40',
-  'group flex flex-col gap-0.5 rounded-xl border border-slate-200/90 bg-white px-4 py-3 shadow-sm transition-[background-color,color,border-color] hover:border-amber-200 hover:bg-amber-50/40 dark:border-neutral-600 dark:bg-neutral-800/80 dark:hover:border-amber-500/50 dark:hover:bg-amber-950/40',
-  'group flex flex-col gap-0.5 rounded-xl border border-slate-200/90 bg-white px-4 py-3 shadow-sm transition-[background-color,color,border-color] hover:border-rose-200 hover:bg-rose-50/40 dark:border-neutral-600 dark:bg-neutral-800/80 dark:hover:border-rose-500/50 dark:hover:bg-rose-950/40',
-  'group flex flex-col gap-0.5 rounded-xl border border-slate-200/90 bg-white px-4 py-3 shadow-sm transition-[background-color,color,border-color] hover:border-sky-200 hover:bg-sky-50/40 dark:border-neutral-600 dark:bg-neutral-800/80 dark:hover:border-sky-500/50 dark:hover:bg-sky-950/40',
-  'group flex flex-col gap-0.5 rounded-xl border border-slate-200/90 bg-white px-4 py-3 shadow-sm transition-[background-color,color,border-color] hover:border-fuchsia-200 hover:bg-fuchsia-50/40 dark:border-neutral-600 dark:bg-neutral-800/80 dark:hover:border-fuchsia-500/50 dark:hover:bg-fuchsia-950/40',
+  'group flex flex-col gap-0.5 rounded-xl border border-slate-200/90 bg-surface-raised px-4 py-3 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50/40 dark:border-border-default/80 dark:hover:border-indigo-500/50 dark:hover:bg-indigo-950/40',
+  'group flex flex-col gap-0.5 rounded-xl border border-slate-200/90 bg-surface-raised px-4 py-3 shadow-sm transition-[background-color,color,border-color] hover:border-violet-200 hover:bg-violet-50/40 dark:border-border-default/80 dark:hover:border-violet-500/50 dark:hover:bg-violet-950/40',
+  'group flex flex-col gap-0.5 rounded-xl border border-slate-200/90 bg-surface-raised px-4 py-3 shadow-sm transition-[background-color,color,border-color] hover:border-emerald-200 hover:bg-emerald-50/40 dark:border-border-default/80 dark:hover:border-emerald-500/50 dark:hover:bg-emerald-950/40',
+  'group flex flex-col gap-0.5 rounded-xl border border-slate-200/90 bg-surface-raised px-4 py-3 shadow-sm transition-[background-color,color,border-color] hover:border-amber-200 hover:bg-amber-50/40 dark:border-border-default/80 dark:hover:border-amber-500/50 dark:hover:bg-amber-950/40',
+  'group flex flex-col gap-0.5 rounded-xl border border-slate-200/90 bg-surface-raised px-4 py-3 shadow-sm transition-[background-color,color,border-color] hover:border-rose-200 hover:bg-rose-50/40 dark:border-border-default/80 dark:hover:border-rose-500/50 dark:hover:bg-rose-950/40',
+  'group flex flex-col gap-0.5 rounded-xl border border-slate-200/90 bg-surface-raised px-4 py-3 shadow-sm transition-[background-color,color,border-color] hover:border-sky-200 hover:bg-sky-50/40 dark:border-border-default/80 dark:hover:border-sky-500/50 dark:hover:bg-sky-950/40',
+  'group flex flex-col gap-0.5 rounded-xl border border-slate-200/90 bg-surface-raised px-4 py-3 shadow-sm transition-[background-color,color,border-color] hover:border-fuchsia-200 hover:bg-fuchsia-50/40 dark:border-border-default/80 dark:hover:border-fuchsia-500/50 dark:hover:bg-fuchsia-950/40',
 ] as const
 
 function monthChipClassForAssignment(a: CourseCalendarAssignment, canDrag: boolean): string {
@@ -173,27 +173,27 @@ function AssignmentHoverPortal({ open }: { open: CalendarAssignmentHoverOpen | n
     <div
       ref={popRef}
       role="tooltip"
-      className="pointer-events-none max-h-[min(22rem,calc(100vh-1rem))] overflow-y-auto rounded-xl border border-slate-200/90 bg-white px-3 py-2.5 text-start text-sm shadow-lg dark:border-neutral-600 dark:bg-neutral-800 dark:shadow-black/40"
+      className="pointer-events-none max-h-[min(22rem,calc(100vh-1rem))] overflow-y-auto rounded-xl border border-slate-200/90 bg-surface-raised px-3 py-2.5 text-start text-sm shadow-lg dark:border-border-default dark:bg-surface-overlay dark:shadow-black/40"
       style={
         pos
           ? { position: 'fixed', top: pos.top, left: pos.left, width: pos.width, zIndex: 80 }
           : { position: 'fixed', top: -4000, left: 0, width: 320, zIndex: 80, opacity: 0 }
       }
     >
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+      <p className="text-[11px] font-semibold uppercase tracking-wide text-fg-muted">
         {calendarItemKindLabel(a.kind)}
       </p>
       {a.courseTitle ? (
-        <p className="mt-1 text-xs font-medium text-slate-600 dark:text-neutral-300">{a.courseTitle}</p>
+        <p className="mt-1 text-xs font-medium text-fg-muted">{a.courseTitle}</p>
       ) : null}
-      <p className="mt-1 font-semibold tracking-tight text-slate-950 dark:text-neutral-100">
+      <p className="mt-1 font-semibold tracking-tight text-slate-950 dark:text-fg-default">
         {a.title || 'Untitled'}
       </p>
-      <p className="mt-2 text-xs text-slate-600 dark:text-neutral-300">
-        <span className="font-medium text-slate-500 dark:text-neutral-400">Due </span>
+      <p className="mt-2 text-xs text-fg-muted">
+        <span className="font-medium text-fg-muted">Due </span>
         {formatDueShort(a.dueAt)}
       </p>
-      {points ? <p className="mt-1.5 text-xs text-slate-600 dark:text-neutral-300">{points}</p> : null}
+      {points ? <p className="mt-1.5 text-xs text-fg-muted">{points}</p> : null}
     </div>,
     document.body,
   )
@@ -280,23 +280,11 @@ function CalendarMonthDayCell({
   return (
     <div
       ref={setNodeRef}
-      className={`flex h-full min-h-0 flex-col bg-white p-1.5 text-start dark:bg-neutral-900/95 ${
-        inMonth ? '' : 'bg-slate-50/90 text-slate-400 dark:bg-neutral-950/80 dark:text-neutral-500'
-      } ${canDragReschedule && isOver ? 'ring-2 ring-inset ring-indigo-400/70 dark:ring-indigo-400/50' : ''} ${
-        isFocusDay && !isOver ? 'ring-2 ring-inset ring-amber-400/80 dark:ring-amber-500/50' : ''
-      }`}
+      className={`flex h-full min-h-0 flex-col bg-surface-raised p-1.5 text-start/95 ${ inMonth ? '' : 'bg-slate-50/90 text-fg-subtle/80' } ${canDragReschedule && isOver ? 'ring-2 ring-inset ring-indigo-400/70 dark:ring-indigo-400/50' : ''} ${ isFocusDay && !isOver ? 'ring-2 ring-inset ring-amber-400/80 dark:ring-amber-500/50' : '' }`}
     >
       <div className="flex shrink-0 items-start">
         <span
-          className={`inline-flex h-7 min-w-[1.75rem] items-center justify-center rounded-lg text-sm font-medium ${
-            isToday
-              ? 'bg-indigo-600 text-white shadow-sm dark:bg-indigo-500 dark:text-white'
-              : isFocusDay
-                ? 'bg-amber-100 text-amber-950 ring-1 ring-amber-300/80 dark:bg-amber-950/60 dark:text-amber-50 dark:ring-amber-600/60'
-                : inMonth
-                  ? 'text-slate-800 dark:text-neutral-200'
-                  : 'text-slate-400 dark:text-neutral-500'
-          }`}
+          className={`inline-flex h-7 min-w-[1.75rem] items-center justify-center rounded-lg text-sm font-medium ${ isToday ? 'bg-accent-solid text-white shadow-sm dark:bg-indigo-500 dark:text-white' : isFocusDay ? 'bg-amber-100 text-amber-950 ring-1 ring-amber-300/80 dark:bg-amber-950/60 dark:text-amber-50 dark:ring-amber-600/60' : inMonth ? 'text-fg-default' : 'text-fg-subtle' }`}
         >
           {cell.getDate()}
         </span>
@@ -489,14 +477,14 @@ export function CourseCalendar({
       <li key={`${a.linkCourseCode ?? courseCode}:${a.id}`}>
         <Link to={itemPath(a)} className={weekCardClassForAssignment(a)}>
           {label ? (
-            <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-fg-muted">
               {label}
             </span>
           ) : null}
-          <span className="text-sm font-semibold tracking-tight text-slate-950 group-hover:text-indigo-800 dark:text-neutral-100 dark:group-hover:text-indigo-300">
+          <span className="text-sm font-semibold tracking-tight text-slate-950 group-hover:text-indigo-800 dark:text-fg-default dark:group-hover:text-indigo-300">
             {a.title || 'Untitled'}
           </span>
-          <span className="text-xs text-slate-500 dark:text-neutral-400">{formatDueShort(a.dueAt)}</span>
+          <span className="text-xs text-fg-muted">{formatDueShort(a.dueAt)}</span>
         </Link>
       </li>
     )
@@ -504,7 +492,7 @@ export function CourseCalendar({
 
   const calendarViewTabs = (
     <div
-      className="inline-flex max-w-full flex-wrap justify-center gap-1 rounded-2xl border border-slate-200/90 bg-slate-50/80 p-1 dark:border-neutral-700 dark:bg-neutral-800/90"
+      className="inline-flex max-w-full flex-wrap justify-center gap-1 rounded-2xl border border-slate-200/90 bg-slate-50/80 p-1 dark:border-border-default/90"
       role="tablist"
       aria-label="Calendar view"
     >
@@ -532,16 +520,16 @@ export function CourseCalendar({
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       {view === 'month' && (
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-900/90 md:p-6">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-surface-raised p-4 shadow-sm dark:border-border-default/90 md:p-6">
           <div className="mb-4 flex min-w-0 shrink-0 flex-wrap items-center gap-x-3 gap-y-2">
-            <h2 className="shrink-0 text-lg font-semibold tracking-tight text-slate-950 dark:text-neutral-100">
+            <h2 className="shrink-0 text-lg font-semibold tracking-tight text-slate-950 dark:text-fg-default">
               {formatDateTime(monthAnchor, { month: 'long', year: 'numeric' })}
             </h2>
             <div className="flex min-w-0 flex-1 basis-[12rem] justify-center">{calendarViewTabs}</div>
             <div className="flex shrink-0 items-center gap-1">
               <button
                 type="button"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border-default bg-surface-raised text-fg-muted shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700"
                 aria-label="Previous month"
                 onClick={() => setMonthAnchor((m) => addMonths(m, -1))}
               >
@@ -549,7 +537,7 @@ export function CourseCalendar({
               </button>
               <button
                 type="button"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border-default bg-surface-raised text-fg-muted shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700"
                 aria-label="Next month"
                 onClick={() => setMonthAnchor((m) => addMonths(m, 1))}
               >
@@ -576,7 +564,7 @@ export function CourseCalendar({
                 {WEEKDAY_LABELS.map((w) => (
                   <div
                     key={w}
-                    className="sticky top-0 z-10 bg-slate-50 px-1 py-2 text-center text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-neutral-800 dark:text-neutral-400"
+                    className="sticky top-0 z-10 bg-surface-base px-1 py-2 text-center text-xs font-semibold uppercase tracking-wide text-fg-muted dark:bg-surface-overlay dark:text-fg-muted"
                   >
                     {w}
                   </div>
@@ -609,7 +597,7 @@ export function CourseCalendar({
               </DragOverlay>
             </DndContext>
           </div>
-          <p className="mt-4 shrink-0 text-xs text-slate-500 dark:text-neutral-400">
+          <p className="mt-4 shrink-0 text-xs text-fg-muted">
             {canRescheduleDueByDrag
               ? 'Drag a due chip to another day to reschedule (the time of day is kept). '
               : ''}
@@ -619,13 +607,13 @@ export function CourseCalendar({
       )}
 
       {view === 'week' && (
-        <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-slate-200/90 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-900/90 md:p-6">
+        <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-slate-200/90 bg-surface-raised p-4 shadow-sm dark:border-border-default/90 md:p-6">
           <div className="mb-4 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
             <div className="min-w-0 shrink-0">
-              <h2 className="text-lg font-semibold tracking-tight text-slate-950 dark:text-neutral-100">
+              <h2 className="text-lg font-semibold tracking-tight text-slate-950 dark:text-fg-default">
                 Week view
               </h2>
-              <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+              <p className="mt-1 text-sm text-fg-muted">
                 {formatDate(weekStart, { dateStyle: 'medium' })} —{' '}
                 {formatDate(new Date(weekEnd.getTime() - 1), {
                   dateStyle: 'medium',
@@ -636,7 +624,7 @@ export function CourseCalendar({
             <div className="flex shrink-0 items-center gap-1">
               <button
                 type="button"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border-default bg-surface-raised text-fg-muted shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700"
                 aria-label="Previous week"
                 onClick={() => {
                   const n = new Date(weekCursor)
@@ -648,7 +636,7 @@ export function CourseCalendar({
               </button>
               <button
                 type="button"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border-default bg-surface-raised text-fg-muted shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700"
                 aria-label="Next week"
                 onClick={() => {
                   const n = new Date(weekCursor)
@@ -661,7 +649,7 @@ export function CourseCalendar({
             </div>
           </div>
           {weekItems.length === 0 ? (
-            <p className="text-sm text-slate-500 dark:text-neutral-400">Nothing due this week.</p>
+            <p className="text-sm text-fg-muted">Nothing due this week.</p>
           ) : (
             <ul className="space-y-2">{weekItems.map(assignmentRow)}</ul>
           )}
@@ -669,13 +657,13 @@ export function CourseCalendar({
       )}
 
       {view === 'todo' && (
-        <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-slate-200/90 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-900/90 md:p-6">
+        <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-slate-200/90 bg-surface-raised p-4 shadow-sm dark:border-border-default/90 md:p-6">
           <div className="mb-4 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
             <div className="min-w-0 shrink-0">
-              <h2 className="text-lg font-semibold tracking-tight text-slate-950 dark:text-neutral-100">
+              <h2 className="text-lg font-semibold tracking-tight text-slate-950 dark:text-fg-default">
                 Due today & next 24 hours
               </h2>
-              <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+              <p className="mt-1 text-sm text-fg-muted">
                 Assignments due on today&apos;s date, or with a due time in the next 24 hours.
               </p>
             </div>
@@ -684,7 +672,7 @@ export function CourseCalendar({
             <div className="h-9 w-[4.75rem] shrink-0 max-sm:hidden" aria-hidden />
           </div>
           {todoItems.length === 0 ? (
-            <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">Nothing in this window.</p>
+            <p className="mt-4 text-sm text-fg-muted">Nothing in this window.</p>
           ) : (
             <ul className="mt-4 space-y-2">{todoItems.map(assignmentRow)}</ul>
           )}
@@ -710,11 +698,7 @@ function ViewTab({ active, onClick, icon, label }: ViewTabProps) {
       role="tab"
       aria-selected={active}
       onClick={onClick}
-      className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-[background-color,color,border-color] ${
-        active
-          ? 'bg-white text-indigo-800 shadow-sm ring-1 ring-slate-200/90 dark:bg-neutral-900 dark:text-indigo-300 dark:ring-neutral-600'
-          : 'text-slate-600 hover:bg-white/70 hover:text-slate-950 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-100'
-      }`}
+      className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-[background-color,color,border-color] ${ active ? 'bg-surface-raised text-indigo-800 shadow-sm ring-1 ring-slate-200/90 dark:bg-surface-raised dark:text-indigo-300 dark:ring-neutral-600' : 'text-fg-muted hover:bg-white/70 hover:text-slate-950 dark:text-fg-muted dark:hover:bg-neutral-700 dark:hover:text-fg-default' }`}
     >
       {icon}
       {label}

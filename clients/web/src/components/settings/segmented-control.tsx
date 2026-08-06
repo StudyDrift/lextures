@@ -70,13 +70,13 @@ export function SegmentedControl<T extends string>({
       role="group"
       aria-label={ariaLabel}
       data-motion-controls={motionEnabled ? 'on' : 'off'}
-      className="relative inline-flex rounded-xl border border-slate-200 bg-slate-50 p-1 dark:border-neutral-600 dark:bg-neutral-800/50"
+      className="relative inline-flex rounded-xl border border-border-default bg-surface-base p-1 dark:border-border-default/50"
     >
       {activeWidth > 0 ? (
         <span
           aria-hidden="true"
           data-testid="segmented-indicator"
-          className="lx-control-indicator pointer-events-none absolute top-1 bottom-1 rounded-lg bg-white shadow-sm dark:bg-neutral-600 dark:shadow-md dark:ring-1 dark:ring-inset dark:ring-white/10"
+          className="lx-control-indicator pointer-events-none absolute top-1 bottom-1 rounded-lg bg-surface-raised shadow-sm dark:bg-neutral-600 dark:shadow-md dark:ring-1 dark:ring-inset dark:ring-white/10"
           style={{
             width: activeWidth,
             transform: `translateX(${offset}px)`,
@@ -100,11 +100,11 @@ export function SegmentedControl<T extends string>({
             'relative z-10 rounded-lg px-4 py-2 text-sm font-medium transition-[color] duration-[var(--dur-fast)]',
             press,
             value === opt.value
-              ? 'text-slate-900 dark:text-neutral-50'
-              : 'text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-neutral-200',
+              ? 'text-fg-default'
+              : 'text-fg-muted hover:text-fg-default dark:text-fg-muted dark:hover:text-fg-default',
             // Fallback fill when indicator not yet measured / motion off.
             value === opt.value && activeWidth === 0
-              ? 'bg-white shadow-sm dark:bg-neutral-600 dark:shadow-md dark:ring-1 dark:ring-inset dark:ring-white/10'
+              ? 'bg-surface-raised shadow-sm dark:bg-neutral-600 dark:shadow-md dark:ring-1 dark:ring-inset dark:ring-white/10'
               : '',
           ]
             .filter(Boolean)

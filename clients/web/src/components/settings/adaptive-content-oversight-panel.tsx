@@ -39,11 +39,11 @@ export function AdaptiveContentOversightPanel() {
     <section aria-labelledby="ace-oversight-heading" className="mt-8" data-testid="ace-oversight-panel">
       <h2
         id="ace-oversight-heading"
-        className="text-base font-semibold text-slate-900 dark:text-neutral-100"
+        className="text-base font-semibold text-fg-default"
       >
         Adaptive content oversight
       </h2>
-      <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+      <p className="mt-1 text-sm text-fg-muted">
         Governance summary for the Adaptive Content Engine — disparity flags, incidents, and
         kill-switch.
       </p>
@@ -70,13 +70,13 @@ export function AdaptiveContentOversightPanel() {
         ].map(([label, value]) => (
           <div
             key={label}
-            className="rounded-lg border border-slate-200 px-3 py-2 dark:border-neutral-700"
+            className="rounded-lg border border-border-default px-3 py-2 dark:border-border-default"
           >
-            <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</dt>
-            <dd className="mt-0.5 text-sm font-semibold text-slate-900 dark:text-neutral-100">
+            <dt className="text-xs font-medium uppercase tracking-wide text-fg-muted">{label}</dt>
+            <dd className="mt-0.5 text-sm font-semibold text-fg-default">
               {value}
               {label === 'Disparity flags' && data.disparityFlags > 0 ? (
-                <span className="ms-2 text-amber-700 dark:text-amber-300" aria-label="Attention needed">
+                <span className="ms-2 text-warning-fg" aria-label="Attention needed">
                   !
                 </span>
               ) : null}
@@ -121,7 +121,7 @@ export function AdaptiveContentOversightPanel() {
         {data.dpiaDocPath ? (
           <a
             href={data.dpiaDocPath}
-            className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 dark:border-neutral-600 dark:text-neutral-200"
+            className="rounded-xl border border-border-default px-4 py-2 text-sm font-medium text-fg-muted dark:border-border-default dark:text-fg-default"
           >
             DPIA
           </a>
@@ -129,7 +129,7 @@ export function AdaptiveContentOversightPanel() {
         {data.aiActChecklistPath ? (
           <a
             href={data.aiActChecklistPath}
-            className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 dark:border-neutral-600 dark:text-neutral-200"
+            className="rounded-xl border border-border-default px-4 py-2 text-sm font-medium text-fg-muted dark:border-border-default dark:text-fg-default"
           >
             EU AI Act checklist
           </a>

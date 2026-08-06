@@ -24,7 +24,7 @@ export function ChecklistDismissedSection({
   const panelId = 'checklist-dismissed'
 
   return (
-    <section aria-labelledby={`${panelId}-heading`} className="mt-6 border-t border-slate-200 pt-4 dark:border-neutral-800">
+    <section aria-labelledby={`${panelId}-heading`} className="mt-6 border-t border-border-default pt-4 dark:border-border-subtle">
       <h2 id={`${panelId}-heading`}>
         <button
           type="button"
@@ -33,7 +33,7 @@ export function ChecklistDismissedSection({
           aria-controls={panelId}
           onClick={onToggle}
         >
-          <span className="inline-flex items-center gap-2 text-base font-semibold text-slate-700 dark:text-neutral-300">
+          <span className="inline-flex items-center gap-2 text-base font-semibold text-fg-muted">
             {expanded ? (
               <ChevronDown className="h-4 w-4 shrink-0" aria-hidden />
             ) : (
@@ -50,15 +50,15 @@ export function ChecklistDismissedSection({
             return (
               <li
                 key={item.id}
-                className="rounded-lg border border-slate-200 bg-slate-50/80 p-3 dark:border-neutral-700 dark:bg-neutral-900/60"
+                className="rounded-lg border border-border-default bg-slate-50/80 p-3 dark:border-border-default/60"
               >
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-slate-800 dark:text-neutral-200">
+                    <p className="text-sm font-medium text-fg-default">
                       {item.title}
                     </p>
                     {d ? (
-                      <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+                      <p className="mt-1 text-xs text-fg-muted">
                         {courseChecklistI18n.dismissedBy(
                           d.byDisplayName || 'Someone',
                           formatTimeAgoFromIso(d.dismissedAt),
@@ -69,7 +69,7 @@ export function ChecklistDismissedSection({
                       </p>
                     ) : null}
                     {itemErrors[item.id] ? (
-                      <p className="mt-1 text-sm text-red-600" role="alert">
+                      <p className="mt-1 text-sm text-danger-fg" role="alert">
                         {itemErrors[item.id]}
                       </p>
                     ) : null}
@@ -78,7 +78,7 @@ export function ChecklistDismissedSection({
                     type="button"
                     disabled={busyItemId === item.id}
                     onClick={() => onRestore(item)}
-                    className="inline-flex min-h-11 items-center rounded-lg border border-slate-300 px-3 text-xs font-semibold text-slate-800 hover:border-amber-300 dark:border-neutral-600 dark:text-neutral-100"
+                    className="inline-flex min-h-11 items-center rounded-lg border border-border-strong px-3 text-xs font-semibold text-fg-default hover:border-amber-300 dark:border-border-default dark:text-fg-default"
                   >
                     {busyItemId === item.id
                       ? courseChecklistI18n.restoring

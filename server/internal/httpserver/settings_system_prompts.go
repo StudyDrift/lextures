@@ -18,15 +18,6 @@ const maxSystemPromptContent = 500_000
 // handleListSystemPrompts is GET /api/v1/settings/system-prompts
 func (d Deps) handleListSystemPrompts() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -56,15 +47,6 @@ type putSystemPromptBody struct {
 // handlePutSystemPrompt is PUT /api/v1/settings/system-prompts/{key}
 func (d Deps) handlePutSystemPrompt() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPut {
-			w.Header().Set("Allow", http.MethodPut+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		uid, ok := d.adminRbacUser(w, r)
 		if !ok {
 			return

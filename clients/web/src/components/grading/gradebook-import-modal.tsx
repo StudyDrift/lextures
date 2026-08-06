@@ -111,29 +111,29 @@ export function GradebookImportModal(props: {
         role="dialog"
         aria-modal="true"
         aria-labelledby={`${baseId}-title`}
-        className="relative z-10 flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-900"
+        className="relative z-10 flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-2xl dark:border-border-default dark:bg-surface-raised"
         onKeyDown={(ev) => {
           if (ev.key === 'Escape' && !confirming) handleClose()
         }}
       >
-        <div className="border-b border-slate-200 px-4 py-3 dark:border-neutral-700">
-          <h2 id={`${baseId}-title`} className="text-lg font-semibold text-slate-900 dark:text-neutral-100">
+        <div className="border-b border-border-default px-4 py-3 dark:border-border-default">
+          <h2 id={`${baseId}-title`} className="text-lg font-semibold text-fg-default">
             Import grades from CSV
           </h2>
-          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+          <p className="mt-1 text-sm text-fg-muted">
             Use a file exported from this course’s “Export CSV” (includes the metadata row). Review the
             preview, then confirm to apply. Import is logged as bulk import in the grade change history.
           </p>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
-          <label className="block text-sm font-medium text-slate-800 dark:text-neutral-200" htmlFor={`${baseId}-file`}>
+          <label className="block text-sm font-medium text-fg-default" htmlFor={`${baseId}-file`}>
             CSV file
           </label>
           <input
             id={`${baseId}-file`}
             type="file"
             accept=".csv,text/csv"
-            className="mt-1 block w-full text-sm text-slate-700 file:me-2 file:rounded file:border-0 file:bg-slate-100 file:px-2 file:py-1.5 file:text-slate-800 dark:text-neutral-300 dark:file:bg-neutral-800 dark:file:text-neutral-100"
+            className="mt-1 block w-full text-sm text-fg-muted file:me-2 file:rounded file:border-0 file:bg-surface-sunken file:px-2 file:py-1.5 file:text-fg-default dark:text-fg-muted dark:file:bg-surface-overlay dark:file:text-fg-default"
             disabled={validating || confirming}
             onChange={(ev) => {
               const f = ev.target.files?.[0] ?? null
@@ -141,26 +141,26 @@ export function GradebookImportModal(props: {
             }}
           />
           {fileName ? (
-            <p className="mt-1 text-xs text-slate-500 dark:text-neutral-500" aria-live="polite">
+            <p className="mt-1 text-xs text-fg-subtle" aria-live="polite">
               {validating ? 'Validating…' : `Selected: ${fileName}`}
             </p>
           ) : null}
 
           {formError ? (
-            <p className="mt-3 text-sm text-red-600 dark:text-red-400" role="alert">
+            <p className="mt-3 text-sm text-danger-fg" role="alert">
               {formError}
             </p>
           ) : null}
 
           {preview && (
             <div className="mt-4 space-y-3">
-              <div className="text-sm text-slate-600 dark:text-neutral-400" aria-live="polite">
-                <span className="font-medium text-slate-800 dark:text-neutral-200">Summary:</span>{' '}
+              <div className="text-sm text-fg-muted" aria-live="polite">
+                <span className="font-medium text-fg-default">Summary:</span>{' '}
                 {preview.stats.unchanged} unchanged, {preview.stats.updated} updated, {preview.stats.added} new
                 cells, {preview.stats.errors} errors, {preview.stats.warnings} out-of-range warnings.
               </div>
               {preview.requireBlindManualHoldAck && preview.confirmable ? (
-                <label className="flex items-start gap-2 text-sm text-slate-800 dark:text-neutral-200">
+                <label className="flex items-start gap-2 text-sm text-fg-default">
                   <input
                     type="checkbox"
                     className="mt-1"
@@ -176,12 +176,12 @@ export function GradebookImportModal(props: {
               ) : null}
               {preview.rows.length > 0 ? (
                 <div
-                  className="overflow-x-auto rounded-lg border border-slate-200 dark:border-neutral-700"
+                  className="overflow-x-auto rounded-lg border border-border-default"
                   role="grid"
                   aria-label="Import preview: score changes by student and assignment"
                 >
                   <table className="min-w-full divide-y divide-slate-200 text-start text-sm dark:divide-neutral-700">
-                    <thead className="bg-slate-50 dark:bg-neutral-800/60">
+                    <thead className="bg-surface-sunken/60">
                       <tr>
                         <th scope="col" className="px-2 py-2 font-medium">
                           Row
@@ -197,13 +197,13 @@ export function GradebookImportModal(props: {
                     <tbody className="divide-y divide-slate-100 dark:divide-neutral-800">
                       {preview.rows.map((row) => (
                         <tr key={row.rowIndex} className={row.error ? 'bg-red-50/80 dark:bg-red-950/30' : undefined}>
-                          <td className="px-2 py-2 text-slate-600 dark:text-neutral-400">{row.rowIndex + 1}</td>
-                          <td className="px-2 py-2 text-slate-800 dark:text-neutral-100">
+                          <td className="px-2 py-2 text-fg-muted">{row.rowIndex + 1}</td>
+                          <td className="px-2 py-2 text-fg-default">
                             {row.studentName || row.studentId || '—'}
                           </td>
-                          <td className="px-2 py-2 text-slate-700 dark:text-neutral-300">
+                          <td className="px-2 py-2 text-fg-muted">
                             {row.error ? (
-                              <span className="text-red-700 dark:text-red-300">{row.error}</span>
+                              <span className="text-danger-fg">{row.error}</span>
                             ) : (
                               <ul className="list-inside list-disc space-y-1">
                                 {row.cells.map((c) => {
@@ -240,10 +240,10 @@ export function GradebookImportModal(props: {
             </div>
           )}
         </div>
-        <div className="flex flex-wrap justify-end gap-2 border-t border-slate-200 px-4 py-3 dark:border-neutral-700">
+        <div className="flex flex-wrap justify-end gap-2 border-t border-border-default px-4 py-3 dark:border-border-default">
           <button
             type="button"
-            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 shadow-sm hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+            className="rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm font-medium text-fg-default shadow-sm hover:bg-surface-base dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700/80"
             onClick={handleClose}
             disabled={confirming}
           >
@@ -251,7 +251,7 @@ export function GradebookImportModal(props: {
           </button>
           <button
             type="button"
-            className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+            className="rounded-lg bg-accent-solid px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
             disabled={!preview?.confirmable || !preview?.token || confirming || validating}
             onClick={() => void onConfirm()}
           >

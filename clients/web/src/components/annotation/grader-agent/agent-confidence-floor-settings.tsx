@@ -28,13 +28,13 @@ export function AgentConfidenceFloorSettings({
   const percent = floorPercent(confidenceFloor)
 
   return (
-    <div className={compact ? 'space-y-2' : 'space-y-3 text-sm text-slate-700 dark:text-neutral-200'}>
+    <div className={compact ? 'space-y-2' : 'space-y-3 text-sm text-fg-default'}>
       {!compact ? (
-        <p className="text-xs text-slate-500 dark:text-neutral-400">
+        <p className="text-xs text-fg-muted">
           {t('gradingAgent.settings.confidenceFloor.help')}
         </p>
       ) : null}
-      <label className="flex min-h-10 cursor-pointer items-center gap-2 text-sm text-slate-700 dark:text-neutral-200">
+      <label className="flex min-h-10 cursor-pointer items-center gap-2 text-sm text-fg-default">
         <input
           type="checkbox"
           className="size-4"
@@ -52,7 +52,7 @@ export function AgentConfidenceFloorSettings({
       </label>
       {enabled ? (
         <label className="block">
-          <span className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-neutral-400">
+          <span className="mb-1.5 block text-xs font-medium text-fg-muted">
             {t('gradingAgent.settings.confidenceFloor.threshold', { percent })}
           </span>
           <input
@@ -69,14 +69,14 @@ export function AgentConfidenceFloorSettings({
             onChange={(e) => onChange(Number(e.target.value) / 100)}
             className="w-full accent-indigo-600"
           />
-          <div className="mt-1 flex justify-between text-xs tabular-nums text-slate-500 dark:text-neutral-400">
+          <div className="mt-1 flex justify-between text-xs tabular-nums text-fg-muted">
             <span>50%</span>
-            <span className="font-medium text-slate-700 dark:text-neutral-200">{percent}%</span>
+            <span className="font-medium text-fg-default">{percent}%</span>
             <span>100%</span>
           </div>
         </label>
       ) : (
-        <p className="text-xs text-slate-500 dark:text-neutral-400">
+        <p className="text-xs text-fg-muted">
           {t('gradingAgent.settings.confidenceFloor.off')}
         </p>
       )}
@@ -85,7 +85,7 @@ export function AgentConfidenceFloorSettings({
           type="button"
           disabled={disabled || !enabled}
           onClick={() => onChange(null)}
-          className="text-sm font-medium text-indigo-700 hover:underline disabled:opacity-50 dark:text-indigo-300"
+          className="text-sm font-medium text-accent-fg hover:underline disabled:opacity-50 dark:text-indigo-300"
         >
           {t('gradingAgent.settings.confidenceFloor.neverHold')}
         </button>

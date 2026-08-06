@@ -64,7 +64,7 @@ type InspectorPanelProps = {
 }
 
 const fieldClass =
-  'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100'
+  'w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base dark:text-fg-default'
 
 export function InspectorPanel({
   workflow,
@@ -140,11 +140,11 @@ export function InspectorPanel({
 
   if (!graph || !selectedNodeId) {
     return (
-      <div className="space-y-4 text-sm text-slate-700 dark:text-neutral-200">
-        <p className="text-sm text-slate-500 dark:text-neutral-400">{t('gradingAgent.canvas.inspector.empty')}</p>
+      <div className="space-y-4 text-sm text-fg-default">
+        <p className="text-sm text-fg-muted">{t('gradingAgent.canvas.inspector.empty')}</p>
         {onSetConfidenceFloor ? (
-          <section className="space-y-2 border-t border-slate-200 pt-3 dark:border-neutral-700">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+          <section className="space-y-2 border-t border-border-default pt-3 dark:border-border-default">
+            <p className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
               {t('gradingAgent.settings.confidenceFloor.title')}
             </p>
             <AgentConfidenceFloorSettings
@@ -160,7 +160,7 @@ export function InspectorPanel({
   const node = graph.nodes.find((n) => n.id === selectedNodeId)
   if (!node) {
     return (
-      <p className="text-sm text-slate-500 dark:text-neutral-400">{t('gradingAgent.canvas.inspector.empty')}</p>
+      <p className="text-sm text-fg-muted">{t('gradingAgent.canvas.inspector.empty')}</p>
     )
   }
 
@@ -172,18 +172,18 @@ export function InspectorPanel({
       ? t('gradingAgent.canvas.slots.gradeRubric')
       : t('gradingAgent.canvas.slots.gradeScore')
     return (
-      <div className="space-y-2 text-sm text-slate-700 dark:text-neutral-200">
+      <div className="space-y-2 text-sm text-fg-default">
         <p className="font-medium">{nodeTitle('gradingAgent.canvas.nodes.output.title')}</p>
         <p>{t('gradingAgent.canvas.inspector.outputHelp')}</p>
         <dl className="space-y-2 pt-1">
           <div>
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+            <dt className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
               {gradeSlotLabel}
             </dt>
             <dd>{t('gradingAgent.canvas.inspector.outputGradeSlot')}</dd>
           </div>
           <div>
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+            <dt className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
               {t('gradingAgent.canvas.slots.comments')}
             </dt>
             <dd>{t('gradingAgent.canvas.inspector.outputCommentsSlot')}</dd>
@@ -196,10 +196,10 @@ export function InspectorPanel({
   if (node.type === 'grader') {
     return (
       <div className="space-y-3">
-        <p className="text-sm font-medium text-slate-800 dark:text-neutral-100">
+        <p className="text-sm font-medium text-fg-default">
           {nodeTitle('gradingAgent.canvas.nodes.grader.title')}
         </p>
-        <label className="block text-sm text-slate-700 dark:text-neutral-200">
+        <label className="block text-sm text-fg-default">
           <span className="mb-1.5 block font-medium">{t('gradingAgent.prompt.label')}</span>
           <WorkflowPromptEditor
             value={typeof node.data.prompt === 'string' ? node.data.prompt : ''}
@@ -212,7 +212,7 @@ export function InspectorPanel({
             expandTitle={t('gradingAgent.prompt.label')}
           />
         </label>
-        <label className="block text-sm text-slate-700 dark:text-neutral-200">
+        <label className="block text-sm text-fg-default">
           <span className="mb-1.5 block font-medium">{t('gradingAgent.model.label')}</span>
           <select
             value={modelId}
@@ -226,7 +226,7 @@ export function InspectorPanel({
               </option>
             ))}
           </select>
-          <p className="mt-1.5 text-xs text-slate-500 dark:text-neutral-400">{t('gradingAgent.model.help')}</p>
+          <p className="mt-1.5 text-xs text-fg-muted">{t('gradingAgent.model.help')}</p>
         </label>
         <button
           type="button"
@@ -241,13 +241,13 @@ export function InspectorPanel({
 
   if (isActivityNodeType(node.type)) {
     return (
-      <div className="space-y-3 text-sm text-slate-700 dark:text-neutral-200">
-        <p className="font-medium text-slate-800 dark:text-neutral-100">
+      <div className="space-y-3 text-sm text-fg-default">
+        <p className="font-medium text-fg-default">
           {nodeTitle('gradingAgent.canvas.nodes.activity.title')}
         </p>
         <p>{t('gradingAgent.canvas.inspector.activityHelp')}</p>
         <label className="block">
-          <span className="mb-1.5 block font-medium text-slate-800 dark:text-neutral-100">
+          <span className="mb-1.5 block font-medium text-fg-default">
             {t('gradingAgent.canvas.inspector.activityAssignment')}
           </span>
           <AssignmentPicker
@@ -259,7 +259,7 @@ export function InspectorPanel({
             noMatchLabel={t('gradingAgent.canvas.inspector.activityAssignmentNoMatch')}
             onChange={(assignmentId) => updateNodeData(node.id, { assignmentItemId: assignmentId })}
           />
-          <p className="mt-1.5 text-xs text-slate-500 dark:text-neutral-400">
+          <p className="mt-1.5 text-xs text-fg-muted">
             {t('gradingAgent.canvas.inspector.activityAssignmentHelp')}
           </p>
           {assignmentsError ? (
@@ -288,13 +288,13 @@ export function InspectorPanel({
     )
     return (
       <div className="space-y-3">
-        <p className="text-sm font-medium text-slate-800 dark:text-neutral-100">
+        <p className="text-sm font-medium text-fg-default">
           {nodeTitle('gradingAgent.canvas.nodes.criterionGrader.title')}
         </p>
-        <p className="text-sm text-slate-700 dark:text-neutral-200">
+        <p className="text-sm text-fg-default">
           {t('gradingAgent.canvas.inspector.criterionGraderHelp')}
         </p>
-        <label className="block text-sm text-slate-700 dark:text-neutral-200">
+        <label className="block text-sm text-fg-default">
           <span className="mb-1.5 block font-medium">{t('gradingAgent.canvas.inspector.criterion')}</span>
           <select
             value={criterionId}
@@ -315,12 +315,12 @@ export function InspectorPanel({
             ))}
           </select>
           {!rubricWired && criteria.length > 0 ? (
-            <p className="mt-1.5 text-xs text-slate-500 dark:text-neutral-400">
+            <p className="mt-1.5 text-xs text-fg-muted">
               {t('gradingAgent.canvas.inspector.criterionUsingAssignmentRubric')}
             </p>
           ) : null}
           {criteria.length === 0 ? (
-            <p className="mt-1.5 text-xs text-amber-700 dark:text-amber-300">
+            <p className="mt-1.5 text-xs text-warning-fg">
               {t('gradingAgent.canvas.inspector.criterionWireRubricHint')}
             </p>
           ) : null}
@@ -332,7 +332,7 @@ export function InspectorPanel({
           rubric={rubric}
           assignmentItemId={itemId}
         />
-        <label className="block text-sm text-slate-700 dark:text-neutral-200">
+        <label className="block text-sm text-fg-default">
           <span className="mb-1.5 block font-medium">{t('gradingAgent.prompt.label')}</span>
           <WorkflowPromptEditor
             value={typeof node.data.prompt === 'string' ? node.data.prompt : ''}
@@ -345,7 +345,7 @@ export function InspectorPanel({
             expandTitle={t('gradingAgent.prompt.label')}
           />
         </label>
-        <label className="block text-sm text-slate-700 dark:text-neutral-200">
+        <label className="block text-sm text-fg-default">
           <span className="mb-1.5 block font-medium">{t('gradingAgent.model.label')}</span>
           <select
             value={modelId}
@@ -359,7 +359,7 @@ export function InspectorPanel({
               </option>
             ))}
           </select>
-          <p className="mt-1.5 text-xs text-slate-500 dark:text-neutral-400">{t('gradingAgent.model.help')}</p>
+          <p className="mt-1.5 text-xs text-fg-muted">{t('gradingAgent.model.help')}</p>
         </label>
         {showCompiledPrompt ? <AiNodeCompiledPrompt detail={dryRunDetail} /> : null}
         <button
@@ -378,12 +378,12 @@ export function InspectorPanel({
     const showCompiledPrompt = nodeExecutionStates[node.id] === 'success' && dryRunDetail
     return (
       <div className="space-y-3">
-        <p className="text-sm font-medium text-slate-800 dark:text-neutral-100">
+        <p className="text-sm font-medium text-fg-default">
           {nodeTitle('gradingAgent.canvas.nodes.ai.title')}
         </p>
-        <p className="text-sm text-slate-700 dark:text-neutral-200">{t('gradingAgent.canvas.inspector.aiHelp')}</p>
+        <p className="text-sm text-fg-default">{t('gradingAgent.canvas.inspector.aiHelp')}</p>
         <AiNodeOutputFormat graph={graph} nodeId={node.id} rubric={rubric} maxPoints={maxPoints} />
-        <label className="block text-sm text-slate-700 dark:text-neutral-200">
+        <label className="block text-sm text-fg-default">
           <span className="mb-1.5 block font-medium">{t('gradingAgent.prompt.label')}</span>
           <WorkflowPromptEditor
             value={typeof node.data.prompt === 'string' ? node.data.prompt : ''}
@@ -410,7 +410,7 @@ export function InspectorPanel({
 
   if (isStudentSubmissionNodeType(node.type)) {
     return (
-      <div className="space-y-3 text-sm text-slate-700 dark:text-neutral-200">
+      <div className="space-y-3 text-sm text-fg-default">
         <p className="font-medium">{nodeTitle('gradingAgent.canvas.nodes.studentSubmission.title')}</p>
         <p>{t('gradingAgent.canvas.inspector.submissionHelp')}</p>
         <SubmissionInspectorSection submission={selectedSubmission} />
@@ -427,10 +427,10 @@ export function InspectorPanel({
 
   if (isQuizResponsesNodeType(node.type)) {
     return (
-      <div className="space-y-3 text-sm text-slate-700 dark:text-neutral-200">
+      <div className="space-y-3 text-sm text-fg-default">
         <p className="font-medium">{nodeTitle('gradingAgent.canvas.nodes.quizResponses.title')}</p>
         <p>{t('gradingAgent.canvas.inspector.quizResponses.help')}</p>
-        <Suspense fallback={<p className="text-xs text-slate-500 dark:text-neutral-400">{t('gradingAgent.canvas.inspector.quizResponses.empty')}</p>}>
+        <Suspense fallback={<p className="text-xs text-fg-muted">{t('gradingAgent.canvas.inspector.quizResponses.empty')}</p>}>
           <QuizResponsesInspector slots={quizQuestionSlots} questions={quizQuestions} />
         </Suspense>
       </div>
@@ -465,7 +465,7 @@ export function InspectorPanel({
   if (isReferenceNodeType(node.type)) {
     return (
       <div className="space-y-2">
-        <p className="text-sm font-medium text-slate-800 dark:text-neutral-100">
+        <p className="text-sm font-medium text-fg-default">
           {nodeTitle('gradingAgent.canvas.nodes.reference.title')}
         </p>
         <ReferenceInspector
@@ -482,7 +482,7 @@ export function InspectorPanel({
   if (isRubricNodeType(node.type)) {
     return (
       <div className="space-y-2">
-        <p className="text-sm font-medium text-slate-800 dark:text-neutral-100">
+        <p className="text-sm font-medium text-fg-default">
           {nodeTitle('gradingAgent.canvas.nodes.rubric.title')}
         </p>
         <RubricInspector
@@ -503,7 +503,7 @@ export function InspectorPanel({
   if (isOriginalityNodeType(node.type)) {
     return (
       <div className="space-y-2">
-        <p className="text-sm font-medium text-slate-800 dark:text-neutral-100">
+        <p className="text-sm font-medium text-fg-default">
           {nodeTitle('gradingAgent.canvas.nodes.originality.title')}
         </p>
         <OriginalityInspector
@@ -520,7 +520,7 @@ export function InspectorPanel({
   if (isScoreAggregatorNodeType(node.type)) {
     return (
       <div className="space-y-2">
-        <p className="text-sm font-medium text-slate-800 dark:text-neutral-100">
+        <p className="text-sm font-medium text-fg-default">
           {nodeTitle('gradingAgent.canvas.nodes.aggregator.title')}
         </p>
         <ScoreAggregatorInspector
@@ -538,7 +538,7 @@ export function InspectorPanel({
   if (isHumanReviewGateNodeType(node.type)) {
     return (
       <div className="space-y-2">
-        <p className="text-sm font-medium text-slate-800 dark:text-neutral-100">
+        <p className="text-sm font-medium text-fg-default">
           {nodeTitle('gradingAgent.canvas.nodes.reviewGate.title')}
         </p>
         <HumanReviewGateInspector
@@ -554,7 +554,7 @@ export function InspectorPanel({
   if (isFlagForReviewNodeType(node.type)) {
     return (
       <div className="space-y-2">
-        <p className="text-sm font-medium text-slate-800 dark:text-neutral-100">
+        <p className="text-sm font-medium text-fg-default">
           {nodeTitle('gradingAgent.canvas.nodes.flagForReview.title')}
         </p>
         <FlagForReviewInspector
@@ -573,7 +573,7 @@ export function InspectorPanel({
   if (isSetScoreNodeType(node.type)) {
     return (
       <div className="space-y-2">
-        <p className="text-sm font-medium text-slate-800 dark:text-neutral-100">
+        <p className="text-sm font-medium text-fg-default">
           {nodeTitle('gradingAgent.canvas.nodes.setScore.title')}
         </p>
         <SetScoreInspector

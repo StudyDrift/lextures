@@ -74,11 +74,6 @@ func (d Deps) registerReportCardRoutes(r chi.Router) {
 // handleListCourseReportCards is GET /api/v1/courses/:course_code/report-cards/:period
 func (d Deps) handleListCourseReportCards() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -134,11 +129,6 @@ func (d Deps) handleListCourseReportCards() http.HandlerFunc {
 // handlePatchReportCard is PATCH /api/v1/report-cards/:cardId
 func (d Deps) handlePatchReportCard() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		actorID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -196,11 +186,6 @@ func (d Deps) handlePatchReportCard() http.HandlerFunc {
 // handleGenerateReportCardPDF is POST /api/v1/report-cards/:cardId/generate-pdf
 func (d Deps) handleGenerateReportCardPDF() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		actorID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -292,11 +277,6 @@ WHERE ar.student_id = $2 AND ac.category = 'absent'`,
 // handleReleaseReportCards is POST /api/v1/courses/:course_code/report-cards/:period/release
 func (d Deps) handleReleaseReportCards() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		actorID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -351,11 +331,6 @@ func (d Deps) handleReleaseReportCards() http.HandlerFunc {
 // handleDownloadReportCardPDF is GET /api/v1/report-cards/:cardId/pdf
 func (d Deps) handleDownloadReportCardPDF() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		actorID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -477,11 +452,6 @@ WHERE ar.student_id = $2 AND ac.category = 'absent'`,
 // handleAIReportCardComment is POST /api/v1/ai/report-card-comment
 func (d Deps) handleAIReportCardComment() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		actorID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -611,11 +581,6 @@ func (d Deps) handleCommentBank() http.HandlerFunc {
 // handleDeleteCommentBankEntry is DELETE /api/v1/admin/orgs/:orgId/report-cards/comment-bank/:entryId
 func (d Deps) handleDeleteCommentBankEntry() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodDelete {
-			w.Header().Set("Allow", http.MethodDelete)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		orgID, err := uuid.Parse(strings.TrimSpace(chi.URLParam(r, "orgId")))
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid org id.")
@@ -645,11 +610,6 @@ func (d Deps) handleDeleteCommentBankEntry() http.HandlerFunc {
 // handleParentReportCards is GET /api/v1/parent/students/:sid/report-cards
 func (d Deps) handleParentReportCards() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		parentID, orgID, ok := d.requireParentViewer(w, r)
 		if !ok {
 			return
@@ -680,11 +640,6 @@ func (d Deps) handleParentReportCards() http.HandlerFunc {
 // released report cards across all courses (mobile M6.2 student view).
 func (d Deps) handleMyReportCards() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		actorID, ok := d.meUserID(w, r)
 		if !ok {
 			return

@@ -169,7 +169,7 @@ function HeaderSortMenuPortal({
     <div
       ref={panelRef}
       role="menu"
-      className="fixed z-[200] min-w-[14rem] rounded-lg border border-slate-200 bg-white py-1 shadow-lg dark:border-neutral-600 dark:bg-neutral-900"
+      className="fixed z-[200] min-w-[14rem] rounded-lg border border-border-default bg-surface-raised py-1 shadow-lg dark:border-border-default dark:bg-surface-raised"
       style={{ top: menu.top, left: menu.left, minWidth: menu.minWidth }}
     >
       {children}
@@ -188,7 +188,7 @@ function menuButtonClass(active: boolean) {
 }
 
 function menuItemClass() {
-  return 'block w-full px-2.5 py-1.5 text-start text-sm text-slate-800 hover:bg-slate-100 dark:text-neutral-100 dark:hover:bg-neutral-800'
+  return 'block w-full px-2.5 py-1.5 text-start text-sm text-fg-default hover:bg-surface-sunken dark:text-fg-default dark:hover:bg-surface-overlay'
 }
 
 function normalizeFilter(s: string): string {
@@ -230,7 +230,7 @@ function heatMapCellClass(t: number): string {
   const u = Math.max(0, Math.min(1, t))
   if (u <= 0.17) return 'bg-sky-100/90 dark:bg-sky-950/35'
   if (u <= 0.33) return 'bg-sky-50/80 dark:bg-sky-950/20'
-  if (u <= 0.5) return 'bg-slate-50 dark:bg-neutral-800/70'
+  if (u <= 0.5) return 'bg-surface-sunken/70'
   if (u <= 0.67) return 'bg-amber-50/90 dark:bg-amber-950/25'
   if (u <= 0.83) return 'bg-amber-100/85 dark:bg-amber-950/40'
   return 'bg-orange-100/80 dark:bg-orange-950/45'
@@ -1139,7 +1139,7 @@ export function GradebookGrid({
   const studentHeaderActive = activeSort?.kind === 'student'
 
   const filterInputClass =
-    'w-full min-w-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950 shadow-sm outline-none placeholder:text-slate-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-indigo-400 dark:focus:ring-indigo-400'
+    'w-full min-w-0 rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-slate-950 shadow-sm outline-none placeholder:text-fg-subtle focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:placeholder:text-neutral-500 dark:focus:border-indigo-400 dark:focus:ring-indigo-400'
 
   const hasFilters = studentFilterNorm.length > 0 || assignmentFilterNorm.length > 0
 
@@ -1170,15 +1170,15 @@ export function GradebookGrid({
 
   const formerStudentsPanel =
     formerStudents.length > 0 ? (
-      <div className="mt-6 rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
+      <div className="mt-6 rounded-xl border border-border-default bg-surface-raised shadow-sm dark:border-border-default dark:bg-surface-raised">
         <button
           type="button"
-          className="flex w-full items-center justify-between gap-2 px-4 py-3 text-start text-sm font-semibold text-slate-800 dark:text-neutral-100"
+          className="flex w-full items-center justify-between gap-2 px-4 py-3 text-start text-sm font-semibold text-fg-default"
           aria-expanded={!formerCollapsed}
           onClick={() => setFormerCollapsed((v) => !v)}
         >
           <span className="inline-flex items-center gap-2">
-            <Users className="h-4 w-4 text-slate-500 dark:text-neutral-400" aria-hidden />
+            <Users className="h-4 w-4 text-fg-muted" aria-hidden />
             Former students ({formerStudents.length})
           </span>
           <ChevronDown
@@ -1187,21 +1187,21 @@ export function GradebookGrid({
           />
         </button>
         {!formerCollapsed && (
-          <div className="overflow-auto border-t border-slate-200 dark:border-neutral-700">
+          <div className="overflow-auto border-t border-border-default">
             <table className="w-full min-w-max border-collapse text-start text-sm">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50 dark:border-neutral-700 dark:bg-neutral-800">
-                  <th scope="col" className="px-4 py-2 text-start font-medium text-slate-600 dark:text-neutral-300">
+                <tr className="border-b border-border-default bg-surface-base dark:border-border-default dark:bg-surface-overlay">
+                  <th scope="col" className="px-4 py-2 text-start font-medium text-fg-muted">
                     Student
                   </th>
-                  <th scope="col" className="px-4 py-2 text-start font-medium text-slate-600 dark:text-neutral-300">
+                  <th scope="col" className="px-4 py-2 text-start font-medium text-fg-muted">
                     Status
                   </th>
                   {visibleColumns.slice(0, 4).map((col) => (
                     <th
                       key={col.id}
                       scope="col"
-                      className="px-3 py-2 text-start font-medium text-slate-600 dark:text-neutral-300"
+                      className="px-3 py-2 text-start font-medium text-fg-muted"
                     >
                       {col.title}
                     </th>
@@ -1212,9 +1212,9 @@ export function GradebookGrid({
                 {formerStudents.map((student) => (
                   <tr
                     key={student.id}
-                    className="border-b border-slate-100 dark:border-neutral-800"
+                    className="border-b border-border-subtle"
                   >
-                    <td className="px-4 py-2 font-medium text-slate-900 dark:text-neutral-100">{student.name}</td>
+                    <td className="px-4 py-2 font-medium text-fg-default">{student.name}</td>
                     <td className="px-4 py-2">
                       <EnrollmentStateBadge state={(student.state ?? 'withdrawn') as EnrollmentState} />
                     </td>
@@ -1223,7 +1223,7 @@ export function GradebookGrid({
                       return (
                         <td
                           key={col.id}
-                          className="px-3 py-2 text-slate-700 dark:text-neutral-300"
+                          className="px-3 py-2 text-fg-muted"
                           aria-label={`${student.name} ${col.title} grade`}
                         >
                           {raw || '—'}
@@ -1234,7 +1234,7 @@ export function GradebookGrid({
                 ))}
               </tbody>
             </table>
-            <p className="px-4 py-2 text-xs text-slate-500 dark:text-neutral-400">
+            <p className="px-4 py-2 text-xs text-fg-muted">
               Former students are read-only; grades are retained for transcript history.
             </p>
           </div>
@@ -1301,9 +1301,9 @@ export function GradebookGrid({
 
   return (
     <div className="mt-6 space-y-3">
-      <div className="flex flex-wrap items-end gap-4 rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3 dark:border-neutral-700 dark:bg-neutral-900/50">
+      <div className="flex flex-wrap items-end gap-4 rounded-xl border border-border-default bg-slate-50/80 px-4 py-3 dark:border-border-default/50">
         <label className="flex min-w-[10rem] flex-1 flex-col gap-1">
-          <span className="text-xs font-medium text-slate-600 dark:text-neutral-400">Student</span>
+          <span className="text-xs font-medium text-fg-muted">Student</span>
           <input
             type="search"
             className={filterInputClass}
@@ -1315,7 +1315,7 @@ export function GradebookGrid({
           />
         </label>
         <label className="flex min-w-[10rem] flex-1 flex-col gap-1">
-          <span className="text-xs font-medium text-slate-600 dark:text-neutral-400">Assignment</span>
+          <span className="text-xs font-medium text-fg-muted">Assignment</span>
           <input
             type="search"
             className={filterInputClass}
@@ -1329,7 +1329,7 @@ export function GradebookGrid({
         {hasFilters && (
           <button
             type="button"
-            className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700/80"
+            className="shrink-0 rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm font-medium text-fg-muted shadow-sm hover:bg-surface-base dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700/80"
             onClick={clearFilters}
           >
             Clear filters
@@ -1348,7 +1348,7 @@ export function GradebookGrid({
               'inline-flex shrink-0 items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium shadow-sm transition-colors',
               transposed
                 ? 'border-indigo-300 bg-indigo-50 text-indigo-950 dark:border-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-100'
-                : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700/80',
+                : 'border-border-default bg-surface-raised text-fg-muted hover:bg-surface-base dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700/80',
             ].join(' ')}
             onClick={() => {
               setTransposed((v) => !v)
@@ -1377,7 +1377,7 @@ export function GradebookGrid({
               'inline-flex shrink-0 items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium shadow-sm transition-colors',
               colorScaleEnabled
                 ? 'border-indigo-300 bg-indigo-50 text-indigo-950 dark:border-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-100'
-                : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700/80',
+                : 'border-border-default bg-surface-raised text-fg-muted hover:bg-surface-base dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700/80',
             ].join(' ')}
             onClick={() => setColorScaleEnabled((v) => !v)}
           >
@@ -1388,13 +1388,13 @@ export function GradebookGrid({
       </div>
 
       {rowCount === 0 && (
-        <p className="text-sm text-slate-600 dark:text-neutral-400">
+        <p className="text-sm text-fg-muted">
           No students match &quot;{studentFilter.trim() || '…'}&quot;. Try a different search or clear filters.
         </p>
       )}
 
       {rowCount > 0 && colCount === 0 && (
-        <p className="text-sm text-slate-600 dark:text-neutral-400">
+        <p className="text-sm text-fg-muted">
           No assignments or quizzes match &quot;{assignmentFilter.trim() || '…'}&quot;. Try a different search or
           clear filters.
         </p>
@@ -1431,7 +1431,7 @@ export function GradebookGrid({
       {rowCount > 0 && baseColCount > 0 && !transposed && (
         <div
           ref={gridScrollRef}
-          className="overflow-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900"
+          className="overflow-auto rounded-xl border border-border-default bg-surface-raised shadow-sm dark:border-border-default dark:bg-surface-raised"
         >
           <table
             role="grid"
@@ -1444,7 +1444,7 @@ export function GradebookGrid({
               <tr
                 ref={headerRowRef}
                 aria-rowindex={1}
-                className="border-b border-slate-200 bg-slate-50 dark:border-neutral-700 dark:bg-neutral-800"
+                className="border-b border-border-default bg-surface-base dark:border-border-default dark:bg-surface-overlay"
               >
                 <th
                   scope="col"
@@ -1455,7 +1455,7 @@ export function GradebookGrid({
                         : 'descending'
                       : 'none'
                   }
-                  className={`sticky top-0 start-0 z-30 ${stickyNameWidth} ${pad} border-b border-e border-slate-200 bg-slate-50 align-bottom dark:border-neutral-700 dark:bg-neutral-800`}
+                  className={`sticky top-0 start-0 z-30 ${stickyNameWidth} ${pad} border-b border-e border-border-default bg-surface-base align-bottom dark:border-border-default dark:bg-surface-overlay`}
                 >
                   <button
                     type="button"
@@ -1471,7 +1471,7 @@ export function GradebookGrid({
                       openHeaderMenu({ kind: 'student' }, e.currentTarget)
                     }}
                   >
-                    <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
                       Student
                     </span>
                     <ChevronDown className="size-3.5 shrink-0 opacity-70" aria-hidden />
@@ -1479,9 +1479,9 @@ export function GradebookGrid({
                 </th>
                 <th
                   scope="col"
-                  className={`sticky top-0 ${stickyFinalLeft} z-25 min-w-[5.5rem] ${pad} border-b border-e border-slate-200 bg-slate-50 align-bottom dark:border-neutral-700 dark:bg-neutral-800`}
+                  className={`sticky top-0 ${stickyFinalLeft} z-25 min-w-[5.5rem] ${pad} border-b border-e border-border-default bg-surface-base align-bottom dark:border-border-default dark:bg-surface-overlay`}
                 >
-                  <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
                     Final
                   </span>
                 </th>
@@ -1497,7 +1497,7 @@ export function GradebookGrid({
                       key={col.id}
                       scope="col"
                       aria-sort={colSort}
-                      className={`sticky top-0 z-20 ${pad} ${assignmentColMin} border-b border-slate-200 bg-slate-50 align-bottom dark:border-neutral-700 dark:bg-neutral-800`}
+                      className={`sticky top-0 z-20 ${pad} ${assignmentColMin} border-b border-border-default bg-surface-base align-bottom dark:border-border-default dark:bg-surface-overlay`}
                     >
                       <button
                         type="button"
@@ -1514,8 +1514,8 @@ export function GradebookGrid({
                         }}
                       >
                         <span className="flex min-w-0 flex-1 flex-col items-start gap-0.5 text-start">
-                          <span className="text-xs font-semibold text-slate-800 dark:text-neutral-200">{col.title}</span>
-                          <span className="text-[0.65rem] font-normal text-slate-500 dark:text-neutral-400">
+                          <span className="text-xs font-semibold text-fg-default">{col.title}</span>
+                          <span className="text-[0.65rem] font-normal text-fg-muted">
                             {col.maxPoints != null ? `Out of ${col.maxPoints}` : 'Max points not set'}
                             {activeCurves?.[col.id] ? ' · Curved' : ''}
                           </span>
@@ -1525,7 +1525,7 @@ export function GradebookGrid({
                             !readOnly ? (
                             <button
                               type="button"
-                              className="mt-1 inline-flex max-w-full items-center justify-center rounded-md border border-slate-200 bg-white px-1.5 py-0.5 text-[0.65rem] font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                              className="mt-1 inline-flex max-w-full items-center justify-center rounded-md border border-border-default bg-surface-raised px-1.5 py-0.5 text-[0.65rem] font-medium text-fg-muted shadow-sm hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
                               aria-label={`Post grades for ${col.title}`}
                               disabled={postGradesPending === col.id}
                               onClick={(e) => {
@@ -1544,28 +1544,28 @@ export function GradebookGrid({
                   )
                 })}
               </tr>
-              <tr aria-rowindex={2} className="border-b border-slate-200 bg-slate-100 text-slate-800 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200">
+              <tr aria-rowindex={2} className="border-b border-border-default bg-surface-sunken text-fg-default dark:border-border-default dark:bg-surface-overlay dark:text-fg-default">
                 <th
                   scope="row"
-                  className={`sticky start-0 z-[28] ${stickyNameWidth} ${pad} border-b border-e border-slate-200 bg-slate-100 align-top text-start font-medium shadow-[inset_0_-1px_0_rgba(15,23,42,0.06)] dark:border-neutral-700 dark:bg-neutral-800`}
+                  className={`sticky start-0 z-[28] ${stickyNameWidth} ${pad} border-b border-e border-border-default bg-surface-sunken align-top text-start font-medium shadow-[inset_0_-1px_0_rgba(15,23,42,0.06)] dark:border-border-default dark:bg-surface-overlay`}
                   style={{ top: `${headerStickyPx > 0 ? headerStickyPx : 72}px` }}
                 >
-                  <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                  <span className="text-[10px] font-semibold uppercase tracking-wide text-fg-muted">
                     Class avg / med
                   </span>
                 </th>
                 <th
                   scope="col"
-                  className={`sticky ${stickyFinalLeft} z-[27] min-w-[5.5rem] ${pad} border-b border-e border-slate-200 bg-slate-100 text-end align-top font-normal shadow-[inset_0_-1px_0_rgba(15,23,42,0.06)] dark:border-neutral-700 dark:bg-neutral-800`}
+                  className={`sticky ${stickyFinalLeft} z-[27] min-w-[5.5rem] ${pad} border-b border-e border-border-default bg-surface-sunken text-end align-top font-normal shadow-[inset_0_-1px_0_rgba(15,23,42,0.06)] dark:border-border-default dark:bg-surface-overlay`}
                   style={{ top: `${headerStickyPx > 0 ? headerStickyPx : 72}px` }}
                 >
                   <div className="flex flex-col items-end gap-0.5 text-[11px] tabular-nums leading-snug">
                     <span>
-                      <span className="text-slate-500 dark:text-neutral-400">Avg </span>
+                      <span className="text-fg-muted">Avg </span>
                       {classSummaryStats.finalAvg != null ? `${formatStat(classSummaryStats.finalAvg)}%` : '—'}
                     </span>
                     <span>
-                      <span className="text-slate-500 dark:text-neutral-400">Med </span>
+                      <span className="text-fg-muted">Med </span>
                       {classSummaryStats.finalMed != null ? `${formatStat(classSummaryStats.finalMed)}%` : '—'}
                     </span>
                   </div>
@@ -1576,16 +1576,16 @@ export function GradebookGrid({
                     <th
                       key={`stats-${col.id}`}
                       scope="col"
-                      className={`sticky z-[26] ${pad} ${assignmentColMin} border-b border-slate-200 bg-slate-100 text-end align-top font-normal shadow-[inset_0_-1px_0_rgba(15,23,42,0.06)] dark:border-neutral-700 dark:bg-neutral-800`}
+                      className={`sticky z-[26] ${pad} ${assignmentColMin} border-b border-border-default bg-surface-sunken text-end align-top font-normal shadow-[inset_0_-1px_0_rgba(15,23,42,0.06)] dark:border-border-default dark:bg-surface-overlay`}
                       style={{ top: `${headerStickyPx > 0 ? headerStickyPx : 72}px` }}
                     >
                       <div className="flex flex-col items-end gap-0.5 text-[11px] tabular-nums leading-snug">
                         <span title={col.maxPoints != null ? `Average of entered scores (out of ${col.maxPoints})` : 'Average of entered scores'}>
-                          <span className="text-slate-500 dark:text-neutral-400">Avg </span>
+                          <span className="text-fg-muted">Avg </span>
                           {st.avg != null ? formatStat(st.avg) : '—'}
                         </span>
                         <span title={col.maxPoints != null ? `Median of entered scores (out of ${col.maxPoints})` : 'Median of entered scores'}>
-                          <span className="text-slate-500 dark:text-neutral-400">Med </span>
+                          <span className="text-fg-muted">Med </span>
                           {st.med != null ? formatStat(st.med) : '—'}
                         </span>
                       </div>
@@ -1600,15 +1600,12 @@ export function GradebookGrid({
                   key={student.id}
                   id={`gradebook-row-${student.id}`}
                   aria-rowindex={row + 3}
-                  className={`border-b border-slate-100 last:border-b-0 dark:border-neutral-700/80 ${highlightStudentId && highlightStudentId === student.id
-                      ? 'bg-amber-50/90 ring-2 ring-inset ring-amber-300/90 dark:bg-amber-950/25 dark:ring-amber-500/50'
-                      : ''
-                    }`}
+                  className={`border-b border-border-subtle last:border-b-0/80 ${highlightStudentId && highlightStudentId === student.id ? 'bg-amber-50/90 ring-2 ring-inset ring-amber-300/90 dark:bg-amber-950/25 dark:ring-amber-500/50' : '' }`}
                 >
                   <th
                     scope="row"
                     title={student.name}
-                    className={`sticky start-0 z-10 ${stickyNameWidth} ${pad} truncate border-e border-slate-200 bg-slate-100 text-start font-medium text-slate-950 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100`}
+                    className={`sticky start-0 z-10 ${stickyNameWidth} ${pad} truncate border-e border-border-default bg-surface-sunken text-start font-medium text-slate-950 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default`}
                   >
                     <div className="flex flex-col gap-0.5">
                       <div className="flex flex-wrap items-center gap-1.5">
@@ -1617,7 +1614,7 @@ export function GradebookGrid({
                         student.enrollmentId ? (
                           <Link
                             to={`/courses/${encodeURIComponent(courseCode)}/students/${encodeURIComponent(student.enrollmentId)}/progress`}
-                            className="text-indigo-700 hover:underline dark:text-indigo-300"
+                            className="text-accent-fg hover:underline dark:text-indigo-300"
                           >
                             {student.name}
                           </Link>
@@ -1648,7 +1645,7 @@ export function GradebookGrid({
                     role="gridcell"
                     tabIndex={-1}
                     aria-label={`Final course percentage for ${student.name}`}
-                    className={`sticky ${stickyFinalLeft} z-[9] ${pad} min-w-[5.5rem] border-e border-slate-200 bg-slate-50 text-end tabular-nums text-slate-800 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200`}
+                    className={`sticky ${stickyFinalLeft} z-[9] ${pad} min-w-[5.5rem] border-e border-border-default bg-surface-base text-end tabular-nums text-fg-default dark:border-border-default dark:bg-surface-raised dark:text-fg-default`}
                   >
                     {formatFinalPercent(finalPercentByStudentId[student.id] ?? null)}
                   </td>
@@ -1722,7 +1719,7 @@ export function GradebookGrid({
                             ? ringBand
                             : isFocusCell && !editing
                               ? ringActive
-                              : (heatSurface ?? 'bg-white dark:bg-neutral-900/80')
+                              : (heatSurface ?? 'bg-surface-raised/80')
 
                     const fillExtSurface = inFillExtension
                       ? 'bg-indigo-100/45 ring-1 ring-inset ring-dashed ring-indigo-400/80 dark:bg-indigo-950/35 dark:ring-indigo-500/70'
@@ -1748,7 +1745,7 @@ export function GradebookGrid({
                         aria-selected={
                           inRect || showEditor || (isFocusCell && !editing && selectionRect == null)
                         }
-                        className={`relative ${pad} min-w-[5.5rem] border-s border-slate-100 text-end tabular-nums outline-none transition-colors dark:border-neutral-700/80 ${cellSurface} ${fillExtSurface} ${droppedSurface}`}
+                        className={`relative ${pad} min-w-[5.5rem] border-s border-border-subtle text-end tabular-nums outline-none transition-colors/80 ${cellSurface} ${fillExtSurface} ${droppedSurface}`}
                         title={
                           cellDropped
                             ? 'This score is excluded from the course total by the group’s drop or replace policy.'
@@ -1817,7 +1814,7 @@ export function GradebookGrid({
                             <select
                               ref={editSelectRef}
                               aria-label={`Grade for ${student.name}, ${col.title}`}
-                              className="m-0 w-full min-w-0 border-0 bg-transparent p-0 text-end text-sm text-slate-950 shadow-none outline-none ring-0 focus:ring-0 dark:text-neutral-100"
+                              className="m-0 w-full min-w-0 border-0 bg-transparent p-0 text-end text-sm text-slate-950 shadow-none outline-none ring-0 focus:ring-0 dark:text-fg-default"
                               value={draft}
                               onChange={(e) => setDraft(e.target.value)}
                               onKeyDown={handleInputKeyDown}
@@ -1837,7 +1834,7 @@ export function GradebookGrid({
                               inputMode="decimal"
                               autoComplete="off"
                               aria-label={`Grade for ${student.name}, ${col.title}`}
-                              className="m-0 w-full min-w-0 border-0 bg-transparent p-0 text-end text-sm tabular-nums text-slate-950 shadow-none outline-none ring-0 focus:ring-0 dark:text-neutral-100"
+                              className="m-0 w-full min-w-0 border-0 bg-transparent p-0 text-end text-sm tabular-nums text-slate-950 shadow-none outline-none ring-0 focus:ring-0 dark:text-fg-default"
                               value={draft}
                               onChange={(e) => setDraft(e.target.value)}
                               onPaste={(e) => {
@@ -1874,9 +1871,9 @@ export function GradebookGrid({
                                 className={
                                   val
                                     ? isExcused
-                                      ? 'font-semibold text-slate-700 dark:text-neutral-200'
-                                      : 'text-slate-950 dark:text-neutral-100'
-                                    : 'text-neutral-400 dark:text-neutral-500'
+                                      ? 'font-semibold text-fg-default'
+                                      : 'text-slate-950 dark:text-fg-default'
+                                    : 'text-fg-muted'
                                 }
                                 aria-label={
                                   isExcused
@@ -1896,7 +1893,7 @@ export function GradebookGrid({
                             type="button"
                             tabIndex={-1}
                             aria-label="Fill — drag to copy the selection down or across"
-                            className="absolute -bottom-px -end-px z-[3] h-2.5 w-2.5 cursor-crosshair border border-white bg-indigo-600 shadow-sm hover:bg-indigo-500 dark:border-neutral-900 dark:bg-indigo-500 dark:hover:bg-indigo-400 touch-none"
+                            className="absolute -bottom-px -end-px z-[3] h-2.5 w-2.5 cursor-crosshair border border-white bg-accent-solid shadow-sm hover:bg-indigo-500 dark:border-neutral-900 dark:bg-indigo-500 dark:hover:bg-indigo-400 touch-none"
                             onPointerDown={(e) => handleFillKnobPointerDown(e, activeSelectionBounds)}
                           />
                         )}
@@ -1914,7 +1911,7 @@ export function GradebookGrid({
 
       {headerMenu?.kind === 'student' && (
         <HeaderSortMenuPortal menu={headerMenu} onClose={closeHeaderMenu}>
-          <div className="border-b border-slate-100 px-3 py-1.5 text-xs font-medium text-slate-500 dark:border-neutral-700 dark:text-neutral-400">
+          <div className="border-b border-border-subtle px-3 py-1.5 text-xs font-medium text-fg-muted dark:border-border-default dark:text-fg-muted">
             Sort students
           </div>
           <button type="button" className={menuItemClass()} onClick={() => pickStudentSort('first_az')}>
@@ -1935,7 +1932,7 @@ export function GradebookGrid({
           <button type="button" className={menuItemClass()} onClick={() => pickStudentSort('display_za')}>
             Full name (Z → A)
           </button>
-          <button type="button" className={`${menuItemClass()} text-slate-500 dark:text-neutral-500`} onClick={clearSort}>
+          <button type="button" className={`${menuItemClass()} text-fg-subtle`} onClick={clearSort}>
             Reset to course order
           </button>
         </HeaderSortMenuPortal>
@@ -1943,7 +1940,7 @@ export function GradebookGrid({
 
       {headerMenu?.kind === 'column' && headerMenu.columnId != null && (
         <HeaderSortMenuPortal menu={headerMenu} onClose={closeHeaderMenu}>
-          <div className="border-b border-slate-100 px-3 py-1.5 text-xs font-medium text-slate-500 dark:border-neutral-700 dark:text-neutral-400">
+          <div className="border-b border-border-subtle px-3 py-1.5 text-xs font-medium text-fg-muted dark:border-border-default dark:text-fg-muted">
             Sort by this column
           </div>
           <button
@@ -1986,7 +1983,7 @@ export function GradebookGrid({
           (visibleColumns.find((c) => c.id === headerMenu.columnId)?.kind === 'assignment' ||
             visibleColumns.find((c) => c.id === headerMenu.columnId)?.kind === 'quiz') ? (
             <>
-              <div className="my-1 border-t border-slate-100 dark:border-neutral-700" />
+              <div className="my-1 border-t border-border-subtle dark:border-border-default" />
               <button
                 type="button"
                 className={menuItemClass()}
@@ -1999,7 +1996,7 @@ export function GradebookGrid({
               </button>
             </>
           ) : null}
-          <button type="button" className={`${menuItemClass()} text-slate-500 dark:text-neutral-500`} onClick={clearSort}>
+          <button type="button" className={`${menuItemClass()} text-fg-subtle`} onClick={clearSort}>
             Reset to course order
           </button>
         </HeaderSortMenuPortal>

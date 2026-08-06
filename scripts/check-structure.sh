@@ -65,6 +65,9 @@ bash scripts/check-layering.sh "${args[@]+"${args[@]}"}" || status=1
 echo "==> structure: file-naming"
 node scripts/check-file-naming.mjs "${args[@]+"${args[@]}"}" || status=1
 
+echo "==> structure: handler-method-dispatch (TD.5)"
+bash scripts/check-handler-method-dispatch.sh "${args[@]+"${args[@]}"}" || status=1
+
 if [[ "$FAST" -eq 1 || "${STRUCTURE_SKIP_DEADCODE:-0}" == "1" ]]; then
   echo "==> structure: deadcode (skipped: --fast / STRUCTURE_SKIP_DEADCODE=1)"
 else

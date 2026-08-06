@@ -49,10 +49,6 @@ func contestToAPI(c acrepo.ContestRow) acmodel.Contest {
 // handleAdaptiveContentContestCreate is POST .../units/{id}/contest (student).
 func (d Deps) handleAdaptiveContentContestCreate() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -119,10 +115,6 @@ func (d Deps) handleAdaptiveContentContestCreate() http.HandlerFunc {
 // handleAdaptiveContentContestsList is GET .../adaptive-content/contests (instructor).
 func (d Deps) handleAdaptiveContentContestsList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, _, ok := d.requireCourseItemCreate(w, r)
 		if !ok {
 			return
@@ -150,10 +142,6 @@ func (d Deps) handleAdaptiveContentContestsList() http.HandlerFunc {
 // handleAdaptiveContentContestResolve is POST .../contests/{id}/resolve (instructor).
 func (d Deps) handleAdaptiveContentContestResolve() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseItemCreate(w, r)
 		if !ok {
 			return
@@ -205,10 +193,6 @@ func (d Deps) handleAdaptiveContentContestResolve() http.HandlerFunc {
 // handleAdminAdaptiveContentOversight is GET /api/v1/admin/adaptive-content/oversight.
 func (d Deps) handleAdminAdaptiveContentOversight() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -246,10 +230,6 @@ func (d Deps) handleAdminAdaptiveContentOversight() http.HandlerFunc {
 // handleAdminAdaptiveContentFairness is GET /api/v1/admin/adaptive-content/fairness?course=…
 func (d Deps) handleAdminAdaptiveContentFairness() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -301,10 +281,6 @@ func (d Deps) handleAdminAdaptiveContentFairness() http.HandlerFunc {
 // handleAdminAdaptiveContentFairnessRefresh is POST /api/v1/admin/adaptive-content/fairness/refresh?course=…
 func (d Deps) handleAdminAdaptiveContentFairnessRefresh() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -344,10 +320,6 @@ func (d Deps) handleAdminAdaptiveContentFairnessRefresh() http.HandlerFunc {
 // handleAdminAdaptiveContentQuarantine is POST /api/v1/admin/adaptive-content/quarantine.
 func (d Deps) handleAdminAdaptiveContentQuarantine() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		actor, ok := d.adminRbacUser(w, r)
 		if !ok {
 			return
@@ -421,10 +393,6 @@ SELECT course_id FROM course.adaptive_content_units WHERE id = $1
 // handleAdminAdaptiveContentKillSwitch is POST /api/v1/admin/adaptive-content/kill-switch.
 func (d Deps) handleAdminAdaptiveContentKillSwitch() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		actor, ok := d.adminRbacUser(w, r)
 		if !ok {
 			return

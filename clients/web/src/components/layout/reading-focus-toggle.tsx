@@ -9,9 +9,9 @@ export function ReadingFocusToggle() {
     <button
       type="button"
       onClick={() => setReadingFocus(true)}
-      className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+      className="inline-flex items-center gap-2 rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
     >
-      <BookOpen className="h-4 w-4 text-indigo-600 dark:text-indigo-400" aria-hidden />
+      <BookOpen className="h-4 w-4 text-accent-fg" aria-hidden />
       Reading focus
     </button>
   )

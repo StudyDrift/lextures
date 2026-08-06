@@ -199,9 +199,7 @@ export function CheckpointMediaPlayer({
                   ? t('contentTools.tools.media_checkpoints.answered')
                   : t('contentTools.tools.media_checkpoints.unanswered'),
               })}
-              className={`absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 border border-white shadow ${
-                done ? 'rotate-45 bg-emerald-600' : 'rounded-full bg-amber-500'
-              }`}
+              className={`absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 border border-white shadow ${ done ? 'rotate-45 bg-emerald-600' : 'rounded-full bg-amber-500' }`}
               style={{ left: `${left}%` }}
               onClick={() => applySeek(cp.atSec)}
             />
@@ -219,10 +217,10 @@ export function CheckpointMediaPlayer({
         />
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 text-xs text-slate-700 dark:text-neutral-200">
+      <div className="flex flex-wrap items-center gap-2 text-xs text-fg-default">
         <button
           type="button"
-          className="min-h-11 min-w-11 rounded-md border border-slate-300 px-3 dark:border-neutral-600"
+          className="min-h-11 min-w-11 rounded-md border border-border-strong px-3 dark:border-border-default"
           onClick={togglePlay}
           disabled={pausedForCheckpoint || !src}
         >
@@ -238,7 +236,7 @@ export function CheckpointMediaPlayer({
           <select
             value={prefs.playbackRate}
             onChange={(e) => updatePrefs({ playbackRate: Number(e.target.value) })}
-            className="rounded border border-slate-300 bg-white px-1 py-1 dark:border-neutral-600 dark:bg-neutral-950"
+            className="rounded border border-border-strong bg-surface-raised px-1 py-1 dark:border-border-default dark:bg-surface-base"
           >
             {supportedPlaybackRates().map((r) => (
               <option key={r} value={r}>
@@ -271,7 +269,7 @@ export function CheckpointMediaPlayer({
           </label>
         ) : null}
       </div>
-      <p className="text-[11px] text-slate-500">
+      <p className="text-[11px] text-fg-muted">
         {t('contentTools.tools.media_checkpoints.shortcuts')}
       </p>
     </div>

@@ -1,6 +1,9 @@
 # UX.1 — Semantic Design Token System
 
-> Implementation plan. Source: [audit.md](audit.md) §2 G-1, G-14, G-16.
+> Implementation plan. Source: [audit.md](../../plan/ui-ux/audit.md) §2 G-1, G-14, G-16.
+> **Shipped** as the token foundation + tooling + codemod first pass. Remaining raw
+> palette literals are ratcheted via `clients/web/raw-palette-allowlist.json`
+> (`npm run tokens:purity`); counts may only decrease.
 
 ## Metadata
 
@@ -10,7 +13,7 @@
 | **Section** | UI/UX — Foundations |
 | **Severity** | BLOCKER |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING |
+| **Status (today)** | SHIPPED |
 | **Estimated effort** | L (1–2mo) |
 | **Owner (proposed)** | Design Systems (new virtual team: 1 design + 2 web) |
 | **Depends on** | — (this is the root of the programme) |

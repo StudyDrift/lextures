@@ -27,7 +27,7 @@ function isInFlightStatus(status?: string | null): boolean {
 
 function statusBadgeClass(status?: string | null): string {
   const base = 'inline-flex rounded-full px-2 py-0.5 text-xs font-medium'
-  if (!status) return `${base} bg-slate-100 text-slate-600 dark:bg-neutral-800 dark:text-neutral-300`
+  if (!status) return `${base} bg-surface-sunken text-fg-muted dark:bg-surface-overlay dark:text-fg-muted`
   const normalized = status.toLowerCase()
   if (
     normalized === 'completed' ||
@@ -48,7 +48,7 @@ function statusBadgeClass(status?: string | null): string {
   if (isInFlightStatus(status)) {
     return `${base} bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200`
   }
-  return `${base} bg-slate-100 text-slate-700 dark:bg-neutral-800 dark:text-neutral-300`
+  return `${base} bg-surface-sunken text-fg-muted dark:bg-surface-overlay dark:text-fg-muted`
 }
 
 export default function ScheduledJobs() {
@@ -172,10 +172,10 @@ export default function ScheduledJobs() {
 
   return (
     <div className="mx-auto max-w-6xl p-6">
-      <h1 id={titleId} className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+      <h1 id={titleId} className="text-xl font-semibold text-fg-default dark:text-slate-100">
         Scheduled jobs
       </h1>
-      <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+      <p className="mt-1 text-sm text-fg-muted dark:text-fg-subtle">
         Cron-scheduled background jobs. Each trigger enqueues a job onto the durable queue and is
         recorded in run history.
       </p>
@@ -186,7 +186,7 @@ export default function ScheduledJobs() {
           className="mt-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-100"
         >
           The background job worker is not running, so triggered jobs stay pending. Set{' '}
-          <code className="rounded bg-white/80 px-1 py-0.5 font-mono text-xs dark:bg-neutral-900">
+          <code className="rounded bg-white/80 px-1 py-0.5 font-mono text-xs dark:bg-surface-raised">
             BACKGROUND_JOBS_ENABLED=1
           </code>{' '}
           in <code className="font-mono text-xs">server/.env</code> and restart the API (enabled by
@@ -195,26 +195,26 @@ export default function ScheduledJobs() {
       ) : null}
 
       {watchingJob ? (
-        <p role="status" className="mt-4 text-sm text-slate-600 dark:text-slate-400">
+        <p role="status" className="mt-4 text-sm text-fg-muted dark:text-fg-subtle">
           Waiting for <span className="font-mono text-xs">{watchingJob}</span> to finish…
         </p>
       ) : null}
 
       {error ? (
-        <p role="alert" className="mt-4 text-sm text-red-600 dark:text-red-400">
+        <p role="alert" className="mt-4 text-sm text-danger-fg">
           {error}
         </p>
       ) : null}
 
       {loading ? (
-        <p className="mt-6 text-sm text-slate-500">Loading…</p>
+        <p className="mt-6 text-sm text-fg-muted">Loading…</p>
       ) : jobs.length === 0 ? (
-        <p className="mt-6 text-sm text-slate-500">No scheduled jobs configured.</p>
+        <p className="mt-6 text-sm text-fg-muted">No scheduled jobs configured.</p>
       ) : (
-        <div className="mt-6 overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-800">
+        <div className="mt-6 overflow-x-auto rounded-xl border border-border-default dark:border-border-subtle">
           <table className="min-w-full text-left text-sm" aria-label="Scheduled jobs">
             <caption className="sr-only">Scheduled background jobs</caption>
-            <thead className="bg-slate-50 text-slate-600 dark:bg-neutral-950 dark:text-slate-400">
+            <thead className="bg-surface-base text-fg-muted dark:bg-surface-base dark:text-fg-subtle">
               <tr>
                 <th scope="col" className="px-4 py-2 font-medium">
                   Name
@@ -242,17 +242,17 @@ export default function ScheduledJobs() {
             <tbody>
               {jobs.map((job) => (
                 <Fragment key={job.name}>
-                  <tr className="border-t border-slate-100 dark:border-neutral-800">
+                  <tr className="border-t border-border-subtle">
                     <td className="px-4 py-3">
-                      <div className="font-medium text-slate-900 dark:text-slate-100">{job.name}</div>
+                      <div className="font-medium text-fg-default dark:text-slate-100">{job.name}</div>
                       {job.description ? (
-                        <div className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
+                        <div className="mt-0.5 text-xs text-fg-muted">
                           {job.description}
                         </div>
                       ) : null}
                     </td>
                     <td className="px-4 py-3">
-                      <code className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-xs text-slate-800 dark:bg-neutral-800 dark:text-neutral-200">
+                      <code className="rounded bg-surface-sunken px-1.5 py-0.5 font-mono text-xs text-fg-default dark:bg-surface-overlay dark:text-fg-default">
                         {job.spec}
                       </code>
                     </td>
@@ -266,7 +266,7 @@ export default function ScheduledJobs() {
                     </td>
                     <td className="whitespace-nowrap px-4 py-3">
                       {job.enabled ? fmt(job.nextRun) : (
-                        <span className="text-slate-500 dark:text-neutral-400">disabled</span>
+                        <span className="text-fg-muted">disabled</span>
                       )}
                     </td>
                     <td className="px-4 py-3">
@@ -274,7 +274,7 @@ export default function ScheduledJobs() {
                         className={
                           job.enabled
                             ? 'inline-flex rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200'
-                            : 'inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 dark:bg-neutral-800 dark:text-neutral-300'
+                            : 'inline-flex rounded-full bg-surface-sunken px-2 py-0.5 text-xs font-medium text-fg-muted dark:bg-surface-overlay dark:text-fg-muted'
                         }
                       >
                         {job.enabled ? 'Enabled' : 'Disabled'}
@@ -292,17 +292,17 @@ export default function ScheduledJobs() {
                     </td>
                   </tr>
                   {expanded === job.name ? (
-                    <tr className="border-t border-slate-100 bg-slate-50/80 dark:border-neutral-800 dark:bg-neutral-950/50">
+                    <tr className="border-t border-border-subtle bg-slate-50/80 dark:border-border-subtle/50">
                       <td colSpan={7} className="px-4 py-4">
                         {history.length === 0 ? (
-                          <p className="text-sm text-slate-500">No run history.</p>
+                          <p className="text-sm text-fg-muted">No run history.</p>
                         ) : (
-                          <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
+                          <div className="overflow-x-auto rounded-lg border border-border-default bg-surface-raised dark:border-border-subtle dark:bg-surface-raised">
                             <table
                               className="min-w-full text-left text-sm"
                               aria-label={`${job.name} history`}
                             >
-                              <thead className="bg-slate-50 text-slate-600 dark:bg-neutral-950 dark:text-slate-400">
+                              <thead className="bg-surface-base text-fg-muted dark:bg-surface-base dark:text-fg-subtle">
                                 <tr>
                                   <th scope="col" className="px-4 py-2 font-medium">
                                     Triggered at
@@ -319,13 +319,13 @@ export default function ScheduledJobs() {
                                 {history.map((h) => (
                                   <tr
                                     key={h.id}
-                                    className="border-t border-slate-100 dark:border-neutral-800"
+                                    className="border-t border-border-subtle"
                                   >
                                     <td className="whitespace-nowrap px-4 py-2">{fmt(h.triggeredAt)}</td>
                                     <td className="px-4 py-2">
                                       <span className={statusBadgeClass(h.status)}>{h.status}</span>
                                     </td>
-                                    <td className="max-w-md px-4 py-2 font-mono text-xs text-slate-600 dark:text-neutral-400">
+                                    <td className="max-w-md px-4 py-2 font-mono text-xs text-fg-muted">
                                       {h.errorLog ?? '—'}
                                     </td>
                                   </tr>

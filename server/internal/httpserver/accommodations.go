@@ -39,11 +39,6 @@ func (d Deps) registerAccommodationRoutes(r chi.Router) {
 
 func (d Deps) handleAccommodationUserSearch() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		uid, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -102,11 +97,6 @@ func (d Deps) handleAccommodationUserSearch() http.HandlerFunc {
 
 func (d Deps) handleEnrollmentAccommodationSummary() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		uid, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -147,11 +137,6 @@ func (d Deps) handleEnrollmentAccommodationSummary() http.HandlerFunc {
 
 func (d Deps) handleListUserAccommodations() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		uid, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -194,11 +179,6 @@ func requireAccManage(ctx context.Context, w http.ResponseWriter, d Deps, userID
 
 func (d Deps) handleCreateUserAccommodation() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		uid, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -321,11 +301,6 @@ func parseAccEffectiveDates(ef, eu *string, w http.ResponseWriter) (from, until 
 
 func (d Deps) handleUpdateUserAccommodation() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPut {
-			w.Header().Set("Allow", http.MethodPut)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		uid, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -392,11 +367,6 @@ func (d Deps) handleUpdateUserAccommodation() http.HandlerFunc {
 
 func (d Deps) handleDeleteUserAccommodation() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodDelete {
-			w.Header().Set("Allow", http.MethodDelete)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		uid, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -430,11 +400,6 @@ func (d Deps) handleDeleteUserAccommodation() http.HandlerFunc {
 
 func (d Deps) handleMyAccommodations() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		uid, ok := d.meUserID(w, r)
 		if !ok {
 			return

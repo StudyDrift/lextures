@@ -25,17 +25,13 @@ export function IconSwap({
     <span className={`relative inline-flex items-center justify-center ${className}`}>
       <span
         aria-hidden
-        className={`absolute inset-0 flex items-center justify-center ${swapTransition} ${
-          active ? activeState : inactiveState
-        }`}
+        className={`absolute inset-0 flex items-center justify-center ${swapTransition} ${ active ? activeState : inactiveState }`}
       >
         <ActiveIcon className={iconClassName} />
       </span>
       <span
         aria-hidden
-        className={`flex items-center justify-center ${swapTransition} ${
-          active ? inactiveState : activeState
-        }`}
+        className={`flex items-center justify-center ${swapTransition} ${ active ? inactiveState : activeState }`}
       >
         <InactiveIcon className={iconClassName} />
       </span>

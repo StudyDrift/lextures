@@ -80,7 +80,7 @@ export function FacetSection({ facet }: Props) {
   const body = () => {
     if (facet.state === 'insufficient_data') {
       return (
-        <p className="text-sm text-slate-500 dark:text-neutral-400">
+        <p className="text-sm text-fg-muted">
           {t('learnerProfile.facet.insufficient')}
         </p>
       )
@@ -94,7 +94,7 @@ export function FacetSection({ facet }: Props) {
     }
     if (loading) {
       return (
-        <p className="text-sm text-slate-500 dark:text-neutral-400">
+        <p className="text-sm text-fg-muted">
           {t('learnerProfile.facet.loading')}
         </p>
       )
@@ -118,7 +118,7 @@ export function FacetSection({ facet }: Props) {
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <button
           type="button"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-700 hover:text-slate-900 dark:text-neutral-200 dark:hover:text-white"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-fg-muted hover:text-fg-default dark:text-fg-default dark:hover:text-white"
           aria-expanded={!collapsed}
           aria-controls={contentId}
           onClick={() => setCollapsed((c) => !c)}
@@ -129,7 +129,7 @@ export function FacetSection({ facet }: Props) {
           />
           {collapsed ? t('learnerProfile.facet.expand') : t('learnerProfile.facet.collapse')}
         </button>
-        <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-neutral-400">
+        <div className="flex flex-wrap items-center gap-3 text-xs text-fg-muted">
           <span>
             {t('learnerProfile.facet.lastComputed', {
               date: formatDate(facet.updatedAt, { dateStyle: 'medium', timeStyle: 'short' }),

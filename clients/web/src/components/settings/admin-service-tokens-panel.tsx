@@ -140,18 +140,18 @@ export function AdminServiceTokensPanel() {
     <section className="mt-10">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-neutral-100">
+          <h3 className="flex items-center gap-2 text-sm font-semibold text-fg-default">
             <KeyRound className="h-4 w-4" aria-hidden />
             Institutional service tokens
           </h3>
-          <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+          <p className="mt-1 text-sm text-fg-muted">
             Org-scoped credentials for SIS sync, webhooks, and other institutional automation. Org admins only.
           </p>
         </div>
         <button
           type="button"
           onClick={() => setCreateOpen(true)}
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-100 dark:hover:bg-neutral-800"
+          className="inline-flex items-center gap-2 rounded-xl border border-border-default px-3 py-2 text-sm font-semibold text-fg-default hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
         >
           <Plus className="h-4 w-4" aria-hidden />
           New service token
@@ -165,23 +165,23 @@ export function AdminServiceTokensPanel() {
       )}
 
       {loading ? (
-        <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">Loading service tokens…</p>
+        <p className="mt-4 text-sm text-fg-muted">Loading service tokens…</p>
       ) : active.length === 0 ? (
-        <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">No service tokens yet.</p>
+        <p className="mt-4 text-sm text-fg-muted">No service tokens yet.</p>
       ) : (
-        <ul className="mt-4 divide-y divide-slate-200 rounded-xl border border-slate-200 dark:divide-neutral-700 dark:border-neutral-600">
+        <ul className="mt-4 divide-y divide-slate-200 rounded-xl border border-border-default dark:divide-neutral-700 dark:border-border-default">
           {active.map((t) => (
             <li key={t.id} className="flex flex-wrap items-start justify-between gap-3 px-4 py-3">
               <div>
-                <p className="font-medium text-slate-900 dark:text-neutral-100">{t.label}</p>
-                <p className="text-xs text-slate-500 dark:text-neutral-400">{t.serviceAccountName}</p>
-                <p className="mt-0.5 font-mono text-xs text-slate-500 dark:text-neutral-400">{t.tokenMask}</p>
-                <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+                <p className="font-medium text-fg-default">{t.label}</p>
+                <p className="text-xs text-fg-muted">{t.serviceAccountName}</p>
+                <p className="mt-0.5 font-mono text-xs text-fg-muted">{t.tokenMask}</p>
+                <p className="mt-1 text-xs text-fg-muted">
                   {t.scopes.join(', ')} · Created {formatDateTime(t.createdAt)}
                   {t.lastUsedAt ? ` · Last used ${formatDateTime(t.lastUsedAt)}` : ''}
                 </p>
                 {t.unusedDays != null && t.unusedDays >= 90 && (
-                  <p className="mt-1 text-xs font-medium text-amber-700 dark:text-amber-300">
+                  <p className="mt-1 text-xs font-medium text-warning-fg">
                     Unused {t.unusedDays} days — consider revoking
                   </p>
                 )}
@@ -211,9 +211,9 @@ export function AdminServiceTokensPanel() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="service-token-title"
-            className="relative z-10 w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-5 shadow-xl dark:border-neutral-700 dark:bg-neutral-900"
+            className="relative z-10 w-full max-w-lg rounded-2xl border border-border-default bg-surface-raised p-5 shadow-xl dark:border-border-default dark:bg-surface-raised"
           >
-            <h2 id="service-token-title" className="text-lg font-semibold text-slate-950 dark:text-neutral-100">
+            <h2 id="service-token-title" className="text-lg font-semibold text-slate-950 dark:text-fg-default">
               Create service token
             </h2>
             <div className="mt-4 space-y-3">
@@ -221,16 +221,16 @@ export function AdminServiceTokensPanel() {
                 value={serviceAccountName}
                 onChange={(e) => setServiceAccountName(e.target.value)}
                 placeholder="Service account name (e.g. SIS roster sync)"
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+                className="w-full rounded-xl border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base dark:text-fg-default"
               />
               <input
                 value={label}
                 onChange={(e) => setLabel(e.target.value)}
                 placeholder="Optional display label"
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+                className="w-full rounded-xl border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base dark:text-fg-default"
               />
               <fieldset>
-                <legend className="text-xs font-semibold uppercase tracking-wide text-slate-500">Scopes</legend>
+                <legend className="text-xs font-semibold uppercase tracking-wide text-fg-muted">Scopes</legend>
                 <ul className="mt-2 max-h-40 space-y-1 overflow-y-auto">
                   {scopes.map((s) => (
                     <li key={s.id}>
@@ -259,7 +259,7 @@ export function AdminServiceTokensPanel() {
                 type="button"
                 disabled={creating || !serviceAccountName.trim() || selectedScopes.length === 0}
                 onClick={() => void createServiceToken()}
-                className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+                className="rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
               >
                 {creating ? 'Creating…' : 'Create'}
               </button>

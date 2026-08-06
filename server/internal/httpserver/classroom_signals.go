@@ -37,11 +37,6 @@ func (d Deps) handlePostSectionHallPass() http.HandlerFunc {
 		if !d.classroomSignalsEnabled(w) {
 			return
 		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		sectionID, err := uuid.Parse(strings.TrimSpace(chi.URLParam(r, "sectionId")))
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid section id.")
@@ -115,11 +110,6 @@ func (d Deps) handleGetSectionActiveHallPasses() http.HandlerFunc {
 		if !d.classroomSignalsEnabled(w) {
 			return
 		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		sectionID, err := uuid.Parse(strings.TrimSpace(chi.URLParam(r, "sectionId")))
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid section id.")
@@ -152,11 +142,6 @@ func (d Deps) handleGetSectionActiveHallPasses() http.HandlerFunc {
 func (d Deps) handlePatchHallPass() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !d.classroomSignalsEnabled(w) {
-			return
-		}
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
 		passID, err := uuid.Parse(strings.TrimSpace(chi.URLParam(r, "passId")))
@@ -231,11 +216,6 @@ func (d Deps) handlePostCourseQuestion() http.HandlerFunc {
 		if !d.classroomSignalsEnabled(w) {
 			return
 		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseID, err := uuid.Parse(strings.TrimSpace(chi.URLParam(r, "courseId")))
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid course id.")
@@ -291,11 +271,6 @@ func (d Deps) handleGetCourseQuestions() http.HandlerFunc {
 		if !d.classroomSignalsEnabled(w) {
 			return
 		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseID, err := uuid.Parse(strings.TrimSpace(chi.URLParam(r, "courseId")))
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid course id.")
@@ -334,11 +309,6 @@ func (d Deps) handleGetCourseQuestions() http.HandlerFunc {
 func (d Deps) handlePatchCourseQuestion() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !d.classroomSignalsEnabled(w) {
-			return
-		}
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
 		courseID, err := uuid.Parse(strings.TrimSpace(chi.URLParam(r, "courseId")))

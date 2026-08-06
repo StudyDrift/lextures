@@ -30,21 +30,21 @@ export function ReflectionJournalPrompt({ courseId }: Props) {
   }
 
   return (
-    <div className="mt-8 border-t border-slate-200 pt-6 dark:border-neutral-700">
+    <div className="mt-8 border-t border-border-default pt-6 dark:border-border-default">
       {saved ? (
         <p className="text-sm text-emerald-700 dark:text-emerald-300">Reflection saved to your private journal.</p>
       ) : null}
       {!open ? (
         <button
           type="button"
-          className="text-sm font-medium text-slate-600 underline hover:text-slate-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+          className="text-sm font-medium text-fg-muted underline hover:text-fg-default dark:text-fg-muted dark:hover:text-fg-default"
           onClick={() => setOpen(true)}
         >
           How did this feel? (optional)
         </button>
       ) : (
         <div className="space-y-2">
-          <label htmlFor="reflection-journal" className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+          <label htmlFor="reflection-journal" className="block text-sm font-medium text-fg-muted">
             Quick reflection (private, max 280 characters)
           </label>
           <textarea
@@ -53,7 +53,7 @@ export function ReflectionJournalPrompt({ courseId }: Props) {
             maxLength={280}
             value={text}
             onChange={(e) => setText(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+            className="w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-raised"
             aria-label="Study session reflection"
             placeholder="e.g. Felt confused about recursion today"
           />
@@ -68,7 +68,7 @@ export function ReflectionJournalPrompt({ courseId }: Props) {
             </button>
             <button
               type="button"
-              className="rounded-lg px-3 py-1.5 text-sm text-slate-600 dark:text-neutral-400"
+              className="rounded-lg px-3 py-1.5 text-sm text-fg-muted"
               onClick={() => setOpen(false)}
             >
               Cancel

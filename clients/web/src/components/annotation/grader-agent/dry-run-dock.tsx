@@ -51,29 +51,19 @@ function StatusBarSegment({
       onClick={onToggle}
       aria-expanded={expanded}
       aria-label={toggleLabel}
-      className={`flex min-w-0 flex-1 items-center gap-2 border-e px-4 py-2.5 text-start last:border-e-0 ${
-        isConsole
-          ? 'border-slate-800 bg-slate-950 text-slate-100 hover:bg-slate-900 dark:border-neutral-800 dark:bg-neutral-950 dark:hover:bg-neutral-900'
-          : 'border-slate-200 bg-white text-slate-900 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800'
-      }`}
+      className={`flex min-w-0 flex-1 items-center gap-2 border-e px-4 py-2.5 text-start last:border-e-0 ${ isConsole ? 'border-slate-800 bg-slate-950 text-slate-100 hover:bg-slate-900 dark:border-border-subtle dark:bg-surface-base dark:hover:bg-surface-raised' : 'border-border-default bg-surface-raised text-fg-default hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay' }`}
     >
       <ChevronUp
-        className={`h-4 w-4 shrink-0 transition-transform ${expanded ? '' : 'rotate-180'} ${
-          isConsole ? 'text-slate-400' : 'text-slate-500 dark:text-neutral-400'
-        }`}
+        className={`h-4 w-4 shrink-0 transition-transform ${expanded ? '' : 'rotate-180'} ${ isConsole ? 'text-fg-subtle' : 'text-fg-muted' }`}
         aria-hidden
       />
       <span
-        className={`shrink-0 text-xs font-semibold uppercase tracking-wide ${
-          isConsole ? 'text-slate-400' : 'text-slate-500 dark:text-neutral-400'
-        }`}
+        className={`shrink-0 text-xs font-semibold uppercase tracking-wide ${ isConsole ? 'text-fg-subtle' : 'text-fg-muted' }`}
       >
         {title}
       </span>
       <span
-        className={`min-w-0 truncate text-xs ${
-          isConsole ? 'text-slate-300' : 'font-semibold tabular-nums text-slate-700 dark:text-neutral-200'
-        }`}
+        className={`min-w-0 truncate text-xs ${ isConsole ? 'text-slate-300' : 'font-semibold tabular-nums text-fg-default' }`}
       >
         {summary}
       </span>
@@ -130,7 +120,7 @@ export function DryRunDock({
   const previewSummary = previewDockSummary(dryRunResult, maxPoints)
 
   return (
-    <div className="relative z-10 flex flex-col bg-white dark:bg-neutral-950">
+    <div className="relative z-10 flex flex-col bg-surface-raised">
       {showExpandedPanels ? (
         <>
           <div
@@ -138,7 +128,7 @@ export function DryRunDock({
             aria-orientation="horizontal"
             aria-label={t('gradingAgent.dryRun.resize')}
             tabIndex={0}
-            className="flex h-2 shrink-0 cursor-ns-resize touch-none items-center justify-center border-b border-slate-200 bg-slate-100 hover:bg-slate-200 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:bg-neutral-800"
+            className="flex h-2 shrink-0 cursor-ns-resize touch-none items-center justify-center border-b border-border-default bg-surface-sunken hover:bg-slate-200 dark:border-border-default dark:bg-surface-raised dark:hover:bg-surface-overlay"
             {...resizeHandleProps}
           >
             <span className="h-1 w-10 rounded-full bg-slate-300 dark:bg-neutral-600" aria-hidden />
@@ -164,10 +154,10 @@ export function DryRunDock({
       <div
         role="toolbar"
         aria-label={t('gradingAgent.dryRun.statusBar.label')}
-        className="flex border-t border-slate-200 dark:border-neutral-700"
+        className="flex border-t border-border-default"
       >
         {batchRunning && cancelRunEnabled ? (
-          <div className="flex shrink-0 items-center border-e border-slate-200 px-3 py-2 dark:border-neutral-700">
+          <div className="flex shrink-0 items-center border-e border-border-default px-3 py-2 dark:border-border-default">
             <Button
               variant="secondary"
               disabled={cancellingRun}

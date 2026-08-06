@@ -58,17 +58,17 @@ export function MapLayout(props: LayoutRendererProps) {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-center gap-2 text-xs text-slate-500">
-        <button type="button" className="rounded border px-2 py-1 dark:border-neutral-700" onClick={() => setZoom((z) => Math.min(8, z + 1))}>
+      <div className="flex items-center gap-2 text-xs text-fg-muted">
+        <button type="button" className="rounded border px-2 py-1 dark:border-border-default" onClick={() => setZoom((z) => Math.min(8, z + 1))}>
           +
         </button>
-        <button type="button" className="rounded border px-2 py-1 dark:border-neutral-700" onClick={() => setZoom((z) => Math.max(1, z - 1))}>
+        <button type="button" className="rounded border px-2 py-1 dark:border-border-default" onClick={() => setZoom((z) => Math.max(1, z - 1))}>
           −
         </button>
         <span>{t('boards.layout.mapZoom', { zoom })}</span>
       </div>
       <div
-        className="relative overflow-hidden rounded-lg border border-slate-200 bg-gradient-to-b from-sky-100 to-emerald-100 dark:border-neutral-700 dark:from-sky-950 dark:to-emerald-950"
+        className="relative overflow-hidden rounded-lg border border-border-default bg-gradient-to-b from-sky-100 to-emerald-100 dark:border-border-default dark:from-sky-950 dark:to-emerald-950"
         style={{ height }}
         role="img"
         aria-label={t('boards.layout.map')}
@@ -150,7 +150,7 @@ export function MapLayout(props: LayoutRendererProps) {
 
       {unpinned.length > 0 ? (
         <section aria-label={t('boards.layout.unpinnedTray')}>
-          <h3 className="mb-2 text-sm font-semibold text-slate-700 dark:text-neutral-200">
+          <h3 className="mb-2 text-sm font-semibold text-fg-default">
             {t('boards.layout.unpinnedTray')}
           </h3>
           <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">

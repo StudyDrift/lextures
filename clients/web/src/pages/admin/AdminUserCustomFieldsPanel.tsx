@@ -76,14 +76,14 @@ export default function AdminUserCustomFieldsPanel({ userId, orgId, onClose }: P
   }
 
   if (loading) {
-    return <p className="text-sm text-slate-500">Loading custom fields…</p>
+    return <p className="text-sm text-fg-muted">Loading custom fields…</p>
   }
 
   return (
     <fieldset className="space-y-3">
-      <legend className="text-sm font-medium text-slate-800 dark:text-slate-200">Custom fields</legend>
+      <legend className="text-sm font-medium text-fg-default dark:text-slate-200">Custom fields</legend>
       {error ? (
-        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+        <p role="alert" className="text-sm text-danger-fg">
           {error}
         </p>
       ) : null}
@@ -94,7 +94,7 @@ export default function AdminUserCustomFieldsPanel({ userId, orgId, onClose }: P
             <select
               value={fieldValues[def.key] ?? ''}
               onChange={(e) => setFieldValues({ ...fieldValues, [def.key]: e.target.value })}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+              className="w-full rounded-lg border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-raised"
             >
               <option value="">—</option>
               {(def.selectOptions ?? []).map((opt) => (
@@ -107,7 +107,7 @@ export default function AdminUserCustomFieldsPanel({ userId, orgId, onClose }: P
             <select
               value={fieldValues[def.key] ?? ''}
               onChange={(e) => setFieldValues({ ...fieldValues, [def.key]: e.target.value })}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+              className="w-full rounded-lg border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-raised"
             >
               <option value="">—</option>
               <option value="true">Yes</option>
@@ -118,7 +118,7 @@ export default function AdminUserCustomFieldsPanel({ userId, orgId, onClose }: P
               type={def.fieldType === 'number' ? 'number' : def.fieldType === 'date' ? 'date' : 'text'}
               value={fieldValues[def.key] ?? ''}
               onChange={(e) => setFieldValues({ ...fieldValues, [def.key]: e.target.value })}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+              className="w-full rounded-lg border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-raised"
             />
           )}
         </label>
@@ -128,7 +128,7 @@ export default function AdminUserCustomFieldsPanel({ userId, orgId, onClose }: P
           type="button"
           disabled={busy}
           onClick={() => void save()}
-          className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+          className="rounded-lg bg-accent-solid px-3 py-2 text-sm font-medium text-white hover:bg-accent disabled:opacity-50"
         >
           Save custom fields
         </button>

@@ -2,7 +2,7 @@
 function masteryCellVisual(levelLabel: string): { className: string; title: string } {
   const t = levelLabel.trim()
   if (t === '—' || t === '-' || t.length === 0) {
-    return { className: 'bg-slate-100 text-slate-500 dark:bg-neutral-800 dark:text-neutral-500', title: t || 'Not assessed' }
+    return { className: 'bg-surface-sunken text-fg-muted dark:bg-surface-overlay', title: t || 'Not assessed' }
   }
   const u = t.toLowerCase()
   if (u.includes('exceed')) {
@@ -17,7 +17,7 @@ function masteryCellVisual(levelLabel: string): { className: string; title: stri
   if (u.includes('not')) {
     return { className: 'bg-rose-100 text-rose-900 dark:bg-rose-900/50 dark:text-rose-100', title: t }
   }
-  return { className: 'bg-slate-100 text-slate-800 dark:bg-neutral-800 dark:text-neutral-200', title: t }
+  return { className: 'bg-surface-sunken text-fg-default dark:bg-surface-overlay dark:text-fg-default', title: t }
 }
 
 export function MasteryLabelCell({

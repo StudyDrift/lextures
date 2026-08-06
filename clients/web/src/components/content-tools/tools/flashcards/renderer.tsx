@@ -260,21 +260,21 @@ export default function FlashcardsRenderer({
       data-content-tool="flashcards"
       data-testid="flashcards-tool"
       aria-labelledby={titleId}
-      className="space-y-4 rounded-lg border border-slate-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-900"
+      className="space-y-4 rounded-lg border border-border-default bg-surface-raised p-4 dark:border-border-default dark:bg-surface-raised"
     >
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-1">
-          <h2 id={titleId} className="text-base font-semibold text-slate-900 dark:text-neutral-50">
+          <h2 id={titleId} className="text-base font-semibold text-fg-default">
             {title}
           </h2>
-          <p className="text-xs text-slate-600 dark:text-neutral-300" data-testid="flashcards-status-chips">
+          <p className="text-xs text-fg-muted" data-testid="flashcards-status-chips">
             {statusChips}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
-            className="rounded-md border border-slate-200 px-2 py-1 text-xs dark:border-neutral-600"
+            className="rounded-md border border-border-default px-2 py-1 text-xs dark:border-border-default"
             onClick={() => setShowHelp((v) => !v)}
             aria-expanded={showHelp}
           >
@@ -295,7 +295,7 @@ export default function FlashcardsRenderer({
             <button
               type="button"
               data-testid="flashcards-end"
-              className="rounded-md border border-slate-200 px-3 py-1.5 text-xs dark:border-neutral-600"
+              className="rounded-md border border-border-default px-3 py-1.5 text-xs dark:border-border-default"
               disabled={busy}
               onClick={() => void endSession()}
             >
@@ -306,7 +306,7 @@ export default function FlashcardsRenderer({
       </header>
 
       {showHelp ? (
-        <p className="text-xs text-slate-600 dark:text-neutral-300" data-testid="flashcards-shortcuts">
+        <p className="text-xs text-fg-muted" data-testid="flashcards-shortcuts">
           {t('contentTools.tools.flashcards.shortcutsBody')}
         </p>
       ) : null}
@@ -322,20 +322,20 @@ export default function FlashcardsRenderer({
       ) : null}
 
       {caughtUp ? (
-        <p data-testid="flashcards-caught-up" className="text-sm text-slate-700 dark:text-neutral-200">
+        <p data-testid="flashcards-caught-up" className="text-sm text-fg-default">
           {t('contentTools.tools.flashcards.caughtUp')}
         </p>
       ) : null}
 
       {sessionSummary ? (
-        <div data-testid="flashcards-summary" className="space-y-1 text-sm text-slate-800 dark:text-neutral-100">
+        <div data-testid="flashcards-summary" className="space-y-1 text-sm text-fg-default">
           <p>
             {t('contentTools.tools.flashcards.sessionSummary', {
               reviewed: String(sessionSummary.reviewed),
             })}
           </p>
           {srsEnabled && sessionSummary.nextDueAt ? (
-            <p className="text-xs text-slate-600 dark:text-neutral-300">
+            <p className="text-xs text-fg-muted">
               {t('contentTools.tools.flashcards.nextDue', { date: sessionSummary.nextDueAt })}
             </p>
           ) : null}
@@ -351,7 +351,7 @@ export default function FlashcardsRenderer({
             total: String(current.total),
           })}
         >
-          <p className="text-xs text-slate-500 dark:text-neutral-400">
+          <p className="text-xs text-fg-muted">
             {t('contentTools.tools.flashcards.progress', {
               index: String(current.index + 1),
               total: String(current.total),
@@ -360,7 +360,7 @@ export default function FlashcardsRenderer({
 
           <div
             lang={current.promptLang || undefined}
-            className="min-h-[5rem] rounded-md bg-slate-50 px-4 py-6 text-center text-lg font-medium text-slate-900 dark:bg-neutral-800 dark:text-neutral-50"
+            className="min-h-[5rem] rounded-md bg-surface-base px-4 py-6 text-center text-lg font-medium text-fg-default dark:bg-surface-overlay"
             data-testid="flashcards-prompt"
           >
             {current.prompt}
@@ -377,7 +377,7 @@ export default function FlashcardsRenderer({
           {current.hint ? (
             <button
               type="button"
-              className="text-xs text-slate-600 underline dark:text-neutral-300"
+              className="text-xs text-fg-muted underline dark:text-fg-muted"
               onClick={() => setShowHint(true)}
             >
               {showHint ? current.hint : t('contentTools.tools.flashcards.showHint')}
@@ -388,7 +388,7 @@ export default function FlashcardsRenderer({
             <button
               type="button"
               data-testid="flashcards-reveal"
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm font-medium dark:border-neutral-600"
+              className="w-full rounded-md border border-border-strong px-3 py-2 text-sm font-medium dark:border-border-default"
               onClick={() => {
                 setRevealed(true)
                 announce(t('contentTools.tools.flashcards.answerRevealed'))
@@ -401,7 +401,7 @@ export default function FlashcardsRenderer({
               <div
                 lang={current.answerLang || undefined}
                 data-testid="flashcards-answer"
-                className="motion-safe:animate-[fadeIn_120ms_ease-out] rounded-md bg-emerald-50 px-4 py-4 text-center text-base text-slate-900 dark:bg-emerald-950/40 dark:text-neutral-50"
+                className="motion-safe:animate-[fadeIn_120ms_ease-out] rounded-md bg-emerald-50 px-4 py-4 text-center text-base text-fg-default dark:bg-emerald-950/40"
               >
                 {current.answer}
               </div>
@@ -416,13 +416,13 @@ export default function FlashcardsRenderer({
                     type="button"
                     data-testid={`flashcards-rate-${r.id}`}
                     disabled={readOnly || busy}
-                    className="rounded-md border border-slate-200 px-2 py-3 text-start text-sm dark:border-neutral-600 disabled:opacity-50"
+                    className="rounded-md border border-border-default px-2 py-3 text-start text-sm dark:border-border-default disabled:opacity-50"
                     onClick={() => void rate(r.id)}
                   >
                     <span className="block font-medium">
                       {t(`contentTools.tools.flashcards.ratings.${r.id}`)}
                     </span>
-                    <span className="block text-xs text-slate-500 dark:text-neutral-400">
+                    <span className="block text-xs text-fg-muted">
                       {t(`contentTools.tools.flashcards.ratingHints.${r.id}`)} · {r.shortcut}
                     </span>
                   </button>

@@ -105,7 +105,23 @@ cross 40 files without an allowlist entry (which is shrink-only).
 
 ---
 
-## 6. Error handling
+## 6. HTTP handlers (method dispatch)
+
+- **Handlers do not check `r.Method`.** The chi router owns dispatch via
+  `r.Get` / `r.Post` / `r.Put` / `r.Patch` / `r.Delete` (and `r.Method`).
+- **`OPTIONS` preflight** is handled by `corsAll` (and the central
+  `MethodNotAllowed` handler for unregistered verbs). Do not re-implement
+  OPTIONS or 405 prologues in single-method handlers.
+- **Method-agnostic handlers** are registered with `Handle` / `HandleFunc` /
+  `Mount`, or the same handler is bound to more than one verb. Those handlers
+  may keep in-handler method dispatch and **must document why** (comment at the
+  registration site or on the handler). See TD.5.
+- Guard: `scripts/check-handler-method-dispatch.sh` (via `make lint-structure`).
+- Analysis map: `python3 scripts/analyze-handler-methods.py`.
+
+---
+
+## 6b. Error handling
 
 ### Go
 
@@ -171,6 +187,7 @@ A PR that only moves files must leave TD.1 inventories unchanged.
 | Layering | `scripts/check-layering.sh` | `layering.txt` | new SQL/pool use in HTTP |
 | Web naming | `scripts/check-file-naming.mjs` | `file-naming.txt` | new non-kebab files |
 | Deadcode | `scripts/check-deadcode-baseline.sh` | `deadcode-baseline.txt` | new unreachable funcs |
+| Handler method dispatch (TD.5) | `scripts/check-handler-method-dispatch.sh` | multi-method allowlist in script | new single-method `r.Method` checks |
 | OpenAPI | `scripts/check-openapi-coverage.sh` | `openapi-coverage.txt` | invalid spec / coverage drop |
 | Shrink-only | `scripts/check-allowlist-shrink.sh` | all of the above | allowlist growth |
 

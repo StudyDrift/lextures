@@ -20,7 +20,7 @@ export function AnnotationHeatmap({ units, maxCount }: AnnotationHeatmapProps) {
 
   return (
     <div className="space-y-3" data-testid="annotation-heatmap">
-      <h3 className="text-sm font-medium text-slate-800 dark:text-neutral-100">
+      <h3 className="text-sm font-medium text-fg-default">
         {t('contentTools.tools.highlight_annotate.heatmap.title')}
       </h3>
       <div className="space-y-1" aria-hidden="true">
@@ -35,16 +35,16 @@ export function AnnotationHeatmap({ units, maxCount }: AnnotationHeatmapProps) {
                 count: u.count,
               })}
             >
-              <span className="w-8 shrink-0 text-slate-500">{u.unitIndex + 1}</span>
+              <span className="w-8 shrink-0 text-fg-muted">{u.unitIndex + 1}</span>
               <div
-                className="min-h-[1.5rem] flex-1 rounded px-2 py-1 text-slate-900 dark:text-neutral-100"
+                className="min-h-[1.5rem] flex-1 rounded px-2 py-1 text-fg-default"
                 style={{
                   backgroundColor: `rgba(15, 118, 110, ${0.08 + intensity * 0.55})`,
                 }}
               >
                 <span className="line-clamp-2">{u.label}</span>
               </div>
-              <span className="w-6 shrink-0 text-end tabular-nums text-slate-600">{u.count}</span>
+              <span className="w-6 shrink-0 text-end tabular-nums text-fg-muted">{u.count}</span>
             </div>
           )
         })}
@@ -52,11 +52,11 @@ export function AnnotationHeatmap({ units, maxCount }: AnnotationHeatmapProps) {
 
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse text-sm" role="table">
-          <caption className="mb-1 text-start text-xs text-slate-600 dark:text-neutral-300">
+          <caption className="mb-1 text-start text-xs text-fg-muted">
             {t('contentTools.tools.highlight_annotate.heatmap.tableCaption')}
           </caption>
           <thead>
-            <tr className="border-b border-slate-200 text-start dark:border-neutral-700">
+            <tr className="border-b border-border-default text-start dark:border-border-default">
               <th scope="col" className="px-2 py-1 font-medium">
                 {t('contentTools.tools.highlight_annotate.heatmap.colUnit')}
               </th>
@@ -70,7 +70,7 @@ export function AnnotationHeatmap({ units, maxCount }: AnnotationHeatmapProps) {
           </thead>
           <tbody>
             {units.map((u) => (
-              <tr key={u.unitIndex} className="border-b border-slate-100 dark:border-neutral-800">
+              <tr key={u.unitIndex} className="border-b border-border-subtle">
                 <td className="px-2 py-1 tabular-nums">{u.unitIndex + 1}</td>
                 <td className="px-2 py-1">{u.label}</td>
                 <td className="px-2 py-1 tabular-nums">{u.count}</td>

@@ -70,7 +70,7 @@ function StudentProgressActionsMenu({
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-2 py-1.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+        className="inline-flex items-center gap-2 rounded-xl border border-border-strong bg-surface-raised px-2 py-1.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-60 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
       >
         More
         <ChevronDown
@@ -83,7 +83,7 @@ function StudentProgressActionsMenu({
           id={menuId}
           role="menu"
           aria-label="Student progress actions"
-          className="absolute end-0 z-50 mt-1 min-w-[12rem] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-900"
+          className="absolute end-0 z-50 mt-1 min-w-[12rem] overflow-hidden rounded-xl border border-border-default bg-surface-raised py-1 shadow-lg shadow-slate-900/10 dark:border-border-default dark:bg-surface-raised"
         >
           <button
             type="button"
@@ -92,9 +92,9 @@ function StudentProgressActionsMenu({
               onMessageStudent()
               setOpen(false)
             }}
-            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-fg-default transition-[background-color,color,border-color] hover:bg-surface-base dark:text-fg-default dark:hover:bg-surface-overlay"
           >
-            <Mail className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
+            <Mail className="h-4 w-4 shrink-0 text-fg-muted" aria-hidden />
             Message Student
           </button>
         </div>
@@ -111,7 +111,7 @@ function statusBadgeClass(status: string): string {
     case 'missing':
       return 'bg-red-100 text-red-900 dark:bg-red-950/50 dark:text-red-200'
     default:
-      return 'bg-slate-100 text-slate-800 dark:bg-neutral-800 dark:text-neutral-200'
+      return 'bg-surface-sunken text-fg-default dark:bg-surface-overlay dark:text-fg-default'
   }
 }
 
@@ -138,7 +138,7 @@ function QuizScoreChart({
   captionId: string
 }) {
   if (quizzes.length === 0) {
-    return <p className="text-sm text-slate-500 dark:text-neutral-400">No quiz attempts yet.</p>
+    return <p className="text-sm text-fg-muted">No quiz attempts yet.</p>
   }
 
   const sorted = sortedQuizAttempts(quizzes)
@@ -151,9 +151,9 @@ function QuizScoreChart({
   if (sorted.length === 1) {
     const only = sorted[0]
     return (
-      <p className="text-sm text-slate-600 dark:text-neutral-400">
+      <p className="text-sm text-fg-muted">
         One quiz attempt so far ({formatQuizAxisDate(only.submittedAt)}):{' '}
-        <strong className="text-slate-900 dark:text-neutral-100">
+        <strong className="text-fg-default">
           {formatQuizScorePercent(only.scorePercent)}
         </strong>
         . A trend chart appears after a second attempt.
@@ -182,10 +182,10 @@ function QuizScoreChart({
 
   return (
     <figure className="mt-2">
-      <figcaption className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+      <figcaption className="text-sm font-semibold text-fg-default">
         Quiz scores over time
       </figcaption>
-      <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+      <p className="mt-1 text-sm text-fg-muted">
         Each dot is one submitted quiz, ordered oldest to newest (left to right). The vertical axis
         is the score percentage.
         {roundedMin === roundedMax
@@ -196,7 +196,7 @@ function QuizScoreChart({
         role="img"
         aria-labelledby={captionId}
         viewBox={`0 0 ${width} ${height}`}
-        className="mt-4 max-w-full rounded-lg border border-slate-200 bg-white dark:border-neutral-700 dark:bg-neutral-900"
+        className="mt-4 max-w-full rounded-lg border border-border-default bg-surface-raised dark:border-border-default dark:bg-surface-raised"
       >
         <title id={captionId}>Quiz scores over time</title>
         {yTicks.map((tick) => {
@@ -421,7 +421,7 @@ export default function StudentProgressPage() {
   if (featuresLoading) {
     return (
       <LmsPage title={title}>
-        <p className="mt-6 text-sm text-slate-500 dark:text-neutral-400">Loading…</p>
+        <p className="mt-6 text-sm text-fg-muted">Loading…</p>
       </LmsPage>
     )
   }
@@ -507,7 +507,7 @@ export default function StudentProgressPage() {
               avatarUrl={data.summary.studentAvatarUrl}
               size="md"
             />
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-neutral-100">
+            <h1 className="text-2xl font-semibold tracking-tight text-fg-default">
               {pageTitle}
             </h1>
           </div>
@@ -520,21 +520,21 @@ export default function StudentProgressPage() {
       }
     >
       {loadState === 'loading' && (
-        <p className="mt-6 text-sm text-slate-500 dark:text-neutral-400">Loading progress…</p>
+        <p className="mt-6 text-sm text-fg-muted">Loading progress…</p>
       )}
       {loadState === 'error' && loadError && (
-        <p className="mt-6 text-sm text-red-600 dark:text-red-400" role="alert">
+        <p className="mt-6 text-sm text-danger-fg" role="alert">
           {loadError}
         </p>
       )}
       {loadState === 'ok' && data && (
         <>
-          <p className="mt-4 text-sm text-slate-600 dark:text-neutral-400">
+          <p className="mt-4 text-sm text-fg-muted">
             {studentProgressI18n.lastUpdated}{' '}
             {data.summary.staleMinutes > 0
               ? `${data.summary.staleMinutes} min ago`
               : 'just now'}
-            <span className="text-slate-400 dark:text-neutral-500">
+            <span className="text-fg-subtle">
               {' '}
               ({formatAbsolute(new Date(data.summary.dataAsOf))})
             </span>
@@ -542,41 +542,41 @@ export default function StudentProgressPage() {
 
           <div
             role="status"
-            className="mt-6 grid gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-4 dark:border-neutral-700 dark:bg-neutral-900"
+            className="mt-6 grid gap-4 rounded-xl border border-border-default bg-surface-raised p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-4 dark:border-border-default dark:bg-surface-raised"
           >
             <dl>
-              <dt className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+              <dt className="text-xs font-medium uppercase tracking-wide text-fg-muted">
                 {studentProgressI18n.submitted}
               </dt>
-              <dd className="mt-1 text-2xl font-semibold tabular-nums text-slate-950 dark:text-neutral-50">
+              <dd className="mt-1 text-2xl font-semibold tabular-nums text-slate-950">
                 {Math.round(data.summary.assignmentsSubmittedPct)}%
                 <span className="sr-only"> assignments submitted</span>
               </dd>
             </dl>
             <dl>
-              <dt className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+              <dt className="text-xs font-medium uppercase tracking-wide text-fg-muted">
                 {studentProgressI18n.modulesViewed}
               </dt>
-              <dd className="mt-1 text-2xl font-semibold tabular-nums text-slate-950 dark:text-neutral-50">
+              <dd className="mt-1 text-2xl font-semibold tabular-nums text-slate-950">
                 {Math.round(data.summary.modulesViewedPct)}%
                 <span className="sr-only"> modules viewed</span>
               </dd>
             </dl>
             <dl>
-              <dt className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+              <dt className="text-xs font-medium uppercase tracking-wide text-fg-muted">
                 {studentProgressI18n.avgScore}
               </dt>
-              <dd className="mt-1 text-2xl font-semibold tabular-nums text-slate-950 dark:text-neutral-50">
+              <dd className="mt-1 text-2xl font-semibold tabular-nums text-slate-950">
                 {data.summary.avgGradePercent != null
                   ? `${Math.round(data.summary.avgGradePercent * 10) / 10}%`
                   : '—'}
               </dd>
             </dl>
             <dl>
-              <dt className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+              <dt className="text-xs font-medium uppercase tracking-wide text-fg-muted">
                 {studentProgressI18n.lastActive}
               </dt>
-              <dd className="mt-1 text-lg font-semibold text-slate-950 dark:text-neutral-50">
+              <dd className="mt-1 text-lg font-semibold text-slate-950">
                 {data.summary.lastActiveAt
                   ? formatTimeAgoFromIso(data.summary.lastActiveAt)
                   : 'Never'}
@@ -592,7 +592,7 @@ export default function StudentProgressPage() {
               <ul className="mt-2 space-y-2 text-sm">
                 {data.missing.map((m) => (
                   <li key={m.itemId} className="flex flex-wrap items-baseline justify-between gap-2">
-                    <span className="font-medium text-slate-900 dark:text-neutral-100">{m.title}</span>
+                    <span className="font-medium text-fg-default">{m.title}</span>
                     <span className="text-amber-900 dark:text-amber-200">
                       {m.daysOverdue} day{m.daysOverdue === 1 ? '' : 's'} overdue
                     </span>
@@ -603,7 +603,7 @@ export default function StudentProgressPage() {
           )}
 
           <div className="mt-8">
-            <div role="tablist" aria-label="Progress sections" className="flex flex-wrap gap-1 border-b border-slate-200 dark:border-neutral-700">
+            <div role="tablist" aria-label="Progress sections" className="flex flex-wrap gap-1 border-b border-border-default">
               {tabs.map((t) => (
                 <button
                   key={t.id}
@@ -614,11 +614,7 @@ export default function StudentProgressPage() {
                   aria-controls={`${tabsId}-panel-${t.id}`}
                   tabIndex={tab === t.id ? 0 : -1}
                   onClick={() => setTab(t.id)}
-                  className={`rounded-t-lg px-4 py-2 text-sm font-medium ${
-                    tab === t.id
-                      ? 'border border-b-0 border-slate-200 bg-white text-indigo-700 dark:border-neutral-600 dark:bg-neutral-900 dark:text-indigo-300'
-                      : 'text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-neutral-100'
-                  }`}
+                  className={`rounded-t-lg px-4 py-2 text-sm font-medium ${ tab === t.id ? 'border border-b-0 border-border-default bg-surface-raised text-accent-fg dark:border-border-default dark:bg-surface-raised dark:text-indigo-300' : 'text-fg-muted hover:text-fg-default dark:text-fg-muted dark:hover:text-fg-default' }`}
                 >
                   {t.label}
                 </button>
@@ -629,10 +625,10 @@ export default function StudentProgressPage() {
               role="tabpanel"
               id={`${tabsId}-panel-${tab}`}
               aria-labelledby={`${tabsId}-tab-${tab}`}
-              className="rounded-b-xl border border-t-0 border-slate-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-900"
+              className="rounded-b-xl border border-t-0 border-border-default bg-surface-raised p-4 dark:border-border-default dark:bg-surface-raised"
             >
               {tab === 'overview' && (
-                <div className="space-y-4 text-sm text-slate-700 dark:text-neutral-300">
+                <div className="space-y-4 text-sm text-fg-muted">
                   <p>
                     Average quiz score:{' '}
                     <strong>
@@ -645,7 +641,7 @@ export default function StudentProgressPage() {
                     <p>
                       <Link
                         to={`/courses/${encodeURIComponent(courseCode)}/gradebook?student=${encodeURIComponent(data.summary.studentUserId)}`}
-                        className="font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+                        className="font-medium text-accent-fg hover:underline dark:text-indigo-400"
                       >
                         Open gradebook for this student
                       </Link>
@@ -662,15 +658,15 @@ export default function StudentProgressPage() {
                       className="grid grid-cols-1 gap-1 py-3 text-sm sm:grid-cols-[minmax(11rem,13rem)_minmax(0,1fr)] sm:items-start sm:gap-x-4"
                     >
                       <time
-                        className="shrink-0 text-xs tabular-nums text-slate-500 sm:text-end dark:text-neutral-500"
+                        className="shrink-0 text-xs tabular-nums text-fg-muted sm:text-end"
                         dateTime={ev.occurredAt}
                       >
                         {formatAbsolute(new Date(ev.occurredAt))}
                       </time>
                       <div className="min-w-0">
-                        <p className="font-medium text-slate-900 dark:text-neutral-100">{ev.label}</p>
+                        <p className="font-medium text-fg-default">{ev.label}</p>
                         {ev.detail ? (
-                          <p className="text-slate-600 dark:text-neutral-400">{ev.detail}</p>
+                          <p className="text-fg-muted">{ev.detail}</p>
                         ) : null}
                       </div>
                     </li>
@@ -681,7 +677,7 @@ export default function StudentProgressPage() {
                 <button
                   type="button"
                   disabled={activityLoading}
-                  className="mt-4 text-sm font-medium text-indigo-600 hover:underline disabled:opacity-50 dark:text-indigo-400"
+                  className="mt-4 text-sm font-medium text-accent-fg hover:underline disabled:opacity-50 dark:text-indigo-400"
                   onClick={() => void loadActivity(false)}
                 >
                   Load more
@@ -692,7 +688,7 @@ export default function StudentProgressPage() {
                 <div className="overflow-x-auto">
                   <table className="min-w-full text-sm">
                     <thead>
-                      <tr className="border-b border-slate-200 text-start dark:border-neutral-700">
+                      <tr className="border-b border-border-default text-start dark:border-border-default">
                         <th scope="col" className="py-2 pe-4 font-medium">
                           Item
                         </th>
@@ -712,7 +708,7 @@ export default function StudentProgressPage() {
                     </thead>
                     <tbody>
                       {data.assignments.map((a) => (
-                        <tr key={a.itemId} className="border-b border-slate-100 dark:border-neutral-800">
+                        <tr key={a.itemId} className="border-b border-border-subtle">
                           <td className="py-2 pe-4">{a.title}</td>
                           <td className="py-2 pe-4">
                             {a.dueAt ? formatAbsolute(new Date(a.dueAt)) : '—'}
@@ -738,13 +734,13 @@ export default function StudentProgressPage() {
               {tab === 'quizzes' && (
                 <>
                   <QuizScoreChart quizzes={data.quizzes} captionId={chartCaptionId} />
-                  <h3 className="mt-8 text-sm font-semibold text-slate-900 dark:text-neutral-100">
+                  <h3 className="mt-8 text-sm font-semibold text-fg-default">
                     All quiz attempts
                   </h3>
                   <div className="mt-3 overflow-x-auto">
                     <table className="min-w-full text-sm">
                       <thead>
-                        <tr className="border-b border-slate-200 text-start dark:border-neutral-700">
+                        <tr className="border-b border-border-default text-start dark:border-border-default">
                           <th scope="col" className="py-2 pe-4 font-medium">
                             Quiz
                           </th>
@@ -758,7 +754,7 @@ export default function StudentProgressPage() {
                       </thead>
                       <tbody>
                         {data.quizzes.map((q) => (
-                          <tr key={q.attemptId} className="border-b border-slate-100 dark:border-neutral-800">
+                          <tr key={q.attemptId} className="border-b border-border-subtle">
                             <td className="py-2 pe-4">{q.title}</td>
                             <td className="py-2 pe-4">{formatAbsolute(new Date(q.submittedAt))}</td>
                             <td className="py-2 tabular-nums">
@@ -774,7 +770,7 @@ export default function StudentProgressPage() {
 
               {tab === 'notes' && data.summary.canManageNotes && (
                 <div className="space-y-4">
-                  <div className="rounded-lg border border-slate-200 p-3 dark:border-neutral-700">
+                  <div className="rounded-lg border border-border-default p-3 dark:border-border-default">
                     <label htmlFor="progress-note" className="text-sm font-medium">
                       {editingNote ? 'Edit note' : 'Add private note'}
                     </label>
@@ -783,14 +779,14 @@ export default function StudentProgressPage() {
                       rows={3}
                       value={noteDraft}
                       onChange={(e) => setNoteDraft(e.target.value)}
-                      className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                      className="mt-2 w-full rounded-lg border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
                     />
                     <div className="mt-2 flex gap-2">
                       <button
                         type="button"
                         disabled={noteBusy || !noteDraft.trim()}
                         onClick={() => void onSaveNote()}
-                        className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
+                        className="rounded-lg bg-accent-solid px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
                       >
                         Save
                       </button>
@@ -801,7 +797,7 @@ export default function StudentProgressPage() {
                             setEditingNote(null)
                             setNoteDraft('')
                           }}
-                          className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm dark:border-neutral-600"
+                          className="rounded-lg border border-border-default px-3 py-1.5 text-sm dark:border-border-default"
                         >
                           Cancel
                         </button>
@@ -811,18 +807,18 @@ export default function StudentProgressPage() {
                   {(data.notes ?? []).map((n) => (
                     <article
                       key={n.id}
-                      className="rounded-lg border border-slate-200 p-3 dark:border-neutral-700"
+                      className="rounded-lg border border-border-default p-3 dark:border-border-default"
                     >
-                      <p className="whitespace-pre-wrap text-sm text-slate-800 dark:text-neutral-200">
+                      <p className="whitespace-pre-wrap text-sm text-fg-default">
                         {n.noteText}
                       </p>
-                      <p className="mt-2 text-xs text-slate-500 dark:text-neutral-500">
+                      <p className="mt-2 text-xs text-fg-subtle">
                         Updated {formatTimeAgoFromIso(n.updatedAt)}
                       </p>
                       <div className="mt-2 flex gap-2">
                         <button
                           type="button"
-                          className="text-xs font-medium text-indigo-600 dark:text-indigo-400"
+                          className="text-xs font-medium text-accent-fg"
                           onClick={() => {
                             setEditingNote(n)
                             setNoteDraft(n.noteText)
@@ -832,7 +828,7 @@ export default function StudentProgressPage() {
                         </button>
                         <button
                           type="button"
-                          className="text-xs font-medium text-red-600 dark:text-red-400"
+                          className="text-xs font-medium text-danger-fg"
                           disabled={noteBusy}
                           onClick={() => void onDeleteNote(n.id)}
                         >
@@ -858,18 +854,18 @@ export default function StudentProgressPage() {
             if (ev.target === ev.currentTarget) closeMessageModal()
           }}
         >
-          <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-900">
-            <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-neutral-700">
+          <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-raised">
+            <div className="flex items-center justify-between border-b border-border-default px-4 py-3 dark:border-border-default">
               <h3
                 id="student-progress-message-title"
-                className="text-sm font-semibold text-slate-900 dark:text-neutral-100"
+                className="text-sm font-semibold text-fg-default"
               >
                 Send message
               </h3>
               <button
                 type="button"
                 onClick={() => closeMessageModal()}
-                className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-neutral-400 dark:hover:bg-neutral-800"
+                className="rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken hover:text-fg-default dark:text-fg-muted dark:hover:bg-surface-overlay"
                 aria-label="Close"
               >
                 <X className="h-5 w-5" />
@@ -877,11 +873,11 @@ export default function StudentProgressPage() {
             </div>
             <form
               onSubmit={(ev) => void onSubmitStudentMessage(ev)}
-              className="space-y-3 px-4 py-4 text-sm text-slate-700 dark:text-neutral-300"
+              className="space-y-3 px-4 py-4 text-sm text-fg-muted"
             >
-              <p className="text-slate-600 dark:text-neutral-400">
+              <p className="text-fg-muted">
                 To{' '}
-                <span className="font-medium text-slate-900 dark:text-neutral-100">
+                <span className="font-medium text-fg-default">
                   {data.summary.studentDisplayName?.trim() || '—'}
                 </span>
               </p>
@@ -891,39 +887,39 @@ export default function StudentProgressPage() {
                 </p>
               ) : null}
               <label className="block">
-                <span className="text-xs font-medium text-slate-600 dark:text-neutral-400">Subject</span>
+                <span className="text-xs font-medium text-fg-muted">Subject</span>
                 <input
                   value={messageSubject}
                   onChange={(ev) => setMessageSubject(ev.target.value)}
-                  className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/20 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+                  className="mt-1 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/20 dark:border-border-default dark:bg-surface-base dark:text-fg-default"
                   placeholder="Optional subject"
                   disabled={messageStatus === 'loading'}
                 />
               </label>
               <label className="block">
-                <span className="text-xs font-medium text-slate-600 dark:text-neutral-400">Message</span>
+                <span className="text-xs font-medium text-fg-muted">Message</span>
                 <textarea
                   value={messageBody}
                   onChange={(ev) => setMessageBody(ev.target.value)}
                   rows={6}
-                  className="mt-1 w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/20 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+                  className="mt-1 w-full resize-y rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/20 dark:border-border-default dark:bg-surface-base dark:text-fg-default"
                   placeholder="Write your message…"
                   disabled={messageStatus === 'loading'}
                   required
                 />
               </label>
-              <div className="flex justify-end gap-2 border-t border-slate-200 pt-3 dark:border-neutral-700">
+              <div className="flex justify-end gap-2 border-t border-border-default pt-3 dark:border-border-default">
                 <button
                   type="button"
                   onClick={() => closeMessageModal()}
-                  className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                  className="rounded-xl px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={messageStatus === 'loading' || !messageBody.trim()}
-                  className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Send className="h-4 w-4" aria-hidden />
                   {messageStatus === 'loading' ? 'Sending…' : 'Send'}

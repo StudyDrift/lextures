@@ -110,42 +110,42 @@ export function ReviewQueuePanel({
           return (
             <li
               key={item.id}
-              className="rounded-lg border border-rose-200/80 bg-white px-3 py-2 text-sm dark:border-rose-900/40 dark:bg-neutral-950"
+              className="rounded-lg border border-rose-200/80 bg-surface-raised px-3 py-2 text-sm dark:border-rose-900/40 dark:bg-surface-base"
             >
-              <p className="font-medium text-slate-900 dark:text-neutral-50">{label}</p>
+              <p className="font-medium text-fg-default">{label}</p>
               <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-rose-700 dark:text-rose-300">
                 {t('gradingAgent.review.flagged.badge')}
               </p>
               {item.flagReason ? (
-                <p className="mt-1 text-slate-700 dark:text-neutral-300">{item.flagReason}</p>
+                <p className="mt-1 text-fg-muted">{item.flagReason}</p>
               ) : null}
               {item.flagPriority ? (
-                <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+                <p className="mt-1 text-xs text-fg-muted">
                   {t('gradingAgent.review.flagged.priority')}: {item.flagPriority}
                 </p>
               ) : null}
               {isEditing ? (
                 <div className="mt-2 space-y-2">
                   <label className="block">
-                    <span className="text-xs font-medium text-slate-600 dark:text-neutral-400">
+                    <span className="text-xs font-medium text-fg-muted">
                       {t('gradingAgent.review.queue.editScore')}
                     </span>
                     <input
                       type="number"
                       value={editScore}
                       onChange={(e) => setEditScore(e.target.value)}
-                      className="mt-1 w-full rounded-md border border-slate-200 px-2 py-1 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                      className="mt-1 w-full rounded-md border border-border-default px-2 py-1 text-sm dark:border-border-default dark:bg-surface-raised"
                     />
                   </label>
                   <label className="block">
-                    <span className="text-xs font-medium text-slate-600 dark:text-neutral-400">
+                    <span className="text-xs font-medium text-fg-muted">
                       {t('gradingAgent.review.queue.editComment')}
                     </span>
                     <textarea
                       value={editComment}
                       onChange={(e) => setEditComment(e.target.value)}
                       rows={2}
-                      className="mt-1 w-full rounded-md border border-slate-200 px-2 py-1 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+                      className="mt-1 w-full rounded-md border border-border-default px-2 py-1 text-sm dark:border-border-default dark:bg-surface-raised"
                     />
                   </label>
                 </div>
@@ -156,7 +156,7 @@ export function ReviewQueuePanel({
                     type="button"
                     disabled={isBusy}
                     onClick={() => onOpenSubmission(item.submissionId)}
-                    className="rounded-md border border-slate-200 px-2.5 py-1 text-xs font-medium dark:border-neutral-700"
+                    className="rounded-md border border-border-default px-2.5 py-1 text-xs font-medium dark:border-border-default"
                   >
                     {t('gradingAgent.review.flagged.openSubmission')}
                   </button>
@@ -175,7 +175,7 @@ export function ReviewQueuePanel({
                       type="button"
                       disabled={isBusy}
                       onClick={() => setEditingId(null)}
-                      className="rounded-md border border-slate-200 px-2.5 py-1 text-xs font-medium dark:border-neutral-700"
+                      className="rounded-md border border-border-default px-2.5 py-1 text-xs font-medium dark:border-border-default"
                     >
                       {t('gradingAgent.review.queue.cancel')}
                     </button>

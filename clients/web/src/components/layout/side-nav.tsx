@@ -79,26 +79,20 @@ export function SideNav() {
       <aside
         id="shell-nav"
         data-onboarding="side-nav"
-        className={`lms-chrome flex h-dvh min-h-0 w-[min(17.5rem,88vw)] max-w-[280px] flex-col border-e border-slate-200/70 bg-[#F2F2F2] text-slate-900 transition-[width] duration-300 ease-in-out print:hidden dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-100 md:h-screen ${
-          sideNavCollapsed ? 'md:w-[72px]' : 'md:w-60'
-        } md:max-w-none md:shrink-0 md:translate-x-0 ${
-          mobileNavOpen ? 'max-md:translate-x-0' : 'max-md:-translate-x-full'
-        } max-md:fixed max-md:start-0 max-md:top-0 max-md:z-40 max-md:shadow-2xl max-md:transition-transform max-md:duration-200 max-md:ease-out max-md:pt-[env(safe-area-inset-top)] max-md:pb-[env(safe-area-inset-bottom)]`}
+        className={`lms-chrome flex h-dvh min-h-0 w-[min(17.5rem,88vw)] max-w-[280px] flex-col border-e border-slate-200/70 bg-[#F2F2F2] text-fg-default transition-[width] duration-300 ease-in-out print:hidden dark:border-border-subtle dark:bg-surface-base dark:text-fg-default md:h-screen ${ sideNavCollapsed ? 'md:w-[72px]' : 'md:w-60' } md:max-w-none md:shrink-0 md:translate-x-0 ${ mobileNavOpen ? 'max-md:translate-x-0' : 'max-md:-translate-x-full' } max-md:fixed max-md:start-0 max-md:top-0 max-md:z-40 max-md:shadow-2xl max-md:transition-transform max-md:duration-200 max-md:ease-out max-md:pt-[env(safe-area-inset-top)] max-md:pb-[env(safe-area-inset-bottom)]`}
       >
         <div className="flex shrink-0 items-center px-3 pb-1 pt-3 md:px-3 md:pb-2 md:pt-4">
           <SideNavTooltip content="Lextures">
             <NavLink
               to="/"
-              className={`flex min-h-0 min-w-0 flex-1 items-center gap-3 rounded-2xl p-1 outline-none ring-slate-400/30 transition-[background-color,color,border-color] hover:bg-white/50 focus-visible:ring-2 dark:ring-neutral-500/40 dark:hover:bg-white/5 ${
-                sideNavCollapsed ? 'justify-center pe-1' : 'pe-2'
-              }`}
+              className={`flex min-h-0 min-w-0 flex-1 items-center gap-3 rounded-2xl p-1 outline-none ring-slate-400/30 transition-[background-color,color,border-color] hover:bg-white/50 focus-visible:ring-2 dark:ring-neutral-500/40 dark:hover:bg-white/5 ${ sideNavCollapsed ? 'justify-center pe-1' : 'pe-2' }`}
               end
             >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-slate-900/[0.06] dark:bg-neutral-800 dark:ring-white/10">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-raised shadow-sm ring-1 ring-slate-900/[0.06] dark:bg-surface-overlay dark:ring-white/10">
                 <BrandLogo className="mx-0 h-7 w-auto shrink-0 object-contain object-left" />
               </span>
               {!sideNavCollapsed && (
-                <span className="truncate text-[1.05rem] font-semibold tracking-tight text-slate-950 dark:text-neutral-100">
+                <span className="truncate text-[1.05rem] font-semibold tracking-tight text-slate-950 dark:text-fg-default">
                   Lextures
                 </span>
               )}
@@ -111,33 +105,21 @@ export function SideNav() {
         </Suspense>
         <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
           <nav
-            className={`absolute inset-0 flex flex-col gap-1 overflow-y-auto px-3 pb-3 pt-0 transition-[opacity,transform] duration-300 ease-out ${
-              showMainNav
-                ? 'z-10 translate-y-0 opacity-100'
-                : 'pointer-events-none z-0 translate-y-1 opacity-0'
-            }`}
+            className={`absolute inset-0 flex flex-col gap-1 overflow-y-auto px-3 pb-3 pt-0 transition-[opacity,transform] duration-300 ease-out ${ showMainNav ? 'z-10 translate-y-0 opacity-100' : 'pointer-events-none z-0 translate-y-1 opacity-0' }`}
             aria-label="Main"
             inert={!showMainNav}
           >
             <SideNavMainLinks />
           </nav>
           <nav
-            className={`sidenav-course-items absolute inset-0 flex flex-col gap-1 overflow-y-auto px-3 pb-3 pt-0 transition-[opacity,transform] duration-300 ease-out ${
-              showCourseNav
-                ? 'z-10 translate-y-0 opacity-100'
-                : 'pointer-events-none z-0 translate-y-1 opacity-0'
-            }`}
+            className={`sidenav-course-items absolute inset-0 flex flex-col gap-1 overflow-y-auto px-3 pb-3 pt-0 transition-[opacity,transform] duration-300 ease-out ${ showCourseNav ? 'z-10 translate-y-0 opacity-100' : 'pointer-events-none z-0 translate-y-1 opacity-0' }`}
             aria-label="Course menu"
             inert={!showCourseNav}
           >
             {courseCode && <SideNavCourseLinks key={courseCode} courseCode={courseCode} />}
           </nav>
           <nav
-            className={`absolute inset-0 flex flex-col gap-1 overflow-y-auto px-3 pb-3 pt-0 transition-[opacity,transform] duration-300 ease-out ${
-              showCourseSettingsNav
-                ? 'z-10 translate-y-0 opacity-100'
-                : 'pointer-events-none z-0 translate-y-1 opacity-0'
-            }`}
+            className={`absolute inset-0 flex flex-col gap-1 overflow-y-auto px-3 pb-3 pt-0 transition-[opacity,transform] duration-300 ease-out ${ showCourseSettingsNav ? 'z-10 translate-y-0 opacity-100' : 'pointer-events-none z-0 translate-y-1 opacity-0' }`}
             aria-label="Course settings menu"
             inert={!showCourseSettingsNav}
           >
@@ -149,11 +131,7 @@ export function SideNav() {
             )}
           </nav>
           <nav
-            className={`absolute inset-0 flex flex-col gap-1 overflow-y-auto px-3 pb-3 pt-0 transition-[opacity,transform] duration-300 ease-out ${
-              showSettingsNav
-                ? 'z-10 translate-y-0 opacity-100'
-                : 'pointer-events-none z-0 translate-y-1 opacity-0'
-            }`}
+            className={`absolute inset-0 flex flex-col gap-1 overflow-y-auto px-3 pb-3 pt-0 transition-[opacity,transform] duration-300 ease-out ${ showSettingsNav ? 'z-10 translate-y-0 opacity-100' : 'pointer-events-none z-0 translate-y-1 opacity-0' }`}
             aria-label="Settings menu"
             inert={!showSettingsNav}
           >

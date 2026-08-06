@@ -152,20 +152,20 @@ export default function CourseModuleTextbookResourcePage() {
       : '/courses'
 
   const fieldClasses =
-    'mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100'
+    'mt-1 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 disabled:opacity-60 dark:border-border-default dark:bg-surface-raised dark:text-fg-default'
 
   return (
     <LmsPage title={data?.metadata?.title || 'Textbook'}>
       <div className="mx-auto max-w-2xl">
-        <p className="mb-4 text-sm text-slate-600 dark:text-neutral-400">
-          <Link to={modulesHref} className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">
+        <p className="mb-4 text-sm text-fg-muted">
+          <Link to={modulesHref} className="font-medium text-accent-fg hover:text-indigo-500 dark:text-indigo-400">
             ← Modules
           </Link>
         </p>
 
         {ia ? <InclusiveAccessBanner status={ia} storageKey={courseCode} /> : null}
 
-        {loading && <p className="text-sm text-slate-600 dark:text-neutral-400">Loading…</p>}
+        {loading && <p className="text-sm text-fg-muted">Loading…</p>}
         {loadError && (
           <p className="text-sm text-rose-700 dark:text-rose-300" role="alert">
             {loadError}
@@ -173,7 +173,7 @@ export default function CourseModuleTextbookResourcePage() {
         )}
 
         {!loading && !loadError && data && (
-          <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-900/85">
+          <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-5 shadow-sm dark:border-border-default/85">
             <div className="flex items-start gap-3">
               <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-orange-200/90 bg-orange-50 text-orange-700 dark:border-orange-500/40 dark:bg-orange-950/55 dark:text-orange-200">
                 <BookCopy className="h-5 w-5" strokeWidth={2} aria-hidden />
@@ -183,38 +183,38 @@ export default function CourseModuleTextbookResourcePage() {
                   {PROVIDER_LABELS[data.provider]}
                 </span>
                 {data.metadata?.title ? (
-                  <h1 className="mt-2 text-lg font-semibold text-slate-900 dark:text-neutral-100">
+                  <h1 className="mt-2 text-lg font-semibold text-fg-default">
                     {data.metadata.title}
                   </h1>
                 ) : null}
-                <dl className="mt-2 grid grid-cols-1 gap-x-6 gap-y-1 text-sm text-slate-600 sm:grid-cols-2 dark:text-neutral-400">
+                <dl className="mt-2 grid grid-cols-1 gap-x-6 gap-y-1 text-sm text-fg-muted sm:grid-cols-2 dark:text-fg-muted">
                   {data.metadata?.isbn ? (
                     <div>
-                      <dt className="inline font-medium text-slate-700 dark:text-neutral-300">ISBN: </dt>
+                      <dt className="inline font-medium text-fg-muted">ISBN: </dt>
                       <dd className="inline font-mono">{data.metadata.isbn}</dd>
                     </div>
                   ) : null}
                   {data.metadata?.edition ? (
                     <div>
-                      <dt className="inline font-medium text-slate-700 dark:text-neutral-300">Edition: </dt>
+                      <dt className="inline font-medium text-fg-muted">Edition: </dt>
                       <dd className="inline">{data.metadata.edition}</dd>
                     </div>
                   ) : null}
                   {data.metadata?.publisher ? (
                     <div>
-                      <dt className="inline font-medium text-slate-700 dark:text-neutral-300">Publisher: </dt>
+                      <dt className="inline font-medium text-fg-muted">Publisher: </dt>
                       <dd className="inline">{data.metadata.publisher}</dd>
                     </div>
                   ) : null}
                   {data.metadata?.chapter ? (
                     <div>
-                      <dt className="inline font-medium text-slate-700 dark:text-neutral-300">Chapter: </dt>
+                      <dt className="inline font-medium text-fg-muted">Chapter: </dt>
                       <dd className="inline">{data.metadata.chapter}</dd>
                     </div>
                   ) : null}
                   {data.metadata?.pageRange ? (
                     <div>
-                      <dt className="inline font-medium text-slate-700 dark:text-neutral-300">Pages: </dt>
+                      <dt className="inline font-medium text-fg-muted">Pages: </dt>
                       <dd className="inline">{data.metadata.pageRange}</dd>
                     </div>
                   ) : null}
@@ -225,12 +225,12 @@ export default function CourseModuleTextbookResourcePage() {
                     type="button"
                     onClick={() => void onOpen()}
                     aria-label={`Open ${data.metadata?.title || 'textbook'}${data.metadata?.chapter ? `, ${data.metadata.chapter}` : ''} in ${PROVIDER_LABELS[data.provider]}`}
-                    className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500"
+                    className="inline-flex items-center justify-center rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500"
                   >
                     Open in {PROVIDER_LABELS[data.provider]}
                   </button>
                   {!data.metadata?.isbn ? (
-                    <p className="mt-2 text-xs text-slate-500 dark:text-neutral-400">
+                    <p className="mt-2 text-xs text-fg-muted">
                       An ISBN has not been configured yet.
                     </p>
                   ) : null}
@@ -238,14 +238,14 @@ export default function CourseModuleTextbookResourcePage() {
 
                 {canEdit && (
                   <form
-                    className="mt-6 space-y-4 border-t border-slate-200 pt-6 dark:border-neutral-700"
+                    className="mt-6 space-y-4 border-t border-border-default pt-6 dark:border-border-default"
                     onSubmit={onSaveMeta}
                   >
-                    <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+                    <h2 className="text-sm font-semibold text-fg-default">
                       Textbook details
                     </h2>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                      <label className="text-xs font-medium text-slate-600 dark:text-neutral-300">
+                      <label className="text-xs font-medium text-fg-muted">
                         Title
                         <input
                           type="text"
@@ -255,7 +255,7 @@ export default function CourseModuleTextbookResourcePage() {
                           className={fieldClasses}
                         />
                       </label>
-                      <label className="text-xs font-medium text-slate-600 dark:text-neutral-300">
+                      <label className="text-xs font-medium text-fg-muted">
                         ISBN
                         <input
                           type="text"
@@ -265,7 +265,7 @@ export default function CourseModuleTextbookResourcePage() {
                           className={fieldClasses}
                         />
                       </label>
-                      <label className="text-xs font-medium text-slate-600 dark:text-neutral-300">
+                      <label className="text-xs font-medium text-fg-muted">
                         Edition
                         <input
                           type="text"
@@ -275,7 +275,7 @@ export default function CourseModuleTextbookResourcePage() {
                           className={fieldClasses}
                         />
                       </label>
-                      <label className="text-xs font-medium text-slate-600 dark:text-neutral-300">
+                      <label className="text-xs font-medium text-fg-muted">
                         Publisher
                         <input
                           type="text"
@@ -285,7 +285,7 @@ export default function CourseModuleTextbookResourcePage() {
                           className={fieldClasses}
                         />
                       </label>
-                      <label className="text-xs font-medium text-slate-600 dark:text-neutral-300">
+                      <label className="text-xs font-medium text-fg-muted">
                         Chapter
                         <input
                           type="text"
@@ -295,7 +295,7 @@ export default function CourseModuleTextbookResourcePage() {
                           className={fieldClasses}
                         />
                       </label>
-                      <label className="text-xs font-medium text-slate-600 dark:text-neutral-300">
+                      <label className="text-xs font-medium text-fg-muted">
                         Page range
                         <input
                           type="text"
@@ -320,7 +320,7 @@ export default function CourseModuleTextbookResourcePage() {
                       <button
                         type="submit"
                         disabled={saving}
-                        className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-white"
+                        className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-surface-raised"
                       >
                         {saving ? 'Saving…' : 'Save details'}
                       </button>
@@ -330,16 +330,16 @@ export default function CourseModuleTextbookResourcePage() {
 
                 {canEdit && (
                   <form
-                    className="mt-6 space-y-4 border-t border-slate-200 pt-6 dark:border-neutral-700"
+                    className="mt-6 space-y-4 border-t border-border-default pt-6 dark:border-border-default"
                     onSubmit={onSaveIa}
                   >
-                    <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+                    <h2 className="text-sm font-semibold text-fg-default">
                       Inclusive Access
                     </h2>
-                    <p className="text-xs text-slate-500 dark:text-neutral-400">
+                    <p className="text-xs text-fg-muted">
                       When enabled, students see an opt-out banner linking to the bookstore opt-out form.
                     </p>
-                    <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-neutral-300">
+                    <label className="flex items-center gap-2 text-sm text-fg-muted">
                       <input
                         type="checkbox"
                         checked={iaEnabled}
@@ -349,7 +349,7 @@ export default function CourseModuleTextbookResourcePage() {
                       Inclusive Access enabled for this course
                     </label>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                      <label className="text-xs font-medium text-slate-600 dark:text-neutral-300">
+                      <label className="text-xs font-medium text-fg-muted">
                         Title
                         <input
                           type="text"
@@ -359,7 +359,7 @@ export default function CourseModuleTextbookResourcePage() {
                           className={fieldClasses}
                         />
                       </label>
-                      <label className="text-xs font-medium text-slate-600 dark:text-neutral-300">
+                      <label className="text-xs font-medium text-fg-muted">
                         ISBN
                         <input
                           type="text"
@@ -369,7 +369,7 @@ export default function CourseModuleTextbookResourcePage() {
                           className={fieldClasses}
                         />
                       </label>
-                      <label className="text-xs font-medium text-slate-600 dark:text-neutral-300">
+                      <label className="text-xs font-medium text-fg-muted">
                         Opt-out URL
                         <input
                           type="url"
@@ -380,7 +380,7 @@ export default function CourseModuleTextbookResourcePage() {
                           className={fieldClasses}
                         />
                       </label>
-                      <label className="text-xs font-medium text-slate-600 dark:text-neutral-300">
+                      <label className="text-xs font-medium text-fg-muted">
                         Provider
                         <select
                           value={iaProvider}
@@ -402,7 +402,7 @@ export default function CourseModuleTextbookResourcePage() {
                       <button
                         type="submit"
                         disabled={iaSaving}
-                        className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-white"
+                        className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-surface-raised"
                       >
                         {iaSaving ? 'Saving…' : 'Save Inclusive Access'}
                       </button>

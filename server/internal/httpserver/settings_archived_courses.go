@@ -25,11 +25,6 @@ type archivedCoursesResponse struct {
 // handleGetArchivedCourses is GET /api/v1/settings/archived-courses.
 func (d Deps) handleGetArchivedCourses() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		viewer, ok := d.adminRbacUser(w, r)
 		if !ok {
 			return
@@ -54,11 +49,6 @@ func (d Deps) handleGetArchivedCourses() http.HandlerFunc {
 // handleRestoreArchivedCourse is POST /api/v1/settings/archived-courses/{course_code}/restore.
 func (d Deps) handleRestoreArchivedCourse() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		viewer, ok := d.adminRbacUser(w, r)
 		if !ok {
 			return
@@ -93,11 +83,6 @@ func (d Deps) handleRestoreArchivedCourse() http.HandlerFunc {
 // handleDeleteArchivedCourse is DELETE /api/v1/settings/archived-courses/{course_code}.
 func (d Deps) handleDeleteArchivedCourse() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodDelete {
-			w.Header().Set("Allow", http.MethodDelete)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		viewer, ok := d.adminRbacUser(w, r)
 		if !ok {
 			return

@@ -47,14 +47,14 @@ export function CourseCatalogPinButton({
           ? [
               'backdrop-blur-sm focus-visible:ring-2 focus-visible:ring-white/80',
               pinned
-                ? 'bg-white/95 text-indigo-600 shadow-sm ring-1 ring-white/60 dark:bg-neutral-900/95 dark:text-indigo-300 dark:ring-white/10'
+                ? 'bg-white/95 text-accent-fg shadow-sm ring-1 ring-white/60/95 dark:text-indigo-300 dark:ring-white/10'
                 : 'bg-black/35 text-white/90 hover:bg-black/50 hover:text-white dark:bg-black/45 dark:hover:bg-black/60',
             ].join(' ')
           : [
               'focus-visible:ring-2 focus-visible:ring-indigo-400/40',
               pinned
-                ? 'bg-indigo-50 text-indigo-600 ring-1 ring-indigo-200/80 dark:bg-indigo-950/50 dark:text-indigo-300 dark:ring-indigo-500/30'
-                : 'text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-200',
+                ? 'bg-indigo-50 text-accent-fg ring-1 ring-indigo-200/80 dark:bg-indigo-950/50 dark:text-indigo-300 dark:ring-indigo-500/30'
+                : 'text-fg-subtle hover:bg-surface-sunken hover:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-fg-default',
             ].join(' '),
         className,
       ]

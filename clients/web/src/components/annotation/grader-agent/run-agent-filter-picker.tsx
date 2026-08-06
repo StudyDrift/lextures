@@ -152,26 +152,20 @@ export function RunAgentFilterPicker({
 
   return (
     <fieldset className="mt-3">
-      <legend id={targetGroupId} className="mb-2 text-xs font-medium text-slate-500 dark:text-neutral-400">
+      <legend id={targetGroupId} className="mb-2 text-xs font-medium text-fg-muted">
         {t('gradingAgent.run.filter.label')}
       </legend>
       <div
         role="radiogroup"
         aria-labelledby={targetGroupId}
-        className="overflow-hidden rounded-xl bg-slate-50 ring-1 ring-black/5 dark:bg-neutral-800/60 dark:ring-white/10"
+        className="overflow-hidden rounded-xl bg-surface-base ring-1 ring-black/5/60 dark:ring-white/10"
       >
         {targets.map((target, index) => {
           const selected = filterState.target === target
           return (
             <label
               key={target}
-              className={`flex min-h-10 cursor-pointer items-center gap-3 px-3 py-2.5 text-sm transition-colors ${
-                index > 0 ? 'border-t border-slate-200/80 dark:border-neutral-700/80' : ''
-              } ${
-                selected
-                  ? 'bg-white text-indigo-900 dark:bg-neutral-900 dark:text-indigo-100'
-                  : 'text-slate-700 hover:bg-white/70 dark:text-neutral-300 dark:hover:bg-neutral-900/50'
-              }`}
+              className={`flex min-h-10 cursor-pointer items-center gap-3 px-3 py-2.5 text-sm transition-colors ${ index > 0 ? 'border-t border-slate-200/80/80' : '' } ${ selected ? 'bg-surface-raised text-indigo-900 dark:bg-surface-raised dark:text-indigo-100' : 'text-fg-muted hover:bg-white/70 dark:text-fg-muted dark:hover:bg-neutral-900/50' }`}
             >
               <input
                 type="radio"
@@ -192,12 +186,12 @@ export function RunAgentFilterPicker({
         })}
       </div>
       {filterState.target === 'section' ? (
-        <label className="mt-2 block text-sm text-slate-700 dark:text-neutral-200">
-          <span className="mb-1 block text-xs font-medium text-slate-500 dark:text-neutral-400">
+        <label className="mt-2 block text-sm text-fg-default">
+          <span className="mb-1 block text-xs font-medium text-fg-muted">
             {t('gradingAgent.run.filter.sectionLabel')}
           </span>
           <select
-            className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+            className="w-full rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised"
             value={filterState.sectionId ?? ''}
             onChange={(e) =>
               setFilterState((prev) => ({
@@ -216,12 +210,12 @@ export function RunAgentFilterPicker({
         </label>
       ) : null}
       {filterState.target === 'group' ? (
-        <label className="mt-2 block text-sm text-slate-700 dark:text-neutral-200">
-          <span className="mb-1 block text-xs font-medium text-slate-500 dark:text-neutral-400">
+        <label className="mt-2 block text-sm text-fg-default">
+          <span className="mb-1 block text-xs font-medium text-fg-muted">
             {t('gradingAgent.run.filter.groupLabel')}
           </span>
           <select
-            className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+            className="w-full rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised"
             value={filterState.groupId ?? ''}
             onChange={(e) =>
               setFilterState((prev) => ({
@@ -240,9 +234,9 @@ export function RunAgentFilterPicker({
         </label>
       ) : null}
       {filterState.target === 'selected' ? (
-        <div className="mt-2 max-h-36 overflow-y-auto rounded-xl bg-slate-50 p-2 ring-1 ring-black/5 dark:bg-neutral-800/60 dark:ring-white/10">
+        <div className="mt-2 max-h-36 overflow-y-auto rounded-xl bg-surface-base p-2 ring-1 ring-black/5/60 dark:ring-white/10">
           {gradableSubmissions.length === 0 ? (
-            <p className="text-xs text-slate-500 dark:text-neutral-400">{t('gradingAgent.run.filter.noSubmissions')}</p>
+            <p className="text-xs text-fg-muted">{t('gradingAgent.run.filter.noSubmissions')}</p>
           ) : (
             gradableSubmissions.map((submission) => {
               const id = submission.id as string
@@ -250,7 +244,7 @@ export function RunAgentFilterPicker({
               return (
                 <label
                   key={id}
-                  className="flex min-h-9 cursor-pointer items-center gap-2 px-1 text-sm text-slate-700 dark:text-neutral-200"
+                  className="flex min-h-9 cursor-pointer items-center gap-2 px-1 text-sm text-fg-default"
                 >
                   <input
                     type="checkbox"
@@ -274,7 +268,7 @@ export function RunAgentFilterPicker({
       ) : null}
       {targetSummary ? (
         <p
-          className="mt-2 text-xs text-slate-600 dark:text-neutral-400"
+          className="mt-2 text-xs text-fg-muted"
           aria-live="polite"
           aria-busy={targetLoading}
         >

@@ -20,10 +20,10 @@ function ChecklistSkeleton() {
   return (
     <div className="space-y-4" aria-busy="true" aria-label="Loading checklist">
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="space-y-2 rounded-lg border border-slate-200 p-4 dark:border-neutral-700">
+        <div key={i} className="space-y-2 rounded-lg border border-border-default p-4 dark:border-border-default">
           <div className="h-5 w-1/3 motion-safe:animate-pulse rounded bg-slate-200 dark:bg-neutral-700" />
-          <div className="h-4 w-full motion-safe:animate-pulse rounded bg-slate-100 dark:bg-neutral-800" />
-          <div className="h-4 w-5/6 motion-safe:animate-pulse rounded bg-slate-100 dark:bg-neutral-800" />
+          <div className="h-4 w-full motion-safe:animate-pulse rounded bg-surface-sunken" />
+          <div className="h-4 w-5/6 motion-safe:animate-pulse rounded bg-surface-sunken" />
         </div>
       ))}
     </div>
@@ -147,7 +147,7 @@ export default function CourseChecklistPage() {
   if (page.loadState === 'forbidden') {
     return (
       <LmsPage title={courseChecklistI18n.pageTitle}>
-        <p className="text-sm text-slate-600 dark:text-neutral-400">{courseChecklistI18n.noAccess}</p>
+        <p className="text-sm text-fg-muted">{courseChecklistI18n.noAccess}</p>
       </LmsPage>
     )
   }
@@ -202,7 +202,7 @@ export default function CourseChecklistPage() {
           />
 
           {page.catalogEmpty ? (
-            <p className="text-sm text-slate-600 dark:text-neutral-400">{courseChecklistI18n.catalogEmpty}</p>
+            <p className="text-sm text-fg-muted">{courseChecklistI18n.catalogEmpty}</p>
           ) : null}
 
           {page.allDone ? (
@@ -232,7 +232,7 @@ export default function CourseChecklistPage() {
             <div className="mb-4 flex justify-end">
               <button
                 type="button"
-                className="inline-flex min-h-11 items-center text-sm font-semibold text-slate-700 underline-offset-2 hover:underline dark:text-neutral-300"
+                className="inline-flex min-h-11 items-center text-sm font-semibold text-fg-muted underline-offset-2 hover:underline dark:text-fg-muted"
                 onClick={() => page.setShowCompleted((v) => !v)}
                 aria-pressed={page.showCompleted}
               >
@@ -244,7 +244,7 @@ export default function CourseChecklistPage() {
           ) : null}
 
           {assistError ? (
-            <p className="mb-4 text-sm text-red-600 dark:text-red-400" role="alert">
+            <p className="mb-4 text-sm text-danger-fg" role="alert">
               {assistError}
             </p>
           ) : null}

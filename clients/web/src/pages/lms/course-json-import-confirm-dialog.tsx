@@ -44,11 +44,11 @@ export function CourseJsonImportConfirmDialog({
         fileName && stats ? (
           <div className="space-y-3">
             <p>
-              Import <span className="font-medium text-slate-800 dark:text-neutral-100">{fileName}</span>
+              Import <span className="font-medium text-fg-default">{fileName}</span>
               {stats.title ? (
                 <>
                   {' '}
-                  from <span className="font-medium text-slate-800 dark:text-neutral-100">{stats.title}</span>
+                  from <span className="font-medium text-fg-default">{stats.title}</span>
                 </>
               ) : null}
               {stats.sourceCourseCode ? (
@@ -60,15 +60,15 @@ export function CourseJsonImportConfirmDialog({
                 </>
               ) : null}{' '}
               into this course using{' '}
-              <span className="font-medium text-slate-800 dark:text-neutral-100">
+              <span className="font-medium text-fg-default">
                 {importModeLabel(importMode)}
               </span>
               .
             </p>
-            <p className="text-slate-500 dark:text-neutral-400">{importModeSummary(importMode)}</p>
+            <p className="text-fg-muted">{importModeSummary(importMode)}</p>
             {pendingStatLines.length > 0 ? (
               <div>
-                <p id={statsListId} className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                <p id={statsListId} className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
                   In this file
                 </p>
                 <ul
@@ -78,10 +78,10 @@ export function CourseJsonImportConfirmDialog({
                   {pendingStatLines.map((line) => (
                     <li
                       key={line.key}
-                      className="flex items-baseline justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 dark:border-neutral-600 dark:bg-neutral-800/60"
+                      className="flex items-baseline justify-between gap-2 rounded-lg border border-border-default bg-surface-base px-2.5 py-1.5 dark:border-border-default/60"
                     >
-                      <span className="text-xs text-slate-600 dark:text-neutral-300">{line.label}</span>
-                      <span className="text-sm font-semibold tabular-nums text-slate-900 dark:text-neutral-100">
+                      <span className="text-xs text-fg-muted">{line.label}</span>
+                      <span className="text-sm font-semibold tabular-nums text-fg-default">
                         {line.count}
                       </span>
                     </li>
@@ -89,13 +89,13 @@ export function CourseJsonImportConfirmDialog({
                 </ul>
               </div>
             ) : (
-              <p className="text-slate-500 dark:text-neutral-400">
+              <p className="text-fg-muted">
                 This file has no modules, bodies, syllabus sections, grading groups, or enrollments
                 counted for preview. You can still import if the server accepts the format.
               </p>
             )}
             {stats.hasCourseSettings ? (
-              <p className="text-xs text-slate-500 dark:text-neutral-500">
+              <p className="text-xs text-fg-subtle">
                 Course settings (title, schedule, feature flags, appearance) are included and will
                 {importMode === 'mergeAdd' ? ' not be applied in merge mode.' : ' be applied from the file.'}
               </p>

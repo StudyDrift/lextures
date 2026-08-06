@@ -46,11 +46,6 @@ type canvasCourseListItem struct {
 // Proxies the Canvas course list for the authenticated user (token is not stored).
 func (d Deps) handleCanvasListCourses() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return

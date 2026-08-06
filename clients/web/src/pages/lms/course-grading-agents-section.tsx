@@ -75,7 +75,7 @@ function statusClass(status: CourseGradingAgentSummary['status']): string {
     return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200'
   }
   if (status === 'archived') {
-    return 'bg-slate-100 text-slate-600 dark:bg-neutral-800 dark:text-neutral-300'
+    return 'bg-surface-sunken text-fg-muted dark:bg-surface-overlay dark:text-fg-muted'
   }
   return 'bg-amber-100 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200'
 }
@@ -379,7 +379,7 @@ export function CourseGradingAgentsSection({
 
   if (loading) {
     return (
-      <p className="flex items-center gap-2 text-sm text-slate-600 dark:text-neutral-300">
+      <p className="flex items-center gap-2 text-sm text-fg-muted">
         <Loader2 className="h-4 w-4 motion-safe:animate-spin" aria-hidden />
         {t('gradingAgent.settings.loading')}
       </p>
@@ -388,7 +388,7 @@ export function CourseGradingAgentsSection({
 
   return (
     <div className="w-full space-y-6">
-      <p className="text-sm text-slate-600 dark:text-neutral-300">{t('gradingAgent.settings.description')}</p>
+      <p className="text-sm text-fg-muted">{t('gradingAgent.settings.description')}</p>
       {loadError ? (
         <p className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-200">
           {loadError}
@@ -396,17 +396,17 @@ export function CourseGradingAgentsSection({
       ) : null}
 
       <section className="space-y-3">
-        <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+        <h3 className="text-sm font-semibold text-fg-default">
           {t('gradingAgent.settings.templatesTitle')}
         </h3>
         {templates.length === 0 ? (
-          <p className="text-sm text-slate-500 dark:text-neutral-400">{t('gradingAgent.settings.templatesEmpty')}</p>
+          <p className="text-sm text-fg-muted">{t('gradingAgent.settings.templatesEmpty')}</p>
         ) : (
-          <div className="w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/5 dark:border-neutral-700 dark:bg-neutral-900/40">
+          <div className="w-full overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-sm shadow-slate-900/5 dark:border-border-default/40">
             <table className="w-full table-auto text-start text-sm">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50/80 dark:border-neutral-700 dark:bg-neutral-800/50">
-                  <th className="w-px whitespace-nowrap px-4 py-3 text-start font-semibold text-slate-900 dark:text-neutral-100">
+                <tr className="border-b border-border-default bg-slate-50/80 dark:border-border-default/50">
+                  <th className="w-px whitespace-nowrap px-4 py-3 text-start font-semibold text-fg-default">
                     <button
                       type="button"
                       className="rounded px-1 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
@@ -416,7 +416,7 @@ export function CourseGradingAgentsSection({
                       {t('gradingAgent.settings.table.template')}
                     </button>
                   </th>
-                  <th className="w-52 px-4 py-3 text-start font-semibold text-slate-900 dark:text-neutral-100">
+                  <th className="w-52 px-4 py-3 text-start font-semibold text-fg-default">
                     <button
                       type="button"
                       className="rounded px-1 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
@@ -426,7 +426,7 @@ export function CourseGradingAgentsSection({
                       {t('gradingAgent.settings.table.updated')}
                     </button>
                   </th>
-                  <th className="w-12 px-4 py-3 text-end font-semibold text-slate-900 dark:text-neutral-100">
+                  <th className="w-12 px-4 py-3 text-end font-semibold text-fg-default">
                     <span className="sr-only">{t('gradingAgent.settings.table.actions')}</span>
                   </th>
                 </tr>
@@ -435,18 +435,18 @@ export function CourseGradingAgentsSection({
                 {sortedTemplates.map((template) => (
                   <tr
                     key={template.id}
-                    className="border-b border-slate-100 last:border-0 dark:border-neutral-800"
+                    className="border-b border-border-subtle last:border-0 dark:border-border-subtle"
                   >
                     <td className="w-px whitespace-nowrap px-4 py-3 text-start">
                       <button
                         type="button"
                         onClick={() => setCreateFromTemplate(template)}
-                        className="text-start font-medium text-indigo-700 hover:underline dark:text-indigo-300"
+                        className="text-start font-medium text-accent-fg hover:underline dark:text-indigo-300"
                       >
                         {template.name}
                       </button>
                     </td>
-                    <td className="px-4 py-3 text-start text-slate-600 dark:text-neutral-300">
+                    <td className="px-4 py-3 text-start text-fg-muted">
                       {formatAbsolute(template.updatedAt)}
                     </td>
                     <td className="px-4 py-3 text-end">
@@ -454,7 +454,7 @@ export function CourseGradingAgentsSection({
                         <button
                           type="button"
                           onClick={() => setDeleteTemplateTarget(template)}
-                          className="inline-flex rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-700 dark:hover:bg-rose-950/40 dark:hover:text-rose-300"
+                          className="inline-flex rounded-lg p-1.5 text-fg-subtle hover:bg-rose-50 hover:text-rose-700 dark:hover:bg-rose-950/40 dark:hover:text-rose-300"
                           aria-label={t('gradingAgent.settings.deleteTemplate.buttonAria', { name: template.name })}
                         >
                           <Trash2 className="h-4 w-4" aria-hidden />
@@ -470,16 +470,16 @@ export function CourseGradingAgentsSection({
       </section>
 
       <section className="space-y-3">
-        <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+        <h3 className="text-sm font-semibold text-fg-default">
           {t('gradingAgent.settings.agentsTitle')}
         </h3>
         {agents.length === 0 ? (
-          <p className="text-sm text-slate-500 dark:text-neutral-400">{t('gradingAgent.settings.empty')}</p>
+          <p className="text-sm text-fg-muted">{t('gradingAgent.settings.empty')}</p>
         ) : (
           <div className="space-y-3">
             <div className="relative max-w-md">
               <Search
-                className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-neutral-500"
+                className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-subtle"
                 aria-hidden
               />
               <input
@@ -488,19 +488,19 @@ export function CourseGradingAgentsSection({
                 onChange={(e) => setAgentFilterQuery(e.target.value)}
                 placeholder={t('gradingAgent.settings.table.filterPlaceholder')}
                 aria-label={t('gradingAgent.settings.table.filterPlaceholder')}
-                className="w-full rounded-xl border border-slate-200 bg-white py-2 ps-10 pe-3 text-sm text-slate-900 shadow-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-500/15 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500/50"
+                className="w-full rounded-xl border border-border-default bg-surface-raised py-2 ps-10 pe-3 text-sm text-fg-default shadow-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-500/15 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:focus:border-indigo-500/50"
               />
             </div>
             {filteredSortedAgents.length === 0 ? (
-              <p className="text-sm text-slate-500 dark:text-neutral-400">
+              <p className="text-sm text-fg-muted">
                 {t('gradingAgent.settings.table.noMatch')}
               </p>
             ) : (
-          <div className="w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/5 dark:border-neutral-700 dark:bg-neutral-900/40">
+          <div className="w-full overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-sm shadow-slate-900/5 dark:border-border-default/40">
             <table className="w-full table-auto text-start text-sm">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50/80 dark:border-neutral-700 dark:bg-neutral-800/50">
-                  <th className="w-px whitespace-nowrap px-4 py-3 text-start font-semibold text-slate-900 dark:text-neutral-100">
+                <tr className="border-b border-border-default bg-slate-50/80 dark:border-border-default/50">
+                  <th className="w-px whitespace-nowrap px-4 py-3 text-start font-semibold text-fg-default">
                     <button
                       type="button"
                       className="rounded px-1 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
@@ -510,13 +510,13 @@ export function CourseGradingAgentsSection({
                       {t('gradingAgent.settings.table.activity')}
                     </button>
                   </th>
-                  <th className="w-28 px-4 py-3 text-start font-semibold text-slate-900 dark:text-neutral-100">
+                  <th className="w-28 px-4 py-3 text-start font-semibold text-fg-default">
                     {t('gradingAgent.settings.table.status')}
                   </th>
-                  <th className="w-36 px-4 py-3 text-start font-semibold text-slate-900 dark:text-neutral-100">
+                  <th className="w-36 px-4 py-3 text-start font-semibold text-fg-default">
                     {t('gradingAgent.settings.table.autoGrade')}
                   </th>
-                  <th className="w-52 px-4 py-3 text-start font-semibold text-slate-900 dark:text-neutral-100">
+                  <th className="w-52 px-4 py-3 text-start font-semibold text-fg-default">
                     <button
                       type="button"
                       className="rounded px-1 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
@@ -526,7 +526,7 @@ export function CourseGradingAgentsSection({
                       {t('gradingAgent.settings.table.updated')}
                     </button>
                   </th>
-                  <th className="w-12 px-4 py-3 text-end font-semibold text-slate-900 dark:text-neutral-100">
+                  <th className="w-12 px-4 py-3 text-end font-semibold text-fg-default">
                     <span className="sr-only">{t('gradingAgent.settings.table.actions')}</span>
                   </th>
                 </tr>
@@ -537,7 +537,7 @@ export function CourseGradingAgentsSection({
                   return (
                     <tr
                       key={agent.id}
-                      className="border-b border-slate-100 last:border-0 dark:border-neutral-800"
+                      className="border-b border-border-subtle last:border-0 dark:border-border-subtle"
                     >
                       <td className="w-px whitespace-nowrap px-4 py-3 text-start">
                         <div className="space-y-1">
@@ -545,7 +545,7 @@ export function CourseGradingAgentsSection({
                             type="button"
                             disabled={opening}
                             onClick={() => void openAgentEditor(agent)}
-                            className="text-start font-medium text-indigo-700 hover:underline disabled:opacity-60 dark:text-indigo-300"
+                            className="text-start font-medium text-accent-fg hover:underline disabled:opacity-60 dark:text-indigo-300"
                           >
                             {agent.assignmentTitle}
                             {agent.itemKind === 'quiz' ? (
@@ -554,7 +554,7 @@ export function CourseGradingAgentsSection({
                               </span>
                             ) : null}
                             {agent.assignmentArchived ? (
-                              <span className="ms-2 text-xs font-normal text-slate-500 dark:text-neutral-400">
+                              <span className="ms-2 text-xs font-normal text-fg-muted">
                                 {t('gradingAgent.settings.archivedAssignment')}
                               </span>
                             ) : null}
@@ -564,7 +564,7 @@ export function CourseGradingAgentsSection({
                               type="button"
                               disabled={opening}
                               onClick={() => void openAgentEditor(agent)}
-                              className="block text-xs font-semibold text-amber-700 hover:underline disabled:opacity-60 dark:text-amber-300"
+                              className="block text-xs font-semibold text-warning-fg hover:underline disabled:opacity-60 dark:text-amber-300"
                               aria-live="polite"
                             >
                               {t('gradingAgent.review.inbox.reviewLink', { count: agent.reviewCount ?? 0 })}
@@ -579,19 +579,19 @@ export function CourseGradingAgentsSection({
                           {statusLabel(agent.status, t)}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-start text-slate-600 dark:text-neutral-300">
+                      <td className="px-4 py-3 text-start text-fg-muted">
                         {agent.autoGradeNew
                           ? t('gradingAgent.settings.autoGradeOn')
                           : t('gradingAgent.settings.autoGradeOff')}
                       </td>
-                      <td className="px-4 py-3 text-start text-slate-600 dark:text-neutral-300">
+                      <td className="px-4 py-3 text-start text-fg-muted">
                         {formatAbsolute(agent.updatedAt)}
                       </td>
                       <td className="px-4 py-3 text-end">
                         <button
                           type="button"
                           onClick={() => setDeleteAgentTarget(agent)}
-                          className="inline-flex rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-700 dark:hover:bg-rose-950/40 dark:hover:text-rose-300"
+                          className="inline-flex rounded-lg p-1.5 text-fg-subtle hover:bg-rose-50 hover:text-rose-700 dark:hover:bg-rose-950/40 dark:hover:text-rose-300"
                           aria-label={t('gradingAgent.settings.deleteAgent.buttonAria', {
                             name: agent.assignmentTitle,
                           })}
@@ -635,7 +635,7 @@ export function CourseGradingAgentsSection({
           deleteAgentTarget ? (
             <>
               {t('gradingAgent.settings.deleteAgent.description')}
-              <p className="mt-2 font-medium text-slate-900 dark:text-neutral-100">
+              <p className="mt-2 font-medium text-fg-default">
                 {deleteAgentTarget.assignmentTitle}
               </p>
             </>
@@ -658,7 +658,7 @@ export function CourseGradingAgentsSection({
           deleteTemplateTarget ? (
             <>
               {t('gradingAgent.settings.deleteTemplate.description')}
-              <p className="mt-2 font-medium text-slate-900 dark:text-neutral-100">
+              <p className="mt-2 font-medium text-fg-default">
                 {deleteTemplateTarget.name}
               </p>
             </>

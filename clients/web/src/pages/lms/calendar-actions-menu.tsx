@@ -67,7 +67,7 @@ export function CalendarActionsMenu(props: Props) {
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-neutral-600 dark:hover:bg-neutral-800 sm:w-auto"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:border-border-strong hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:border-border-default dark:hover:bg-surface-overlay sm:w-auto"
       >
         <span>Actions</span>
         <ChevronDown
@@ -81,19 +81,19 @@ export function CalendarActionsMenu(props: Props) {
           id={menuId}
           role="menu"
           aria-label="Calendar actions"
-          className="absolute start-0 end-0 z-50 mt-1 min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10 sm:left-auto sm:end-0 sm:min-w-[16rem] dark:border-neutral-600 dark:bg-neutral-800 dark:shadow-black/40"
+          className="absolute start-0 end-0 z-50 mt-1 min-w-0 overflow-hidden rounded-xl border border-border-default bg-surface-raised py-1 shadow-lg shadow-slate-900/10 sm:left-auto sm:end-0 sm:min-w-[16rem] dark:border-border-default dark:bg-surface-overlay dark:shadow-black/40"
         >
           <button
             type="button"
             role="menuitem"
             disabled={downloading}
             onClick={() => void handleDownloadFeed()}
-            className="flex w-full items-start gap-2.5 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-neutral-700"
+            className="flex w-full items-start gap-2.5 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-neutral-700"
           >
-            <Download className="mt-0.5 h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
+            <Download className="mt-0.5 h-4 w-4 shrink-0 text-fg-muted" aria-hidden />
             <span className="flex min-w-0 flex-col gap-0.5">
-              <span className="font-semibold text-slate-950 dark:text-neutral-100">{downloadLabel}</span>
-              <span className="text-xs text-slate-500 dark:text-neutral-400">{downloadHint}</span>
+              <span className="font-semibold text-slate-950 dark:text-fg-default">{downloadLabel}</span>
+              <span className="text-xs text-fg-muted">{downloadHint}</span>
             </span>
           </button>
         </div>

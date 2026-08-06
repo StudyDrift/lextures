@@ -113,12 +113,12 @@ export function DiagramHotspotEditor({
       ) : null}
 
       <label className="block space-y-1 text-xs">
-        <span className="font-medium text-slate-700 dark:text-neutral-300">
+        <span className="font-medium text-fg-muted">
           {t('contentTools.tools.diagram_hotspot.editor.prompt')}
         </span>
         <textarea
           id={`${idPrefix}-${baseId}-prompt`}
-          className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+          className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
           rows={2}
           disabled={disabled}
           value={typeof value.prompt === 'string' ? value.prompt : ''}
@@ -127,11 +127,11 @@ export function DiagramHotspotEditor({
       </label>
 
       <label className="block space-y-1 text-xs">
-        <span className="font-medium text-slate-700 dark:text-neutral-300">
+        <span className="font-medium text-fg-muted">
           {t('contentTools.tools.diagram_hotspot.editor.mode')}
         </span>
         <select
-          className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+          className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
           disabled={disabled}
           value={mode}
           onChange={(e) => patch({ mode: e.target.value })}
@@ -141,14 +141,14 @@ export function DiagramHotspotEditor({
         </select>
       </label>
 
-      <fieldset className="space-y-2 rounded border border-slate-200 p-3 dark:border-neutral-700">
+      <fieldset className="space-y-2 rounded border border-border-default p-3 dark:border-border-default">
         <legend className="px-1 text-xs font-medium">
           {t('contentTools.tools.diagram_hotspot.editor.image')}
         </legend>
         <label className="block space-y-1 text-xs">
           <span>{t('contentTools.tools.diagram_hotspot.editor.imageUrl')}</span>
           <input
-            className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+            className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
             disabled={disabled}
             value={image.url}
             onChange={(e) => patch({ image: { ...image, url: e.target.value } })}
@@ -158,7 +158,7 @@ export function DiagramHotspotEditor({
           <span>{t('contentTools.tools.diagram_hotspot.editor.imageAlt')}</span>
           <input
             data-testid="diagram-editor-alt"
-            className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+            className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
             disabled={disabled}
             value={image.alt}
             onChange={(e) => patch({ image: { ...image, alt: e.target.value } })}
@@ -170,7 +170,7 @@ export function DiagramHotspotEditor({
             <input
               type="number"
               min={1}
-              className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+              className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
               disabled={disabled}
               value={image.naturalWidth}
               onChange={(e) =>
@@ -183,7 +183,7 @@ export function DiagramHotspotEditor({
             <input
               type="number"
               min={1}
-              className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+              className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
               disabled={disabled}
               value={image.naturalHeight}
               onChange={(e) =>
@@ -196,7 +196,7 @@ export function DiagramHotspotEditor({
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <h3 className="text-xs font-medium text-slate-700 dark:text-neutral-300">
+          <h3 className="text-xs font-medium text-fg-muted">
             {t('contentTools.tools.diagram_hotspot.editor.regions')}
           </h3>
           <button
@@ -256,7 +256,7 @@ export function DiagramHotspotEditor({
           {labels.map((label, idx) => (
             <div key={label.id} className="grid gap-2 sm:grid-cols-3">
               <input
-                className="rounded border px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                className="rounded border px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
                 disabled={disabled}
                 placeholder={t('contentTools.tools.diagram_hotspot.editor.labelText')}
                 value={label.text}
@@ -267,7 +267,7 @@ export function DiagramHotspotEditor({
                 }}
               />
               <select
-                className="rounded border px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                className="rounded border px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
                 disabled={disabled}
                 value={correctByLabel[label.id] ?? ''}
                 onChange={(e) =>
@@ -312,7 +312,7 @@ export function DiagramHotspotEditor({
           {prompts.map((p, idx) => (
             <div key={p.id} className="grid gap-2 sm:grid-cols-3">
               <input
-                className="rounded border px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                className="rounded border px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
                 disabled={disabled}
                 value={p.text}
                 onChange={(e) => {
@@ -322,7 +322,7 @@ export function DiagramHotspotEditor({
                 }}
               />
               <select
-                className="rounded border px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                className="rounded border px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
                 disabled={disabled}
                 value={correctByPrompt[p.id] ?? ''}
                 onChange={(e) =>
@@ -355,7 +355,7 @@ export function DiagramHotspotEditor({
         <label className="block space-y-1 text-xs">
           <span>{t('contentTools.tools.diagram_hotspot.editor.attempts')}</span>
           <select
-            className="w-full rounded border px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+            className="w-full rounded border px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
             disabled={disabled}
             value={value.attempts === 'unlimited' ? 'unlimited' : String(value.attempts ?? 3)}
             onChange={(e) =>
@@ -375,7 +375,7 @@ export function DiagramHotspotEditor({
         <label className="block space-y-1 text-xs">
           <span>{t('contentTools.tools.diagram_hotspot.editor.outlines')}</span>
           <select
-            className="w-full rounded border px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+            className="w-full rounded border px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
             disabled={disabled}
             value={
               typeof value.showRegionOutlines === 'string' ? value.showRegionOutlines : 'on_focus'

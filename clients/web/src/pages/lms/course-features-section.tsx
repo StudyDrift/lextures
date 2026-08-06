@@ -631,11 +631,11 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
 
   return (
     <section
-      className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-800 dark:bg-neutral-950"
+      className="rounded-2xl border border-border-default bg-surface-raised p-5 shadow-sm shadow-slate-900/5 dark:border-border-subtle dark:bg-surface-base"
       data-focus-anchor="course.features.grid"
     >
-      <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Course tools</h2>
-      <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+      <h2 className="text-sm font-semibold text-fg-default">Course tools</h2>
+      <p className="mt-1 text-sm text-fg-muted">
         Turn tools on or off for everyone in this course. Disabled tools disappear from the course
         menu and cannot be used until you enable them again.
       </p>
@@ -646,13 +646,13 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
           placeholder="Search tools…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-indigo-500"
+          className="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-fg-default placeholder:text-fg-subtle focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:placeholder:text-neutral-500 dark:focus:border-indigo-500"
         />
       </div>
 
       <div className="mt-1 divide-y divide-slate-100 dark:divide-neutral-800">
         {visibleFeatures.length === 0 ? (
-          <p className="py-6 text-center text-sm text-slate-400 dark:text-neutral-500">
+          <p className="py-6 text-center text-sm text-fg-subtle">
             No tools match &ldquo;{query}&rdquo;
           </p>
         ) : (
@@ -670,26 +670,26 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
         )}
       </div>
 
-      <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50/80 p-4 dark:border-neutral-800 dark:bg-neutral-900/50">
-        <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+      <div className="mt-6 rounded-xl border border-border-default bg-slate-50/80 p-4 dark:border-border-subtle/50">
+        <h3 className="text-sm font-semibold text-fg-default">
           Adaptive Content settings
         </h3>
-        <p id="adaptive-content-settings-help" className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+        <p id="adaptive-content-settings-help" className="mt-1 text-xs text-fg-muted">
           Course-wide defaults for which adaptation axes are allowed, cost budget, and holdout
           percent. Unit authoring, preview, and approval live under Settings → Adaptive Content.
         </p>
         {!adaptiveContentEnabled ? (
-          <p className="mt-3 text-sm text-slate-500 dark:text-neutral-400">
+          <p className="mt-3 text-sm text-fg-muted">
             Turn on <span className="font-medium">Adaptive Content</span> to configure.
           </p>
         ) : aceLoading || !aceSettings ? (
-          <p className="mt-3 text-sm text-slate-500 dark:text-neutral-400">Loading settings…</p>
+          <p className="mt-3 text-sm text-fg-muted">Loading settings…</p>
         ) : (
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            <label className="flex flex-col gap-1 text-xs font-medium text-slate-700 dark:text-neutral-300">
+            <label className="flex flex-col gap-1 text-xs font-medium text-fg-muted">
               Default strategy
               <select
-                className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+                className="rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base dark:text-fg-default"
                 value={aceSettings.defaultStrategy}
                 onChange={(e) =>
                   setAceSettings({ ...aceSettings, defaultStrategy: e.target.value })
@@ -701,13 +701,13 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
                 <option value="aggressive">aggressive</option>
               </select>
             </label>
-            <label className="flex flex-col gap-1 text-xs font-medium text-slate-700 dark:text-neutral-300">
+            <label className="flex flex-col gap-1 text-xs font-medium text-fg-muted">
               Holdout percent (0–50)
               <input
                 type="number"
                 min={0}
                 max={50}
-                className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+                className="rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base dark:text-fg-default"
                 value={aceSettings.holdoutPercent}
                 onChange={(e) =>
                   setAceSettings({
@@ -717,12 +717,12 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
                 }
               />
             </label>
-            <label className="flex flex-col gap-1 text-xs font-medium text-slate-700 dark:text-neutral-300">
+            <label className="flex flex-col gap-1 text-xs font-medium text-fg-muted">
               Monthly token budget (0 = unlimited)
               <input
                 type="number"
                 min={0}
-                className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+                className="rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base dark:text-fg-default"
                 value={aceSettings.monthlyTokenBudget}
                 onChange={(e) =>
                   setAceSettings({
@@ -733,7 +733,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
               />
             </label>
             <div className="flex flex-col gap-2 justify-end">
-              <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-neutral-300">
+              <label className="flex items-center gap-2 text-sm text-fg-muted">
                 <input
                   type="checkbox"
                   checked={aceSettings.requireInstructorApproval}
@@ -746,7 +746,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
                 />
                 Require instructor approval
               </label>
-              <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-neutral-300">
+              <label className="flex items-center gap-2 text-sm text-fg-muted">
                 <input
                   type="checkbox"
                   checked={aceSettings.studentOptoutAllowed}
@@ -765,7 +765,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
                 type="button"
                 disabled={aceSaving || saving}
                 onClick={() => void saveAceSettings()}
-                className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
+                className="rounded-lg bg-accent-solid px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
               >
                 {aceSaving ? 'Saving…' : 'Save Adaptive Content settings'}
               </button>
@@ -774,28 +774,28 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
         )}
       </div>
 
-      <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50/80 p-4 dark:border-neutral-800 dark:bg-neutral-900/50">
-        <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+      <div className="mt-6 rounded-xl border border-border-default bg-slate-50/80 p-4 dark:border-border-subtle/50">
+        <h3 className="text-sm font-semibold text-fg-default">
           {t('course.features.contentTools.title')} settings
         </h3>
-        <p id="content-tools-settings-help" className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+        <p id="content-tools-settings-help" className="mt-1 text-xs text-fg-muted">
           {t('course.features.contentTools.allowlistHelp')}
         </p>
         {!contentToolsEnabled ? (
-          <p className="mt-3 text-sm text-slate-500 dark:text-neutral-400">
+          <p className="mt-3 text-sm text-fg-muted">
             Turn on <span className="font-medium">{t('course.features.contentTools.title')}</span> to
             configure.
           </p>
         ) : ctLoading || !ctSettings ? (
-          <p className="mt-3 text-sm text-slate-500 dark:text-neutral-400">Loading settings…</p>
+          <p className="mt-3 text-sm text-fg-muted">Loading settings…</p>
         ) : (
           <div className="mt-3 grid gap-3">
             <fieldset>
-              <legend className="text-xs font-medium text-slate-700 dark:text-neutral-300">
+              <legend className="text-xs font-medium text-fg-muted">
                 {t('course.features.contentTools.allowlistLabel')}
               </legend>
               {ctCatalog.length === 0 ? (
-                <p className="mt-2 text-sm text-slate-500 dark:text-neutral-400">
+                <p className="mt-2 text-sm text-fg-muted">
                   No tools in the catalog yet.
                 </p>
               ) : (
@@ -804,7 +804,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
                     const checked = ctSettings.allowedToolIds.includes(tool.id)
                     return (
                       <li key={tool.id}>
-                        <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-neutral-300">
+                        <label className="flex items-center gap-2 text-sm text-fg-muted">
                           <input
                             type="checkbox"
                             checked={checked}
@@ -816,7 +816,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
                             }}
                           />
                           <span className="font-mono text-xs">{tool.id}</span>
-                          <span className="text-slate-400 dark:text-neutral-500">
+                          <span className="text-fg-subtle">
                             ({tool.category})
                           </span>
                         </label>
@@ -826,7 +826,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
                 </ul>
               )}
             </fieldset>
-            <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-neutral-300">
+            <label className="flex items-center gap-2 text-sm text-fg-muted">
               <input
                 type="checkbox"
                 checked={ctSettings.studentResetAllowed}
@@ -839,13 +839,13 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
               />
               {t('course.features.contentTools.studentResetAllowed')}
             </label>
-            <label className="flex max-w-xs flex-col gap-1 text-xs font-medium text-slate-700 dark:text-neutral-300">
+            <label className="flex max-w-xs flex-col gap-1 text-xs font-medium text-fg-muted">
               {t('course.features.contentTools.maxInstancesPerItem')}
               <input
                 type="number"
                 min={1}
                 max={200}
-                className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+                className="rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base dark:text-fg-default"
                 value={ctSettings.maxInstancesPerItem}
                 onChange={(e) =>
                   setCtSettings({
@@ -856,10 +856,10 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
                 aria-describedby="content-tools-settings-help"
               />
             </label>
-            <label className="flex max-w-xs flex-col gap-1 text-xs font-medium text-slate-700 dark:text-neutral-300">
+            <label className="flex max-w-xs flex-col gap-1 text-xs font-medium text-fg-muted">
               {t('course.features.contentTools.linkIngestionMode')}
               <select
-                className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+                className="rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base dark:text-fg-default"
                 value={ctSettings.linkIngestionMode}
                 onChange={(e) =>
                   setCtSettings({
@@ -877,11 +877,11 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
               </select>
             </label>
             {ctSettings.linkIngestionMode === 'allowlist' ? (
-              <label className="flex max-w-lg flex-col gap-1 text-xs font-medium text-slate-700 dark:text-neutral-300">
+              <label className="flex max-w-lg flex-col gap-1 text-xs font-medium text-fg-muted">
                 {t('course.features.contentTools.linkHostAllowlist')}
                 <input
                   type="text"
-                  className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+                  className="rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base dark:text-fg-default"
                   value={ctSettings.linkHostAllowlist.join(', ')}
                   onChange={(e) =>
                     setCtSettings({
@@ -896,13 +896,13 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
                 />
               </label>
             ) : null}
-            <label className="flex max-w-xs flex-col gap-1 text-xs font-medium text-slate-700 dark:text-neutral-300">
+            <label className="flex max-w-xs flex-col gap-1 text-xs font-medium text-fg-muted">
               {t('course.features.contentTools.dailyAiCallsPerUser')}
               <input
                 type="number"
                 min={1}
                 max={10000}
-                className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+                className="rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base dark:text-fg-default"
                 value={ctSettings.dailyAiCallsPerUser}
                 onChange={(e) =>
                   setCtSettings({
@@ -912,12 +912,12 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
                 }
               />
             </label>
-            <label className="flex max-w-xs flex-col gap-1 text-xs font-medium text-slate-700 dark:text-neutral-300">
+            <label className="flex max-w-xs flex-col gap-1 text-xs font-medium text-fg-muted">
               {t('course.features.contentTools.monthlyAiTokenBudget')}
               <input
                 type="number"
                 min={0}
-                className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+                className="rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base dark:text-fg-default"
                 value={ctSettings.monthlyAiTokenBudget}
                 onChange={(e) =>
                   setCtSettings({
@@ -932,7 +932,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
                 type="button"
                 disabled={ctSaving || saving}
                 onClick={() => void saveCtSettings()}
-                className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
+                className="rounded-lg bg-accent-solid px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
               >
                 {ctSaving
                   ? t('course.features.contentTools.saving')

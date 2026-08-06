@@ -72,7 +72,7 @@ export function WhiteboardToolbar({
           <button
             type="button"
             title={activeTool.label}
-            className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-100 text-indigo-700 transition-colors dark:bg-indigo-950 dark:text-indigo-300"
+            className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-100 text-accent-fg transition-colors dark:bg-indigo-950 dark:text-indigo-300"
           >
             {activeTool.icon}
           </button>
@@ -85,11 +85,7 @@ export function WhiteboardToolbar({
               type="button"
               title={t.label}
               onClick={() => onToolChange(t.id)}
-              className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${
-                tool === t.id
-                  ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300'
-                  : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200'
-              }`}
+              className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${ tool === t.id ? 'bg-indigo-100 text-accent-fg dark:bg-indigo-950 dark:text-indigo-300' : 'text-fg-muted hover:bg-surface-sunken hover:text-fg-muted dark:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-fg-default' }`}
             >
               {t.icon}
             </button>
@@ -103,11 +99,7 @@ export function WhiteboardToolbar({
             type="button"
             title="Eraser"
             onClick={() => onToolChange('eraser')}
-            className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${
-              tool === 'eraser'
-                ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300'
-                : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200'
-            }`}
+            className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${ tool === 'eraser' ? 'bg-indigo-100 text-accent-fg dark:bg-indigo-950 dark:text-indigo-300' : 'text-fg-muted hover:bg-surface-sunken hover:text-fg-muted dark:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-fg-default' }`}
           >
             <Eraser className="h-5 w-5" />
           </button>
@@ -123,14 +115,10 @@ export function WhiteboardToolbar({
                 onEraserSizeChange(s)
                 onToolChange('eraser')
               }}
-              className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${
-                eraserSize === s && tool === 'eraser'
-                  ? 'bg-indigo-100 dark:bg-indigo-950'
-                  : 'hover:bg-slate-100 dark:hover:bg-neutral-800'
-              }`}
+              className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${ eraserSize === s && tool === 'eraser' ? 'bg-indigo-100 dark:bg-indigo-950' : 'hover:bg-surface-sunken dark:hover:bg-surface-overlay' }`}
             >
               <span
-                className="rounded-full border border-slate-400 bg-white dark:border-neutral-500 dark:bg-neutral-800"
+                className="rounded-full border border-slate-400 bg-surface-raised dark:border-neutral-500 dark:bg-surface-overlay"
                 style={{ width: s, height: s }}
               />
             </button>
@@ -138,7 +126,7 @@ export function WhiteboardToolbar({
         </div>
       </WhiteboardPopoverGroup>
 
-      <div className={`${isHorizontal ? 'h-8 w-px' : 'my-1 h-px w-8'} bg-slate-200 dark:bg-neutral-800`} />
+      <div className={`${isHorizontal ? 'h-8 w-px' : 'my-1 h-px w-8'} bg-slate-200 dark:bg-surface-overlay`} />
 
       <WhiteboardPopoverGroup
         trigger={
@@ -161,11 +149,7 @@ export function WhiteboardToolbar({
               type="button"
               title={`Stroke ${w}px`}
               onClick={() => onStrokeWidthChange(w)}
-              className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${
-                strokeWidth === w
-                  ? 'bg-indigo-100 dark:bg-indigo-950'
-                  : 'hover:bg-slate-100 dark:hover:bg-neutral-800'
-              }`}
+              className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${ strokeWidth === w ? 'bg-indigo-100 dark:bg-indigo-950' : 'hover:bg-surface-sunken dark:hover:bg-surface-overlay' }`}
             >
               <span
                 className="rounded-full bg-slate-700 dark:bg-neutral-300"
@@ -176,7 +160,7 @@ export function WhiteboardToolbar({
         </div>
       </WhiteboardPopoverGroup>
 
-      <div className={`${isHorizontal ? 'h-8 w-px' : 'my-1 h-px w-8'} bg-slate-200 dark:bg-neutral-800`} />
+      <div className={`${isHorizontal ? 'h-8 w-px' : 'my-1 h-px w-8'} bg-slate-200 dark:bg-surface-overlay`} />
 
       <WhiteboardPopoverGroup
         trigger={
@@ -195,22 +179,20 @@ export function WhiteboardToolbar({
               type="button"
               title={c}
               onClick={() => onColorChange(c)}
-              className={`h-7 w-7 rounded-full transition-transform ${
-                color === c ? 'ring-2 ring-indigo-500 ring-offset-1 scale-110' : 'hover:scale-110'
-              }`}
+              className={`h-7 w-7 rounded-full transition-transform ${ color === c ? 'ring-2 ring-indigo-500 ring-offset-1 scale-110' : 'hover:scale-110' }`}
               style={{ backgroundColor: c, border: c === '#ffffff' ? '1px solid #e2e8f0' : undefined }}
             />
           ))}
         </div>
       </WhiteboardPopoverGroup>
 
-      <div className={`${isHorizontal ? 'h-8 w-px' : 'my-1 h-px w-8'} bg-slate-200 dark:bg-neutral-800`} />
+      <div className={`${isHorizontal ? 'h-8 w-px' : 'my-1 h-px w-8'} bg-slate-200 dark:bg-surface-overlay`} />
 
       <button
         type="button"
         title="Clear canvas"
         onClick={onClear}
-        className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-rose-500 dark:text-neutral-400 dark:hover:bg-neutral-800"
+        className="flex h-9 w-9 items-center justify-center rounded-lg text-fg-muted hover:bg-surface-sunken hover:text-rose-500 dark:text-fg-muted dark:hover:bg-surface-overlay"
       >
         <Trash2 className="h-5 w-5" />
       </button>
@@ -220,7 +202,7 @@ export function WhiteboardToolbar({
           type="button"
           title="Export PNG"
           onClick={onExportPng}
-          className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-neutral-400 dark:hover:bg-neutral-800"
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-fg-muted hover:bg-surface-sunken hover:text-fg-muted dark:text-fg-muted dark:hover:bg-surface-overlay"
         >
           <Download className="h-5 w-5" />
         </button>
@@ -231,7 +213,7 @@ export function WhiteboardToolbar({
           type="button"
           title="Load whiteboard"
           onClick={onLoad}
-          className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-neutral-400 dark:hover:bg-neutral-800"
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-fg-muted hover:bg-surface-sunken hover:text-fg-muted dark:text-fg-muted dark:hover:bg-surface-overlay"
         >
           <FolderOpen className="h-5 w-5" />
         </button>
@@ -243,7 +225,7 @@ export function WhiteboardToolbar({
           title="Save whiteboard"
           disabled={saving}
           onClick={onSave}
-          className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-indigo-600 disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-800"
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-fg-muted hover:bg-surface-sunken hover:text-accent-fg disabled:opacity-50 dark:text-fg-muted dark:hover:bg-surface-overlay"
         >
           <Save className="h-5 w-5" />
         </button>
@@ -253,14 +235,14 @@ export function WhiteboardToolbar({
 
   if (isHorizontal) {
     return (
-      <div className="flex flex-wrap items-center gap-1 border-b border-slate-200 bg-white px-2 py-1.5 dark:border-neutral-800 dark:bg-neutral-950">
+      <div className="flex flex-wrap items-center gap-1 border-b border-border-default bg-surface-raised px-2 py-1.5 dark:border-border-subtle dark:bg-surface-base">
         {toolButtons}
       </div>
     )
   }
 
   return (
-    <div className="flex w-14 flex-col items-center gap-1 border-r border-slate-200 bg-white py-3 dark:border-neutral-800 dark:bg-neutral-950">
+    <div className="flex w-14 flex-col items-center gap-1 border-r border-border-default bg-surface-raised py-3 dark:border-border-subtle dark:bg-surface-base">
       {toolButtons}
     </div>
   )

@@ -71,12 +71,12 @@ function StepIcon({ status, children }: { status: CheckStep['status']; children:
     )
   if (status === 'checking')
     return (
-      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 dark:bg-neutral-800">
-        <span className="h-4 w-4 motion-safe:animate-spin rounded-full border-2 border-slate-300 border-t-indigo-500" aria-hidden />
+      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-sunken">
+        <span className="h-4 w-4 motion-safe:animate-spin rounded-full border-2 border-border-strong border-t-indigo-500" aria-hidden />
       </span>
     )
   return (
-    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 dark:bg-neutral-800 dark:text-neutral-400">
+    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-sunken text-fg-muted dark:bg-surface-overlay dark:text-fg-muted">
       {children}
     </span>
   )
@@ -180,18 +180,18 @@ function ProctoringPreExamChecklistInner({
       aria-modal="true"
       aria-labelledby={titleId}
     >
-      <div className="w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
+      <div className="w-full max-w-md overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-2xl dark:border-border-default dark:bg-surface-raised">
         {/* Header */}
-        <div className="flex items-center gap-3 border-b border-slate-200 px-5 py-4 dark:border-neutral-700">
-          <ShieldCheck className="h-5 w-5 shrink-0 text-indigo-600 dark:text-indigo-400" aria-hidden />
-          <h2 id={titleId} className="flex-1 text-sm font-semibold text-slate-900 dark:text-neutral-100">
+        <div className="flex items-center gap-3 border-b border-border-default px-5 py-4 dark:border-border-default">
+          <ShieldCheck className="h-5 w-5 shrink-0 text-accent-fg" aria-hidden />
+          <h2 id={titleId} className="flex-1 text-sm font-semibold text-fg-default">
             Proctored Exam — {VENDOR_LABELS[vendor]}
           </h2>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+            className="rounded-lg p-1.5 text-fg-subtle hover:bg-surface-sunken hover:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-fg-default"
           >
             <X className="h-4 w-4" aria-hidden />
           </button>
@@ -199,13 +199,13 @@ function ProctoringPreExamChecklistInner({
 
         {/* Progress */}
         <div className="px-5 pt-4">
-          <p className="text-xs text-slate-500 dark:text-neutral-400">
+          <p className="text-xs text-fg-muted">
             Complete the checks below before starting your exam.
           </p>
           <p
             role="status"
             aria-live="polite"
-            className="mt-1 text-xs font-medium text-slate-700 dark:text-neutral-300"
+            className="mt-1 text-xs font-medium text-fg-muted"
           >
             {completedCount} of {steps.length} checks passed
           </p>
@@ -216,12 +216,12 @@ function ProctoringPreExamChecklistInner({
           {steps.map((step, idx) => (
             <li
               key={step.id}
-              className={`flex gap-3 py-3 ${idx < steps.length - 1 ? 'border-b border-slate-100 dark:border-neutral-800' : ''}`}
+              className={`flex gap-3 py-3 ${idx < steps.length - 1 ? 'border-b border-border-subtle' : ''}`}
             >
               <StepIcon status={step.status}>{step.icon}</StepIcon>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-slate-900 dark:text-neutral-100">{step.label}</p>
-                <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">{step.description}</p>
+                <p className="text-sm font-medium text-fg-default">{step.label}</p>
+                <p className="mt-0.5 text-xs text-fg-muted">{step.description}</p>
               </div>
             </li>
           ))}
@@ -230,7 +230,7 @@ function ProctoringPreExamChecklistInner({
         {/* Footer */}
         <div className="px-5 pb-5 pt-4">
           {!required && anyFail && (
-            <p className="mb-3 text-xs text-amber-700 dark:text-amber-400" role="alert">
+            <p className="mb-3 text-xs text-warning-fg dark:text-amber-400" role="alert">
               Proctoring is optional for this exam. You may proceed without all checks passing, but your
               instructor will be notified that proctoring was unavailable.
             </p>
@@ -241,7 +241,7 @@ function ProctoringPreExamChecklistInner({
             onClick={handleProceed}
             disabled={!canProceed}
             aria-disabled={!canProceed}
-            className="w-full rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+            className="w-full rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
           >
             Begin Proctored Exam
           </button>

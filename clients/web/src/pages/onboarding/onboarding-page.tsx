@@ -101,8 +101,8 @@ export default function OnboardingPage() {
 
   if (loading || featuresLoading) {
     return (
-      <div className="flex min-h-dvh items-center justify-center bg-slate-50 dark:bg-neutral-950">
-        <p className="text-sm text-slate-500 dark:text-neutral-400">{t('onboarding.loading')}</p>
+      <div className="flex min-h-dvh items-center justify-center bg-surface-base">
+        <p className="text-sm text-fg-muted">{t('onboarding.loading')}</p>
       </div>
     )
   }
@@ -169,13 +169,13 @@ export default function OnboardingPage() {
     return (
       <OnboardingShell step={0} title={t('onboarding.welcome.title')}>
         {errorBanner}
-        <p className="text-sm text-slate-600 dark:text-neutral-400">{t('onboarding.welcome.description')}</p>
+        <p className="text-sm text-fg-muted">{t('onboarding.welcome.description')}</p>
         <div className="mt-6 flex flex-wrap gap-3">
           <button
             type="button"
             disabled={submitting}
             onClick={() => void saveStep(1)}
-            className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
           >
             {t('onboarding.welcome.start')}
             <ArrowRight className="h-4 w-4" aria-hidden />
@@ -184,7 +184,7 @@ export default function OnboardingPage() {
             type="button"
             disabled={submitting}
             onClick={() => void skipAll()}
-            className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-300 dark:hover:bg-neutral-800"
+            className="rounded-xl border border-border-default px-4 py-2.5 text-sm font-medium text-fg-muted hover:bg-surface-base dark:border-border-default dark:text-fg-muted dark:hover:bg-surface-overlay"
           >
             {t('onboarding.welcome.skip')}
           </button>
@@ -197,24 +197,20 @@ export default function OnboardingPage() {
     return (
       <OnboardingShell step={1} title={t('onboarding.goal.title')} onBack={() => setStep(0)}>
         {errorBanner}
-        <p className="text-sm text-slate-600 dark:text-neutral-400">{t('onboarding.goal.description')}</p>
+        <p className="text-sm text-fg-muted">{t('onboarding.goal.description')}</p>
         <div className="mt-4 flex flex-wrap gap-2">
           {ONBOARDING_TOPICS.map((topicOption) => (
             <button
               key={topicOption.id}
               type="button"
               onClick={() => setTopic(topicOption.id)}
-              className={`rounded-full border px-3 py-1.5 text-sm font-medium ${
-                topic === topicOption.id
-                  ? 'border-indigo-600 bg-indigo-50 text-indigo-800 dark:border-indigo-400 dark:bg-indigo-950 dark:text-indigo-100'
-                  : 'border-slate-200 text-slate-700 dark:border-neutral-600 dark:text-neutral-300'
-              }`}
+              className={`rounded-full border px-3 py-1.5 text-sm font-medium ${ topic === topicOption.id ? 'border-indigo-600 bg-indigo-50 text-indigo-800 dark:border-indigo-400 dark:bg-indigo-950 dark:text-indigo-100' : 'border-border-default text-fg-muted dark:border-border-default dark:text-fg-muted' }`}
             >
               {topicOption.label}
             </button>
           ))}
         </div>
-        <label className="mt-4 block text-sm font-medium text-slate-700 dark:text-neutral-300" htmlFor="goal-text">
+        <label className="mt-4 block text-sm font-medium text-fg-muted" htmlFor="goal-text">
           {t('onboarding.goal.label')}
         </label>
         <input
@@ -223,9 +219,9 @@ export default function OnboardingPage() {
           value={goalText}
           onChange={(e) => setGoalText(e.target.value)}
           placeholder={t('onboarding.goal.placeholder')}
-          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+          className="mt-1 w-full rounded-lg border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
         />
-        <label className="mt-4 block text-sm font-medium text-slate-700 dark:text-neutral-300" htmlFor="target-date">
+        <label className="mt-4 block text-sm font-medium text-fg-muted" htmlFor="target-date">
           {t('onboarding.goal.targetDate')}
         </label>
         <input
@@ -233,7 +229,7 @@ export default function OnboardingPage() {
           type="date"
           value={targetDate}
           onChange={(e) => setTargetDate(e.target.value)}
-          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+          className="mt-1 w-full rounded-lg border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
         />
         <button
           type="button"
@@ -245,7 +241,7 @@ export default function OnboardingPage() {
               targetDate: targetDate || null,
             })
           }
-          className="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+          className="mt-6 inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
         >
           {t('onboarding.goal.continue')}
           <ArrowRight className="h-4 w-4" aria-hidden />
@@ -264,11 +260,7 @@ export default function OnboardingPage() {
             {EXPERIENCE_LEVELS.map((value) => (
               <label
                 key={value}
-                className={`flex cursor-pointer flex-col rounded-xl border p-4 ${
-                  priorLevel === value
-                    ? 'border-indigo-600 bg-indigo-50 dark:border-indigo-400 dark:bg-indigo-950/40'
-                    : 'border-slate-200 dark:border-neutral-700'
-                }`}
+                className={`flex cursor-pointer flex-col rounded-xl border p-4 ${ priorLevel === value ? 'border-indigo-600 bg-indigo-50 dark:border-indigo-400 dark:bg-indigo-950/40' : 'border-border-default' }`}
               >
                 <span className="flex items-center gap-2">
                   <input
@@ -277,11 +269,11 @@ export default function OnboardingPage() {
                     checked={priorLevel === value}
                     onChange={() => setPriorLevel(value)}
                   />
-                  <span className="font-medium text-slate-900 dark:text-neutral-100">
+                  <span className="font-medium text-fg-default">
                     {t(`onboarding.experience.${value}.label`)}
                   </span>
                 </span>
-                <span className="mt-1 pl-6 text-xs text-slate-500 dark:text-neutral-400">
+                <span className="mt-1 pl-6 text-xs text-fg-muted">
                   {t(`onboarding.experience.${value}.hint`)}
                 </span>
               </label>
@@ -292,7 +284,7 @@ export default function OnboardingPage() {
           type="button"
           disabled={submitting}
           onClick={() => void saveStep(3, { priorKnowledgeLevel: priorLevel })}
-          className="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+          className="mt-6 inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
         >
           {t('onboarding.goal.continue')}
           <ArrowRight className="h-4 w-4" aria-hidden />
@@ -306,25 +298,21 @@ export default function OnboardingPage() {
     return (
       <OnboardingShell step={3} title={t('onboarding.diagnostic.title')} onBack={() => setStep(2)}>
         {errorBanner}
-        <p className="text-sm text-slate-600 dark:text-neutral-400">{t('onboarding.diagnostic.description')}</p>
+        <p className="text-sm text-fg-muted">{t('onboarding.diagnostic.description')}</p>
         {q ? (
           <div className="mt-4">
-            <p className="text-xs text-slate-500 dark:text-neutral-400">
+            <p className="text-xs text-fg-muted">
               {t('onboarding.diagnostic.questionProgress', {
                 current: questionIndex + 1,
                 total: questions.length,
               })}
             </p>
-            <p className="mt-2 font-medium text-slate-900 dark:text-neutral-100">{q.prompt}</p>
+            <p className="mt-2 font-medium text-fg-default">{q.prompt}</p>
             <div className="mt-3 space-y-2">
               {q.choices.map((choice, idx) => (
                 <label
                   key={choice}
-                  className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm ${
-                    answers[q.id] === idx
-                      ? 'border-indigo-600 bg-indigo-50 dark:border-indigo-400 dark:bg-indigo-950/40'
-                      : 'border-slate-200 dark:border-neutral-700'
-                  }`}
+                  className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm ${ answers[q.id] === idx ? 'border-indigo-600 bg-indigo-50 dark:border-indigo-400 dark:bg-indigo-950/40' : 'border-border-default' }`}
                 >
                   <input
                     type="radio"
@@ -342,7 +330,7 @@ export default function OnboardingPage() {
                   type="button"
                   disabled={answers[q.id] === undefined || submitting}
                   onClick={() => setQuestionIndex((i) => i + 1)}
-                  className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+                  className="rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
                 >
                   {t('onboarding.diagnostic.nextQuestion')}
                 </button>
@@ -351,7 +339,7 @@ export default function OnboardingPage() {
                   type="button"
                   disabled={answers[q.id] === undefined || submitting}
                   onClick={() => void saveStep(4, { diagnosticAnswers: answers })}
-                  className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+                  className="rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
                 >
                   {t('onboarding.goal.continue')}
                 </button>
@@ -363,7 +351,7 @@ export default function OnboardingPage() {
           type="button"
           disabled={submitting}
           onClick={() => void saveStep(4, { skipDiagnostic: true })}
-          className="mt-4 text-sm font-medium text-slate-600 underline hover:text-slate-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+          className="mt-4 text-sm font-medium text-fg-muted underline hover:text-fg-default dark:text-fg-muted dark:hover:text-fg-default"
         >
           {t('onboarding.diagnostic.skip')}
         </button>
@@ -375,7 +363,7 @@ export default function OnboardingPage() {
     return (
       <OnboardingShell step={4} title={t('onboarding.habits.title')} onBack={() => setStep(3)}>
         {errorBanner}
-        <label className="block text-sm font-medium text-slate-700 dark:text-neutral-300" htmlFor="daily-minutes">
+        <label className="block text-sm font-medium text-fg-muted" htmlFor="daily-minutes">
           {t('onboarding.habits.dailyGoal')}
         </label>
         <input
@@ -385,9 +373,9 @@ export default function OnboardingPage() {
           max={480}
           value={dailyMinutes}
           onChange={(e) => setDailyMinutes(Number(e.target.value))}
-          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+          className="mt-1 w-full rounded-lg border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
         />
-        <div className="mt-4 rounded-xl border border-slate-200 p-4 dark:border-neutral-700">
+        <div className="mt-4 rounded-xl border border-border-default p-4 dark:border-border-default">
           <label className="flex items-start gap-3">
             <input
               type="checkbox"
@@ -396,23 +384,23 @@ export default function OnboardingPage() {
               className="mt-1"
             />
             <span>
-              <span className="block text-sm font-medium text-slate-900 dark:text-neutral-100">
+              <span className="block text-sm font-medium text-fg-default">
                 {t('onboarding.habits.reminders.label')}
               </span>
-              <span className="block text-xs text-slate-500 dark:text-neutral-400">
+              <span className="block text-xs text-fg-muted">
                 {t('onboarding.habits.reminders.hint')}
               </span>
             </span>
           </label>
           {reminderOptIn ? (
-            <label className="mt-3 block text-sm text-slate-700 dark:text-neutral-300" htmlFor="reminder-time">
+            <label className="mt-3 block text-sm text-fg-muted" htmlFor="reminder-time">
               {t('onboarding.habits.reminders.time')}
               <input
                 id="reminder-time"
                 type="time"
                 value={reminderTime}
                 onChange={(e) => setReminderTime(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                className="mt-1 w-full rounded-lg border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
               />
             </label>
           ) : null}
@@ -421,7 +409,7 @@ export default function OnboardingPage() {
           type="button"
           disabled={submitting}
           onClick={() => void saveStep(5, { dailyMinutes, reminderOptIn, reminderTime })}
-          className="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+          className="mt-6 inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
         >
           {t('onboarding.goal.continue')}
           <ArrowRight className="h-4 w-4" aria-hidden />
@@ -435,7 +423,7 @@ export default function OnboardingPage() {
       <OnboardingShell step={5} title={t('onboarding.consent.title')} onBack={() => setStep(4)}>
         {errorBanner}
         <div className="space-y-4">
-          <label className="flex items-start gap-3 rounded-xl border border-slate-200 p-4 dark:border-neutral-700">
+          <label className="flex items-start gap-3 rounded-xl border border-border-default p-4 dark:border-border-default">
             <input
               type="checkbox"
               checked={termsAccepted}
@@ -443,7 +431,7 @@ export default function OnboardingPage() {
               className="mt-1"
               required
             />
-            <span className="text-sm text-slate-700 dark:text-neutral-300">
+            <span className="text-sm text-fg-muted">
               <Trans
                 i18nKey="onboarding.consent.terms"
                 ns="onboarding"
@@ -451,7 +439,7 @@ export default function OnboardingPage() {
                   termsLink: (
                     <Link
                       to="/trust"
-                      className="font-medium text-indigo-600 underline dark:text-indigo-400"
+                      className="font-medium text-accent-fg underline dark:text-indigo-400"
                     />
                   ),
                 }}
@@ -459,14 +447,14 @@ export default function OnboardingPage() {
             </span>
           </label>
           {gdprModuleEnabled ? (
-            <label className="flex items-start gap-3 rounded-xl border border-slate-200 p-4 dark:border-neutral-700">
+            <label className="flex items-start gap-3 rounded-xl border border-border-default p-4 dark:border-border-default">
               <input
                 type="checkbox"
                 checked={marketingConsent}
                 onChange={(e) => setMarketingConsent(e.target.checked)}
                 className="mt-1"
               />
-              <span className="text-sm text-slate-700 dark:text-neutral-300">{t('onboarding.consent.marketing')}</span>
+              <span className="text-sm text-fg-muted">{t('onboarding.consent.marketing')}</span>
             </label>
           ) : null}
         </div>
@@ -474,7 +462,7 @@ export default function OnboardingPage() {
           type="button"
           disabled={submitting || !termsAccepted}
           onClick={() => void finishOnboarding()}
-          className="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+          className="mt-6 inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
         >
           {t('onboarding.consent.finish')}
           <ArrowRight className="h-4 w-4" aria-hidden />
@@ -487,14 +475,14 @@ export default function OnboardingPage() {
 
   return (
     <OnboardingShell step={6} title={t('onboarding.done.title')}>
-      <p className="text-sm text-slate-600 dark:text-neutral-400">{t('onboarding.done.description')}</p>
+      <p className="text-sm text-fg-muted">{t('onboarding.done.description')}</p>
       {recommended ? (
         <article className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50/80 p-4 dark:border-emerald-900/40 dark:bg-emerald-950/30">
           <div className="flex items-center gap-2 text-xs font-medium text-emerald-800 dark:text-emerald-200">
             <Sparkles className="h-4 w-4" aria-hidden />
             {t('onboarding.done.startHere')}
           </div>
-          <p className="mt-2 font-semibold text-slate-900 dark:text-neutral-50">{recommended}</p>
+          <p className="mt-2 font-semibold text-fg-default">{recommended}</p>
           {goals?.recommendedCourseCode ? (
             <Link
               to={`/courses/${encodeURIComponent(goals.recommendedCourseCode)}`}
@@ -506,11 +494,11 @@ export default function OnboardingPage() {
           ) : null}
         </article>
       ) : (
-        <p className="mt-4 text-sm text-slate-600 dark:text-neutral-400">{t('onboarding.done.browseCatalog')}</p>
+        <p className="mt-4 text-sm text-fg-muted">{t('onboarding.done.browseCatalog')}</p>
       )}
       <Link
         to="/"
-        className="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500"
+        className="mt-6 inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500"
       >
         {t('onboarding.done.goToDashboard')}
         <ArrowRight className="h-4 w-4" aria-hidden />

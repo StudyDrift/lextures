@@ -66,7 +66,7 @@ export function ResultCard({
       className={
         (correct
           ? 'rounded-xl bg-emerald-50 p-4 text-emerald-950 dark:bg-emerald-950/40 dark:text-emerald-50'
-          : 'rounded-xl bg-slate-100 p-4 text-slate-900 dark:bg-neutral-800 dark:text-neutral-50') +
+          : 'rounded-xl bg-surface-sunken p-4 text-fg-default dark:bg-surface-overlay') +
         (feedbackClass ? ` ${feedbackClass}` : '')
       }
       role="status"

@@ -178,11 +178,7 @@ export default function CourseBehavior() {
           role="tab"
           aria-selected={activeTab === 'award'}
           onClick={() => setActiveTab('award')}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors cursor-pointer ${
-            activeTab === 'award'
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-gray-600 hover:text-gray-900'
-          }`}
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors cursor-pointer ${ activeTab === 'award' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900' }`}
         >
           Award PBIS Points
         </button>
@@ -190,11 +186,7 @@ export default function CourseBehavior() {
           role="tab"
           aria-selected={activeTab === 'referral'}
           onClick={() => setActiveTab('referral')}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors cursor-pointer ${
-            activeTab === 'referral'
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-gray-600 hover:text-gray-900'
-          }`}
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors cursor-pointer ${ activeTab === 'referral' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900' }`}
         >
           File Referral
         </button>
@@ -203,7 +195,7 @@ export default function CourseBehavior() {
       {activeTab === 'award' && (
         <section aria-label="Award PBIS points">
           {categories.length === 0 && (
-            <p className="text-amber-700 bg-amber-50 border border-amber-200 rounded p-3 mb-4 text-sm">
+            <p className="text-warning-fg bg-amber-50 border border-amber-200 rounded p-3 mb-4 text-sm">
               No behavior categories configured. Ask your administrator to set up PBIS categories.
             </p>
           )}
@@ -283,12 +275,12 @@ export default function CourseBehavior() {
           )}
 
           {error && (
-            <p role="alert" className="text-red-600 text-sm mb-3">
+            <p role="alert" className="text-danger-fg text-sm mb-3">
               {error}
             </p>
           )}
           {saveMsg && (
-            <p className="text-green-700 text-sm mb-3">{saveMsg}</p>
+            <p className="text-success-fg text-sm mb-3">{saveMsg}</p>
           )}
 
           <button
@@ -393,12 +385,12 @@ export default function CourseBehavior() {
           </div>
 
           {refError && (
-            <p role="alert" className="text-red-600 text-sm mb-3">
+            <p role="alert" className="text-danger-fg text-sm mb-3">
               {refError}
             </p>
           )}
           {refMsg && (
-            <p className="text-green-700 text-sm mb-3">{refMsg}</p>
+            <p className="text-success-fg text-sm mb-3">{refMsg}</p>
           )}
 
           <button

@@ -242,7 +242,7 @@ export function AiProviderSettingsPanel() {
   if (loading) {
     return (
       <section className="mt-8">
-        <p className="text-sm text-slate-500 dark:text-neutral-400">{t('common.loading')}</p>
+        <p className="text-sm text-fg-muted">{t('common.loading')}</p>
       </section>
     )
   }
@@ -279,15 +279,15 @@ export function AiProviderSettingsPanel() {
     } satisfies AIProviderCredential)
 
   return (
-    <section className="mt-8 rounded-xl border border-slate-200 bg-white p-5 dark:border-neutral-600 dark:bg-neutral-900">
-      <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">{t('settings.ai.org.title')}</h3>
-      <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">{t('settings.ai.org.description')}</p>
+    <section className="mt-8 rounded-xl border border-border-default bg-surface-raised p-5 dark:border-border-default dark:bg-surface-raised">
+      <h3 className="text-sm font-semibold text-fg-default">{t('settings.ai.org.title')}</h3>
+      <p className="mt-1 text-sm text-fg-muted">{t('settings.ai.org.description')}</p>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <label className="block text-sm">
-          <span className="font-medium text-slate-700 dark:text-neutral-300">{t('settings.ai.org.provider')}</span>
+          <span className="font-medium text-fg-muted">{t('settings.ai.org.provider')}</span>
           <select
-            className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+            className="mt-1 w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
             value={provider}
             onChange={(e) => setProvider(e.target.value)}
           >
@@ -299,9 +299,9 @@ export function AiProviderSettingsPanel() {
           </select>
         </label>
         <label className="block text-sm">
-          <span className="font-medium text-slate-700 dark:text-neutral-300">{t('settings.ai.org.modelAlias')}</span>
+          <span className="font-medium text-fg-muted">{t('settings.ai.org.modelAlias')}</span>
           <select
-            className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+            className="mt-1 w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
             value={modelAlias}
             onChange={(e) => setModelAlias(e.target.value)}
           >
@@ -313,11 +313,11 @@ export function AiProviderSettingsPanel() {
           </select>
         </label>
         <label className="block text-sm sm:col-span-2">
-          <span className="font-medium text-slate-700 dark:text-neutral-300">
+          <span className="font-medium text-fg-muted">
             {t('settings.ai.org.fallbackProvider')}
           </span>
           <select
-            className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+            className="mt-1 w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
             value={fallbackProvider}
             onChange={(e) => setFallbackProvider(e.target.value)}
           >
@@ -330,16 +330,16 @@ export function AiProviderSettingsPanel() {
           </select>
         </label>
         <label className="block text-sm sm:col-span-2">
-          <span className="font-medium text-slate-700 dark:text-neutral-300">{t('settings.ai.org.legacyByok')}</span>
+          <span className="font-medium text-fg-muted">{t('settings.ai.org.legacyByok')}</span>
           <input
             type="password"
-            className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+            className="mt-1 w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
             value={byokKey}
             placeholder={PLATFORM_SECRET_PLACEHOLDER}
             onChange={(e) => setByokKey(e.target.value)}
             autoComplete="off"
           />
-          <span className="mt-1 block text-xs text-slate-500 dark:text-neutral-400">
+          <span className="mt-1 block text-xs text-fg-muted">
             {t('settings.ai.org.legacyByokHelp')}
           </span>
           {data.byokConfigured ? (
@@ -352,10 +352,10 @@ export function AiProviderSettingsPanel() {
 
       {selectedDraft ? (
         <div className="mt-6">
-          <h4 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+          <h4 className="text-sm font-semibold text-fg-default">
             {t('settings.ai.org.providerCredentials', { provider: providerLabel(provider) })}
           </h4>
-          <ul className="mt-2 divide-y divide-slate-200 rounded-xl border border-slate-200 dark:divide-neutral-700 dark:border-neutral-700">
+          <ul className="mt-2 divide-y divide-slate-200 rounded-xl border border-border-default dark:divide-neutral-700 dark:border-border-default">
             <ProviderCredentialForm
               provider={provider}
               credential={selectedCred}
@@ -380,7 +380,7 @@ export function AiProviderSettingsPanel() {
         </button>
         <button
           type="button"
-          className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 disabled:opacity-50 dark:border-neutral-600 dark:text-neutral-200"
+          className="rounded-lg border border-border-strong px-4 py-2 text-sm font-medium text-fg-muted disabled:opacity-50 dark:border-border-default dark:text-fg-default"
           disabled={testing}
           onClick={() => void testConnection()}
         >

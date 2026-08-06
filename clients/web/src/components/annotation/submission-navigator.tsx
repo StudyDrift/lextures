@@ -27,7 +27,7 @@ function SubmissionStatusBadge({
   if (!hasSubmission) {
     return (
       <span
-        className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-neutral-500"
+        className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-fg-subtle"
         title="No submission"
       >
         Missing
@@ -37,7 +37,7 @@ function SubmissionStatusBadge({
   if (syncing) {
     return (
       <span title="Syncing to Canvas" className="inline-flex shrink-0">
-        <Loader2 className="h-3.5 w-3.5 motion-safe:animate-spin text-indigo-600 dark:text-indigo-400" aria-hidden />
+        <Loader2 className="h-3.5 w-3.5 motion-safe:animate-spin text-accent-fg" aria-hidden />
       </span>
     )
   }
@@ -142,7 +142,7 @@ export function SubmissionStudentPicker({
         aria-expanded={open}
         aria-controls={menuId}
         onClick={() => setOpen((prev) => !prev)}
-        className="flex w-full min-w-0 items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-start text-xs font-semibold text-slate-800 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:hover:bg-neutral-900"
+        className="flex w-full min-w-0 items-center gap-1.5 rounded-lg border border-border-strong bg-surface-raised px-2.5 py-1.5 text-start text-xs font-semibold text-fg-default hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-50 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:hover:bg-surface-raised"
       >
         <span className="min-w-0 flex-1 truncate">{currentLabel}</span>
         {current ? (
@@ -152,9 +152,7 @@ export function SubmissionStudentPicker({
           />
         ) : null}
         <ChevronDown
-          className={`h-3.5 w-3.5 shrink-0 text-slate-500 transition-transform dark:text-neutral-400 ${
-            open ? 'rotate-180' : ''
-          }`}
+          className={`h-3.5 w-3.5 shrink-0 text-fg-muted transition-transform dark:text-fg-muted ${ open ? 'rotate-180' : '' }`}
           aria-hidden="true"
         />
       </button>
@@ -164,9 +162,9 @@ export function SubmissionStudentPicker({
           id={menuId}
           role="menu"
           aria-labelledby={buttonId}
-          className="absolute start-0 top-full z-50 mt-1 flex max-h-72 w-full min-w-[14rem] flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg dark:border-neutral-600 dark:bg-neutral-900"
+          className="absolute start-0 top-full z-50 mt-1 flex max-h-72 w-full min-w-[14rem] flex-col overflow-hidden rounded-xl border border-border-default bg-surface-raised shadow-lg dark:border-border-default dark:bg-surface-raised"
         >
-          <div className="shrink-0 border-b border-slate-200 p-2 dark:border-neutral-700">
+          <div className="shrink-0 border-b border-border-default p-2 dark:border-border-default">
             <label htmlFor={filterId} className="sr-only">
               Filter students
             </label>
@@ -205,15 +203,15 @@ export function SubmissionStudentPicker({
                   }
                 }
               }}
-              className="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 outline-none ring-indigo-500/0 placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-indigo-400"
+              className="w-full rounded-lg border border-border-strong bg-surface-raised px-2.5 py-1.5 text-xs text-fg-default outline-none ring-indigo-500/0 placeholder:text-fg-subtle focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:placeholder:text-neutral-500 dark:focus:border-indigo-400"
             />
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto py-1">
             {submissions.length === 0 ? (
-              <p className="px-3 py-2 text-xs text-slate-500 dark:text-neutral-400">No submissions.</p>
+              <p className="px-3 py-2 text-xs text-fg-muted">No submissions.</p>
             ) : visibleEntries.length === 0 ? (
-              <p className="px-3 py-2 text-xs text-slate-500 dark:text-neutral-400">No matching students.</p>
+              <p className="px-3 py-2 text-xs text-fg-muted">No matching students.</p>
             ) : (
               visibleEntries.map(({ submission, i, label }, visibleIndex) => {
                 const active = i === index
@@ -233,15 +231,9 @@ export function SubmissionStudentPicker({
                       onIndexChange(i)
                       setOpen(false)
                     }}
-                    className={`flex w-full items-center gap-2 px-3 py-2 text-start text-xs transition-[background-color,color,border-color] ${
-                      highlighted
-                        ? 'bg-indigo-50 font-semibold text-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-100'
-                        : active
-                          ? 'font-semibold text-indigo-800 dark:text-indigo-200'
-                          : 'text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800'
-                    }`}
+                    className={`flex w-full items-center gap-2 px-3 py-2 text-start text-xs transition-[background-color,color,border-color] ${ highlighted ? 'bg-indigo-50 font-semibold text-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-100' : active ? 'font-semibold text-indigo-800 dark:text-indigo-200' : 'text-fg-muted hover:bg-surface-base dark:text-fg-default dark:hover:bg-surface-overlay' }`}
                   >
-                    <span className="w-5 shrink-0 tabular-nums text-slate-400 dark:text-neutral-500">
+                    <span className="w-5 shrink-0 tabular-nums text-fg-subtle">
                       {i + 1}.
                     </span>
                     <span className="min-w-0 flex-1 truncate">{label}</span>
@@ -288,13 +280,13 @@ export function SubmissionNavigator({
 
   return (
     <div
-      className="flex min-w-0 flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900/80"
+      className="flex min-w-0 flex-wrap items-center gap-3 rounded-xl border border-border-default bg-slate-50/80 px-3 py-2 text-sm dark:border-border-default/80"
       aria-label={anonymisedAriaLabel}
     >
-      <label className="inline-flex shrink-0 items-center gap-2 font-medium text-slate-700 dark:text-neutral-200">
+      <label className="inline-flex shrink-0 items-center gap-2 font-medium text-fg-default">
         <span className="sr-only">Filter submissions</span>
         <select
-          className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+          className="rounded-lg border border-border-strong bg-surface-raised px-2 py-1 text-sm dark:border-border-default dark:bg-surface-base"
           value={gradedFilter}
           disabled={disabled}
           onChange={(e) => onGradedFilterChange(e.target.value as GradedFilter)}
@@ -308,7 +300,7 @@ export function SubmissionNavigator({
       <div className="grid min-w-[18rem] flex-1 grid-cols-[4.5rem_minmax(0,1fr)_4.5rem] items-center gap-2">
         <button
           type="button"
-          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-950 dark:hover:bg-neutral-900"
+          className="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-1.5 text-xs font-semibold hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:bg-surface-base dark:hover:bg-surface-raised"
           disabled={disabled || index <= 0}
           onClick={prev}
           aria-label="Previous submission"
@@ -323,14 +315,14 @@ export function SubmissionNavigator({
             disabled={disabled}
             onIndexChange={onIndexChange}
           />
-          <span className="w-10 shrink-0 text-end text-xs tabular-nums text-slate-500 dark:text-neutral-400">
+          <span className="w-10 shrink-0 text-end text-xs tabular-nums text-fg-muted">
             {submissions.length === 0 ? '0/0' : `${index + 1}/${submissions.length}`}
           </span>
         </div>
 
         <button
           type="button"
-          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-950 dark:hover:bg-neutral-900"
+          className="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-1.5 text-xs font-semibold hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:bg-surface-base dark:hover:bg-surface-raised"
           disabled={disabled || submissions.length === 0 || index >= submissions.length - 1}
           onClick={next}
           aria-label="Next submission"

@@ -44,15 +44,15 @@ export function BoardNodeView(props: NodeViewProps) {
       data-type="board-block"
     >
       {!boardId || !courseCode ? (
-        <div className="rounded-md border border-dashed border-slate-300 p-4 text-sm text-slate-600 dark:border-neutral-600 dark:text-neutral-300">
+        <div className="rounded-md border border-dashed border-border-strong p-4 text-sm text-fg-muted dark:border-border-default dark:text-fg-muted">
           {t('boards.embed.missing')}
         </div>
       ) : loading ? (
-        <div className="rounded-md border border-slate-200 p-4 text-sm text-slate-500 dark:border-neutral-700">
+        <div className="rounded-md border border-border-default p-4 text-sm text-fg-muted dark:border-border-default">
           {t('common.loading')}
         </div>
       ) : error ? (
-        <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-400">
+        <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-danger-fg dark:border-red-900 dark:bg-red-950/30 dark:text-red-400">
           {t('boards.embed.loadError')}
         </div>
       ) : ctx?.mode === 'denied' || !ctx?.board ? (
@@ -60,19 +60,19 @@ export function BoardNodeView(props: NodeViewProps) {
           {t('boards.embed.denied')}
         </div>
       ) : (
-        <div className="overflow-hidden rounded-md border border-slate-200 dark:border-neutral-700">
-          <div className="flex items-center justify-between gap-2 border-b border-slate-200 bg-slate-50 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900">
+        <div className="overflow-hidden rounded-md border border-border-default">
+          <div className="flex items-center justify-between gap-2 border-b border-border-default bg-surface-base px-3 py-2 dark:border-border-default dark:bg-surface-raised">
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-slate-900 dark:text-neutral-100">
+              <p className="truncate text-sm font-semibold text-fg-default">
                 {ctx.board.title}
               </p>
-              <p className="text-xs text-slate-500 dark:text-neutral-400">
+              <p className="text-xs text-fg-muted">
                 {ctx.mode === 'interactive' ? t('boards.embed.interactive') : t('boards.embed.readonly')}
               </p>
             </div>
             <Link
               to={`/courses/${encodeURIComponent(courseCode)}/boards/${encodeURIComponent(boardId)}`}
-              className="shrink-0 text-sm font-medium text-indigo-600 dark:text-indigo-400"
+              className="shrink-0 text-sm font-medium text-accent-fg"
             >
               {t('boards.embed.open')}
             </Link>

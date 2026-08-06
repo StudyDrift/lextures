@@ -21,7 +21,7 @@ export function ConfidenceIndicator({ score, className = '' }: Props) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-neutral-300 ${className}`}
+      className={`inline-flex items-center gap-1.5 text-xs font-medium text-fg-muted ${className}`}
       title={t('learnerProfile.confidence.label', { level: label })}
     >
       <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden />

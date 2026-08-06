@@ -69,10 +69,10 @@ export function LRSSettingsPanel() {
   if (featuresLoading) {
     return (
       <section>
-        <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">
+        <h2 className="text-base font-semibold text-fg-default">
           Learning Record Stores
         </h2>
-        <p className="mt-4 text-sm text-slate-500">Loading…</p>
+        <p className="mt-4 text-sm text-fg-muted">Loading…</p>
       </section>
     )
   }
@@ -80,10 +80,10 @@ export function LRSSettingsPanel() {
   if (!xapiEmissionEnabled) {
     return (
       <section>
-        <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">
+        <h2 className="text-base font-semibold text-fg-default">
           Learning Record Stores
         </h2>
-        <p className="mt-4 text-sm text-slate-600 dark:text-neutral-400">
+        <p className="mt-4 text-sm text-fg-muted">
           xAPI emission is not enabled for this platform. Turn on{' '}
           <span className="font-medium">xAPI / Caliper emission</span> under Platform settings to
           configure external LRS endpoints.
@@ -94,15 +94,15 @@ export function LRSSettingsPanel() {
 
   return (
     <section>
-      <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">
+      <h2 className="text-base font-semibold text-fg-default">
         Learning Record Stores
       </h2>
-      <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+      <p className="mt-1 text-sm text-fg-muted">
         Forward xAPI statements to external LRS endpoints. Credentials are encrypted at rest and
         never returned in API responses.
       </p>
 
-      {loading && <p className="mt-4 text-sm text-slate-500">Loading…</p>}
+      {loading && <p className="mt-4 text-sm text-fg-muted">Loading…</p>}
       {error && (
         <p className="mt-4 text-sm text-rose-700 dark:text-rose-300" role="alert">
           {error}
@@ -115,19 +115,19 @@ export function LRSSettingsPanel() {
       )}
 
       {!loading && endpoints.length > 0 && (
-        <ul className="mt-4 divide-y divide-slate-200 rounded-xl border border-slate-200 dark:divide-neutral-700 dark:border-neutral-700">
+        <ul className="mt-4 divide-y divide-slate-200 rounded-xl border border-border-default dark:divide-neutral-700 dark:border-border-default">
           {endpoints.map((ep) => (
             <li key={ep.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
               <div>
-                <p className="text-sm font-medium text-slate-900 dark:text-neutral-100">
+                <p className="text-sm font-medium text-fg-default">
                   {ep.label || ep.endpointUrl}
                 </p>
-                <p className="text-xs text-slate-500 dark:text-neutral-400">{ep.endpointUrl}</p>
+                <p className="text-xs text-fg-muted">{ep.endpointUrl}</p>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold dark:border-neutral-600"
+                  className="rounded-lg border border-border-default px-3 py-1.5 text-xs font-semibold dark:border-border-default"
                   onClick={async () => {
                     setTestMsg(null)
                     try {
@@ -157,15 +157,15 @@ export function LRSSettingsPanel() {
         </ul>
       )}
 
-      <form className="mt-6 space-y-4 rounded-xl border border-slate-200 p-4 dark:border-neutral-700" onSubmit={handleAdd}>
-        <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Add LRS endpoint</h3>
+      <form className="mt-6 space-y-4 rounded-xl border border-border-default p-4 dark:border-border-default" onSubmit={handleAdd}>
+        <h3 className="text-sm font-semibold text-fg-default">Add LRS endpoint</h3>
         <div>
           <label htmlFor={labelId} className="text-sm font-medium">
             Label
           </label>
           <input
             id={labelId}
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+            className="mt-1 w-full rounded-lg border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-raised"
             value={form.label}
             onChange={(e) => setForm((f) => ({ ...f, label: e.target.value }))}
           />
@@ -178,7 +178,7 @@ export function LRSSettingsPanel() {
             id={urlId}
             required
             type="url"
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+            className="mt-1 w-full rounded-lg border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-raised"
             value={form.endpointUrl}
             onChange={(e) => setForm((f) => ({ ...f, endpointUrl: e.target.value }))}
           />
@@ -190,7 +190,7 @@ export function LRSSettingsPanel() {
           <input
             id={userId}
             autoComplete="username"
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+            className="mt-1 w-full rounded-lg border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-raised"
             value={form.username}
             onChange={(e) => setForm((f) => ({ ...f, username: e.target.value }))}
           />
@@ -203,7 +203,7 @@ export function LRSSettingsPanel() {
             id={passId}
             type="password"
             autoComplete="new-password"
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+            className="mt-1 w-full rounded-lg border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-raised"
             value={form.password}
             onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
           />
@@ -211,7 +211,7 @@ export function LRSSettingsPanel() {
         <button
           type="submit"
           disabled={saving}
-          className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+          className="rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
         >
           {saving ? 'Saving…' : 'Add endpoint'}
         </button>

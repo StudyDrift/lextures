@@ -46,11 +46,6 @@ type resetBody struct {
 
 func (d Deps) handleLogin() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		var b loginBody
 		if err := json.NewDecoder(r.Body).Decode(&b); err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
@@ -80,11 +75,6 @@ func (d Deps) handleLogin() http.HandlerFunc {
 
 func (d Deps) handleSignup() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		var b signupBody
 		if err := json.NewDecoder(r.Body).Decode(&b); err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
@@ -120,11 +110,6 @@ func (d Deps) handleSignup() http.HandlerFunc {
 
 func (d Deps) handleForgotPassword() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		var b forgotBody
 		if err := json.NewDecoder(r.Body).Decode(&b); err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
@@ -147,11 +132,6 @@ type magicLinkRequestBody struct {
 
 func (d Deps) handleMagicLinkRequest() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.Pool == nil {
 			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInvalidInput, "Database is not configured.")
 			return
@@ -178,6 +158,8 @@ type magicLinkConsumeBody struct {
 	Token string `json:"token"`
 }
 
+// handleMagicLinkConsume is registered for both GET and POST (query vs JSON body).
+// TD.5 FR-6: multi-method — in-handler dispatch is load-bearing.
 func (d Deps) handleMagicLinkConsume() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet && r.Method != http.MethodPost {
@@ -216,11 +198,6 @@ type refreshTokenBody struct {
 
 func (d Deps) handleAuthRefresh() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.Pool == nil || d.JWTSigner == nil {
 			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInvalidInput, "Database is not configured.")
 			return
@@ -250,11 +227,6 @@ func (d Deps) handleAuthRefresh() http.HandlerFunc {
 
 func (d Deps) handleAuthLogout() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.Pool == nil {
 			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInvalidInput, "Database is not configured.")
 			return
@@ -287,11 +259,6 @@ func (d Deps) handleAuthLogout() http.HandlerFunc {
 
 func (d Deps) handleAuthLogoutAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.JWTSigner == nil {
 			apierr.WriteJSON(w, http.StatusUnauthorized, apierr.CodeUnauthorized, "Sign in required.")
 			return
@@ -321,11 +288,6 @@ func (d Deps) handleAuthLogoutAll() http.HandlerFunc {
 
 func (d Deps) handleResetPassword() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		var b resetBody
 		if err := json.NewDecoder(r.Body).Decode(&b); err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
@@ -347,11 +309,6 @@ func (d Deps) handleResetPassword() http.HandlerFunc {
 // handleSAMLStatus reports whether SAML SP is enabled and the default IdP for the login UI (server/src/routes/auth.rs saml_status_handler).
 func (d Deps) handleSAMLStatus() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		if !d.effectiveConfig().SAMLSSOEnabled {
 			_, _ = w.Write([]byte(`{"enabled":false}`))
@@ -391,11 +348,6 @@ func (d Deps) handleSAMLStatus() http.HandlerFunc {
 
 func (d Deps) handleOIDCStatus() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		cfg := d.effectiveConfig()
 		oidcOn := cfg.OIDCSSOEnabled
@@ -479,11 +431,6 @@ type oidcLinkBody struct {
 
 func (d Deps) handleOIDCLink() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.JWTSigner == nil {
 			apierr.WriteJSON(w, http.StatusUnauthorized, apierr.CodeUnauthorized, "Sign in required.")
 			return
@@ -583,11 +530,6 @@ func writeAuthErr(w http.ResponseWriter, err error) {
 
 func (d Deps) handleGetPublicPasswordPolicy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.Pool == nil {
 			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInvalidInput, "Database is not configured.")
 			return
@@ -624,11 +566,6 @@ type changePasswordBody struct {
 
 func (d Deps) handleChangePassword() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.JWTSigner == nil {
 			apierr.WriteJSON(w, http.StatusUnauthorized, apierr.CodeUnauthorized, "Sign in required.")
 			return

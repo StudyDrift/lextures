@@ -59,17 +59,17 @@ export function ChecklistHelpPopover({ helpRef, itemId, open, onClose, sources }
         onClick={onClose}
       >
         <div
-          className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-xl border border-slate-200 bg-white p-5 shadow-xl dark:border-neutral-700 dark:bg-neutral-900"
+          className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-xl border border-border-default bg-surface-raised p-5 shadow-xl dark:border-border-default dark:bg-surface-raised"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-start justify-between gap-3">
-            <h2 id={titleId} className="text-base font-semibold text-slate-900 dark:text-neutral-50">
+            <h2 id={titleId} className="text-base font-semibold text-fg-default">
               {entry.title}
             </h2>
             <button
               ref={closeRef}
               type="button"
-              className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-neutral-800"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-fg-muted hover:bg-surface-sunken dark:hover:bg-surface-overlay"
               aria-label={courseChecklistI18n.helpClose}
               onClick={onClose}
             >
@@ -77,27 +77,27 @@ export function ChecklistHelpPopover({ helpRef, itemId, open, onClose, sources }
             </button>
           </div>
 
-          <section className="mt-4 space-y-3 text-sm text-slate-700 dark:text-neutral-300">
+          <section className="mt-4 space-y-3 text-sm text-fg-muted">
             <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
                 {courseChecklistI18n.helpWhat}
               </h3>
               <p className="mt-1">{entry.what}</p>
             </div>
             <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
                 {courseChecklistI18n.helpWhy}
               </h3>
               <p className="mt-1">{entry.why}</p>
             </div>
             <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
                 {courseChecklistI18n.helpHow}
               </h3>
               <p className="mt-1">{entry.how}</p>
             </div>
             <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
                 {courseChecklistI18n.helpWhenDismiss}
               </h3>
               <p className="mt-1">{entry.whenToDismiss}</p>
@@ -110,7 +110,7 @@ export function ChecklistHelpPopover({ helpRef, itemId, open, onClose, sources }
                 <li key={src}>
                   <a
                     href={courseDesignResearchHref(src)}
-                    className="rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-medium text-slate-700 underline-offset-2 hover:underline dark:bg-neutral-800 dark:text-neutral-300"
+                    className="rounded bg-surface-sunken px-1.5 py-0.5 text-[11px] font-medium text-fg-muted underline-offset-2 hover:underline dark:bg-surface-overlay dark:text-fg-muted"
                     onClick={(e) => {
                       e.preventDefault()
                       setResearchSource(src)

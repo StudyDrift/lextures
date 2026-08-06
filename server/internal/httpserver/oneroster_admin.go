@@ -20,11 +20,6 @@ const maxOneRosterUploadBytes = 52 << 20 // 52 MiB
 
 func (d Deps) handleAdminOneRosterUpload() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.effectiveConfig().OneRosterEnabled {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeInvalidInput, "OneRoster is not enabled.")
 			return
@@ -90,11 +85,6 @@ func (d Deps) handleAdminOneRosterUpload() http.HandlerFunc {
 
 func (d Deps) handleAdminOneRosterSyncRunsList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.effectiveConfig().OneRosterEnabled {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeInvalidInput, "OneRoster is not enabled.")
 			return
@@ -159,11 +149,6 @@ LIMIT 100
 
 func (d Deps) handleAdminOneRosterSyncRunDetail() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.effectiveConfig().OneRosterEnabled {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeInvalidInput, "OneRoster is not enabled.")
 			return
@@ -217,11 +202,6 @@ LIMIT 10000
 
 func (d Deps) handleAdminOneRosterBearerPost() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.effectiveConfig().OneRosterEnabled {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeInvalidInput, "OneRoster is not enabled.")
 			return
@@ -261,11 +241,6 @@ func (d Deps) handleOneRosterV1P2() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !d.effectiveConfig().OneRosterEnabled {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeInvalidInput, "OneRoster is not enabled.")
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
 		raw := r.Header.Get("Authorization")

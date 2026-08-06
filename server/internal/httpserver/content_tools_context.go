@@ -28,10 +28,6 @@ func (d Deps) registerContentToolsContextRoutes(r chi.Router) {
 
 func (d Deps) handleContentToolsContextSourcesList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		_, _, courseID, ok := d.requireContentToolsGradeRead(w, r)
 		if !ok {
 			return
@@ -113,10 +109,6 @@ func (d Deps) handleContentToolsContextSourcesList() http.HandlerFunc {
 
 func (d Deps) handleContentToolsContextSourceReingest() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		_, viewer, courseID, ok := d.requireContentToolsGradeRead(w, r)
 		if !ok {
 			return
@@ -163,10 +155,6 @@ func (d Deps) handleContentToolsContextSourceReingest() http.HandlerFunc {
 
 func (d Deps) handleContentToolsContextSourcePatch() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		_, viewer, courseID, ok := d.requireContentToolsGradeRead(w, r)
 		if !ok {
 			return
@@ -202,10 +190,6 @@ func (d Deps) handleContentToolsContextSourcePatch() http.HandlerFunc {
 
 func (d Deps) handleContentToolsContextPreview() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, viewer, courseID, ok := d.requireContentToolsCourse(w, r)
 		if !ok {
 			return

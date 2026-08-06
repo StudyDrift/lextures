@@ -138,11 +138,6 @@ func (d Deps) handleSectionAttendance() http.HandlerFunc {
 // handleStudentAttendance is GET /api/v1/students/:studentId/attendance
 func (d Deps) handleStudentAttendance() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		actorID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -190,11 +185,6 @@ SELECT EXISTS(
 // handleOrgUnitAttendanceDashboard is GET /api/v1/org-units/:unitId/attendance/dashboard
 func (d Deps) handleOrgUnitAttendanceDashboard() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		actorID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -324,11 +314,6 @@ func (d Deps) handleAdminAttendanceCodes() http.HandlerFunc {
 // handleAdminAttendanceCodeDelete is DELETE /api/v1/admin/orgs/:orgId/attendance/codes/:codeId
 func (d Deps) handleAdminAttendanceCodeDelete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodDelete {
-			w.Header().Set("Allow", http.MethodDelete)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		orgID, err := uuid.Parse(strings.TrimSpace(chi.URLParam(r, "orgId")))
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid org id.")
@@ -359,11 +344,6 @@ func (d Deps) handleAdminAttendanceCodeDelete() http.HandlerFunc {
 // Returns a synchronous CSV download.
 func (d Deps) handleAdminAttendanceExport() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		orgID, err := uuid.Parse(strings.TrimSpace(chi.URLParam(r, "orgId")))
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid org id.")
@@ -484,11 +464,6 @@ ORDER BY ar.date ASC, cs.section_code ASC, u.email ASC
 // handleParentStudentAttendance is GET /api/v1/parent/students/:sid/attendance
 func (d Deps) handleParentStudentAttendance() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		parentID, _, ok := d.requireParentViewer(w, r)
 		if !ok {
 			return

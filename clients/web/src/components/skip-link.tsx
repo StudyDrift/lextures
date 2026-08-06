@@ -21,7 +21,7 @@ export function SkipLink({ target = '#main-content', label = 'Skip to main conte
         // Visible on focus
         'focus:translate-y-0 focus:opacity-100',
         // Styling
-        'rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white',
+        'rounded-md bg-accent-solid px-4 py-2 text-sm font-semibold text-white',
         'transition-[opacity,transform] duration-150',
         'focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2',
       ].join(' ')}

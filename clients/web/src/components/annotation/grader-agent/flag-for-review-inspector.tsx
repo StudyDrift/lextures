@@ -31,10 +31,10 @@ export function FlagForReviewInspector({
   const reasonTemplate = typeof data.reasonTemplate === 'string' ? data.reasonTemplate : ''
 
   return (
-    <div className="space-y-3 text-sm text-slate-700 dark:text-neutral-200">
+    <div className="space-y-3 text-sm text-fg-default">
       <p>{t('gradingAgent.canvas.inspector.flagForReviewHelp')}</p>
       <label className="block">
-        <span className="mb-1.5 block font-medium text-slate-800 dark:text-neutral-100">
+        <span className="mb-1.5 block font-medium text-fg-default">
           {t('gradingAgent.canvas.inspector.flagForReviewQueue')}
         </span>
         <select value={queue} onChange={(e) => onChange({ queue: e.target.value })} className={fieldClass}>
@@ -46,7 +46,7 @@ export function FlagForReviewInspector({
         </select>
       </label>
       <label className="block">
-        <span className="mb-1.5 block font-medium text-slate-800 dark:text-neutral-100">
+        <span className="mb-1.5 block font-medium text-fg-default">
           {t('gradingAgent.canvas.inspector.flagForReviewPriority')}
         </span>
         <select
@@ -62,7 +62,7 @@ export function FlagForReviewInspector({
         </select>
       </label>
       <label className="block">
-        <span className="mb-1.5 block font-medium text-slate-800 dark:text-neutral-100">
+        <span className="mb-1.5 block font-medium text-fg-default">
           {t('gradingAgent.canvas.inspector.flagForReviewReasonTemplate')}
         </span>
         <WorkflowPromptEditor

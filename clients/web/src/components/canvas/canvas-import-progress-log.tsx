@@ -32,19 +32,19 @@ export function CanvasImportProgressLog({
   return (
     <div
       className={[
-        'rounded-xl border border-slate-200 bg-slate-50/80 dark:border-neutral-700 dark:bg-neutral-900/60',
+        'rounded-xl border border-border-default bg-slate-50/80 dark:border-border-default/60',
         className,
       ].join(' ')}
     >
       <button
         type="button"
-        className="flex w-full items-center gap-2 px-3 py-2.5 text-start text-sm font-medium text-slate-800 dark:text-neutral-100"
+        className="flex w-full items-center gap-2 px-3 py-2.5 text-start text-sm font-medium text-fg-default"
         onClick={() => setExpanded((open) => !open)}
         aria-expanded={expanded}
       >
         {active ? (
           <Loader2
-            className="h-4 w-4 shrink-0 motion-safe:animate-spin text-indigo-600 dark:text-indigo-400"
+            className="h-4 w-4 shrink-0 motion-safe:animate-spin text-accent-fg"
             aria-hidden
           />
         ) : (
@@ -54,12 +54,12 @@ export function CanvasImportProgressLog({
           />
         )}
         <span className="min-w-0 flex-1 truncate">{title}</span>
-        <span className="shrink-0 text-xs tabular-nums text-slate-500 dark:text-neutral-500">
+        <span className="shrink-0 text-xs tabular-nums text-fg-subtle">
           {entries.length}
         </span>
         <ChevronDown
           className={[
-            'h-4 w-4 shrink-0 text-slate-500 transition-colors dark:text-neutral-400',
+            'h-4 w-4 shrink-0 text-fg-muted transition-colors dark:text-fg-muted',
             expanded ? 'rotate-180' : '',
           ].join(' ')}
           aria-hidden
@@ -70,7 +70,7 @@ export function CanvasImportProgressLog({
           role="log"
           aria-live="polite"
           aria-relevant="additions"
-          className={['overflow-y-auto border-t border-slate-200 px-3 py-3 dark:border-neutral-700', maxHeightClassName].join(
+          className={['overflow-y-auto border-t border-border-default px-3 py-3 dark:border-border-default', maxHeightClassName].join(
             ' ',
           )}
         >
@@ -83,7 +83,7 @@ export function CanvasImportProgressLog({
               {entries.map((entry) => (
                 <li
                   key={entry.id}
-                  className="canvas-import-status-in text-sm leading-snug text-slate-600 dark:text-neutral-400"
+                  className="canvas-import-status-in text-sm leading-snug text-fg-muted"
                 >
                   {entry.text}
                 </li>

@@ -36,7 +36,7 @@ export type ScheduleDatetimeFieldProps = {
 }
 
 const defaultInputClass =
-  'w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500 dark:focus:ring-indigo-500'
+  'w-full rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm text-fg-default focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 disabled:opacity-60 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:focus:border-indigo-500 dark:focus:ring-indigo-500'
 
 /**
  * Date control that switches between calendar `datetime-local` (fixed courses)
@@ -71,7 +71,7 @@ export function ScheduleDatetimeField({
     <div>
       {!hideLabel ? (
         <div className="mb-1 flex items-center justify-between gap-2">
-          <label htmlFor={id} className="text-xs font-medium text-slate-600 dark:text-neutral-300">
+          <label htmlFor={id} className="text-xs font-medium text-fg-muted">
             {displayLabel}
           </label>
           {value ? (
@@ -79,7 +79,7 @@ export function ScheduleDatetimeField({
               type="button"
               onClick={() => onChange('')}
               disabled={disabled}
-              className="text-[11px] font-medium text-indigo-600 hover:text-indigo-500 disabled:opacity-50 dark:text-indigo-400"
+              className="text-[11px] font-medium text-accent-fg hover:text-indigo-500 disabled:opacity-50 dark:text-indigo-400"
             >
               Clear
             </button>
@@ -91,7 +91,7 @@ export function ScheduleDatetimeField({
             type="button"
             onClick={() => onChange('')}
             disabled={disabled}
-            className="text-[11px] font-medium text-indigo-600 hover:text-indigo-500 disabled:opacity-50 dark:text-indigo-400"
+            className="text-[11px] font-medium text-accent-fg hover:text-indigo-500 disabled:opacity-50 dark:text-indigo-400"
           >
             Clear
           </button>
@@ -148,7 +148,7 @@ export function ScheduleDatetimeField({
           <div className="flex items-center gap-2">
             <label
               htmlFor={`${id}-time`}
-              className="shrink-0 text-[11px] font-medium text-slate-500 dark:text-neutral-400"
+              className="shrink-0 text-[11px] font-medium text-fg-muted"
             >
               Time
             </label>
@@ -188,7 +188,7 @@ export function ScheduleDatetimeField({
       )}
 
       {displayHint ? (
-        <p className="mt-1 text-[11px] leading-snug text-slate-500 dark:text-neutral-400">
+        <p className="mt-1 text-[11px] leading-snug text-fg-muted">
           {displayHint}
         </p>
       ) : null}

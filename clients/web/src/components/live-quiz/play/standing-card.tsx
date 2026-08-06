@@ -24,7 +24,7 @@ export function StandingCard({
           {t('liveQuiz.standing.youPlaced', { rank })}
         </p>
       ) : (
-        <p className="text-lg text-slate-600 dark:text-neutral-300">
+        <p className="text-lg text-fg-muted">
           {nickname ? t('liveQuiz.standing.thanksNamed', { nickname }) : t('liveQuiz.standing.thanks')}
         </p>
       )}
@@ -39,7 +39,7 @@ export function StandingCard({
               className={
                 row.playerId === playerId
                   ? 'flex items-center justify-between rounded-lg bg-indigo-50 px-3 py-2 font-medium dark:bg-indigo-950/40'
-                  : 'flex items-center justify-between rounded-lg bg-slate-100 px-3 py-2 dark:bg-neutral-800'
+                  : 'flex items-center justify-between rounded-lg bg-surface-sunken px-3 py-2 dark:bg-surface-overlay'
               }
             >
               <span>

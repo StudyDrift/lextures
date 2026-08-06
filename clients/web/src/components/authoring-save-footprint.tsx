@@ -27,21 +27,21 @@ export function AuthoringSaveFootprint({
 
   return (
     <div
-      className={`lms-print-hide flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm shadow-sm dark:border-neutral-700 dark:bg-neutral-900 ${className}`}
+      className={`lms-print-hide flex flex-wrap items-center gap-3 rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm shadow-sm dark:border-border-default dark:bg-surface-raised ${className}`}
       aria-live="polite"
     >
-      <div className="min-w-0 flex-1 text-slate-600 dark:text-neutral-300">
+      <div className="min-w-0 flex-1 text-fg-muted">
         {saving ? (
-          <span className="font-medium text-slate-800 dark:text-neutral-100">Saving…</span>
+          <span className="font-medium text-fg-default">Saving…</span>
         ) : error ? (
           <span className="text-rose-700 dark:text-rose-300">Could not save — check your connection and try again.</span>
         ) : rel ? (
           <span>
             <span className="font-medium text-emerald-800 dark:text-emerald-200">Saved</span>{' '}
-            <span className="text-slate-500 dark:text-neutral-400">{rel}</span>
+            <span className="text-fg-muted">{rel}</span>
           </span>
         ) : (
-          <span className="text-slate-500 dark:text-neutral-400">Not saved yet</span>
+          <span className="text-fg-muted">Not saved yet</span>
         )}
       </div>
       {error && onRetry ? (

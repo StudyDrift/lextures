@@ -42,7 +42,7 @@ type PaletteItemConfig = {
 }
 
 const PALETTE_SURFACE_CLASS =
-  'rounded-xl bg-white shadow-sm ring-1 ring-black/[0.05] hover:shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_1px_2px_-1px_rgba(0,0,0,0.08),0_2px_4px_0_rgba(0,0,0,0.04)] motion-safe:transition-[box-shadow,transform] motion-safe:active:scale-[0.98] dark:bg-neutral-900 dark:ring-white/10 dark:hover:ring-white/[0.13]'
+  'rounded-xl bg-surface-raised shadow-sm ring-1 ring-black/[0.05] hover:shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_1px_2px_-1px_rgba(0,0,0,0.08),0_2px_4px_0_rgba(0,0,0,0.04)] motion-safe:transition-[box-shadow,transform] motion-safe:active:scale-[0.98] dark:bg-surface-raised dark:ring-white/10 dark:hover:ring-white/[0.13]'
 
 const INPUT_ITEMS: PaletteItemConfig[] = [
   {
@@ -50,14 +50,14 @@ const INPUT_ITEMS: PaletteItemConfig[] = [
     labelKey: 'gradingAgent.canvas.palette.studentSubmission',
     descriptionKey: 'gradingAgent.canvas.palette.description.studentSubmission',
     icon: FileText,
-    iconClass: 'bg-slate-500/10 text-slate-600 dark:bg-neutral-500/15 dark:text-neutral-300',
+    iconClass: 'bg-slate-500/10 text-fg-muted dark:bg-neutral-500/15 dark:text-fg-muted',
   },
   {
     type: 'activity',
     labelKey: 'gradingAgent.canvas.palette.activity',
     descriptionKey: 'gradingAgent.canvas.palette.description.activity',
     icon: ClipboardList,
-    iconClass: 'bg-amber-500/10 text-amber-700 dark:text-amber-300',
+    iconClass: 'bg-amber-500/10 text-warning-fg',
   },
   {
     type: 'reference',
@@ -81,14 +81,14 @@ const PROCESSING_ITEMS: PaletteItemConfig[] = [
     labelKey: 'gradingAgent.canvas.palette.ai',
     descriptionKey: 'gradingAgent.canvas.palette.description.ai',
     icon: Sparkles,
-    iconClass: 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300',
+    iconClass: 'bg-indigo-500/10 text-accent-fg',
   },
   {
     type: 'criterionGrader',
     labelKey: 'gradingAgent.canvas.palette.criterionGrader',
     descriptionKey: 'gradingAgent.canvas.palette.description.criterionGrader',
     icon: Target,
-    iconClass: 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300',
+    iconClass: 'bg-indigo-500/10 text-accent-fg',
   },
   {
     type: 'codeTestRunner',
@@ -102,7 +102,7 @@ const PROCESSING_ITEMS: PaletteItemConfig[] = [
     labelKey: 'gradingAgent.canvas.palette.router',
     descriptionKey: 'gradingAgent.canvas.palette.description.router',
     icon: GitBranch,
-    iconClass: 'bg-slate-500/10 text-slate-600 dark:text-neutral-300',
+    iconClass: 'bg-slate-500/10 text-fg-muted',
   },
   {
     type: 'scoreAggregator',
@@ -116,14 +116,14 @@ const PROCESSING_ITEMS: PaletteItemConfig[] = [
     labelKey: 'gradingAgent.canvas.palette.reviewGate',
     descriptionKey: 'gradingAgent.canvas.palette.description.reviewGate',
     icon: UserCheck,
-    iconClass: 'bg-slate-500/10 text-slate-600 dark:text-neutral-300',
+    iconClass: 'bg-slate-500/10 text-fg-muted',
   },
   {
     type: 'originality',
     labelKey: 'gradingAgent.canvas.palette.originality',
     descriptionKey: 'gradingAgent.canvas.palette.description.originality',
     icon: ShieldCheck,
-    iconClass: 'bg-amber-500/10 text-amber-700 dark:text-amber-300',
+    iconClass: 'bg-amber-500/10 text-warning-fg',
   },
   {
     type: 'setScore',
@@ -151,7 +151,7 @@ function normalizeSearch(value: string): string {
 function PaletteGroup({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="space-y-1.5">
-      <h3 className="px-0.5 text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-neutral-500">
+      <h3 className="px-0.5 text-[11px] font-semibold uppercase tracking-wide text-fg-subtle">
         {title}
       </h3>
       <div className="flex flex-col gap-1.5">{children}</div>
@@ -224,10 +224,10 @@ function PaletteItem({
         <Icon className="size-4" strokeWidth={2} />
       </span>
       <span className="min-w-0 flex-1 pt-0.5">
-        <span className="text-pretty text-sm font-medium leading-snug text-slate-800 dark:text-neutral-100">
+        <span className="text-pretty text-sm font-medium leading-snug text-fg-default">
           {label}
         </span>
-        <span className="mt-0.5 block text-pretty text-xs leading-snug text-slate-500 dark:text-neutral-400">
+        <span className="mt-0.5 block text-pretty text-xs leading-snug text-fg-muted">
           {description}
         </span>
       </span>
@@ -254,7 +254,7 @@ function PaletteFixedItem({
 }) {
   return (
     <div
-      className="flex min-h-10 items-start gap-2.5 rounded-xl bg-slate-50 px-2.5 py-2.5 ring-1 ring-black/[0.04] dark:bg-neutral-900/60 dark:ring-white/[0.06]"
+      className="flex min-h-10 items-start gap-2.5 rounded-xl bg-surface-base px-2.5 py-2.5 ring-1 ring-black/[0.04]/60 dark:ring-white/[0.06]"
       title={description}
     >
       <span
@@ -265,15 +265,15 @@ function PaletteFixedItem({
       </span>
       <span className="min-w-0 flex-1 pt-0.5">
         <span className="flex flex-wrap items-center gap-1.5">
-          <span className="text-pretty text-sm font-medium leading-snug text-slate-700 dark:text-neutral-200">
+          <span className="text-pretty text-sm font-medium leading-snug text-fg-default">
             {label}
           </span>
-          <span className="inline-flex items-center gap-1 rounded-full bg-slate-200/80 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600 dark:bg-neutral-800 dark:text-neutral-400">
+          <span className="inline-flex items-center gap-1 rounded-full bg-slate-200/80 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-fg-muted dark:bg-surface-overlay dark:text-fg-muted">
             <Lock className="size-2.5" aria-hidden />
             {badge}
           </span>
         </span>
-        <span className="mt-0.5 block text-pretty text-xs leading-snug text-slate-500 dark:text-neutral-400">
+        <span className="mt-0.5 block text-pretty text-xs leading-snug text-fg-muted">
           {description}
         </span>
       </span>
@@ -298,7 +298,7 @@ function PaletteUnavailableItem({
 }) {
   return (
     <div
-      className="flex min-h-10 items-start gap-2.5 rounded-xl bg-slate-50/80 px-2.5 py-2.5 opacity-70 ring-1 ring-black/[0.04] dark:bg-neutral-900/40 dark:ring-white/[0.06]"
+      className="flex min-h-10 items-start gap-2.5 rounded-xl bg-slate-50/80 px-2.5 py-2.5 opacity-70 ring-1 ring-black/[0.04]/40 dark:ring-white/[0.06]"
       title={tooltip}
     >
       <span
@@ -309,14 +309,14 @@ function PaletteUnavailableItem({
       </span>
       <span className="min-w-0 flex-1 pt-0.5">
         <span className="flex flex-wrap items-center gap-1.5">
-          <span className="text-pretty text-sm font-medium leading-snug text-slate-600 dark:text-neutral-400">
+          <span className="text-pretty text-sm font-medium leading-snug text-fg-muted">
             {label}
           </span>
-          <span className="rounded-full bg-slate-200/80 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:bg-neutral-800 dark:text-neutral-500">
+          <span className="rounded-full bg-slate-200/80 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-fg-muted dark:bg-surface-overlay">
             {badge}
           </span>
         </span>
-        <span className="mt-0.5 block text-pretty text-xs leading-snug text-slate-500 dark:text-neutral-500">
+        <span className="mt-0.5 block text-pretty text-xs leading-snug text-fg-subtle">
           {description}
         </span>
       </span>
@@ -403,17 +403,17 @@ export function NodePalette({
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="shrink-0 space-y-2 pb-3">
         <div>
-          <h2 className="text-balance text-sm font-semibold text-slate-900 dark:text-neutral-50">
+          <h2 className="text-balance text-sm font-semibold text-fg-default">
             {t('gradingAgent.canvas.palette.title')}
           </h2>
-          <p className="mt-1 text-pretty text-xs leading-relaxed text-slate-500 dark:text-neutral-400">
+          <p className="mt-1 text-pretty text-xs leading-relaxed text-fg-muted">
             {t('gradingAgent.canvas.palette.hint')}
           </p>
         </div>
         <label className="relative block">
           <span className="sr-only">{t('gradingAgent.canvas.palette.searchLabel')}</span>
           <Search
-            className="pointer-events-none absolute start-2.5 top-1/2 size-3.5 -translate-y-1/2 text-slate-400 dark:text-neutral-500"
+            className="pointer-events-none absolute start-2.5 top-1/2 size-3.5 -translate-y-1/2 text-fg-subtle"
             aria-hidden
           />
           <input
@@ -421,7 +421,7 @@ export function NodePalette({
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder={t('gradingAgent.canvas.palette.searchPlaceholder')}
-            className="w-full rounded-lg bg-slate-50 py-2 ps-8 pe-3 text-sm text-slate-900 shadow-sm ring-1 ring-black/[0.05] outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500/30 dark:bg-neutral-900 dark:text-neutral-100 dark:ring-white/10 dark:placeholder:text-neutral-500 dark:focus:ring-indigo-400/25"
+            className="w-full rounded-lg bg-surface-base py-2 ps-8 pe-3 text-sm text-fg-default shadow-sm ring-1 ring-black/[0.05] outline-none placeholder:text-fg-subtle focus:ring-2 focus:ring-indigo-500/30 dark:bg-surface-raised dark:text-fg-default dark:ring-white/10 dark:placeholder:text-neutral-500 dark:focus:ring-indigo-400/25"
           />
         </label>
       </div>
@@ -511,7 +511,7 @@ export function NodePalette({
             ) : null}
           </div>
         ) : (
-          <p className="px-0.5 py-6 text-center text-pretty text-sm text-slate-500 dark:text-neutral-400">
+          <p className="px-0.5 py-6 text-center text-pretty text-sm text-fg-muted">
             {t('gradingAgent.canvas.palette.searchEmpty')}
           </p>
         )}

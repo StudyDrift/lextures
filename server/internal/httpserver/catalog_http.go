@@ -51,11 +51,6 @@ func (d Deps) handleCatalogSectionsList() http.HandlerFunc {
 		if d.catalogFeatureOff(w) {
 			return
 		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -134,11 +129,6 @@ func (d Deps) handleCatalogSectionDetail() http.HandlerFunc {
 		if d.catalogFeatureOff(w) {
 			return
 		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -176,11 +166,6 @@ func (d Deps) handleCatalogSectionDetail() http.HandlerFunc {
 func (d Deps) handleCatalogSchedule() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if d.catalogFeatureOff(w) {
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
 		userID, ok := d.meUserID(w, r)
@@ -222,11 +207,6 @@ func (d Deps) handleCatalogSchedule() http.HandlerFunc {
 func (d Deps) handleAdminCatalogSync() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if d.catalogFeatureOff(w) {
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
 		orgID, ok := d.meOrgID(w, r)
@@ -294,11 +274,6 @@ func (d Deps) handleAdminCatalogSync() http.HandlerFunc {
 func (d Deps) handleAdminCatalogSyncStatus() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if d.catalogFeatureOff(w) {
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
 		orgID, ok := d.meOrgID(w, r)

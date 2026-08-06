@@ -155,11 +155,6 @@ func (d Deps) registerAdminConsoleRoutes(r chi.Router) {
 
 func (d Deps) handleMeAdminConsoleCapabilities() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -210,11 +205,6 @@ func (d Deps) handleMeAdminConsoleCapabilities() http.HandlerFunc {
 
 func (d Deps) handleAdminConsoleOverview() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		_, orgID, _, ok := d.adminConsoleAccess(w, r, false)
 		if !ok {
 			return
@@ -287,11 +277,6 @@ func parseAdminConsoleListParams(r *http.Request) adminconsole.ListParams {
 
 func (d Deps) handleAdminConsoleUsers() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		_, orgID, _, ok := d.adminConsoleAccess(w, r, false)
 		if !ok {
 			return
@@ -307,11 +292,6 @@ func (d Deps) handleAdminConsoleUsers() http.HandlerFunc {
 
 func (d Deps) handleAdminConsoleUserPatch() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		actor, orgID, _, ok := d.adminConsoleAccess(w, r, true)
 		if !ok {
 			return
@@ -436,11 +416,6 @@ ON CONFLICT DO NOTHING
 
 func (d Deps) handleAdminConsoleCourses() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		_, orgID, _, ok := d.adminConsoleAccess(w, r, false)
 		if !ok {
 			return
@@ -456,11 +431,6 @@ func (d Deps) handleAdminConsoleCourses() http.HandlerFunc {
 
 func (d Deps) handleAdminConsoleCourseStatusPatch() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		actor, orgID, _, ok := d.adminConsoleAccess(w, r, true)
 		if !ok {
 			return
@@ -545,11 +515,6 @@ func (d Deps) handleAdminConsoleCourseStatusPatch() http.HandlerFunc {
 
 func (d Deps) handleAdminConsoleAuditLog() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		_, orgID, _, ok := d.adminConsoleAccess(w, r, false)
 		if !ok {
 			return
@@ -733,11 +698,6 @@ func writeAdminConsoleSettings(w http.ResponseWriter, ctx context.Context, pool 
 
 func (d Deps) handleAdminConsoleDelegate() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		actor, orgID, ga, ok := d.adminConsoleAccess(w, r, true)
 		if !ok {
 			return
@@ -780,11 +740,6 @@ func (d Deps) handleAdminConsoleDelegate() http.HandlerFunc {
 
 func (d Deps) handleAdminConsoleIntegrations() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		_, orgID, _, ok := d.adminConsoleAccess(w, r, false)
 		if !ok {
 			return

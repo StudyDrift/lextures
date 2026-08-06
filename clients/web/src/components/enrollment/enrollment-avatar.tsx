@@ -117,14 +117,14 @@ export function EnrollmentAvatar({
                 left: previewPos.left,
                 transform: 'translateY(-50%)',
               }}
-              className="pointer-events-none fixed z-[200] w-36 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl ring-1 ring-slate-900/5 dark:border-neutral-700 dark:bg-neutral-900 dark:ring-white/10"
+              className="pointer-events-none fixed z-[200] w-36 overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-2xl ring-1 ring-slate-900/5 dark:border-border-default dark:bg-surface-raised dark:ring-white/10"
             >
               <img
                 src={resolvedAvatarUrl}
                 alt=""
                 className="h-32 w-full object-cover"
               />
-              <p className="truncate px-3 py-2 text-center text-sm font-medium text-slate-900 dark:text-neutral-100">
+              <p className="truncate px-3 py-2 text-center text-sm font-medium text-fg-default">
                 {label}
               </p>
             </div>,

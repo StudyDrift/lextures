@@ -21,11 +21,6 @@ type mobileLinkHandlingJSON struct {
 // handleGetOrgMobileLinkHandling is GET /api/v1/orgs/{orgId}/settings/mobile-link-handling
 func (d Deps) handleGetOrgMobileLinkHandling() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		orgID, ok := d.parseOrgID(w, r)
 		if !ok {
 			return
@@ -57,6 +52,7 @@ type putOrgMobileLinkBody struct {
 // handlePutOrgMobileLinkHandling is PUT /api/v1/orgs/{orgId}/settings/mobile-link-handling
 func (d Deps) handlePutOrgMobileLinkHandling() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// TD.5 FR-6: registered for both PUT and PATCH — dispatch is load-bearing.
 		if r.Method != http.MethodPut && r.Method != http.MethodPatch {
 			w.Header().Set("Allow", "PUT, PATCH")
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)

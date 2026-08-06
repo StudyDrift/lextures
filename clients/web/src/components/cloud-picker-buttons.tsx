@@ -59,7 +59,7 @@ export function CloudPickerButtons({
 
   return (
     <div>
-      <p className="mb-2 text-xs font-medium text-slate-600 dark:text-neutral-300">
+      <p className="mb-2 text-xs font-medium text-fg-muted">
         {label}
       </p>
       <div className="flex flex-wrap gap-2">
@@ -70,7 +70,7 @@ export function CloudPickerButtons({
             disabled={disabled || picking !== null}
             onClick={() => void handlePick(provider.provider, provider)}
             aria-haspopup="dialog"
-            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
+            className="rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-fg-muted shadow-sm hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-60 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700"
           >
             {picking === provider.provider ? 'Opening…' : CLOUD_PROVIDER_LABELS[provider.provider]}
           </button>

@@ -108,16 +108,16 @@ export function CloudProvidersPanel() {
 
   return (
     <section>
-      <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">
+      <h2 className="text-base font-semibold text-fg-default">
         Cloud file picker integrations
       </h2>
-      <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+      <p className="mt-1 text-sm text-fg-muted">
         Enable cloud storage providers and register the OAuth or SDK credentials required by each
         picker. Users authenticate with their own accounts — no user tokens are stored on the server.
       </p>
 
       {loading && (
-        <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">Loading…</p>
+        <p className="mt-4 text-sm text-fg-muted">Loading…</p>
       )}
       {error && (
         <p className="mt-4 text-sm text-rose-700 dark:text-rose-300" role="alert">
@@ -131,7 +131,7 @@ export function CloudProvidersPanel() {
       )}
 
       {!loading && !error && (
-        <ul className="mt-4 divide-y divide-slate-200 rounded-xl border border-slate-200 dark:divide-neutral-700 dark:border-neutral-700">
+        <ul className="mt-4 divide-y divide-slate-200 rounded-xl border border-border-default dark:divide-neutral-700 dark:border-border-default">
           {providers.map((p) => {
             const meta = PROVIDER_META[p.provider]
             const draft = drafts[p.provider]
@@ -141,10 +141,10 @@ export function CloudProvidersPanel() {
               <li key={p.provider} className="px-4 py-4">
                 <div className="flex items-start gap-4">
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-slate-900 dark:text-neutral-100">
+                    <p className="text-sm font-medium text-fg-default">
                       {meta.label}
                     </p>
-                    <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
+                    <p className="mt-0.5 text-xs text-fg-muted">
                       {meta.description}
                     </p>
                   </div>
@@ -155,16 +155,10 @@ export function CloudProvidersPanel() {
                     aria-label={`${draft.enabled ? 'Disable' : 'Enable'} ${meta.label}`}
                     disabled={isSaving}
                     onClick={() => updateDraft(p.provider, { enabled: !draft.enabled })}
-                    className={`relative mt-0.5 inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:opacity-60 ${
-                      draft.enabled
-                        ? 'bg-indigo-600'
-                        : 'bg-slate-200 dark:bg-neutral-600'
-                    }`}
+                    className={`relative mt-0.5 inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:opacity-60 ${ draft.enabled ? 'bg-accent-solid' : 'bg-slate-200 dark:bg-neutral-600' }`}
                   >
                     <span
-                      className={`pointer-events-none block h-5 w-5 rounded-full bg-white shadow ring-0 transition-transform ${
-                        draft.enabled ? 'translate-x-5' : 'translate-x-0'
-                      }`}
+                      className={`pointer-events-none block h-5 w-5 rounded-full bg-surface-raised shadow ring-0 transition-transform ${ draft.enabled ? 'translate-x-5' : 'translate-x-0' }`}
                     />
                   </button>
                 </div>
@@ -172,7 +166,7 @@ export function CloudProvidersPanel() {
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   {(p.provider === 'google_drive' || p.provider === 'onedrive') && (
                     <label className="block text-xs">
-                      <span className="font-medium text-slate-600 dark:text-neutral-300">
+                      <span className="font-medium text-fg-muted">
                         OAuth client ID
                       </span>
                       <input
@@ -181,13 +175,13 @@ export function CloudProvidersPanel() {
                         disabled={isSaving}
                         onChange={(e) => updateDraft(p.provider, { clientId: e.target.value })}
                         placeholder={p.provider === 'google_drive' ? '123456789.apps.googleusercontent.com' : 'Azure application (client) ID'}
-                        className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+                        className="mt-1 w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-fg-default outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-60 dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
                       />
                     </label>
                   )}
                   {p.provider === 'google_drive' && (
                     <label className="block text-xs">
-                      <span className="font-medium text-slate-600 dark:text-neutral-300">
+                      <span className="font-medium text-fg-muted">
                         API key (Picker developer key)
                       </span>
                       <input
@@ -196,13 +190,13 @@ export function CloudProvidersPanel() {
                         disabled={isSaving}
                         onChange={(e) => updateDraft(p.provider, { apiKey: e.target.value })}
                         placeholder="AIza…"
-                        className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+                        className="mt-1 w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-fg-default outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-60 dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
                       />
                     </label>
                   )}
                   {p.provider === 'dropbox' && (
                     <label className="block text-xs sm:col-span-2">
-                      <span className="font-medium text-slate-600 dark:text-neutral-300">
+                      <span className="font-medium text-fg-muted">
                         App key
                       </span>
                       <input
@@ -211,7 +205,7 @@ export function CloudProvidersPanel() {
                         disabled={isSaving}
                         onChange={(e) => updateDraft(p.provider, { appKey: e.target.value })}
                         placeholder="Dropbox Chooser app key"
-                        className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+                        className="mt-1 w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-fg-default outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-60 dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
                       />
                     </label>
                   )}
@@ -222,7 +216,7 @@ export function CloudProvidersPanel() {
                     type="button"
                     disabled={isSaving}
                     onClick={() => void handleSave(p.provider)}
-                    className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="rounded-lg bg-accent-solid px-3 py-1.5 text-sm font-medium text-white hover:bg-accent disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {isSaving ? 'Saving…' : 'Save'}
                   </button>

@@ -32,11 +32,6 @@ var globalCollabRooms = yrelay.NewRegistry()
 // First message must be text JSON: {"authToken":"..."}.
 func (d Deps) handleCollabDocWS() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.JWTSigner == nil || d.Pool == nil {
 			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "server misconfiguration")
 			return

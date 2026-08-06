@@ -19,8 +19,8 @@ export function RecentCertificatesCard() {
       <div className="rounded-2xl border border-emerald-100 bg-emerald-50/80 px-5 py-4 dark:border-emerald-900/40 dark:bg-emerald-950/30">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Recent certificates</p>
-            <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">
+            <p className="text-sm font-semibold text-fg-default">Recent certificates</p>
+            <p className="mt-1 text-xs text-fg-muted">
               Download PDFs or share verification links with employers.
             </p>
           </div>
@@ -37,11 +37,11 @@ export function RecentCertificatesCard() {
             <li key={item.id}>
               <Link
                 to="/me/credentials"
-                className="flex items-center gap-2 rounded-lg bg-white/80 px-3 py-2 text-sm text-slate-800 hover:bg-white dark:bg-neutral-900/60 dark:text-neutral-100 dark:hover:bg-neutral-900"
+                className="flex items-center gap-2 rounded-lg bg-white/80 px-3 py-2 text-sm text-fg-default hover:bg-surface-raised/60 dark:text-fg-default dark:hover:bg-surface-raised"
               >
                 <Award className="h-4 w-4 shrink-0 text-emerald-600" aria-hidden />
                 <span className="truncate font-medium">{item.title}</span>
-                <span className="ml-auto shrink-0 text-xs text-slate-500">
+                <span className="ml-auto shrink-0 text-xs text-fg-muted">
                   {new Date(item.issuedAt).toLocaleDateString()}
                 </span>
               </Link>

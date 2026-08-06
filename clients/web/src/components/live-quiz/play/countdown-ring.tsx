@@ -35,13 +35,13 @@ export function CountdownRing({
       aria-atomic="true"
     >
       <div
-        className="relative grid h-16 w-16 place-items-center rounded-full border-4 border-slate-200 dark:border-neutral-700"
+        className="relative grid h-16 w-16 place-items-center rounded-full border-4 border-border-default"
         style={{
           background: `conic-gradient(currentColor ${pct * 360}deg, transparent 0)`,
           color: urgent ? '#dc2626' : '#4f46e5',
         }}
       >
-        <span className="grid h-12 w-12 place-items-center rounded-full bg-white text-xl font-bold tabular-nums text-slate-900 dark:bg-neutral-950 dark:text-neutral-50">
+        <span className="grid h-12 w-12 place-items-center rounded-full bg-surface-raised text-xl font-bold tabular-nums text-fg-default dark:bg-surface-base">
           {left}
         </span>
       </div>

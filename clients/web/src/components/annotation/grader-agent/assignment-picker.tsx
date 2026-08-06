@@ -104,13 +104,11 @@ export function AssignmentPicker({
         aria-expanded={open}
         aria-controls={menuId}
         onClick={() => setOpen((prev) => !prev)}
-        className="flex w-full min-w-0 items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-start text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:hover:bg-neutral-900"
+        className="flex w-full min-w-0 items-center gap-1.5 rounded-lg border border-border-strong bg-surface-raised px-2.5 py-2 text-start text-sm font-medium text-fg-default hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-50 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:hover:bg-surface-raised"
       >
         <span className="min-w-0 flex-1 truncate">{currentLabel}</span>
         <ChevronDown
-          className={`h-4 w-4 shrink-0 text-slate-500 transition-transform dark:text-neutral-400 ${
-            open ? 'rotate-180' : ''
-          }`}
+          className={`h-4 w-4 shrink-0 text-fg-muted transition-transform dark:text-fg-muted ${ open ? 'rotate-180' : '' }`}
           aria-hidden="true"
         />
       </button>
@@ -120,9 +118,9 @@ export function AssignmentPicker({
           id={menuId}
           role="menu"
           aria-labelledby={buttonId}
-          className="absolute start-0 top-full z-50 mt-1 flex max-h-72 w-full min-w-[14rem] flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg dark:border-neutral-600 dark:bg-neutral-900"
+          className="absolute start-0 top-full z-50 mt-1 flex max-h-72 w-full min-w-[14rem] flex-col overflow-hidden rounded-xl border border-border-default bg-surface-raised shadow-lg dark:border-border-default dark:bg-surface-raised"
         >
-          <div className="shrink-0 border-b border-slate-200 p-2 dark:border-neutral-700">
+          <div className="shrink-0 border-b border-border-default p-2 dark:border-border-default">
             <label htmlFor={filterId} className="sr-only">
               {filterPlaceholder}
             </label>
@@ -161,15 +159,15 @@ export function AssignmentPicker({
                   }
                 }
               }}
-              className="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 outline-none ring-indigo-500/0 placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-indigo-400"
+              className="w-full rounded-lg border border-border-strong bg-surface-raised px-2.5 py-1.5 text-xs text-fg-default outline-none ring-indigo-500/0 placeholder:text-fg-subtle focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:placeholder:text-neutral-500 dark:focus:border-indigo-400"
             />
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto py-1">
             {assignments.length === 0 ? (
-              <p className="px-3 py-2 text-xs text-slate-500 dark:text-neutral-400">{emptyLabel}</p>
+              <p className="px-3 py-2 text-xs text-fg-muted">{emptyLabel}</p>
             ) : visibleEntries.length === 0 ? (
-              <p className="px-3 py-2 text-xs text-slate-500 dark:text-neutral-400">{noMatchLabel}</p>
+              <p className="px-3 py-2 text-xs text-fg-muted">{noMatchLabel}</p>
             ) : (
               visibleEntries.map((assignment, visibleIndex) => {
                 const active = assignment.id === value
@@ -189,13 +187,7 @@ export function AssignmentPicker({
                       onChange(assignment.id)
                       setOpen(false)
                     }}
-                    className={`flex w-full items-center gap-2 px-3 py-2 text-start text-xs transition-[background-color,color,border-color] ${
-                      highlighted
-                        ? 'bg-indigo-50 font-semibold text-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-100'
-                        : active
-                          ? 'font-semibold text-indigo-800 dark:text-indigo-200'
-                          : 'text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800'
-                    }`}
+                    className={`flex w-full items-center gap-2 px-3 py-2 text-start text-xs transition-[background-color,color,border-color] ${ highlighted ? 'bg-indigo-50 font-semibold text-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-100' : active ? 'font-semibold text-indigo-800 dark:text-indigo-200' : 'text-fg-muted hover:bg-surface-base dark:text-fg-default dark:hover:bg-surface-overlay' }`}
                   >
                     <span className="min-w-0 flex-1 truncate">{assignment.title}</span>
                   </button>

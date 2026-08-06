@@ -79,10 +79,10 @@ export default function OrgTaxSettingsPage() {
     <LmsPage title="Tax settings">
       <div className="mx-auto max-w-3xl space-y-6">
         <header>
-          <h1 id={titleId} className="text-2xl font-semibold text-slate-900 dark:text-neutral-100">
+          <h1 id={titleId} className="text-2xl font-semibold text-fg-default">
             Tax settings
           </h1>
-          <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
+          <p className="mt-2 text-sm text-fg-muted">
             Configure Stripe Tax jurisdictions, seller details, and run period reports.
           </p>
         </header>
@@ -99,10 +99,10 @@ export default function OrgTaxSettingsPage() {
         ) : null}
 
         {loading || !settings ? (
-          <p className="text-sm text-slate-600 dark:text-neutral-400">Loading…</p>
+          <p className="text-sm text-fg-muted">Loading…</p>
         ) : (
           <form onSubmit={(e) => void handleSave(e)} className="space-y-6">
-            <section className="rounded-xl border border-slate-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
+            <section className="rounded-xl border border-border-default bg-surface-raised p-5 dark:border-border-subtle dark:bg-surface-raised">
               <label className="flex items-center gap-2 text-sm font-medium">
                 <input
                   type="checkbox"
@@ -123,7 +123,7 @@ export default function OrgTaxSettingsPage() {
                         priceDisplay: e.target.value as 'inclusive' | 'exclusive',
                       })
                     }
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                    className="mt-1 w-full rounded-lg border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
                   >
                     <option value="exclusive">Tax exclusive (US norm)</option>
                     <option value="inclusive">Tax inclusive (EU norm)</option>
@@ -135,7 +135,7 @@ export default function OrgTaxSettingsPage() {
                     type="text"
                     value={settings.defaultTaxCategory}
                     onChange={(e) => setSettings({ ...settings, defaultTaxCategory: e.target.value })}
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                    className="mt-1 w-full rounded-lg border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
                   />
                 </div>
               </div>
@@ -155,7 +155,7 @@ export default function OrgTaxSettingsPage() {
                     })
                   }
                   placeholder="GB, DE, US-CA"
-                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                  className="mt-1 w-full rounded-lg border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
                 />
               </div>
 
@@ -166,7 +166,7 @@ export default function OrgTaxSettingsPage() {
                     type="text"
                     value={settings.sellerName}
                     onChange={(e) => setSettings({ ...settings, sellerName: e.target.value })}
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                    className="mt-1 w-full rounded-lg border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
                   />
                 </div>
                 <div>
@@ -175,7 +175,7 @@ export default function OrgTaxSettingsPage() {
                     value={settings.sellerAddress}
                     onChange={(e) => setSettings({ ...settings, sellerAddress: e.target.value })}
                     rows={3}
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                    className="mt-1 w-full rounded-lg border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
                   />
                 </div>
                 <div>
@@ -184,7 +184,7 @@ export default function OrgTaxSettingsPage() {
                     type="text"
                     value={settings.sellerTaxId}
                     onChange={(e) => setSettings({ ...settings, sellerTaxId: e.target.value })}
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                    className="mt-1 w-full rounded-lg border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
                   />
                 </div>
               </div>
@@ -192,7 +192,7 @@ export default function OrgTaxSettingsPage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="mt-4 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
+                className="mt-4 rounded-lg bg-accent-solid px-4 py-2 text-sm font-medium text-white hover:bg-accent disabled:opacity-60"
               >
                 {saving ? 'Saving…' : 'Save settings'}
               </button>
@@ -200,7 +200,7 @@ export default function OrgTaxSettingsPage() {
           </form>
         )}
 
-        <section className="rounded-xl border border-slate-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
+        <section className="rounded-xl border border-border-default bg-surface-raised p-5 dark:border-border-subtle dark:bg-surface-raised">
           <div className="flex flex-wrap items-end gap-3">
             <div>
               <label className="block text-sm font-medium">Report period</label>
@@ -208,25 +208,25 @@ export default function OrgTaxSettingsPage() {
                 type="month"
                 value={period}
                 onChange={(e) => setPeriod(e.target.value)}
-                className="mt-1 rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                className="mt-1 rounded-lg border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
               />
             </div>
             <button
               type="button"
               onClick={() => void load()}
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-800"
+              className="rounded-lg border border-border-strong px-4 py-2 text-sm hover:bg-surface-base dark:border-border-default dark:hover:bg-surface-overlay"
             >
               Refresh report
             </button>
           </div>
 
           {reportRows.length === 0 ? (
-            <p className="mt-4 text-sm text-slate-600 dark:text-neutral-400">No tax collected in this period.</p>
+            <p className="mt-4 text-sm text-fg-muted">No tax collected in this period.</p>
           ) : (
             <div className="mt-4 overflow-x-auto">
               <table className="min-w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-slate-200 text-slate-500 dark:border-neutral-700">
+                  <tr className="border-b border-border-default text-fg-muted dark:border-border-default">
                     <th className="py-2 pr-4 font-medium">Jurisdiction</th>
                     <th className="py-2 pr-4 font-medium">Type</th>
                     <th className="py-2 pr-4 font-medium">Transactions</th>
@@ -236,7 +236,7 @@ export default function OrgTaxSettingsPage() {
                 </thead>
                 <tbody>
                   {reportRows.map((row) => (
-                    <tr key={`${row.jurisdiction}-${row.taxType}`} className="border-b border-slate-100 dark:border-neutral-800">
+                    <tr key={`${row.jurisdiction}-${row.taxType}`} className="border-b border-border-subtle">
                       <td className="py-3 pr-4">{row.jurisdiction}</td>
                       <td className="py-3 pr-4 uppercase">{row.taxType}</td>
                       <td className="py-3 pr-4">{row.transactionCount}</td>

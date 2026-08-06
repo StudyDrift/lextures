@@ -160,7 +160,7 @@ export default function CourseSyllabus() {
   if (!courseCode) {
     return (
       <LmsPage title="Syllabus" description="">
-        <p className="mt-6 text-sm text-slate-500">Invalid link.</p>
+        <p className="mt-6 text-sm text-fg-muted">Invalid link.</p>
       </LmsPage>
     )
   }
@@ -180,7 +180,7 @@ export default function CourseSyllabus() {
               type="button"
               onClick={cancelEdit}
               disabled={saving}
-              className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-xl border border-border-strong bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-60"
             >
               Cancel
             </button>
@@ -188,7 +188,7 @@ export default function CourseSyllabus() {
               type="button"
               onClick={() => void save()}
               disabled={saving}
-              className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {saving ? 'Saving…' : 'Save'}
             </button>
@@ -201,7 +201,7 @@ export default function CourseSyllabus() {
               type="button"
               onClick={beginEdit}
               disabled={loading}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-xl border border-border-strong bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-60"
             >
               <Pencil className="h-4 w-4" aria-hidden />
               Edit
@@ -220,7 +220,7 @@ export default function CourseSyllabus() {
           {loadError}
         </p>
       )}
-      {loading && <p className="mt-8 text-sm text-slate-500">Loading syllabus…</p>}
+      {loading && <p className="mt-8 text-sm text-fg-muted">Loading syllabus…</p>}
 
       {!loading && !loadError && !editing && canEdit && (
         <div className="mt-6">
@@ -231,10 +231,10 @@ export default function CourseSyllabus() {
       {!loading && !loadError && !editing && (
         <div className="mx-auto mt-8 w-full max-w-[72ch] min-w-0 space-y-6 text-[1.0625rem] leading-relaxed">
           {sections.length === 0 && !permLoading && (
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-fg-muted">
               {canEdit ? (
                 <>
-                  No syllabus content yet. Select <span className="font-medium text-slate-700">Edit</span> to add
+                  No syllabus content yet. Select <span className="font-medium text-fg-muted">Edit</span> to add
                   sections.
                 </>
               ) : (

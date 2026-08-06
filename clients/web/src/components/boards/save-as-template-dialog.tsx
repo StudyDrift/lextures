@@ -62,13 +62,13 @@ export function SaveAsTemplateDialog({ open, onClose, courseCode, board, onSaved
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="w-full max-w-md rounded-none bg-white p-4 shadow-xl dark:bg-neutral-900 sm:rounded-lg"
+        className="w-full max-w-md rounded-none bg-surface-raised p-4 shadow-xl dark:bg-surface-raised sm:rounded-lg"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 id={titleId} className="text-lg font-semibold text-slate-900 dark:text-neutral-100">
+        <h2 id={titleId} className="text-lg font-semibold text-fg-default">
           {t('boards.template.saveTitle')}
         </h2>
-        <p className="mt-1 text-sm text-slate-600 dark:text-neutral-300">
+        <p className="mt-1 text-sm text-fg-muted">
           {t('boards.template.saveSubtitle')}
         </p>
         <form
@@ -78,20 +78,20 @@ export function SaveAsTemplateDialog({ open, onClose, courseCode, board, onSaved
           className="mt-4 space-y-3"
         >
           <label className="block text-sm">
-            <span className="font-medium text-slate-700 dark:text-neutral-200">
+            <span className="font-medium text-fg-default">
               {t('boards.template.scopeLabel')}
             </span>
             <select
               value={scope}
               onChange={(e) => setScope(e.target.value as 'course' | 'org')}
-              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+              className="mt-1 w-full rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
             >
               <option value="course">{t('boards.template.scopeCourse')}</option>
               <option value="org">{t('boards.template.scopeOrg')}</option>
             </select>
           </label>
           <label className="block text-sm">
-            <span className="font-medium text-slate-700 dark:text-neutral-200">
+            <span className="font-medium text-fg-default">
               {t('boards.create.titleLabel')}
             </span>
             <input
@@ -99,18 +99,18 @@ export function SaveAsTemplateDialog({ open, onClose, courseCode, board, onSaved
               onChange={(e) => setTitle(e.target.value)}
               maxLength={200}
               required
-              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+              className="mt-1 w-full rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
             />
           </label>
           <label className="block text-sm">
-            <span className="font-medium text-slate-700 dark:text-neutral-200">
+            <span className="font-medium text-fg-default">
               {t('boards.create.descriptionLabel')}
             </span>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
-              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+              className="mt-1 w-full rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
             />
           </label>
           <label className="flex items-start gap-2 text-sm">
@@ -139,7 +139,7 @@ export function SaveAsTemplateDialog({ open, onClose, courseCode, board, onSaved
               </label>
             </div>
           ) : (
-            <p className="text-xs text-slate-500 dark:text-neutral-400">
+            <p className="text-xs text-fg-muted">
               {t('boards.template.structureOnlyHint')}
             </p>
           )}
@@ -147,14 +147,14 @@ export function SaveAsTemplateDialog({ open, onClose, courseCode, board, onSaved
             <button
               type="button"
               onClick={onClose}
-              className="rounded-md px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:text-neutral-200 dark:hover:bg-neutral-800"
+              className="rounded-md px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-sunken dark:text-fg-default dark:hover:bg-surface-overlay"
             >
               {t('dialogs.cancel')}
             </button>
             <button
               type="submit"
               disabled={submitting || (includePosts && !confirmPosts) || !title.trim()}
-              className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+              className="rounded-md bg-accent-solid px-3 py-2 text-sm font-medium text-white hover:bg-accent disabled:opacity-50"
             >
               {submitting ? t('common.loading') : t('boards.template.saveSubmit')}
             </button>

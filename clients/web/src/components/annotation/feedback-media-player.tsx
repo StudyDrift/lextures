@@ -114,28 +114,28 @@ function FeedbackMediaItem({
   }
 
   if (!mediaUrl) {
-    return <p className="text-sm text-slate-500 dark:text-neutral-400">Loading…</p>
+    return <p className="text-sm text-fg-muted">Loading…</p>
   }
 
   const cap =
     media.captionStatus === 'done' ? (
-      <span className="ms-2 text-xs text-slate-500 dark:text-neutral-400">(captions)</span>
+      <span className="ms-2 text-xs text-fg-muted">(captions)</span>
     ) : media.captionStatus === 'failed' ? (
-      <span className="ms-2 text-xs text-amber-700 dark:text-amber-200">(captions unavailable)</span>
+      <span className="ms-2 text-xs text-warning-fg dark:text-amber-200">(captions unavailable)</span>
     ) : (
-      <span className="ms-2 text-xs text-slate-500 dark:text-neutral-400">(captions generating…)</span>
+      <span className="ms-2 text-xs text-fg-muted">(captions generating…)</span>
     )
 
   return (
     <>
     {ConfirmDialogHost}
     <div
-      className="rounded-xl border border-slate-200 bg-slate-50/80 p-3 dark:border-neutral-600 dark:bg-neutral-900/60"
+      className="rounded-xl border border-border-default bg-slate-50/80 p-3 dark:border-border-default/60"
       onKeyDown={onKeyDown}
       tabIndex={0}
     >
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-        <div className="text-sm font-medium text-slate-800 dark:text-neutral-100">
+        <div className="text-sm font-medium text-fg-default">
           Instructor feedback
           {media.durationSecs != null ? ` · ${media.durationSecs}s` : null}
           {cap}
@@ -166,7 +166,7 @@ function FeedbackMediaItem({
           {trackUrl ? <track kind="captions" srcLang="en" label="Captions" default src={trackUrl} /> : null}
         </audio>
       )}
-      <p className="mt-1 text-xs text-slate-500 dark:text-neutral-500">
+      <p className="mt-1 text-xs text-fg-subtle">
         Keyboard: Space play/pause · ←/→ seek · M mute
       </p>
     </div>
@@ -187,7 +187,7 @@ export type FeedbackMediaPlayerListProps = {
 export function FeedbackMediaPlayerList({ courseCode, itemId, submissionId, items, readOnly, onChanged }: FeedbackMediaPlayerListProps) {
   if (items.length === 0) {
     return (
-      <p className="text-sm text-slate-600 dark:text-neutral-400">
+      <p className="text-sm text-fg-muted">
         {readOnly ? 'No media feedback yet.' : 'No media feedback saved yet.'}
       </p>
     )

@@ -285,7 +285,7 @@ function FeedMessageBody({
           return (
             <p
               key={`t-${i}`}
-              className="whitespace-pre-wrap text-[0.9375rem] leading-relaxed text-slate-800 dark:text-neutral-100"
+              className="whitespace-pre-wrap text-[0.9375rem] leading-relaxed text-fg-default"
             >
               {formatMessageBody(part.text, peopleById, roster)}
             </p>
@@ -293,7 +293,7 @@ function FeedMessageBody({
         }
         if (!isFeedEmbeddedCourseImageUrl(part.src)) {
           return (
-            <p key={`i-${i}`} className="text-xs text-slate-400 dark:text-neutral-500">
+            <p key={`i-${i}`} className="text-xs text-fg-subtle">
               [Image link not allowed]
             </p>
           )
@@ -303,7 +303,7 @@ function FeedMessageBody({
             key={`i-${i}`}
             src={part.src}
             alt={part.alt || 'Attached image'}
-            className="max-h-[min(24rem,70vh)] w-auto max-w-full rounded-lg border border-slate-200 dark:border-neutral-700"
+            className="max-h-[min(24rem,70vh)] w-auto max-w-full rounded-lg border border-border-default"
           />
         )
       })}
@@ -621,7 +621,7 @@ export default function CourseFeedPage() {
   if (!courseCode) {
     return (
       <LmsPage title="Feed" description="">
-        <p className="mt-6 text-sm text-slate-500">Invalid link.</p>
+        <p className="mt-6 text-sm text-fg-muted">Invalid link.</p>
     </LmsPage>
     )
   }
@@ -632,19 +632,25 @@ export default function CourseFeedPage() {
 
   const pageTitle = course ? `Course feed, ${course.title}` : 'Course feed'
 
+  // Same full-height pattern as inbox: viewport height under the top bar (h-14),
+  // no LmsPage padding wrapper — nested fillHeight never reaches the columns.
   return (
-    <LmsPage fillHeight omitHeader title={pageTitle}>
-      <div data-focus-anchor="feed.channel.announcements">
-      {loading && <p className="text-sm text-slate-500 dark:text-neutral-400">Loading…</p>}
+    <>
+      <h1 className="sr-only">{pageTitle}</h1>
+      <div
+        data-focus-anchor="feed.channel.announcements"
+        className="flex h-[calc(100dvh-3.5rem)] min-h-0 flex-col overflow-hidden bg-surface-raised px-3 py-3 sm:px-4 sm:py-3 md:px-5"
+      >
+      {loading && <p className="shrink-0 text-sm text-fg-muted">Loading…</p>}
       {error && (
-        <p className="mt-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-100">
+        <p className="mb-2 shrink-0 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-100">
           {error}
         </p>
       )}
 
       {notifPrefsOpen && (
         <div
-          className="fixed inset-0 z-[60] flex items-end justify-center bg-slate-900/40 p-4 sm:items-center dark:bg-neutral-950"
+          className="fixed inset-0 z-[60] flex items-end justify-center bg-slate-900/40 p-4 sm:items-center dark:bg-surface-base"
           role="dialog"
           aria-modal="true"
           aria-labelledby="feed-notif-prefs-title"
@@ -652,15 +658,15 @@ export default function CourseFeedPage() {
             if (e.target === e.currentTarget) setNotifPrefsOpen(false)
           }}
         >
-          <div className="w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-950">
-            <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 dark:border-neutral-800">
+          <div className="w-full max-w-md overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-base">
+            <div className="flex items-center justify-between border-b border-border-subtle px-4 py-3 dark:border-border-subtle">
               <div className="flex min-w-0 items-center gap-2">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-200">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-accent-fg dark:bg-indigo-950/60 dark:text-indigo-200">
                   <Bell className="h-4 w-4" aria-hidden />
                 </span>
                 <h3
                   id="feed-notif-prefs-title"
-                  className="text-sm font-semibold text-slate-900 dark:text-neutral-100"
+                  className="text-sm font-semibold text-fg-default"
                 >
                   Notification Preferences
                 </h3>
@@ -668,98 +674,98 @@ export default function CourseFeedPage() {
               <button
                 type="button"
                 onClick={() => setNotifPrefsOpen(false)}
-                className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
+                className="rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken hover:text-fg-default dark:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-fg-default"
                 aria-label="Close"
               >
                 <X className="h-5 w-5" aria-hidden />
               </button>
             </div>
             <div className="max-h-[min(28rem,70vh)] space-y-4 overflow-y-auto px-4 py-4">
-              <p className="text-xs leading-relaxed text-slate-500 dark:text-neutral-400">
+              <p className="text-xs leading-relaxed text-fg-muted">
                 Choose what you want to be notified about for this course feed. Preferences are
                 stored on this device for this course until account-wide delivery is connected.
               </p>
               <fieldset className="space-y-3">
                 <legend className="sr-only">Feed notification options</legend>
-                <label className="flex cursor-pointer gap-3 rounded-xl border border-transparent px-1 py-1 hover:border-slate-100 hover:bg-slate-50/80 dark:hover:border-neutral-800 dark:hover:bg-neutral-900">
+                <label className="flex cursor-pointer gap-3 rounded-xl border border-transparent px-1 py-1 hover:border-border-subtle hover:bg-slate-50/80 dark:hover:border-border-subtle dark:hover:bg-surface-raised">
                   <input
                     type="checkbox"
-                    className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 dark:border-neutral-600 dark:bg-neutral-900"
+                    className="mt-0.5 h-4 w-4 shrink-0 rounded border-border-strong text-accent-fg focus:ring-indigo-500 dark:border-border-default dark:bg-surface-raised"
                     checked={notifPrefsDraft.onMention}
                     onChange={(e) =>
                       setNotifPrefsDraft((p) => ({ ...p, onMention: e.target.checked }))
                     }
                   />
                   <span className="min-w-0">
-                    <span className="block text-sm font-medium text-slate-900 dark:text-neutral-100">
+                    <span className="block text-sm font-medium text-fg-default">
                       When someone @mentions me
                     </span>
-                    <span className="mt-0.5 block text-xs text-slate-500 dark:text-neutral-400">
+                    <span className="mt-0.5 block text-xs text-fg-muted">
                       Includes messages where your name appears after @.
                     </span>
                   </span>
                 </label>
-                <label className="flex cursor-pointer gap-3 rounded-xl border border-transparent px-1 py-1 hover:border-slate-100 hover:bg-slate-50/80 dark:hover:border-neutral-800 dark:hover:bg-neutral-900">
+                <label className="flex cursor-pointer gap-3 rounded-xl border border-transparent px-1 py-1 hover:border-border-subtle hover:bg-slate-50/80 dark:hover:border-border-subtle dark:hover:bg-surface-raised">
                   <input
                     type="checkbox"
-                    className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 dark:border-neutral-600 dark:bg-neutral-900"
+                    className="mt-0.5 h-4 w-4 shrink-0 rounded border-border-strong text-accent-fg focus:ring-indigo-500 dark:border-border-default dark:bg-surface-raised"
                     checked={notifPrefsDraft.onReplyToMyPost}
                     onChange={(e) =>
                       setNotifPrefsDraft((p) => ({ ...p, onReplyToMyPost: e.target.checked }))
                     }
                   />
                   <span className="min-w-0">
-                    <span className="block text-sm font-medium text-slate-900 dark:text-neutral-100">
+                    <span className="block text-sm font-medium text-fg-default">
                       When someone replies to my post
                     </span>
-                    <span className="mt-0.5 block text-xs text-slate-500 dark:text-neutral-400">
+                    <span className="mt-0.5 block text-xs text-fg-muted">
                       Replies in threads you started at the top level.
                     </span>
                   </span>
                 </label>
-                <label className="flex cursor-pointer gap-3 rounded-xl border border-transparent px-1 py-1 hover:border-slate-100 hover:bg-slate-50/80 dark:hover:border-neutral-800 dark:hover:bg-neutral-900">
+                <label className="flex cursor-pointer gap-3 rounded-xl border border-transparent px-1 py-1 hover:border-border-subtle hover:bg-slate-50/80 dark:hover:border-border-subtle dark:hover:bg-surface-raised">
                   <input
                     type="checkbox"
-                    className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 dark:border-neutral-600 dark:bg-neutral-900"
+                    className="mt-0.5 h-4 w-4 shrink-0 rounded border-border-strong text-accent-fg focus:ring-indigo-500 dark:border-border-default dark:bg-surface-raised"
                     checked={notifPrefsDraft.onAnyChannelMessage}
                     onChange={(e) =>
                       setNotifPrefsDraft((p) => ({ ...p, onAnyChannelMessage: e.target.checked }))
                     }
                   />
                   <span className="min-w-0">
-                    <span className="block text-sm font-medium text-slate-900 dark:text-neutral-100">
+                    <span className="block text-sm font-medium text-fg-default">
                       Every new message in the feed
                     </span>
-                    <span className="mt-0.5 block text-xs text-slate-500 dark:text-neutral-400">
+                    <span className="mt-0.5 block text-xs text-fg-muted">
                       Can be frequent in active channels.
                     </span>
                   </span>
                 </label>
-                <label className="flex cursor-pointer gap-3 rounded-xl border border-transparent px-1 py-1 hover:border-slate-100 hover:bg-slate-50/80 dark:hover:border-neutral-800 dark:hover:bg-neutral-900">
+                <label className="flex cursor-pointer gap-3 rounded-xl border border-transparent px-1 py-1 hover:border-border-subtle hover:bg-slate-50/80 dark:hover:border-border-subtle dark:hover:bg-surface-raised">
                   <input
                     type="checkbox"
-                    className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 dark:border-neutral-600 dark:bg-neutral-900"
+                    className="mt-0.5 h-4 w-4 shrink-0 rounded border-border-strong text-accent-fg focus:ring-indigo-500 dark:border-border-default dark:bg-surface-raised"
                     checked={notifPrefsDraft.onEveryone}
                     onChange={(e) =>
                       setNotifPrefsDraft((p) => ({ ...p, onEveryone: e.target.checked }))
                     }
                   />
                   <span className="min-w-0">
-                    <span className="block text-sm font-medium text-slate-900 dark:text-neutral-100">
+                    <span className="block text-sm font-medium text-fg-default">
                       When staff uses @everyone
                     </span>
-                    <span className="mt-0.5 block text-xs text-slate-500 dark:text-neutral-400">
+                    <span className="mt-0.5 block text-xs text-fg-muted">
                       Whole-class announcements from instructors.
                     </span>
                   </span>
                 </label>
               </fieldset>
             </div>
-            <div className="flex items-center justify-end gap-2 border-t border-slate-100 bg-slate-50/80 px-4 py-3 dark:border-neutral-800 dark:bg-neutral-900">
+            <div className="flex items-center justify-end gap-2 border-t border-border-subtle bg-slate-50/80 px-4 py-3 dark:border-border-subtle dark:bg-surface-raised">
               <button
                 type="button"
                 onClick={() => setNotifPrefsOpen(false)}
-                className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                className="rounded-xl px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay"
               >
                 Cancel
               </button>
@@ -769,7 +775,7 @@ export default function CourseFeedPage() {
                   saveFeedNotificationPrefs(courseCode, notifPrefsDraft)
                   setNotifPrefsOpen(false)
                 }}
-                className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 dark:shadow-none"
+                className="rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 dark:shadow-none"
               >
                 Save
               </button>
@@ -779,10 +785,10 @@ export default function CourseFeedPage() {
       )}
 
       {!loading && (
-        <div className="flex min-h-0 flex-1 flex-col gap-3 md:flex-row md:items-stretch">
-          <aside className="flex w-full shrink-0 flex-col rounded-xl border border-slate-200 bg-white p-2.5 dark:border-neutral-800 dark:bg-neutral-950 md:h-auto md:w-52">
-            <div className="flex items-center justify-between gap-2 px-1 pb-2">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3 md:flex-row">
+          <aside className="flex max-h-40 w-full shrink-0 flex-col overflow-hidden rounded-xl border border-border-subtle bg-surface-base p-2.5 md:max-h-none md:h-full md:w-52">
+            <div className="flex shrink-0 items-center justify-between gap-2 px-1 pb-2">
+              <p className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
                 Channels
               </p>
               <button
@@ -791,13 +797,13 @@ export default function CourseFeedPage() {
                   setNewChannelName('')
                   setNewChannelModalOpen(true)
                 }}
-                className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+                className="rounded-md p-1 text-fg-subtle hover:bg-surface-sunken hover:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-fg-default"
                 aria-label="New channel"
               >
                 <Plus className="h-4 w-4" aria-hidden />
               </button>
             </div>
-            <div className="flex flex-col gap-0.5">
+            <div className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto">
               {channels.map((ch) => {
                 const chUnread = feedUnreadForChannel(courseCode, ch.id)
                 return (
@@ -805,17 +811,13 @@ export default function CourseFeedPage() {
                     key={ch.id}
                     type="button"
                     onClick={() => setActiveChannelId(ch.id)}
-                    className={`flex w-full items-center gap-2 rounded-lg px-2 py-2 text-start text-sm font-medium ${
-                      ch.id === activeChannelId
-                        ? 'bg-indigo-50 text-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-100'
-                        : 'text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-900'
-                    }`}
+                    className={`flex w-full items-center gap-2 rounded-lg px-2 py-2 text-start text-sm font-medium ${ ch.id === activeChannelId ? 'bg-indigo-50 text-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-100' : 'text-fg-muted hover:bg-surface-base dark:text-fg-default dark:hover:bg-surface-raised' }`}
                   >
                     <Hash className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
                     <span className="min-w-0 flex-1 truncate">{ch.name}</span>
                     {chUnread > 0 ? (
                       <span
-                        className="min-w-[1.25rem] shrink-0 rounded-full bg-indigo-600 px-1.5 py-0.5 text-center text-[0.65rem] font-bold leading-none text-white tabular-nums dark:bg-indigo-500"
+                        className="min-w-[1.25rem] shrink-0 rounded-full bg-accent-solid px-1.5 py-0.5 text-center text-[0.65rem] font-bold leading-none text-white tabular-nums dark:bg-indigo-500"
                         aria-label={`${chUnread} new ${chUnread === 1 ? 'post' : 'posts'} in ${ch.name}`}
                       >
                         {chUnread > 99 ? '99+' : chUnread}
@@ -829,7 +831,7 @@ export default function CourseFeedPage() {
 
           {newChannelModalOpen && (
             <div
-              className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/40 p-4 sm:items-center dark:bg-neutral-950"
+              className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/40 p-4 sm:items-center dark:bg-surface-base"
               role="dialog"
               aria-modal="true"
               aria-labelledby="feed-new-channel-title"
@@ -837,23 +839,23 @@ export default function CourseFeedPage() {
                 if (e.target === e.currentTarget && !creatingChannel) setNewChannelModalOpen(false)
               }}
             >
-              <div className="w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-950">
-                <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 dark:border-neutral-800">
-                  <h3 id="feed-new-channel-title" className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+              <div className="w-full max-w-md overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-base">
+                <div className="flex items-center justify-between border-b border-border-subtle px-4 py-3 dark:border-border-subtle">
+                  <h3 id="feed-new-channel-title" className="text-sm font-semibold text-fg-default">
                     New channel
                   </h3>
                   <button
                     type="button"
                     onClick={() => !creatingChannel && setNewChannelModalOpen(false)}
                     disabled={creatingChannel}
-                    className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
+                    className="rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken hover:text-fg-default disabled:opacity-50 dark:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-fg-default"
                     aria-label="Close"
                   >
                     <X className="h-5 w-5" aria-hidden />
                   </button>
                 </div>
                 <div className="p-4">
-                  <label className="mb-1.5 block text-xs font-medium text-slate-600 dark:text-neutral-400" htmlFor="feed-new-channel-name">
+                  <label className="mb-1.5 block text-xs font-medium text-fg-muted" htmlFor="feed-new-channel-name">
                     Channel name
                   </label>
                   <input
@@ -870,15 +872,15 @@ export default function CourseFeedPage() {
                     autoFocus
                     disabled={creatingChannel}
                     maxLength={80}
-                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:focus:border-indigo-500 dark:focus:ring-indigo-500/30"
+                    className="w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm text-fg-default focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:focus:border-indigo-500 dark:focus:ring-indigo-500/30"
                   />
                 </div>
-                <div className="flex items-center justify-end gap-2 border-t border-slate-100 bg-slate-50/80 px-4 py-3 dark:border-neutral-800 dark:bg-neutral-900">
+                <div className="flex items-center justify-end gap-2 border-t border-border-subtle bg-slate-50/80 px-4 py-3 dark:border-border-subtle dark:bg-surface-raised">
                   <button
                     type="button"
                     onClick={() => !creatingChannel && setNewChannelModalOpen(false)}
                     disabled={creatingChannel}
-                    className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-50 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                    className="rounded-xl px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-sunken disabled:opacity-50 dark:text-fg-muted dark:hover:bg-surface-overlay"
                   >
                     Cancel
                   </button>
@@ -886,7 +888,7 @@ export default function CourseFeedPage() {
                     type="button"
                     onClick={() => void onCreateChannel()}
                     disabled={creatingChannel || !newChannelName.trim()}
-                    className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 dark:disabled:opacity-40"
+                    className="rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 dark:disabled:opacity-40"
                   >
                     {creatingChannel ? 'Creating…' : 'Create'}
                   </button>
@@ -895,29 +897,29 @@ export default function CourseFeedPage() {
             </div>
           )}
 
-          <section className="feed-container flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[8px] border border-neutral-200 bg-neutral-50 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none">
+          <section className="feed-container flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-border-subtle bg-surface-base">
             {/* Channel Header inside the feed container */}
-            <div className="channel-header flex shrink-0 items-center justify-between border-b border-neutral-200 bg-white px-4 py-3 dark:border-neutral-800 dark:bg-neutral-900">
+            <div className="channel-header flex shrink-0 items-center justify-between border-b border-border-subtle bg-surface-base px-4 py-3">
               <div className="flex items-center gap-2">
-                <span className="text-lg font-semibold text-neutral-400 dark:text-neutral-500">#</span>
-                <h2 className="truncate text-base font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
+                <span className="text-lg font-semibold text-fg-muted">#</span>
+                <h2 className="truncate text-base font-semibold tracking-tight text-fg-default">
                   {channels.find((c) => c.id === activeChannelId)?.name ?? 'general'}
                 </h2>
               </div>
               <details className="group/feed-channel-menu relative shrink-0">
                 <summary
-                  className="list-none cursor-pointer rounded p-1 text-neutral-500 outline-none hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-300 [&::-webkit-details-marker]:hidden"
+                  className="list-none cursor-pointer rounded p-1 text-neutral-500 outline-none hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-surface-overlay dark:hover:text-fg-muted [&::-webkit-details-marker]:hidden"
                   aria-label="Channel menu"
                 >
                   <MoreHorizontal className="h-4 w-4" aria-hidden />
                 </summary>
                 <div
-                  className="absolute end-0 top-full z-40 mt-1 min-w-[14rem] overflow-hidden rounded-lg border border-neutral-200 bg-white py-1 text-sm shadow-lg dark:border-neutral-700 dark:bg-neutral-900"
+                  className="absolute end-0 top-full z-40 mt-1 min-w-[14rem] overflow-hidden rounded-lg border border-neutral-200 bg-surface-raised py-1 text-sm shadow-lg dark:border-border-default dark:bg-surface-raised"
                   onMouseDown={(ev) => ev.preventDefault()}
                 >
                   <button
                     type="button"
-                    className="flex w-full items-center gap-2 px-2.5 py-1.5 text-start text-neutral-700 hover:bg-neutral-100 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                    className="flex w-full items-center gap-2 px-2.5 py-1.5 text-start text-neutral-700 hover:bg-neutral-100 dark:text-fg-default dark:hover:bg-surface-overlay"
                     onClick={(e) => {
                       closeParentDetails(e.currentTarget)
                       setNotifPrefsDraft(loadFeedNotificationPrefs(courseCode))
@@ -948,7 +950,7 @@ export default function CourseFeedPage() {
                   return (
                     <article
                       key={m.id}
-                      className="border-b border-neutral-100 py-2 last:border-b-0 last:pb-1.5 dark:border-neutral-800/70"
+                      className="border-b border-neutral-100 py-2 last:border-b-0 last:pb-1.5/70"
                     >
                       <MessageBlock
                         message={m}
@@ -981,10 +983,10 @@ export default function CourseFeedPage() {
                         <button
                           type="button"
                           onClick={() => toggleRepliesExpanded(m.id)}
-                          className="group/replylink ms-14 mt-1 flex items-center gap-1.5 rounded-lg py-0.5 ps-1 pe-1.5 text-start text-xs font-medium text-indigo-600 hover:bg-indigo-50/80 dark:text-indigo-400 dark:hover:bg-indigo-950/40"
+                          className="group/replylink ms-14 mt-1 flex items-center gap-1.5 rounded-lg py-0.5 ps-1 pe-1.5 text-start text-xs font-medium text-accent-fg hover:bg-indigo-50/80 dark:text-indigo-400 dark:hover:bg-indigo-950/40"
                           aria-expanded={expandedReplyRoots.has(m.id)}
                         >
-                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-slate-500 ring-1 ring-slate-200/80 transition-colors group-hover/replylink:bg-white group-hover/replylink:text-indigo-600 dark:bg-neutral-800 dark:text-neutral-400 dark:ring-neutral-700 dark:group-hover/replylink:bg-neutral-900 dark:group-hover/replylink:text-indigo-300">
+                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-surface-sunken text-fg-muted ring-1 ring-slate-200/80 transition-colors group-hover/replylink:bg-surface-raised group-hover/replylink:text-accent-fg dark:bg-surface-overlay dark:text-fg-muted dark:ring-neutral-700 dark:group-hover/replylink:bg-surface-raised dark:group-hover/replylink:text-indigo-300">
                             <MessageCircle className="h-3 w-3 shrink-0" aria-hidden />
                           </span>
                           {expandedReplyRoots.has(m.id)
@@ -1040,8 +1042,8 @@ export default function CourseFeedPage() {
                   )
                 })}
                 {messages.length === 0 && (
-                  <div className="flex flex-col items-center justify-center py-12 text-center text-sm text-neutral-500 dark:text-neutral-400">
-                    <div className="mb-2 text-base font-medium text-neutral-600 dark:text-neutral-300">
+                  <div className="flex min-h-full flex-col items-center justify-center py-12 text-center text-sm text-fg-muted">
+                    <div className="mb-2 text-base font-medium text-fg-muted">
                       You&apos;re at the beginning of #{channels.find((c) => c.id === activeChannelId)?.name ?? 'general'}
                     </div>
                     <div>No messages yet. Say hello!</div>
@@ -1049,15 +1051,15 @@ export default function CourseFeedPage() {
                 )}
               </div>
 
-              <div className="shrink-0 border-t border-slate-200 px-3 py-2 sm:px-4 dark:border-neutral-800">
+              <div className="shrink-0 border-t border-border-subtle px-3 py-2 sm:px-4">
                 {replyTo && (
-                  <div className="mb-2 flex items-center justify-between gap-2 rounded-lg bg-slate-50 px-3 py-2 text-xs dark:bg-neutral-900">
-                    <span className="truncate text-slate-600 dark:text-neutral-300">
+                  <div className="mb-2 flex items-center justify-between gap-2 rounded-lg bg-surface-base px-3 py-2 text-xs dark:bg-surface-raised">
+                    <span className="truncate text-fg-muted">
                       Replying to <strong>{authorLabel(replyTo)}</strong>
                     </span>
                     <button
                       type="button"
-                      className="shrink-0 rounded p-1 hover:bg-slate-200 dark:hover:bg-neutral-800"
+                      className="shrink-0 rounded p-1 hover:bg-slate-200 dark:hover:bg-surface-overlay"
                       aria-label="Cancel reply"
                       onClick={() => setReplyTo(null)}
                     >
@@ -1082,8 +1084,8 @@ export default function CourseFeedPage() {
         </div>
       )}
       {ConfirmDialogHost}
-          </div>
-    </LmsPage>
+      </div>
+    </>
   )
 }
 
@@ -1140,7 +1142,7 @@ function MessageBlock({
       className={
         isReply
           ? 'group/msg flex gap-2 rounded px-1 py-0.5 transition-colors group-hover/replyrow:bg-neutral-800/60 dark:group-hover/replyrow:bg-neutral-700/50'
-          : 'group/msg rounded-xl px-1 py-0.5 transition-colors hover:bg-slate-50/70 dark:hover:bg-neutral-900'
+          : 'group/msg rounded-xl px-1 py-0.5 transition-colors hover:bg-slate-50/70 dark:hover:bg-surface-raised'
       }
     >
       {isReply ? (
@@ -1150,21 +1152,21 @@ function MessageBlock({
           <div className="min-w-0 flex-1 pt-0.5">
             {/* Header: username + tiny timestamp + badges + reaction pill */}
             <div className="flex items-baseline gap-x-1.5 leading-none">
-              <span className="truncate font-semibold text-[13px] text-slate-900 dark:text-neutral-100">
+              <span className="truncate font-semibold text-[13px] text-fg-default">
                 {author}
               </span>
               <time
-                className="shrink-0 text-[10px] font-medium text-neutral-500 dark:text-neutral-400"
+                className="shrink-0 text-[10px] font-medium text-neutral-500 dark:text-fg-muted"
                 dateTime={m.createdAt}
                 title={formatAbsolute(m.createdAt)}
               >
                 {formatRelativeCompact(m.createdAt)}
               </time>
               {m.editedAt && (
-                <span className="text-[10px] text-neutral-500 dark:text-neutral-400">edited</span>
+                <span className="text-[10px] text-neutral-500 dark:text-fg-muted">edited</span>
               )}
               {m.mentionsEveryone && (
-                <span className="rounded bg-amber-400/20 px-1 py-px text-[9px] font-medium text-amber-700 dark:text-amber-300">
+                <span className="rounded bg-amber-400/20 px-1 py-px text-[9px] font-medium text-warning-fg">
                   @everyone
                 </span>
               )}
@@ -1173,11 +1175,7 @@ function MessageBlock({
               <button
                 type="button"
                 onClick={onToggleLike}
-                className={`ml-auto inline-flex items-center gap-0.5 rounded-full px-1.5 py-px text-[10px] font-medium transition-colors ${
-                  m.viewerHasLiked
-                    ? 'bg-rose-500/15 text-rose-600 dark:text-rose-400'
-                    : 'bg-neutral-700/60 text-neutral-400 hover:bg-neutral-600 hover:text-neutral-200 opacity-70 group-hover/replyrow:opacity-100'
-                }`}
+                className={`ml-auto inline-flex items-center gap-0.5 rounded-full px-1.5 py-px text-[10px] font-medium transition-colors ${ m.viewerHasLiked ? 'bg-rose-500/15 text-rose-600 dark:text-rose-400' : 'bg-neutral-700/60 text-fg-muted hover:bg-neutral-600 hover:text-fg-default opacity-70 group-hover/replyrow:opacity-100' }`}
                 title={m.viewerHasLiked ? 'Unlike' : 'Like'}
               >
                 <Heart className={`h-2.5 w-2.5 ${m.viewerHasLiked ? 'fill-current' : ''}`} aria-hidden />
@@ -1187,16 +1185,16 @@ function MessageBlock({
               {showActionsMenu && (
                 <details className="group/menu relative ml-1 shrink-0">
                   <summary
-                    className="list-none cursor-pointer rounded p-0.5 text-neutral-500 hover:bg-neutral-700/60 hover:text-neutral-300 [&::-webkit-details-marker]:hidden"
+                    className="list-none cursor-pointer rounded p-0.5 text-neutral-500 hover:bg-neutral-700/60 hover:text-fg-muted [&::-webkit-details-marker]:hidden"
                     aria-label="Message actions"
                   >
                     <MoreHorizontal className="h-3 w-3" aria-hidden />
                   </summary>
-                  <div className="absolute end-0 top-full z-30 mt-1 min-w-[8rem] overflow-hidden rounded-lg border border-neutral-700 bg-neutral-900 py-0.5 text-xs shadow-xl ring-1 ring-black/20">
+                  <div className="absolute end-0 top-full z-30 mt-1 min-w-[8rem] overflow-hidden rounded-lg border border-border-default bg-surface-raised py-0.5 text-xs shadow-xl ring-1 ring-black/20">
                     {mine && (
                       <button
                         type="button"
-                        className="flex w-full items-center gap-2 px-3 py-1 text-start text-neutral-200 hover:bg-neutral-800"
+                        className="flex w-full items-center gap-2 px-3 py-1 text-start text-fg-default hover:bg-surface-overlay"
                         onClick={(e) => {
                           closeParentDetails(e.currentTarget)
                           onStartEdit(m)
@@ -1209,7 +1207,7 @@ function MessageBlock({
                     {mine && (
                       <button
                         type="button"
-                        className="flex w-full items-center gap-2 px-3 py-1 text-start text-rose-300 hover:bg-neutral-800"
+                        className="flex w-full items-center gap-2 px-3 py-1 text-start text-rose-300 hover:bg-surface-overlay"
                         onClick={(e) => {
                           closeParentDetails(e.currentTarget)
                           onDelete()
@@ -1225,7 +1223,7 @@ function MessageBlock({
             </div>
 
             {/* Body */}
-            <div className="mt-0.5 text-[13px] leading-snug text-slate-800 dark:text-neutral-200">
+            <div className="mt-0.5 text-[13px] leading-snug text-fg-default">
               <FeedMessageBody body={m.body} peopleById={peopleById} roster={roster} />
             </div>
           </div>
@@ -1238,21 +1236,21 @@ function MessageBlock({
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
-                  <span className="truncate text-[0.9375rem] font-semibold text-slate-900 dark:text-neutral-50">
+                  <span className="truncate text-[0.9375rem] font-semibold text-fg-default">
                     {author}
                   </span>
                   <span className="text-slate-300 dark:text-neutral-600" aria-hidden>
                     ·
                   </span>
                   <time
-                    className="shrink-0 text-xs font-medium text-slate-400 dark:text-neutral-500"
+                    className="shrink-0 text-xs font-medium text-fg-subtle"
                     dateTime={m.createdAt}
                     title={formatAbsolute(m.createdAt)}
                   >
                     {formatRelativeCompact(m.createdAt)}
                   </time>
                   {m.editedAt && (
-                    <span className="text-xs font-medium text-slate-400 dark:text-neutral-500">
+                    <span className="text-xs font-medium text-fg-subtle">
                       · edited
                     </span>
                   )}
@@ -1275,16 +1273,16 @@ function MessageBlock({
               {showActionsMenu && (
                 <details className="group/menu relative shrink-0 -me-1 -mt-0.5">
                   <summary
-                    className="list-none cursor-pointer rounded-full p-1.5 text-slate-400 outline-none hover:bg-slate-200/80 hover:text-slate-600 dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-300 [&::-webkit-details-marker]:hidden"
+                    className="list-none cursor-pointer rounded-full p-1.5 text-fg-subtle outline-none hover:bg-slate-200/80 hover:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-fg-muted [&::-webkit-details-marker]:hidden"
                     aria-label="Message actions"
                   >
                     <MoreHorizontal className="h-4 w-4" aria-hidden />
                   </summary>
-                  <div className="absolute end-0 top-full z-30 mt-1 min-w-[10.5rem] overflow-hidden rounded-xl border border-slate-200/90 bg-white py-1 text-sm shadow-lg ring-1 ring-black/5 dark:border-neutral-700 dark:bg-neutral-900 dark:ring-white/10">
+                  <div className="absolute end-0 top-full z-30 mt-1 min-w-[10.5rem] overflow-hidden rounded-xl border border-slate-200/90 bg-surface-raised py-1 text-sm shadow-lg ring-1 ring-black/5 dark:border-border-default dark:bg-surface-raised dark:ring-white/10">
                     {depth === 0 && (
                       <button
                         type="button"
-                        className="flex w-full items-center gap-2 px-2.5 py-1.5 text-start text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                        className="flex w-full items-center gap-2 px-2.5 py-1.5 text-start text-fg-muted hover:bg-surface-base dark:text-fg-default dark:hover:bg-surface-overlay"
                         onClick={(e) => {
                           closeParentDetails(e.currentTarget)
                           onReply()
@@ -1297,7 +1295,7 @@ function MessageBlock({
                     {mine && (
                       <button
                         type="button"
-                        className="flex w-full items-center gap-2 px-2.5 py-1.5 text-start text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                        className="flex w-full items-center gap-2 px-2.5 py-1.5 text-start text-fg-muted hover:bg-surface-base dark:text-fg-default dark:hover:bg-surface-overlay"
                         onClick={(e) => {
                           closeParentDetails(e.currentTarget)
                           onStartEdit(m)
@@ -1323,7 +1321,7 @@ function MessageBlock({
                     {staff && depth === 0 && (
                       <button
                         type="button"
-                        className="flex w-full items-center gap-2 px-2.5 py-1.5 text-start text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                        className="flex w-full items-center gap-2 px-2.5 py-1.5 text-start text-fg-muted hover:bg-surface-base dark:text-fg-default dark:hover:bg-surface-overlay"
                         onClick={(e) => {
                           closeParentDetails(e.currentTarget)
                           onTogglePin()
@@ -1350,20 +1348,20 @@ function MessageBlock({
                     }
                   }}
                   rows={3}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-inner dark:border-neutral-700 dark:bg-neutral-900"
+                  className="w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm shadow-inner dark:border-border-default dark:bg-surface-raised"
                   maxLength={8000}
                 />
                 <div className="flex gap-2">
                   <button
                     type="button"
-                    className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500"
+                    className="rounded-lg bg-accent-solid px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500"
                     onClick={onSaveEdit}
                   >
                     Save
                   </button>
                   <button
                     type="button"
-                    className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium dark:border-neutral-700"
+                    className="rounded-lg border border-border-default px-3 py-1.5 text-xs font-medium dark:border-border-default"
                     onClick={onCancelEdit}
                   >
                     Cancel
@@ -1395,13 +1393,7 @@ function MessageBlock({
                         ? 'Unlike'
                         : 'Like'
                   }
-                  className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-sm font-medium transition-colors ${
-                    m.viewerHasLiked
-                      ? 'bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-950/35 dark:text-rose-400 dark:hover:bg-rose-950/55'
-                      : m.likeCount > 0
-                        ? 'text-rose-500/95 hover:bg-rose-50 dark:text-rose-400/90 dark:hover:bg-rose-950/30'
-                        : 'text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-300'
-                  }`}
+                  className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-sm font-medium transition-colors ${ m.viewerHasLiked ? 'bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-950/35 dark:text-rose-400 dark:hover:bg-rose-950/55' : m.likeCount > 0 ? 'text-rose-500/95 hover:bg-rose-50 dark:text-rose-400/90 dark:hover:bg-rose-950/30' : 'text-fg-subtle hover:bg-surface-sunken hover:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-fg-muted' }`}
                 >
                   <Heart
                     className={`h-4 w-4 shrink-0 ${m.viewerHasLiked ? 'fill-current' : ''}`}
@@ -1415,7 +1407,7 @@ function MessageBlock({
                   <button
                     type="button"
                     onClick={onReply}
-                    className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
+                    className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-sm font-medium text-fg-muted transition-colors hover:bg-surface-sunken hover:text-fg-default dark:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-fg-default"
                   >
                     <MessageCircle className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
                     Reply

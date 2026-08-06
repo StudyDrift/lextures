@@ -361,6 +361,30 @@ jobs:
       - name: Validate design-token contrast pairs (WCAG 2.1 AA)
         run: npm run contrast:check
 
+  design-system-coverage:
+    name: Design-system coverage ratchet (UX.2)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: clients/web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: clients/web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --quiet
+
+      - name: Design-system coverage (fail on decrease)
+        run: npm run ds:coverage
+
+      - name: Gallery export coverage
+        run: npm run ds:gallery
+
   e2e-coverage:
     name: E2E coverage gate (E2E.4)
     runs-on: ubuntu-latest

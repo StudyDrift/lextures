@@ -112,7 +112,7 @@ export function FlashcardsEditor({
   return (
     <div className="space-y-4" data-testid="flashcards-editor">
       <label className="block space-y-1 text-xs">
-        <span className="font-medium text-slate-700 dark:text-neutral-300">
+        <span className="font-medium text-fg-muted">
           {t('contentTools.tools.flashcards.editor.title')}
         </span>
         <input
@@ -121,7 +121,7 @@ export function FlashcardsEditor({
           disabled={disabled}
           value={typeof value.title === 'string' ? value.title : ''}
           onChange={(e) => patch({ title: e.target.value })}
-          className="w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+          className="w-full rounded-md border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
         />
       </label>
 
@@ -153,7 +153,7 @@ export function FlashcardsEditor({
             disabled={disabled}
             value={typeof value.sessionCap === 'number' ? value.sessionCap : 20}
             onChange={(e) => patch({ sessionCap: Number(e.target.value) || 20 })}
-            className="w-16 rounded-md border border-slate-200 px-1 py-0.5 dark:border-neutral-600 dark:bg-neutral-950"
+            className="w-16 rounded-md border border-border-default px-1 py-0.5 dark:border-border-default dark:bg-surface-base"
           />
         </label>
       </div>
@@ -166,7 +166,7 @@ export function FlashcardsEditor({
         <button
           type="button"
           disabled={disabled}
-          className="rounded-md border border-slate-200 px-2 py-1 text-xs dark:border-neutral-600"
+          className="rounded-md border border-border-default px-2 py-1 text-xs dark:border-border-default"
           onClick={() => setBulkOpen((v) => !v)}
         >
           {t('contentTools.tools.flashcards.editor.bulkPaste')}
@@ -174,7 +174,7 @@ export function FlashcardsEditor({
         <button
           type="button"
           disabled={disabled || cards.length >= 20}
-          className="rounded-md border border-slate-200 px-2 py-1 text-xs dark:border-neutral-600"
+          className="rounded-md border border-border-default px-2 py-1 text-xs dark:border-border-default"
           onClick={addCard}
         >
           {t('contentTools.tools.flashcards.editor.addCard')}
@@ -182,7 +182,7 @@ export function FlashcardsEditor({
       </div>
 
       {bulkOpen ? (
-        <div className="space-y-2 rounded-md border border-slate-200 p-3 dark:border-neutral-600">
+        <div className="space-y-2 rounded-md border border-border-default p-3 dark:border-border-default">
           <label className="block space-y-1 text-xs">
             <span>{t('contentTools.tools.flashcards.editor.delimiter')}</span>
             <input
@@ -190,7 +190,7 @@ export function FlashcardsEditor({
               value={delimiter}
               disabled={disabled}
               onChange={(e) => setDelimiter(e.target.value || '—')}
-              className="w-24 rounded-md border border-slate-200 px-2 py-1 dark:border-neutral-600 dark:bg-neutral-950"
+              className="w-24 rounded-md border border-border-default px-2 py-1 dark:border-border-default dark:bg-surface-base"
             />
           </label>
           <textarea
@@ -203,10 +203,10 @@ export function FlashcardsEditor({
               setBulkPreview(parseBulk(e.target.value, delimiter))
             }}
             placeholder={t('contentTools.tools.flashcards.editor.bulkPlaceholder')}
-            className="w-full rounded-md border border-slate-200 px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+            className="w-full rounded-md border border-border-default px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
           />
           {bulkPreview.length > 0 ? (
-            <p className="text-xs text-slate-600 dark:text-neutral-300">
+            <p className="text-xs text-fg-muted">
               {t('contentTools.tools.flashcards.editor.bulkPreview', {
                 count: String(bulkPreview.length),
               })}
@@ -227,10 +227,10 @@ export function FlashcardsEditor({
         {cards.map((card, idx) => (
           <li
             key={card.id}
-            className="space-y-2 rounded-md border border-slate-200 p-3 dark:border-neutral-600"
+            className="space-y-2 rounded-md border border-border-default p-3 dark:border-border-default"
             data-testid={`flashcards-card-editor-${idx}`}
           >
-            <div className="flex items-center justify-between gap-2 text-xs text-slate-500">
+            <div className="flex items-center justify-between gap-2 text-xs text-fg-muted">
               <span>
                 {t('contentTools.tools.flashcards.editor.cardId')}: {card.id}
               </span>
@@ -250,7 +250,7 @@ export function FlashcardsEditor({
                 rows={2}
                 value={card.front}
                 onChange={(e) => updateCard(idx, { ...card, front: e.target.value })}
-                className="w-full rounded-md border border-slate-200 px-2 py-1 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                className="w-full rounded-md border border-border-default px-2 py-1 text-sm dark:border-border-default dark:bg-surface-base"
               />
             </label>
             <label className="block space-y-1 text-xs">
@@ -260,7 +260,7 @@ export function FlashcardsEditor({
                 rows={2}
                 value={card.back}
                 onChange={(e) => updateCard(idx, { ...card, back: e.target.value })}
-                className="w-full rounded-md border border-slate-200 px-2 py-1 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                className="w-full rounded-md border border-border-default px-2 py-1 text-sm dark:border-border-default dark:bg-surface-base"
               />
             </label>
             <div className="grid grid-cols-2 gap-2 text-xs">
@@ -270,7 +270,7 @@ export function FlashcardsEditor({
                   disabled={disabled}
                   value={card.frontLang ?? ''}
                   onChange={(e) => updateCard(idx, { ...card, frontLang: e.target.value })}
-                  className="w-full rounded-md border border-slate-200 px-2 py-1 dark:border-neutral-600 dark:bg-neutral-950"
+                  className="w-full rounded-md border border-border-default px-2 py-1 dark:border-border-default dark:bg-surface-base"
                 />
               </label>
               <label className="space-y-1">
@@ -279,7 +279,7 @@ export function FlashcardsEditor({
                   disabled={disabled}
                   value={card.backLang ?? ''}
                   onChange={(e) => updateCard(idx, { ...card, backLang: e.target.value })}
-                  className="w-full rounded-md border border-slate-200 px-2 py-1 dark:border-neutral-600 dark:bg-neutral-950"
+                  className="w-full rounded-md border border-border-default px-2 py-1 dark:border-border-default dark:bg-surface-base"
                 />
               </label>
             </div>
@@ -289,7 +289,7 @@ export function FlashcardsEditor({
                 disabled={disabled}
                 value={card.hint ?? ''}
                 onChange={(e) => updateCard(idx, { ...card, hint: e.target.value })}
-                className="w-full rounded-md border border-slate-200 px-2 py-1 dark:border-neutral-600 dark:bg-neutral-950"
+                className="w-full rounded-md border border-border-default px-2 py-1 dark:border-border-default dark:bg-surface-base"
               />
             </label>
           </li>

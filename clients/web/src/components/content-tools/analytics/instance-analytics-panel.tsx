@@ -82,16 +82,16 @@ export function InstanceAnalyticsPanel({
         if (e.target === e.currentTarget) onClose()
       }}
     >
-      <div className="flex max-h-[min(90vh,56rem)] w-full max-w-2xl flex-col overflow-hidden rounded-t-2xl border border-slate-200 bg-white shadow-xl sm:rounded-2xl dark:border-neutral-600 dark:bg-neutral-950">
-        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-slate-200 px-4 py-3 sm:px-5 dark:border-neutral-700">
+      <div className="flex max-h-[min(90vh,56rem)] w-full max-w-2xl flex-col overflow-hidden rounded-t-2xl border border-border-default bg-surface-raised shadow-xl sm:rounded-2xl dark:border-border-default dark:bg-surface-base">
+        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-border-default px-4 py-3 sm:px-5 dark:border-border-default">
           <div className="min-w-0">
             <h2
               id="instance-analytics-title"
-              className="text-base font-semibold text-slate-900 dark:text-neutral-100"
+              className="text-base font-semibold text-fg-default"
             >
               {t('contentTools.analytics.panelTitle')}
             </h2>
-            <p className="mt-0.5 truncate text-sm text-slate-500 dark:text-neutral-400">
+            <p className="mt-0.5 truncate text-sm text-fg-muted">
               {data?.title || data?.toolId || '—'}
             </p>
           </div>
@@ -99,7 +99,7 @@ export function InstanceAnalyticsPanel({
             type="button"
             onClick={onClose}
             aria-label={t('contentTools.instructor.close')}
-            className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+            className="rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken hover:text-fg-default dark:hover:bg-surface-overlay dark:hover:text-fg-default"
           >
             <X className="h-5 w-5" aria-hidden />
           </button>
@@ -107,7 +107,7 @@ export function InstanceAnalyticsPanel({
 
         <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-5">
           {loading ? (
-            <p className="text-sm text-slate-500 dark:text-neutral-400">
+            <p className="text-sm text-fg-muted">
               {t('contentTools.runtime.loading')}
             </p>
           ) : null}
@@ -124,7 +124,7 @@ export function InstanceAnalyticsPanel({
             <div className="space-y-5">
               {data.learners === 0 ? (
                 <p
-                  className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-600 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300"
+                  className="rounded-xl border border-dashed border-border-default bg-surface-base px-3 py-3 text-sm text-fg-muted dark:border-border-default dark:bg-surface-raised dark:text-fg-muted"
                   data-testid="analytics-empty"
                 >
                   {t('contentTools.analytics.empty')}
@@ -165,7 +165,7 @@ export function InstanceAnalyticsPanel({
 
               {!data.suppressed && data.askQuestionsThemes && data.askQuestionsThemes.length > 0 ? (
                 <div data-testid="ask-questions-themes">
-                  <h3 className="mb-2 text-sm font-semibold text-slate-900 dark:text-neutral-100">
+                  <h3 className="mb-2 text-sm font-semibold text-fg-default">
                     {t('contentTools.tools.ask_questions.themesTitle')}
                     {typeof data.totalQuestions === 'number'
                       ? ` (${data.totalQuestions})`
@@ -175,13 +175,13 @@ export function InstanceAnalyticsPanel({
                     {data.askQuestionsThemes.map((theme) => (
                       <li
                         key={theme.theme}
-                        className="rounded-xl border border-slate-200 px-3 py-2 text-sm dark:border-neutral-700"
+                        className="rounded-xl border border-border-default px-3 py-2 text-sm dark:border-border-default"
                       >
-                        <div className="font-medium text-slate-900 dark:text-neutral-100">
+                        <div className="font-medium text-fg-default">
                           {theme.theme}{' '}
-                          <span className="text-xs font-normal text-slate-500">×{theme.count}</span>
+                          <span className="text-xs font-normal text-fg-muted">×{theme.count}</span>
                         </div>
-                        <ul className="mt-1 list-disc ps-4 text-xs text-slate-600 dark:text-neutral-300">
+                        <ul className="mt-1 list-disc ps-4 text-xs text-fg-muted">
                           {theme.representativeExamples.map((ex) => (
                             <li key={ex}>{ex}</li>
                           ))}
@@ -253,7 +253,7 @@ export function InstanceAnalyticsPanel({
                 : null}
 
               <div>
-                <h3 className="mb-2 text-sm font-semibold text-slate-900 dark:text-neutral-100">
+                <h3 className="mb-2 text-sm font-semibold text-fg-default">
                   {t('contentTools.analytics.needsAttention')}
                 </h3>
                 <NeedsAttentionList items={data.needsAttention} />
@@ -263,11 +263,11 @@ export function InstanceAnalyticsPanel({
         </div>
 
         {data && !loading ? (
-          <div className="flex shrink-0 flex-wrap items-center gap-2 border-t border-slate-200 bg-slate-50/80 px-4 py-3 sm:px-5 dark:border-neutral-700 dark:bg-neutral-900/80">
+          <div className="flex shrink-0 flex-wrap items-center gap-2 border-t border-border-default bg-slate-50/80 px-4 py-3 sm:px-5 dark:border-border-default/80">
             {onOpenRoster ? (
               <button
                 type="button"
-                className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                className="rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-sm font-medium text-fg-muted shadow-sm hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
                 onClick={onOpenRoster}
               >
                 {t('contentTools.instructor.openResponses')}
@@ -275,7 +275,7 @@ export function InstanceAnalyticsPanel({
             ) : null}
             <button
               type="button"
-              className="rounded-lg bg-indigo-600 px-3.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+              className="rounded-lg bg-accent-solid px-3.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-400"
               onClick={() => setGradeOpen(true)}
               data-testid="open-grade-link"
             >
@@ -307,11 +307,11 @@ export function InstanceAnalyticsPanel({
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2.5 dark:border-neutral-700 dark:bg-neutral-900">
-      <div className="text-[11px] uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+    <div className="rounded-xl border border-border-subtle bg-surface-base px-3 py-2.5 dark:border-border-default dark:bg-surface-raised">
+      <div className="text-[11px] uppercase tracking-wide text-fg-muted">
         {label}
       </div>
-      <div className="mt-0.5 text-lg font-semibold tabular-nums text-slate-900 dark:text-neutral-100">
+      <div className="mt-0.5 text-lg font-semibold tabular-nums text-fg-default">
         {value}
       </div>
     </div>

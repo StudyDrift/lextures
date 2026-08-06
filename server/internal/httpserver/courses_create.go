@@ -29,11 +29,6 @@ type createCourseBody struct {
 // handleCreateCourse is POST /api/v1/courses.
 func (d Deps) handleCreateCourse() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 
 		userID, ok := d.meUserID(w, r)
 		if !ok {

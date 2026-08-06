@@ -69,9 +69,9 @@ export default function AdminLayout() {
   if (canAccess === false) {
     return (
       <div className="mx-auto max-w-lg p-8 text-center">
-        <Activity className="mx-auto mb-3 h-10 w-10 text-slate-400" aria-hidden />
-        <h1 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Access denied</h1>
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+        <Activity className="mx-auto mb-3 h-10 w-10 text-fg-subtle" aria-hidden />
+        <h1 className="text-lg font-semibold text-fg-default dark:text-slate-100">Access denied</h1>
+        <p className="mt-2 text-sm text-fg-muted dark:text-fg-subtle">
           You need org admin or global admin permissions to use the admin console.
         </p>
       </div>
@@ -107,9 +107,9 @@ export default function AdminLayout() {
     <div className="flex min-h-0 flex-1 flex-col md:flex-row">
       <nav
         aria-label="Admin console"
-        className="border-b border-slate-200 bg-slate-50 px-3 py-2 md:w-56 md:shrink-0 md:border-b-0 md:border-r md:py-4 dark:border-neutral-800 dark:bg-neutral-950"
+        className="border-b border-border-default bg-surface-base px-3 py-2 md:w-56 md:shrink-0 md:border-b-0 md:border-r md:py-4 dark:border-border-subtle dark:bg-surface-base"
       >
-        <p className="mb-2 hidden px-2 text-xs font-semibold uppercase tracking-wide text-slate-500 md:block">
+        <p className="mb-2 hidden px-2 text-xs font-semibold uppercase tracking-wide text-fg-muted md:block">
           Admin console
         </p>
         <ul className="flex gap-1 overflow-x-auto md:flex-col md:overflow-visible">
@@ -122,7 +122,7 @@ export default function AdminLayout() {
                   `flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium whitespace-nowrap ${
                     isActive
                       ? 'bg-indigo-100 text-indigo-900 dark:bg-indigo-950 dark:text-indigo-100'
-                      : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-neutral-900'
+                      : 'text-fg-muted hover:bg-surface-sunken dark:text-slate-300 dark:hover:bg-surface-raised'
                   }`
                 }
               >
@@ -135,7 +135,7 @@ export default function AdminLayout() {
       </nav>
       <div className="min-h-0 min-w-0 flex-1 overflow-auto p-4 md:p-6">
         {canAccess === null ? (
-          <p className="text-sm text-slate-500">Loading admin console…</p>
+          <p className="text-sm text-fg-muted">Loading admin console…</p>
         ) : (
           <>
             <AdminSearchBar />

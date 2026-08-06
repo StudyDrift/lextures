@@ -69,7 +69,7 @@ function isExternalFileDragEvent(
 
 const CHECKBOX_COLUMN_CLASS = 'w-11 px-4 py-2.5 align-middle text-left'
 const CHECKBOX_INPUT_CLASS =
-  'block h-4 w-4 shrink-0 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 dark:border-neutral-600 dark:bg-neutral-900'
+  'block h-4 w-4 shrink-0 rounded border-border-strong text-accent-fg focus:ring-indigo-500 dark:border-border-default dark:bg-surface-raised'
 
 export default function CourseFilesPage() {
   const { t } = useTranslation('common')
@@ -501,7 +501,7 @@ export default function CourseFilesPage() {
   if (permLoading) {
     return (
       <LmsPage title="Files">
-        <p className="text-sm text-slate-500 dark:text-neutral-400">Loading…</p>
+        <p className="text-sm text-fg-muted">Loading…</p>
     </LmsPage>
     )
   }
@@ -528,7 +528,7 @@ export default function CourseFilesPage() {
             <button
               type="button"
               onClick={() => setShowNewFolder(v => !v)}
-              className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+              className="inline-flex items-center gap-1.5 rounded-md border border-border-default bg-surface-raised px-2 py-1.5 text-sm font-medium text-fg-muted shadow-sm hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
             >
               <FolderPlus className="h-4 w-4" aria-hidden />
               New folder
@@ -537,7 +537,7 @@ export default function CourseFilesPage() {
               type="button"
               disabled={uploading}
               onClick={() => fileInputRef.current?.click()}
-              className="inline-flex items-center gap-1.5 rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 rounded-md bg-accent-solid px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-accent disabled:opacity-60"
             >
               {uploading ? (
                 uploadProgress ?? 'Uploading…'
@@ -572,7 +572,7 @@ export default function CourseFilesPage() {
 
       {/* New folder inline form */}
       {showNewFolder && (
-        <div className="mb-4 flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 dark:border-neutral-700 dark:bg-neutral-900">
+        <div className="mb-4 flex items-center gap-2 rounded-lg border border-border-default bg-surface-base px-4 py-3 dark:border-border-default dark:bg-surface-raised">
           <input
             autoFocus
             type="text"
@@ -580,19 +580,19 @@ export default function CourseFilesPage() {
             onChange={e => setNewFolderName(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') void handleCreateFolder(); if (e.key === 'Escape') { setShowNewFolder(false); setNewFolderName('') } }}
             placeholder="Folder name"
-            className="min-w-0 flex-1 rounded border border-slate-300 bg-white px-2 py-1 text-sm text-slate-900 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+            className="min-w-0 flex-1 rounded border border-border-strong bg-surface-raised px-2 py-1 text-sm text-fg-default dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
           />
           <button
             type="button"
             onClick={() => void handleCreateFolder()}
-            className="rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700"
+            className="rounded bg-accent-solid px-3 py-1 text-sm font-medium text-white hover:bg-accent"
           >
             Create
           </button>
           <button
             type="button"
             onClick={() => { setShowNewFolder(false); setNewFolderName('') }}
-            className="rounded px-2 py-1 text-sm text-slate-500 hover:text-slate-700 dark:text-neutral-400"
+            className="rounded px-2 py-1 text-sm text-fg-muted hover:text-fg-muted dark:text-fg-muted"
           >
             Cancel
           </button>
@@ -602,7 +602,7 @@ export default function CourseFilesPage() {
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <div className="relative min-w-[12rem] flex-1 sm:max-w-md">
           <Search
-            className="pointer-events-none absolute start-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-neutral-500"
+            className="pointer-events-none absolute start-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-subtle"
             aria-hidden
           />
           <input
@@ -611,12 +611,12 @@ export default function CourseFilesPage() {
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Search files and folders…"
             aria-label="Search files and folders"
-            className="w-full rounded-lg border border-slate-200 bg-white py-2 ps-9 pe-3 text-sm text-slate-900 outline-none placeholder:text-slate-500 focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/20 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-indigo-500"
+            className="w-full rounded-lg border border-border-default bg-surface-raised py-2 ps-9 pe-3 text-sm text-fg-default outline-none placeholder:text-fg-muted focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/20 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:placeholder:text-neutral-500 dark:focus:border-indigo-500"
           />
         </div>
         {canManage && selectedItems.size > 0 && (
           <div className="flex shrink-0 items-center gap-2">
-            <span className="text-sm text-slate-600 dark:text-neutral-300">
+            <span className="text-sm text-fg-muted">
               {selectedItems.size} selected
             </span>
             <SelectionActionsMenu
@@ -629,7 +629,7 @@ export default function CourseFilesPage() {
             <button
               type="button"
               onClick={clearSelection}
-              className="text-sm text-slate-500 hover:text-slate-700 dark:text-neutral-400 dark:hover:text-neutral-200"
+              className="text-sm text-fg-muted hover:text-fg-muted dark:text-fg-muted dark:hover:text-fg-default"
             >
               Clear
             </button>
@@ -640,10 +640,10 @@ export default function CourseFilesPage() {
       {/* Content */}
       {loading ? (
         <div className="flex items-center justify-center py-16">
-          <span className="text-sm text-slate-500 dark:text-neutral-400">Loading…</span>
+          <span className="text-sm text-fg-muted">Loading…</span>
         </div>
       ) : error ? (
-        <div className="rounded-md bg-red-50 p-4 text-sm text-red-700 dark:bg-red-950/30 dark:text-red-400">
+        <div className="rounded-md bg-red-50 p-4 text-sm text-danger-fg dark:bg-red-950/30 dark:text-red-400">
           {error}
         </div>
       ) : !contents || (contents.folders.length === 0 && contents.files.length === 0) ? (
@@ -654,20 +654,16 @@ export default function CourseFilesPage() {
           onExternalFileDrop={e => void handleExternalFileDrop(e, folderId ?? null)}
         />
       ) : filteredFolders.length === 0 && filteredFiles.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-white py-16 text-center dark:border-neutral-800 dark:bg-neutral-950">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-border-default bg-surface-raised py-16 text-center dark:border-border-subtle dark:bg-surface-base">
           <Search className="mb-3 h-10 w-10 text-slate-300 dark:text-neutral-600" aria-hidden />
-          <p className="text-sm font-medium text-slate-700 dark:text-neutral-200">No matching files or folders</p>
-          <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+          <p className="text-sm font-medium text-fg-default">No matching files or folders</p>
+          <p className="mt-1 text-sm text-fg-muted">
             Try a different search term.
           </p>
         </div>
       ) : (
         <div
-          className={`overflow-hidden rounded-xl border bg-white dark:bg-neutral-950 ${
-            externalFileDragActive && dragOverFolderId === null
-              ? 'border-indigo-400 ring-2 ring-indigo-500/20 dark:border-indigo-600'
-              : 'border-slate-200 dark:border-neutral-800'
-          }`}
+          className={`overflow-hidden rounded-xl border bg-surface-raised ${ externalFileDragActive && dragOverFolderId === null ? 'border-indigo-400 ring-2 ring-indigo-500/20 dark:border-indigo-600' : 'border-border-default dark:border-border-subtle' }`}
           onDragOver={e => {
             if (canManage && isExternalFileDragEvent(e, draggingItem)) {
               e.preventDefault()
@@ -692,7 +688,7 @@ export default function CourseFilesPage() {
               </colgroup>
             )}
             <thead>
-              <tr className="bg-slate-50 dark:bg-neutral-900">
+              <tr className="bg-surface-base">
                 {canManage && (
                   <th className={CHECKBOX_COLUMN_CLASS}>
                     <SelectAllCheckbox
@@ -702,10 +698,10 @@ export default function CourseFilesPage() {
                     />
                   </th>
                 )}
-                <th className={`py-2.5 pr-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400 ${canManage ? 'pl-2' : 'pl-4'}`}>Name</th>
-                <th className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">Size</th>
-                <th className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">Modified</th>
-                {canManage && <th className="py-2.5 pl-3 pr-4 text-right text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">Actions</th>}
+                <th className={`py-2.5 pr-3 text-left text-xs font-semibold uppercase tracking-wide text-fg-muted ${canManage ? 'pl-2' : 'pl-4'}`}>Name</th>
+                <th className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-fg-muted">Size</th>
+                <th className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-fg-muted">Modified</th>
+                {canManage && <th className="py-2.5 pl-3 pr-4 text-right text-xs font-semibold uppercase tracking-wide text-fg-muted">Actions</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50 dark:divide-neutral-800/60">
@@ -771,14 +767,14 @@ export default function CourseFilesPage() {
       )}
       {contextMenu && (
         <div
-          className="fixed z-20 min-w-[160px] rounded-lg border border-slate-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-900"
+          className="fixed z-20 min-w-[160px] rounded-lg border border-border-default bg-surface-raised py-1 shadow-lg dark:border-border-default dark:bg-surface-raised"
           style={{ top: contextMenu.y, left: contextMenu.x }}
           onClick={e => e.stopPropagation()}
         >
           {contextMenu.kind === 'folder' && (
             <>
               <button
-                className="flex w-full items-center gap-2 px-4 py-2 text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                className="flex w-full items-center gap-2 px-4 py-2 text-sm hover:bg-surface-base dark:hover:bg-surface-overlay"
                 onClick={() => { navigateToFolder(contextMenu.item.id); setContextMenu(null) }}
               >
                 Open
@@ -786,14 +782,14 @@ export default function CourseFilesPage() {
               {canManage && (
                 <>
                   <button
-                    className="flex w-full items-center gap-2 px-4 py-2 text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                    className="flex w-full items-center gap-2 px-4 py-2 text-sm hover:bg-surface-base dark:hover:bg-surface-overlay"
                     onClick={() => { setRenamingFolder(contextMenu.item as FileFolder); setRenameValue((contextMenu.item as FileFolder).name); setContextMenu(null) }}
                   >
                     Rename
                   </button>
-                  <hr className="my-1 border-slate-100 dark:border-neutral-700" />
+                  <hr className="my-1 border-border-subtle dark:border-border-default" />
                   <button
-                    className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
+                    className="flex w-full items-center gap-2 px-4 py-2 text-sm text-danger-fg hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
                     onClick={() => { void handleDeleteFolder(contextMenu.item as FileFolder); setContextMenu(null) }}
                   >
                     Delete
@@ -805,13 +801,13 @@ export default function CourseFilesPage() {
           {contextMenu.kind === 'file' && (
             <>
               <button
-                className="flex w-full items-center gap-2 px-4 py-2 text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                className="flex w-full items-center gap-2 px-4 py-2 text-sm hover:bg-surface-base dark:hover:bg-surface-overlay"
                 onClick={() => { setPreviewFile(contextMenu.item as FileItem); setContextMenu(null) }}
               >
                 Preview
               </button>
               <button
-                className="flex w-full items-center gap-2 px-4 py-2 text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                className="flex w-full items-center gap-2 px-4 py-2 text-sm hover:bg-surface-base dark:hover:bg-surface-overlay"
                 onClick={() => { void handleDownloadFile(contextMenu.item as FileItem); setContextMenu(null) }}
               >
                 Download
@@ -819,14 +815,14 @@ export default function CourseFilesPage() {
               {canManage && (
                 <>
                   <button
-                    className="flex w-full items-center gap-2 px-4 py-2 text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                    className="flex w-full items-center gap-2 px-4 py-2 text-sm hover:bg-surface-base dark:hover:bg-surface-overlay"
                     onClick={() => { setRenamingFile(contextMenu.item as FileItem); setRenameValue((contextMenu.item as FileItem).displayName); setContextMenu(null) }}
                   >
                     Rename
                   </button>
-                  <hr className="my-1 border-slate-100 dark:border-neutral-700" />
+                  <hr className="my-1 border-border-subtle dark:border-border-default" />
                   <button
-                    className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
+                    className="flex w-full items-center gap-2 px-4 py-2 text-sm text-danger-fg hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
                     onClick={() => { void handleDeleteFile(contextMenu.item as FileItem); setContextMenu(null) }}
                   >
                     Delete
@@ -873,7 +869,7 @@ export default function CourseFilesPage() {
 }
 
 function FileMimeIcon({ mimeType }: { mimeType: string }) {
-  const className = 'h-4 w-4 shrink-0 text-slate-400 dark:text-neutral-500'
+  const className = 'h-4 w-4 shrink-0 text-fg-subtle'
   if (mimeType.startsWith('image/')) return <Image className={className} aria-hidden />
   if (mimeType === 'application/pdf') return <FileText className={className} aria-hidden />
   if (mimeType.includes('spreadsheet') || mimeType.includes('excel') || mimeType.includes('csv')) {
@@ -954,7 +950,7 @@ function SelectionActionsMenu({
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
         onClick={() => setOpen(o => !o)}
-        className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+        className="inline-flex items-center gap-1.5 rounded-md border border-border-default bg-surface-raised px-2 py-1.5 text-sm font-medium text-fg-muted shadow-sm hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
       >
         Actions
         <ChevronDown
@@ -967,7 +963,7 @@ function SelectionActionsMenu({
           id={menuId}
           role="menu"
           aria-label="Selected file actions"
-          className="absolute start-0 z-50 mt-1 min-w-[10rem] overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-900"
+          className="absolute start-0 z-50 mt-1 min-w-[10rem] overflow-hidden rounded-lg border border-border-default bg-surface-raised py-1 shadow-lg dark:border-border-default dark:bg-surface-raised"
         >
           <button
             type="button"
@@ -977,7 +973,7 @@ function SelectionActionsMenu({
               onRename()
               setOpen(false)
             }}
-            className="flex w-full items-center px-2.5 py-2 text-start text-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-800"
+            className="flex w-full items-center px-2.5 py-2 text-start text-sm hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-surface-overlay"
           >
             Rename
           </button>
@@ -989,12 +985,12 @@ function SelectionActionsMenu({
                 onMoveUp()
                 setOpen(false)
               }}
-              className="flex w-full items-center px-2.5 py-2 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+              className="flex w-full items-center px-2.5 py-2 text-start text-sm hover:bg-surface-base dark:hover:bg-surface-overlay"
             >
               Move up a folder
             </button>
           )}
-          <hr className="my-1 border-slate-100 dark:border-neutral-700" />
+          <hr className="my-1 border-border-subtle dark:border-border-default" />
           <button
             type="button"
             role="menuitem"
@@ -1002,7 +998,7 @@ function SelectionActionsMenu({
               onDelete()
               setOpen(false)
             }}
-            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
+            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm text-danger-fg hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
           >
             <Trash2 className="h-4 w-4 shrink-0" aria-hidden />
             Delete
@@ -1026,11 +1022,7 @@ function EmptyState({
 }) {
   return (
     <div
-      className={`flex flex-col items-center justify-center rounded-xl border-2 border-dashed py-16 text-center ${
-        externalFileDragActive
-          ? 'border-indigo-400 bg-indigo-50/50 dark:border-indigo-600 dark:bg-indigo-950/30'
-          : 'border-slate-200 dark:border-neutral-700'
-      }`}
+      className={`flex flex-col items-center justify-center rounded-xl border-2 border-dashed py-16 text-center ${ externalFileDragActive ? 'border-indigo-400 bg-indigo-50/50 dark:border-indigo-600 dark:bg-indigo-950/30' : 'border-border-default' }`}
       onDragOver={e => {
         if (canManage) {
           e.preventDefault()
@@ -1042,15 +1034,15 @@ function EmptyState({
       }}
     >
       <FolderOpen className="mb-3 h-12 w-12 text-slate-300 dark:text-neutral-600" aria-hidden />
-      <p className="text-sm font-medium text-slate-700 dark:text-neutral-200">No files yet</p>
-      <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+      <p className="text-sm font-medium text-fg-default">No files yet</p>
+      <p className="mt-1 text-sm text-fg-muted">
         {canManage ? 'Upload files, drag and drop them here, or create folders to organize course materials.' : 'No files have been uploaded to this course yet.'}
       </p>
       {canManage && (
         <button
           type="button"
           onClick={onUpload}
-          className="mt-4 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+          className="mt-4 rounded-md bg-accent-solid px-4 py-2 text-sm font-medium text-white hover:bg-accent"
         >
           Upload files
         </button>
@@ -1096,15 +1088,15 @@ function FolderRow({
   const isSelf = draggingItem?.id === folder.id && draggingItem?.kind === 'folder'
   const isDragOver = dragOverFolderId === folder.id
 
-  let dragClass = 'group cursor-pointer hover:bg-slate-50 dark:hover:bg-neutral-900/50 transition-colors'
+  let dragClass = 'group cursor-pointer hover:bg-surface-base dark:hover:bg-neutral-900/50 transition-colors'
   if (isDropTargetMode) {
     if (isSelf) {
       dragClass = 'opacity-40 select-none pointer-events-none'
     } else {
       if (isDragOver) {
-        dragClass = 'bg-indigo-100/90 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-500 ring-inset font-semibold shadow-sm'
+        dragClass = 'bg-indigo-100/90 dark:bg-indigo-900/60 text-accent-fg ring-2 ring-indigo-500 ring-inset font-semibold shadow-sm'
       } else {
-        dragClass = 'bg-indigo-50/60 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 border border-dashed border-indigo-300 dark:border-indigo-700'
+        dragClass = 'bg-indigo-50/60 dark:bg-indigo-950/30 text-accent-fg border border-dashed border-indigo-300 dark:border-indigo-700'
       }
     }
   }
@@ -1179,36 +1171,36 @@ function FolderRow({
             className="flex items-center gap-2"
             onSubmit={e => { e.preventDefault(); onRenameSubmit() }}
           >
-            <FolderOpen className="h-4 w-4 shrink-0 text-slate-400 dark:text-neutral-500" aria-hidden />
+            <FolderOpen className="h-4 w-4 shrink-0 text-fg-subtle" aria-hidden />
             <input
               autoFocus
               value={renameValue}
               onChange={e => setRenameValue(e.target.value)}
               onKeyDown={e => e.key === 'Escape' && onRenameCancel()}
-              className="min-w-0 flex-1 rounded border border-indigo-400 px-1.5 py-0.5 text-sm dark:bg-neutral-800"
+              className="min-w-0 flex-1 rounded border border-indigo-400 px-1.5 py-0.5 text-sm dark:bg-surface-overlay"
             />
-            <button type="submit" className="text-xs text-indigo-600 hover:underline font-medium">Save</button>
-            <button type="button" onClick={onRenameCancel} className="text-xs text-slate-400 hover:underline">Cancel</button>
+            <button type="submit" className="text-xs text-accent-fg hover:underline font-medium">Save</button>
+            <button type="button" onClick={onRenameCancel} className="text-xs text-fg-subtle hover:underline">Cancel</button>
           </form>
         ) : (
           <button
-            className="flex items-center gap-2 text-left text-sm font-medium text-slate-800 hover:text-indigo-600 dark:text-neutral-100 dark:hover:text-indigo-400"
+            className="flex items-center gap-2 text-left text-sm font-medium text-fg-default hover:text-accent-fg dark:text-fg-default dark:hover:text-indigo-400"
             onClick={onNavigate}
           >
-            <FolderOpen className="h-4 w-4 shrink-0 text-slate-400 dark:text-neutral-500" aria-hidden />
+            <FolderOpen className="h-4 w-4 shrink-0 text-fg-subtle" aria-hidden />
             {folder.name}
           </button>
         )}
       </td>
-      <td className="px-3 py-2.5 text-slate-400 dark:text-neutral-500">—</td>
-      <td className="px-3 py-2.5 text-slate-500 dark:text-neutral-400">
+      <td className="px-3 py-2.5 text-fg-subtle">—</td>
+      <td className="px-3 py-2.5 text-fg-muted">
         {formatAbsoluteShort(folder.updatedAt)}
       </td>
       {canManage && (
         <td className="py-2.5 pl-3 pr-4 text-right">
           <div className="invisible flex items-center justify-end gap-2 group-hover:visible">
-            <button onClick={onRenameStart} className="text-xs text-slate-500 hover:text-indigo-600 dark:text-neutral-400 font-medium">Rename</button>
-            <button onClick={onDelete} className="text-xs text-red-500 hover:text-red-700 font-medium">Delete</button>
+            <button onClick={onRenameStart} className="text-xs text-fg-muted hover:text-accent-fg dark:text-fg-muted font-medium">Rename</button>
+            <button onClick={onDelete} className="text-xs text-red-500 hover:text-danger-fg font-medium">Delete</button>
           </div>
         </td>
       )}
@@ -1244,7 +1236,7 @@ function FileRow({
   const isDraggingActive = draggingItem !== null
   const isSelf = draggingItem?.id === file.id && draggingItem?.kind === 'file'
 
-  let dragClass = 'group cursor-default hover:bg-slate-50 dark:hover:bg-neutral-900/50 transition-colors'
+  let dragClass = 'group cursor-default hover:bg-surface-base dark:hover:bg-neutral-900/50 transition-colors'
   if (isDraggingActive) {
     if (isSelf) {
       dragClass = 'opacity-40 select-none pointer-events-none'
@@ -1290,31 +1282,31 @@ function FileRow({
               value={renameValue}
               onChange={e => setRenameValue(e.target.value)}
               onKeyDown={e => e.key === 'Escape' && onRenameCancel()}
-              className="min-w-0 flex-1 rounded border border-indigo-400 px-1.5 py-0.5 text-sm dark:bg-neutral-800"
+              className="min-w-0 flex-1 rounded border border-indigo-400 px-1.5 py-0.5 text-sm dark:bg-surface-overlay"
             />
-            <button type="submit" className="text-xs text-indigo-600 hover:underline font-medium">Save</button>
-            <button type="button" onClick={onRenameCancel} className="text-xs text-slate-400 hover:underline">Cancel</button>
+            <button type="submit" className="text-xs text-accent-fg hover:underline font-medium">Save</button>
+            <button type="button" onClick={onRenameCancel} className="text-xs text-fg-subtle hover:underline">Cancel</button>
           </form>
         ) : (
           <button
             type="button"
             onClick={onPreview}
-            className="flex items-center gap-2 text-left text-sm font-medium text-slate-800 hover:text-indigo-600 dark:text-neutral-100 dark:hover:text-indigo-400"
+            className="flex items-center gap-2 text-left text-sm font-medium text-fg-default hover:text-accent-fg dark:text-fg-default dark:hover:text-indigo-400"
           >
             <FileMimeIcon mimeType={file.mimeType} />
             {file.displayName}
           </button>
         )}
       </td>
-      <td className="px-3 py-2.5 text-slate-500 dark:text-neutral-400">{formatBytes(file.byteSize)}</td>
-      <td className="px-3 py-2.5 text-slate-500 dark:text-neutral-400">
+      <td className="px-3 py-2.5 text-fg-muted">{formatBytes(file.byteSize)}</td>
+      <td className="px-3 py-2.5 text-fg-muted">
         {formatAbsoluteShort(file.updatedAt)}
       </td>
       {canManage && (
         <td className="py-2.5 pl-3 pr-4 text-right">
           <div className="invisible flex items-center justify-end gap-2 group-hover:visible">
-            <button onClick={onRenameStart} className="text-xs text-slate-500 hover:text-indigo-600 dark:text-neutral-400 font-medium">Rename</button>
-            <button onClick={onDelete} className="text-xs text-red-500 hover:text-red-700 font-medium">Delete</button>
+            <button onClick={onRenameStart} className="text-xs text-fg-muted hover:text-accent-fg dark:text-fg-muted font-medium">Rename</button>
+            <button onClick={onDelete} className="text-xs text-red-500 hover:text-danger-fg font-medium">Delete</button>
           </div>
         </td>
       )}

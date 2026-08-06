@@ -12,7 +12,7 @@ export function RunHistoryPanel({ runs, loading = false }: RunHistoryPanelProps)
 
   if (loading && runs.length === 0) {
     return (
-      <section className="mt-4 rounded-xl border border-slate-200 p-4 text-sm text-slate-600 dark:border-neutral-700 dark:text-neutral-300">
+      <section className="mt-4 rounded-xl border border-border-default p-4 text-sm text-fg-muted dark:border-border-default dark:text-fg-muted">
         {t('gradingAgent.review.history.loading')}
       </section>
     )
@@ -22,27 +22,27 @@ export function RunHistoryPanel({ runs, loading = false }: RunHistoryPanelProps)
 
   return (
     <section
-      className="mt-4 rounded-xl border border-slate-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-950"
+      className="mt-4 rounded-xl border border-border-default bg-surface-raised p-4 dark:border-border-default dark:bg-surface-base"
       aria-label={t('gradingAgent.review.history.title')}
     >
-      <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+      <h3 className="text-sm font-semibold text-fg-default">
         {t('gradingAgent.review.history.title')}
       </h3>
       <ul className="mt-3 space-y-2">
         {runs.map((run) => (
           <li
             key={run.id}
-            className="rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-700"
+            className="rounded-lg border border-border-default px-3 py-2 text-sm dark:border-border-default"
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="font-medium text-slate-900 dark:text-neutral-50">
+              <span className="font-medium text-fg-default">
                 {t(`gradingAgent.review.history.scope.${run.scope}`, { defaultValue: run.scope })}
               </span>
-              <span className="text-xs uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+              <span className="text-xs uppercase tracking-wide text-fg-muted">
                 {t(`gradingAgent.review.history.status.${run.status}`, { defaultValue: run.status })}
               </span>
             </div>
-            <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">
+            <p className="mt-1 text-xs text-fg-muted">
               {t('gradingAgent.review.history.counts', {
                 completed: run.completedCount,
                 failed: run.failedCount,
@@ -50,24 +50,24 @@ export function RunHistoryPanel({ runs, loading = false }: RunHistoryPanelProps)
               })}
             </p>
             {run.model ? (
-              <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+              <p className="mt-1 text-xs text-fg-muted">
                 {t('gradingAgent.review.history.model', { model: run.model })}
               </p>
             ) : null}
             {run.costUsd != null ? (
-              <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+              <p className="mt-1 text-xs text-fg-muted">
                 {t('gradingAgent.review.history.cost', { cost: run.costUsd.toFixed(4) })}
               </p>
             ) : null}
             {run.promptTokens != null || run.completionTokens != null ? (
-              <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+              <p className="mt-1 text-xs text-fg-muted">
                 {t('gradingAgent.review.history.tokens', {
                   prompt: run.promptTokens ?? 0,
                   completion: run.completionTokens ?? 0,
                 })}
               </p>
             ) : null}
-            <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+            <p className="mt-1 text-xs text-fg-muted">
               {formatAbsolute(run.createdAt)}
             </p>
           </li>

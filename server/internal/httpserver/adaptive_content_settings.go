@@ -115,10 +115,6 @@ func unitToAPIWithConcepts(u acrepo.UnitRow, conceptIDs []uuid.UUID) acmodel.Uni
 // handleAdaptiveContentSettingsGet is GET .../adaptive-content/settings (course member).
 func (d Deps) handleAdaptiveContentSettingsGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, _, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -151,10 +147,6 @@ func (d Deps) handleAdaptiveContentSettingsGet() http.HandlerFunc {
 // handleAdaptiveContentSettingsPut is PUT .../adaptive-content/settings (instructor).
 func (d Deps) handleAdaptiveContentSettingsPut() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		if acsvc.KillSwitchEngaged() {
 			writeACEKillSwitch(w)
 			return
@@ -240,10 +232,6 @@ func (d Deps) handleAdaptiveContentSettingsPut() http.HandlerFunc {
 // handleAdaptiveContentUnitsList is GET .../adaptive-content/units (instructor|reviewer).
 func (d Deps) handleAdaptiveContentUnitsList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, _, _, ok := d.requireAdaptiveContentReview(w, r)
 		if !ok {
 			return
@@ -300,10 +288,6 @@ func (d Deps) handleAdaptiveContentUnitsList() http.HandlerFunc {
 // handleAdaptiveContentUnitsCreate is POST .../adaptive-content/units (instructor).
 func (d Deps) handleAdaptiveContentUnitsCreate() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		if acsvc.KillSwitchEngaged() {
 			writeACEKillSwitch(w)
 			return
@@ -425,10 +409,6 @@ func (d Deps) handleAdaptiveContentUnitsCreate() http.HandlerFunc {
 // handleAdaptiveContentUnitPatch is PATCH .../units/{unit_id} (instructor).
 func (d Deps) handleAdaptiveContentUnitPatch() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		if acsvc.KillSwitchEngaged() {
 			writeACEKillSwitch(w)
 			return
@@ -605,10 +585,6 @@ func (d Deps) handleAdaptiveContentUnitPatch() http.HandlerFunc {
 // handleAdaptiveContentUnitDelete is DELETE .../units/{unit_id} (instructor).
 func (d Deps) handleAdaptiveContentUnitDelete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		if acsvc.KillSwitchEngaged() {
 			writeACEKillSwitch(w)
 			return

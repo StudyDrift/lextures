@@ -21,10 +21,6 @@ func jobsMethodNotAllowed(w http.ResponseWriter, allow string) {
 // jobs page (plan 17.3 §9 GET /admin/jobs).
 func (d Deps) handleAdminJobsList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			jobsMethodNotAllowed(w, http.MethodGet)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -48,10 +44,6 @@ func (d Deps) handleAdminJobsList() http.HandlerFunc {
 // handleAdminJobsDeadLetters lists dead-letter jobs (plan 17.3 §9).
 func (d Deps) handleAdminJobsDeadLetters() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			jobsMethodNotAllowed(w, http.MethodGet)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -67,10 +59,6 @@ func (d Deps) handleAdminJobsDeadLetters() http.HandlerFunc {
 // handleAdminJobsRedrive re-enqueues a dead-letter job (plan 17.3 AC-5).
 func (d Deps) handleAdminJobsRedrive() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			jobsMethodNotAllowed(w, http.MethodPost)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -95,10 +83,6 @@ func (d Deps) handleAdminJobsRedrive() http.HandlerFunc {
 // handleAdminJobsCancel deletes a pending job (plan 17.3 §9 DELETE /admin/jobs/{id}).
 func (d Deps) handleAdminJobsCancel() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodDelete {
-			jobsMethodNotAllowed(w, http.MethodDelete)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}

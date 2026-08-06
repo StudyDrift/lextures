@@ -74,12 +74,12 @@ export function ChecklistEvidenceTable({
   const table = (
     <table className="w-full min-w-[20rem] border-collapse text-sm">
       <thead>
-        <tr className="border-b border-slate-200 text-start dark:border-neutral-700">
+        <tr className="border-b border-border-default text-start dark:border-border-default">
           {evidence.columns.map((col) => (
             <th
               key={col}
               scope="col"
-              className="px-3 py-2 text-start text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400"
+              className="px-3 py-2 text-start text-xs font-semibold uppercase tracking-wide text-fg-muted"
             >
               {col}
             </th>
@@ -95,7 +95,7 @@ export function ChecklistEvidenceTable({
           return (
             <tr
               key={key}
-              className="border-b border-slate-100 last:border-0 dark:border-neutral-800 max-sm:block max-sm:border max-sm:rounded-lg max-sm:mb-2 max-sm:p-2"
+              className="border-b border-border-subtle last:border-0 dark:border-border-subtle max-sm:block max-sm:border max-sm:rounded-lg max-sm:mb-2 max-sm:p-2"
             >
               {evidence.columns.map((col, colIdx) => {
                 const value = cells[colIdx] ?? ''
@@ -103,7 +103,7 @@ export function ChecklistEvidenceTable({
                 return (
                   <td
                     key={col}
-                    className="px-3 py-2 text-slate-800 dark:text-neutral-200 max-sm:block max-sm:px-0 max-sm:py-1"
+                    className="px-3 py-2 text-fg-default max-sm:block max-sm:px-0 max-sm:py-1"
                     data-label={col}
                   >
                     {isFirst && route ? (
@@ -117,7 +117,7 @@ export function ChecklistEvidenceTable({
                     ) : isFirst ? (
                       <span className="font-medium">{row.label}</span>
                     ) : (
-                      <span className="max-sm:before:content-[attr(data-label)_':_'] max-sm:before:font-semibold max-sm:before:text-slate-500">
+                      <span className="max-sm:before:content-[attr(data-label)_':_'] max-sm:before:font-semibold max-sm:before:text-fg-muted">
                         {value}
                       </span>
                     )}
@@ -137,9 +137,9 @@ export function ChecklistEvidenceTable({
   )
 
   return (
-    <div className="mt-3 overflow-x-auto rounded-lg border border-slate-200 dark:border-neutral-700">
+    <div className="mt-3 overflow-x-auto rounded-lg border border-border-default">
       {truncatedAt != null ? (
-        <p className="border-b border-slate-200 px-3 py-2 text-xs text-slate-500 dark:border-neutral-700 dark:text-neutral-400">
+        <p className="border-b border-border-default px-3 py-2 text-xs text-fg-muted dark:border-border-default dark:text-fg-muted">
           {courseChecklistI18n.evidenceTruncated(rows.length, truncatedAt)}
         </p>
       ) : null}

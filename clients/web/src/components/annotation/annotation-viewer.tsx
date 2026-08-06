@@ -543,7 +543,7 @@ export function AnnotationViewer({
 
   if (!filePath || !mimeType) {
     return (
-      <p className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-600 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300">
+      <p className="rounded-lg border border-border-default bg-surface-base px-4 py-6 text-sm text-fg-muted dark:border-border-default dark:bg-surface-raised dark:text-fg-muted">
         No file on this submission yet.
       </p>
     )
@@ -570,7 +570,7 @@ export function AnnotationViewer({
 
   if (imageUrl) {
     return (
-      <div className="max-h-[80vh] overflow-auto rounded-xl border border-slate-200 bg-white dark:border-neutral-700 dark:bg-neutral-950">
+      <div className="max-h-[80vh] overflow-auto rounded-xl border border-border-default bg-surface-raised dark:border-border-default dark:bg-surface-base">
         <div className="relative inline-block max-w-full">
           <img
             src={imageUrl}
@@ -598,7 +598,7 @@ export function AnnotationViewer({
             onTextBoxComplete={onTextBoxComplete}
           />
         </div>
-        <p className="border-t border-slate-200 px-3 py-2 text-xs text-slate-500 dark:border-neutral-700 dark:text-neutral-400">
+        <p className="border-t border-border-default px-3 py-2 text-xs text-fg-muted dark:border-border-default dark:text-fg-muted">
           Image submissions highlight by dragging a box. Use PDF uploads to highlight selected text.
         </p>
       </div>
@@ -606,13 +606,13 @@ export function AnnotationViewer({
   }
 
   if (!pageLayouts.length) {
-    return <p className="text-sm text-slate-500 dark:text-neutral-400">Loading PDF…</p>
+    return <p className="text-sm text-fg-muted">Loading PDF…</p>
   }
 
   const textLayerInteractive = !readOnly && tool === 'highlight' && textSelectHighlight
 
   return (
-    <div className="max-h-[80vh] space-y-4 overflow-auto rounded-xl border border-slate-200 bg-slate-50/50 p-3 dark:border-neutral-700 dark:bg-neutral-950/40">
+    <div className="max-h-[80vh] space-y-4 overflow-auto rounded-xl border border-border-default bg-slate-50/50 p-3 dark:border-border-default/40">
       {pageLayouts.map((pv, idx) => (
         <div
           key={pv.n}
@@ -627,7 +627,7 @@ export function AnnotationViewer({
             ref={(el) => {
               canvasRefs.current[idx] = el
             }}
-            className="block bg-white dark:bg-neutral-950"
+            className="block bg-surface-raised"
           />
           <div
             ref={(el) => {

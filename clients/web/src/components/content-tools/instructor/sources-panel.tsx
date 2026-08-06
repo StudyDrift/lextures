@@ -86,25 +86,25 @@ export function SourcesPanel({ courseCode, itemId, instanceId }: Props) {
     <section className="mt-6" data-testid="content-tools-sources-panel" aria-labelledby="ct-sources-heading">
       <div className="mb-2 flex flex-wrap items-end justify-between gap-2">
         <div>
-          <h2 id="ct-sources-heading" className="text-base font-semibold text-slate-900 dark:text-neutral-100">
+          <h2 id="ct-sources-heading" className="text-base font-semibold text-fg-default">
             {t('contentTools.context.sourcesTitle')}
           </h2>
-          <p className="mt-0.5 text-sm text-slate-600 dark:text-neutral-300">
+          <p className="mt-0.5 text-sm text-fg-muted">
             {t('contentTools.context.sourcesHelp')}
           </p>
         </div>
-        <p className="text-xs text-slate-500 dark:text-neutral-400" data-testid="ct-sources-token-budget">
+        <p className="text-xs text-fg-muted" data-testid="ct-sources-token-budget">
           {t('contentTools.context.tokenBudget', { count: totalTokens })}
         </p>
       </div>
-      {loading ? <p className="text-sm text-slate-500">{t('contentTools.context.loading')}</p> : null}
+      {loading ? <p className="text-sm text-fg-muted">{t('contentTools.context.loading')}</p> : null}
       {error ? (
         <p className="text-sm text-rose-600" role="alert">
           {error}
         </p>
       ) : null}
       {!loading && items.length === 0 ? (
-        <p className="text-sm text-slate-500" data-testid="ct-sources-empty">
+        <p className="text-sm text-fg-muted" data-testid="ct-sources-empty">
           {t('contentTools.context.empty')}
         </p>
       ) : null}
@@ -112,7 +112,7 @@ export function SourcesPanel({ courseCode, itemId, instanceId }: Props) {
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-sm" aria-label={t('contentTools.context.tableLabel')}>
             <thead>
-              <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500 dark:border-neutral-700">
+              <tr className="border-b border-border-default text-xs uppercase tracking-wide text-fg-muted dark:border-border-default">
                 <th className="px-2 py-2 font-medium">{t('contentTools.context.colTitle')}</th>
                 <th className="px-2 py-2 font-medium">{t('contentTools.context.colHost')}</th>
                 <th className="px-2 py-2 font-medium">{t('contentTools.context.colOrigin')}</th>
@@ -124,13 +124,13 @@ export function SourcesPanel({ courseCode, itemId, instanceId }: Props) {
               {items.map((row) => (
                 <tr
                   key={row.id}
-                  className="border-b border-slate-100 dark:border-neutral-800"
+                  className="border-b border-border-subtle"
                   data-testid={`ct-source-row-${row.id}`}
                   data-status={row.status}
                   data-excluded={row.excluded ? '1' : '0'}
                 >
                   <td className="px-2 py-2">
-                    <div className="font-medium text-slate-800 dark:text-neutral-100">
+                    <div className="font-medium text-fg-default">
                       {row.title || row.url}
                     </div>
                     {row.error ? (
@@ -139,8 +139,8 @@ export function SourcesPanel({ courseCode, itemId, instanceId }: Props) {
                       </div>
                     ) : null}
                   </td>
-                  <td className="px-2 py-2 text-slate-600 dark:text-neutral-300">{row.host || '—'}</td>
-                  <td className="px-2 py-2 text-slate-600 dark:text-neutral-300">{row.origin}</td>
+                  <td className="px-2 py-2 text-fg-muted">{row.host || '—'}</td>
+                  <td className="px-2 py-2 text-fg-muted">{row.origin}</td>
                   <td className="px-2 py-2">
                     <span className="inline-flex items-center gap-1">
                       <span aria-hidden="true">
@@ -148,7 +148,7 @@ export function SourcesPanel({ courseCode, itemId, instanceId }: Props) {
                       </span>
                       <span>{statusLabel(row.status)}</span>
                       {row.excluded ? (
-                        <span className="ml-1 text-xs text-slate-500">
+                        <span className="ml-1 text-xs text-fg-muted">
                           ({t('contentTools.context.excluded')})
                         </span>
                       ) : null}
@@ -207,20 +207,20 @@ export function SourcesPanel({ courseCode, itemId, instanceId }: Props) {
           className="fixed inset-0 z-40 flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4"
           data-testid="ct-extracted-drawer"
         >
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-auto rounded-t-xl bg-white p-4 shadow-lg sm:rounded-xl dark:bg-neutral-900">
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-auto rounded-t-xl bg-surface-raised p-4 shadow-lg sm:rounded-xl dark:bg-surface-raised">
             <div className="mb-3 flex items-start justify-between gap-2">
               <h3 id="ct-extracted-title" className="text-base font-semibold">
                 {t('contentTools.context.extractedTitle')}
               </h3>
               <button
                 type="button"
-                className="text-sm text-slate-600 underline dark:text-neutral-300"
+                className="text-sm text-fg-muted underline dark:text-fg-muted"
                 onClick={() => setDrawer(null)}
               >
                 {t('contentTools.context.close')}
               </button>
             </div>
-            <pre className="whitespace-pre-wrap text-sm text-slate-800 dark:text-neutral-100">
+            <pre className="whitespace-pre-wrap text-sm text-fg-default">
               {drawer.extractedText || t('contentTools.context.noExtracted')}
             </pre>
           </div>

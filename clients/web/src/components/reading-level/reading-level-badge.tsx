@@ -18,7 +18,7 @@ export function ReadingLevelBadge({ fkgl, sufficient, aboveThreshold, onClick }:
     'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium'
   const tone = aboveThreshold
     ? 'border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-100'
-    : 'border-slate-200 bg-slate-50 text-slate-700 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200'
+    : 'border-border-default bg-surface-base text-fg-muted dark:border-border-default dark:bg-surface-overlay dark:text-fg-default'
 
   if (onClick) {
     return (

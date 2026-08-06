@@ -9,15 +9,6 @@ import (
 // Reader markups persistence is not ported yet in server; return a schema-compatible empty list.
 func (d Deps) handleListAssignmentMarkups() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, _, ok := d.requireCourseAccess(w, r); !ok {
 			return
 		}

@@ -41,12 +41,13 @@ func TestAdminSearch_QueryTooShort(t *testing.T) {
 }
 
 func TestAdminSearch_MethodNotAllowed(t *testing.T) {
-	d := Deps{Config: config.Config{AdminSearchEnabled: true}}
+	// TD.5: method dispatch is owned by chi; wrong verbs must 405 on the full stack.
+	h := NewHandler(Deps{Config: config.Config{AdminSearchEnabled: true}})
 	rr := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodPost, "/api/v1/admin/search?q=test", nil)
-	d.handleAdminSearchOmnisearch()(rr, r)
+	h.ServeHTTP(rr, r)
 	if rr.Code != http.StatusMethodNotAllowed {
-		t.Fatalf("status=%d", rr.Code)
+		t.Fatalf("status=%d body=%s", rr.Code, rr.Body.String())
 	}
 }
 

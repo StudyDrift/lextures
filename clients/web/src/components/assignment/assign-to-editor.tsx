@@ -65,7 +65,7 @@ function targetFromApi(t: AssignToTarget): DraftTarget {
 }
 
 const selectClass =
-  'rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100'
+  'rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm text-fg-default focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 disabled:opacity-60 dark:border-border-default dark:bg-surface-base dark:text-fg-default'
 
 const inputClass = selectClass
 
@@ -186,7 +186,7 @@ export function AssignToEditor({
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 py-2 text-sm text-slate-500 dark:text-neutral-400">
+      <div className="flex items-center gap-2 py-2 text-sm text-fg-muted">
         <Loader2 className="size-4 shrink-0 animate-spin" aria-hidden />
         Loading assign-to targets…
       </div>
@@ -195,7 +195,7 @@ export function AssignToEditor({
 
   return (
     <div className="space-y-3 pt-1">
-      <p className="text-[11px] leading-relaxed text-slate-500 dark:text-neutral-400">
+      <p className="text-[11px] leading-relaxed text-fg-muted">
         By default this item is assigned to everyone. Add a section, group, or student target to give it a
         different due date or availability window, or to hide it from everyone else.
       </p>
@@ -210,7 +210,7 @@ export function AssignToEditor({
         {targets.map((t) => (
           <div
             key={t.key}
-            className="space-y-2 rounded-lg border border-slate-200 bg-slate-50/60 p-2.5 dark:border-neutral-700 dark:bg-neutral-900/40"
+            className="space-y-2 rounded-lg border border-border-default bg-slate-50/60 p-2.5 dark:border-border-default/40"
           >
             <div className="flex flex-wrap items-center gap-2">
               <select
@@ -343,7 +343,7 @@ export function AssignToEditor({
           type="button"
           disabled={disabled || saving}
           onClick={addTarget}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-800 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-2.5 py-1.5 text-xs font-medium text-fg-default shadow-sm hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-40 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
         >
           <Plus className="size-3.5 shrink-0" aria-hidden />
           Add audience
@@ -352,7 +352,7 @@ export function AssignToEditor({
           type="button"
           disabled={disabled || saving}
           onClick={() => void save()}
-          className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+          className="inline-flex items-center gap-2 rounded-lg bg-accent-solid px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
         >
           {saving ? <Loader2 className="size-3.5 shrink-0 animate-spin" aria-hidden /> : null}
           Save assign-to targets
@@ -365,8 +365,8 @@ export function AssignToEditor({
 function BulkExtendRow({ disabled, onExtend }: { disabled?: boolean; onExtend: (local: string) => void }) {
   const [local, setLocal] = useState('')
   return (
-    <div className="flex flex-wrap items-end gap-2 border-t border-slate-200/70 pt-2 dark:border-neutral-700/60">
-      <label className="space-y-1 text-[11px] text-slate-500 dark:text-neutral-400">
+    <div className="flex flex-wrap items-end gap-2 border-t border-slate-200/70 pt-2/60">
+      <label className="space-y-1 text-[11px] text-fg-muted">
         Quick-extend due date for this student
         <input
           type="datetime-local"
@@ -380,7 +380,7 @@ function BulkExtendRow({ disabled, onExtend }: { disabled?: boolean; onExtend: (
         type="button"
         disabled={disabled || !local}
         onClick={() => onExtend(local)}
-        className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-800 shadow-sm hover:bg-slate-50 disabled:opacity-40 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+        className="rounded-lg border border-border-default bg-surface-raised px-2.5 py-1.5 text-xs font-medium text-fg-default shadow-sm hover:bg-surface-base disabled:opacity-40 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
       >
         Extend
       </button>

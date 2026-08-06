@@ -9,6 +9,12 @@ import {
 } from 'react'
 import { apiUrl } from '../lib/api'
 import { resolveOrgBrandAssetUrl } from '../lib/branding-url'
+import {
+  applyAccentRampToElement,
+  deriveAccentRamp,
+  parseOklch,
+  type AccentStep,
+} from '../lib/tokens/oklch'
 
 export type OrgBrandingState = {
   logoUrl: string | null
@@ -16,6 +22,8 @@ export type OrgBrandingState = {
   primaryColor: string
   secondaryColor: string
   contrastWarningPrimary: boolean
+  accentOklch: string | null
+  tokensVersion: number
   loaded: boolean
 }
 
@@ -25,16 +33,33 @@ const defaultState: OrgBrandingState = {
   primaryColor: '#4F46E5',
   secondaryColor: '#7C3AED',
   contrastWarningPrimary: false,
+  accentOklch: null,
+  tokensVersion: 1,
   loaded: false,
 }
 
 const OrgBrandingContext = createContext<OrgBrandingState>(defaultState)
 
-function applyCssVars(primary: string, secondary: string) {
+function applyCssVars(
+  primary: string,
+  secondary: string,
+  accentOklch: string | null,
+  derivedRamp?: Record<string, string> | null,
+) {
   const root = document.documentElement
   root.style.setProperty('--lex-brand-primary', primary)
   root.style.setProperty('--lex-brand-secondary', secondary)
   root.style.setProperty('--color-primary', primary)
+  // UX.1 — apply validated accent ramp to semantic --lx-accent-* primitives
+  if (derivedRamp && Object.keys(derivedRamp).length > 0) {
+    applyAccentRampToElement(root, derivedRamp as Record<AccentStep, string>)
+  } else if (accentOklch) {
+    const seed = parseOklch(accentOklch)
+    if (seed) applyAccentRampToElement(root, deriveAccentRamp(seed))
+    else applyAccentRampToElement(root, null)
+  } else {
+    applyAccentRampToElement(root, null)
+  }
 }
 
 function applyFavicon(href: string | null) {
@@ -82,12 +107,17 @@ export function OrgBrandingProvider({ children }: { children: ReactNode }) {
           primaryColor?: string
           secondaryColor?: string
           contrastWarningPrimary?: boolean
+          accentOklch?: string | null
+          derivedRamp?: Record<string, string> | null
+          tokensVersion?: number
         }
         const primary =
           (o.primaryColor ?? defaultState.primaryColor).trim() || defaultState.primaryColor
         const secondary =
           (o.secondaryColor ?? defaultState.secondaryColor).trim() || defaultState.secondaryColor
-        applyCssVars(primary, secondary)
+        const accentOklch =
+          typeof o.accentOklch === 'string' && o.accentOklch.trim() ? o.accentOklch.trim() : null
+        applyCssVars(primary, secondary, accentOklch, o.derivedRamp)
         applyFavicon(o.faviconUrl ?? null)
         if (!cancelled) {
           setState({
@@ -96,11 +126,13 @@ export function OrgBrandingProvider({ children }: { children: ReactNode }) {
             primaryColor: primary,
             secondaryColor: secondary,
             contrastWarningPrimary: o.contrastWarningPrimary === true,
+            accentOklch,
+            tokensVersion: typeof o.tokensVersion === 'number' ? o.tokensVersion : 1,
             loaded: true,
           })
         }
       } catch {
-        applyCssVars(defaultState.primaryColor, defaultState.secondaryColor)
+        applyCssVars(defaultState.primaryColor, defaultState.secondaryColor, null)
         if (!cancelled) {
           setState((s) => ({ ...s, loaded: true }))
         }

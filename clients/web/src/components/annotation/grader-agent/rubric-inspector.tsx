@@ -109,10 +109,10 @@ export function RubricInspector({
         : null
 
   return (
-    <div className="space-y-3 text-sm text-slate-700 dark:text-neutral-200">
+    <div className="space-y-3 text-sm text-fg-default">
       <p>{t('gradingAgent.canvas.inspector.rubricHelp')}</p>
       <fieldset>
-        <legend className="mb-1.5 block font-medium text-slate-800 dark:text-neutral-100">
+        <legend className="mb-1.5 block font-medium text-fg-default">
           {t('gradingAgent.canvas.inspector.rubricSource')}
         </legend>
         <div className="flex flex-col gap-1.5">
@@ -137,7 +137,7 @@ export function RubricInspector({
         </div>
       </fieldset>
       {source === 'assignment' ? (
-        <p className="text-xs text-slate-500 dark:text-neutral-400">
+        <p className="text-xs text-fg-muted">
           {assignmentHasRubric
             ? t('gradingAgent.canvas.inspector.rubricAssignmentHelp')
             : t('gradingAgent.canvas.inspector.rubricAssignmentMissing')}
@@ -145,7 +145,7 @@ export function RubricInspector({
       ) : null}
       {source === 'library' ? (
         <label className="block">
-          <span className="mb-1.5 block font-medium text-slate-800 dark:text-neutral-100">
+          <span className="mb-1.5 block font-medium text-fg-default">
             {t('gradingAgent.canvas.inspector.rubricLibraryAssignment')}
           </span>
           <AssignmentPicker
@@ -157,14 +157,14 @@ export function RubricInspector({
             noMatchLabel={t('gradingAgent.canvas.inspector.rubricLibraryNoMatch')}
             onChange={(assignmentId) => onChange({ rubricAssignmentItemId: assignmentId })}
           />
-          <p className="mt-1.5 text-xs text-slate-500 dark:text-neutral-400">
+          <p className="mt-1.5 text-xs text-fg-muted">
             {t('gradingAgent.canvas.inspector.rubricLibraryHelp')}
           </p>
           {assignmentsError ? (
             <p className="mt-1 text-xs text-rose-700 dark:text-rose-300">{assignmentsError}</p>
           ) : null}
           {libraryLoading ? (
-            <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+            <p className="mt-1 text-xs text-fg-muted">
               {t('gradingAgent.canvas.inspector.rubricLibraryLoading')}
             </p>
           ) : null}
@@ -175,12 +175,12 @@ export function RubricInspector({
       ) : null}
       {source === 'inline' ? (
         <div className="space-y-2">
-          <p className="font-medium text-slate-800 dark:text-neutral-100">
+          <p className="font-medium text-fg-default">
             {t('gradingAgent.canvas.inspector.rubricInlineTitle')}
           </p>
           {(inlineRubric?.criteria ?? []).map((criterion, index) => (
             <label key={criterion.id} className="block">
-              <span className="mb-1 block text-xs font-medium text-slate-600 dark:text-neutral-400">
+              <span className="mb-1 block text-xs font-medium text-fg-muted">
                 {t('gradingAgent.canvas.inspector.rubricInlineCriterion', { index: index + 1 })}
               </span>
               <input
@@ -216,14 +216,14 @@ export function RubricInspector({
                 },
               })
             }}
-            className="text-xs font-medium text-indigo-700 hover:underline dark:text-indigo-300"
+            className="text-xs font-medium text-accent-fg hover:underline dark:text-indigo-300"
           >
             {t('gradingAgent.canvas.inspector.rubricInlineAddCriterion')}
           </button>
         </div>
       ) : null}
       {summaryRubric?.criteria?.length ? (
-        <p className="text-xs text-slate-500 dark:text-neutral-400">
+        <p className="text-xs text-fg-muted">
           {t('gradingAgent.canvas.inspector.rubricCriteriaSummary', {
             count: summaryRubric.criteria.length,
             names: rubricCriteriaSummary(summaryRubric),

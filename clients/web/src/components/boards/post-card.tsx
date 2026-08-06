@@ -52,7 +52,7 @@ function DrawingThumb({ data }: { data: unknown }) {
       ref={canvasRef}
       width={280}
       height={160}
-      className="w-full rounded border border-slate-200 dark:border-neutral-700"
+      className="w-full rounded border border-border-default"
       aria-hidden
     />
   )
@@ -131,21 +131,21 @@ export function PostCard({
   return (
     <article
       id={`board-post-${post.id}`}
-      className="flex flex-col gap-2 rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-neutral-700 dark:bg-neutral-900"
+      className="flex flex-col gap-2 rounded-lg border border-border-default bg-surface-raised p-3 shadow-sm dark:border-border-default dark:bg-surface-raised"
       tabIndex={-1}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           {post.title ? (
-            <h3 className="truncate text-sm font-semibold text-slate-900 dark:text-neutral-100">
+            <h3 className="truncate text-sm font-semibold text-fg-default">
               {post.title}
             </h3>
           ) : null}
-          <p className="text-xs text-slate-500 dark:text-neutral-400">
+          <p className="text-xs text-fg-muted">
             {t(`boards.post.type.${post.contentType}`)}
           </p>
           {isPending ? (
-            <p className="mt-1 text-xs font-medium text-amber-700 dark:text-amber-400" role="status">
+            <p className="mt-1 text-xs font-medium text-warning-fg dark:text-amber-400" role="status">
               {t('boards.moderation.pendingBadge')}
             </p>
           ) : null}
@@ -164,7 +164,7 @@ export function PostCard({
                   e.stopPropagation()
                   setReportOpen(true)
                 }}
-                className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+                className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-fg-subtle hover:bg-surface-sunken hover:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-fg-default"
                 aria-label={t('boards.report.action')}
               >
                 <Flag className="size-4 shrink-0" strokeWidth={2} aria-hidden />
@@ -177,7 +177,7 @@ export function PostCard({
                   e.stopPropagation()
                   onDelete?.(post.id)
                 }}
-                className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30"
+                className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-fg-subtle hover:bg-red-50 hover:text-danger-fg dark:hover:bg-red-950/30"
                 aria-label={t('boards.post.delete')}
               >
                 <Trash2 className="size-4 shrink-0" strokeWidth={2} aria-hidden />
@@ -188,7 +188,7 @@ export function PostCard({
       </div>
 
       {isRemoved ? (
-        <p className="text-sm italic text-slate-500 dark:text-neutral-400">
+        <p className="text-sm italic text-fg-muted">
           {t('boards.moderation.removedPlaceholder')}
         </p>
       ) : null}
@@ -200,7 +200,7 @@ export function PostCard({
             dangerouslySetInnerHTML={{ __html: post.body.html }}
           />
         ) : (
-          <p className="whitespace-pre-wrap text-sm text-slate-700 dark:text-neutral-200">
+          <p className="whitespace-pre-wrap text-sm text-fg-default">
             {bodyPlain(post)}
           </p>
         )
@@ -210,12 +210,12 @@ export function PostCard({
       (post.contentType === 'image' || post.contentType === 'file' || post.contentType === 'video' || post.contentType === 'audio') &&
       att ? (
         scan === 'pending' ? (
-          <div className="flex items-center gap-2 text-sm text-slate-500">
+          <div className="flex items-center gap-2 text-sm text-fg-muted">
             <Loader2 className="size-4 motion-safe:animate-spin" aria-hidden />
             {t('boards.post.scanning')}
           </div>
         ) : scan === 'blocked' ? (
-          <div className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-400">
+          <div className="flex items-center gap-2 text-sm text-warning-fg dark:text-amber-400">
             <AlertTriangle className="size-4" aria-hidden />
             {t('boards.post.blocked')}
           </div>
@@ -236,7 +236,7 @@ export function PostCard({
         ) : att.url ? (
           <a
             href={att.url}
-            className="inline-flex items-center gap-2 text-sm font-medium text-indigo-600 dark:text-indigo-400"
+            className="inline-flex items-center gap-2 text-sm font-medium text-accent-fg"
             download={att.fileName}
           >
             <FileText className="size-4" aria-hidden />
@@ -265,7 +265,7 @@ export function PostCard({
             href={post.linkUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex gap-3 rounded border border-slate-200 p-2 hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-800"
+            className="flex gap-3 rounded border border-border-default p-2 hover:bg-surface-base dark:border-border-default dark:hover:bg-surface-overlay"
           >
             {post.linkPreview.image ? (
               <img
@@ -274,14 +274,14 @@ export function PostCard({
                 className="h-16 w-16 shrink-0 rounded object-cover"
               />
             ) : (
-              <Link2 className="size-8 shrink-0 text-slate-400" aria-hidden />
+              <Link2 className="size-8 shrink-0 text-fg-subtle" aria-hidden />
             )}
             <span className="min-w-0 text-sm">
-              <span className="block font-medium text-slate-900 dark:text-neutral-100">
+              <span className="block font-medium text-fg-default">
                 {post.linkPreview.title || post.linkUrl}
               </span>
               {post.linkPreview.description ? (
-                <span className="mt-0.5 line-clamp-2 text-slate-500 dark:text-neutral-400">
+                <span className="mt-0.5 line-clamp-2 text-fg-muted">
                   {post.linkPreview.description}
                 </span>
               ) : null}
@@ -292,7 +292,7 @@ export function PostCard({
             href={post.linkUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="break-all text-sm text-indigo-600 dark:text-indigo-400"
+            className="break-all text-sm text-accent-fg"
           >
             {post.linkUrl}
           </a>
@@ -302,7 +302,7 @@ export function PostCard({
       {!isRemoved && post.contentType === 'drawing' ? <DrawingThumb data={post.drawingData} /> : null}
 
       {!isRemoved && showEngagement && courseCode && boardId && onPostUpdate ? (
-        <div className="mt-1 flex flex-col gap-1 border-t border-slate-100 pt-2 dark:border-neutral-800">
+        <div className="mt-1 flex flex-col gap-1 border-t border-border-subtle pt-2 dark:border-border-subtle">
           <div className="flex flex-wrap items-center gap-2">
             <ReactionControl
               courseCode={courseCode}
@@ -320,7 +320,7 @@ export function PostCard({
               aria-expanded={commentsOpen}
               aria-controls={`board-post-comments-${post.id}`}
               onClick={() => setCommentsOpen((o) => !o)}
-              className="inline-flex min-h-9 items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+              className="inline-flex min-h-9 items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay"
             >
               <MessageSquare className="size-4" aria-hidden />
               <span className="tabular-nums">{post.commentCount ?? 0}</span>

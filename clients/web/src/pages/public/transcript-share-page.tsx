@@ -60,13 +60,13 @@ export default function TranscriptSharePage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-100 to-slate-200 px-4 py-16 text-slate-900 dark:from-neutral-950 dark:to-neutral-900 dark:text-neutral-50">
+    <main className="min-h-screen bg-gradient-to-b from-slate-100 to-slate-200 px-4 py-16 text-fg-default dark:from-neutral-950 dark:to-neutral-900">
       <div className="mx-auto max-w-lg">
-        <p className="text-sm font-semibold tracking-wide text-indigo-700 dark:text-indigo-300">Lextures</p>
+        <p className="text-sm font-semibold tracking-wide text-accent-fg">Lextures</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight">{t('transcripts.share.heading')}</h1>
-        <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">{t('transcripts.share.help')}</p>
+        <p className="mt-2 text-sm text-fg-muted">{t('transcripts.share.help')}</p>
 
-        {loading ? <p className="mt-8 text-sm text-slate-500">{t('common.loading')}</p> : null}
+        {loading ? <p className="mt-8 text-sm text-fg-muted">{t('common.loading')}</p> : null}
         {error ? (
           <p className="mt-8 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-100" role="alert">
             {error}
@@ -80,11 +80,11 @@ export default function TranscriptSharePage() {
             </h2>
             <dl className="space-y-2 text-sm">
               <div className="flex justify-between gap-4">
-                <dt className="text-slate-500">{t('transcripts.share.expires')}</dt>
+                <dt className="text-fg-muted">{t('transcripts.share.expires')}</dt>
                 <dd>{formatDate(meta.expiresAt, { dateStyle: 'medium', timeStyle: 'short' })}</dd>
               </div>
               <div className="flex justify-between gap-4">
-                <dt className="text-slate-500">{t('transcripts.share.downloadsLeft')}</dt>
+                <dt className="text-fg-muted">{t('transcripts.share.downloadsLeft')}</dt>
                 <dd>{meta.downloadsRemaining}</dd>
               </div>
             </dl>
@@ -104,7 +104,7 @@ export default function TranscriptSharePage() {
               type="button"
               onClick={() => void onDownload()}
               disabled={downloading || meta.expired || meta.exhausted}
-              className="w-full rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
+              className="w-full rounded-md bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
             >
               {downloading ? t('transcripts.share.downloading') : t('transcripts.share.download')}
             </button>
@@ -112,7 +112,7 @@ export default function TranscriptSharePage() {
             {meta.verificationUrl || meta.verifyToken ? (
               <a
                 href={meta.verificationUrl ?? `/verify/${encodeURIComponent(meta.verifyToken!)}`}
-                className="block w-full rounded-md border border-slate-300 px-4 py-2.5 text-center text-sm font-semibold text-slate-800 hover:bg-slate-50 dark:border-neutral-700 dark:text-neutral-100 dark:hover:bg-neutral-800"
+                className="block w-full rounded-md border border-border-strong px-4 py-2.5 text-center text-sm font-semibold text-fg-default hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
               >
                 {t('transcripts.share.verify')}
               </a>

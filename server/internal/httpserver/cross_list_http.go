@@ -57,11 +57,6 @@ func groupToJSON(g *crosslisting.GroupWithMembers) crossListGroupJSON {
 // GET /api/v1/orgs/:orgId/cross-list-groups
 func (d Deps) handleOrgCrossListGroupsGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		orgIDStr := strings.TrimSpace(chi.URLParam(r, "orgId"))
 		orgID, err := uuid.Parse(orgIDStr)
 		if err != nil {
@@ -87,11 +82,6 @@ func (d Deps) handleOrgCrossListGroupsGet() http.HandlerFunc {
 
 func (d Deps) handleOrgCrossListGroupsPost() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		orgIDStr := strings.TrimSpace(chi.URLParam(r, "orgId"))
 		orgID, err := uuid.Parse(orgIDStr)
 		if err != nil {
@@ -158,11 +148,6 @@ func (d Deps) handleOrgCrossListGroupsPost() http.HandlerFunc {
 // POST /api/v1/orgs/:orgId/cross-list-groups/:gid/members
 func (d Deps) handleOrgCrossListMembersPost() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		orgIDStr := strings.TrimSpace(chi.URLParam(r, "orgId"))
 		orgID, err := uuid.Parse(orgIDStr)
 		if err != nil {
@@ -225,11 +210,6 @@ SELECT course_id FROM course.cross_list_groups WHERE id = $1 AND org_id = $2
 // DELETE /api/v1/orgs/:orgId/cross-list-groups/:gid/members/:sid
 func (d Deps) handleOrgCrossListMemberDelete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodDelete {
-			w.Header().Set("Allow", http.MethodDelete)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		orgIDStr := strings.TrimSpace(chi.URLParam(r, "orgId"))
 		orgID, err := uuid.Parse(orgIDStr)
 		if err != nil {

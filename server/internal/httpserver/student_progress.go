@@ -155,11 +155,6 @@ func (d Deps) logProgressAccess(courseCode string, studentID, viewer uuid.UUID, 
 
 func (d Deps) handleEnrollmentProgressGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.guardStudentProgress(w) {
 			return
 		}
@@ -356,11 +351,6 @@ func formatProgressPoints(earned, max float64) string {
 
 func (d Deps) handleEnrollmentProgressActivity() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.guardStudentProgress(w) {
 			return
 		}
@@ -413,11 +403,6 @@ func (d Deps) handleEnrollmentProgressActivity() http.HandlerFunc {
 
 func (d Deps) handleEnrollmentProgressNotePost() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.guardStudentProgress(w) {
 			return
 		}
@@ -465,11 +450,6 @@ func (d Deps) handleEnrollmentProgressNotePost() http.HandlerFunc {
 
 func (d Deps) handleEnrollmentProgressNotePut() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPut {
-			w.Header().Set("Allow", http.MethodPut)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.guardStudentProgress(w) {
 			return
 		}
@@ -525,11 +505,6 @@ func (d Deps) handleEnrollmentProgressNotePut() http.HandlerFunc {
 
 func (d Deps) handleEnrollmentProgressNoteDelete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodDelete {
-			w.Header().Set("Allow", http.MethodDelete)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.guardStudentProgress(w) {
 			return
 		}

@@ -33,10 +33,10 @@ export function UnsavedChangesBanner({
           : 'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 duration-300',
       ].join(' ')}
     >
-      <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white/90 px-6 py-4 shadow-xl backdrop-blur-md dark:border-neutral-800 dark:bg-neutral-900/90">
+      <div className="flex items-center justify-between rounded-2xl border border-border-default bg-white/90 px-6 py-4 shadow-xl backdrop-blur-md dark:border-border-subtle/90">
         <div className="flex flex-col">
-          <span className="text-sm font-semibold text-slate-900 dark:text-neutral-50">Unsaved changes</span>
-          <span className="text-xs text-slate-500 dark:text-neutral-400">
+          <span className="text-sm font-semibold text-fg-default">Unsaved changes</span>
+          <span className="text-xs text-fg-muted">
             {saveStatus === 'error' && saveMessage ? (
               <span className="font-medium text-rose-600 dark:text-rose-400">{saveMessage}</span>
             ) : (

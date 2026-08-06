@@ -38,7 +38,7 @@ export default function CourseChecklistHelpPage() {
       actions={
         <Link
           to={COURSE_DESIGN_RESEARCH_HREF}
-          className="inline-flex min-h-11 items-center rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+          className="inline-flex min-h-11 items-center rounded-lg border border-border-default bg-surface-raised px-3 text-sm font-medium text-fg-muted hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
         >
           Rule-to-standard mapping
         </Link>
@@ -51,32 +51,32 @@ export default function CourseChecklistHelpPage() {
             <li
               key={entry.helpRef}
               id={slug}
-              className="scroll-mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-900"
+              className="scroll-mt-6 rounded-xl border border-border-default bg-surface-raised p-5 shadow-sm dark:border-border-default dark:bg-surface-raised"
             >
-              <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-50">
+              <h2 className="text-base font-semibold text-fg-default">
                 {entry.title}
               </h2>
-              <dl className="mt-3 space-y-3 text-sm text-slate-700 dark:text-neutral-300">
+              <dl className="mt-3 space-y-3 text-sm text-fg-muted">
                 <div>
-                  <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  <dt className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
                     {courseChecklistI18n.helpWhat}
                   </dt>
                   <dd className="mt-1">{entry.what}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  <dt className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
                     {courseChecklistI18n.helpWhy}
                   </dt>
                   <dd className="mt-1">{entry.why}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  <dt className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
                     {courseChecklistI18n.helpHow}
                   </dt>
                   <dd className="mt-1">{entry.how}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  <dt className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
                     {courseChecklistI18n.helpWhenDismiss}
                   </dt>
                   <dd className="mt-1">{entry.whenToDismiss}</dd>
@@ -88,7 +88,7 @@ export default function CourseChecklistHelpPage() {
                     <li key={src}>
                       <Link
                         to={courseDesignResearchHref(src)}
-                        className="rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-medium text-slate-700 underline-offset-2 hover:underline dark:bg-neutral-800 dark:text-neutral-300"
+                        className="rounded bg-surface-sunken px-1.5 py-0.5 text-[11px] font-medium text-fg-muted underline-offset-2 hover:underline dark:bg-surface-overlay dark:text-fg-muted"
                       >
                         {src}
                       </Link>

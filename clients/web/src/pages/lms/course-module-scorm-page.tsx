@@ -49,9 +49,9 @@ export default function CourseModuleScormPage() {
   return (
     <LmsPage title={payload?.title ?? 'SCORM activity'}>
       {loading ? (
-        <p className="text-sm text-slate-500 dark:text-neutral-400">{scormI18n.loading}</p>
+        <p className="text-sm text-fg-muted">{scormI18n.loading}</p>
       ) : error ? (
-        <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+        <p className="text-sm text-danger-fg" role="alert">
           {error}
         </p>
       ) : payload && scoId ? (

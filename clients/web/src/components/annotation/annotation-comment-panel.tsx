@@ -65,20 +65,20 @@ function CommentEditor({
         onChange={(e) => setDraft(e.target.value)}
         rows={2}
         placeholder="Add a comment…"
-        className="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-50"
+        className="w-full rounded-md border border-border-strong bg-surface-raised px-2 py-1.5 text-xs text-fg-default shadow-sm focus:border-indigo-500 focus:outline-none dark:border-border-default dark:bg-surface-base"
       />
       {dirty ? (
         <div className="flex gap-1">
           <button
             type="button"
-            className="rounded-md bg-indigo-600 px-2 py-1 text-[11px] font-semibold text-white hover:bg-indigo-500"
+            className="rounded-md bg-accent-solid px-2 py-1 text-[11px] font-semibold text-white hover:bg-indigo-500"
             onClick={() => onUpdateBody(annotation, draft)}
           >
             Save comment
           </button>
           <button
             type="button"
-            className="rounded-md border border-slate-300 px-2 py-1 text-[11px] font-medium text-slate-600 hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-300 dark:hover:bg-neutral-900"
+            className="rounded-md border border-border-strong px-2 py-1 text-[11px] font-medium text-fg-muted hover:bg-surface-base dark:border-border-default dark:text-fg-muted dark:hover:bg-surface-raised"
             onClick={() => setDraft(annotation.body ?? '')}
           >
             Cancel
@@ -100,14 +100,14 @@ export function AnnotationCommentPanel({
   return (
     <aside
       aria-label="Annotation comments"
-      className="flex max-h-[70vh] w-full max-w-sm flex-col rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-950 lg:max-h-none"
+      className="flex max-h-[70vh] w-full max-w-sm flex-col rounded-xl border border-border-default bg-surface-raised shadow-sm dark:border-border-default dark:bg-surface-base lg:max-h-none"
     >
-      <div className="border-b border-slate-200 px-3 py-2 text-sm font-semibold text-slate-800 dark:border-neutral-700 dark:text-neutral-100">
+      <div className="border-b border-border-default px-3 py-2 text-sm font-semibold text-fg-default dark:border-border-default dark:text-fg-default">
         Comments
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto p-2">
         {annotations.length === 0 ? (
-          <p className="px-2 py-6 text-center text-sm text-slate-500 dark:text-neutral-400">
+          <p className="px-2 py-6 text-center text-sm text-fg-muted">
             {readOnly
               ? 'No annotations on this submission.'
               : 'No annotations yet — use the toolbar above to highlight, draw, or pin feedback.'}
@@ -121,13 +121,9 @@ export function AnnotationCommentPanel({
                   <button
                     type="button"
                     onClick={() => onSelect(a.id)}
-                    className={`w-full rounded-lg border px-2 py-2 text-start text-xs transition-[background-color,color,border-color] ${
-                      selected
-                        ? 'border-indigo-500 bg-indigo-50 dark:border-indigo-400 dark:bg-indigo-950/40'
-                        : 'border-slate-200 hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-900'
-                    }`}
+                    className={`w-full rounded-lg border px-2 py-2 text-start text-xs transition-[background-color,color,border-color] ${ selected ? 'border-indigo-500 bg-indigo-50 dark:border-indigo-400 dark:bg-indigo-950/40' : 'border-border-default hover:bg-surface-base dark:border-border-default dark:hover:bg-surface-raised' }`}
                   >
-                    <div className="flex items-center gap-1.5 font-semibold text-slate-800 dark:text-neutral-100">
+                    <div className="flex items-center gap-1.5 font-semibold text-fg-default">
                       <span
                         aria-hidden
                         className="inline-block h-3 w-3 shrink-0 rounded-sm border border-black/10"
@@ -136,17 +132,17 @@ export function AnnotationCommentPanel({
                       {annotationLabel(a)}
                     </div>
                     {anchorQuote(a) ? (
-                      <div className="mt-1 line-clamp-2 border-s-2 border-slate-300 ps-2 italic text-slate-500 dark:border-neutral-600 dark:text-neutral-400">
+                      <div className="mt-1 line-clamp-2 border-s-2 border-border-strong ps-2 italic text-fg-muted dark:border-border-default dark:text-fg-muted">
                         “{anchorQuote(a)}”
                       </div>
                     ) : null}
                     {readOnly || !selected ? (
                       a.body ? (
-                        <div className="mt-1 line-clamp-4 whitespace-pre-wrap text-slate-600 dark:text-neutral-300">
+                        <div className="mt-1 line-clamp-4 whitespace-pre-wrap text-fg-muted">
                           {a.body}
                         </div>
                       ) : (
-                        <div className="mt-1 italic text-slate-400 dark:text-neutral-500">
+                        <div className="mt-1 italic text-fg-subtle">
                           {readOnly ? 'No comment' : 'No comment yet — select to add one'}
                         </div>
                       )

@@ -1,6 +1,11 @@
 # UX.2 — Core Component Library and Adoption Ratchet
 
-> Implementation plan. Source: [audit.md](audit.md) §1, §2 G-2.
+> Implementation plan. Source: [audit.md](../../plan/ui-ux/audit.md) §1, §2 G-2.
+> **Shipped** as the core library + gallery + coverage/allowlist ratchet + pilot
+> adoptions (`EmptyState` → `Button`, `ConfirmDialog` → `AlertDialog`,
+> `Dialog` → `OverlaySurface`). Full call-site migration continues under
+> `npm run ds:coverage` / `raw-interactive-allowlist.json` (counts may only
+> decrease; coverage may only increase). Guide: [docs/guides/component-library.md](../../guides/component-library.md).
 
 ## Metadata
 
@@ -10,7 +15,7 @@
 | **Section** | UI/UX — Foundations |
 | **Severity** | BLOCKER |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | THIN — primitives exist, adoption is ~0.25% |
+| **Status (today)** | SHIPPED (library + ratchet; product migration ongoing) |
 | **Estimated effort** | XL (>2mo) |
 | **Owner (proposed)** | Design Systems |
 | **Depends on** | UX.1 |
@@ -230,7 +235,7 @@ agent) consume this library like any other feature area.
 - **Must ship after** — [UX.1](UX.1-semantic-design-token-system.md).
 - **Must ship before** — UX.4 (ARIA remediation is *delivered by* migrating to
   these components), UX.6, UX.9, UX.10, UX.11, UX.12, UX.13, UX.14.
-- **Runs in parallel with** — [UX.3](UX.3-typography-and-reading-system.md).
+- **Runs in parallel with** — [UX.3](../../plan/ui-ux/UX.3-typography-and-reading-system.md).
 - **Shared infra** — none beyond CI.
 - **Internal sequencing**: overlays and forms first (they carry the accessibility
   debt), then actions, then display/layout. Migrate **by directory**, highest-
@@ -338,13 +343,13 @@ agent) consume this library like any other feature area.
   `clients/web/src/lib/control-motion.ts`, `clients/web/src/components/use-confirm.tsx`,
   `clients/web/src/lib/lms-toast.ts`, `clients/web/eslint-rules/`,
   `clients/web/.oxlintrc.json`
-- Research: [research.md](research.md) R-24, R-25, R-27, R-28, R-35
-- Audit: [audit.md](audit.md) §1, G-2, G-3, G-4, G-5a, G-5c
+- Research: [research.md](../../plan/ui-ux/research.md) R-24, R-25, R-27, R-28, R-35
+- Audit: [audit.md](../../plan/ui-ux/audit.md) §1, G-2, G-3, G-4, G-5a, G-5c
 - External: [WAI-ARIA Authoring Practices Guide](https://www.w3.org/WAI/ARIA/apg/),
   [React Aria Components](https://react-spectrum.adobe.com/react-aria/),
   [Instructure UI](https://github.com/instructure/instructure-ui) (LMS peer)
 - Related plans: [UX.1](UX.1-semantic-design-token-system.md),
-  [UX.4](UX.4-aria-widget-and-focus-management-remediation.md),
-  [UX.6](UX.6-form-and-validation-system.md),
-  [UX.18](UX.18-design-system-governance-and-measurement.md),
-  [`../tech_debt/TD.14-decompose-god-components.md`](../tech_debt/TD.14-decompose-god-components.md)
+  [UX.4](../../plan/ui-ux/UX.4-aria-widget-and-focus-management-remediation.md),
+  [UX.6](../../plan/ui-ux/UX.6-form-and-validation-system.md),
+  [UX.18](../../plan/ui-ux/UX.18-design-system-governance-and-measurement.md),
+  [`../tech_debt/TD.14-decompose-god-components.md`](../../plan/tech_debt/TD.14-decompose-god-components.md)

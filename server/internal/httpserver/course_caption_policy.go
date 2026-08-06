@@ -16,15 +16,6 @@ type courseCaptionPolicyBody struct {
 // handlePatchCourseCaptionPolicy is PATCH /api/v1/courses/{course_code}/caption-policy
 func (d Deps) handlePatchCourseCaptionPolicy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return

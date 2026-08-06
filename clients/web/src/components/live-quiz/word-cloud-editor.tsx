@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 export function WordCloudEditor() {
   const { t } = useTranslation('common')
   return (
-    <p className="rounded-md border border-dashed border-slate-300 p-4 text-sm text-slate-600 dark:border-neutral-600 dark:text-neutral-300">
+    <p className="rounded-md border border-dashed border-border-strong p-4 text-sm text-fg-muted dark:border-border-default dark:text-fg-muted">
       {t('liveQuiz.editor.wordCloudHint')}
     </p>
   )

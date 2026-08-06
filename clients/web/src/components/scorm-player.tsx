@@ -50,7 +50,7 @@ export function ScormPlayer({
   return (
     <div className="relative min-h-[320px] w-full">
       {hasResume ? (
-        <p className="mb-2 text-sm text-slate-600 dark:text-neutral-400" role="status">
+        <p className="mb-2 text-sm text-fg-muted" role="status">
           Resume where you left off
         </p>
       ) : null}
@@ -58,7 +58,7 @@ export function ScormPlayer({
         title={`SCORM activity: ${title}`}
         src={renderUrl}
         sandbox="allow-scripts allow-same-origin"
-        className="h-[min(70vh,640px)] w-full rounded-xl border border-slate-200/80 bg-white dark:border-neutral-600 dark:bg-neutral-900"
+        className="h-[min(70vh,640px)] w-full rounded-xl border border-slate-200/80 bg-surface-raised dark:border-border-default dark:bg-surface-raised"
         onError={() => setLoadError(true)}
       />
     </div>
@@ -118,14 +118,14 @@ export function ScormLaunchClient({
 
   if (error) {
     return (
-      <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+      <p className="text-sm text-danger-fg" role="alert">
         {error}
       </p>
     )
   }
 
   if (!renderUrl) {
-    return <p className="text-sm text-slate-500 dark:text-neutral-400">Preparing activity…</p>
+    return <p className="text-sm text-fg-muted">Preparing activity…</p>
   }
 
   return (

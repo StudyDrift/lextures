@@ -38,15 +38,6 @@ func (d Deps) handleEnrollmentStatePatch() http.HandlerFunc {
 		LISStatusCode  string  `json:"lisStatusCode"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.requireEnrollmentStateMachine(w) {
 			return
 		}
@@ -171,15 +162,6 @@ func (d Deps) handleEnrollmentStateHistory() http.HandlerFunc {
 		History []histRow `json:"history"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.requireEnrollmentStateMachine(w) {
 			return
 		}

@@ -84,11 +84,6 @@ func (d Deps) adminOrgID(w http.ResponseWriter, r *http.Request) (uuid.UUID, boo
 // handleGetAdminLRSConfig is GET /api/v1/admin/lrs-config.
 func (d Deps) handleGetAdminLRSConfig() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.xapiEmissionEnabled(w) {
 			return
 		}
@@ -138,11 +133,6 @@ func (d Deps) handleGetAdminLRSConfig() http.HandlerFunc {
 // handlePostAdminLRSConfig is POST /api/v1/admin/lrs-config.
 func (d Deps) handlePostAdminLRSConfig() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.xapiEmissionEnabled(w) {
 			return
 		}
@@ -200,11 +190,6 @@ func (d Deps) handlePostAdminLRSConfig() http.HandlerFunc {
 // handlePutAdminLRSConfig is PUT /api/v1/admin/lrs-config/{id}.
 func (d Deps) handlePutAdminLRSConfig() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPut {
-			w.Header().Set("Allow", http.MethodPut)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.xapiEmissionEnabled(w) {
 			return
 		}
@@ -262,11 +247,6 @@ func (d Deps) handlePutAdminLRSConfig() http.HandlerFunc {
 // handlePostAdminLRSTest sends a test statement to an LRS endpoint.
 func (d Deps) handlePostAdminLRSTest() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.xapiEmissionEnabled(w) {
 			return
 		}
@@ -290,11 +270,6 @@ func (d Deps) handlePostAdminLRSTest() http.HandlerFunc {
 // handleGetAdminLRSDeadLetter is GET /api/v1/admin/lrs-dead-letter.
 func (d Deps) handleGetAdminLRSDeadLetter() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.xapiEmissionEnabled(w) {
 			return
 		}
@@ -331,11 +306,6 @@ func (d Deps) handleGetAdminLRSDeadLetter() http.HandlerFunc {
 // handlePostAdminLRSDeadLetterRetry is POST /api/v1/admin/lrs-dead-letter/{id}/retry.
 func (d Deps) handlePostAdminLRSDeadLetterRetry() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.xapiEmissionEnabled(w) {
 			return
 		}
@@ -363,11 +333,6 @@ func (d Deps) handlePostAdminLRSDeadLetterRetry() http.HandlerFunc {
 // handleGetCourseEvents is GET /api/v1/courses/{course_code}/events.
 func (d Deps) handleGetCourseEvents() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.xapiEmissionEnabled(w) {
 			return
 		}

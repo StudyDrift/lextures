@@ -26,10 +26,6 @@ func (d Deps) registerAdminContentToolsRoutes(r chi.Router) {
 
 func (d Deps) handleAdminContentToolsVersionsList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			jobsMethodNotAllowed(w, http.MethodGet)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -87,10 +83,6 @@ type adminContentToolsVersionPatchBody struct {
 
 func (d Deps) handleAdminContentToolsVersionPatch() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPatch {
-			jobsMethodNotAllowed(w, http.MethodPatch)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -154,10 +146,6 @@ type adminContentToolsMigrationCreateBody struct {
 
 func (d Deps) handleAdminContentToolsMigrationCreate() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			jobsMethodNotAllowed(w, http.MethodPost)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -213,10 +201,6 @@ func (d Deps) handleAdminContentToolsMigrationCreate() http.HandlerFunc {
 
 func (d Deps) handleAdminContentToolsMigrationGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			jobsMethodNotAllowed(w, http.MethodGet)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -244,10 +228,6 @@ func (d Deps) handleAdminContentToolsMigrationGet() http.HandlerFunc {
 
 func (d Deps) handleAdminContentToolsQuarantineList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			jobsMethodNotAllowed(w, http.MethodGet)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -299,10 +279,6 @@ func migrationJobJSON(job *ctrepo.MigrationJobRow) map[string]any {
 
 func (d Deps) handleAdminContentToolsTelemetry() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			jobsMethodNotAllowed(w, http.MethodGet)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}

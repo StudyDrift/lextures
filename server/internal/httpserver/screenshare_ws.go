@@ -122,11 +122,6 @@ func broadcastScreenSharePresentChanged(sessionID uuid.UUID, presenterID string)
 // handleScreenShareWS is GET .../screen-share/sessions/{session_id}/ws
 func (d Deps) handleScreenShareWS() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.JWTSigner == nil || d.Pool == nil {
 			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "server misconfiguration")
 			return

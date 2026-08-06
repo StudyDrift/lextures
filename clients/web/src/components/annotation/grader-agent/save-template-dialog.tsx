@@ -45,13 +45,13 @@ export function SaveTemplateDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-neutral-900"
+        className="w-full max-w-sm rounded-2xl bg-surface-raised p-6 shadow-xl dark:bg-surface-raised"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 id={titleId} className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+        <h3 id={titleId} className="text-sm font-semibold text-fg-default">
           {t('gradingAgent.save.templateDialogTitle')}
         </h3>
-        <label htmlFor={inputId} className="mt-4 mb-1 block text-xs font-medium text-slate-600 dark:text-neutral-400">
+        <label htmlFor={inputId} className="mt-4 mb-1 block text-xs font-medium text-fg-muted">
           {t('gradingAgent.save.templateNameLabel')}
         </label>
         <input
@@ -62,7 +62,7 @@ export function SaveTemplateDialog({
           disabled={saving}
           onChange={(e) => setName(e.target.value)}
           placeholder={t('gradingAgent.save.templateNamePlaceholder')}
-          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100"
+          className="w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-60 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
           onKeyDown={(e) => {
             if (e.key === 'Enter') void submit()
             if (e.key === 'Escape') onClose()
@@ -78,7 +78,7 @@ export function SaveTemplateDialog({
             type="button"
             disabled={saving}
             onClick={onClose}
-            className="rounded-lg px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100 disabled:opacity-60 dark:text-neutral-400 dark:hover:bg-neutral-800"
+            className="rounded-lg px-3 py-1.5 text-sm text-fg-muted hover:bg-surface-sunken disabled:opacity-60 dark:text-fg-muted dark:hover:bg-surface-overlay"
           >
             {t('gradingAgent.save.templateCancel')}
           </button>
@@ -86,7 +86,7 @@ export function SaveTemplateDialog({
             type="button"
             disabled={saving || !name.trim()}
             onClick={() => void submit()}
-            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-lg bg-accent-solid px-3 py-1.5 text-sm font-medium text-white hover:bg-accent disabled:opacity-50"
           >
             {saving ? (
               <>

@@ -36,17 +36,13 @@ function ScoreBadge({ score }: { score: number }) {
   const label = sev === 'high' ? atRiskI18n.severityHigh : atRiskI18n.severityModerate
   const icon =
     sev === 'high' ? (
-      <AlertTriangle className="h-4 w-4 text-red-600" aria-hidden />
+      <AlertTriangle className="h-4 w-4 text-danger-fg" aria-hidden />
     ) : (
       <AlertTriangle className="h-4 w-4 text-orange-600" aria-hidden />
     )
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-sm font-medium ${
-        sev === 'high'
-          ? 'bg-red-50 text-red-800 dark:bg-red-950/50 dark:text-red-200'
-          : 'bg-orange-50 text-orange-800 dark:bg-orange-950/50 dark:text-orange-200'
-      }`}
+      className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-sm font-medium ${ sev === 'high' ? 'bg-red-50 text-red-800 dark:bg-red-950/50 dark:text-red-200' : 'bg-orange-50 text-orange-800 dark:bg-orange-950/50 dark:text-orange-200' }`}
       title={`${atRiskI18n.score}: ${score}`}
     >
       {icon}
@@ -84,13 +80,13 @@ function AlertRow({
   }
 
   return (
-    <li className="flex flex-col gap-2 rounded-lg border border-slate-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-900">
+    <li className="flex flex-col gap-2 rounded-lg border border-border-default bg-surface-raised p-4 dark:border-border-default dark:bg-surface-raised">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <p className="font-medium text-slate-900 dark:text-neutral-100">{alert.displayName}</p>
+          <p className="font-medium text-fg-default">{alert.displayName}</p>
           <div className="mt-1 flex flex-wrap items-center gap-2">
             <ScoreBadge score={alert.score} />
-            <span className="rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-700 dark:bg-neutral-800 dark:text-neutral-300">
+            <span className="rounded bg-surface-sunken px-2 py-0.5 text-xs text-fg-muted dark:bg-surface-overlay dark:text-fg-muted">
               {alert.topFactorLabel}
             </span>
           </div>
@@ -98,7 +94,7 @@ function AlertRow({
         <div className="relative">
           <button
             type="button"
-            className="rounded p-0.5 hover:bg-slate-100 dark:hover:bg-neutral-800"
+            className="rounded p-0.5 hover:bg-surface-sunken dark:hover:bg-surface-overlay"
             aria-label="Actions"
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((o) => !o)}
@@ -108,13 +104,13 @@ function AlertRow({
           {menuOpen && (
             <ul
               role="menu"
-              className="absolute end-0 z-10 mt-1 min-w-[10rem] rounded-md border border-slate-200 bg-white py-1 shadow-lg dark:border-neutral-600 dark:bg-neutral-900"
+              className="absolute end-0 z-10 mt-1 min-w-[10rem] rounded-md border border-border-default bg-surface-raised py-1 shadow-lg dark:border-border-default dark:bg-surface-raised"
             >
               <li>
                 <button
                   type="button"
                   role="menuitem"
-                  className="w-full px-2.5 py-1.5 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                  className="w-full px-2.5 py-1.5 text-start text-sm hover:bg-surface-base dark:hover:bg-surface-overlay"
                   disabled={busy}
                   onClick={() => patch({ status: 'dismissed' })}
                 >
@@ -125,7 +121,7 @@ function AlertRow({
                 <button
                   type="button"
                   role="menuitem"
-                  className="w-full px-2.5 py-1.5 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                  className="w-full px-2.5 py-1.5 text-start text-sm hover:bg-surface-base dark:hover:bg-surface-overlay"
                   disabled={busy}
                   onClick={() => patch({ status: 'snoozed', snoozeDays: 7 })}
                 >
@@ -136,7 +132,7 @@ function AlertRow({
                 <button
                   type="button"
                   role="menuitem"
-                  className="w-full px-2.5 py-1.5 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                  className="w-full px-2.5 py-1.5 text-start text-sm hover:bg-surface-base dark:hover:bg-surface-overlay"
                   disabled={busy}
                   onClick={() => patch({ status: 'snoozed', snoozeDays: 14 })}
                 >
@@ -147,7 +143,7 @@ function AlertRow({
                 <button
                   type="button"
                   role="menuitem"
-                  className="w-full px-2.5 py-1.5 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                  className="w-full px-2.5 py-1.5 text-start text-sm hover:bg-surface-base dark:hover:bg-surface-overlay"
                   disabled={busy}
                   onClick={() => patch({ status: 'supported', snoozeDays: 14 })}
                 >
@@ -158,7 +154,7 @@ function AlertRow({
                 <button
                   type="button"
                   role="menuitem"
-                  className="w-full px-2.5 py-1.5 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                  className="w-full px-2.5 py-1.5 text-start text-sm hover:bg-surface-base dark:hover:bg-surface-overlay"
                   onClick={() => {
                     setMenuOpen(false)
                     setNoteOpen(true)
@@ -171,7 +167,7 @@ function AlertRow({
                 <Link
                   role="menuitem"
                   to={`/courses/${encodeURIComponent(courseCode)}/enrollments`}
-                  className="block px-3 py-2 text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                  className="block px-3 py-2 text-sm hover:bg-surface-base dark:hover:bg-surface-overlay"
                   onClick={() => setMenuOpen(false)}
                 >
                   {atRiskI18n.viewProgress}
@@ -184,7 +180,7 @@ function AlertRow({
       {noteOpen && (
         <div className="flex flex-col gap-2">
           <textarea
-            className="w-full rounded border border-slate-300 p-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+            className="w-full rounded border border-border-strong p-2 text-sm dark:border-border-default dark:bg-surface-base"
             rows={2}
             value={note}
             onChange={(e) => setNote(e.target.value)}
@@ -192,7 +188,7 @@ function AlertRow({
           />
           <button
             type="button"
-            className="self-start rounded bg-indigo-600 px-3 py-1 text-sm text-white disabled:opacity-50"
+            className="self-start rounded bg-accent-solid px-3 py-1 text-sm text-white disabled:opacity-50"
             disabled={busy}
             onClick={() => patch({ notes: note })}
           >
@@ -201,7 +197,7 @@ function AlertRow({
         </div>
       )}
       {alert.notes && !noteOpen && (
-        <p className="text-sm text-slate-600 dark:text-neutral-400">{alert.notes}</p>
+        <p className="text-sm text-fg-muted">{alert.notes}</p>
       )}
     </li>
   )
@@ -223,10 +219,10 @@ function AtRiskEmptyState({
         role="status"
       >
         <CheckCircle2 className="mx-auto h-12 w-12 text-emerald-600 dark:text-emerald-400" aria-hidden />
-        <p className="mt-4 text-lg font-semibold text-slate-900 dark:text-neutral-100">
+        <p className="mt-4 text-lg font-semibold text-fg-default">
           {atRiskI18n.emptyAfterReportTitle}
         </p>
-        <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-slate-600 dark:text-neutral-400">
+        <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-fg-muted">
           {atRiskI18n.emptyAfterReportDescription}
         </p>
       </div>
@@ -235,20 +231,20 @@ function AtRiskEmptyState({
 
   return (
     <div
-      className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 px-6 py-12 text-center dark:border-neutral-700 dark:bg-neutral-900"
+      className="mt-8 rounded-2xl border border-border-default bg-surface-base px-6 py-12 text-center dark:border-border-default dark:bg-surface-raised"
       role="status"
     >
       <Users className="mx-auto h-12 w-12 text-indigo-500 dark:text-indigo-400" aria-hidden />
-      <p className="mt-4 text-lg font-semibold text-slate-900 dark:text-neutral-100">
+      <p className="mt-4 text-lg font-semibold text-fg-default">
         {atRiskI18n.emptyInitialTitle}
       </p>
-      <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-slate-600 dark:text-neutral-400">
+      <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-fg-muted">
         {atRiskI18n.emptyInitialDescription}
       </p>
       <button
         type="button"
         onClick={onRunReport}
-        className="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500"
+        className="mt-6 inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500"
       >
         <RefreshCw className="h-4 w-4" aria-hidden />
         {atRiskI18n.emptyRunReportCta}
@@ -327,7 +323,7 @@ export default function CourseAtRiskPage() {
   if (featuresLoading || permLoading) {
     return (
       <LmsPage title={atRiskI18n.title}>
-        <p className="text-slate-600 dark:text-neutral-400">Loading…</p>
+        <p className="text-fg-muted">Loading…</p>
       </LmsPage>
     )
   }
@@ -335,7 +331,7 @@ export default function CourseAtRiskPage() {
   if (!atRiskAlertsEnabled) {
     return (
       <LmsPage title={atRiskI18n.title}>
-        <p className="text-slate-600 dark:text-neutral-400">At-risk alerts are not enabled.</p>
+        <p className="text-fg-muted">At-risk alerts are not enabled.</p>
       </LmsPage>
     )
   }
@@ -343,7 +339,7 @@ export default function CourseAtRiskPage() {
   if (!canView) {
     return (
       <LmsPage title={atRiskI18n.title}>
-        <p className="text-slate-600 dark:text-neutral-400">You do not have permission to view this page.</p>
+        <p className="text-fg-muted">You do not have permission to view this page.</p>
       </LmsPage>
     )
   }
@@ -357,7 +353,7 @@ export default function CourseAtRiskPage() {
           onClick={() => setConfigOpen(true)}
           disabled={loading || reportRunning}
           aria-label={atRiskI18n.runScoring}
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50/60 disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200"
+          className="inline-flex items-center gap-2 rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm font-semibold text-fg-muted shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50/60 disabled:opacity-50 dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
         >
           <RefreshCw className="h-4 w-4" aria-hidden />
           {atRiskI18n.runScoring}
@@ -372,7 +368,7 @@ export default function CourseAtRiskPage() {
         onRunReport={handleRunReport}
       />
       {loading && !reportRunning && (
-        <p className="text-slate-600 dark:text-neutral-400">Loading…</p>
+        <p className="text-fg-muted">Loading…</p>
       )}
       {error && (
         <p
@@ -396,7 +392,7 @@ export default function CourseAtRiskPage() {
         <div className="mt-8">
           <button
             type="button"
-            className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-neutral-300"
+            className="flex items-center gap-2 text-sm font-medium text-fg-muted"
             onClick={() => setResolvedOpen((o) => !o)}
           >
             {resolvedOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -407,7 +403,7 @@ export default function CourseAtRiskPage() {
               {resolved.map((a) => (
                 <li
                   key={a.id}
-                  className="rounded border border-slate-100 p-3 text-sm dark:border-neutral-800"
+                  className="rounded border border-border-subtle p-3 text-sm dark:border-border-subtle"
                 >
                   {a.displayName} — {a.status}
                 </li>

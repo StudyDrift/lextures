@@ -76,7 +76,7 @@ export type QuizPageSettingsPanelProps = {
 }
 
 const inputClass =
-  'w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500 dark:focus:ring-indigo-500'
+  'w-full rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm text-fg-default focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 disabled:opacity-60 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:focus:border-indigo-500 dark:focus:ring-indigo-500'
 
 function SettingsAccordion({
   title,
@@ -103,22 +103,22 @@ function SettingsAccordion({
   return (
     <details
       key={forceOpen ? 'forced-open' : 'manual'}
-      className="group border-b border-slate-100 last:border-b-0 dark:border-neutral-800/80"
+      className="group border-b border-border-subtle last:border-b-0/80"
       open={forceOpen || undefined}
       data-focus-accordion={sectionId}
       data-focus-anchor={sectionId ? `quiz.${sectionId}` : undefined}
     >
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2 text-[13px] font-medium text-slate-600 outline-none motion-safe:transition-colors hover:bg-slate-50/80 hover:text-slate-800 dark:text-neutral-400 dark:hover:bg-neutral-800/30 dark:hover:text-neutral-200 [&::-webkit-details-marker]:hidden">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2 text-[13px] font-medium text-fg-muted outline-none motion-safe:transition-colors hover:bg-slate-50/80 hover:text-fg-default dark:text-fg-muted dark:hover:bg-neutral-800/30 dark:hover:text-fg-default [&::-webkit-details-marker]:hidden">
         <span className="inline-flex min-w-0 items-center gap-2">
           <span className="truncate">{title}</span>
           {badge != null && badge > 0 ? (
-            <span className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-indigo-50 px-1.5 text-[11px] font-semibold text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300">
+            <span className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-indigo-50 px-1.5 text-[11px] font-semibold text-accent-fg dark:bg-indigo-950/60 dark:text-indigo-300">
               {badge}
             </span>
           ) : null}
         </span>
         <ChevronDown
-          className="h-3.5 w-3.5 shrink-0 text-slate-400/80 motion-safe:transition-transform motion-safe:duration-200 group-open:rotate-180 dark:text-neutral-500"
+          className="h-3.5 w-3.5 shrink-0 text-fg-subtle/80 motion-safe:transition-transform motion-safe:duration-200 group-open:rotate-180"
           aria-hidden
         />
       </summary>
@@ -142,7 +142,7 @@ function QuizPinnedGroup({ pins }: { pins: ReturnType<typeof usePinnedSettings> 
 
 function SettingsAccordionGroup({ children }: { children: ReactNode }) {
   return (
-    <div className="overflow-hidden rounded-lg border border-slate-200/70 bg-white dark:border-neutral-700/50 dark:bg-neutral-950/20">
+    <div className="overflow-hidden rounded-lg border border-slate-200/70 bg-surface-raised/50/20">
       {children}
     </div>
   )
@@ -166,10 +166,10 @@ function ToggleRow({
   return (
     <div className="flex items-start justify-between gap-3 py-2">
       <div className="min-w-0">
-        <label htmlFor={id} className="text-[13px] font-medium text-slate-700 dark:text-neutral-200">
+        <label htmlFor={id} className="text-[13px] font-medium text-fg-default">
           {label}
         </label>
-        <p className="mt-0.5 text-[11px] leading-relaxed text-slate-400 dark:text-neutral-500">{description}</p>
+        <p className="mt-0.5 text-[11px] leading-relaxed text-fg-subtle">{description}</p>
       </div>
       <button
         id={id}
@@ -178,14 +178,10 @@ function ToggleRow({
         aria-checked={checked}
         disabled={disabled}
         onClick={() => onChange(!checked)}
-        className={`relative mt-0.5 h-5 w-9 shrink-0 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-          checked ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-neutral-600'
-        }`}
+        className={`relative mt-0.5 h-5 w-9 shrink-0 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${ checked ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-neutral-600' }`}
       >
         <span
-          className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-colors ${
-            checked ? 'start-4.5' : 'start-0.5'
-          }`}
+          className={`absolute top-0.5 h-4 w-4 rounded-full bg-surface-raised transition-colors ${ checked ? 'start-4.5' : 'start-0.5' }`}
         />
       </button>
     </div>
@@ -205,11 +201,11 @@ function Field({
 }) {
   return (
     <div className="space-y-1">
-      <label className="block text-xs font-medium text-slate-500 dark:text-neutral-400" htmlFor={htmlFor}>
+      <label className="block text-xs font-medium text-fg-muted" htmlFor={htmlFor}>
         {label}
       </label>
       {children}
-      {hint ? <p className="text-[11px] leading-snug text-slate-400 dark:text-neutral-500">{hint}</p> : null}
+      {hint ? <p className="text-[11px] leading-snug text-fg-subtle">{hint}</p> : null}
     </div>
   )
 }
@@ -314,13 +310,13 @@ export function QuizPageSettingsPanel({
   return (
     <SettingsPanelProvider surface="quiz" query={settingsQuery} pins={pins}>
       <div className="space-y-3">
-        <p className="text-xs leading-relaxed text-slate-500 dark:text-neutral-400">
+        <p className="text-xs leading-relaxed text-fg-muted">
           Save the page from the toolbar to apply changes.
         </p>
 
         <div className="relative">
           <Search
-            className="pointer-events-none absolute start-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400 dark:text-neutral-500"
+            className="pointer-events-none absolute start-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-fg-subtle"
             aria-hidden
           />
           <input
@@ -337,7 +333,7 @@ export function QuizPageSettingsPanel({
         <QuizPinnedGroup pins={pins} />
 
         {searching && visibleSectionCount === 0 && !hasPinnedSearchHit ? (
-          <p className="rounded-lg border border-slate-200/70 px-3 py-6 text-center text-sm text-slate-400 dark:border-neutral-700/50 dark:text-neutral-500">
+          <p className="rounded-lg border border-slate-200/70 px-3 py-6 text-center text-sm text-fg-subtle/50">
             No settings match &ldquo;{settingsQuery.trim()}&rdquo;
           </p>
         ) : (
@@ -577,12 +573,12 @@ export function QuizPageSettingsPanel({
                     </Field>
                   </SettingRow>
                   {gradingGroups.length === 0 ? (
-                    <p className="text-[11px] leading-snug text-slate-400 dark:text-neutral-500">
+                    <p className="text-[11px] leading-snug text-fg-subtle">
                       Add groups under Course Settings → Assignment groups & weights.
                     </p>
                   ) : null}
                   {onNeverDropChange && onReplaceWithFinalChange ? (
-                    <div className="mt-2 divide-y divide-slate-100/90 border-t border-slate-100/90 pt-2 dark:divide-neutral-800/80 dark:border-neutral-800/80">
+                    <div className="mt-2 divide-y divide-slate-100/90 border-t border-slate-100/90 pt-2 dark:divide-neutral-800/80/80">
                       <SettingRow settingId="quiz.grading.never-drop">
                         <ToggleRow
                           id="quiz-never-drop"
@@ -773,7 +769,7 @@ export function QuizPageSettingsPanel({
                     />
                   </SettingRow>
                   {lockdownDeliveryEnabled ? (
-                    <div className="space-y-3 border-t border-slate-100/90 py-3 dark:border-neutral-800/80">
+                    <div className="space-y-3 border-t border-slate-100/90 py-3/80">
                       <SettingRow settingId="quiz.presentation.lockdown-mode">
                         <Field
                           label="Lockdown delivery"

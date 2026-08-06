@@ -58,7 +58,7 @@ export function AnswerTrueFalse({
         </button>
       )}
       {!locked && (
-        <p className="col-span-full text-center text-xs text-slate-500 dark:text-neutral-400">
+        <p className="col-span-full text-center text-xs text-fg-muted">
           {t('liveQuiz.answer.tfHint')}
         </p>
       )}

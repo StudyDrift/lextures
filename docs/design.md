@@ -2,28 +2,31 @@
 
 This document describes the product UI direction for the Lextures learning management system. It is inspired by modern **SaaS dashboard** patterns: calm, structured, and content-first.
 
+**Implementation of colour, space, radius, and elevation is the semantic token system (UX.1).** See [design-tokens.md](design-tokens.md). Feature code must use semantic utilities (`bg-surface-raised`, `text-fg-muted`, …), never raw Tailwind palette literals.
+
 ## Design intent
 
-- **Light-first**: Primary workspace sits on white (`#FFFFFF`) with generous whitespace.
-- **Layered surfaces**: Sidebars and secondary regions use a subtle cool gray (`#F8F9FA` range) to separate navigation from content without heavy chrome.
-- **Soft depth**: Cards and elevated surfaces use **thin borders** (`slate-200`–`slate-100`) and **very soft shadows**—enough to read hierarchy, not a “neumorphic” stack.
-- **Friendly geometry**: **12–16px** corner radius on cards, inputs, and primary controls; pill-shaped search and secondary actions where it fits.
+- **Light-first**: Primary workspace uses `surface-raised` / `surface-base` with generous whitespace.
+- **Layered surfaces**: Navigation and secondary regions use sunken/base elevation so hierarchy is structural, not arbitrary greys.
+- **Soft depth**: Cards use semantic elevation tokens (`elevation-1` / `shadow-card`) and `border-border-default`—enough hierarchy, not neumorphism.
+- **Friendly geometry**: Radius tokens (`radius-md` / `radius-lg`) on cards, inputs, and primary controls.
 
 ## Color
 
+Colour is **semantic**. Authors pick intent; themes supply values.
 
-| Role                   | Usage                                  | Reference                                                                      |
-| ---------------------- | -------------------------------------- | ------------------------------------------------------------------------------ |
-| **Primary accent**     | Primary buttons, active nav, key links | Indigo / violet family — e.g. `#6366F1` (Tailwind `indigo-500` / `indigo-600`) |
-| **Success / progress** | Positive metrics, completion           | Teal / emerald (`teal-500`–`600`)                                              |
-| **Warning**            | Low-urgency tags, cautions             | Amber (`amber-500`)                                                            |
-| **Text primary**       | Headings, emphasis                     | `slate-900`                                                                    |
-| **Text secondary**     | Descriptions, metadata                 | `slate-500`–`slate-600`                                                        |
-| **Borders**            | Dividers, card outlines                | `slate-200`                                                                    |
-| **Page background**    | Main canvas behind content             | White or `slate-50`                                                            |
+| Role | Semantic token / utility | Notes |
+| --- | --- | --- |
+| **Page background** | `bg-surface-base` | Dark themes elevate surfaces (base darkest) |
+| **Card / panel** | `bg-surface-raised` | |
+| **Body text** | `text-fg-default` | AA by construction against surfaces |
+| **Secondary text** | `text-fg-muted` / `text-fg-subtle` | |
+| **Primary accent** | `bg-accent-solid` / `text-accent-fg` | Org can override via brand accent OKLCH |
+| **On accent** | `text-fg-on-accent` | Guaranteed AA on solid |
+| **Borders** | `border-border-default` / `border-border-strong` | Strong meets SC 1.4.11 |
+| **Status** | `info` / `success` / `warning` / `danger` | Fixed vocabulary — learn once |
 
-
-Avoid pure black text; **slate-900** keeps contrast high while staying soft.
+Do not encode meaning with colour alone (SC 1.4.1): pair with icon or text.
 
 ## Typography
 
@@ -41,39 +44,42 @@ Avoid pure black text; **slate-900** keeps contrast high while staying soft.
 ### Navigation (sidebar)
 
 - Light gray background, **right border** only.
-- Items: icon + label, **rounded** hover (`hover:bg-white` or `hover:bg-slate-100`).
-- **Active** state: light indigo wash (`bg-indigo-50`) + **indigo** text and icon—not a heavy filled bar unless the pattern is icon-only.
+- Items: icon + label, **rounded** hover (`hover:bg-surface-sunken`).
+- **Active** state: `bg-accent-surface` + `text-accent-fg`—not a heavy filled bar unless the pattern is icon-only.
 
 ### Top bar
 
-- White background, **bottom border**, optional **shadow-sm**.
-- **Search**: Rounded field, muted fill (`bg-slate-100`), placeholder in `slate-500`.
+- Raised surface, **bottom border**, optional elevation shadow.
+- **Search**: Rounded field, sunken fill, `text-fg-subtle` placeholder.
 
 ### Buttons
 
-- **Primary**: Filled indigo, white text, rounded-lg or rounded-full for prominent CTAs.
-- **Secondary**: Outline (`border-slate-200`) or ghost on light surfaces.
+- **Primary**: `bg-accent-solid` + `text-fg-on-accent` (component token `--lx-button-primary-*`).
+- **Secondary**: Outline `border-border-default` or ghost on raised surfaces.
 
 ### Cards
 
-- **White** surface, `rounded-2xl`, `border border-slate-200`, `shadow-sm`.
-- Optional header art or illustration band; metadata row at bottom in **smaller, muted** type.
+- Raised surface, large radius, `border-border-default`, `shadow-card`.
+- Optional header art; metadata row in **muted** type (`text-fg-muted`).
 
 ### Forms (auth and settings)
 
-- Centered **card** on a very subtle tinted or radial background (optional).
-- Inputs: white fields, **slate-200** border, **indigo** focus ring.
+- Centered **card** on surface-base / sunken.
+- Inputs: raised fields, `border-border-default`, focus via `--lx-border-focus` / `ring-focus-ring`.
 
 ## Iconography
 
-- **Line-style** icons (e.g. Lucide), consistent stroke; active state inherits accent color.
+- **Line-style** icons (e.g. Lucide), consistent stroke; active state inherits accent token.
 
 ## Accessibility
 
-- Maintain **WCAG contrast** for text on `slate-50` / white / indigo buttons.
-- Visible **focus** styles (ring) on links and controls; semantic headings and `nav` labels.
+- Contrast is a **build invariant** (`npm run contrast:check`); do not add pairs that fail AA.
+- Visible **focus** via `border-focus` / focus-ring tokens; semantic headings and `nav` labels.
+- High-contrast themes cover every route via `data-theme`, not a one-off override sheet.
 
 ## Implementation notes
 
-- Tailwind utility classes map the palette above (`slate-`*, `indigo-*`, `teal-*` for positive metrics).
-- Global font and `body` background are set in `clients/web/src/index.css`; page shells live under `clients/web/src/components/layout/`.
+- **Never** write raw palette literals (`slate-*`, `neutral-*`, arbitrary hex) in `clients/web/src` feature code — enforced by `npm run tokens:purity`.
+- Token CSS: `clients/web/src/styles/tokens/`; theme application: `lib/ui-theme.ts`.
+- Global font and document background use semantic tokens in `clients/web/src/index.css`; shells under `clients/web/src/components/layout/`.
+- Full reference: [design-tokens.md](design-tokens.md).

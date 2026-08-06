@@ -12,7 +12,7 @@ export function TimelineLayout(props: LayoutRendererProps) {
 
   if (props.posts.length === 0) {
     return (
-      <p className="m-auto max-w-md px-4 text-center text-sm text-slate-500 dark:text-neutral-400">
+      <p className="m-auto max-w-md px-4 text-center text-sm text-fg-muted">
         {t('boards.detail.emptyPosts')}
       </p>
     )
@@ -24,7 +24,7 @@ export function TimelineLayout(props: LayoutRendererProps) {
         {dated.map((post) => (
           <li key={post.id} className="relative">
             <span className="absolute -start-[1.55rem] top-3 size-3 rounded-full bg-indigo-500 ring-4 ring-slate-50 dark:ring-neutral-900" aria-hidden />
-            <time className="mb-1 block text-xs font-medium text-slate-500" dateTime={post.eventDate}>
+            <time className="mb-1 block text-xs font-medium text-fg-muted" dateTime={post.eventDate}>
               {post.eventDate
                 ? new Date(post.eventDate).toLocaleDateString(undefined, {
                     year: 'numeric',
@@ -56,14 +56,14 @@ export function TimelineLayout(props: LayoutRendererProps) {
       </ol>
 
       <section
-        className="rounded-lg border border-dashed border-slate-300 p-3 dark:border-neutral-600"
+        className="rounded-lg border border-dashed border-border-strong p-3 dark:border-border-default"
         aria-label={t('boards.layout.undatedTray')}
       >
-        <h3 className="mb-2 text-sm font-semibold text-slate-700 dark:text-neutral-200">
+        <h3 className="mb-2 text-sm font-semibold text-fg-default">
           {t('boards.layout.undatedTray')}
         </h3>
         {undated.length === 0 ? (
-          <p className="text-xs text-slate-400">{t('boards.layout.undatedEmpty')}</p>
+          <p className="text-xs text-fg-subtle">{t('boards.layout.undatedEmpty')}</p>
         ) : (
           <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {undated.map((post) => (

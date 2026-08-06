@@ -20,11 +20,6 @@ import (
 // handleQuizAttemptsList is GET /api/v1/courses/{course_code}/quizzes/{item_id}/attempts.
 func (d Deps) handleQuizAttemptsList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return

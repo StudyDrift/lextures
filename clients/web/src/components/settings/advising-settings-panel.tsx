@@ -72,8 +72,8 @@ export function AdvisingSettingsPanel() {
   if (featuresLoading) {
     return (
       <section>
-        <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Advising</h2>
-        <p className="mt-4 text-sm text-slate-500">Loading…</p>
+        <h2 className="text-base font-semibold text-fg-default">Advising</h2>
+        <p className="mt-4 text-sm text-fg-muted">Loading…</p>
       </section>
     )
   }
@@ -81,8 +81,8 @@ export function AdvisingSettingsPanel() {
   if (!ffAdvisingIntegration) {
     return (
       <section>
-        <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Advising</h2>
-        <p className="mt-4 text-sm text-slate-600 dark:text-neutral-400">
+        <h2 className="text-base font-semibold text-fg-default">Advising</h2>
+        <p className="mt-4 text-sm text-fg-muted">
           Advising integration is not enabled. Turn on{' '}
           <span className="font-medium">Advising integration</span> under Global platform settings.
         </p>
@@ -92,13 +92,13 @@ export function AdvisingSettingsPanel() {
 
   return (
     <section>
-      <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Advising</h2>
-      <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+      <h2 className="text-base font-semibold text-fg-default">Advising</h2>
+      <p className="mt-1 text-sm text-fg-muted">
         Configure the advising appointment link and degree-audit provider for student dashboards.
       </p>
 
       {error && (
-        <p role="alert" className="mt-4 text-sm text-red-600 dark:text-red-400">
+        <p role="alert" className="mt-4 text-sm text-danger-fg">
           {error}
         </p>
       )}
@@ -109,11 +109,11 @@ export function AdvisingSettingsPanel() {
       )}
 
       {loading ? (
-        <p className="mt-4 text-sm text-slate-500">Loading configuration…</p>
+        <p className="mt-4 text-sm text-fg-muted">Loading configuration…</p>
       ) : (
         <form onSubmit={handleSave} className="mt-6 space-y-4">
           <div>
-            <label htmlFor="advising-appointment-url" className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+            <label htmlFor="advising-appointment-url" className="block text-sm font-medium text-fg-muted">
               Advising appointment URL
             </label>
             <input
@@ -122,21 +122,21 @@ export function AdvisingSettingsPanel() {
               value={appointmentUrl}
               onChange={(e) => setAppointmentUrl(e.target.value)}
               placeholder="https://navigate.example.edu/appointments"
-              className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-50"
+              className="mt-1 block w-full rounded-md border border-border-strong bg-surface-raised px-3 py-2 text-sm text-fg-default focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-border-default dark:bg-surface-raised"
             />
-            <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+            <p className="mt-1 text-xs text-fg-muted">
               Shown as &quot;Schedule Advising Appointment&quot; on the student dashboard (EAB Navigate, Calendly, etc.).
             </p>
           </div>
           <div>
-            <label htmlFor="advising-provider" className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+            <label htmlFor="advising-provider" className="block text-sm font-medium text-fg-muted">
               Degree audit provider
             </label>
             <select
               id="advising-provider"
               value={provider}
               onChange={(e) => setProvider(e.target.value as typeof provider)}
-              className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-50"
+              className="mt-1 block w-full rounded-md border border-border-strong bg-surface-raised px-3 py-2 text-sm text-fg-default focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-border-default dark:bg-surface-raised"
             >
               <option value="none">None</option>
               <option value="degreeworks">DegreeWorks</option>
@@ -146,7 +146,7 @@ export function AdvisingSettingsPanel() {
           {provider !== 'none' && (
             <>
               <div>
-                <label htmlFor="advising-base-url" className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+                <label htmlFor="advising-base-url" className="block text-sm font-medium text-fg-muted">
                   Degree audit API base URL
                 </label>
                 <input
@@ -155,11 +155,11 @@ export function AdvisingSettingsPanel() {
                   value={baseUrl}
                   onChange={(e) => setBaseUrl(e.target.value)}
                   placeholder="https://degreeworks.example.edu/api"
-                  className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-50"
+                  className="mt-1 block w-full rounded-md border border-border-strong bg-surface-raised px-3 py-2 text-sm text-fg-default focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-border-default dark:bg-surface-raised"
                 />
               </div>
               <div>
-                <label htmlFor="advising-creds" className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+                <label htmlFor="advising-creds" className="block text-sm font-medium text-fg-muted">
                   API credentials reference
                 </label>
                 <input
@@ -168,15 +168,15 @@ export function AdvisingSettingsPanel() {
                   value={credentialsRef}
                   onChange={(e) => setCredentialsRef(e.target.value)}
                   placeholder="cloud-provider credential id"
-                  className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-50"
+                  className="mt-1 block w-full rounded-md border border-border-strong bg-surface-raised px-3 py-2 text-sm text-fg-default focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-border-default dark:bg-surface-raised"
                 />
               </div>
-              <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-neutral-300">
+              <label className="flex items-center gap-2 text-sm text-fg-muted">
                 <input
                   type="checkbox"
                   checked={atRiskBanner}
                   onChange={(e) => setAtRiskBanner(e.target.checked)}
-                  className="rounded border-slate-300"
+                  className="rounded border-border-strong"
                 />
                 Show at-risk banner on student dashboard when flagged by degree audit
               </label>
@@ -185,12 +185,12 @@ export function AdvisingSettingsPanel() {
           <button
             type="submit"
             disabled={saving}
-            className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
+            className="rounded-md bg-accent-solid px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
           >
             {saving ? 'Saving…' : 'Save configuration'}
           </button>
           {config && (
-            <p className="text-xs text-slate-500 dark:text-neutral-400">
+            <p className="text-xs text-fg-muted">
               Current provider: {config.degreeAuditProvider || 'none'}
             </p>
           )}

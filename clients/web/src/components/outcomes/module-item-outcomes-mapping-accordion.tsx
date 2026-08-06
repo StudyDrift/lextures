@@ -81,12 +81,12 @@ export function ModuleItemOutcomesMappingAccordion({
 
   return (
     <div className="space-y-3 pt-1">
-      <p className="text-[11px] leading-snug text-slate-400 dark:text-neutral-500">
+      <p className="text-[11px] leading-snug text-fg-subtle">
         Link this {mode === 'assignment' ? 'assignment' : 'quiz'} to course learning outcomes with
         measurement and intensity.{' '}
         <Link
           to={settingsOutcomesUrl}
-          className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
+          className="font-medium text-accent-fg hover:text-indigo-500 dark:text-indigo-400"
         >
           Open full outcomes page
         </Link>
@@ -94,7 +94,7 @@ export function ModuleItemOutcomesMappingAccordion({
       </p>
 
       {!canMap ? (
-        <p className="text-[11px] text-slate-500 dark:text-neutral-500">
+        <p className="text-[11px] text-fg-subtle">
           You need course edit permission to change outcome mappings.
         </p>
       ) : null}
@@ -104,7 +104,7 @@ export function ModuleItemOutcomesMappingAccordion({
       ) : null}
 
       {loading ? (
-        <p className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-neutral-500">
+        <p className="flex items-center gap-1.5 text-[11px] text-fg-subtle">
           <Loader2 className="h-3.5 w-3.5 motion-safe:animate-spin" aria-hidden />
           Loading…
         </p>
@@ -129,7 +129,7 @@ export function ModuleItemOutcomesMappingAccordion({
       {!loading && canMap && mode === 'quiz' ? (
         <div className="space-y-4">
           <section className="space-y-2">
-            <h4 className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+            <h4 className="text-[11px] font-semibold uppercase tracking-wide text-fg-muted">
               Whole quiz
             </h4>
             <OutcomeLinksEditor
@@ -147,12 +147,12 @@ export function ModuleItemOutcomesMappingAccordion({
             />
           </section>
 
-          <section className="space-y-2 border-t border-slate-100 pt-3 dark:border-neutral-800/80">
-            <h4 className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+          <section className="space-y-2 border-t border-border-subtle pt-3/80">
+            <h4 className="text-[11px] font-semibold uppercase tracking-wide text-fg-muted">
               By question
             </h4>
             {quizQuestions.length === 0 ? (
-              <p className="text-[11px] text-slate-500 dark:text-neutral-500">
+              <p className="text-[11px] text-fg-subtle">
                 Add questions in the quiz editor to map individual questions.
               </p>
             ) : (
@@ -160,7 +160,7 @@ export function ModuleItemOutcomesMappingAccordion({
                 <div>
                   <label
                     htmlFor={`outcomes-question-pick-${itemId}`}
-                    className="mb-0.5 block text-[11px] font-medium text-slate-500 dark:text-neutral-400"
+                    className="mb-0.5 block text-[11px] font-medium text-fg-muted"
                   >
                     Question
                   </label>
@@ -169,7 +169,7 @@ export function ModuleItemOutcomesMappingAccordion({
                     value={questionId}
                     onChange={(e) => setQuestionId(e.target.value)}
                     disabled={disabled}
-                    className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500 dark:focus:ring-indigo-500"
+                    className="w-full rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm text-fg-default focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 disabled:opacity-60 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:focus:border-indigo-500 dark:focus:ring-indigo-500"
                   >
                     {quizQuestions.map((q) => (
                       <option key={q.id} value={q.id}>
@@ -179,7 +179,7 @@ export function ModuleItemOutcomesMappingAccordion({
                     ))}
                   </select>
                   {selectedQuestionLabel ? (
-                    <p className="mt-1 text-[11px] text-slate-400 dark:text-neutral-500">
+                    <p className="mt-1 text-[11px] text-fg-subtle">
                       Mapping for: {selectedQuestionLabel}
                     </p>
                   ) : null}

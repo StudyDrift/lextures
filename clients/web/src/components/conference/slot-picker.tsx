@@ -30,7 +30,7 @@ function SlotStatusIcon({ status, isMine }: { status: ConferenceSlot['status']; 
     return <Circle className="h-4 w-4 fill-sky-500 text-sky-500" aria-hidden />
   }
   if (status === 'booked') {
-    return <Circle className="h-4 w-4 fill-neutral-400 text-neutral-400" aria-hidden />
+    return <Circle className="h-4 w-4 fill-neutral-400 text-fg-muted" aria-hidden />
   }
   return <XCircle className="h-4 w-4 text-rose-500" aria-hidden />
 }
@@ -45,7 +45,7 @@ export function SlotPicker({
 }: SlotPickerProps) {
   if (slots.length === 0) {
     return (
-      <p className="text-sm text-neutral-500 dark:text-neutral-400">
+      <p className="text-sm text-neutral-500 dark:text-fg-muted">
         No slots available for this teacher on the selected date.
       </p>
     )
@@ -73,20 +73,14 @@ export function SlotPicker({
                 if (canBook) onBook(slot)
                 else if (canCancel) onCancel(slot)
               }}
-              className={`flex items-center gap-2 rounded-xl border px-3 py-3 text-left text-sm transition-[background-color,color,border-color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
-                isMine
-                  ? 'border-sky-300 bg-sky-50 dark:border-sky-700 dark:bg-sky-950/30'
-                  : slot.status === 'open'
-                    ? 'border-neutral-200 bg-white hover:border-emerald-300 hover:bg-emerald-50/50 dark:border-neutral-700 dark:bg-neutral-900/40 dark:hover:border-emerald-700'
-                    : 'border-neutral-200 bg-neutral-50 opacity-80 dark:border-neutral-700 dark:bg-neutral-900/20'
-              } ${!canBook && !canCancel ? 'cursor-not-allowed' : ''}`}
+              className={`flex items-center gap-2 rounded-xl border px-3 py-3 text-left text-sm transition-[background-color,color,border-color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${ isMine ? 'border-sky-300 bg-sky-50 dark:border-sky-700 dark:bg-sky-950/30' : slot.status === 'open' ? 'border-neutral-200 bg-surface-raised hover:border-emerald-300 hover:bg-emerald-50/50 dark:border-border-default/40 dark:hover:border-emerald-700' : 'border-neutral-200 bg-neutral-50 opacity-80 dark:border-border-default/20' } ${!canBook && !canCancel ? 'cursor-not-allowed' : ''}`}
             >
               <SlotStatusIcon status={slot.status} isMine={isMine} />
               <span className="min-w-0 flex-1">
-                <time dateTime={slot.startAt} className="font-medium text-neutral-900 dark:text-neutral-100">
+                <time dateTime={slot.startAt} className="font-medium text-neutral-900 dark:text-fg-default">
                   {formatConferenceSlotTime(slot)}
                 </time>
-                <span className="mt-0.5 block text-xs text-neutral-500 dark:text-neutral-400">
+                <span className="mt-0.5 block text-xs text-neutral-500 dark:text-fg-muted">
                   {slot.status === 'open' && 'Available'}
                   {slot.status === 'booked' && (isMine ? 'Your booking' : 'Booked')}
                   {slot.status === 'cancelled' && 'Cancelled'}

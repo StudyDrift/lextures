@@ -18,13 +18,13 @@ type TabKey = (typeof TABS)[number]['key']
 
 function ResultRow({ item }: { item: AdminSearchResult }) {
   return (
-    <li className="border-b border-slate-100 px-1 py-3 last:border-0 dark:border-neutral-800">
-      <Link to={item.path} className="block hover:text-indigo-700 dark:hover:text-indigo-300">
-        <p className="font-medium text-slate-900 dark:text-slate-100">{item.title}</p>
-        <p className="text-sm text-slate-500 dark:text-slate-400">{item.subtitle}</p>
+    <li className="border-b border-border-subtle px-1 py-3 last:border-0 dark:border-border-subtle">
+      <Link to={item.path} className="block hover:text-accent-fg dark:hover:text-indigo-300">
+        <p className="font-medium text-fg-default dark:text-slate-100">{item.title}</p>
+        <p className="text-sm text-fg-muted dark:text-fg-subtle">{item.subtitle}</p>
         {item.snippet ? (
           <p
-            className="mt-1 text-sm text-slate-600 dark:text-slate-300"
+            className="mt-1 text-sm text-fg-muted dark:text-slate-300"
             dangerouslySetInnerHTML={{ __html: item.snippet }}
           />
         ) : null}
@@ -88,29 +88,25 @@ export default function AdminSearchResults() {
 
   return (
     <div>
-      <h1 id={titleId} className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+      <h1 id={titleId} className="text-xl font-semibold text-fg-default dark:text-slate-100">
         Search results
       </h1>
       {q ? (
-        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+        <p className="mt-1 text-sm text-fg-muted dark:text-fg-subtle">
           Showing matches for &ldquo;{q}&rdquo;
           {data ? ` (${data.total} total, ${data.tookMs} ms)` : ''}
         </p>
       ) : (
-        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">Enter a query from the search bar.</p>
+        <p className="mt-1 text-sm text-fg-muted dark:text-fg-subtle">Enter a query from the search bar.</p>
       )}
 
-      <div className="mt-4 flex gap-2 border-b border-slate-200 dark:border-neutral-800">
+      <div className="mt-4 flex gap-2 border-b border-border-default dark:border-border-subtle">
         {TABS.map((tab) => (
           <button
             key={tab.key}
             type="button"
             onClick={() => setTab(tab.key)}
-            className={`border-b-2 px-3 py-2 text-sm font-medium ${
-              type === tab.key
-                ? 'border-indigo-600 text-indigo-700 dark:border-indigo-400 dark:text-indigo-300'
-                : 'border-transparent text-slate-600 hover:text-slate-900 dark:text-slate-400'
-            }`}
+            className={`border-b-2 px-3 py-2 text-sm font-medium ${ type === tab.key ? 'border-indigo-600 text-accent-fg dark:border-indigo-400 dark:text-indigo-300' : 'border-transparent text-fg-muted hover:text-fg-default dark:text-fg-subtle' }`}
           >
             {tab.label}
           </button>
@@ -120,13 +116,13 @@ export default function AdminSearchResults() {
       {loading ? (
         <div className="mt-6 space-y-3" aria-busy="true">
           {[1, 2, 3].map((n) => (
-            <div key={n} className="h-14 animate-pulse rounded-lg bg-slate-100 dark:bg-neutral-800" />
+            <div key={n} className="h-14 animate-pulse rounded-lg bg-surface-sunken" />
           ))}
         </div>
       ) : error ? (
-        <p className="mt-6 text-sm text-red-600">{error}</p>
+        <p className="mt-6 text-sm text-danger-fg">{error}</p>
       ) : !data || data.items.length === 0 ? (
-        <p className="mt-6 text-sm text-slate-500">No {type} found.</p>
+        <p className="mt-6 text-sm text-fg-muted">No {type} found.</p>
       ) : (
         <>
           <ul className="mt-4 divide-y divide-slate-100 dark:divide-neutral-800">
@@ -140,18 +136,18 @@ export default function AdminSearchResults() {
                 type="button"
                 disabled={page <= 1}
                 onClick={() => setPage(page - 1)}
-                className="rounded border border-slate-300 px-3 py-1 disabled:opacity-40 dark:border-neutral-700"
+                className="rounded border border-border-strong px-3 py-1 disabled:opacity-40 dark:border-border-default"
               >
                 Previous
               </button>
-              <span className="text-slate-600 dark:text-slate-400">
+              <span className="text-fg-muted dark:text-fg-subtle">
                 Page {page} of {data.totalPages}
               </span>
               <button
                 type="button"
                 disabled={page >= data.totalPages}
                 onClick={() => setPage(page + 1)}
-                className="rounded border border-slate-300 px-3 py-1 disabled:opacity-40 dark:border-neutral-700"
+                className="rounded border border-border-strong px-3 py-1 disabled:opacity-40 dark:border-border-default"
               >
                 Next
               </button>

@@ -44,12 +44,12 @@ export function LmsPage({
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between sm:gap-4">
           <div className="min-w-0 flex-1">
             {titleContent ?? (
-              <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-neutral-100">
+              <h1 className="text-2xl font-semibold tracking-tight text-fg-default">
                 {title}
               </h1>
             )}
             {description && (
-              <p className="mt-2 mb-4 max-w-2xl text-sm leading-relaxed text-stone-600 dark:text-neutral-400">
+              <p className="mt-2 mb-4 max-w-2xl text-sm leading-relaxed text-stone-600 dark:text-fg-muted">
                 {description}
               </p>
             )}

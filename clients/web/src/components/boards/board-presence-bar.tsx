@@ -51,7 +51,7 @@ export function BoardPresenceBar({ awareness }: Props) {
         </span>
       ))}
       {overflow > 0 ? (
-        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-300 text-xs font-semibold text-slate-700 ring-2 ring-white dark:bg-neutral-600 dark:text-neutral-100 dark:ring-neutral-800">
+        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-300 text-xs font-semibold text-fg-muted ring-2 ring-white dark:bg-neutral-600 dark:text-fg-default dark:ring-neutral-800">
           +{overflow}
         </span>
       ) : null}

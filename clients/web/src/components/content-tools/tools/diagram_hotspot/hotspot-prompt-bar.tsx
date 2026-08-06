@@ -21,7 +21,7 @@ export function HotspotPromptBar({
 }: HotspotPromptBarProps) {
   return (
     <div className="space-y-1" data-testid="diagram-hotspot-prompt">
-      <p className="text-sm text-slate-700 dark:text-neutral-200">
+      <p className="text-sm text-fg-default">
         {prompts[activePromptIndex]?.text ?? ''}
       </p>
       {prompts.length > 1 ? (
@@ -45,7 +45,7 @@ export function HotspotPromptBar({
         </div>
       ) : null}
       {selectedRegionId ? (
-        <p className="text-xs text-slate-600 dark:text-neutral-300" data-testid="diagram-selected">
+        <p className="text-xs text-fg-muted" data-testid="diagram-selected">
           {t('contentTools.tools.diagram_hotspot.selected', { region: selectedRegionLabel })}
         </p>
       ) : null}

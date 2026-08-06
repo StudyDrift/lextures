@@ -20,10 +20,10 @@ import {
 } from './outcome-links-helpers'
 
 const settingsInputClass =
-  'w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500 dark:focus:ring-indigo-500'
+  'w-full rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm text-fg-default focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 disabled:opacity-60 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:focus:border-indigo-500 dark:focus:ring-indigo-500'
 
 const compactInputClass =
-  'w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500'
+  'w-full rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm text-fg-default focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:focus:border-indigo-500'
 
 type OutcomeLinksEditorProps = {
   courseCode: string
@@ -164,11 +164,11 @@ export function OutcomeLinksEditor({
   return (
     <div className={variant === 'compact' ? 'space-y-2.5' : 'space-y-3'}>
       {!hideHeaderHint && variant === 'settings' ? (
-        <p className="text-[11px] leading-snug text-slate-400 dark:text-neutral-500">
+        <p className="text-[11px] leading-snug text-fg-subtle">
           Link with measurement and intensity.{' '}
           <Link
             to={settingsOutcomesUrl}
-            className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
+            className="font-medium text-accent-fg hover:text-indigo-500 dark:text-indigo-400"
           >
             Open full outcomes page
           </Link>
@@ -177,7 +177,7 @@ export function OutcomeLinksEditor({
       ) : null}
 
       {!canMap ? (
-        <p className={`${textSize} text-slate-500 dark:text-neutral-500`}>
+        <p className={`${textSize} text-fg-subtle`}>
           You need course edit permission to change outcome mappings.
         </p>
       ) : null}
@@ -190,7 +190,7 @@ export function OutcomeLinksEditor({
       ) : null}
 
       {loading ? (
-        <p className={`flex items-center gap-1.5 ${textSize} text-slate-500 dark:text-neutral-500`}>
+        <p className={`flex items-center gap-1.5 ${textSize} text-fg-subtle`}>
           <Loader2 className="h-3.5 w-3.5 motion-safe:animate-spin" aria-hidden />
           Loading…
         </p>
@@ -199,21 +199,21 @@ export function OutcomeLinksEditor({
       {!loading && canMap ? (
         <>
           {mappedRows.length === 0 ? (
-            <p className={`${textSize} text-slate-500 dark:text-neutral-500`}>{emptyLabel}</p>
+            <p className={`${textSize} text-fg-subtle`}>{emptyLabel}</p>
           ) : (
             <ul className="flex flex-wrap gap-1.5">
               {mappedRows.map(({ outcome, link }) => (
                 <li key={link.id}>
-                  <span className="inline-flex max-w-full items-center gap-1 rounded-full border border-slate-200/90 bg-slate-50 py-1 pe-1 ps-2.5 text-slate-700 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200">
+                  <span className="inline-flex max-w-full items-center gap-1 rounded-full border border-slate-200/90 bg-surface-base py-1 pe-1 ps-2.5 text-fg-muted dark:border-border-default dark:bg-surface-overlay dark:text-fg-default">
                     <span className={`min-w-0 truncate font-medium ${textSize}`}>{outcome.title}</span>
-                    <span className={`hidden shrink-0 text-slate-400 sm:inline ${textSize} dark:text-neutral-500`}>
+                    <span className={`hidden shrink-0 text-fg-subtle sm:inline ${textSize}`}>
                       {formatOutcomeLinkLevels(link)}
                     </span>
                     <button
                       type="button"
                       disabled={disabled || removingId === link.id}
                       onClick={() => void onRemove(outcome.id, link.id)}
-                      className="shrink-0 rounded-full p-1 text-slate-400 motion-safe:transition-colors hover:bg-rose-50 hover:text-rose-700 disabled:opacity-50 dark:hover:bg-rose-950/40 dark:hover:text-rose-300"
+                      className="shrink-0 rounded-full p-1 text-fg-subtle motion-safe:transition-colors hover:bg-rose-50 hover:text-rose-700 disabled:opacity-50 dark:hover:bg-rose-950/40 dark:hover:text-rose-300"
                       aria-label={`Remove ${outcome.title}`}
                     >
                       {removingId === link.id ? (
@@ -237,7 +237,7 @@ export function OutcomeLinksEditor({
               type="button"
               disabled={linkBlocked || outcomes.length === 0}
               onClick={() => setFormOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 shadow-sm motion-safe:transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-200 dark:hover:bg-neutral-800"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-2.5 py-1.5 text-xs font-medium text-fg-muted shadow-sm motion-safe:transition-colors hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-50 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:hover:bg-surface-overlay"
             >
               <Plus className="h-3.5 w-3.5" aria-hidden />
               Add outcome
@@ -249,14 +249,14 @@ export function OutcomeLinksEditor({
               onSubmit={onAdd}
               className={
                 variant === 'compact'
-                  ? 'space-y-2 rounded-xl border border-slate-200/90 bg-slate-50/70 p-3 dark:border-neutral-700 dark:bg-neutral-950/50'
-                  : 'space-y-2 border-t border-slate-100 pt-2 dark:border-neutral-800/80'
+                  ? 'space-y-2 rounded-xl border border-slate-200/90 bg-slate-50/70 p-3 dark:border-border-default/50'
+                  : 'space-y-2 border-t border-border-subtle pt-2/80'
               }
             >
               <div>
                 <label
                   htmlFor={`${formId}-outcome`}
-                  className={`mb-0.5 block font-medium text-slate-500 dark:text-neutral-400 ${textSize}`}
+                  className={`mb-0.5 block font-medium text-fg-muted ${textSize}`}
                 >
                   Outcome
                 </label>
@@ -280,7 +280,7 @@ export function OutcomeLinksEditor({
                 <div>
                   <label
                     htmlFor={`${formId}-measurement`}
-                    className={`mb-0.5 block font-medium text-slate-500 dark:text-neutral-400 ${textSize}`}
+                    className={`mb-0.5 block font-medium text-fg-muted ${textSize}`}
                   >
                     Measurement
                   </label>
@@ -301,7 +301,7 @@ export function OutcomeLinksEditor({
                 <div>
                   <label
                     htmlFor={`${formId}-intensity`}
-                    className={`mb-0.5 block font-medium text-slate-500 dark:text-neutral-400 ${textSize}`}
+                    className={`mb-0.5 block font-medium text-fg-muted ${textSize}`}
                   >
                     Intensity
                   </label>
@@ -327,8 +327,8 @@ export function OutcomeLinksEditor({
                   disabled={linkBlocked || adding || !outcomeId || outcomes.length === 0}
                   className={
                     variant === 'compact'
-                      ? 'rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50'
-                      : 'w-full rounded-lg bg-indigo-600 px-2 py-1.5 text-[12px] font-semibold text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50'
+                      ? 'rounded-lg bg-accent-solid px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50'
+                      : 'w-full rounded-lg bg-accent-solid px-2 py-1.5 text-[12px] font-semibold text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50'
                   }
                 >
                   {adding ? 'Adding…' : 'Add mapping'}
@@ -341,7 +341,7 @@ export function OutcomeLinksEditor({
                       setFormOpen(false)
                       setActionError(null)
                     }}
-                    className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-800"
+                    className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-fg-muted hover:bg-surface-sunken disabled:opacity-50 dark:text-fg-muted dark:hover:bg-surface-overlay"
                   >
                     Cancel
                   </button>
@@ -349,11 +349,11 @@ export function OutcomeLinksEditor({
               </div>
 
               {outcomes.length === 0 ? (
-                <p className={`${textSize} text-slate-500 dark:text-neutral-500`}>
+                <p className={`${textSize} text-fg-subtle`}>
                   Create outcomes under Course Settings → Outcomes first.{' '}
                   <Link
                     to={settingsOutcomesUrl}
-                    className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
+                    className="font-medium text-accent-fg hover:text-indigo-500 dark:text-indigo-400"
                   >
                     Open outcomes
                   </Link>

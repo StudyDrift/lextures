@@ -89,7 +89,7 @@ function normEnrollmentRole(role: string): string {
 }
 
 const ENROLLMENT_ROLE_SELECT_CLASS =
-  'w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100'
+  'w-full rounded-xl border border-border-default bg-surface-raised px-2 py-1.5 text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-border-default dark:bg-surface-raised dark:text-fg-default'
 
 const ASSIGNABLE_ENROLLMENT_ROLES: { value: string; label: string }[] = [
   { value: 'student', label: 'Student' },
@@ -956,7 +956,7 @@ export default function CourseEnrollments() {
       titleContent={
         <div className="min-w-0 flex-1" data-focus-anchor="enrollments.list">
           <div className="flex flex-wrap items-start justify-between gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-neutral-100">
+            <h1 className="text-2xl font-semibold tracking-tight text-fg-default">
               Enrollments
             </h1>
             <EnrollmentsActionsMenu
@@ -976,14 +976,14 @@ export default function CourseEnrollments() {
               enableGroupsBusy={enableGroupsBusy}
             />
           </div>
-          <p className="mt-2 max-w-2xl text-xs text-slate-500 dark:text-neutral-400">
+          <p className="mt-2 max-w-2xl text-xs text-fg-muted">
             {courseCode
               ? `People and roles for course ${courseCode}.`
               : 'Course enrollments'}
           </p>
           {enrollmentGroupsEnabled ? (
             <div
-              className="mt-4 flex gap-1 border-b border-slate-200 dark:border-neutral-700"
+              className="mt-4 flex gap-1 border-b border-border-default"
               role="tablist"
               aria-label="Enrollments sections"
             >
@@ -992,11 +992,7 @@ export default function CourseEnrollments() {
                 role="tab"
                 aria-selected={mainTab === 'roster'}
                 onClick={() => setMainTab('roster')}
-                className={`rounded-t-lg px-4 py-2 text-sm font-semibold transition-[background-color,color,border-color] ${
-                  mainTab === 'roster'
-                    ? 'border border-b-0 border-slate-200 bg-white text-slate-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100'
-                    : 'text-slate-500 hover:text-slate-800 dark:text-neutral-400 dark:hover:text-neutral-200'
-                }`}
+                className={`rounded-t-lg px-4 py-2 text-sm font-semibold transition-[background-color,color,border-color] ${ mainTab === 'roster' ? 'border border-b-0 border-border-default bg-surface-raised text-fg-default dark:border-border-default dark:bg-surface-raised dark:text-fg-default' : 'text-fg-muted hover:text-fg-default dark:text-fg-muted dark:hover:text-fg-default' }`}
               >
                 Enrollments
               </button>
@@ -1005,11 +1001,7 @@ export default function CourseEnrollments() {
                 role="tab"
                 aria-selected={mainTab === 'groups'}
                 onClick={() => setMainTab('groups')}
-                className={`rounded-t-lg px-4 py-2 text-sm font-semibold transition-[background-color,color,border-color] ${
-                  mainTab === 'groups'
-                    ? 'border border-b-0 border-slate-200 bg-white text-slate-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100'
-                    : 'text-slate-500 hover:text-slate-800 dark:text-neutral-400 dark:hover:text-neutral-200'
-                }`}
+                className={`rounded-t-lg px-4 py-2 text-sm font-semibold transition-[background-color,color,border-color] ${ mainTab === 'groups' ? 'border border-b-0 border-border-default bg-surface-raised text-fg-default dark:border-border-default dark:bg-surface-raised dark:text-fg-default' : 'text-fg-muted hover:text-fg-default dark:text-fg-muted dark:hover:text-fg-default' }`}
               >
                 Groups
               </button>
@@ -1034,17 +1026,17 @@ export default function CourseEnrollments() {
         </p>
       )}
       {mainTab === 'roster' && enrollments === null && !error && (
-        <p className="mt-8 text-sm text-slate-500">Loading enrollments…</p>
+        <p className="mt-8 text-sm text-fg-muted">Loading enrollments…</p>
       )}
       {mainTab === 'roster' && enrollments && enrollments.length === 0 && !error && (
-        <p className="mt-8 text-sm text-slate-500">No enrollments yet.</p>
+        <p className="mt-8 text-sm text-fg-muted">No enrollments yet.</p>
       )}
 
       {mainTab === 'roster' && enrollments && enrollments.length > 0 && (
-        <div className="mt-8 overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div className="mt-8 overflow-x-auto rounded-xl border border-border-default bg-surface-raised shadow-sm">
           <table className="w-full min-w-[16rem] text-start text-sm">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <tr className="border-b border-border-default bg-surface-base text-xs font-semibold uppercase tracking-wide text-fg-muted">
                 <th className="px-4 py-3">Name</th>
                 <th className="px-4 py-3">Role</th>
                 {ffEnrollmentStateMachine ? <th className="px-4 py-3">Status</th> : null}
@@ -1080,9 +1072,9 @@ export default function CourseEnrollments() {
                 return (
                   <tr
                     key={e.id}
-                    className="group border-b border-slate-100 last:border-0"
+                    className="group border-b border-border-subtle last:border-0"
                   >
-                    <td className="px-4 py-3 font-medium text-slate-900">
+                    <td className="px-4 py-3 font-medium text-fg-default">
                       <div className="flex flex-wrap items-center gap-2">
                         <EnrollmentAvatar
                           userId={e.userId}
@@ -1094,7 +1086,7 @@ export default function CourseEnrollments() {
                         (er === 'student' || er === 'learner') ? (
                           <Link
                             to={`/courses/${encodeURIComponent(courseCode)}/students/${encodeURIComponent(e.id)}/progress`}
-                            className="text-indigo-700 hover:underline dark:text-indigo-300"
+                            className="text-accent-fg hover:underline dark:text-indigo-300"
                           >
                             {e.displayName?.trim() || '—'}
                           </Link>
@@ -1111,7 +1103,7 @@ export default function CourseEnrollments() {
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-slate-700">
+                    <td className="px-4 py-3 text-fg-muted">
                       <div className="flex flex-wrap items-center gap-2">
                         <EnrollmentRoleBadge courseRoleKey={e.role} roleDisplay={e.roleDisplay} />
                         {e.invitationPending ? (
@@ -1122,7 +1114,7 @@ export default function CourseEnrollments() {
                       </div>
                     </td>
                     {ffEnrollmentStateMachine ? (
-                      <td className="px-4 py-3 text-slate-700">
+                      <td className="px-4 py-3 text-fg-muted">
                         <EnrollmentStateBadge
                           state={e.state ?? 'active'}
                           changedAt={e.stateChangedAt}
@@ -1130,7 +1122,7 @@ export default function CourseEnrollments() {
                       </td>
                     ) : null}
                     {sectionsEnabled ? (
-                      <td className="px-4 py-3 text-slate-600">
+                      <td className="px-4 py-3 text-fg-muted">
                         {e.sectionCode?.trim()
                           ? e.sectionName?.trim()
                             ? `${e.sectionCode} (${e.sectionName})`
@@ -1138,7 +1130,7 @@ export default function CourseEnrollments() {
                           : '—'}
                       </td>
                     ) : null}
-                    <td className="px-4 py-3 text-slate-600">
+                    <td className="px-4 py-3 text-fg-muted">
                       {formatTimeAgoFromIso(e.lastCourseAccessAt, relativeNowMs)}
                     </td>
                     {showActionsColumn && (
@@ -1157,7 +1149,7 @@ export default function CourseEnrollments() {
                                 <button
                                   type="button"
                                   onClick={() => openSectionTransferModal(e)}
-                                  className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition-[opacity,background-color,color,border-color] hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
+                                  className="inline-flex rounded-lg p-1.5 text-fg-subtle opacity-0 transition-[opacity,background-color,color,border-color] hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
                                   aria-label={`Change section for ${e.displayName?.trim() || 'this student'}`}
                                 >
                                   <Shuffle className="h-4 w-4" aria-hidden />
@@ -1169,7 +1161,7 @@ export default function CourseEnrollments() {
                                 <button
                                   type="button"
                                   onClick={() => openGroupAssignModal(e)}
-                                  className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition-[opacity,background-color,color,border-color] hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
+                                  className="inline-flex rounded-lg p-1.5 text-fg-subtle opacity-0 transition-[opacity,background-color,color,border-color] hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
                                   aria-label={`Assign groups for ${e.displayName?.trim() || 'this person'}`}
                                 >
                                   <UsersRound className="h-4 w-4" aria-hidden />
@@ -1187,7 +1179,7 @@ export default function CourseEnrollments() {
                                     setEditMessage(null)
                                     setDemoteStatus('idle')
                                   }}
-                                  className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition-[opacity,background-color,color,border-color] hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100"
+                                  className="inline-flex rounded-lg p-1.5 text-fg-subtle opacity-0 transition-[opacity,background-color,color,border-color] hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100"
                                   aria-label={`Edit role for ${e.displayName?.trim() || 'this person'}`}
                                 >
                                   <Pencil className="h-4 w-4" aria-hidden />
@@ -1199,7 +1191,7 @@ export default function CourseEnrollments() {
                                 <button
                                   type="button"
                                   onClick={() => openMessageModal(e)}
-                                  className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition-[opacity,background-color,color,border-color] hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
+                                  className="inline-flex rounded-lg p-1.5 text-fg-subtle opacity-0 transition-[opacity,background-color,color,border-color] hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
                                   aria-label={`Send message to ${e.displayName?.trim() || 'this person'}`}
                                 >
                                   <Mail className="h-4 w-4" aria-hidden />
@@ -1217,7 +1209,7 @@ export default function CourseEnrollments() {
                                     setStateChangeStatus('idle')
                                     setStateChangeMessage(null)
                                   }}
-                                  className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition-[opacity,background-color,color,border-color] hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
+                                  className="inline-flex rounded-lg p-1.5 text-fg-subtle opacity-0 transition-[opacity,background-color,color,border-color] hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
                                   aria-label={`Change enrollment status for ${e.displayName?.trim() || 'this student'}`}
                                 >
                                   <ClipboardList className="h-4 w-4" aria-hidden />
@@ -1228,7 +1220,7 @@ export default function CourseEnrollments() {
                               <IconActionTooltip label="Gradebook">
                                 <Link
                                   to={`/courses/${encodeURIComponent(courseCode)}/gradebook?student=${encodeURIComponent(e.userId)}`}
-                                  className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition-[opacity,background-color,color,border-color] hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
+                                  className="inline-flex rounded-lg p-1.5 text-fg-subtle opacity-0 transition-[opacity,background-color,color,border-color] hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
                                   aria-label={`View gradebook for ${e.displayName?.trim() || 'this student'}`}
                                 >
                                   <ClipboardList className="h-4 w-4" aria-hidden />
@@ -1239,7 +1231,7 @@ export default function CourseEnrollments() {
                               <IconActionTooltip label="Student report">
                                 <Link
                                   to={`/courses/${encodeURIComponent(courseCode)}/students/${encodeURIComponent(e.id)}/progress`}
-                                  className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition-[opacity,background-color,color,border-color] hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
+                                  className="inline-flex rounded-lg p-1.5 text-fg-subtle opacity-0 transition-[opacity,background-color,color,border-color] hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
                                   aria-label={`View report for ${e.displayName?.trim() || 'this student'}`}
                                 >
                                   <BarChart3 className="h-4 w-4" aria-hidden />
@@ -1252,7 +1244,7 @@ export default function CourseEnrollments() {
                                   type="button"
                                   onClick={() => setRemoveConfirmTarget(e)}
                                   disabled={removingId === e.id}
-                                  className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition-[opacity,background-color,color,border-color] hover:bg-rose-50 hover:text-rose-700 group-hover:opacity-100 focus-visible:opacity-100 disabled:cursor-not-allowed disabled:opacity-40"
+                                  className="inline-flex rounded-lg p-1.5 text-fg-subtle opacity-0 transition-[opacity,background-color,color,border-color] hover:bg-rose-50 hover:text-rose-700 group-hover:opacity-100 focus-visible:opacity-100 disabled:cursor-not-allowed disabled:opacity-40"
                                   aria-label={`Remove ${e.role} enrollment for ${e.displayName?.trim() || 'this person'}`}
                                 >
                                   <Trash2 className="h-4 w-4" aria-hidden />
@@ -1289,38 +1281,38 @@ export default function CourseEnrollments() {
             if (ev.target === ev.currentTarget) closeGroupAssignModal()
           }}
         >
-          <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-900">
-            <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-neutral-700">
+          <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-raised">
+            <div className="flex items-center justify-between border-b border-border-default px-4 py-3 dark:border-border-default">
               <h3
                 id="group-assign-title"
-                className="text-sm font-semibold text-slate-900 dark:text-neutral-100"
+                className="text-sm font-semibold text-fg-default"
               >
                 Group membership
               </h3>
               <button
                 type="button"
                 onClick={() => closeGroupAssignModal()}
-                className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-neutral-400 dark:hover:bg-neutral-800"
+                className="rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken hover:text-fg-default dark:text-fg-muted dark:hover:bg-surface-overlay"
                 aria-label="Close"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="max-h-[min(28rem,70vh)] overflow-y-auto p-4 text-sm text-slate-700 dark:text-neutral-300">
-              <p className="font-medium text-slate-900 dark:text-neutral-100">
+            <div className="max-h-[min(28rem,70vh)] overflow-y-auto p-4 text-sm text-fg-muted">
+              <p className="font-medium text-fg-default">
                 {groupAssignTarget.displayName?.trim() || '—'}
               </p>
-              <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+              <p className="mt-1 text-xs text-fg-muted">
                 Student enrollments only. Choose a group per set, or leave unassigned.
               </p>
               {groupAssignLoading ? (
-                <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">Loading groups…</p>
+                <p className="mt-4 text-sm text-fg-muted">Loading groups…</p>
               ) : groupAssignTree && groupAssignTree.groupSets.length > 0 ? (
                 <div className="mt-4 space-y-4">
                   {groupAssignTree.groupSets.map((set) => (
                     <div key={set.id}>
                       <label
-                        className="text-xs font-medium text-slate-600 dark:text-neutral-400"
+                        className="text-xs font-medium text-fg-muted"
                         htmlFor={`group-pick-${set.id}`}
                       >
                         {set.name}
@@ -1334,7 +1326,7 @@ export default function CourseEnrollments() {
                             [set.id]: ev.target.value,
                           }))
                         }
-                        className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+                        className="mt-1 w-full rounded-xl border border-border-default bg-surface-raised px-2 py-1.5 text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
                         disabled={groupAssignStatus === 'loading'}
                       >
                         <option value="">Unassigned</option>
@@ -1348,7 +1340,7 @@ export default function CourseEnrollments() {
                   ))}
                 </div>
               ) : (
-                <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">
+                <p className="mt-4 text-sm text-fg-muted">
                   No group sets are configured yet. Open the Groups tab to add some.
                 </p>
               )}
@@ -1357,7 +1349,7 @@ export default function CourseEnrollments() {
                   className={
                     groupAssignStatus === 'error'
                       ? 'mt-3 text-sm text-rose-700 dark:text-rose-300'
-                      : 'mt-3 text-sm text-slate-600 dark:text-neutral-400'
+                      : 'mt-3 text-sm text-fg-muted'
                   }
                   role="status"
                 >
@@ -1368,7 +1360,7 @@ export default function CourseEnrollments() {
                 <button
                   type="button"
                   onClick={() => closeGroupAssignModal()}
-                  className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                  className="rounded-xl px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay"
                 >
                   Cancel
                 </button>
@@ -1378,7 +1370,7 @@ export default function CourseEnrollments() {
                   disabled={
                     groupAssignStatus === 'loading' || groupAssignLoading || !groupAssignTree
                   }
-                  className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {groupAssignStatus === 'loading' ? 'Saving…' : 'Save'}
                 </button>
@@ -1398,33 +1390,33 @@ export default function CourseEnrollments() {
             if (ev.target === ev.currentTarget) closeSectionTransferModal()
           }}
         >
-          <div className="w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-900">
-            <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-neutral-700">
+          <div className="w-full max-w-md overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-raised">
+            <div className="flex items-center justify-between border-b border-border-default px-4 py-3 dark:border-border-default">
               <h3
                 id="section-transfer-title"
-                className="text-sm font-semibold text-slate-900 dark:text-neutral-100"
+                className="text-sm font-semibold text-fg-default"
               >
                 Move to section
               </h3>
               <button
                 type="button"
                 onClick={() => closeSectionTransferModal()}
-                className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-neutral-400 dark:hover:bg-neutral-800"
+                className="rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken hover:text-fg-default dark:text-fg-muted dark:hover:bg-surface-overlay"
                 aria-label="Close"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <form onSubmit={onSubmitSectionTransfer} className="space-y-4 p-4 text-sm text-slate-700 dark:text-neutral-300">
-              <p className="font-medium text-slate-900 dark:text-neutral-100">
+            <form onSubmit={onSubmitSectionTransfer} className="space-y-4 p-4 text-sm text-fg-muted">
+              <p className="font-medium text-fg-default">
                 {sectionTransferTarget.displayName?.trim() || 'Student'}
               </p>
               <label className="block">
-                <span className="text-xs font-medium text-slate-600 dark:text-neutral-400">New section</span>
+                <span className="text-xs font-medium text-fg-muted">New section</span>
                 <select
                   value={sectionTransferPick}
                   onChange={(ev) => setSectionTransferPick(ev.target.value)}
-                  className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+                  className="mt-1 w-full rounded-xl border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
                   aria-label="Select section to transfer this student into"
                   disabled={sectionTransferStatus === 'loading'}
                 >
@@ -1447,14 +1439,14 @@ export default function CourseEnrollments() {
                 <button
                   type="button"
                   onClick={() => closeSectionTransferModal()}
-                  className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                  className="rounded-xl px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={sectionTransferStatus === 'loading' || !sectionTransferPick}
-                  className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
+                  className="rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
                 >
                   {sectionTransferStatus === 'loading' ? 'Saving…' : 'Save'}
                 </button>
@@ -1474,18 +1466,18 @@ export default function CourseEnrollments() {
             if (ev.target === ev.currentTarget) closeMessageModal()
           }}
         >
-          <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-900">
-            <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-neutral-700">
+          <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-raised">
+            <div className="flex items-center justify-between border-b border-border-default px-4 py-3 dark:border-border-default">
               <h3
                 id="enrollment-message-title"
-                className="text-sm font-semibold text-slate-900 dark:text-neutral-100"
+                className="text-sm font-semibold text-fg-default"
               >
                 Send message
               </h3>
               <button
                 type="button"
                 onClick={() => closeMessageModal()}
-                className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-neutral-400 dark:hover:bg-neutral-800"
+                className="rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken hover:text-fg-default dark:text-fg-muted dark:hover:bg-surface-overlay"
                 aria-label="Close"
               >
                 <X className="h-5 w-5" />
@@ -1493,11 +1485,11 @@ export default function CourseEnrollments() {
             </div>
             <form
               onSubmit={(ev) => void onSubmitEnrollmentMessage(ev)}
-              className="space-y-3 px-4 py-4 text-sm text-slate-700 dark:text-neutral-300"
+              className="space-y-3 px-4 py-4 text-sm text-fg-muted"
             >
-              <p className="text-slate-600 dark:text-neutral-400">
+              <p className="text-fg-muted">
                 To{' '}
-                <span className="font-medium text-slate-900 dark:text-neutral-100">
+                <span className="font-medium text-fg-default">
                   {messageTarget.displayName?.trim() || '—'}
                 </span>
               </p>
@@ -1507,39 +1499,39 @@ export default function CourseEnrollments() {
                 </p>
               ) : null}
               <label className="block">
-                <span className="text-xs font-medium text-slate-600 dark:text-neutral-400">Subject</span>
+                <span className="text-xs font-medium text-fg-muted">Subject</span>
                 <input
                   value={messageSubject}
                   onChange={(ev) => setMessageSubject(ev.target.value)}
-                  className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/20 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+                  className="mt-1 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/20 dark:border-border-default dark:bg-surface-base dark:text-fg-default"
                   placeholder="Optional subject"
                   disabled={messageStatus === 'loading'}
                 />
               </label>
               <label className="block">
-                <span className="text-xs font-medium text-slate-600 dark:text-neutral-400">Message</span>
+                <span className="text-xs font-medium text-fg-muted">Message</span>
                 <textarea
                   value={messageBody}
                   onChange={(ev) => setMessageBody(ev.target.value)}
                   rows={6}
-                  className="mt-1 w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/20 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+                  className="mt-1 w-full resize-y rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/20 dark:border-border-default dark:bg-surface-base dark:text-fg-default"
                   placeholder="Write your message…"
                   disabled={messageStatus === 'loading'}
                   required
                 />
               </label>
-              <div className="flex justify-end gap-2 border-t border-slate-200 pt-3 dark:border-neutral-700">
+              <div className="flex justify-end gap-2 border-t border-border-default pt-3 dark:border-border-default">
                 <button
                   type="button"
                   onClick={() => closeMessageModal()}
-                  className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                  className="rounded-xl px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={messageStatus === 'loading' || !messageBody.trim()}
-                  className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Send className="h-4 w-4" aria-hidden />
                   {messageStatus === 'loading' ? 'Sending…' : 'Send'}
@@ -1560,30 +1552,30 @@ export default function CourseEnrollments() {
             if (e.target === e.currentTarget) closeEditModal()
           }}
         >
-          <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-900">
-            <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-neutral-700">
-              <h3 id="edit-enrollment-title" className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+          <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-raised">
+            <div className="flex items-center justify-between border-b border-border-default px-4 py-3 dark:border-border-default">
+              <h3 id="edit-enrollment-title" className="text-sm font-semibold text-fg-default">
                 Edit enrollment
               </h3>
               <button
                 type="button"
                 onClick={() => closeEditModal()}
-                className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                className="rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken hover:text-fg-default"
                 aria-label="Close"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="p-4 text-sm text-slate-700">
-              <p className="font-medium text-slate-900">
+            <div className="p-4 text-sm text-fg-muted">
+              <p className="font-medium text-fg-default">
                 {editTarget.displayName?.trim() || '—'}
               </p>
-              <p className="mt-1 text-xs text-slate-500">
-                Current enrollment role: <span className="font-medium text-slate-700">{editTarget.role}</span>
+              <p className="mt-1 text-xs text-fg-muted">
+                Current enrollment role: <span className="font-medium text-fg-muted">{editTarget.role}</span>
               </p>
 
               {normEnrollmentRole(editTarget.role) === 'instructor' && !isCourseCreator && (
-                <p className="mt-4 text-xs text-slate-600">
+                <p className="mt-4 text-xs text-fg-muted">
                   Demoting removes instructor access and per-course permissions for this course. Only
                   the course creator can assign a different course-scoped role.
                 </p>
@@ -1591,10 +1583,10 @@ export default function CourseEnrollments() {
 
               {isCourseCreator && normEnrollmentRole(editTarget.role) !== 'teacher' && (
                 <div className="mt-4">
-                  <label htmlFor="edit-builtin-course-role" className="text-xs font-medium text-slate-600">
+                  <label htmlFor="edit-builtin-course-role" className="text-xs font-medium text-fg-muted">
                     Enrollment role
                   </label>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs text-fg-muted">
                     Built-in roles (TA, designer, observer, etc.) control what this person can see and
                     edit in this course.
                   </p>
@@ -1619,7 +1611,7 @@ export default function CourseEnrollments() {
                   className={
                     editSaveStatus === 'error' || demoteStatus === 'error'
                       ? 'mt-3 text-sm text-rose-700'
-                      : 'mt-3 text-sm text-slate-700'
+                      : 'mt-3 text-sm text-fg-muted'
                   }
                   role="status"
                 >
@@ -1631,7 +1623,7 @@ export default function CourseEnrollments() {
                 <button
                   type="button"
                   onClick={() => closeEditModal()}
-                  className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100"
+                  className="rounded-xl px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-sunken"
                 >
                   Close
                 </button>
@@ -1640,7 +1632,7 @@ export default function CourseEnrollments() {
                     type="button"
                     onClick={() => void onDemoteEnrollmentToStudent()}
                     disabled={demoteStatus === 'loading' || editSaveStatus === 'loading'}
-                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 shadow-sm hover:border-amber-200 hover:bg-amber-50 hover:text-amber-950 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm font-medium text-fg-default shadow-sm hover:border-amber-200 hover:bg-amber-50 hover:text-amber-950 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {demoteStatus === 'loading' ? 'Demoting…' : 'Demote to student'}
                   </button>
@@ -1654,7 +1646,7 @@ export default function CourseEnrollments() {
                       demoteStatus === 'loading' ||
                       !editBuiltinCourseRole.trim()
                     }
-                    className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {editSaveStatus === 'loading' ? 'Saving…' : 'Save role'}
                   </button>
@@ -1675,22 +1667,22 @@ export default function CourseEnrollments() {
             if (e.target === e.currentTarget) closeModal()
           }}
         >
-          <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-900">
-            <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-neutral-700">
-              <h3 id="add-enrollment-title" className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+          <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-raised">
+            <div className="flex items-center justify-between border-b border-border-default px-4 py-3 dark:border-border-default">
+              <h3 id="add-enrollment-title" className="text-sm font-semibold text-fg-default">
                 Add enrollment
               </h3>
               <button
                 type="button"
                 onClick={() => closeModal()}
-                className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                className="rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken hover:text-fg-default"
                 aria-label="Close"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
             <form onSubmit={(e) => void onSubmitAddEnrollments(e)} className="p-4">
-              <label htmlFor="enrollment-emails" className="text-xs font-medium text-slate-600">
+              <label htmlFor="enrollment-emails" className="text-xs font-medium text-fg-muted">
                 Email addresses
               </label>
               <textarea
@@ -1702,15 +1694,15 @@ export default function CourseEnrollments() {
                   'One per line, or separated by commas or spaces.\n' +
                   'example@school.edu, other@school.edu'
                 }
-                className="mt-1 w-full resize-y rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2"
+                className="mt-1 w-full resize-y rounded-xl border border-border-default bg-surface-raised px-2 py-1.5 text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2"
                 disabled={addStatus === 'loading'}
               />
-              <p className="mt-2 text-xs text-slate-500">
+              <p className="mt-2 text-xs text-fg-muted">
                 Only people who already have an account can be enrolled.
               </p>
 
               <div className="mt-4">
-                <label htmlFor="enrollment-role" className="text-xs font-medium text-slate-600 dark:text-neutral-400">
+                <label htmlFor="enrollment-role" className="text-xs font-medium text-fg-muted">
                   Role
                 </label>
                 <select
@@ -1733,15 +1725,15 @@ export default function CourseEnrollments() {
 
               {isCourseCreator && !addCourseRole.trim() && (
                 <div className="mt-4">
-                  <label htmlFor="enrollment-app-role" className="text-xs font-medium text-slate-600 dark:text-neutral-400">
+                  <label htmlFor="enrollment-app-role" className="text-xs font-medium text-fg-muted">
                     Course-scoped app role
                   </label>
-                  <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+                  <p className="mt-1 text-xs text-fg-muted">
                     App roles with scope <span className="font-mono">course</span> (configure under
                     Settings → Roles & Permissions). Permissions are applied for this course only.
                   </p>
                   {rolesLoading ? (
-                    <p className="mt-2 text-sm text-slate-500">Loading roles…</p>
+                    <p className="mt-2 text-sm text-fg-muted">Loading roles…</p>
                   ) : rolesError ? (
                     <p className="mt-2 text-sm text-rose-700">{rolesError}</p>
                   ) : courseScopedRoles.length === 0 ? (
@@ -1773,7 +1765,7 @@ export default function CourseEnrollments() {
                   className={
                     addStatus === 'error'
                       ? 'mt-3 text-sm text-rose-700'
-                      : 'mt-3 text-sm text-slate-700'
+                      : 'mt-3 text-sm text-fg-muted'
                   }
                   role="status"
                 >
@@ -1784,14 +1776,14 @@ export default function CourseEnrollments() {
                 <button
                   type="button"
                   onClick={() => closeModal()}
-                  className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100"
+                  className="rounded-xl px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-sunken"
                 >
                   Close
                 </button>
                 <button
                   type="submit"
                   disabled={submitDisabled}
-                  className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {addStatus === 'loading' ? 'Adding…' : 'Add'}
                 </button>
@@ -1807,31 +1799,31 @@ export default function CourseEnrollments() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="enrollment-state-dialog-title"
-            className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl dark:border-neutral-700 dark:bg-neutral-900"
+            className="w-full max-w-md rounded-2xl border border-border-default bg-surface-raised p-6 shadow-xl dark:border-border-default dark:bg-surface-raised"
             onClick={(ev) => ev.stopPropagation()}
           >
             <div className="flex items-start justify-between gap-3">
-              <h2 id="enrollment-state-dialog-title" className="text-lg font-semibold text-slate-900 dark:text-neutral-100">
+              <h2 id="enrollment-state-dialog-title" className="text-lg font-semibold text-fg-default">
                 Change enrollment status
               </h2>
               <button
                 type="button"
-                className="rounded-lg p-1 text-slate-500 hover:bg-slate-100 dark:hover:bg-neutral-800"
+                className="rounded-lg p-1 text-fg-muted hover:bg-surface-sunken dark:hover:bg-surface-overlay"
                 aria-label="Close"
                 onClick={() => setStateChangeTarget(null)}
               >
                 <X className="h-5 w-5" aria-hidden />
               </button>
             </div>
-            <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
+            <p className="mt-2 text-sm text-fg-muted">
               {stateChangeTarget.displayName?.trim() || 'Student'}
             </p>
-            <label className="mt-4 block text-sm font-medium text-slate-700 dark:text-neutral-300" htmlFor="enrollment-state-select">
+            <label className="mt-4 block text-sm font-medium text-fg-muted" htmlFor="enrollment-state-select">
               Status
             </label>
             <select
               id="enrollment-state-select"
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+              className="mt-1 w-full rounded-lg border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
               value={stateChangeValue}
               onChange={(ev) => setStateChangeValue(ev.target.value as EnrollmentState)}
             >
@@ -1843,12 +1835,12 @@ export default function CourseEnrollments() {
               <option value="no_credit">No Credit</option>
               <option value="incomplete">Incomplete</option>
             </select>
-            <label className="mt-4 block text-sm font-medium text-slate-700 dark:text-neutral-300" htmlFor="enrollment-state-reason">
+            <label className="mt-4 block text-sm font-medium text-fg-muted" htmlFor="enrollment-state-reason">
               Reason (optional)
             </label>
             <textarea
               id="enrollment-state-reason"
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+              className="mt-1 w-full rounded-lg border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
               rows={3}
               value={stateChangeReason}
               onChange={(ev) => setStateChangeReason(ev.target.value)}
@@ -1861,14 +1853,14 @@ export default function CourseEnrollments() {
             <div className="mt-5 flex justify-end gap-2">
               <button
                 type="button"
-                className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 dark:border-neutral-600 dark:text-neutral-200"
+                className="rounded-lg border border-border-default px-4 py-2 text-sm font-medium text-fg-muted dark:border-border-default dark:text-fg-default"
                 onClick={() => setStateChangeTarget(null)}
               >
                 Cancel
               </button>
               <button
                 type="button"
-                className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                className="rounded-lg bg-accent-solid px-4 py-2 text-sm font-medium text-white hover:bg-accent disabled:opacity-50"
                 disabled={stateChangeStatus === 'loading'}
                 onClick={() => void submitStateChange()}
               >
@@ -1886,11 +1878,11 @@ export default function CourseEnrollments() {
           removeConfirmTarget ? (
             <>
               This will remove{' '}
-              <span className="font-medium text-slate-900 dark:text-neutral-100">
+              <span className="font-medium text-fg-default">
                 {removeConfirmTarget.displayName?.trim() || 'this person'}
               </span>{' '}
               from the course as a{' '}
-              <span className="font-medium text-slate-900 dark:text-neutral-100">
+              <span className="font-medium text-fg-default">
                 {removeConfirmTarget.roleDisplay?.trim() || removeConfirmTarget.role}
               </span>
               . This action cannot be undone.

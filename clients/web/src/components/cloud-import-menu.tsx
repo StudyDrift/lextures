@@ -85,7 +85,7 @@ export function CloudImportMenu({
         aria-controls={open ? menuId : undefined}
         disabled={isBusy}
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+        className="inline-flex items-center gap-1.5 rounded-md border border-border-default bg-surface-raised px-3 py-1.5 text-sm font-medium text-fg-muted shadow-sm hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-60 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
       >
         {picking ? (
           'Importing…'
@@ -105,7 +105,7 @@ export function CloudImportMenu({
           id={menuId}
           role="menu"
           aria-label="Import from cloud storage"
-          className="absolute end-0 z-50 mt-1 min-w-[12rem] overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-900"
+          className="absolute end-0 z-50 mt-1 min-w-[12rem] overflow-hidden rounded-lg border border-border-default bg-surface-raised py-1 shadow-lg dark:border-border-default dark:bg-surface-raised"
         >
           {providers.map((provider) => (
             <button
@@ -114,12 +114,12 @@ export function CloudImportMenu({
               role="menuitem"
               aria-haspopup="dialog"
               onClick={() => void handlePick(provider.provider, provider)}
-              className="flex w-full flex-col gap-0.5 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:hover:bg-neutral-800"
+              className="flex w-full flex-col gap-0.5 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:hover:bg-surface-overlay"
             >
-              <span className="font-medium text-slate-900 dark:text-neutral-100">
+              <span className="font-medium text-fg-default">
                 {CLOUD_PROVIDER_LABELS[provider.provider]}
               </span>
-              <span className="text-xs text-slate-500 dark:text-neutral-400">
+              <span className="text-xs text-fg-muted">
                 Import from {CLOUD_PROVIDER_LABELS[provider.provider]}
               </span>
             </button>

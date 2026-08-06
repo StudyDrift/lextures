@@ -47,7 +47,7 @@ export function CourseCatalogActionsMenu({
   const triggerClass =
     variant === 'overlay'
       ? 'bg-black/35 text-white/90 backdrop-blur-sm hover:bg-black/50 hover:text-white dark:bg-black/45 dark:hover:bg-black/60'
-      : 'text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-200'
+      : 'text-fg-subtle hover:bg-surface-sunken hover:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-fg-default'
 
   return (
     <div ref={rootRef} className={`relative ${className}`}>
@@ -76,7 +76,7 @@ export function CourseCatalogActionsMenu({
           id={menuId}
           role="menu"
           aria-label={`Actions for ${displayTitle}`}
-          className="absolute end-0 z-50 mt-1 min-w-[12rem] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-800 dark:shadow-black/40"
+          className="absolute end-0 z-50 mt-1 min-w-[12rem] overflow-hidden rounded-xl border border-border-default bg-surface-raised py-1 shadow-lg shadow-slate-900/10 dark:border-border-default dark:bg-surface-overlay dark:shadow-black/40"
           onPointerDown={(e) => e.stopPropagation()}
         >
           <button
@@ -93,9 +93,9 @@ export function CourseCatalogActionsMenu({
               })
               setOpen(false)
             }}
-            className="flex w-full items-center gap-2 px-2 py-2 text-start text-sm transition-colors hover:bg-slate-50 disabled:opacity-60 dark:hover:bg-neutral-700"
+            className="flex w-full items-center gap-2 px-2 py-2 text-start text-sm transition-colors hover:bg-surface-base disabled:opacity-60 dark:hover:bg-neutral-700"
           >
-            <Pin className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
+            <Pin className="h-4 w-4 shrink-0 text-fg-muted" aria-hidden />
             <span>{pinned ? 'Unpin from sidebar' : 'Pin to sidebar'}</span>
           </button>
           {onRenameRequest ? (
@@ -108,13 +108,13 @@ export function CourseCatalogActionsMenu({
                 onRenameRequest()
                 setOpen(false)
               }}
-              className="flex w-full items-center gap-2 px-2 py-2 text-start text-sm transition-colors hover:bg-slate-50 dark:hover:bg-neutral-700"
+              className="flex w-full items-center gap-2 px-2 py-2 text-start text-sm transition-colors hover:bg-surface-base dark:hover:bg-neutral-700"
             >
-              <Pencil className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
+              <Pencil className="h-4 w-4 shrink-0 text-fg-muted" aria-hidden />
               <span>Rename</span>
             </button>
           ) : null}
-          <div role="none" className="my-1 border-t border-slate-100 dark:border-neutral-700" />
+          <div role="none" className="my-1 border-t border-border-subtle dark:border-border-default" />
           <div role="presentation" className="px-0.5">
             <CourseCatalogHideButton
               course={course}

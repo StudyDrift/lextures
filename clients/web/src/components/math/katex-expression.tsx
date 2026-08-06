@@ -37,7 +37,7 @@ export function KatexExpression({ latex, displayMode, className }: KatexExpressi
       <code
         className={
           className ??
-          'rounded bg-slate-100 px-1 font-mono text-[13px] text-slate-800 dark:bg-neutral-800 dark:text-neutral-100'
+          'rounded bg-surface-sunken px-1 font-mono text-[13px] text-fg-default dark:bg-surface-overlay dark:text-fg-default'
         }
       >
         {displayMode ? `$$${latex}$$` : `$${latex}$`}

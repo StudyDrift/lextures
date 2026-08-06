@@ -96,11 +96,7 @@ export default function Reports() {
               key={p}
               type="button"
               onClick={() => setPreset(p)}
-              className={`rounded-xl border px-3 py-2 text-sm font-semibold shadow-sm transition-[background-color,color,border-color] ${
-                preset === p
-                  ? 'border-indigo-300 bg-indigo-50 text-indigo-900 dark:border-indigo-500/50 dark:bg-indigo-950/60 dark:text-indigo-100'
-                  : 'border-slate-200 bg-white text-slate-700 hover:border-indigo-200 hover:bg-indigo-50/60 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:border-indigo-500/40 dark:hover:bg-indigo-950/40'
-              }`}
+              className={`rounded-xl border px-3 py-2 text-sm font-semibold shadow-sm transition-[background-color,color,border-color] ${ preset === p ? 'border-indigo-300 bg-indigo-50 text-indigo-900 dark:border-indigo-500/50 dark:bg-indigo-950/60 dark:text-indigo-100' : 'border-border-default bg-surface-raised text-fg-muted hover:border-indigo-200 hover:bg-indigo-50/60 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:border-indigo-500/40 dark:hover:bg-indigo-950/40' }`}
             >
               {p === '7d' ? '7 days' : p === '30d' ? '30 days' : '90 days'}
             </button>
@@ -119,7 +115,7 @@ export default function Reports() {
               }
             }}
             aria-label="Export learning activity report as PDF"
-            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50/60 disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:border-indigo-500/40 dark:hover:bg-indigo-950/40"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm font-semibold text-fg-muted shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50/60 disabled:opacity-50 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:border-indigo-500/40 dark:hover:bg-indigo-950/40"
           >
             <Download className="h-4 w-4" aria-hidden />
             {exporting ? 'Generating…' : 'Export PDF'}
@@ -130,9 +126,9 @@ export default function Reports() {
       <RequirePermission
         permission={PERM_REPORTS_VIEW}
         fallback={
-          <p className="mt-8 max-w-xl rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200">
+          <p className="mt-8 max-w-xl rounded-xl border border-border-default bg-surface-base px-4 py-3 text-sm text-fg-muted dark:border-border-default dark:bg-surface-raised dark:text-fg-default">
             You do not have permission to view reports. Ask an administrator to grant{' '}
-            <code className="rounded bg-slate-200/80 px-1.5 py-0.5 font-mono text-xs dark:bg-neutral-800">
+            <code className="rounded bg-slate-200/80 px-1.5 py-0.5 font-mono text-xs dark:bg-surface-overlay">
               {PERM_REPORTS_VIEW}
             </code>
             .
@@ -140,7 +136,7 @@ export default function Reports() {
         }
       >
         {loading && (
-          <p className="mt-8 text-sm text-slate-500 dark:text-neutral-400" aria-live="polite">
+          <p className="mt-8 text-sm text-fg-muted" aria-live="polite">
             Loading report…
           </p>
         )}
@@ -154,36 +150,36 @@ export default function Reports() {
         )}
         {!loading && !error && report && (
           <div className="mt-8 space-y-10">
-            <div className="flex flex-wrap items-center gap-2 text-sm text-slate-600 dark:text-neutral-400">
-              <BarChart3 className="h-4 w-4 shrink-0 text-indigo-600 dark:text-indigo-400" aria-hidden />
+            <div className="flex flex-wrap items-center gap-2 text-sm text-fg-muted">
+              <BarChart3 className="h-4 w-4 shrink-0 text-accent-fg" aria-hidden />
               <span className="tabular-nums">{formatRange(report.range.from, report.range.to)}</span>
-              <span className="text-slate-400 dark:text-neutral-500">(UTC)</span>
+              <span className="text-fg-subtle">(UTC)</span>
             </div>
 
             <section>
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-neutral-100">Summary</h2>
+              <h2 className="text-lg font-semibold text-fg-default">Summary</h2>
               <div className="mt-4 grid gap-4 sm:grid-cols-3">
-                <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
-                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                <div className="rounded-2xl border border-border-default bg-surface-raised p-4 shadow-sm dark:border-border-subtle dark:bg-surface-base">
+                  <p className="text-xs font-medium uppercase tracking-wide text-fg-muted">
                     Total events
                   </p>
-                  <p className="mt-1 text-2xl font-semibold tabular-nums text-slate-900 dark:text-neutral-100">
+                  <p className="mt-1 text-2xl font-semibold tabular-nums text-fg-default">
                     {formatNumber(report.summary.totalEvents)}
                   </p>
                 </div>
-                <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
-                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                <div className="rounded-2xl border border-border-default bg-surface-raised p-4 shadow-sm dark:border-border-subtle dark:bg-surface-base">
+                  <p className="text-xs font-medium uppercase tracking-wide text-fg-muted">
                     Active learners
                   </p>
-                  <p className="mt-1 text-2xl font-semibold tabular-nums text-slate-900 dark:text-neutral-100">
+                  <p className="mt-1 text-2xl font-semibold tabular-nums text-fg-default">
                     {formatNumber(report.summary.uniqueUsers)}
                   </p>
                 </div>
-                <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
-                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                <div className="rounded-2xl border border-border-default bg-surface-raised p-4 shadow-sm dark:border-border-subtle dark:bg-surface-base">
+                  <p className="text-xs font-medium uppercase tracking-wide text-fg-muted">
                     Courses with activity
                   </p>
-                  <p className="mt-1 text-2xl font-semibold tabular-nums text-slate-900 dark:text-neutral-100">
+                  <p className="mt-1 text-2xl font-semibold tabular-nums text-fg-default">
                     {formatNumber(report.summary.uniqueCourses)}
                   </p>
                 </div>
@@ -191,12 +187,12 @@ export default function Reports() {
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-neutral-100">Activity by day</h2>
-              <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+              <h2 className="text-lg font-semibold text-fg-default">Activity by day</h2>
+              <p className="mt-1 text-sm text-fg-muted">
                 Stacked daily totals (course visits, content opens, content leaves).
               </p>
               {report.byDay.length === 0 ? (
-                <p className="mt-4 text-sm text-slate-600 dark:text-neutral-400">No events in this range.</p>
+                <p className="mt-4 text-sm text-fg-muted">No events in this range.</p>
               ) : (
                 <div className="mt-4 flex max-h-80 flex-col gap-2 overflow-y-auto pe-1">
                   {report.byDay.map((row) => {
@@ -205,11 +201,11 @@ export default function Reports() {
                     const seg = (n: number) => (total > 0 ? n : 0)
                     return (
                       <div key={row.day} className="flex min-h-[28px] items-center gap-3 text-sm">
-                        <span className="w-28 shrink-0 text-slate-600 tabular-nums dark:text-neutral-400">
+                        <span className="w-28 shrink-0 text-fg-muted tabular-nums dark:text-fg-muted">
                           {formatDay(row.day)}
                         </span>
                         <div className="min-w-0 flex-1">
-                          <div className="flex h-7 w-full rounded-lg bg-slate-100 dark:bg-neutral-800">
+                          <div className="flex h-7 w-full rounded-lg bg-surface-sunken">
                             <div
                               className="flex h-full min-w-0 flex-row overflow-hidden rounded-lg"
                               style={{ width: `${barPct}%` }}
@@ -221,7 +217,7 @@ export default function Reports() {
                             </div>
                           </div>
                         </div>
-                        <span className="w-10 shrink-0 text-end tabular-nums text-slate-700 dark:text-neutral-200">
+                        <span className="w-10 shrink-0 text-end tabular-nums text-fg-default">
                           {total}
                         </span>
                       </div>
@@ -229,7 +225,7 @@ export default function Reports() {
                   })}
                 </div>
               )}
-              <div className="mt-4 flex flex-wrap gap-4 text-xs text-slate-600 dark:text-neutral-400">
+              <div className="mt-4 flex flex-wrap gap-4 text-xs text-fg-muted">
                 <span className="inline-flex items-center gap-1.5">
                   <span className="h-2 w-4 rounded bg-indigo-500" /> Course visit
                 </span>
@@ -243,21 +239,21 @@ export default function Reports() {
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-neutral-100">Events by type</h2>
+              <h2 className="text-lg font-semibold text-fg-default">Events by type</h2>
               {report.byEventKind.length === 0 ? (
-                <p className="mt-4 text-sm text-slate-600 dark:text-neutral-400">No events in this range.</p>
+                <p className="mt-4 text-sm text-fg-muted">No events in this range.</p>
               ) : (
                 <ul className="mt-4 space-y-3">
                   {report.byEventKind.map((k) => (
                     <li key={k.eventKind}>
                       <div className="flex items-center justify-between gap-4 text-sm">
-                        <span className="text-slate-700 dark:text-neutral-300">{eventKindLabel(k.eventKind)}</span>
-                        <span className="tabular-nums text-slate-900 dark:text-neutral-100">
+                        <span className="text-fg-muted">{eventKindLabel(k.eventKind)}</span>
+                        <span className="tabular-nums text-fg-default">
                           {formatNumber(k.count)} (
                           {Math.round((k.count / kindTotal) * 100)}%)
                         </span>
                       </div>
-                      <div className="mt-1 h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-neutral-800">
+                      <div className="mt-1 h-2 overflow-hidden rounded-full bg-surface-sunken">
                         <div
                           className="h-full rounded-full bg-indigo-500"
                           style={{ width: `${(k.count / kindTotal) * 100}%` }}
@@ -270,16 +266,16 @@ export default function Reports() {
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-neutral-100">Top courses</h2>
-              <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+              <h2 className="text-lg font-semibold text-fg-default">Top courses</h2>
+              <p className="mt-1 text-sm text-fg-muted">
                 By total audit events in the selected range.
               </p>
               {report.topCourses.length === 0 ? (
-                <p className="mt-4 text-sm text-slate-600 dark:text-neutral-400">No course activity in this range.</p>
+                <p className="mt-4 text-sm text-fg-muted">No course activity in this range.</p>
               ) : (
-                <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
+                <div className="mt-4 overflow-x-auto rounded-2xl border border-border-default bg-surface-raised shadow-sm dark:border-border-subtle dark:bg-surface-base">
                   <table className="min-w-full text-start text-sm">
-                    <thead className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-600 dark:border-neutral-700 dark:bg-neutral-800/80 dark:text-neutral-300">
+                    <thead className="border-b border-border-default bg-surface-base text-xs font-semibold uppercase tracking-wide text-fg-muted dark:border-border-default/80 dark:text-fg-muted">
                       <tr>
                         <th className="px-4 py-3">Course</th>
                         <th className="px-4 py-3">Code</th>
@@ -289,16 +285,16 @@ export default function Reports() {
                     <tbody className="divide-y divide-slate-100 dark:divide-neutral-800">
                       {report.topCourses.map((c) => (
                         <tr key={c.courseId} className="hover:bg-slate-50/80 dark:hover:bg-neutral-800/80">
-                          <td className="px-4 py-3 font-medium text-slate-900 dark:text-neutral-100">
+                          <td className="px-4 py-3 font-medium text-fg-default">
                             <Link
                               to={`/courses/${encodeURIComponent(c.courseCode)}`}
-                              className="text-indigo-600 underline-offset-2 hover:underline dark:text-indigo-400 dark:hover:text-indigo-300"
+                              className="text-accent-fg underline-offset-2 hover:underline dark:text-indigo-400 dark:hover:text-indigo-300"
                             >
                               {c.title}
                             </Link>
                           </td>
-                          <td className="px-4 py-3 text-slate-600 dark:text-neutral-400">{c.courseCode}</td>
-                          <td className="px-4 py-3 text-end tabular-nums text-slate-900 dark:text-neutral-100">
+                          <td className="px-4 py-3 text-fg-muted">{c.courseCode}</td>
+                          <td className="px-4 py-3 text-end tabular-nums text-fg-default">
                             {formatNumber(c.eventCount)}
                           </td>
                         </tr>

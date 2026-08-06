@@ -206,7 +206,7 @@ export function BlockEditorShell({
       ref={containerRef}
       className={
         className ??
-        'block-editor-root flex min-h-[min(70vh,720px)] w-full flex-col overflow-hidden rounded-xl border border-slate-200/90 bg-[#f0f0f0] shadow-sm shadow-slate-900/5 dark:border-neutral-700 dark:bg-neutral-950 dark:shadow-black/40 md:min-h-[min(75vh,880px)]'
+        'block-editor-root flex min-h-[min(70vh,720px)] w-full flex-col overflow-hidden rounded-xl border border-slate-200/90 bg-[#f0f0f0] shadow-sm shadow-slate-900/5 dark:border-border-default dark:bg-surface-base dark:shadow-black/40 md:min-h-[min(75vh,880px)]'
       }
       style={{ '--block-editor-sidebar-width': `${sidebarWidth}px` } as CSSProperties}
     >
@@ -214,7 +214,7 @@ export function BlockEditorShell({
         <div
           role="region"
           aria-label="Block editor canvas"
-          className="min-h-0 min-w-0 flex-1 overflow-y-auto bg-[#f0f0f0] dark:bg-neutral-950"
+          className="min-h-0 min-w-0 flex-1 overflow-y-auto bg-[#f0f0f0] dark:bg-surface-base"
         >
           {children}
         </div>
@@ -240,25 +240,15 @@ export function BlockEditorShell({
           data-testid="block-editor-sidebar-resize"
         >
           <div
-            className={`absolute inset-y-0 -start-2 flex w-4 cursor-col-resize items-center justify-center ${
-              dragging ? 'bg-indigo-500/10' : ''
-            }`}
+            className={`absolute inset-y-0 -start-2 flex w-4 cursor-col-resize items-center justify-center ${ dragging ? 'bg-indigo-500/10' : '' }`}
             aria-hidden="true"
           >
             <div
-              className={`h-full w-px transition-colors ${
-                dragging
-                  ? 'bg-indigo-500'
-                  : 'bg-slate-300 hover:bg-indigo-400 dark:bg-neutral-600 dark:hover:bg-indigo-400'
-              }`}
+              className={`h-full w-px transition-colors ${ dragging ? 'bg-indigo-500' : 'bg-slate-300 hover:bg-indigo-400 dark:bg-neutral-600 dark:hover:bg-indigo-400' }`}
             />
             {/* Grip dots for discoverability */}
             <div
-              className={`pointer-events-none absolute top-1/2 flex -translate-y-1/2 flex-col gap-1 rounded-full px-0.5 py-1.5 ${
-                dragging
-                  ? 'bg-indigo-500 text-white'
-                  : 'bg-slate-200 text-slate-500 hover:bg-slate-300 dark:bg-neutral-700 dark:text-neutral-300'
-              }`}
+              className={`pointer-events-none absolute top-1/2 flex -translate-y-1/2 flex-col gap-1 rounded-full px-0.5 py-1.5 ${ dragging ? 'bg-indigo-500 text-white' : 'bg-slate-200 text-fg-muted hover:bg-slate-300 dark:bg-neutral-700 dark:text-fg-muted' }`}
             >
               <span className="block size-0.5 rounded-full bg-current" />
               <span className="block size-0.5 rounded-full bg-current" />
@@ -270,7 +260,7 @@ export function BlockEditorShell({
         <aside
           id={sidebarId}
           aria-label="Editor settings"
-          className="flex max-h-[min(42vh,420px)] min-h-0 w-full shrink-0 flex-col border-t border-slate-200/90 bg-white dark:border-neutral-700 dark:bg-neutral-900 md:max-h-none md:w-[var(--block-editor-sidebar-width)] md:border-s md:border-t-0"
+          className="flex max-h-[min(42vh,420px)] min-h-0 w-full shrink-0 flex-col border-t border-slate-200/90 bg-surface-raised dark:border-border-default dark:bg-surface-raised md:max-h-none md:w-[var(--block-editor-sidebar-width)] md:border-s md:border-t-0"
         >
           {sidebar}
         </aside>

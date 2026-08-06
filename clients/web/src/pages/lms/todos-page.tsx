@@ -212,7 +212,7 @@ export default function TodosPage() {
       ) : null}
 
       {loading ? (
-        <p className="text-sm text-slate-500 dark:text-neutral-400" role="status">
+        <p className="text-sm text-fg-muted" role="status">
           Loading todos…
         </p>
       ) : null}
@@ -232,13 +232,13 @@ export default function TodosPage() {
 
       {!loading && showGradingList ? (
         <section
-          className={showStudentBoard ? 'mt-10 border-t border-slate-200 pt-8 dark:border-neutral-700' : ''}
+          className={showStudentBoard ? 'mt-10 border-t border-border-default pt-8 dark:border-border-default' : ''}
           aria-label="Grading todo list"
         >
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-fg-muted">
             Needs grading
           </h2>
-          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-300">
+          <p className="mt-1 text-sm text-fg-muted">
             Open SpeedGrader from any row to grade ungraded submissions.
           </p>
           <div className="mt-4">
@@ -252,7 +252,7 @@ export default function TodosPage() {
       ) : null}
 
       {!loading && !showStudentBoard && !showGradingList && courses !== null ? (
-        <p className="rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm text-slate-600 dark:border-neutral-700 dark:bg-neutral-900/50 dark:text-neutral-300">
+        <p className="rounded-xl border border-border-default bg-slate-50/80 px-4 py-3 text-sm text-fg-muted dark:border-border-default/50 dark:text-fg-muted">
           Join a course as a student to plan your week here, or as teaching staff to see grading work.
         </p>
       ) : null}

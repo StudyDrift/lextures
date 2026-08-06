@@ -48,8 +48,8 @@ function DistributionView({
 }) {
   if (aggregate.suppressed) {
     return (
-      <div data-testid={testId} className="space-y-1 text-sm text-slate-700 dark:text-neutral-200">
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-300">
+      <div data-testid={testId} className="space-y-1 text-sm text-fg-default">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
           {title}
         </h3>
         <p data-testid={`${testId}-suppressed`}>
@@ -58,7 +58,7 @@ function DistributionView({
             count: String(aggregate.learners),
           })}
         </p>
-        <p className="text-xs text-slate-500 dark:text-neutral-400">
+        <p className="text-xs text-fg-muted">
           {t('contentTools.tools.class_pulse.waitingForMore', {
             count: String(aggregate.learners),
           })}
@@ -77,10 +77,10 @@ function DistributionView({
   return (
     <div data-testid={testId} className="space-y-3">
       <div className="flex items-baseline justify-between gap-2">
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-300">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
           {title}
         </h3>
-        <p className="text-xs text-slate-500 dark:text-neutral-400">
+        <p className="text-xs text-fg-muted">
           {t('contentTools.tools.class_pulse.respondents', { count: String(aggregate.learners) })}
         </p>
       </div>
@@ -91,15 +91,15 @@ function DistributionView({
           return (
             <li key={r.optionId} className="space-y-1">
               <div className="flex flex-wrap items-baseline justify-between gap-2 text-sm">
-                <span className="font-medium text-slate-900 dark:text-neutral-100">
+                <span className="font-medium text-fg-default">
                   {r.label}
                   {r.yours ? (
-                    <span className="ms-2 text-xs font-normal text-slate-600 dark:text-neutral-300">
+                    <span className="ms-2 text-xs font-normal text-fg-muted">
                       {t('contentTools.tools.class_pulse.yourAnswer')}
                     </span>
                   ) : null}
                 </span>
-                <span className="text-xs text-slate-600 dark:text-neutral-300">
+                <span className="text-xs text-fg-muted">
                   {showPercentages && typeof r.percent === 'number'
                     ? t('contentTools.tools.class_pulse.countPercent', {
                         count: String(r.count),
@@ -108,7 +108,7 @@ function DistributionView({
                     : t('contentTools.tools.class_pulse.countOnly', { count: String(r.count) })}
                 </span>
               </div>
-              <div className="h-2 w-full overflow-hidden rounded bg-slate-100 dark:bg-neutral-800">
+              <div className="h-2 w-full overflow-hidden rounded bg-surface-sunken">
                 <div
                   className="h-full bg-slate-700 dark:bg-neutral-300"
                   style={{ width }}
@@ -120,10 +120,10 @@ function DistributionView({
         })}
       </ul>
 
-      <table className="w-full text-sm text-slate-800 dark:text-neutral-100" data-testid={`${testId}-table`}>
+      <table className="w-full text-sm text-fg-default" data-testid={`${testId}-table`}>
         <caption className="sr-only">{title}</caption>
         <thead>
-          <tr className="border-b border-slate-200 text-start text-xs uppercase tracking-wide text-slate-600 dark:border-neutral-700 dark:text-neutral-300">
+          <tr className="border-b border-border-default text-start text-xs uppercase tracking-wide text-fg-muted dark:border-border-default dark:text-fg-muted">
             <th scope="col" className="py-1 pe-2">
               {t('contentTools.tools.class_pulse.colOption')}
             </th>
@@ -139,7 +139,7 @@ function DistributionView({
         </thead>
         <tbody>
           {rows.map((r) => (
-            <tr key={r.optionId} className="border-b border-slate-100 dark:border-neutral-800">
+            <tr key={r.optionId} className="border-b border-border-subtle">
               <td className="py-1 pe-2">
                 {r.label}
                 {r.yours ? ` (${t('contentTools.tools.class_pulse.yourAnswer')})` : ''}
@@ -304,23 +304,23 @@ export default function ClassPulseRenderer({
   return (
     <div className="space-y-4" data-content-tool="class_pulse" data-testid="class-pulse">
       <div className="space-y-1">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+        <p className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
           {t('contentTools.tools.class_pulse.label')}
         </p>
-        <p id={questionId} className="text-sm font-medium text-slate-900 dark:text-neutral-100">
+        <p id={questionId} className="text-sm font-medium text-fg-default">
           {question}
         </p>
       </div>
 
       {showVoting && !(votingRound === 2 && readOnly) ? (
         <fieldset disabled={readOnly || busy || (votingRound === 1 && Boolean(vote1))} aria-labelledby={legendId}>
-          <legend id={legendId} className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-300">
+          <legend id={legendId} className="mb-2 text-xs font-semibold uppercase tracking-wide text-fg-muted">
             {votingRound === 2
               ? t('contentTools.tools.class_pulse.revotePrompt')
               : t('contentTools.tools.class_pulse.chooseOption')}
           </legend>
           {votingRound === 2 ? (
-            <p className="mb-2 text-sm text-slate-600 dark:text-neutral-300">
+            <p className="mb-2 text-sm text-fg-muted">
               {t('contentTools.tools.class_pulse.discussThenRevote')}
             </p>
           ) : null}
@@ -328,7 +328,7 @@ export default function ClassPulseRenderer({
             {options.map((o) => (
               <label
                 key={`${votingRound}-${o.id}`}
-                className="flex cursor-pointer items-start gap-2 rounded border border-slate-200 px-3 py-2 text-sm dark:border-neutral-700"
+                className="flex cursor-pointer items-start gap-2 rounded border border-border-default px-3 py-2 text-sm dark:border-border-default"
               >
                 <input
                   type="radio"
@@ -395,16 +395,16 @@ export default function ClassPulseRenderer({
 
       {reveal?.correctOptionId ? (
         <div
-          className="rounded border border-slate-200 p-3 text-sm dark:border-neutral-700"
+          className="rounded border border-border-default p-3 text-sm dark:border-border-default"
           data-testid="class-pulse-reveal"
         >
-          <p className="font-medium text-slate-900 dark:text-neutral-100">
+          <p className="font-medium text-fg-default">
             {t('contentTools.tools.class_pulse.correctAnswer', {
               answer: optionLabel(options, reveal.correctOptionId),
             })}
           </p>
           {reveal.explanation ? (
-            <p className="mt-1 whitespace-pre-wrap text-slate-700 dark:text-neutral-200">
+            <p className="mt-1 whitespace-pre-wrap text-fg-default">
               {reveal.explanation}
             </p>
           ) : null}

@@ -32,15 +32,15 @@ export function TranscriptPanel({
 
   return (
     <aside
-      className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-neutral-700 dark:bg-neutral-900/60"
+      className="flex flex-col gap-3 rounded-lg border border-border-default bg-surface-base p-3 dark:border-border-default/60"
       data-testid="media-checkpoint-transcript"
       aria-label={t('contentTools.tools.media_checkpoints.transcript')}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="text-sm font-semibold text-slate-800 dark:text-neutral-100">
+        <h3 className="text-sm font-semibold text-fg-default">
           {t('contentTools.tools.media_checkpoints.transcript')}
         </h3>
-        <label className="flex min-h-11 items-center gap-2 text-xs font-medium text-slate-700 dark:text-neutral-200">
+        <label className="flex min-h-11 items-center gap-2 text-xs font-medium text-fg-default">
           <input
             type="checkbox"
             checked={transcriptOnly}
@@ -58,7 +58,7 @@ export function TranscriptPanel({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t('contentTools.tools.media_checkpoints.transcriptSearch')}
-          className="w-full min-h-11 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+          className="w-full min-h-11 rounded-md border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
         />
       </label>
 
@@ -70,12 +70,12 @@ export function TranscriptPanel({
               type="button"
               role="listitem"
               onClick={() => onOpenCheckpoint(cp.id)}
-              className="flex w-full min-h-11 items-start justify-between gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-start text-sm dark:border-neutral-600 dark:bg-neutral-950"
+              className="flex w-full min-h-11 items-start justify-between gap-2 rounded-md border border-border-default bg-surface-raised px-3 py-2 text-start text-sm dark:border-border-default dark:bg-surface-base"
             >
               <span>
                 {t('contentTools.tools.media_checkpoints.checkpointN', { n: i + 1 })} — {cp.question.prompt}
               </span>
-              <span className="shrink-0 text-xs text-slate-500">{formatTimestamp(cp.atSec)}</span>
+              <span className="shrink-0 text-xs text-fg-muted">{formatTimestamp(cp.atSec)}</span>
             </button>
           ))}
         </div>
@@ -83,7 +83,7 @@ export function TranscriptPanel({
 
       <ol className="max-h-64 space-y-1 overflow-y-auto text-sm" dir="auto">
         {filtered.length === 0 ? (
-          <li className="text-slate-500">{t('contentTools.tools.media_checkpoints.transcriptEmpty')}</li>
+          <li className="text-fg-muted">{t('contentTools.tools.media_checkpoints.transcriptEmpty')}</li>
         ) : (
           filtered.map((line) => {
             const active = Math.abs(currentTime - line.atSec) < 2.5
@@ -92,13 +92,9 @@ export function TranscriptPanel({
                 <button
                   type="button"
                   onClick={() => onSeek(line.atSec)}
-                  className={`flex w-full min-h-11 gap-2 rounded px-2 py-1.5 text-start ${
-                    active
-                      ? 'bg-sky-100 text-slate-900 dark:bg-sky-900/40 dark:text-neutral-50'
-                      : 'hover:bg-white/80 dark:hover:bg-neutral-800'
-                  }`}
+                  className={`flex w-full min-h-11 gap-2 rounded px-2 py-1.5 text-start ${ active ? 'bg-sky-100 text-fg-default dark:bg-sky-900/40' : 'hover:bg-white/80 dark:hover:bg-surface-overlay' }`}
                 >
-                  <span className="shrink-0 font-mono text-xs text-slate-500">
+                  <span className="shrink-0 font-mono text-xs text-fg-muted">
                     {formatTimestamp(line.atSec)}
                   </span>
                   <span>{line.text}</span>

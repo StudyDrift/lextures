@@ -140,11 +140,11 @@ const MODULE_SORT_ID = 'sortable-modules'
 
 /** Quiet icon-only controls (no box borders) for module + item toolbars. */
 const iconGhost =
-  'rounded-md p-2.5 text-slate-500 transition-[background-color,color,border-color] hover:bg-slate-200/45 hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-50 sm:p-1.5 dark:text-neutral-400 dark:hover:bg-neutral-700/35 dark:hover:text-neutral-200'
+  'rounded-md p-2.5 text-fg-muted transition-[background-color,color,border-color] hover:bg-slate-200/45 hover:text-fg-default disabled:cursor-not-allowed disabled:opacity-50 sm:p-1.5 dark:text-fg-muted dark:hover:bg-neutral-700/35 dark:hover:text-fg-default'
 const iconGhostPublished =
-  'rounded-md p-2.5 text-indigo-600 transition-[background-color,color,border-color] hover:bg-indigo-50/90 hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 sm:p-1.5 dark:text-indigo-400 dark:hover:bg-indigo-950/45 dark:hover:text-indigo-300'
+  'rounded-md p-2.5 text-accent-fg transition-[background-color,color,border-color] hover:bg-indigo-50/90 hover:text-accent-fg disabled:cursor-not-allowed disabled:opacity-50 sm:p-1.5 dark:text-indigo-400 dark:hover:bg-indigo-950/45 dark:hover:text-indigo-300'
 const iconGhostDraft =
-  'rounded-md p-2.5 text-slate-400 transition-[background-color,color,border-color] hover:bg-slate-200/45 hover:text-slate-600 disabled:cursor-not-allowed disabled:opacity-50 sm:p-1.5 dark:text-neutral-500 dark:hover:bg-neutral-700/35 dark:hover:text-neutral-300'
+  'rounded-md p-2.5 text-fg-subtle transition-[background-color,color,border-color] hover:bg-slate-200/45 hover:text-fg-muted disabled:cursor-not-allowed disabled:opacity-50 sm:p-1.5 dark:hover:bg-neutral-700/35 dark:hover:text-fg-muted'
 
 function sortableDragStyle(
   transform: Transform | null,
@@ -160,7 +160,7 @@ function sortableDragStyle(
 }
 
 const moduleChildMetaLineClasses =
-  'mt-0.5 text-xs font-normal leading-snug text-slate-500 dark:text-neutral-400'
+  'mt-0.5 text-xs font-normal leading-snug text-fg-muted'
 
 function formatPtsLabel(n: number): string {
   return n === 1 ? '1 pt' : `${n} pts`
@@ -307,7 +307,7 @@ function ModuleChildStudentStatusRow({
               style={{ width: `${pct ?? 0}%` }}
             />
           </div>
-          <p className="mt-1 text-[11px] font-medium tabular-nums text-slate-500 dark:text-neutral-400">
+          <p className="mt-1 text-[11px] font-medium tabular-nums text-fg-muted">
             {studentMetrics.hasRecordedGrade
               ? `${studentMetrics.earned}/${studentMetrics.max} pts`
               : `Not graded · ${studentMetrics.max} pts max`}
@@ -322,7 +322,7 @@ function BlueprintLockIcon({ locked }: { locked?: boolean }) {
   if (!locked) return null
   return (
     <Lock
-      className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400"
+      className="h-4 w-4 shrink-0 text-fg-muted"
       aria-label="Blueprint-locked item – contact your district admin to modify"
     />
   )
@@ -360,7 +360,7 @@ function ChildRowContent({
       {child.kind === 'content_page' ? (
         <div className="flex items-center gap-3">
           <span
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-indigo-200/80 bg-indigo-50 text-indigo-600 dark:border-indigo-500/35 dark:bg-indigo-950/60 dark:text-indigo-300"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-indigo-200/80 bg-indigo-50 text-accent-fg dark:border-indigo-500/35 dark:bg-indigo-950/60 dark:text-indigo-300"
             aria-hidden
           >
             <FileText className="h-4 w-4" strokeWidth={2} />
@@ -369,7 +369,7 @@ function ChildRowContent({
             <div className="flex min-w-0 items-center gap-2">
               <Link
                 to={`/courses/${encodeURIComponent(courseCode)}/modules/content/${encodeURIComponent(child.id)}`}
-                className="min-w-0 flex-1 text-base font-semibold leading-snug tracking-tight text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+                className="min-w-0 flex-1 text-base font-semibold leading-snug tracking-tight text-accent-fg hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
               >
                 {child.title}
               </Link>
@@ -393,7 +393,7 @@ function ChildRowContent({
             <div className="flex min-w-0 items-center gap-2">
               <Link
                 to={`/courses/${encodeURIComponent(courseCode)}/modules/assignment/${encodeURIComponent(child.id)}`}
-                className="min-w-0 flex-1 text-base font-semibold leading-snug tracking-tight text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+                className="min-w-0 flex-1 text-base font-semibold leading-snug tracking-tight text-accent-fg hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
               >
                 {child.title}
               </Link>
@@ -424,7 +424,7 @@ function ChildRowContent({
             <div className="flex flex-wrap items-center gap-2">
               <Link
                 to={`/courses/${encodeURIComponent(courseCode)}/modules/quiz/${encodeURIComponent(child.id)}`}
-                className="min-w-0 text-base font-semibold leading-snug tracking-tight text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+                className="min-w-0 text-base font-semibold leading-snug tracking-tight text-accent-fg hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
                 aria-label={
                   child.isAdaptive ? `${child.title} (adaptive quiz)` : undefined
                 }
@@ -458,14 +458,14 @@ function ChildRowContent({
                   href={child.externalUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="min-w-0 flex-1 text-base font-semibold leading-snug tracking-tight text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+                  className="min-w-0 flex-1 text-base font-semibold leading-snug tracking-tight text-accent-fg hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
                 >
                   {child.title}
                 </a>
               ) : (
                 <Link
                   to={`/courses/${encodeURIComponent(courseCode)}/modules/external-link/${encodeURIComponent(child.id)}`}
-                  className="min-w-0 flex-1 text-base font-semibold leading-snug tracking-tight text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+                  className="min-w-0 flex-1 text-base font-semibold leading-snug tracking-tight text-accent-fg hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
                 >
                   {child.title}
                 </Link>
@@ -489,7 +489,7 @@ function ChildRowContent({
             <div className="flex min-w-0 items-center gap-2">
               <Link
                 to={`/courses/${encodeURIComponent(courseCode)}/modules/lti/${encodeURIComponent(child.id)}`}
-                className="min-w-0 flex-1 text-base font-semibold leading-snug tracking-tight text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+                className="min-w-0 flex-1 text-base font-semibold leading-snug tracking-tight text-accent-fg hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
               >
                 {child.title}
               </Link>
@@ -512,7 +512,7 @@ function ChildRowContent({
             <div className="flex min-w-0 items-center gap-2">
               <Link
                 to={`/courses/${encodeURIComponent(courseCode)}/modules/h5p/${encodeURIComponent(child.id)}`}
-                className="min-w-0 flex-1 text-base font-semibold leading-snug tracking-tight text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+                className="min-w-0 flex-1 text-base font-semibold leading-snug tracking-tight text-accent-fg hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
               >
                 {child.title}
               </Link>
@@ -535,7 +535,7 @@ function ChildRowContent({
             <div className="flex min-w-0 items-center gap-2">
               <Link
                 to={`/courses/${encodeURIComponent(courseCode)}/modules/scorm/${encodeURIComponent(child.id)}`}
-                className="min-w-0 flex-1 text-base font-semibold leading-snug tracking-tight text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+                className="min-w-0 flex-1 text-base font-semibold leading-snug tracking-tight text-accent-fg hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
               >
                 {child.title}
               </Link>
@@ -558,7 +558,7 @@ function ChildRowContent({
             <div className="flex min-w-0 items-center gap-2">
               <Link
                 to={`/courses/${encodeURIComponent(courseCode)}/modules/vibe-activity/${encodeURIComponent(child.id)}`}
-                className="min-w-0 flex-1 text-base font-semibold leading-snug tracking-tight text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+                className="min-w-0 flex-1 text-base font-semibold leading-snug tracking-tight text-accent-fg hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
               >
                 {child.title}
               </Link>
@@ -581,7 +581,7 @@ function ChildRowContent({
             <div className="flex min-w-0 items-center gap-2">
               <Link
                 to={`/courses/${encodeURIComponent(courseCode)}/modules/library-resource/${encodeURIComponent(child.id)}`}
-                className="min-w-0 flex-1 text-base font-semibold leading-snug tracking-tight text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+                className="min-w-0 flex-1 text-base font-semibold leading-snug tracking-tight text-accent-fg hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
               >
                 {child.title}
               </Link>
@@ -604,7 +604,7 @@ function ChildRowContent({
             <div className="flex min-w-0 items-center gap-2">
               <Link
                 to={`/courses/${encodeURIComponent(courseCode)}/modules/textbook-resource/${encodeURIComponent(child.id)}`}
-                className="min-w-0 flex-1 text-base font-semibold leading-snug tracking-tight text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+                className="min-w-0 flex-1 text-base font-semibold leading-snug tracking-tight text-accent-fg hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
               >
                 {child.title}
               </Link>
@@ -618,7 +618,7 @@ function ChildRowContent({
       ) : (
         <div className="min-w-0 flex-1">
           <div className="flex min-w-0 items-center gap-2">
-            <p className="min-w-0 flex-1 text-lg font-bold leading-snug tracking-tight text-slate-950 sm:text-xl dark:text-neutral-100">
+            <p className="min-w-0 flex-1 text-lg font-bold leading-snug tracking-tight text-slate-950 sm:text-xl dark:text-fg-default">
               {child.title}
             </p>
             <BlueprintLockIcon locked={child.blueprintLocked} />
@@ -681,9 +681,7 @@ function ModulePublishMenu({
         }
         aria-label={item.published ? 'Published to students' : 'Hidden from students'}
         aria-pressed={item.published}
-        className={`flex shrink-0 items-center justify-center ${
-          item.published ? iconGhostPublished : iconGhostDraft
-        }`}
+        className={`flex shrink-0 items-center justify-center ${ item.published ? iconGhostPublished : iconGhostDraft }`}
       >
         <IconSwap
           active={item.published}
@@ -697,7 +695,7 @@ function ModulePublishMenu({
           id={menuId}
           role="menu"
           aria-label="Module visibility options"
-          className="absolute end-0 z-50 mt-1 min-w-[11rem] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-800 dark:shadow-black/40"
+          className="absolute end-0 z-50 mt-1 min-w-[11rem] overflow-hidden rounded-xl border border-border-default bg-surface-raised py-1 shadow-lg shadow-slate-900/10 dark:border-border-default dark:bg-surface-overlay dark:shadow-black/40"
         >
           {item.published ? (
             <>
@@ -708,7 +706,7 @@ function ModulePublishMenu({
                   onUnpublishModuleOnly()
                   setMenuOpen(false)
                 }}
-                className="flex w-full px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+                className="flex w-full px-2.5 py-2 text-start text-sm font-medium text-fg-default transition-[background-color,color,border-color] hover:bg-surface-base dark:text-fg-default dark:hover:bg-neutral-700/80"
               >
                 Unpublish Module Only
               </button>
@@ -719,7 +717,7 @@ function ModulePublishMenu({
                   onUnpublishAllItems()
                   setMenuOpen(false)
                 }}
-                className="flex w-full border-t border-slate-100 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+                className="flex w-full border-t border-border-subtle px-2.5 py-2 text-start text-sm font-medium text-fg-default transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-neutral-700/80"
               >
                 Unpublish All Items
               </button>
@@ -733,7 +731,7 @@ function ModulePublishMenu({
                   onPublishModuleOnly()
                   setMenuOpen(false)
                 }}
-                className="flex w-full px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+                className="flex w-full px-2.5 py-2 text-start text-sm font-medium text-fg-default transition-[background-color,color,border-color] hover:bg-surface-base dark:text-fg-default dark:hover:bg-neutral-700/80"
               >
                 Publish Module Only
               </button>
@@ -744,7 +742,7 @@ function ModulePublishMenu({
                   onPublishAllItems()
                   setMenuOpen(false)
                 }}
-                className="flex w-full border-t border-slate-100 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+                className="flex w-full border-t border-border-subtle px-2.5 py-2 text-start text-sm font-medium text-fg-default transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-neutral-700/80"
               >
                 Publish All Items
               </button>
@@ -827,7 +825,7 @@ function ModuleItemRowActions({
             id={menuId}
             role="menu"
             aria-label="Module item actions"
-            className="absolute end-0 z-50 mt-1 min-w-[10rem] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-800 dark:shadow-black/40"
+            className="absolute end-0 z-50 mt-1 min-w-[10rem] overflow-hidden rounded-xl border border-border-default bg-surface-raised py-1 shadow-lg shadow-slate-900/10 dark:border-border-default dark:bg-surface-overlay dark:shadow-black/40"
           >
             <button
               type="button"
@@ -836,7 +834,7 @@ function ModuleItemRowActions({
                 onEditTitle()
                 setMenuOpen(false)
               }}
-              className="flex w-full px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+              className="flex w-full px-2.5 py-2 text-start text-sm font-medium text-fg-default transition-[background-color,color,border-color] hover:bg-surface-base dark:text-fg-default dark:hover:bg-neutral-700/80"
             >
               Edit title
             </button>
@@ -847,7 +845,7 @@ function ModuleItemRowActions({
                 onArchive()
                 setMenuOpen(false)
               }}
-              className="flex w-full border-t border-slate-100 px-2.5 py-2 text-start text-sm font-medium text-rose-700 transition-[background-color,color,border-color] hover:bg-rose-50 dark:border-neutral-700 dark:text-rose-300 dark:hover:bg-rose-950/50"
+              className="flex w-full border-t border-border-subtle px-2.5 py-2 text-start text-sm font-medium text-rose-700 transition-[background-color,color,border-color] hover:bg-rose-50 dark:border-border-default dark:text-rose-300 dark:hover:bg-rose-950/50"
             >
               Delete
             </button>
@@ -908,11 +906,7 @@ function SortableChildRow({
           {(!disabled || dragHandlesVisible || isDragging) && (
             <button
               type="button"
-              className={`flex h-11 w-11 shrink-0 cursor-grab touch-none items-center justify-center rounded-lg border-0 bg-transparent p-0 text-slate-400 shadow-none transition-[opacity,background-color,color,border-color] hover:text-slate-600 active:cursor-grabbing focus-visible:pointer-events-auto focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 sm:h-9 sm:w-9 dark:text-neutral-500 dark:hover:text-neutral-300 ${
-                gripAlwaysOn
-                  ? 'opacity-100'
-                  : 'opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto'
-              }`}
+              className={`flex h-11 w-11 shrink-0 cursor-grab touch-none items-center justify-center rounded-lg border-0 bg-transparent p-0 text-fg-subtle shadow-none transition-[opacity,background-color,color,border-color] hover:text-fg-muted active:cursor-grabbing focus-visible:pointer-events-auto focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 sm:h-9 sm:w-9 dark:hover:text-fg-muted ${ gripAlwaysOn ? 'opacity-100' : 'opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto' }`}
               aria-label="Drag to reorder or move item to another module"
               {...listeners}
               {...attributes}
@@ -929,7 +923,7 @@ function SortableChildRow({
               studentGradeContext={studentGradeContext}
             />
             {child.archived ? (
-              <p className="mt-1 text-xs font-medium text-slate-500 dark:text-neutral-400">Archived</p>
+              <p className="mt-1 text-xs font-medium text-fg-muted">Archived</p>
             ) : null}
           </div>
         </div>
@@ -1037,9 +1031,7 @@ function ModuleCardBody({
   const showAccordionToggle = !minified && children.length > 0
   return (
     <div
-      className={`w-full rounded-2xl border border-slate-200/70 bg-slate-50/60 shadow-sm dark:border-neutral-700/80 dark:bg-neutral-800/85 ${
-        minified ? 'p-2.5' : 'p-4'
-      }`}
+      className={`w-full rounded-2xl border border-border-subtle bg-surface-sunken/60 shadow-sm ${ minified ? 'p-2.5' : 'p-4' }`}
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-3">
         <div className="group flex min-w-0 flex-1 items-start gap-2 sm:gap-3">
@@ -1055,7 +1047,7 @@ function ModuleCardBody({
               >
                 <span className="flex items-start gap-2">
                   <span
-                    className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center text-slate-500 dark:text-neutral-400"
+                    className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center text-fg-muted"
                     aria-hidden
                   >
                     {collapsed ? (
@@ -1065,16 +1057,16 @@ function ModuleCardBody({
                     )}
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="flex items-center gap-2 text-sm font-semibold text-slate-950 dark:text-neutral-100">
+                    <span className="flex items-center gap-2 text-sm font-semibold text-slate-950 dark:text-fg-default">
                       <span className="min-w-0">{item.title}</span>
                       <BlueprintLockIcon locked={item.blueprintLocked} />
                     </span>
                     {!collapsed ? (
-                      <span className="mt-1 block text-xs font-normal text-slate-500 dark:text-neutral-400">
+                      <span className="mt-1 block text-xs font-normal text-fg-muted">
                         Course activities and items can be grouped under this module.
                       </span>
                     ) : (
-                      <span className="mt-1 block text-xs font-normal text-slate-500 dark:text-neutral-400">
+                      <span className="mt-1 block text-xs font-normal text-fg-muted">
                         {children.length} {children.length === 1 ? 'item' : 'items'}
                       </span>
                     )}
@@ -1083,17 +1075,17 @@ function ModuleCardBody({
               </button>
             ) : (
               <>
-                <p className="flex items-center gap-2 text-sm font-semibold text-slate-950 dark:text-neutral-100">
+                <p className="flex items-center gap-2 text-sm font-semibold text-slate-950 dark:text-fg-default">
                   <span className="min-w-0">{item.title}</span>
                   <BlueprintLockIcon locked={item.blueprintLocked} />
                 </p>
                 {!minified && (
-                  <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+                  <p className="mt-1 text-xs text-fg-muted">
                     Course activities and items can be grouped under this module.
                   </p>
                 )}
                 {minified && children.length > 0 && (
-                  <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
+                  <p className="mt-0.5 text-xs text-fg-muted">
                     {children.length} {children.length === 1 ? 'item' : 'items'}
                   </p>
                 )}
@@ -1102,7 +1094,7 @@ function ModuleCardBody({
           </div>
         </div>
         {canEditModules && !minified && (
-          <div className="flex w-full flex-wrap items-center justify-end gap-1 border-t border-slate-200/60 pt-3 sm:w-auto sm:shrink-0 sm:flex-nowrap sm:border-0 sm:pt-0 dark:border-neutral-600/60">
+          <div className="flex w-full flex-wrap items-center justify-end gap-1 border-t border-border-subtle pt-3 sm:w-auto sm:shrink-0 sm:flex-nowrap sm:border-0 sm:pt-0">
             <ModulePublishMenu
               item={item}
               disabled={anyModalBusy}
@@ -1226,12 +1218,12 @@ function ModuleAdaptivePathPanel({ courseCode, moduleId }: { courseCode: string;
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="text-xs font-semibold text-indigo-800 hover:text-indigo-600 dark:text-indigo-200 dark:hover:text-indigo-100"
+        className="text-xs font-semibold text-indigo-800 hover:text-accent-fg dark:text-indigo-200 dark:hover:text-indigo-100"
       >
         {open ? '▼' : '▶'} Adaptive path rules
       </button>
       {open && (
-        <div className="mt-2 space-y-2 text-xs text-slate-700 dark:text-neutral-200">
+        <div className="mt-2 space-y-2 text-xs text-fg-default">
           {err ? <p className="text-rose-700 dark:text-rose-300">{err}</p> : null}
           {loading ? <p>Loading…</p> : null}
           <ul className="space-y-1">
@@ -1254,11 +1246,11 @@ function ModuleAdaptivePathPanel({ courseCode, moduleId }: { courseCode: string;
           </ul>
           <div className="grid gap-2 border-t border-indigo-100 pt-2 dark:border-indigo-900/50 sm:grid-cols-2">
             <label className="block sm:col-span-2">
-              <span className="font-medium text-slate-600 dark:text-neutral-300">Rule type</span>
+              <span className="font-medium text-fg-muted">Rule type</span>
               <select
                 value={ruleType}
                 onChange={(e) => setRuleType(e.target.value)}
-                className="mt-1 w-full rounded border border-slate-200 bg-white px-2 py-1 text-xs dark:border-neutral-600 dark:bg-neutral-900"
+                className="mt-1 w-full rounded border border-border-default bg-surface-raised px-2 py-1 text-xs dark:border-border-default dark:bg-surface-raised"
               >
                 <option value="skip_if_mastered">skip_if_mastered</option>
                 <option value="required_if_not_mastered">required_if_not_mastered</option>
@@ -1267,11 +1259,11 @@ function ModuleAdaptivePathPanel({ courseCode, moduleId }: { courseCode: string;
               </select>
             </label>
             <label className="block">
-              <span className="font-medium text-slate-600 dark:text-neutral-300">Concept</span>
+              <span className="font-medium text-fg-muted">Concept</span>
               <select
                 value={conceptPick}
                 onChange={(e) => setConceptPick(e.target.value)}
-                className="mt-1 w-full rounded border border-slate-200 bg-white px-2 py-1 text-xs dark:border-neutral-600 dark:bg-neutral-900"
+                className="mt-1 w-full rounded border border-border-default bg-surface-raised px-2 py-1 text-xs dark:border-border-default dark:bg-surface-raised"
               >
                 {concepts.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -1281,22 +1273,22 @@ function ModuleAdaptivePathPanel({ courseCode, moduleId }: { courseCode: string;
               </select>
             </label>
             <label className="block">
-              <span className="font-medium text-slate-600 dark:text-neutral-300">Threshold</span>
+              <span className="font-medium text-fg-muted">Threshold</span>
               <input
                 value={threshold}
                 onChange={(e) => setThreshold(e.target.value)}
-                className="mt-1 w-full rounded border border-slate-200 bg-white px-2 py-1 text-xs dark:border-neutral-600 dark:bg-neutral-900"
+                className="mt-1 w-full rounded border border-border-default bg-surface-raised px-2 py-1 text-xs dark:border-border-default dark:bg-surface-raised"
               />
             </label>
             <label className="block sm:col-span-2">
-              <span className="font-medium text-slate-600 dark:text-neutral-300">
+              <span className="font-medium text-fg-muted">
                 Target item id (optional except remediation / required)
               </span>
               <input
                 value={targetId}
                 onChange={(e) => setTargetId(e.target.value)}
                 placeholder="UUID of structure item"
-                className="mt-1 w-full rounded border border-slate-200 bg-white px-2 py-1 font-mono text-xs dark:border-neutral-600 dark:bg-neutral-900"
+                className="mt-1 w-full rounded border border-border-default bg-surface-raised px-2 py-1 font-mono text-xs dark:border-border-default dark:bg-surface-raised"
               />
             </label>
             <div className="sm:col-span-2">
@@ -1304,7 +1296,7 @@ function ModuleAdaptivePathPanel({ courseCode, moduleId }: { courseCode: string;
                 type="button"
                 disabled={saving}
                 onClick={() => void onAdd()}
-                className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
+                className="rounded-lg bg-accent-solid px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
               >
                 Add rule
               </button>
@@ -1402,11 +1394,7 @@ function SortableModuleCard({
       >
         <ul
           id={`module-items-${item.id}`}
-          className={`mt-4 border-t border-slate-200/55 pt-4 dark:border-neutral-700/80 ${
-            children.length > 0
-              ? 'divide-y divide-slate-200/55 dark:divide-neutral-700/80'
-              : 'min-h-10'
-          }`}
+          className={`mt-4 border-t border-border-subtle pt-4 ${ children.length > 0 ? 'divide-y divide-border-subtle' : 'min-h-10' }`}
           aria-label={
             children.length === 0 ? `Drop items into ${item.title || 'module'}` : undefined
           }
@@ -1465,11 +1453,7 @@ function SortableModuleCard({
           canEditModules ? (
             <button
               type="button"
-              className={`mt-0.5 flex h-11 w-11 shrink-0 cursor-grab touch-none items-center justify-center rounded-lg border-0 bg-transparent p-0 text-slate-400 shadow-none transition-[opacity,background-color,color,border-color] hover:text-slate-600 active:cursor-grabbing focus-visible:pointer-events-auto focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 sm:h-9 sm:w-9 dark:text-neutral-500 dark:hover:text-neutral-300 ${
-                gripsPinned || isDragging
-                  ? 'opacity-100'
-                  : 'opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto'
-              }`}
+              className={`mt-0.5 flex h-11 w-11 shrink-0 cursor-grab touch-none items-center justify-center rounded-lg border-0 bg-transparent p-0 text-fg-subtle shadow-none transition-[opacity,background-color,color,border-color] hover:text-fg-muted active:cursor-grabbing focus-visible:pointer-events-auto focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 sm:h-9 sm:w-9 dark:hover:text-fg-muted ${ gripsPinned || isDragging ? 'opacity-100' : 'opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto' }`}
               aria-label="Drag to reorder module"
               {...listeners}
               {...attributes}
@@ -1509,7 +1493,7 @@ function StaticModuleCard({
     !collapsed && children.length > 0 ? (
       <ul
         id={`module-items-${item.id}`}
-        className="mt-4 divide-y divide-slate-200/55 border-t border-slate-200/55 pt-4 dark:divide-neutral-700/80 dark:border-neutral-700/80"
+        className="mt-4 divide-y divide-border-subtle border-t border-border-subtle pt-4"
       >
         {children.map((child) => (
           <StaticChildRow
@@ -2573,7 +2557,7 @@ export default function CourseModules() {
   if (!courseCode) {
     return (
       <LmsPage title="Modules" description="">
-        <p className="mt-6 text-sm text-slate-500 dark:text-neutral-400">Invalid link.</p>
+        <p className="mt-6 text-sm text-fg-muted">Invalid link.</p>
       </LmsPage>
     )
   }
@@ -2593,11 +2577,7 @@ export default function CourseModules() {
                 aria-expanded={modulesAiOpen}
                 aria-haspopup="dialog"
                 onClick={() => setModulesAiOpen((o) => !o)}
-                className={`inline-flex h-11 items-center gap-2 rounded-xl px-3 text-sm font-medium transition-[background-color,color] focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30 ${
-                  modulesAiOpen
-                    ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300'
-                    : 'text-slate-600 hover:bg-slate-100 dark:text-neutral-300 dark:hover:bg-neutral-800'
-                }`}
+                className={`inline-flex h-11 items-center gap-2 rounded-xl px-3 text-sm font-medium transition-[background-color,color] focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30 ${ modulesAiOpen ? 'bg-indigo-100 text-accent-fg dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay' }`}
               >
                 <Bot className="h-5 w-5" aria-hidden />
                 <span className="hidden sm:inline">AI</span>
@@ -2672,19 +2652,19 @@ export default function CourseModules() {
       )}
       {loading && <CourseModulesLoadingSkeleton />}
       {!loading && showViewerOnlyHint && (
-        <p className="mt-8 text-sm text-slate-500 dark:text-neutral-400">
+        <p className="mt-8 text-sm text-fg-muted">
           You can view this outline, but only the course creator and assigned course teachers can add
           modules.
         </p>
       )}
       {empty && canEditModules && (
-        <p className="mt-8 text-sm text-slate-500 dark:text-neutral-400">
+        <p className="mt-8 text-sm text-fg-muted">
           No course items yet. Use{' '}
-          <span className="font-medium text-slate-700 dark:text-neutral-300">Actions</span>, then <span className="font-medium text-slate-700 dark:text-neutral-300">Add Module</span>, to add a module.
+          <span className="font-medium text-fg-muted">Actions</span>, then <span className="font-medium text-fg-muted">Add Module</span>, to add a module.
         </p>
       )}
       {empty && !canEditModules && (
-        <p className="mt-8 text-sm text-slate-500 dark:text-neutral-400">No modules yet.</p>
+        <p className="mt-8 text-sm text-fg-muted">No modules yet.</p>
       )}
       {!loading && hasRows && canEditModules && (
         <DndContext
@@ -2738,7 +2718,7 @@ export default function CourseModules() {
             <ul className="mt-8 flex w-full max-w-none flex-col gap-3">
               {nonModuleTopLevel.map((item) => (
                 <li key={item.id} className="w-full">
-                  <p className="text-base font-semibold tracking-tight text-slate-950 dark:text-neutral-100">
+                  <p className="text-base font-semibold tracking-tight text-slate-950 dark:text-fg-default">
                     {item.title}
                   </p>
                 </li>
@@ -2798,17 +2778,17 @@ export default function CourseModules() {
           {activeDragId && activeItem ? (
             <DragOverlay dropAnimation={null}>
               {activeItem.kind === 'module' ? (
-                <div className="pointer-events-none w-full rounded-2xl border border-slate-200/70 bg-slate-50/95 px-4 py-3 shadow-lg dark:border-neutral-600 dark:bg-neutral-800/95">
-                  <p className="text-sm font-semibold text-slate-950 dark:text-neutral-100">{activeItem.title}</p>
-                  <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
+                <div className="pointer-events-none w-full rounded-2xl border border-border-subtle bg-surface-raised px-4 py-3 shadow-lg">
+                  <p className="text-sm font-semibold text-slate-950 dark:text-fg-default">{activeItem.title}</p>
+                  <p className="mt-0.5 text-xs text-fg-muted">
                     {(moduleChildrenById.get(activeItem.id) ?? []).length}{' '}
                     {(moduleChildrenById.get(activeItem.id) ?? []).length === 1 ? 'item' : 'items'}
                   </p>
                 </div>
               ) : (
-                <div className="pointer-events-none max-w-lg rounded-xl border border-slate-300 bg-white px-3 py-2 shadow-lg dark:border-neutral-600 dark:bg-neutral-800">
-                  <p className="text-sm font-semibold text-slate-950 dark:text-neutral-100">{activeItem.title}</p>
-                  <p className="text-xs text-slate-500 dark:text-neutral-400">
+                <div className="pointer-events-none max-w-lg rounded-xl border border-border-strong bg-surface-raised px-3 py-2 shadow-lg dark:border-border-default dark:bg-surface-overlay">
+                  <p className="text-sm font-semibold text-slate-950 dark:text-fg-default">{activeItem.title}</p>
+                  <p className="text-xs text-fg-muted">
                     {activeItem.kind === 'content_page'
                       ? 'Page'
                       : activeItem.kind === 'assignment'
@@ -2839,7 +2819,7 @@ export default function CourseModules() {
             <ul className="mt-8 flex w-full max-w-none flex-col gap-3">
               {nonModuleTopLevel.map((item) => (
                 <li key={item.id} className="w-full">
-                  <p className="text-base font-semibold tracking-tight text-slate-950 dark:text-neutral-100">
+                  <p className="text-base font-semibold tracking-tight text-slate-950 dark:text-fg-default">
                     {item.title}
                   </p>
                 </li>
@@ -3114,11 +3094,11 @@ export default function CourseModules() {
             }
           }}
         >
-          <div className="w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-neutral-600 dark:bg-neutral-800">
-            <div className="flex items-start justify-between gap-3 border-b border-slate-200 px-4 py-3 dark:border-neutral-600">
+          <div className="w-full max-w-md overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-overlay">
+            <div className="flex items-start justify-between gap-3 border-b border-border-default px-4 py-3 dark:border-border-default">
               <h3
                 id={moduleDeleteDialogTitleId}
-                className="text-sm font-semibold text-slate-900 dark:text-neutral-100"
+                className="text-sm font-semibold text-fg-default"
               >
                 Delete module
               </h3>
@@ -3131,7 +3111,7 @@ export default function CourseModules() {
                   }
                 }}
                 disabled={moduleDeleting}
-                className="shrink-0 rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
+                className="shrink-0 rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken hover:text-fg-default disabled:cursor-not-allowed disabled:opacity-50 dark:text-fg-muted dark:hover:bg-neutral-700 dark:hover:text-fg-default"
                 aria-label="Close"
               >
                 <X className="h-5 w-5" aria-hidden />
@@ -3139,36 +3119,36 @@ export default function CourseModules() {
             </div>
             <div className="p-4">
               {moduleDeletePreviewLoading ? (
-                <p className="text-sm text-slate-600 dark:text-neutral-300">
+                <p className="text-sm text-fg-muted">
                   Checking module contents…
                 </p>
               ) : moduleDeleteGradedItems.length > 0 ? (
                 <>
-                  <p className="text-sm leading-relaxed text-slate-600 dark:text-neutral-300">
-                    Delete <span className="font-medium text-slate-900 dark:text-neutral-100">{moduleDeleteTarget.title}</span> and everything inside?
+                  <p className="text-sm leading-relaxed text-fg-muted">
+                    Delete <span className="font-medium text-fg-default">{moduleDeleteTarget.title}</span> and everything inside?
                   </p>
-                  <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-neutral-300">
+                  <p className="mt-3 text-sm leading-relaxed text-fg-muted">
                     Some items have student grades. To preserve those records, these items will be
-                    <span className="font-medium text-slate-900 dark:text-neutral-100"> archived</span> instead of deleted:
+                    <span className="font-medium text-fg-default"> archived</span> instead of deleted:
                   </p>
-                  <ul className="mt-2 max-h-40 overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200">
+                  <ul className="mt-2 max-h-40 overflow-y-auto rounded-lg border border-border-default bg-surface-base px-3 py-2 text-sm text-fg-default dark:border-border-default dark:bg-surface-raised dark:text-fg-default">
                     {moduleDeleteGradedItems.map((g) => (
                       <li key={g.id} className="truncate py-0.5">
                         {g.title || 'Untitled'}
                       </li>
                     ))}
                   </ul>
-                  <p className="mt-3 text-xs leading-relaxed text-slate-500 dark:text-neutral-400">
+                  <p className="mt-3 text-xs leading-relaxed text-fg-muted">
                     The module and any items without grades will be archived alongside them so the
                     outline stays consistent. You can restore archived content from course settings.
                   </p>
                 </>
               ) : (
                 <>
-                  <p className="text-sm leading-relaxed text-slate-600 dark:text-neutral-300">
-                    Delete <span className="font-medium text-slate-900 dark:text-neutral-100">{moduleDeleteTarget.title}</span> and every assignment, page, quiz, and other item inside it?
+                  <p className="text-sm leading-relaxed text-fg-muted">
+                    Delete <span className="font-medium text-fg-default">{moduleDeleteTarget.title}</span> and every assignment, page, quiz, and other item inside it?
                   </p>
-                  <p className="mt-3 text-xs leading-relaxed text-slate-500 dark:text-neutral-400">
+                  <p className="mt-3 text-xs leading-relaxed text-fg-muted">
                     This cannot be undone.
                   </p>
                 </>
@@ -3188,7 +3168,7 @@ export default function CourseModules() {
                     }
                   }}
                   disabled={moduleDeleting}
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700/80"
+                  className="rounded-xl border border-border-default bg-surface-raised px-4 py-2 text-sm font-medium text-fg-muted shadow-sm hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-50 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700/80"
                 >
                   Cancel
                 </button>
@@ -3227,11 +3207,11 @@ export default function CourseModules() {
             }
           }}
         >
-          <div className="w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-neutral-600 dark:bg-neutral-800">
-            <div className="flex items-start justify-between gap-3 border-b border-slate-200 px-4 py-3 dark:border-neutral-600">
+          <div className="w-full max-w-md overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-overlay">
+            <div className="flex items-start justify-between gap-3 border-b border-border-default px-4 py-3 dark:border-border-default">
               <h3
                 id={archiveDialogTitleId}
-                className="text-sm font-semibold text-slate-900 dark:text-neutral-100"
+                className="text-sm font-semibold text-fg-default"
               >
                 Delete item
               </h3>
@@ -3241,19 +3221,19 @@ export default function CourseModules() {
                   if (busyChildItemId !== archiveConfirmItem.id) setArchiveConfirmItem(null)
                 }}
                 disabled={busyChildItemId === archiveConfirmItem.id}
-                className="shrink-0 rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
+                className="shrink-0 rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken hover:text-fg-default disabled:cursor-not-allowed disabled:opacity-50 dark:text-fg-muted dark:hover:bg-neutral-700 dark:hover:text-fg-default"
                 aria-label="Close"
               >
                 <X className="h-5 w-5" aria-hidden />
               </button>
             </div>
             <div className="p-4">
-              <p className="text-sm leading-relaxed text-slate-600 dark:text-neutral-300">
+              <p className="text-sm leading-relaxed text-fg-muted">
                 Archive this item? It will be removed from the outline. Restore it anytime from course
                 settings under Archived content.
               </p>
               {archiveConfirmItem.title ? (
-                <p className="mt-2 text-sm font-medium text-slate-900 dark:text-neutral-100">
+                <p className="mt-2 text-sm font-medium text-fg-default">
                   {archiveConfirmItem.title}
                 </p>
               ) : null}
@@ -3262,7 +3242,7 @@ export default function CourseModules() {
                   type="button"
                   onClick={() => setArchiveConfirmItem(null)}
                   disabled={busyChildItemId === archiveConfirmItem.id}
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700/80"
+                  className="rounded-xl border border-border-default bg-surface-raised px-4 py-2 text-sm font-medium text-fg-muted shadow-sm hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-50 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700/80"
                 >
                   Cancel
                 </button>
@@ -3270,7 +3250,7 @@ export default function CourseModules() {
                   type="button"
                   onClick={() => void confirmArchiveChild()}
                   disabled={busyChildItemId === archiveConfirmItem.id}
-                  className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+                  className="rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-indigo-500 dark:hover:bg-indigo-400"
                 >
                   {busyChildItemId === archiveConfirmItem.id ? 'Archiving…' : 'Delete'}
                 </button>

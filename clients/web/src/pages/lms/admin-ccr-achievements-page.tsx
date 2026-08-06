@@ -145,11 +145,11 @@ export default function AdminCCRAchievementsPage() {
           <div>
             <div className="flex items-center gap-2">
               <Award className="h-5 w-5 text-violet-600" aria-hidden />
-              <h1 className="text-xl font-semibold text-slate-900 dark:text-neutral-100">
+              <h1 className="text-xl font-semibold text-fg-default">
                 Co-curricular achievements
               </h1>
             </div>
-            <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+            <p className="mt-1 text-sm text-fg-muted">
               Add manual extracurricular records (leadership roles, service hours, workshops) to a student&apos;s
               comprehensive learner record.
             </p>
@@ -162,7 +162,7 @@ export default function AdminCCRAchievementsPage() {
           </Link>
         </div>
 
-        <section aria-label="Find learner" className="rounded-xl border border-slate-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-900">
+        <section aria-label="Find learner" className="rounded-xl border border-border-default bg-surface-raised p-4 dark:border-border-default dark:bg-surface-raised">
           <h2 className="text-base font-semibold">Find learner</h2>
           <div className="mt-3 flex flex-wrap gap-2">
             <input
@@ -173,7 +173,7 @@ export default function AdminCCRAchievementsPage() {
                 if (e.key === 'Enter') void runSearch()
               }}
               placeholder="Email, name, sid, or user id"
-              className="min-w-[240px] flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+              className="min-w-[240px] flex-1 rounded-lg border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
             />
             <button
               type="button"
@@ -185,7 +185,7 @@ export default function AdminCCRAchievementsPage() {
             </button>
           </div>
           {searchError ? (
-            <p role="alert" className="mt-2 text-sm text-red-700 dark:text-red-300">
+            <p role="alert" className="mt-2 text-sm text-danger-fg">
               {searchError}
             </p>
           ) : null}
@@ -196,10 +196,10 @@ export default function AdminCCRAchievementsPage() {
                   <button
                     type="button"
                     onClick={() => pickUser(hit)}
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-left text-sm hover:bg-slate-50 dark:border-neutral-600 dark:hover:bg-neutral-800"
+                    className="w-full rounded-lg border border-border-default px-3 py-2 text-left text-sm hover:bg-surface-base dark:border-border-default dark:hover:bg-surface-overlay"
                   >
                     <span className="font-medium">{formatLearnerLabel(hit)}</span>
-                    <span className="ml-2 text-slate-500">{hit.email}</span>
+                    <span className="ml-2 text-fg-muted">{hit.email}</span>
                   </button>
                 </li>
               ))}
@@ -208,7 +208,7 @@ export default function AdminCCRAchievementsPage() {
         </section>
 
         {selectedUser ? (
-          <section aria-label="Add achievement" className="rounded-xl border border-slate-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-900">
+          <section aria-label="Add achievement" className="rounded-xl border border-border-default bg-surface-raised p-4 dark:border-border-default dark:bg-surface-raised">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h2 className="text-base font-semibold">
                 Add record for {formatLearnerLabel(selectedUser)}
@@ -216,7 +216,7 @@ export default function AdminCCRAchievementsPage() {
               <button
                 type="button"
                 onClick={clearSelection}
-                className="text-sm text-slate-600 underline hover:text-slate-900 dark:text-neutral-400"
+                className="text-sm text-fg-muted underline hover:text-fg-default dark:text-fg-muted"
               >
                 Change learner
               </button>
@@ -231,7 +231,7 @@ export default function AdminCCRAchievementsPage() {
                   onChange={(e) => setTitle(e.target.value)}
                   required
                   placeholder="e.g. Student Government President"
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                  className="mt-1 w-full rounded-lg border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
                 />
               </label>
               <label className="block sm:col-span-2">
@@ -240,7 +240,7 @@ export default function AdminCCRAchievementsPage() {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={3}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                  className="mt-1 w-full rounded-lg border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
                 />
               </label>
               <label className="block">
@@ -249,7 +249,7 @@ export default function AdminCCRAchievementsPage() {
                   type="datetime-local"
                   value={issuedAt}
                   onChange={(e) => setIssuedAt(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                  className="mt-1 w-full rounded-lg border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
                 />
               </label>
               <label className="block">
@@ -259,7 +259,7 @@ export default function AdminCCRAchievementsPage() {
                   value={evidenceUrl}
                   onChange={(e) => setEvidenceUrl(e.target.value)}
                   placeholder="https://…"
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                  className="mt-1 w-full rounded-lg border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
                 />
               </label>
               <label className="block sm:col-span-2">
@@ -269,11 +269,11 @@ export default function AdminCCRAchievementsPage() {
                   value={outcomeTags}
                   onChange={(e) => setOutcomeTags(e.target.value)}
                   placeholder="Leadership, Civic engagement"
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                  className="mt-1 w-full rounded-lg border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
                 />
               </label>
               {saveError ? (
-                <p role="alert" className="sm:col-span-2 text-sm text-red-700 dark:text-red-300">
+                <p role="alert" className="sm:col-span-2 text-sm text-danger-fg">
                   {saveError}
                 </p>
               ) : null}
@@ -290,7 +290,7 @@ export default function AdminCCRAchievementsPage() {
 
             {added.length > 0 ? (
               <div className="mt-6">
-                <h3 className="text-sm font-semibold text-slate-700 dark:text-neutral-300">Added this session</h3>
+                <h3 className="text-sm font-semibold text-fg-muted">Added this session</h3>
                 <ul className="mt-2 space-y-2">
                   {added.map((row) => (
                     <li
@@ -298,7 +298,7 @@ export default function AdminCCRAchievementsPage() {
                       className="rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm dark:border-green-900/40 dark:bg-green-950/30"
                     >
                       <span className="font-medium">{row.title}</span>
-                      <span className="ml-2 text-slate-500">{row.issuedAt}</span>
+                      <span className="ml-2 text-fg-muted">{row.issuedAt}</span>
                     </li>
                   ))}
                 </ul>

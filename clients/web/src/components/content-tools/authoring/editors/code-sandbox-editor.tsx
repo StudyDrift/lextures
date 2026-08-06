@@ -87,7 +87,7 @@ export function CodeSandboxEditor({
         <span className="font-medium">{t('contentTools.tools.code_sandbox.editor.prompt')}</span>
         <textarea
           id={`${idPrefix}-${baseId}-prompt`}
-          className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+          className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
           rows={2}
           disabled={disabled}
           value={typeof value.prompt === 'string' ? value.prompt : ''}
@@ -98,7 +98,7 @@ export function CodeSandboxEditor({
       <label className="block space-y-1 text-xs">
         <span className="font-medium">{t('contentTools.tools.code_sandbox.editor.language')}</span>
         <select
-          className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+          className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
           disabled={disabled}
           value={typeof value.language === 'string' ? value.language : 'python'}
           onChange={(e) => patch({ language: e.target.value })}
@@ -111,7 +111,7 @@ export function CodeSandboxEditor({
       <label className="block space-y-1 text-xs">
         <span className="font-medium">{t('contentTools.tools.code_sandbox.editor.starterCode')}</span>
         <textarea
-          className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 font-mono text-xs dark:border-neutral-600 dark:bg-neutral-950"
+          className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 font-mono text-xs dark:border-border-default dark:bg-surface-base"
           rows={6}
           disabled={disabled}
           dir="ltr"
@@ -124,7 +124,7 @@ export function CodeSandboxEditor({
         <label className="block space-y-1 text-xs">
           <span className="font-medium">{t('contentTools.tools.code_sandbox.editor.prefixCode')}</span>
           <textarea
-            className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 font-mono text-xs dark:border-neutral-600 dark:bg-neutral-950"
+            className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 font-mono text-xs dark:border-border-default dark:bg-surface-base"
             rows={3}
             disabled={disabled}
             dir="ltr"
@@ -135,7 +135,7 @@ export function CodeSandboxEditor({
         <label className="block space-y-1 text-xs">
           <span className="font-medium">{t('contentTools.tools.code_sandbox.editor.suffixCode')}</span>
           <textarea
-            className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 font-mono text-xs dark:border-neutral-600 dark:bg-neutral-950"
+            className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 font-mono text-xs dark:border-border-default dark:bg-surface-base"
             rows={3}
             disabled={disabled}
             dir="ltr"
@@ -148,7 +148,7 @@ export function CodeSandboxEditor({
       <label className="block space-y-1 text-xs">
         <span className="font-medium">{t('contentTools.tools.code_sandbox.editor.sampleInput')}</span>
         <textarea
-          className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 font-mono text-xs dark:border-neutral-600 dark:bg-neutral-950"
+          className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 font-mono text-xs dark:border-border-default dark:bg-surface-base"
           rows={2}
           disabled={disabled}
           dir="ltr"
@@ -183,12 +183,12 @@ export function CodeSandboxEditor({
         {tests.map((tc, idx) => (
           <div
             key={tc.id}
-            className="space-y-2 rounded border border-slate-200 p-2 dark:border-neutral-700"
+            className="space-y-2 rounded border border-border-default p-2 dark:border-border-default"
             data-testid={`code-sandbox-test-row-${tc.id}`}
           >
             <div className="flex flex-wrap gap-2">
               <input
-                className="min-w-[8rem] flex-1 rounded border border-slate-300 px-2 py-1 text-xs dark:border-neutral-600 dark:bg-neutral-950"
+                className="min-w-[8rem] flex-1 rounded border border-border-strong px-2 py-1 text-xs dark:border-border-default dark:bg-surface-base"
                 disabled={disabled}
                 value={tc.name}
                 onChange={(e) => {
@@ -221,7 +221,7 @@ export function CodeSandboxEditor({
               </button>
             </div>
             <textarea
-              className="w-full rounded border border-slate-300 px-2 py-1 font-mono text-xs dark:border-neutral-600 dark:bg-neutral-950"
+              className="w-full rounded border border-border-strong px-2 py-1 font-mono text-xs dark:border-border-default dark:bg-surface-base"
               rows={2}
               disabled={disabled}
               dir="ltr"
@@ -234,7 +234,7 @@ export function CodeSandboxEditor({
               }}
             />
             <textarea
-              className="w-full rounded border border-slate-300 px-2 py-1 font-mono text-xs dark:border-neutral-600 dark:bg-neutral-950"
+              className="w-full rounded border border-border-strong px-2 py-1 font-mono text-xs dark:border-border-default dark:bg-surface-base"
               rows={2}
               disabled={disabled}
               dir="ltr"
@@ -247,7 +247,7 @@ export function CodeSandboxEditor({
               }}
             />
             <input
-              className="w-full rounded border border-slate-300 px-2 py-1 text-xs dark:border-neutral-600 dark:bg-neutral-950"
+              className="w-full rounded border border-border-strong px-2 py-1 text-xs dark:border-border-default dark:bg-surface-base"
               disabled={disabled}
               placeholder={t('contentTools.tools.code_sandbox.editor.feedback')}
               value={tc.feedback ?? ''}
@@ -265,7 +265,7 @@ export function CodeSandboxEditor({
         <label className="block space-y-1 text-xs">
           <span className="font-medium">{t('contentTools.tools.code_sandbox.editor.editorMode')}</span>
           <select
-            className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+            className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
             disabled={disabled}
             value={typeof value.editorMode === 'string' ? value.editorMode : 'user_choice'}
             onChange={(e) => patch({ editorMode: e.target.value })}
@@ -278,7 +278,7 @@ export function CodeSandboxEditor({
         <label className="block space-y-1 text-xs">
           <span className="font-medium">{t('contentTools.tools.code_sandbox.editor.scoringMode')}</span>
           <select
-            className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+            className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
             disabled={disabled}
             value={typeof value.scoringMode === 'string' ? value.scoringMode : 'auto'}
             onChange={(e) => patch({ scoringMode: e.target.value })}
@@ -289,10 +289,10 @@ export function CodeSandboxEditor({
         </label>
       </div>
 
-      <div className="space-y-2 rounded border border-dashed border-slate-300 p-3 dark:border-neutral-600">
+      <div className="space-y-2 rounded border border-dashed border-border-strong p-3 dark:border-border-default">
         <p className="text-xs font-medium">{t('contentTools.tools.code_sandbox.editor.tryTitle')}</p>
         <textarea
-          className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 font-mono text-xs dark:border-neutral-600 dark:bg-neutral-950"
+          className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 font-mono text-xs dark:border-border-default dark:bg-surface-base"
           rows={4}
           disabled={disabled || tryBusy}
           dir="ltr"
@@ -308,7 +308,7 @@ export function CodeSandboxEditor({
         >
           {t('contentTools.tools.code_sandbox.editor.tryIt')}
         </button>
-        {tryMsg ? <p className="text-xs text-slate-600 dark:text-neutral-400">{tryMsg}</p> : null}
+        {tryMsg ? <p className="text-xs text-fg-muted">{tryMsg}</p> : null}
       </div>
     </div>
   )

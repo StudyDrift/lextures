@@ -233,15 +233,6 @@ func (errOutcomePatchInvalidModuleID) Error() string { return "invalid moduleStr
 // handleCourseOutcomePatch is PATCH /api/v1/courses/{course_code}/outcomes/{outcome_id}.
 func (d Deps) handleCourseOutcomePatch() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -333,15 +324,6 @@ func (d Deps) handleCourseOutcomePatch() http.HandlerFunc {
 // handleCourseOutcomesPost is POST /api/v1/courses/{course_code}/outcomes.
 func (d Deps) handleCourseOutcomesPost() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -399,15 +381,6 @@ func (d Deps) handleCourseOutcomesPost() http.HandlerFunc {
 // handleCourseOutcomesList is GET /api/v1/courses/{course_code}/outcomes.
 func (d Deps) handleCourseOutcomesList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -477,15 +450,6 @@ func (d Deps) handleCourseOutcomesList() http.HandlerFunc {
 // handleCourseOutcomeSubOutcomesPost is POST /api/v1/courses/{course_code}/outcomes/{outcome_id}/sub-outcomes.
 func (d Deps) handleCourseOutcomeSubOutcomesPost() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -553,15 +517,6 @@ func (d Deps) handleCourseOutcomeSubOutcomesPost() http.HandlerFunc {
 // handleCourseOutcomeLinksPost is POST /api/v1/courses/{course_code}/outcomes/{outcome_id}/links.
 func (d Deps) handleCourseOutcomeLinksPost() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -631,15 +586,6 @@ func (d Deps) handleCourseOutcomeLinksPost() http.HandlerFunc {
 // handleCourseOutcomeDelete is DELETE /api/v1/courses/{course_code}/outcomes/{outcome_id}.
 func (d Deps) handleCourseOutcomeDelete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodDelete {
-			w.Header().Set("Allow", http.MethodDelete+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -685,15 +631,6 @@ func (d Deps) handleCourseOutcomeDelete() http.HandlerFunc {
 // handleCourseOutcomeLinkDelete is DELETE /api/v1/courses/{course_code}/outcomes/{outcome_id}/links/{link_id}.
 func (d Deps) handleCourseOutcomeLinkDelete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodDelete {
-			w.Header().Set("Allow", http.MethodDelete+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return

@@ -180,15 +180,13 @@ export function FeedbackMediaRecorder({ courseCode, itemId, submissionId, onComp
   }
 
   return (
-    <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-neutral-600 dark:bg-neutral-900/40">
-      <div className="flex gap-2 border-b border-slate-200 pb-2 dark:border-neutral-600" role="tablist">
+    <div className="space-y-3 rounded-xl border border-border-default bg-surface-raised p-4 dark:border-border-default/40">
+      <div className="flex gap-2 border-b border-border-default pb-2 dark:border-border-default" role="tablist">
         <button
           type="button"
           role="tab"
           aria-selected={tab === 'record'}
-          className={`rounded-md px-3 py-1.5 text-sm font-medium ${
-            tab === 'record' ? 'bg-slate-200 dark:bg-neutral-700' : 'text-slate-600 hover:bg-slate-100 dark:text-neutral-300 dark:hover:bg-neutral-800'
-          }`}
+          className={`rounded-md px-3 py-1.5 text-sm font-medium ${ tab === 'record' ? 'bg-slate-200 dark:bg-neutral-700' : 'text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay' }`}
           onClick={() => setTab('record')}
         >
           Record
@@ -197,9 +195,7 @@ export function FeedbackMediaRecorder({ courseCode, itemId, submissionId, onComp
           type="button"
           role="tab"
           aria-selected={tab === 'upload'}
-          className={`rounded-md px-3 py-1.5 text-sm font-medium ${
-            tab === 'upload' ? 'bg-slate-200 dark:bg-neutral-700' : 'text-slate-600 hover:bg-slate-100 dark:text-neutral-300 dark:hover:bg-neutral-800'
-          }`}
+          className={`rounded-md px-3 py-1.5 text-sm font-medium ${ tab === 'upload' ? 'bg-slate-200 dark:bg-neutral-700' : 'text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay' }`}
           onClick={() => setTab('upload')}
         >
           Upload
@@ -211,24 +207,20 @@ export function FeedbackMediaRecorder({ courseCode, itemId, submissionId, onComp
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
-              className={`rounded-md px-2 py-1 text-xs font-semibold ${
-                recordKind === 'audio' ? 'bg-indigo-100 text-indigo-900 dark:bg-indigo-900/50 dark:text-indigo-100' : 'border border-slate-300 dark:border-neutral-600'
-              }`}
+              className={`rounded-md px-2 py-1 text-xs font-semibold ${ recordKind === 'audio' ? 'bg-indigo-100 text-indigo-900 dark:bg-indigo-900/50 dark:text-indigo-100' : 'border border-border-strong' }`}
               onClick={() => setRecordKind('audio')}
             >
               Audio
             </button>
             <button
               type="button"
-              className={`rounded-md px-2 py-1 text-xs font-semibold ${
-                recordKind === 'video' ? 'bg-indigo-100 text-indigo-900 dark:bg-indigo-900/50 dark:text-indigo-100' : 'border border-slate-300 dark:border-neutral-600'
-              }`}
+              className={`rounded-md px-2 py-1 text-xs font-semibold ${ recordKind === 'video' ? 'bg-indigo-100 text-indigo-900 dark:bg-indigo-900/50 dark:text-indigo-100' : 'border border-border-strong' }`}
               onClick={() => setRecordKind('video')}
             >
               Video
             </button>
           </div>
-          <p className="text-xs text-slate-600 dark:text-neutral-400" role="timer" aria-live="polite">
+          <p className="text-xs text-fg-muted" role="timer" aria-live="polite">
             {recording
               ? `Time remaining: ${Math.floor(secondsLeft / 60)}:${String(secondsLeft % 60).padStart(2, '0')}`
               : `Maximum duration ${MAX_SECS / 60} minutes.`}
@@ -237,7 +229,7 @@ export function FeedbackMediaRecorder({ courseCode, itemId, submissionId, onComp
             {!recording ? (
               <button
                 type="button"
-                className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
+                className="rounded-lg bg-accent-solid px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
                 onClick={() => void startRecording().catch((e) => setMessage(e instanceof Error ? e.message : 'Could not start.'))}
               >
                 {recordKind === 'audio' ? 'Record voice' : 'Record video'}
@@ -255,7 +247,7 @@ export function FeedbackMediaRecorder({ courseCode, itemId, submissionId, onComp
         </div>
       ) : (
         <div>
-          <label className="block text-sm text-slate-700 dark:text-neutral-200">
+          <label className="block text-sm text-fg-default">
             <span className="mb-1 block">File (MP3, M4A, MP4, MOV, WEBM — up to 500 MB)</span>
             <input
               type="file"
@@ -265,7 +257,7 @@ export function FeedbackMediaRecorder({ courseCode, itemId, submissionId, onComp
             />
           </label>
           {uploadPct != null ? (
-            <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400" aria-live="polite">
+            <p className="mt-2 text-sm text-fg-muted" aria-live="polite">
               Uploading… {uploadPct}%
             </p>
           ) : null}

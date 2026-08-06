@@ -96,7 +96,7 @@ export default function BehaviorDashboard() {
       </div>
 
       {error && (
-        <p role="alert" className="text-red-600 text-sm mb-4">
+        <p role="alert" className="text-danger-fg text-sm mb-4">
           {error}
         </p>
       )}
@@ -107,12 +107,12 @@ export default function BehaviorDashboard() {
         <>
           <div className="grid grid-cols-2 gap-4 mb-8">
             <div className="border rounded p-4 bg-green-50">
-              <div className="text-3xl font-bold text-green-700">{dashboard.totalPoints}</div>
+              <div className="text-3xl font-bold text-success-fg">{dashboard.totalPoints}</div>
               <div className="text-sm text-green-600 mt-1">Total Points Awarded</div>
             </div>
             <div className="border rounded p-4 bg-red-50">
-              <div className="text-3xl font-bold text-red-700">{dashboard.totalReferrals}</div>
-              <div className="text-sm text-red-600 mt-1">Total Referrals Filed</div>
+              <div className="text-3xl font-bold text-danger-fg">{dashboard.totalReferrals}</div>
+              <div className="text-sm text-danger-fg mt-1">Total Referrals Filed</div>
             </div>
           </div>
 
@@ -126,7 +126,7 @@ export default function BehaviorDashboard() {
                   {dashboard.pointsByCategory.map((p) => (
                     <li key={p.categoryId} className="flex justify-between px-3 py-2 text-sm">
                       <span>{p.categoryName}</span>
-                      <span className="font-semibold text-green-700">{p.points} pts</span>
+                      <span className="font-semibold text-success-fg">{p.points} pts</span>
                     </li>
                   ))}
                 </ul>
@@ -142,7 +142,7 @@ export default function BehaviorDashboard() {
                   {dashboard.referralsByCategory.map((r) => (
                     <li key={r.categoryId} className="flex justify-between px-3 py-2 text-sm">
                       <span>{r.categoryName}</span>
-                      <span className="font-semibold text-red-700">{r.count}</span>
+                      <span className="font-semibold text-danger-fg">{r.count}</span>
                     </li>
                   ))}
                 </ul>
@@ -166,7 +166,7 @@ export default function BehaviorDashboard() {
         </div>
 
         {seedMsg && (
-          <p className="text-green-700 text-sm mb-3">{seedMsg}</p>
+          <p className="text-success-fg text-sm mb-3">{seedMsg}</p>
         )}
 
         {categories.length === 0 ? (
@@ -186,11 +186,7 @@ export default function BehaviorDashboard() {
                 )}
                 <span className="flex-1">{c.name}</span>
                 <span
-                  className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                    c.type === 'positive'
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-red-100 text-red-700'
-                  }`}
+                  className={`text-xs px-2 py-0.5 rounded-full font-medium ${ c.type === 'positive' ? 'bg-green-100 text-success-fg' : 'bg-red-100 text-danger-fg' }`}
                 >
                   {c.type}
                 </span>

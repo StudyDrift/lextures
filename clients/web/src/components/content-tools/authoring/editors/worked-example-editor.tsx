@@ -279,7 +279,7 @@ export function WorkedExampleEditor({
                 </button>
                 <button
                   type="button"
-                  className="rounded border px-2 py-0.5 text-xs text-red-700"
+                  className="rounded border px-2 py-0.5 text-xs text-danger-fg"
                   disabled={disabled}
                   onClick={() => setSteps(steps.filter((_, i) => i !== idx))}
                 >

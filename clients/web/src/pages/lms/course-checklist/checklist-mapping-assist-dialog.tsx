@@ -121,14 +121,14 @@ export function ChecklistMappingAssistDialog({
       onClick={onClose}
     >
       <div
-        className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-900"
+        className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-xl border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-raised"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="border-b border-slate-200 px-5 py-4 dark:border-neutral-700">
-          <h2 id={titleId} className="text-base font-semibold text-slate-900 dark:text-neutral-50">
+        <div className="border-b border-border-default px-5 py-4 dark:border-border-default">
+          <h2 id={titleId} className="text-base font-semibold text-fg-default">
             {courseChecklistI18n.assistReviewTitle}
           </h2>
-          <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400" aria-live="polite">
+          <p className="mt-1 text-xs text-fg-muted" aria-live="polite">
             {courseChecklistI18n.assistAiLabel} ·{' '}
             {courseChecklistI18n.assistSelectedCount(selectedCount, proposals.length)}
           </p>
@@ -136,7 +136,7 @@ export function ChecklistMappingAssistDialog({
 
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-3">
           {loading ? (
-            <p className="text-sm text-slate-600 dark:text-neutral-400" aria-live="polite">
+            <p className="text-sm text-fg-muted" aria-live="polite">
               {courseChecklistI18n.assistWorking}
             </p>
           ) : null}
@@ -156,7 +156,7 @@ export function ChecklistMappingAssistDialog({
           ) : null}
 
           {!loading && !error && proposals.length === 0 ? (
-            <p className="text-sm text-slate-600 dark:text-neutral-400">
+            <p className="text-sm text-fg-muted">
               No proposals. {manualHref ? courseChecklistI18n.assistOpenManual : null}
             </p>
           ) : null}
@@ -168,21 +168,21 @@ export function ChecklistMappingAssistDialog({
               return (
                 <li
                   key={k}
-                  className="rounded-lg border border-slate-200 p-3 dark:border-neutral-700"
+                  className="rounded-lg border border-border-default p-3 dark:border-border-default"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div className="min-w-0 flex-1 text-sm">
-                      <p className="font-medium text-slate-900 dark:text-neutral-50">
+                      <p className="font-medium text-fg-default">
                         {p.itemTitle || p.structureItemId} → {p.outcomeTitle || p.outcomeId}
                       </p>
-                      <p className="mt-0.5 text-xs text-slate-500">
+                      <p className="mt-0.5 text-xs text-fg-muted">
                         {p.measurementLevel} · {p.intensityLevel}
                         {typeof p.confidence === 'number'
                           ? ` · ${Math.round(p.confidence * 100)}%`
                           : ''}
                       </p>
                       {p.rationale ? (
-                        <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">
+                        <p className="mt-1 text-xs text-fg-muted">
                           {p.rationale}
                         </p>
                       ) : null}
@@ -191,11 +191,7 @@ export function ChecklistMappingAssistDialog({
                       <button
                         type="button"
                         aria-label={`${courseChecklistI18n.assistAccept}: ${p.itemTitle || p.structureItemId}`}
-                        className={`inline-flex min-h-11 items-center rounded-lg px-3 text-xs font-semibold ${
-                          checked
-                            ? 'bg-amber-700 text-white'
-                            : 'border border-slate-300 text-slate-700 dark:border-neutral-600 dark:text-neutral-200'
-                        }`}
+                        className={`inline-flex min-h-11 items-center rounded-lg px-3 text-xs font-semibold ${ checked ? 'bg-amber-700 text-white' : 'border border-border-strong text-fg-muted dark:border-border-default dark:text-fg-default' }`}
                         onClick={() => setSelected((s) => ({ ...s, [k]: true }))}
                       >
                         {courseChecklistI18n.assistAccept}
@@ -203,11 +199,7 @@ export function ChecklistMappingAssistDialog({
                       <button
                         type="button"
                         aria-label={`${courseChecklistI18n.assistReject}: ${p.itemTitle || p.structureItemId}`}
-                        className={`inline-flex min-h-11 items-center rounded-lg px-3 text-xs font-semibold ${
-                          !checked
-                            ? 'bg-slate-800 text-white dark:bg-neutral-200 dark:text-neutral-900'
-                            : 'border border-slate-300 text-slate-700 dark:border-neutral-600 dark:text-neutral-200'
-                        }`}
+                        className={`inline-flex min-h-11 items-center rounded-lg px-3 text-xs font-semibold ${ !checked ? 'bg-slate-800 text-white dark:bg-neutral-200 dark:text-neutral-900' : 'border border-border-strong text-fg-muted dark:border-border-default dark:text-fg-default' }`}
                         onClick={() => setSelected((s) => ({ ...s, [k]: false }))}
                       >
                         {courseChecklistI18n.assistReject}
@@ -220,11 +212,11 @@ export function ChecklistMappingAssistDialog({
           </ul>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 px-5 py-3 dark:border-neutral-700">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border-default px-5 py-3 dark:border-border-default">
           <div className="flex gap-2">
             <button
               type="button"
-              className="inline-flex min-h-11 items-center rounded-lg border border-slate-300 px-3 text-xs font-semibold dark:border-neutral-600"
+              className="inline-flex min-h-11 items-center rounded-lg border border-border-strong px-3 text-xs font-semibold dark:border-border-default"
               onClick={() => {
                 const next: Record<string, boolean> = {}
                 proposals.forEach((p, i) => {
@@ -237,7 +229,7 @@ export function ChecklistMappingAssistDialog({
             </button>
             <button
               type="button"
-              className="inline-flex min-h-11 items-center rounded-lg border border-slate-300 px-3 text-xs font-semibold dark:border-neutral-600"
+              className="inline-flex min-h-11 items-center rounded-lg border border-border-strong px-3 text-xs font-semibold dark:border-border-default"
               onClick={() => {
                 const next: Record<string, boolean> = {}
                 proposals.forEach((p, i) => {
@@ -252,7 +244,7 @@ export function ChecklistMappingAssistDialog({
           <div className="flex gap-2">
             <button
               type="button"
-              className="inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-semibold text-slate-700 dark:text-neutral-200"
+              className="inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-semibold text-fg-default"
               onClick={onClose}
               disabled={applying}
             >

@@ -139,13 +139,13 @@ export function CreateGradingAgentModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-neutral-900"
+        className="w-full max-w-md rounded-2xl bg-surface-raised p-6 shadow-xl dark:bg-surface-raised"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 id={titleId} className="text-lg font-semibold text-slate-900 dark:text-neutral-100">
+        <h2 id={titleId} className="text-lg font-semibold text-fg-default">
           {t('gradingAgent.settings.create.title')}
         </h2>
-        <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
+        <p className="mt-2 text-sm text-fg-muted">
           {t('gradingAgent.settings.create.description')}
         </p>
 
@@ -153,11 +153,7 @@ export function CreateGradingAgentModal({
           <legend className="sr-only">{t('gradingAgent.settings.create.sourceLegend')}</legend>
           <label
             htmlFor={sourceTemplateId}
-            className={`flex cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 transition-[background-color,color,border-color] ${
-              source === 'template'
-                ? 'border-indigo-400 bg-indigo-50/70 dark:border-indigo-500 dark:bg-indigo-950/30'
-                : 'border-slate-200 hover:border-slate-300 dark:border-neutral-700 dark:hover:border-neutral-600'
-            } ${!hasTemplates ? 'cursor-not-allowed opacity-50' : ''}`}
+            className={`flex cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 transition-[background-color,color,border-color] ${ source === 'template' ? 'border-indigo-400 bg-indigo-50/70 dark:border-indigo-500 dark:bg-indigo-950/30' : 'border-border-default hover:border-border-strong dark:hover:border-border-default' } ${!hasTemplates ? 'cursor-not-allowed opacity-50' : ''}`}
           >
             <input
               id={sourceTemplateId}
@@ -170,10 +166,10 @@ export function CreateGradingAgentModal({
               className="mt-0.5"
             />
             <span className="min-w-0">
-              <span className="block text-sm font-medium text-slate-900 dark:text-neutral-100">
+              <span className="block text-sm font-medium text-fg-default">
                 {t('gradingAgent.settings.create.sourceTemplate')}
               </span>
-              <span className="mt-0.5 block text-xs text-slate-600 dark:text-neutral-400">
+              <span className="mt-0.5 block text-xs text-fg-muted">
                 {hasTemplates
                   ? t('gradingAgent.settings.create.sourceTemplateHelp')
                   : t('gradingAgent.settings.create.noTemplates')}
@@ -183,11 +179,7 @@ export function CreateGradingAgentModal({
 
           <label
             htmlFor={sourceAssignmentId}
-            className={`flex cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 transition-[background-color,color,border-color] ${
-              source === 'assignment'
-                ? 'border-indigo-400 bg-indigo-50/70 dark:border-indigo-500 dark:bg-indigo-950/30'
-                : 'border-slate-200 hover:border-slate-300 dark:border-neutral-700 dark:hover:border-neutral-600'
-            }`}
+            className={`flex cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 transition-[background-color,color,border-color] ${ source === 'assignment' ? 'border-indigo-400 bg-indigo-50/70 dark:border-indigo-500 dark:bg-indigo-950/30' : 'border-border-default hover:border-border-strong dark:hover:border-border-default' }`}
           >
             <input
               id={sourceAssignmentId}
@@ -200,10 +192,10 @@ export function CreateGradingAgentModal({
               className="mt-0.5"
             />
             <span className="min-w-0">
-              <span className="block text-sm font-medium text-slate-900 dark:text-neutral-100">
+              <span className="block text-sm font-medium text-fg-default">
                 {t('gradingAgent.settings.create.sourceAssignment')}
               </span>
-              <span className="mt-0.5 block text-xs text-slate-600 dark:text-neutral-400">
+              <span className="mt-0.5 block text-xs text-fg-muted">
                 {t('gradingAgent.settings.create.sourceAssignmentHelp')}
               </span>
             </span>
@@ -211,11 +203,7 @@ export function CreateGradingAgentModal({
 
           <label
             htmlFor={sourceAsTemplateId}
-            className={`flex cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 transition-[background-color,color,border-color] ${
-              source === 'asTemplate'
-                ? 'border-indigo-400 bg-indigo-50/70 dark:border-indigo-500 dark:bg-indigo-950/30'
-                : 'border-slate-200 hover:border-slate-300 dark:border-neutral-700 dark:hover:border-neutral-600'
-            }`}
+            className={`flex cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 transition-[background-color,color,border-color] ${ source === 'asTemplate' ? 'border-indigo-400 bg-indigo-50/70 dark:border-indigo-500 dark:bg-indigo-950/30' : 'border-border-default hover:border-border-strong dark:hover:border-border-default' }`}
           >
             <input
               id={sourceAsTemplateId}
@@ -228,10 +216,10 @@ export function CreateGradingAgentModal({
               className="mt-0.5"
             />
             <span className="min-w-0">
-              <span className="block text-sm font-medium text-slate-900 dark:text-neutral-100">
+              <span className="block text-sm font-medium text-fg-default">
                 {t('gradingAgent.settings.create.sourceAsTemplate')}
               </span>
-              <span className="mt-0.5 block text-xs text-slate-600 dark:text-neutral-400">
+              <span className="mt-0.5 block text-xs text-fg-muted">
                 {t('gradingAgent.settings.create.sourceAsTemplateHelp')}
               </span>
             </span>
@@ -242,7 +230,7 @@ export function CreateGradingAgentModal({
           <div className="mt-4">
             <label
               htmlFor={templateSelectId}
-              className="mb-1.5 block text-xs font-medium text-slate-600 dark:text-neutral-400"
+              className="mb-1.5 block text-xs font-medium text-fg-muted"
             >
               {t('gradingAgent.settings.create.templateLabel')}
             </label>
@@ -251,7 +239,7 @@ export function CreateGradingAgentModal({
               value={templateId}
               disabled={submitting}
               onChange={(e) => setTemplateId(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+              className="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-sm text-fg-default focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-60 dark:border-border-default dark:bg-surface-base dark:text-fg-default"
             >
               {templates.map((template) => (
                 <option key={template.id} value={template.id}>
@@ -266,7 +254,7 @@ export function CreateGradingAgentModal({
           <div className="mt-4">
             <label
               htmlFor={templateNameInputId}
-              className="mb-1.5 block text-xs font-medium text-slate-600 dark:text-neutral-400"
+              className="mb-1.5 block text-xs font-medium text-fg-muted"
             >
               {t('gradingAgent.settings.create.newTemplateNameLabel')}
             </label>
@@ -277,23 +265,19 @@ export function CreateGradingAgentModal({
               disabled={submitting}
               onChange={(e) => setTemplateName(e.target.value)}
               placeholder={t('gradingAgent.save.templateNamePlaceholder')}
-              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+              className="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-sm text-fg-default focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-60 dark:border-border-default dark:bg-surface-base dark:text-fg-default"
             />
           </div>
         ) : (
           <>
             <fieldset className="mt-4">
-              <legend className="mb-1.5 block text-xs font-medium text-slate-600 dark:text-neutral-400">
+              <legend className="mb-1.5 block text-xs font-medium text-fg-muted">
                 {t('gradingAgent.settings.create.itemKindLegend')}
               </legend>
               <div className="flex gap-2">
                 <label
                   htmlFor={itemKindAssignmentId}
-                  className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-[background-color,border-color] ${
-                    itemKind === 'assignment'
-                      ? 'border-indigo-400 bg-indigo-50/70 text-indigo-900 dark:border-indigo-500 dark:bg-indigo-950/30 dark:text-indigo-100'
-                      : 'border-slate-200 text-slate-700 hover:border-slate-300 dark:border-neutral-700 dark:text-neutral-200'
-                  }`}
+                  className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-[background-color,border-color] ${ itemKind === 'assignment' ? 'border-indigo-400 bg-indigo-50/70 text-indigo-900 dark:border-indigo-500 dark:bg-indigo-950/30 dark:text-indigo-100' : 'border-border-default text-fg-muted hover:border-border-strong dark:text-fg-default' }`}
                 >
                   <input
                     id={itemKindAssignmentId}
@@ -309,11 +293,7 @@ export function CreateGradingAgentModal({
                 </label>
                 <label
                   htmlFor={itemKindQuizId}
-                  className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-[background-color,border-color] ${
-                    itemKind === 'quiz'
-                      ? 'border-indigo-400 bg-indigo-50/70 text-indigo-900 dark:border-indigo-500 dark:bg-indigo-950/30 dark:text-indigo-100'
-                      : 'border-slate-200 text-slate-700 hover:border-slate-300 dark:border-neutral-700 dark:text-neutral-200'
-                  }`}
+                  className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-[background-color,border-color] ${ itemKind === 'quiz' ? 'border-indigo-400 bg-indigo-50/70 text-indigo-900 dark:border-indigo-500 dark:bg-indigo-950/30 dark:text-indigo-100' : 'border-border-default text-fg-muted hover:border-border-strong dark:text-fg-default' }`}
                 >
                   <input
                     id={itemKindQuizId}
@@ -331,26 +311,26 @@ export function CreateGradingAgentModal({
             </fieldset>
 
             <div className="mt-4">
-              <label className="mb-1.5 block text-xs font-medium text-slate-600 dark:text-neutral-400">
+              <label className="mb-1.5 block text-xs font-medium text-fg-muted">
                 {itemKind === 'quiz'
                   ? t('gradingAgent.settings.create.quizLabel')
                   : t('gradingAgent.settings.create.assignmentLabel')}
               </label>
               {itemsLoading ? (
-                <p className="flex items-center gap-2 text-sm text-slate-500 dark:text-neutral-400">
+                <p className="flex items-center gap-2 text-sm text-fg-muted">
                   <Loader2 className="h-4 w-4 motion-safe:animate-spin" aria-hidden />
                   {itemKind === 'quiz'
                     ? t('gradingAgent.settings.create.loadingQuizzes')
                     : t('gradingAgent.settings.create.loadingAssignments')}
                 </p>
               ) : !hasItems ? (
-                <p className="text-sm text-slate-500 dark:text-neutral-400">
+                <p className="text-sm text-fg-muted">
                   {itemKind === 'quiz'
                     ? t('gradingAgent.settings.create.noQuizzes')
                     : t('gradingAgent.settings.create.noAssignments')}
                 </p>
               ) : itemKind === 'quiz' ? (
-                <Suspense fallback={<p className="text-sm text-slate-500 dark:text-neutral-400">{t('gradingAgent.settings.create.loadingQuizzes')}</p>}>
+                <Suspense fallback={<p className="text-sm text-fg-muted">{t('gradingAgent.settings.create.loadingQuizzes')}</p>}>
                   <QuizPicker
                     quizzes={availableQuizzes}
                     value={assignmentId}
@@ -389,7 +369,7 @@ export function CreateGradingAgentModal({
             type="button"
             disabled={submitting}
             onClick={onClose}
-            className="rounded-lg px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100 disabled:opacity-60 dark:text-neutral-400 dark:hover:bg-neutral-800"
+            className="rounded-lg px-3 py-1.5 text-sm text-fg-muted hover:bg-surface-sunken disabled:opacity-60 dark:text-fg-muted dark:hover:bg-surface-overlay"
           >
             {t('gradingAgent.save.templateCancel')}
           </button>
@@ -397,7 +377,7 @@ export function CreateGradingAgentModal({
             type="button"
             disabled={!canContinue}
             onClick={() => void submit()}
-            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-lg bg-accent-solid px-3 py-1.5 text-sm font-medium text-white hover:bg-accent disabled:opacity-50"
           >
             {submitting ? (
               <>

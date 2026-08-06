@@ -46,17 +46,17 @@ export function ToolBlockCard({
       role="group"
       aria-label={t('contentTools.authoring.toolBlockAria', { name: title })}
       data-content-tool-instance={instanceId}
-      className="rounded-md border border-slate-200 bg-slate-50/80 dark:border-neutral-700 dark:bg-neutral-900/50"
+      className="rounded-md border border-border-default bg-slate-50/80 dark:border-border-default/50"
     >
       <div className="flex items-start justify-between gap-2 px-3 py-2">
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-slate-900 dark:text-neutral-100">
+          <p className="truncate text-sm font-semibold text-fg-default">
             {unavailable ? t('contentTools.authoring.unavailableTool') : title}
           </p>
           {summary ? (
-            <p className="mt-0.5 line-clamp-2 text-xs text-slate-500 dark:text-neutral-400">{summary}</p>
+            <p className="mt-0.5 line-clamp-2 text-xs text-fg-muted">{summary}</p>
           ) : (
-            <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
+            <p className="mt-0.5 text-xs text-fg-muted">
               {t('contentTools.authoring.noConfigSummary')}
             </p>
           )}
@@ -65,7 +65,7 @@ export function ToolBlockCard({
           <button
             type="button"
             onClick={onConfigure}
-            className="rounded p-1.5 text-slate-600 hover:bg-slate-200 dark:text-neutral-300 dark:hover:bg-neutral-700"
+            className="rounded p-1.5 text-fg-muted hover:bg-slate-200 dark:text-fg-muted dark:hover:bg-neutral-700"
             aria-label={t('contentTools.authoring.configure')}
             title={t('contentTools.authoring.configure')}
           >
@@ -74,7 +74,7 @@ export function ToolBlockCard({
           <button
             type="button"
             onClick={onPreview}
-            className="rounded p-1.5 text-slate-600 hover:bg-slate-200 dark:text-neutral-300 dark:hover:bg-neutral-700"
+            className="rounded p-1.5 text-fg-muted hover:bg-slate-200 dark:text-fg-muted dark:hover:bg-neutral-700"
             aria-label={t('contentTools.authoring.preview')}
             title={t('contentTools.authoring.preview')}
           >
@@ -83,7 +83,7 @@ export function ToolBlockCard({
           <button
             type="button"
             onClick={onDuplicate}
-            className="rounded p-1.5 text-slate-600 hover:bg-slate-200 dark:text-neutral-300 dark:hover:bg-neutral-700"
+            className="rounded p-1.5 text-fg-muted hover:bg-slate-200 dark:text-fg-muted dark:hover:bg-neutral-700"
             aria-label={t('contentTools.authoring.duplicate')}
             title={t('contentTools.authoring.duplicate')}
           >

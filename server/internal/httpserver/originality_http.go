@@ -172,15 +172,6 @@ func (d Deps) parseSubmissionID(w http.ResponseWriter, r *http.Request) (uuid.UU
 // handleGetSubmissionOriginality is GET .../submissions/{submission_id}/originality
 func (d Deps) handleGetSubmissionOriginality() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.requirePlagiarismWorkflow(w) {
 			return
 		}
@@ -225,15 +216,6 @@ func (d Deps) handleGetSubmissionOriginality() http.HandlerFunc {
 // handleGetSubmissionOriginalityEmbed is GET .../originality/embed-url
 func (d Deps) handleGetSubmissionOriginalityEmbed() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.requirePlagiarismWorkflow(w) {
 			return
 		}
@@ -288,15 +270,6 @@ func (d Deps) handleGetSubmissionOriginalityEmbed() http.HandlerFunc {
 // handleGetSubmissionOriginalitySummary is GET .../originality/summary
 func (d Deps) handleGetSubmissionOriginalitySummary() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.requirePlagiarismWorkflow(w) {
 			return
 		}
@@ -337,15 +310,6 @@ func (d Deps) handleGetSubmissionOriginalitySummary() http.HandlerFunc {
 // handlePostSubmissionOriginalityRetry is POST .../originality/retry
 func (d Deps) handlePostSubmissionOriginalityRetry() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.requirePlagiarismWorkflow(w) {
 			return
 		}

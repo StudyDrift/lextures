@@ -157,11 +157,6 @@ func topFactorLabel(key string, missing *float32, inactive *int) string {
 // handleCourseAtRiskList is GET /api/v1/courses/{course_code}/at-risk
 func (d Deps) handleCourseAtRiskList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		_, _, courseID, ok := d.requireAtRiskInstructor(w, r)
 		if !ok {
 			return
@@ -203,11 +198,6 @@ func (d Deps) handleCourseAtRiskPatch() http.HandlerFunc {
 		Notes       *string `json:"notes"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		_, _, courseID, ok := d.requireAtRiskInstructor(w, r)
 		if !ok {
 			return
@@ -275,11 +265,6 @@ func (d Deps) handleCourseAtRiskPatch() http.HandlerFunc {
 // handleEnrollmentAtRiskHistory is GET /api/v1/courses/{course_code}/enrollments/{enrollment_id}/at-risk-history
 func (d Deps) handleEnrollmentAtRiskHistory() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		_, _, courseID, ok := d.requireAtRiskInstructor(w, r)
 		if !ok {
 			return
@@ -381,11 +366,6 @@ func mergeAtRiskConfigBody(base atrisk.Config, b atRiskConfigBody) atrisk.Config
 // handleCourseAtRiskConfigGet is GET /api/v1/courses/{course_code}/at-risk/config
 func (d Deps) handleCourseAtRiskConfigGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		_, _, courseID, ok := d.requireAtRiskInstructor(w, r)
 		if !ok {
 			return
@@ -403,11 +383,6 @@ func (d Deps) handleCourseAtRiskConfigGet() http.HandlerFunc {
 // handleCourseAtRiskConfigPut is PUT /api/v1/courses/{course_code}/at-risk/config
 func (d Deps) handleCourseAtRiskConfigPut() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPut {
-			w.Header().Set("Allow", http.MethodPut)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		_, _, courseID, ok := d.requireAtRiskInstructor(w, r)
 		if !ok {
 			return
@@ -439,11 +414,6 @@ func (d Deps) handleCourseAtRiskConfigPut() http.HandlerFunc {
 // handleCourseAtRiskRun is POST /api/v1/courses/{course_code}/at-risk/run
 func (d Deps) handleCourseAtRiskRun() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		_, _, cid, ok := d.requireAtRiskInstructor(w, r)
 		if !ok {
 			return
@@ -466,11 +436,6 @@ func (d Deps) handleAdminAtRiskRun() http.HandlerFunc {
 		CourseCode *string `json:"courseCode"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		var body reqBody
 		b, _ := io.ReadAll(r.Body)
 		_ = r.Body.Close()
@@ -507,11 +472,6 @@ func (d Deps) handleAdminAtRiskRun() http.HandlerFunc {
 // handleAdminAtRiskConfigPut is PUT /api/v1/admin/at-risk/config
 func (d Deps) handleAdminAtRiskConfigGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -559,11 +519,6 @@ func (d Deps) handleAdminAtRiskConfigPut() http.HandlerFunc {
 		MissingPctThreshold   *float32 `json:"missingPctThreshold"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPut {
-			w.Header().Set("Allow", http.MethodPut)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}

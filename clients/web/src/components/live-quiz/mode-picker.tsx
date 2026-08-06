@@ -11,8 +11,8 @@ type Props = {
 }
 
 const fieldClass =
-  'w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100'
-const labelMuted = 'mb-1 block text-xs font-medium text-slate-600 dark:text-neutral-400'
+  'w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm text-fg-default outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60 dark:border-border-default dark:bg-surface-base dark:text-fg-default'
+const labelMuted = 'mb-1 block text-xs font-medium text-fg-muted'
 
 export function ModePicker({ value, onChange, teamEnabled = true, pacedEnabled = true }: Props) {
   const { t } = useTranslation()
@@ -24,7 +24,7 @@ export function ModePicker({ value, onChange, teamEnabled = true, pacedEnabled =
 
   return (
     <fieldset className="space-y-3">
-      <legend className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+      <legend className="text-sm font-semibold text-fg-default">
         {t('liveQuiz.mode.label')}
       </legend>
       <div className="flex flex-col gap-2" role="radiogroup" aria-label={t('liveQuiz.mode.label')}>
@@ -36,7 +36,7 @@ export function ModePicker({ value, onChange, teamEnabled = true, pacedEnabled =
               className={
                 selected
                   ? 'flex cursor-pointer items-start gap-3 rounded-xl border border-indigo-400 bg-indigo-50/60 px-3 py-2.5 dark:border-indigo-500 dark:bg-indigo-950/40'
-                  : 'flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2.5 hover:border-slate-300 dark:border-neutral-700 dark:bg-neutral-950 dark:hover:border-neutral-600'
+                  : 'flex cursor-pointer items-start gap-3 rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 hover:border-border-strong dark:bg-surface-base dark:hover:border-border-default'
               }
             >
               <input
@@ -44,13 +44,13 @@ export function ModePicker({ value, onChange, teamEnabled = true, pacedEnabled =
                 name="liveQuizMode"
                 checked={selected}
                 onChange={() => onChange({ ...value, mode: id })}
-                className="mt-1 h-4 w-4 border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                className="mt-1 h-4 w-4 border-border-strong text-accent-fg focus:ring-indigo-500"
               />
               <span>
-                <span className="block text-sm font-medium text-slate-900 dark:text-neutral-100">
+                <span className="block text-sm font-medium text-fg-default">
                   {t(`liveQuiz.mode.${id}`)}
                 </span>
-                <span className="mt-0.5 block text-xs text-slate-600 dark:text-neutral-400">
+                <span className="mt-0.5 block text-xs text-fg-muted">
                   {t(`liveQuiz.mode.${id}Hint`)}
                 </span>
               </span>
@@ -120,7 +120,7 @@ export function ModePicker({ value, onChange, teamEnabled = true, pacedEnabled =
 
       {value.mode === 'student_paced' ? (
         <div className="grid gap-3 sm:grid-cols-2">
-          <label className="flex items-center gap-2 text-sm text-slate-800 dark:text-neutral-200">
+          <label className="flex items-center gap-2 text-sm text-fg-default">
             <input
               type="checkbox"
               checked={value.pacedConfig.shuffle ?? true}
@@ -130,11 +130,11 @@ export function ModePicker({ value, onChange, teamEnabled = true, pacedEnabled =
                   pacedConfig: { ...value.pacedConfig, shuffle: e.target.checked },
                 })
               }
-              className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+              className="h-4 w-4 rounded border-border-strong text-accent-fg focus:ring-indigo-500"
             />
             {t('liveQuiz.paced.shuffle')}
           </label>
-          <label className="flex items-center gap-2 text-sm text-slate-800 dark:text-neutral-200">
+          <label className="flex items-center gap-2 text-sm text-fg-default">
             <input
               type="checkbox"
               checked={value.pacedConfig.perQuestionTimers ?? true}
@@ -144,7 +144,7 @@ export function ModePicker({ value, onChange, teamEnabled = true, pacedEnabled =
                   pacedConfig: { ...value.pacedConfig, perQuestionTimers: e.target.checked },
                 })
               }
-              className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+              className="h-4 w-4 rounded border-border-strong text-accent-fg focus:ring-indigo-500"
             />
             {t('liveQuiz.paced.perQuestionTimers')}
           </label>

@@ -85,11 +85,6 @@ func (d Deps) platformEmailTemplateAccess(w http.ResponseWriter, r *http.Request
 
 func (d Deps) handlePlatformEmailTemplatesList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.platformEmailTemplateAccess(w, r); !ok {
 			return
 		}
@@ -132,11 +127,6 @@ func (d Deps) handlePlatformEmailTemplatesList() http.HandlerFunc {
 
 func (d Deps) handlePlatformEmailTemplateGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.platformEmailTemplateAccess(w, r); !ok {
 			return
 		}
@@ -188,11 +178,6 @@ func (d Deps) handlePlatformEmailTemplateGet() http.HandlerFunc {
 func (d Deps) handlePlatformEmailTemplatePut() http.HandlerFunc {
 	svc := d.emailTemplateService()
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPut {
-			w.Header().Set("Allow", http.MethodPut)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		actor, ok := d.platformEmailTemplateAccess(w, r)
 		if !ok {
 			return
@@ -234,11 +219,6 @@ func (d Deps) handlePlatformEmailTemplatePut() http.HandlerFunc {
 
 func (d Deps) handlePlatformEmailTemplateHistory() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.platformEmailTemplateAccess(w, r); !ok {
 			return
 		}
@@ -259,11 +239,6 @@ func (d Deps) handlePlatformEmailTemplateHistory() http.HandlerFunc {
 
 func (d Deps) handlePlatformEmailTemplateRestore() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.platformEmailTemplateAccess(w, r); !ok {
 			return
 		}
@@ -296,11 +271,6 @@ func (d Deps) handlePlatformEmailTemplateRestore() http.HandlerFunc {
 
 func (d Deps) handlePlatformEmailTemplateReset() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.platformEmailTemplateAccess(w, r); !ok {
 			return
 		}
@@ -316,11 +286,6 @@ func (d Deps) handlePlatformEmailTemplateReset() http.HandlerFunc {
 func (d Deps) handlePlatformEmailTemplateTest() http.HandlerFunc {
 	svc := d.emailTemplateService()
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		actor, ok := d.platformEmailTemplateAccess(w, r)
 		if !ok {
 			return
@@ -341,11 +306,6 @@ func (d Deps) handlePlatformEmailTemplateTest() http.HandlerFunc {
 func (d Deps) handlePlatformEmailTemplatePreview() http.HandlerFunc {
 	svc := d.emailTemplateService()
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		actor, ok := d.platformEmailTemplateAccess(w, r)
 		if !ok {
 			return

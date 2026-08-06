@@ -73,21 +73,21 @@ export function OidcSignInButtons({ nextPath }: Props) {
       )}
       {s.enabled && s.google && (
         <a
-          className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-slate-300 hover:bg-slate-50"
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:border-border-strong hover:bg-surface-base"
           href={p('/auth/oidc/google/login')}
           aria-label="Sign in with Google"
         >
-          <span className="text-[15px] font-bold text-slate-700">G</span>
+          <span className="text-[15px] font-bold text-fg-muted">G</span>
           Sign in with Google
         </a>
       )}
       {s.enabled && s.microsoft && (
         <a
-          className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-slate-300 hover:bg-slate-50"
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:border-border-strong hover:bg-surface-base"
           href={p('/auth/oidc/microsoft/login')}
           aria-label="Sign in with Microsoft"
         >
-          <span className="text-sm font-bold text-slate-800">M</span>
+          <span className="text-sm font-bold text-fg-default">M</span>
           Sign in with Microsoft
         </a>
       )}
@@ -104,7 +104,7 @@ export function OidcSignInButtons({ nextPath }: Props) {
         s.custom?.map((c) => (
           <a
             key={c.id}
-            className="flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-300 hover:bg-slate-50"
+            className="flex w-full items-center justify-center rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:border-indigo-300 hover:bg-surface-base"
             href={p(`/auth/oidc/custom/login?configId=${encodeURIComponent(c.id)}`)}
             aria-label={`Sign in with ${c.displayName}`}
           >

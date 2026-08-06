@@ -108,21 +108,21 @@ export function ConsentPrompt() {
       aria-labelledby="consent-prompt-title"
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm"
     >
-      <div className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-neutral-900">
-        <header className="flex items-start gap-3 border-b border-slate-200 px-6 py-4 dark:border-neutral-800">
+      <div className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-surface-raised shadow-xl dark:bg-surface-raised">
+        <header className="flex items-start gap-3 border-b border-border-default px-6 py-4 dark:border-border-subtle">
           <ShieldCheck className="mt-0.5 h-6 w-6 shrink-0 text-violet-600 dark:text-violet-400" aria-hidden="true" />
           <div className="min-w-0">
-            <h2 id="consent-prompt-title" className="text-lg font-semibold text-slate-900 dark:text-neutral-100">
+            <h2 id="consent-prompt-title" className="text-lg font-semibold text-fg-default">
               Research participation request
             </h2>
-            <p className="mt-0.5 text-sm text-slate-600 dark:text-neutral-400">
+            <p className="mt-0.5 text-sm text-fg-muted">
               {current.title}
-              <span className="ms-2 text-xs text-slate-400">IRB protocol {current.irbProtocol}</span>
+              <span className="ms-2 text-xs text-fg-subtle">IRB protocol {current.irbProtocol}</span>
             </p>
           </div>
         </header>
 
-        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-2 dark:border-neutral-800">
+        <div className="flex items-center justify-between border-b border-border-subtle px-6 py-2 dark:border-border-subtle">
           <a
             href="#consent-prompt-actions"
             className="text-xs font-medium text-violet-600 hover:underline dark:text-violet-400"
@@ -134,7 +134,7 @@ export function ConsentPrompt() {
             Skip to bottom
           </a>
           {remaining > 1 ? (
-            <span className="text-xs text-slate-400">{remaining} studies awaiting your response</span>
+            <span className="text-xs text-fg-subtle">{remaining} studies awaiting your response</span>
           ) : null}
         </div>
 
@@ -143,11 +143,11 @@ export function ConsentPrompt() {
             <ReactMarkdown remarkPlugins={[remarkGfm]}>{current.consentText}</ReactMarkdown>
           </div>
           {current.dataUseDescription ? (
-            <div className="mt-4 rounded-lg bg-slate-50 px-4 py-3 dark:bg-neutral-800/60">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+            <div className="mt-4 rounded-lg bg-surface-base px-4 py-3/60">
+              <p className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
                 How your data will be used
               </p>
-              <p className="mt-1 text-sm text-slate-700 dark:text-neutral-300">{current.dataUseDescription}</p>
+              <p className="mt-1 text-sm text-fg-muted">{current.dataUseDescription}</p>
             </div>
           ) : null}
           <div ref={bottomRef} />
@@ -155,19 +155,19 @@ export function ConsentPrompt() {
 
         <footer
           id="consent-prompt-actions"
-          className="space-y-3 border-t border-slate-200 px-6 py-4 dark:border-neutral-800"
+          className="space-y-3 border-t border-border-default px-6 py-4 dark:border-border-subtle"
         >
           {error ? (
-            <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+            <p role="alert" className="text-sm text-danger-fg">
               {error}
             </p>
           ) : null}
-          <label className="flex items-start gap-2 text-sm text-slate-700 dark:text-neutral-300">
+          <label className="flex items-start gap-2 text-sm text-fg-muted">
             <input
               type="checkbox"
               checked={agreed}
               onChange={(e) => setAgreed(e.target.checked)}
-              className="mt-0.5 h-4 w-4 rounded border-slate-300"
+              className="mt-0.5 h-4 w-4 rounded border-border-strong"
             />
             <span>I have read and agree to participate in this research study.</span>
           </label>
@@ -176,7 +176,7 @@ export function ConsentPrompt() {
               type="button"
               onClick={remindLater}
               disabled={submitting}
-              className="text-sm font-medium text-slate-500 hover:text-slate-700 disabled:opacity-50 dark:text-neutral-400"
+              className="text-sm font-medium text-fg-muted hover:text-fg-muted disabled:opacity-50 dark:text-fg-muted"
             >
               Remind me later
             </button>
@@ -184,7 +184,7 @@ export function ConsentPrompt() {
               type="button"
               onClick={() => void respond('declined')}
               disabled={submitting}
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800"
+              className="rounded-lg border border-border-strong px-4 py-2 text-sm font-medium text-fg-muted hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
             >
               No, I decline
             </button>

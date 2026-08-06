@@ -304,11 +304,6 @@ func src(s platformconfig.Source) string {
 // handleGetPlatformSettings is GET /api/v1/settings/platform
 func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -796,11 +791,6 @@ type putPlatformBody struct {
 // handlePutPlatformSettings is PUT /api/v1/settings/platform
 func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPut {
-			w.Header().Set("Allow", http.MethodPut)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		actorID, ok := d.adminRbacUser(w, r)
 		if !ok {
 			return

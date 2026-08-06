@@ -21,11 +21,6 @@ func (d Deps) registerPlatformCoursesRoutes(r chi.Router) {
 
 func (d Deps) handleAdminCoursesStats() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -68,11 +63,6 @@ func parsePlatformCoursesListParams(r *http.Request) platformcourses.ListParams 
 
 func (d Deps) handleAdminCoursesSearch() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -105,11 +95,6 @@ func (d Deps) handleAdminCoursesSearch() http.HandlerFunc {
 
 func (d Deps) handleAdminCoursesReport() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -133,11 +118,6 @@ func (d Deps) handleAdminCoursesReport() http.HandlerFunc {
 
 func (d Deps) handleAdminCoursesAccess() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		actor, ok := d.adminRbacUser(w, r)
 		if !ok {
 			return

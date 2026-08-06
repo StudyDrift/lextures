@@ -81,12 +81,12 @@ export function LocaleSwitcher({ initialLocale, onLocaleChange, embedded = false
   return (
     <div className={embedded ? '' : 'mt-8'}>
       <div className="flex items-center gap-2">
-        <Globe className="h-4 w-4 text-slate-500 dark:text-neutral-400" aria-hidden />
-        <p className="text-sm font-medium text-slate-700 dark:text-neutral-200">{t('common.locale.label')}</p>
+        <Globe className="h-4 w-4 text-fg-muted" aria-hidden />
+        <p className="text-sm font-medium text-fg-default">{t('common.locale.label')}</p>
       </div>
-      <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">{t('common.locale.description')}</p>
+      <p className="mt-1 text-sm text-fg-muted">{t('common.locale.description')}</p>
       {!rtlEnabled ? (
-        <p className="mt-2 text-xs text-amber-700 dark:text-amber-300">
+        <p className="mt-2 text-xs text-warning-fg">
           {t('common.locale.rtlDisabledHint')}
         </p>
       ) : null}
@@ -96,7 +96,7 @@ export function LocaleSwitcher({ initialLocale, onLocaleChange, embedded = false
       <select
         id={selectId}
         data-testid="locale-switcher"
-        className="mt-3 w-full max-w-xs rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+        className="mt-3 w-full max-w-xs rounded-xl border border-border-default bg-surface-raised px-2 py-1.5 text-sm text-fg-default dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
         value={localeTag}
         disabled={saving}
         onChange={(e) => void onSelect(e.target.value)}

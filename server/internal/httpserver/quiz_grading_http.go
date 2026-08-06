@@ -43,11 +43,6 @@ func (d Deps) requireQuizGrader(w http.ResponseWriter, r *http.Request) (viewer 
 
 func (d Deps) handleQuizAttemptGradingGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode := chi.URLParam(r, "course_code")
 		if _, ok := d.requireQuizGrader(w, r); !ok {
 			return
@@ -118,11 +113,6 @@ func (d Deps) handleQuizAttemptGradingPut() http.HandlerFunc {
 		Questions []questionGrade `json:"questions"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPut {
-			w.Header().Set("Allow", http.MethodPut)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode := chi.URLParam(r, "course_code")
 		if _, ok := d.requireQuizGrader(w, r); !ok {
 			return

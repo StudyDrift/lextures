@@ -9946,6 +9946,53 @@
       "rationale": "Internal dead-code deletion and baseline ratchet. No user-facing journey; guarded by make lint-structure / deadcode CI, not Playwright.",
       "owner": "Platform",
       "reviewed": true
+    },
+    {
+      "id": "TD.5",
+      "path": "docs/completed/tech_debt/TD.5-remove-unreachable-method-dispatch.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "none",
+      "client": "docs",
+      "coverage": "api-contract",
+      "rationale": "Behaviour-preserving removal of unreachable in-handler OPTIONS/405 prologues. OPTIONS preflight and wrong-method responses remain via corsAll + chi MethodNotAllowed. Guarded by Go characterization tests (TestTD5_*), analyze-handler-methods.py, and check-handler-method-dispatch.sh.",
+      "owner": "Platform",
+      "specs": [
+        {
+          "path": "e2e/tests/auth.spec.ts"
+        },
+        {
+          "path": "e2e/tests/public-api.spec.ts"
+        }
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "UX.1",
+      "path": "docs/completed/ui-ux/UX.1-semantic-design-token-system.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "minor",
+      "client": "web",
+      "coverage": "not-applicable",
+      "rationale": "Design-token foundation and purity ratchet (npm run tokens:purity / raw-palette allowlist). No Playwright journey; structural tooling owns regression detection.",
+      "owner": "Web Platform",
+      "reviewed": true
+    },
+    {
+      "id": "UX.2",
+      "path": "docs/completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "minor",
+      "client": "web",
+      "coverage": "not-applicable",
+      "rationale": "Core component library adoption ratchet. No dedicated e2e journey; covered by web unit/component tests and lint ratchets rather than Playwright.",
+      "owner": "Web Platform",
+      "reviewed": true
     }
   ]
 }

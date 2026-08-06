@@ -192,7 +192,7 @@ export default function AdminAccommodationsPage() {
   if (!canManage) {
     return (
       <LmsPage title="Accommodations">
-        <p className="text-sm text-slate-600 dark:text-neutral-300">
+        <p className="text-sm text-fg-muted">
           You need the accessibility coordinator or Global Admin role to manage student accommodations.
         </p>
       </LmsPage>
@@ -218,7 +218,7 @@ export default function AdminAccommodationsPage() {
   return (
     <LmsPage title="Student accommodations">
       <div className="max-w-3xl space-y-6">
-        <p className="text-sm text-slate-600 dark:text-neutral-300">
+        <p className="text-sm text-fg-muted">
           Create operational accommodation settings per learner. Course-scoped records override global
           (all courses) settings. This page does not store disability documentation.
         </p>
@@ -226,21 +226,21 @@ export default function AdminAccommodationsPage() {
           <p className="text-sm">
             <Link
               to="/admin/accommodations/audit"
-              className="font-medium text-indigo-700 hover:underline dark:text-indigo-300"
+              className="font-medium text-accent-fg hover:underline dark:text-indigo-300"
             >
               View accommodation audit report →
             </Link>
           </p>
         )}
 
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
+        <div className="rounded-xl border border-border-default bg-surface-raised p-4 shadow-sm dark:border-border-default dark:bg-surface-raised">
           <label
             htmlFor={`${formId}-learner-search`}
-            className="mb-1 block text-xs font-medium text-slate-600 dark:text-neutral-400"
+            className="mb-1 block text-xs font-medium text-fg-muted"
           >
             Find learner
           </label>
-          <p className="mb-2 text-xs text-slate-500 dark:text-neutral-500">
+          <p className="mb-2 text-xs text-fg-subtle">
             Search by email, first or last name, display name, campus student id (sid), or paste their user id
             (UUID).
           </p>
@@ -255,7 +255,7 @@ export default function AdminAccommodationsPage() {
                   void runSearch()
                 }
               }}
-              className="min-w-[12rem] flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+              className="min-w-[12rem] flex-1 rounded-lg border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
               placeholder="e.g. jordan@school.edu, Lee, or 00123456"
               spellCheck={false}
               autoComplete="off"
@@ -264,7 +264,7 @@ export default function AdminAccommodationsPage() {
               type="button"
               onClick={() => void runSearch()}
               disabled={searchBusy}
-              className="rounded-lg bg-slate-800 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-700 disabled:opacity-50 dark:bg-neutral-200 dark:text-neutral-900 dark:hover:bg-white"
+              className="rounded-lg bg-slate-800 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-700 disabled:opacity-50 dark:bg-neutral-200 dark:text-neutral-900 dark:hover:bg-surface-raised"
             >
               {searchBusy ? 'Searching…' : 'Search'}
             </button>
@@ -276,20 +276,20 @@ export default function AdminAccommodationsPage() {
           )}
 
           {searchHits.length > 0 && (
-            <ul className="mt-3 max-h-60 space-y-1 overflow-y-auto rounded-lg border border-slate-200 dark:border-neutral-700">
+            <ul className="mt-3 max-h-60 space-y-1 overflow-y-auto rounded-lg border border-border-default">
               {searchHits.map((hit) => (
                 <li key={hit.id}>
                   <button
                     type="button"
                     onClick={() => pickUser(hit)}
-                    className="flex w-full flex-col items-start gap-0.5 px-3 py-2 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                    className="flex w-full flex-col items-start gap-0.5 px-3 py-2 text-start text-sm hover:bg-surface-base dark:hover:bg-surface-overlay"
                   >
-                    <span className="font-medium text-slate-900 dark:text-neutral-100">
+                    <span className="font-medium text-fg-default">
                       {formatLearnerLabel(hit)}
                     </span>
-                    <span className="text-xs text-slate-600 dark:text-neutral-400">{hit.email}</span>
+                    <span className="text-xs text-fg-muted">{hit.email}</span>
                     {hit.sid ? (
-                      <span className="text-xs text-slate-500 dark:text-neutral-500">SID: {hit.sid}</span>
+                      <span className="text-xs text-fg-subtle">SID: {hit.sid}</span>
                     ) : null}
                   </button>
                 </li>
@@ -300,18 +300,18 @@ export default function AdminAccommodationsPage() {
           {selectedUser && (
             <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-indigo-200 bg-indigo-50/80 px-3 py-2 text-sm dark:border-indigo-900 dark:bg-indigo-950/40">
               <div className="min-w-0">
-                <p className="font-medium text-slate-900 dark:text-neutral-100">
+                <p className="font-medium text-fg-default">
                   Selected: {formatLearnerLabel(selectedUser)}
                 </p>
-                <p className="truncate text-xs text-slate-600 dark:text-neutral-400">{selectedUser.email}</p>
-                <p className="mt-0.5 font-mono text-[11px] text-slate-500 dark:text-neutral-500">
+                <p className="truncate text-xs text-fg-muted">{selectedUser.email}</p>
+                <p className="mt-0.5 font-mono text-[11px] text-fg-subtle">
                   User id: {selectedUser.id}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={clearSelection}
-                className="shrink-0 rounded-lg border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-white dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-900"
+                className="shrink-0 rounded-lg border border-border-strong px-2 py-1 text-xs font-medium text-fg-muted hover:bg-surface-raised dark:border-border-default dark:text-fg-default dark:hover:bg-surface-raised"
               >
                 Change learner
               </button>
@@ -323,7 +323,7 @@ export default function AdminAccommodationsPage() {
               type="button"
               onClick={() => void loadList()}
               disabled={listBusy || !selectedUser}
-              className="rounded-lg bg-slate-800 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-700 disabled:opacity-50 dark:bg-neutral-200 dark:text-neutral-900 dark:hover:bg-white"
+              className="rounded-lg bg-slate-800 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-700 disabled:opacity-50 dark:bg-neutral-200 dark:text-neutral-900 dark:hover:bg-surface-raised"
             >
               {listBusy ? 'Loading…' : 'Load accommodation records'}
             </button>
@@ -336,9 +336,9 @@ export default function AdminAccommodationsPage() {
         </div>
 
         {accommodationsEngineEnabled && (
-          <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-            <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Bulk CSV import</h2>
-            <p className="mt-1 text-xs text-slate-500 dark:text-neutral-500">
+          <section className="rounded-xl border border-border-default bg-surface-raised p-4 shadow-sm dark:border-border-default dark:bg-surface-raised">
+            <h2 className="text-sm font-semibold text-fg-default">Bulk CSV import</h2>
+            <p className="mt-1 text-xs text-fg-subtle">
               Required columns: <code className="font-mono">student_external_id</code>,{' '}
               <code className="font-mono">accommodation_type</code>, <code className="font-mono">value</code>.
               External id may be email or campus SID.
@@ -357,7 +357,7 @@ export default function AdminAccommodationsPage() {
                   const f = e.target.files?.[0]
                   if (f) void onCsvImport(f)
                 }}
-                className="block w-full text-sm text-slate-700 file:me-3 file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-semibold dark:text-neutral-300 dark:file:bg-neutral-800"
+                className="block w-full text-sm text-fg-muted file:me-3 file:rounded-lg file:border-0 file:bg-surface-sunken file:px-3 file:py-2 file:text-sm file:font-semibold dark:text-fg-muted dark:file:bg-surface-overlay"
               />
             </div>
             {csvError && (
@@ -366,7 +366,7 @@ export default function AdminAccommodationsPage() {
               </p>
             )}
             {csvSummary && (
-              <p className="mt-2 text-sm text-slate-700 dark:text-neutral-300">
+              <p className="mt-2 text-sm text-fg-muted">
                 Created {csvSummary.created}, updated {csvSummary.updated}
                 {csvSummary.errors.length > 0
                   ? `; ${csvSummary.errors.length} row error(s).`
@@ -389,46 +389,46 @@ export default function AdminAccommodationsPage() {
         <form
           id={formId}
           onSubmit={(e) => void onCreate(e)}
-          className="space-y-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-900"
+          className="space-y-4 rounded-xl border border-border-default bg-surface-raised p-4 shadow-sm dark:border-border-default dark:bg-surface-raised"
         >
-          <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">New record</h2>
+          <h2 className="text-sm font-semibold text-fg-default">New record</h2>
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-neutral-400">
+              <label className="mb-1 block text-xs font-medium text-fg-muted">
                 Course code (optional)
               </label>
               <input
                 value={courseCode}
                 onChange={(e) => setCourseCode(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                className="w-full rounded-lg border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
                 placeholder="Leave blank for all courses"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-neutral-400">
+              <label className="mb-1 block text-xs font-medium text-fg-muted">
                 Time multiplier (1.0 = none)
               </label>
               <input
                 value={timeMultiplier}
                 onChange={(e) => setTimeMultiplier(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                className="w-full rounded-lg border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
                 inputMode="decimal"
               />
-              <p className="mt-1 text-xs text-slate-500">Example: 1.5 for time-and-a-half.</p>
+              <p className="mt-1 text-xs text-fg-muted">Example: 1.5 for time-and-a-half.</p>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-neutral-400">
+              <label className="mb-1 block text-xs font-medium text-fg-muted">
                 Extra quiz attempts
               </label>
               <input
                 value={extraAttempts}
                 onChange={(e) => setExtraAttempts(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                className="w-full rounded-lg border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
                 inputMode="numeric"
               />
             </div>
             <div className="flex flex-col gap-2 sm:col-span-2">
-              <label className="inline-flex items-center gap-2 text-sm text-slate-800 dark:text-neutral-200">
+              <label className="inline-flex items-center gap-2 text-sm text-fg-default">
                 <input
                   id={`${formId}-hints`}
                   type="checkbox"
@@ -437,7 +437,7 @@ export default function AdminAccommodationsPage() {
                 />
                 <span id={`${formId}-hints-label`}>Always allow hints (overrides lockdown for this learner)</span>
               </label>
-              <label className="inline-flex items-center gap-2 text-sm text-slate-800 dark:text-neutral-200">
+              <label className="inline-flex items-center gap-2 text-sm text-fg-default">
                 <input
                   id={`${formId}-reduced`}
                   type="checkbox"
@@ -446,7 +446,7 @@ export default function AdminAccommodationsPage() {
                 />
                 <span id={`${formId}-reduced-label`}>Reduced-distraction quiz layout</span>
               </label>
-              <label className="inline-flex items-center gap-2 text-sm text-slate-800 dark:text-neutral-200">
+              <label className="inline-flex items-center gap-2 text-sm text-fg-default">
                 <input
                   id={`${formId}-stt`}
                   type="checkbox"
@@ -455,7 +455,7 @@ export default function AdminAccommodationsPage() {
                 />
                 <span id={`${formId}-stt-label`}>Speech-to-text dictation enabled</span>
               </label>
-              <label className="inline-flex items-center gap-2 text-sm text-slate-800 dark:text-neutral-200">
+              <label className="inline-flex items-center gap-2 text-sm text-fg-default">
                 <input
                   id={`${formId}-tts`}
                   type="checkbox"
@@ -464,7 +464,7 @@ export default function AdminAccommodationsPage() {
                 />
                 <span id={`${formId}-tts-label`}>Text-to-speech read-aloud enabled</span>
               </label>
-              <label className="inline-flex items-center gap-2 text-sm text-slate-800 dark:text-neutral-200">
+              <label className="inline-flex items-center gap-2 text-sm text-fg-default">
                 <input
                   id={`${formId}-dyslexia`}
                   type="checkbox"
@@ -473,7 +473,7 @@ export default function AdminAccommodationsPage() {
                 />
                 <span id={`${formId}-dyslexia-label`}>Dyslexia-friendly display preset</span>
               </label>
-              <label className="inline-flex items-center gap-2 text-sm text-slate-800 dark:text-neutral-200">
+              <label className="inline-flex items-center gap-2 text-sm text-fg-default">
                 <input
                   id={`${formId}-contrast`}
                   type="checkbox"
@@ -482,7 +482,7 @@ export default function AdminAccommodationsPage() {
                 />
                 <span id={`${formId}-contrast-label`}>High-contrast theme</span>
               </label>
-              <label className="inline-flex items-center gap-2 text-sm text-slate-800 dark:text-neutral-200">
+              <label className="inline-flex items-center gap-2 text-sm text-fg-default">
                 <input
                   id={`${formId}-motion`}
                   type="checkbox"
@@ -491,7 +491,7 @@ export default function AdminAccommodationsPage() {
                 />
                 <span id={`${formId}-motion-label`}>Reduced motion</span>
               </label>
-              <label className="inline-flex items-center gap-2 text-sm text-slate-800 dark:text-neutral-200">
+              <label className="inline-flex items-center gap-2 text-sm text-fg-default">
                 <input
                   id={`${formId}-separate`}
                   type="checkbox"
@@ -504,34 +504,34 @@ export default function AdminAccommodationsPage() {
               </label>
             </div>
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-neutral-400">
+              <label className="mb-1 block text-xs font-medium text-fg-muted">
                 Alternative format notes (coordinator only)
               </label>
               <textarea
                 value={altFormat}
                 onChange={(e) => setAltFormat(e.target.value)}
                 rows={2}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                className="w-full rounded-lg border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-neutral-400">
+              <label className="mb-1 block text-xs font-medium text-fg-muted">
                 Effective from (YYYY-MM-DD)
               </label>
               <input
                 value={effectiveFrom}
                 onChange={(e) => setEffectiveFrom(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                className="w-full rounded-lg border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-neutral-400">
+              <label className="mb-1 block text-xs font-medium text-fg-muted">
                 Effective until (YYYY-MM-DD)
               </label>
               <input
                 value={effectiveUntil}
                 onChange={(e) => setEffectiveUntil(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                className="w-full rounded-lg border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
               />
             </div>
           </div>
@@ -543,16 +543,16 @@ export default function AdminAccommodationsPage() {
           <button
             type="submit"
             disabled={saveBusy || !selectedUser}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
+            className="rounded-lg bg-accent-solid px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
           >
             {saveBusy ? 'Saving…' : 'Create record'}
           </button>
         </form>
 
         {rows.length > 0 && (
-          <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white dark:border-neutral-700 dark:bg-neutral-900">
+          <div className="overflow-x-auto rounded-xl border border-border-default bg-surface-raised dark:border-border-default dark:bg-surface-raised">
             <table className="min-w-full text-start text-sm">
-              <thead className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase text-slate-600 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-400">
+              <thead className="border-b border-border-default bg-surface-base text-xs font-semibold uppercase text-fg-muted dark:border-border-default dark:bg-surface-base dark:text-fg-muted">
                 <tr>
                   <th className="px-3 py-2">Scope</th>
                   <th className="px-3 py-2">Multiplier</th>
@@ -564,13 +564,13 @@ export default function AdminAccommodationsPage() {
               </thead>
               <tbody>
                 {rows.map((r) => (
-                  <tr key={r.id} className="border-b border-slate-100 dark:border-neutral-800">
-                    <td className="px-3 py-2 text-slate-800 dark:text-neutral-200">
+                  <tr key={r.id} className="border-b border-border-subtle">
+                    <td className="px-3 py-2 text-fg-default">
                       {r.courseCode ?? 'All courses'}
                     </td>
                     <td className="px-3 py-2 tabular-nums">{r.timeMultiplier}</td>
                     <td className="px-3 py-2 tabular-nums">{r.extraAttempts}</td>
-                    <td className="px-3 py-2 text-xs text-slate-600 dark:text-neutral-400">
+                    <td className="px-3 py-2 text-xs text-fg-muted">
                       {[
                         r.hintsAlwaysEnabled && 'hints',
                         r.reducedDistractionMode && 'reduced',
@@ -584,7 +584,7 @@ export default function AdminAccommodationsPage() {
                         .filter(Boolean)
                         .join(', ') || '—'}
                     </td>
-                    <td className="px-3 py-2 text-xs text-slate-600 dark:text-neutral-400">
+                    <td className="px-3 py-2 text-xs text-fg-muted">
                       {[r.effectiveFrom, r.effectiveUntil].filter(Boolean).join(' → ') || '—'}
                     </td>
                     <td className="px-3 py-2 text-end">

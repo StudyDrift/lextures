@@ -82,7 +82,7 @@ export function CourseCatalogNicknameEditor({
         setError(null)
         setOpen(true)
       }}
-      className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-slate-400 transition-[background-color,color,border-color] hover:bg-slate-100 hover:text-slate-700 dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+      className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-fg-subtle transition-[background-color,color,border-color] hover:bg-surface-sunken hover:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-fg-default"
       aria-label={`Edit nickname for ${course.title}`}
       title="Edit nickname"
     >
@@ -95,9 +95,9 @@ export function CourseCatalogNicknameEditor({
       {compact ? (
         <div className="flex items-center gap-1.5">
           {hasNickname ? (
-            <p className="min-w-0 flex-1 text-xs text-slate-500 line-clamp-1 dark:text-neutral-400">{course.title}</p>
+            <p className="min-w-0 flex-1 text-xs text-fg-muted line-clamp-1 dark:text-fg-muted">{course.title}</p>
           ) : (
-            <span className="min-w-0 flex-1 text-xs text-slate-500 dark:text-neutral-400">Add nickname</span>
+            <span className="min-w-0 flex-1 text-xs text-fg-muted">Add nickname</span>
           )}
           {editButton}
         </div>
@@ -108,13 +108,13 @@ export function CourseCatalogNicknameEditor({
             {editButton}
           </div>
           {hasNickname ? (
-            <p className="mt-0.5 text-xs text-slate-500 line-clamp-1 dark:text-neutral-400">{course.title}</p>
+            <p className="mt-0.5 text-xs text-fg-muted line-clamp-1 dark:text-fg-muted">{course.title}</p>
           ) : null}
         </>
       )}
       {open ? (
         <div
-          className="mt-2 space-y-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm dark:border-neutral-600 dark:bg-neutral-900"
+          className="mt-2 space-y-2 rounded-lg border border-border-default bg-surface-raised p-2 shadow-sm dark:border-border-default dark:bg-surface-raised"
           onClick={(e) => {
             e.preventDefault()
             e.stopPropagation()
@@ -146,7 +146,7 @@ export function CourseCatalogNicknameEditor({
                 setError(null)
               }
             }}
-            className="w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+            className="w-full rounded-md border border-border-default bg-surface-raised px-2 py-1.5 text-sm text-fg-default outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 dark:border-border-default dark:bg-surface-base dark:text-fg-default"
           />
           {error ? <p className="text-xs text-rose-600 dark:text-rose-300">{error}</p> : null}
           <div className="flex justify-end gap-2">
@@ -157,7 +157,7 @@ export function CourseCatalogNicknameEditor({
                 setOpen(false)
                 setError(null)
               }}
-              className="rounded-md px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+              className="rounded-md px-2 py-1 text-xs font-medium text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay"
             >
               Cancel
             </button>
@@ -165,7 +165,7 @@ export function CourseCatalogNicknameEditor({
               type="button"
               disabled={saving}
               onClick={() => void save()}
-              className="rounded-md bg-indigo-600 px-2 py-1 text-xs font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+              className="rounded-md bg-accent-solid px-2 py-1 text-xs font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
             >
               Save
             </button>

@@ -92,11 +92,6 @@ func (d Deps) emailTemplateService() emailtemplatesvc.Service {
 
 func (d Deps) handleAdminEmailTemplatesList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		_, orgID, _, ok := d.adminEmailTemplateAccess(w, r, false)
 		if !ok {
 			return
@@ -139,11 +134,6 @@ func (d Deps) handleAdminEmailTemplatesList() http.HandlerFunc {
 
 func (d Deps) handleAdminEmailTemplateGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		_, orgID, _, ok := d.adminEmailTemplateAccess(w, r, false)
 		if !ok {
 			return
@@ -195,11 +185,6 @@ func (d Deps) handleAdminEmailTemplateGet() http.HandlerFunc {
 func (d Deps) handleAdminEmailTemplatePut() http.HandlerFunc {
 	svc := d.emailTemplateService()
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPut {
-			w.Header().Set("Allow", http.MethodPut)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		actor, orgID, _, ok := d.adminEmailTemplateAccess(w, r, true)
 		if !ok {
 			return
@@ -250,11 +235,6 @@ func (d Deps) handleAdminEmailTemplatePut() http.HandlerFunc {
 
 func (d Deps) handleAdminEmailTemplateHistory() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		_, orgID, _, ok := d.adminEmailTemplateAccess(w, r, false)
 		if !ok {
 			return
@@ -276,11 +256,6 @@ func (d Deps) handleAdminEmailTemplateHistory() http.HandlerFunc {
 
 func (d Deps) handleAdminEmailTemplateRestore() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		_, orgID, _, ok := d.adminEmailTemplateAccess(w, r, true)
 		if !ok {
 			return
@@ -314,11 +289,6 @@ func (d Deps) handleAdminEmailTemplateRestore() http.HandlerFunc {
 
 func (d Deps) handleAdminEmailTemplateReset() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		_, orgID, _, ok := d.adminEmailTemplateAccess(w, r, true)
 		if !ok {
 			return
@@ -335,11 +305,6 @@ func (d Deps) handleAdminEmailTemplateReset() http.HandlerFunc {
 func (d Deps) handleAdminEmailTemplateTest() http.HandlerFunc {
 	svc := d.emailTemplateService()
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		actor, orgID, _, ok := d.adminEmailTemplateAccess(w, r, true)
 		if !ok {
 			return
@@ -361,11 +326,6 @@ func (d Deps) handleAdminEmailTemplateTest() http.HandlerFunc {
 func (d Deps) handleAdminEmailTemplatePreview() http.HandlerFunc {
 	svc := d.emailTemplateService()
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		actor, orgID, _, ok := d.adminEmailTemplateAccess(w, r, false)
 		if !ok {
 			return

@@ -1,5 +1,6 @@
 import { useId, type ComponentType, type ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { Button } from './button'
+import { LinkButton } from './link-button'
 
 export type EmptyStateAction =
   | { label: string; to: string }
@@ -15,57 +16,44 @@ export type EmptyStateProps = {
 }
 
 function ActionButton({ action, variant }: { action: EmptyStateAction; variant: 'primary' | 'secondary' }) {
-  const base =
-    'inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out motion-safe:active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-950'
   if ('to' in action) {
     return (
-      <Link
-        to={action.to}
-        className={
-          variant === 'primary'
-            ? `${base} bg-indigo-600 text-white hover:bg-indigo-500`
-            : `${base} border border-slate-200 bg-white text-slate-800 hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800`
-        }
-      >
+      <LinkButton to={action.to} variant={variant === 'primary' ? 'primary' : 'secondary'}>
         {action.label}
-      </Link>
+      </LinkButton>
     )
   }
   return (
-    <button
-      type="button"
-      onClick={action.onClick}
-      className={
-        variant === 'primary'
-          ? `${base} bg-indigo-600 text-white hover:bg-indigo-500`
-          : `${base} border border-slate-200 bg-white text-slate-800 hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800`
-      }
-    >
+    <Button type="button" variant={variant === 'primary' ? 'primary' : 'secondary'} onClick={action.onClick}>
       {action.label}
-    </button>
+    </Button>
   )
 }
 
-export function EmptyState({ icon: Icon, title, body, primaryAction, secondaryAction, className = '' }: EmptyStateProps) {
+export function EmptyState({
+  icon: Icon,
+  title,
+  body,
+  primaryAction,
+  secondaryAction,
+  className = '',
+}: EmptyStateProps) {
   const titleId = useId()
   return (
     <section
-      className={`rounded-2xl bg-slate-50/80 px-6 py-12 shadow-card dark:bg-neutral-900/40 ${className}`}
+      className={`rounded-2xl bg-surface-sunken/80 px-6 py-12 shadow-card/40 ${className}`}
       role="status"
       aria-labelledby={titleId}
     >
       <div className="mx-auto flex max-w-md flex-col items-center text-center">
-        <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-white text-slate-400 shadow-sm ring-1 ring-slate-200/80 dark:bg-neutral-950 dark:text-neutral-500 dark:ring-neutral-700">
+        <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-raised text-fg-subtle shadow-sm ring-1 ring-border-default">
           <Icon className="h-6 w-6 shrink-0" aria-hidden />
         </span>
-        <h2
-          id={titleId}
-          className="mt-4 text-base font-semibold tracking-tight text-slate-900 dark:text-neutral-50"
-        >
+        <h2 id={titleId} className="mt-4 text-base font-semibold tracking-tight text-fg-default">
           {title}
         </h2>
         {body != null && body !== false ? (
-          <div className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-neutral-400">{body}</div>
+          <div className="mt-2 text-sm leading-relaxed text-fg-muted">{body}</div>
         ) : null}
         {(primaryAction || secondaryAction) && (
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">

@@ -26,7 +26,7 @@ type Props = {
 }
 
 const inputClass =
-  'mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100'
+  'mt-1 w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm text-fg-default outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-60 dark:border-border-default dark:bg-surface-raised dark:text-fg-default'
 
 export function ProviderCredentialForm({
   provider,
@@ -74,22 +74,22 @@ export function ProviderCredentialForm({
       <div className="flex flex-wrap items-start gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="text-sm font-medium text-slate-900 dark:text-neutral-100">{label}</p>
+            <p className="text-sm font-medium text-fg-default">{label}</p>
             {configured ? (
               <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
                 {t('settings.ai.badge.configured')}
               </span>
             ) : (
-              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 dark:bg-neutral-800 dark:text-neutral-300">
+              <span className="rounded-full bg-surface-sunken px-2 py-0.5 text-xs font-medium text-fg-muted dark:bg-surface-overlay dark:text-fg-muted">
                 {t('settings.ai.badge.notConfigured')}
               </span>
             )}
             {draft.enabled ? (
-              <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300">
+              <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-accent-fg dark:bg-indigo-950/40 dark:text-indigo-300">
                 {t('settings.ai.badge.enabled')}
               </span>
             ) : (
-              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500 dark:bg-neutral-800 dark:text-neutral-400">
+              <span className="rounded-full bg-surface-sunken px-2 py-0.5 text-xs font-medium text-fg-muted dark:bg-surface-overlay dark:text-fg-muted">
                 {t('settings.ai.badge.disabled')}
               </span>
             )}
@@ -100,7 +100,7 @@ export function ProviderCredentialForm({
             ) : null}
           </div>
           {isKnownAIProvider(provider) && (provider === 'bedrock' || provider === 'vertex') ? (
-            <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+            <p className="mt-1 text-xs text-fg-muted">
               {t('settings.ai.help.cloudAuth', {
                 docs:
                   provider === 'bedrock'
@@ -122,14 +122,10 @@ export function ProviderCredentialForm({
             }
             disabled={busy}
             onClick={() => onChange({ enabled: !draft.enabled })}
-            className={`relative mt-0.5 inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:opacity-60 ${
-              draft.enabled ? 'bg-indigo-600' : 'bg-slate-200 dark:bg-neutral-600'
-            }`}
+            className={`relative mt-0.5 inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:opacity-60 ${ draft.enabled ? 'bg-accent-solid' : 'bg-slate-200 dark:bg-neutral-600' }`}
           >
             <span
-              className={`pointer-events-none block h-5 w-5 rounded-full bg-white shadow ring-0 transition-transform ${
-                draft.enabled ? 'translate-x-5' : 'translate-x-0'
-              }`}
+              className={`pointer-events-none block h-5 w-5 rounded-full bg-surface-raised shadow ring-0 transition-transform ${ draft.enabled ? 'translate-x-5' : 'translate-x-0' }`}
             />
           </button>
         ) : null}
@@ -140,7 +136,7 @@ export function ProviderCredentialForm({
           if (field.type === 'select' && field.options) {
             return (
               <label key={field.key} className="block text-xs sm:col-span-2">
-                <span className="font-medium text-slate-600 dark:text-neutral-300">{t(field.labelKey)}</span>
+                <span className="font-medium text-fg-muted">{t(field.labelKey)}</span>
                 <select
                   value={draft.settings[field.key] ?? field.options[0]?.value ?? ''}
                   disabled={busy}
@@ -159,7 +155,7 @@ export function ProviderCredentialForm({
           if (field.type === 'textarea') {
             return (
               <label key={field.key} className="block text-xs sm:col-span-2">
-                <span className="font-medium text-slate-600 dark:text-neutral-300">
+                <span className="font-medium text-fg-muted">
                   {t(field.labelKey)}
                   {field.required ? ' *' : ''}
                 </span>
@@ -172,14 +168,14 @@ export function ProviderCredentialForm({
                   className={`${inputClass} font-mono`}
                 />
                 {field.helpKey ? (
-                  <span className="mt-1 block text-xs text-slate-500 dark:text-neutral-400">{t(field.helpKey)}</span>
+                  <span className="mt-1 block text-xs text-fg-muted">{t(field.helpKey)}</span>
                 ) : null}
               </label>
             )
           }
           return (
             <label key={field.key} className="block text-xs">
-              <span className="font-medium text-slate-600 dark:text-neutral-300">
+              <span className="font-medium text-fg-muted">
                 {t(field.labelKey)}
                 {field.required ? ' *' : ''}
               </span>
@@ -199,7 +195,7 @@ export function ProviderCredentialForm({
 
         {showApiKey ? (
           <label className="block text-xs sm:col-span-2">
-            <span className="font-medium text-slate-600 dark:text-neutral-300">{t('settings.ai.fields.apiKey')}</span>
+            <span className="font-medium text-fg-muted">{t('settings.ai.fields.apiKey')}</span>
             <input
               type="password"
               autoComplete="off"
@@ -209,7 +205,7 @@ export function ProviderCredentialForm({
               onChange={(e) => onChange({ apiKey: e.target.value })}
               className={`${inputClass} font-mono`}
             />
-            <span className="mt-1 block text-xs text-slate-500 dark:text-neutral-400">
+            <span className="mt-1 block text-xs text-fg-muted">
               {t('settings.ai.fields.apiKeyHelp')}
             </span>
           </label>
@@ -218,7 +214,7 @@ export function ProviderCredentialForm({
         {showAwsKeys ? (
           <>
             <label className="block text-xs sm:col-span-2">
-              <span className="font-medium text-slate-600 dark:text-neutral-300">
+              <span className="font-medium text-fg-muted">
                 {t('settings.ai.fields.awsAccessKeyId')}
               </span>
               <input
@@ -232,7 +228,7 @@ export function ProviderCredentialForm({
               />
             </label>
             <label className="block text-xs sm:col-span-2">
-              <span className="font-medium text-slate-600 dark:text-neutral-300">
+              <span className="font-medium text-fg-muted">
                 {t('settings.ai.fields.awsSecretAccessKey')}
               </span>
               <input
@@ -250,7 +246,7 @@ export function ProviderCredentialForm({
 
         {showSA ? (
           <label className="block text-xs sm:col-span-2">
-            <span className="font-medium text-slate-600 dark:text-neutral-300">
+            <span className="font-medium text-fg-muted">
               {t('settings.ai.fields.serviceAccountJson')}
             </span>
             <textarea
@@ -265,10 +261,10 @@ export function ProviderCredentialForm({
               type="file"
               accept="application/json,.json"
               disabled={busy}
-              className="mt-2 block w-full text-xs text-slate-600 dark:text-neutral-300"
+              className="mt-2 block w-full text-xs text-fg-muted"
               onChange={(e) => onServiceAccountFile(e.target.files?.[0] ?? null)}
             />
-            <span className="mt-1 block text-xs text-slate-500 dark:text-neutral-400">
+            <span className="mt-1 block text-xs text-fg-muted">
               {t('settings.ai.fields.serviceAccountJsonHelp')}
             </span>
           </label>
@@ -289,7 +285,7 @@ export function ProviderCredentialForm({
             type="button"
             disabled={busy}
             onClick={onClear}
-            className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 disabled:opacity-50 dark:border-neutral-600 dark:text-neutral-200"
+            className="rounded-lg border border-border-strong px-3 py-1.5 text-sm font-medium text-fg-muted disabled:opacity-50 dark:border-border-default dark:text-fg-default"
           >
             {clearing ? t('settings.ai.actions.clearing') : t('settings.ai.actions.clearKey')}
           </button>

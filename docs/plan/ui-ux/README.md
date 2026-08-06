@@ -23,7 +23,7 @@
 | `components/ui/empty-state.tsx` | ✅ | **15** | ~150 |
 | `lib/lms-toast.ts` (incl. `toastWithUndo`) | ✅ | **1** | ~300 |
 | `lib/a11y/focus-trap.ts` | ✅ | **3** | **129** |
-| Semantic colour tokens | ❌ | — | all |
+| Semantic colour tokens | ✅ UX.1 | migrating (purity ratchet) | all |
 
 Against that: **2,016 hand-rolled `<button>` elements**, **129 hand-rolled
 dialogs**, **33,331 raw colour literals in 698 of 795 component files**.
@@ -42,8 +42,8 @@ exists so it does not happen again.**
 
 | ID | Plan | Severity | Effort | Depends on |
 |---|---|---|---|---|
-| **UX.1** | [Semantic design token system](UX.1-semantic-design-token-system.md) | BLOCKER | L | — |
-| **UX.2** | [Core component library and adoption ratchet](UX.2-core-component-library-and-adoption-ratchet.md) | BLOCKER | XL | UX.1 |
+| **UX.1** | [Semantic design token system](../../completed/ui-ux/UX.1-semantic-design-token-system.md) (shipped) | BLOCKER | L | — |
+| **UX.2** | [Core component library and adoption ratchet](../../completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md) (shipped — library + ratchet; migration ongoing) | BLOCKER | XL | UX.1 |
 | **UX.3** | [Typography and reading system](UX.3-typography-and-reading-system.md) | MAJOR | M | UX.1 |
 
 ### Accessibility — legal floor, not polish

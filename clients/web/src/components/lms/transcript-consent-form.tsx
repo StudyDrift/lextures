@@ -73,11 +73,11 @@ export function TranscriptConsentForm({ orderId, onSigned, onCancel }: Transcrip
   }
 
   if (loading) {
-    return <p className="mt-4 text-sm text-slate-500">{t('transcripts.consent.loading')}</p>
+    return <p className="mt-4 text-sm text-fg-muted">{t('transcripts.consent.loading')}</p>
   }
   if (!preview) {
     return (
-      <p role="alert" className="mt-4 text-sm text-red-600 dark:text-red-400">
+      <p role="alert" className="mt-4 text-sm text-danger-fg">
         {error ?? t('transcripts.consent.errorLoad')}
       </p>
     )
@@ -93,7 +93,7 @@ export function TranscriptConsentForm({ orderId, onSigned, onCancel }: Transcrip
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium dark:border-neutral-700"
+            className="rounded-md border border-border-strong px-4 py-2 text-sm font-medium dark:border-border-default"
           >
             {t('transcripts.order.close')}
           </button>
@@ -104,7 +104,7 @@ export function TranscriptConsentForm({ orderId, onSigned, onCancel }: Transcrip
 
   if (!preview.requiresConsent) {
     return (
-      <p className="mt-5 text-sm text-slate-600 dark:text-neutral-400" role="status">
+      <p className="mt-5 text-sm text-fg-muted" role="status">
         {t('transcripts.consent.notRequired')}
       </p>
     )
@@ -112,43 +112,43 @@ export function TranscriptConsentForm({ orderId, onSigned, onCancel }: Transcrip
 
   return (
     <div className="mt-5 space-y-4">
-      <p className="text-sm text-slate-600 dark:text-neutral-400">{t('transcripts.consent.help')}</p>
+      <p className="text-sm text-fg-muted">{t('transcripts.consent.help')}</p>
 
       <div>
-        <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-50">
+        <h3 className="text-sm font-semibold text-fg-default">
           {t('transcripts.consent.recipientsHeading')}
         </h3>
-        <ul className="mt-2 list-inside list-disc text-sm text-slate-700 dark:text-neutral-300">
+        <ul className="mt-2 list-inside list-disc text-sm text-fg-muted">
           {preview.recipients.map((r) => (
             <li key={r.id}>
-              {r.name} <span className="text-xs text-slate-500">({r.type})</span>
+              {r.name} <span className="text-xs text-fg-muted">({r.type})</span>
             </li>
           ))}
         </ul>
-        <p className="mt-2 text-xs text-slate-500 dark:text-neutral-400">
+        <p className="mt-2 text-xs text-fg-muted">
           {t('transcripts.consent.scopeLabel')}: {preview.scope}
         </p>
-        <p className="text-xs text-slate-500 dark:text-neutral-400">
+        <p className="text-xs text-fg-muted">
           {t('transcripts.consent.purposeLabel')}: {preview.purpose}
         </p>
       </div>
 
       <div>
-        <h3 id={textId} className="text-sm font-semibold text-slate-900 dark:text-neutral-50">
+        <h3 id={textId} className="text-sm font-semibold text-fg-default">
           {t('transcripts.consent.authorizationHeading')}
         </h3>
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-fg-muted">
           {t('transcripts.consent.versionLabel', { version: preview.textVersion })}
         </p>
         <pre
           aria-labelledby={textId}
-          className="mt-2 max-h-56 overflow-y-auto whitespace-pre-wrap rounded-md border border-slate-200 bg-slate-50 p-3 text-xs text-slate-800 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-200"
+          className="mt-2 max-h-56 overflow-y-auto whitespace-pre-wrap rounded-md border border-border-default bg-surface-base p-3 text-xs text-fg-default dark:border-border-default dark:bg-surface-base dark:text-fg-default"
         >
           {preview.authorizationText}
         </pre>
       </div>
 
-      <label htmlFor={typedId} className="block text-sm font-medium text-slate-800 dark:text-neutral-100">
+      <label htmlFor={typedId} className="block text-sm font-medium text-fg-default">
         {t('transcripts.consent.typedSignature')}
         <input
           id={typedId}
@@ -156,31 +156,31 @@ export function TranscriptConsentForm({ orderId, onSigned, onCancel }: Transcrip
           autoComplete="name"
           value={typedName}
           onChange={(e) => setTypedName(e.target.value)}
-          className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+          className="mt-1 w-full rounded-md border border-border-strong bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
           aria-describedby={`${typedId}-hint`}
         />
-        <span id={`${typedId}-hint`} className="mt-1 block text-xs text-slate-500">
+        <span id={`${typedId}-hint`} className="mt-1 block text-xs text-fg-muted">
           {t('transcripts.consent.typedHint')}
         </span>
       </label>
 
-      <label htmlFor={agreeId} className="flex items-start gap-2 text-sm text-slate-800 dark:text-neutral-100">
+      <label htmlFor={agreeId} className="flex items-start gap-2 text-sm text-fg-default">
         <input
           id={agreeId}
           type="checkbox"
           checked={agree}
           onChange={(e) => setAgree(e.target.checked)}
-          className="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600"
+          className="mt-1 h-4 w-4 rounded border-border-strong text-accent-fg"
         />
         <span>{t('transcripts.consent.agreeCheckbox')}</span>
       </label>
 
-      <p className="text-xs text-slate-500 dark:text-neutral-400">
+      <p className="text-xs text-fg-muted">
         {t('transcripts.consent.dateStamp', { date: new Date().toLocaleString() })}
       </p>
 
       {error ? (
-        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+        <p role="alert" className="text-sm text-danger-fg">
           {error}
         </p>
       ) : null}
@@ -191,7 +191,7 @@ export function TranscriptConsentForm({ orderId, onSigned, onCancel }: Transcrip
             type="button"
             onClick={onCancel}
             disabled={busy}
-            className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium dark:border-neutral-700"
+            className="rounded-md border border-border-strong px-4 py-2 text-sm font-medium dark:border-border-default"
           >
             {t('transcripts.order.cancel')}
           </button>
@@ -200,7 +200,7 @@ export function TranscriptConsentForm({ orderId, onSigned, onCancel }: Transcrip
           type="button"
           onClick={() => void handleSign()}
           disabled={busy}
-          className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
+          className="rounded-md bg-accent-solid px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
         >
           {busy ? t('transcripts.consent.signing') : t('transcripts.consent.sign')}
         </button>

@@ -1,0 +1,63 @@
+/*
+ * UX.1 / AN.1 — Motion tokens relocated into the token layer.
+ * All original variable names are preserved as aliases (FR-13).
+ */
+
+:root {
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-exit: cubic-bezier(0.3, 0, 1, 1);
+  --ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  /* Bubble spring (response ≈ 0.5s, damping ≈ 0.72). Fallback when linear() unsupported. */
+  --ease-bubble: var(--ease-standard);
+  --dur-instant: 100ms;
+  --dur-fast: 150ms;
+  --dur-base: 220ms;
+  --dur-slow: 320ms;
+  --dur-deliberate: 480ms;
+  --stagger-step: 40ms;
+  --motion-enter-translate: 12px;
+  --motion-enter-scale: 0.97;
+  --motion-press-scale: 0.97;
+
+  /* Aliases used by Tailwind @theme / duration utilities */
+  --ease-lx-standard: var(--ease-standard);
+  --ease-lx-exit: var(--ease-exit);
+  --ease-lx-bubble: var(--ease-bubble);
+  --duration-instant: 100ms;
+  --duration-fast: 150ms;
+  --duration-base: 220ms;
+  --duration-slow: 320ms;
+  --duration-deliberate: 480ms;
+}
+
+@supports (animation-timing-function: linear(0, 1)) {
+  :root {
+    --ease-bubble: linear(
+      0,
+      0.044,
+      0.15,
+      0.2862,
+      0.4304,
+      0.5678,
+      0.6897,
+      0.7919,
+      0.8733,
+      0.9349,
+      0.979,
+      1.0086,
+      1.0265,
+      1.0356,
+      1.0384,
+      1.037,
+      1.0331,
+      1.028,
+      1.0225,
+      1.0171,
+      1.0124,
+      1.0084,
+      1.0052,
+      1.0027,
+      1
+    );
+  }
+}

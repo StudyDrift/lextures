@@ -17,11 +17,6 @@ import (
 // handleOIDCLogin is GET /auth/oidc/{provider}/login — starts the OIDC code+PKCE flow.
 func (d Deps) handleOIDCLogin() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.Pool == nil {
 			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "Database is not configured.")
 			return
@@ -71,11 +66,6 @@ func (d Deps) handleOIDCLogin() http.HandlerFunc {
 // handleOIDCCallback is GET /auth/oidc/{provider}/callback — exchanges code, returns HTML to app with fragment token.
 func (d Deps) handleOIDCCallback() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.Pool == nil {
 			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "Database is not configured.")
 			return
@@ -166,11 +156,6 @@ type nativeGoogleBody struct {
 // handleOIDCAppleNative is POST /api/v1/auth/oidc/apple/native — verifies an AuthenticationServices ID token.
 func (d Deps) handleOIDCAppleNative() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.Pool == nil {
 			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "Database is not configured.")
 			return
@@ -213,11 +198,6 @@ func (d Deps) handleOIDCAppleNative() http.HandlerFunc {
 // handleOIDCGoogleNative is POST /api/v1/auth/oidc/google/native — verifies a Credential Manager Google ID token.
 func (d Deps) handleOIDCGoogleNative() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.Pool == nil {
 			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "Database is not configured.")
 			return

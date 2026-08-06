@@ -19,7 +19,7 @@ export function EmbeddedWhiteboard({
 
   return (
     <div
-      className={`overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-neutral-800 dark:bg-neutral-950 ${className ?? ''}`}
+      className={`overflow-hidden rounded-xl border border-border-default bg-surface-raised dark:border-border-subtle dark:bg-surface-base ${className ?? ''}`}
       onMouseDown={(e) => e.stopPropagation()}
       onPointerDown={(e) => e.stopPropagation()}
     >

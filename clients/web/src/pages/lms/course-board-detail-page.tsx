@@ -364,17 +364,17 @@ export default function CourseBoardDetailPage() {
       <LmsPage title={board?.title ?? t('boards.detail.title')} fillHeight omitHeader>
         {loading ? (
           <div className="flex min-h-48 flex-1 items-center justify-center">
-            <span className="text-sm text-slate-500 dark:text-neutral-400">{t('common.loading')}</span>
+            <span className="text-sm text-fg-muted">{t('common.loading')}</span>
           </div>
         ) : error ? (
-          <div className="rounded-md bg-red-50 p-4 text-sm text-red-700 dark:bg-red-950/30 dark:text-red-400">
+          <div className="rounded-md bg-red-50 p-4 text-sm text-danger-fg dark:bg-red-950/30 dark:text-red-400">
             {error}
           </div>
         ) : board ? (
           <div
             className={
               boardFullscreen
-                ? 'fixed inset-0 z-[100] flex min-h-0 flex-col gap-3 overflow-hidden bg-white p-3 dark:bg-neutral-900 sm:p-4'
+                ? 'fixed inset-0 z-[100] flex min-h-0 flex-col gap-3 overflow-hidden bg-surface-raised p-3 dark:bg-surface-raised sm:p-4'
                 : // Top bar is h-14 (3.5rem). LmsPage omitHeader adds ~1.25–1.75rem vertical padding.
                   // Explicit height is required because RouteTransition does not stretch flex-1.
                   'flex h-[calc(100dvh-5.25rem)] min-h-0 flex-1 flex-col gap-3 overflow-hidden'
@@ -385,7 +385,7 @@ export default function CourseBoardDetailPage() {
                 {!boardFullscreen ? (
                   <Link
                     to={listBase}
-                    className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+                    className="inline-flex items-center gap-1.5 text-sm font-medium text-accent-fg hover:text-accent-fg dark:text-indigo-400 dark:hover:text-indigo-300"
                   >
                     <ArrowLeft className="size-4" aria-hidden />
                     {t('boards.detail.back')}
@@ -397,13 +397,13 @@ export default function CourseBoardDetailPage() {
                       value={titleDraft}
                       onChange={(e) => setTitleDraft(e.target.value)}
                       maxLength={200}
-                      className="rounded-md border border-slate-300 px-3 py-1.5 text-lg font-semibold dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                      className="rounded-md border border-border-strong px-3 py-1.5 text-lg font-semibold dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
                       aria-label={t('boards.create.titleLabel')}
                     />
                     <button
                       type="button"
                       onClick={() => void saveRename()}
-                      className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white"
+                      className="rounded-md bg-accent-solid px-3 py-1.5 text-sm font-medium text-white"
                     >
                       {t('boards.rename.save')}
                     </button>
@@ -413,18 +413,18 @@ export default function CourseBoardDetailPage() {
                         setRenaming(false)
                         setTitleDraft(board.title)
                       }}
-                      className="rounded-md px-3 py-1.5 text-sm text-slate-600 dark:text-neutral-300"
+                      className="rounded-md px-3 py-1.5 text-sm text-fg-muted"
                     >
                       {t('dialogs.cancel')}
                     </button>
                   </div>
                 ) : (
-                  <h1 className="truncate text-2xl font-semibold text-slate-900 dark:text-neutral-100">
+                  <h1 className="truncate text-2xl font-semibold text-fg-default">
                     {board.title}
                   </h1>
                 )}
                 {board.description && !boardFullscreen ? (
-                  <p className="text-sm text-slate-600 dark:text-neutral-300">{board.description}</p>
+                  <p className="text-sm text-fg-muted">{board.description}</p>
                 ) : null}
               </div>
               <div className="relative z-20 flex flex-wrap items-center gap-2">
@@ -435,7 +435,7 @@ export default function CourseBoardDetailPage() {
                   </>
                 ) : null}
                 {postingBlocked ? (
-                  <p className="text-sm text-amber-700 dark:text-amber-400" role="status">
+                  <p className="text-sm text-warning-fg dark:text-amber-400" role="status">
                     {board.locked ? t('boards.moderation.lockedBanner') : t('boards.moderation.frozenBanner')}
                   </p>
                 ) : (board.capabilities?.canPost ?? board.canPost !== false) ? (
@@ -450,7 +450,7 @@ export default function CourseBoardDetailPage() {
                 ) : null}
                 <button
                   type="button"
-                  className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-border-default px-3 py-1.5 text-sm font-medium text-fg-muted hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
                   onClick={() => setBoardFullscreen((v) => !v)}
                   aria-pressed={boardFullscreen}
                   aria-label={
@@ -471,7 +471,7 @@ export default function CourseBoardDetailPage() {
                 </button>
                 <button
                   type="button"
-                  className="rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                  className="rounded-md border border-border-default px-3 py-1.5 text-sm font-medium text-fg-muted hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
                   onClick={() => setPresentOpen(true)}
                 >
                   {t('boards.present.action')}
@@ -483,15 +483,15 @@ export default function CourseBoardDetailPage() {
                       aria-label={t('boards.detail.menuAria')}
                       aria-expanded={menuOpen}
                       onClick={() => setMenuOpen((o) => !o)}
-                      className="rounded-md border border-slate-200 p-2 text-slate-600 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                      className="rounded-md border border-border-default p-2 text-fg-muted hover:bg-surface-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-border-default dark:text-fg-muted dark:hover:bg-surface-overlay"
                     >
                       <MoreHorizontal className="h-5 w-5" aria-hidden />
                     </button>
                     {menuOpen ? (
-                      <div className="absolute end-0 z-10 mt-1 w-52 rounded-md border border-slate-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-900">
+                      <div className="absolute end-0 z-10 mt-1 w-52 rounded-md border border-border-default bg-surface-raised py-1 shadow-lg dark:border-border-default dark:bg-surface-raised">
                         <button
                           type="button"
-                          className="block w-full px-3 py-2 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                          className="block w-full px-3 py-2 text-start text-sm hover:bg-surface-base dark:hover:bg-surface-overlay"
                           onClick={() => {
                             setMenuOpen(false)
                             setRenaming(true)
@@ -501,7 +501,7 @@ export default function CourseBoardDetailPage() {
                         </button>
                         <button
                           type="button"
-                          className="block w-full px-3 py-2 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                          className="block w-full px-3 py-2 text-start text-sm hover:bg-surface-base dark:hover:bg-surface-overlay"
                           onClick={() => {
                             setMenuOpen(false)
                             setShareOpen(true)
@@ -511,7 +511,7 @@ export default function CourseBoardDetailPage() {
                         </button>
                         <button
                           type="button"
-                          className="block w-full px-3 py-2 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                          className="block w-full px-3 py-2 text-start text-sm hover:bg-surface-base dark:hover:bg-surface-overlay"
                           onClick={() => {
                             setMenuOpen(false)
                             setQuickJoinOpen(true)
@@ -521,7 +521,7 @@ export default function CourseBoardDetailPage() {
                         </button>
                         <button
                           type="button"
-                          className="block w-full px-3 py-2 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                          className="block w-full px-3 py-2 text-start text-sm hover:bg-surface-base dark:hover:bg-surface-overlay"
                           onClick={() => {
                             setMenuOpen(false)
                             setExportOpen(true)
@@ -531,7 +531,7 @@ export default function CourseBoardDetailPage() {
                         </button>
                         <button
                           type="button"
-                          className="block w-full px-3 py-2 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                          className="block w-full px-3 py-2 text-start text-sm hover:bg-surface-base dark:hover:bg-surface-overlay"
                           onClick={() => {
                             setMenuOpen(false)
                             setAnalyticsOpen(true)
@@ -541,7 +541,7 @@ export default function CourseBoardDetailPage() {
                         </button>
                         <button
                           type="button"
-                          className="block w-full px-3 py-2 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                          className="block w-full px-3 py-2 text-start text-sm hover:bg-surface-base dark:hover:bg-surface-overlay"
                           onClick={() => {
                             setMenuOpen(false)
                             setModerationOpen(true)
@@ -551,7 +551,7 @@ export default function CourseBoardDetailPage() {
                         </button>
                         <button
                           type="button"
-                          className="block w-full px-3 py-2 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                          className="block w-full px-3 py-2 text-start text-sm hover:bg-surface-base dark:hover:bg-surface-overlay"
                           onClick={() => {
                             setMenuOpen(false)
                             setSettingsOpen((o) => !o)
@@ -561,7 +561,7 @@ export default function CourseBoardDetailPage() {
                         </button>
                         <button
                           type="button"
-                          className="block w-full px-3 py-2 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                          className="block w-full px-3 py-2 text-start text-sm hover:bg-surface-base dark:hover:bg-surface-overlay"
                           onClick={() => {
                             setMenuOpen(false)
                             setSaveTemplateOpen(true)
@@ -571,7 +571,7 @@ export default function CourseBoardDetailPage() {
                         </button>
                         <button
                           type="button"
-                          className="block w-full px-3 py-2 text-start text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
+                          className="block w-full px-3 py-2 text-start text-sm text-danger-fg hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
                           onClick={() => {
                             setMenuOpen(false)
                             void archiveBoard()
@@ -602,15 +602,15 @@ export default function CourseBoardDetailPage() {
             </div>
 
             {canManageBoard && settingsOpen ? (
-              <div className="max-h-48 shrink-0 space-y-4 overflow-y-auto rounded-md border border-slate-200 bg-white p-3 dark:border-neutral-700 dark:bg-neutral-900">
+              <div className="max-h-48 shrink-0 space-y-4 overflow-y-auto rounded-md border border-border-default bg-surface-raised p-3 dark:border-border-default dark:bg-surface-raised">
                 <label className="flex flex-col gap-1 text-sm">
-                  <span className="font-medium text-slate-800 dark:text-neutral-100">
+                  <span className="font-medium text-fg-default">
                     {t('boards.settings.reactionMode')}
                   </span>
                   <select
                     value={board.reactionMode}
                     onChange={(e) => void handleReactionMode(e.target.value as BoardReactionMode)}
-                    className="max-w-xs rounded-md border border-slate-300 px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+                    className="max-w-xs rounded-md border border-border-strong px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-overlay"
                     aria-label={t('boards.settings.reactionMode')}
                   >
                     {(['none', 'like', 'vote', 'star', 'grade'] as BoardReactionMode[]).map((mode) => (
@@ -620,16 +620,16 @@ export default function CourseBoardDetailPage() {
                     ))}
                   </select>
                 </label>
-                <p className="text-xs text-slate-500 dark:text-neutral-400">
+                <p className="text-xs text-fg-muted">
                   {t('boards.settings.assignmentHint')}
                 </p>
                 {minorsFloor ? (
-                  <p className="text-xs text-amber-700 dark:text-amber-400" role="status">
+                  <p className="text-xs text-warning-fg dark:text-amber-400" role="status">
                     {t('boards.moderation.minorsFloor')}
                   </p>
                 ) : null}
                 <label className="flex flex-col gap-1 text-sm">
-                  <span className="font-medium text-slate-800 dark:text-neutral-100">
+                  <span className="font-medium text-fg-default">
                     {t('boards.moderation.modeLabel')}
                   </span>
                   <select
@@ -638,14 +638,14 @@ export default function CourseBoardDetailPage() {
                     onChange={(e) =>
                       void patchModeration({ moderationMode: e.target.value as BoardModerationMode })
                     }
-                    className="max-w-xs rounded-md border border-slate-300 px-2 py-1.5 text-sm disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-800"
+                    className="max-w-xs rounded-md border border-border-strong px-2 py-1.5 text-sm disabled:opacity-60 dark:border-border-default dark:bg-surface-overlay"
                   >
                     <option value="open">{t('boards.moderation.mode.open')}</option>
                     <option value="approval">{t('boards.moderation.mode.approval')}</option>
                   </select>
                 </label>
                 <label className="flex flex-col gap-1 text-sm">
-                  <span className="font-medium text-slate-800 dark:text-neutral-100">
+                  <span className="font-medium text-fg-default">
                     {t('boards.moderation.filterLabel')}
                   </span>
                   <select
@@ -654,7 +654,7 @@ export default function CourseBoardDetailPage() {
                     onChange={(e) =>
                       void patchModeration({ filterAction: e.target.value as BoardFilterAction })
                     }
-                    className="max-w-xs rounded-md border border-slate-300 px-2 py-1.5 text-sm disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-800"
+                    className="max-w-xs rounded-md border border-border-strong px-2 py-1.5 text-sm disabled:opacity-60 dark:border-border-default dark:bg-surface-overlay"
                   >
                     <option value="flag">{t('boards.moderation.filter.flag')}</option>
                     <option value="block">{t('boards.moderation.filter.block')}</option>
@@ -664,14 +664,14 @@ export default function CourseBoardDetailPage() {
                   <button
                     type="button"
                     onClick={() => void patchModeration({ locked: !board.locked })}
-                    className="rounded-md border border-slate-300 px-3 py-1.5 text-sm dark:border-neutral-600"
+                    className="rounded-md border border-border-strong px-3 py-1.5 text-sm dark:border-border-default"
                   >
                     {board.locked ? t('boards.moderation.unlock') : t('boards.moderation.lock')}
                   </button>
                   <button
                     type="button"
                     onClick={() => void patchModeration({ freezeMinutes: 5 })}
-                    className="rounded-md border border-slate-300 px-3 py-1.5 text-sm dark:border-neutral-600"
+                    className="rounded-md border border-border-strong px-3 py-1.5 text-sm dark:border-border-default"
                   >
                     {t('boards.moderation.freeze5')}
                   </button>
@@ -679,7 +679,7 @@ export default function CourseBoardDetailPage() {
                     <button
                       type="button"
                       onClick={() => void patchModeration({ frozenUntil: '' })}
-                      className="rounded-md border border-slate-300 px-3 py-1.5 text-sm dark:border-neutral-600"
+                      className="rounded-md border border-border-strong px-3 py-1.5 text-sm dark:border-border-default"
                     >
                       {t('boards.moderation.unfreeze')}
                     </button>
@@ -689,7 +689,7 @@ export default function CourseBoardDetailPage() {
             ) : null}
 
             <div
-              className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-dashed border-slate-300 bg-slate-50 p-3 dark:border-neutral-700 dark:bg-neutral-900/40 sm:p-4"
+              className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-dashed border-border-strong bg-surface-base p-3 dark:border-border-default/40 sm:p-4"
               role="region"
               aria-label={t('boards.detail.canvasAria')}
             >

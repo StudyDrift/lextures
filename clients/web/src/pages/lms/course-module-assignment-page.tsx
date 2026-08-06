@@ -704,7 +704,7 @@ export default function CourseModuleAssignmentPage() {
   if (!courseCode || !itemId) {
     return (
       <LmsPage title="Assignment" description="">
-        <p className="mt-6 text-sm text-slate-500">Invalid link.</p>
+        <p className="mt-6 text-sm text-fg-muted">Invalid link.</p>
       </LmsPage>
     )
   }
@@ -730,7 +730,7 @@ export default function CourseModuleAssignmentPage() {
               type="button"
               onClick={cancelEdit}
               disabled={saving}
-              className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-xl border border-border-strong bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-60"
             >
               Cancel
             </button>
@@ -738,7 +738,7 @@ export default function CourseModuleAssignmentPage() {
               type="button"
               onClick={() => void save()}
               disabled={saving}
-              className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {saving ? 'Saving…' : 'Save'}
             </button>
@@ -782,7 +782,7 @@ export default function CourseModuleAssignmentPage() {
       }
     >
       <p className="mt-2 text-start text-sm">
-        <Link to={backTo} className="font-medium text-indigo-600 hover:text-indigo-500">
+        <Link to={backTo} className="font-medium text-accent-fg hover:text-indigo-500">
           ← Back to modules
         </Link>
       </p>
@@ -793,40 +793,40 @@ export default function CourseModuleAssignmentPage() {
             {loadError}
           </p>
         )}
-        {loading && <p className="mt-8 text-sm text-slate-500">Loading…</p>}
+        {loading && <p className="mt-8 text-sm text-fg-muted">Loading…</p>}
 
         {!loading && !loadError && !editing && (
           <div className="mt-8 space-y-6">
-            <div className="rounded-2xl border border-slate-200/90 bg-slate-50/70 p-4 dark:border-neutral-600 dark:bg-neutral-900/90">
+            <div className="rounded-2xl border border-slate-200/90 bg-slate-50/70 p-4 dark:border-border-default/90">
               <dl className="space-y-2 text-sm">
                 {assignmentDateTimeIsSet(dueAt) ? (
                   <div className="flex justify-between gap-4">
-                    <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Due date</dt>
-                    <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
+                    <dt className="shrink-0 text-fg-muted">Due date</dt>
+                    <dd className="min-w-0 text-end font-medium text-fg-default">
                       {formatOptionalDateTime(dueAt, courseTimezone)}
                     </dd>
                   </div>
                 ) : null}
                 {assignmentDateTimeIsSet(availableFromAt) ? (
                   <div className="flex justify-between gap-4">
-                    <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Visibility start</dt>
-                    <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
+                    <dt className="shrink-0 text-fg-muted">Visibility start</dt>
+                    <dd className="min-w-0 text-end font-medium text-fg-default">
                       {formatOptionalDateTime(availableFromAt, courseTimezone)}
                     </dd>
                   </div>
                 ) : null}
                 {assignmentDateTimeIsSet(availableUntilAt) ? (
                   <div className="flex justify-between gap-4">
-                    <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Visibility end</dt>
-                    <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
+                    <dt className="shrink-0 text-fg-muted">Visibility end</dt>
+                    <dd className="min-w-0 text-end font-medium text-fg-default">
                       {formatOptionalDateTime(availableUntilAt, courseTimezone)}
                     </dd>
                   </div>
                 ) : null}
                 {submissionTypesAreSet(submissionAllowText, submissionAllowFileUpload, submissionAllowUrl) ? (
                   <div className="flex justify-between gap-4">
-                    <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Submission types</dt>
-                    <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
+                    <dt className="shrink-0 text-fg-muted">Submission types</dt>
+                    <dd className="min-w-0 text-end font-medium text-fg-default">
                       {formatSubmissionTypes(submissionAllowText, submissionAllowFileUpload, submissionAllowUrl)}
                     </dd>
                   </div>
@@ -834,49 +834,49 @@ export default function CourseModuleAssignmentPage() {
                 {originalityDetection !== 'disabled' ? (
                   <>
                     <div className="flex justify-between gap-4">
-                      <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Originality checks</dt>
-                      <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
+                      <dt className="shrink-0 text-fg-muted">Originality checks</dt>
+                      <dd className="min-w-0 text-end font-medium text-fg-default">
                         {formatOriginalityDetection(originalityDetection)}
                       </dd>
                     </div>
                     <div className="flex justify-between gap-4">
-                      <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Student score visibility</dt>
-                      <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
+                      <dt className="shrink-0 text-fg-muted">Student score visibility</dt>
+                      <dd className="min-w-0 text-end font-medium text-fg-default">
                         {formatOriginalityStudentVisibility(originalityStudentVisibility)}
                       </dd>
                     </div>
                   </>
                 ) : null}
                 <div className="flex justify-between gap-4">
-                  <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Late submission</dt>
-                  <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
+                  <dt className="shrink-0 text-fg-muted">Late submission</dt>
+                  <dd className="min-w-0 text-end font-medium text-fg-default">
                     {formatLateSubmissionSummary(lateSubmissionPolicy, latePenaltyPercent)}
                   </dd>
                 </div>
                 {pointsWorth != null ? (
                   <div className="flex justify-between gap-4">
-                    <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Points</dt>
-                    <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
+                    <dt className="shrink-0 text-fg-muted">Points</dt>
+                    <dd className="min-w-0 text-end font-medium text-fg-default">
                       {formatPointsWorth(pointsWorth)}
                     </dd>
                   </div>
                 ) : null}
                 {assignmentGroupId ? (
                   <div className="flex justify-between gap-4">
-                    <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Assignment group</dt>
-                    <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
+                    <dt className="shrink-0 text-fg-muted">Assignment group</dt>
+                    <dd className="min-w-0 text-end font-medium text-fg-default">
                       {assignmentGroupDisplayName(assignmentGroupId, gradingGroups)}
                     </dd>
                   </div>
                 ) : null}
                 {rubric && rubric.criteria.length > 0 ? (
                   <div className="flex justify-between gap-4">
-                    <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Rubric</dt>
-                    <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
+                    <dt className="shrink-0 text-fg-muted">Rubric</dt>
+                    <dd className="min-w-0 text-end font-medium text-fg-default">
                       <button
                         type="button"
                         onClick={() => setRubricViewerOpen(true)}
-                        className="font-medium text-indigo-600 underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 dark:text-indigo-400"
+                        className="font-medium text-accent-fg underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 dark:text-indigo-400"
                         aria-haspopup="dialog"
                       >
                         {rubric.criteria.length === 1
@@ -888,8 +888,8 @@ export default function CourseModuleAssignmentPage() {
                 ) : null}
                 {blindGrading ? (
                   <div className="flex justify-between gap-4">
-                    <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Blind grading</dt>
-                    <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
+                    <dt className="shrink-0 text-fg-muted">Blind grading</dt>
+                    <dd className="min-w-0 text-end font-medium text-fg-default">
                       {identitiesRevealedAt
                         ? `Identities revealed ${formatOptionalDateTime(identitiesRevealedAt)}`
                         : 'Active (identities hidden)'}
@@ -898,16 +898,16 @@ export default function CourseModuleAssignmentPage() {
                 ) : null}
                 {viewerIsCourseStaff && moderatedGrading ? (
                   <div className="flex justify-between gap-4">
-                    <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Moderated grading</dt>
-                    <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
+                    <dt className="shrink-0 text-fg-muted">Moderated grading</dt>
+                    <dd className="min-w-0 text-end font-medium text-fg-default">
                       Enabled ({moderationThresholdPct}% threshold)
                     </dd>
                   </div>
                 ) : null}
                 {requiresAssignmentAccessCode ? (
                   <div className="flex justify-between gap-4">
-                    <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Access code</dt>
-                    <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">Required</dd>
+                    <dt className="shrink-0 text-fg-muted">Access code</dt>
+                    <dd className="min-w-0 text-end font-medium text-fg-default">Required</dd>
                   </div>
                 ) : null}
               </dl>

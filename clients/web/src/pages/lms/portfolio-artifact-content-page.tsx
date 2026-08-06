@@ -129,7 +129,7 @@ export default function PortfolioArtifactContentPage() {
   if (!pid || !aid) {
     return (
       <LmsPage title="Content page" description="">
-        <p className="mt-6 text-sm text-slate-500">Invalid link.</p>
+        <p className="mt-6 text-sm text-fg-muted">Invalid link.</p>
       </LmsPage>
     )
   }
@@ -149,7 +149,7 @@ export default function PortfolioArtifactContentPage() {
               type="button"
               onClick={cancelEdit}
               disabled={saving}
-              className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+              className="rounded-xl border border-border-strong bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-60 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
             >
               Cancel
             </button>
@@ -157,7 +157,7 @@ export default function PortfolioArtifactContentPage() {
               type="button"
               onClick={() => void save()}
               disabled={saving}
-              className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {saving ? 'Saving…' : 'Save'}
             </button>
@@ -169,7 +169,7 @@ export default function PortfolioArtifactContentPage() {
               type="button"
               onClick={beginEdit}
               disabled={loading || Boolean(loadError)}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+              className="inline-flex items-center gap-2 rounded-xl border border-border-strong bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-60 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
             >
               <Pencil className="h-4 w-4" aria-hidden />
               Edit
@@ -179,7 +179,7 @@ export default function PortfolioArtifactContentPage() {
       }
     >
       <p className="mt-2 text-start text-sm">
-        <Link to={backTo} className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300">
+        <Link to={backTo} className="font-medium text-accent-fg hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300">
           ← Back to portfolio
         </Link>
       </p>
@@ -201,7 +201,7 @@ export default function PortfolioArtifactContentPage() {
             {loadError}
           </p>
         )}
-        {loading && <p className="mt-8 text-sm text-slate-500">Loading…</p>}
+        {loading && <p className="mt-8 text-sm text-fg-muted">Loading…</p>}
 
         {!loading && !loadError && !editing && (
           <div className="mt-8 space-y-6 text-[1.0625rem] leading-relaxed">

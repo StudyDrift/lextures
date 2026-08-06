@@ -70,7 +70,7 @@ export default function ReviewSessionPage() {
   if (!userId) {
     return (
       <LmsPage title="Review" description="Sign in to use spaced repetition.">
-        <p className="mt-6 text-sm text-slate-600 dark:text-neutral-400">You need to be signed in.</p>
+        <p className="mt-6 text-sm text-fg-muted">You need to be signed in.</p>
       </LmsPage>
     )
   }
@@ -83,7 +83,7 @@ export default function ReviewSessionPage() {
       <div className="mt-4">
         <Link
           to="/"
-          className="inline-flex items-center gap-2 text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
+          className="inline-flex items-center gap-2 text-sm font-medium text-accent-fg hover:text-indigo-500 dark:text-indigo-400"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden />
           Back to dashboard
@@ -96,12 +96,12 @@ export default function ReviewSessionPage() {
         </p>
       )}
 
-      {loading && <p className="mt-8 text-sm text-slate-500 dark:text-neutral-400">Loading queue…</p>}
+      {loading && <p className="mt-8 text-sm text-fg-muted">Loading queue…</p>}
 
       {!loading && !current && (
-        <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-8 text-center dark:border-neutral-800 dark:bg-neutral-950">
-          <p className="text-sm font-medium text-slate-800 dark:text-neutral-100">You&apos;re caught up</p>
-          <p className="mt-2 text-xs text-slate-500 dark:text-neutral-400">
+        <div className="mt-8 rounded-2xl border border-border-default bg-surface-raised p-8 text-center dark:border-border-subtle dark:bg-surface-base">
+          <p className="text-sm font-medium text-fg-default">You&apos;re caught up</p>
+          <p className="mt-2 text-xs text-fg-muted">
             When instructors enable SRS on a course and tag questions, due items appear here.
           </p>
         </div>
@@ -109,11 +109,11 @@ export default function ReviewSessionPage() {
 
       {!loading && current && (
         <div className="mt-8 space-y-6">
-          <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500 dark:text-neutral-400">
+          <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-fg-muted">
             <span>
               {reviewedCount + 1} of {totalDue || queue.length} due
             </span>
-            <span className="font-mono text-[11px] text-slate-400 dark:text-neutral-500">{current.courseTitle}</span>
+            <span className="font-mono text-[11px] text-fg-subtle">{current.courseTitle}</span>
           </div>
           <div
             role="region"
@@ -125,18 +125,18 @@ export default function ReviewSessionPage() {
                 setRevealed((r) => !r)
               }
             }}
-            className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm outline-none ring-indigo-500 focus-visible:ring-2 dark:border-neutral-800 dark:bg-neutral-950"
+            className="rounded-2xl border border-border-default bg-surface-raised p-6 shadow-sm outline-none ring-indigo-500 focus-visible:ring-2 dark:border-border-subtle dark:bg-surface-base"
           >
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-neutral-500">
+            <p className="text-xs font-semibold uppercase tracking-wide text-fg-subtle">
               Question
             </p>
-            <div className="mt-3 whitespace-pre-wrap text-base text-slate-900 dark:text-neutral-50">{current.stem}</div>
+            <div className="mt-3 whitespace-pre-wrap text-base text-fg-default">{current.stem}</div>
             {current.profileRationale ? (
               <ProfileRationaleChip rationale={current.profileRationale} className="mt-4" />
             ) : null}
             <button
               type="button"
-              className="mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-100 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+              className="mt-6 rounded-xl border border-border-default bg-surface-base px-4 py-2 text-sm font-medium text-fg-default transition-[background-color,color,border-color] hover:bg-surface-sunken dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
               onClick={() => setRevealed((r) => !r)}
             >
               {revealed ? 'Hide answer' : 'Show answer (Space)'}
@@ -172,7 +172,7 @@ export default function ReviewSessionPage() {
             <GradeButton
               label="Good"
               shortcut="3"
-              color="bg-indigo-600 hover:bg-indigo-500"
+              color="bg-accent-solid hover:bg-indigo-500"
               onClick={() => void onGrade('good')}
             />
             <GradeButton

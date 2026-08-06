@@ -73,11 +73,6 @@ func kitJSON(k quizgame.Kit) map[string]any {
 // handleListQuizKits is GET /api/v1/courses/{course_code}/live-quizzes/kits.
 func (d Deps) handleListQuizKits() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, _, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -123,11 +118,6 @@ func (d Deps) handleCreateQuizKit() http.HandlerFunc {
 		Tags        []string `json:"tags"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -181,11 +171,6 @@ func (d Deps) handleCreateQuizKit() http.HandlerFunc {
 // handleGetQuizKit is GET /api/v1/courses/{course_code}/live-quizzes/kits/{kit_id}.
 func (d Deps) handleGetQuizKit() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, _, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -220,11 +205,6 @@ func (d Deps) handlePatchQuizKit() http.HandlerFunc {
 		Archived      *bool     `json:"archived"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -286,11 +266,6 @@ func (d Deps) handleDuplicateQuizKit() http.HandlerFunc {
 // handleArchiveQuizKit is POST /api/v1/courses/{course_code}/live-quizzes/kits/{kit_id}/archive.
 func (d Deps) handleArchiveQuizKit() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -326,11 +301,6 @@ func (d Deps) handleArchiveQuizKit() http.HandlerFunc {
 // handleRestoreQuizKit is POST /api/v1/courses/{course_code}/live-quizzes/kits/{kit_id}/restore.
 func (d Deps) handleRestoreQuizKit() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return

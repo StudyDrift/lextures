@@ -168,8 +168,8 @@ export function TranscriptsSettingsPanel() {
   if (featuresLoading) {
     return (
       <section>
-        <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Transcripts</h2>
-        <p className="mt-4 text-sm text-slate-500">Loading…</p>
+        <h2 className="text-base font-semibold text-fg-default">Transcripts</h2>
+        <p className="mt-4 text-sm text-fg-muted">Loading…</p>
       </section>
     )
   }
@@ -177,8 +177,8 @@ export function TranscriptsSettingsPanel() {
   if (!ffTranscripts) {
     return (
       <section>
-        <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Transcripts</h2>
-        <p className="mt-4 text-sm text-slate-600 dark:text-neutral-400">
+        <h2 className="text-base font-semibold text-fg-default">Transcripts</h2>
+        <p className="mt-4 text-sm text-fg-muted">
           Transcripts is not enabled for this platform. Turn on{' '}
           <span className="font-medium">Transcripts</span> under Global platform settings.
         </p>
@@ -188,14 +188,14 @@ export function TranscriptsSettingsPanel() {
 
   return (
     <section>
-      <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Transcripts</h2>
-      <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+      <h2 className="text-base font-semibold text-fg-default">Transcripts</h2>
+      <p className="mt-1 text-sm text-fg-muted">
         Register your institution&apos;s webhook URL. When a student requests an official transcript,
         Lextures sends a POST request to this endpoint with the student&apos;s information.
       </p>
 
       {error && (
-        <p role="alert" className="mt-4 text-sm text-red-600 dark:text-red-400">
+        <p role="alert" className="mt-4 text-sm text-danger-fg">
           {error}
         </p>
       )}
@@ -206,11 +206,11 @@ export function TranscriptsSettingsPanel() {
       )}
 
       {loading ? (
-        <p className="mt-4 text-sm text-slate-500">Loading configuration…</p>
+        <p className="mt-4 text-sm text-fg-muted">Loading configuration…</p>
       ) : (
         <form onSubmit={handleSave} className="mt-6 space-y-4">
           <div>
-            <label htmlFor={urlId} className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+            <label htmlFor={urlId} className="block text-sm font-medium text-fg-muted">
               Webhook URL
             </label>
             <input
@@ -220,14 +220,14 @@ export function TranscriptsSettingsPanel() {
               value={webhookUrl}
               onChange={(e) => setWebhookUrl(e.target.value)}
               placeholder="https://sis.example.edu/api/transcript-requests"
-              className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-50"
+              className="mt-1 block w-full rounded-md border border-border-strong bg-surface-raised px-3 py-2 text-sm text-fg-default focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-border-default dark:bg-surface-raised"
             />
-            <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+            <p className="mt-1 text-xs text-fg-muted">
               POST-only endpoint. Receives JSON with requestId, requestedAt, delivery preferences, and student profile fields.
             </p>
           </div>
           <div>
-            <label htmlFor={pickupId} className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+            <label htmlFor={pickupId} className="block text-sm font-medium text-fg-muted">
               Pickup instructions
             </label>
             <textarea
@@ -236,142 +236,142 @@ export function TranscriptsSettingsPanel() {
               value={pickupInstructions}
               onChange={(e) => setPickupInstructions(e.target.value)}
               placeholder={'Registrar office, Room 101\nMonday–Friday, 9:00 AM–4:00 PM\nBring a photo ID'}
-              className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-50"
+              className="mt-1 block w-full rounded-md border border-border-strong bg-surface-raised px-3 py-2 text-sm text-fg-default focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-border-default dark:bg-surface-raised"
             />
-            <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+            <p className="mt-1 text-xs text-fg-muted">
               Shown to students who choose in-person pickup. Leave blank to hide the pickup option.
             </p>
           </div>
-          <div className="flex items-start gap-3 rounded-md border border-slate-200 px-3 py-3 dark:border-neutral-700">
+          <div className="flex items-start gap-3 rounded-md border border-border-default px-3 py-3 dark:border-border-default">
             <input
               id={officialId}
               type="checkbox"
               checked={officialEnabled}
               onChange={(e) => setOfficialEnabled(e.target.checked)}
-              className="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+              className="mt-1 h-4 w-4 rounded border-border-strong text-accent-fg focus:ring-indigo-500"
             />
             <div>
-              <label htmlFor={officialId} className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+              <label htmlFor={officialId} className="block text-sm font-medium text-fg-muted">
                 Enable official transcript generation
               </label>
-              <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+              <p className="mt-1 text-xs text-fg-muted">
                 When on, Lextures can issue sealed official transcripts (PDF + PESC XML) from the gradebook.
                 Unofficial previews remain available whenever Transcripts is enabled.
               </p>
             </div>
           </div>
-          <div className="flex items-start gap-3 rounded-md border border-slate-200 px-3 py-3 dark:border-neutral-700">
+          <div className="flex items-start gap-3 rounded-md border border-border-default px-3 py-3 dark:border-border-default">
             <input
               id={ordersUiId}
               type="checkbox"
               checked={ordersUiEnabled}
               onChange={(e) => setOrdersUiEnabled(e.target.checked)}
-              className="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+              className="mt-1 h-4 w-4 rounded border-border-strong text-accent-fg focus:ring-indigo-500"
             />
             <div>
-              <label htmlFor={ordersUiId} className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+              <label htmlFor={ordersUiId} className="block text-sm font-medium text-fg-muted">
                 Multi-recipient order builder
               </label>
-              <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+              <p className="mt-1 text-xs text-fg-muted">
                 When on, students use the recipient directory and multi-destination order flow. The legacy
                 single-destination request modal remains when this is off.
               </p>
             </div>
           </div>
-          <div className="flex items-start gap-3 rounded-md border border-slate-200 px-3 py-3 dark:border-neutral-700">
+          <div className="flex items-start gap-3 rounded-md border border-border-default px-3 py-3 dark:border-border-default">
             <input
               id={autoApprovalId}
               type="checkbox"
               checked={autoApprovalEnabled}
               onChange={(e) => setAutoApprovalEnabled(e.target.checked)}
-              className="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+              className="mt-1 h-4 w-4 rounded border-border-strong text-accent-fg focus:ring-indigo-500"
             />
             <div>
-              <label htmlFor={autoApprovalId} className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+              <label htmlFor={autoApprovalId} className="block text-sm font-medium text-fg-muted">
                 Auto-approve orders without holds
               </label>
-              <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+              <p className="mt-1 text-xs text-fg-muted">
                 When on, submitted orders with no active holds skip the registrar review queue and go straight
                 to processing.
               </p>
             </div>
           </div>
-          <div className="flex items-start gap-3 rounded-md border border-slate-200 px-3 py-3 dark:border-neutral-700">
+          <div className="flex items-start gap-3 rounded-md border border-border-default px-3 py-3 dark:border-border-default">
             <input
               id={registrarConsoleId}
               type="checkbox"
               checked={registrarConsoleEnabled}
               onChange={(e) => setRegistrarConsoleEnabled(e.target.checked)}
-              className="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+              className="mt-1 h-4 w-4 rounded border-border-strong text-accent-fg focus:ring-indigo-500"
             />
             <div>
-              <label htmlFor={registrarConsoleId} className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+              <label htmlFor={registrarConsoleId} className="block text-sm font-medium text-fg-muted">
                 Registrar fulfillment console
               </label>
-              <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+              <p className="mt-1 text-xs text-fg-muted">
                 When on, registrars can open the fulfillment queue at Admin → Transcripts to approve, reject,
                 and manage holds.
               </p>
             </div>
           </div>
-          <div className="flex items-start gap-3 rounded-md border border-slate-200 px-3 py-3 dark:border-neutral-700">
+          <div className="flex items-start gap-3 rounded-md border border-border-default px-3 py-3 dark:border-border-default">
             <input
               id={consentRequiredId}
               type="checkbox"
               checked={consentRequired}
               onChange={(e) => setConsentRequired(e.target.checked)}
-              className="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+              className="mt-1 h-4 w-4 rounded border-border-strong text-accent-fg focus:ring-indigo-500"
             />
             <div>
-              <label htmlFor={consentRequiredId} className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+              <label htmlFor={consentRequiredId} className="block text-sm font-medium text-fg-muted">
                 Require FERPA e-signature for third-party releases
               </label>
-              <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+              <p className="mt-1 text-xs text-fg-muted">
                 When on (recommended), third-party transcript orders stay in pending consent until the student
                 or a linked guardian signs a scoped release authorization. Self-delivery is logged without a
                 third-party signature.
               </p>
             </div>
           </div>
-          <div className="flex items-start gap-3 rounded-md border border-slate-200 px-3 py-3 dark:border-neutral-700">
+          <div className="flex items-start gap-3 rounded-md border border-border-default px-3 py-3 dark:border-border-default">
             <input
               id={feesEnabledId}
               type="checkbox"
               checked={feesEnabled}
               onChange={(e) => setFeesEnabled(e.target.checked)}
-              className="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+              className="mt-1 h-4 w-4 rounded border-border-strong text-accent-fg focus:ring-indigo-500"
             />
             <div>
-              <label htmlFor={feesEnabledId} className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+              <label htmlFor={feesEnabledId} className="block text-sm font-medium text-fg-muted">
                 Charge transcript fees (Stripe checkout)
               </label>
-              <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+              <p className="mt-1 text-xs text-fg-muted">
                 When on, orders compute an itemized total and require payment (or a waiver) before fulfillment.
                 When off, transcripts remain free.
               </p>
             </div>
           </div>
-          <div className="flex items-start gap-3 rounded-md border border-slate-200 px-3 py-3 dark:border-neutral-700">
+          <div className="flex items-start gap-3 rounded-md border border-border-default px-3 py-3 dark:border-border-default">
             <input
               id={deliveryV2Id}
               type="checkbox"
               checked={deliveryV2}
               onChange={(e) => setDeliveryV2(e.target.checked)}
-              className="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+              className="mt-1 h-4 w-4 rounded border-border-strong text-accent-fg focus:ring-indigo-500"
             />
             <div>
-              <label htmlFor={deliveryV2Id} className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+              <label htmlFor={deliveryV2Id} className="block text-sm font-medium text-fg-muted">
                 Electronic delivery adapters (v2)
               </label>
-              <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+              <p className="mt-1 text-xs text-fg-muted">
                 Enable PESC, EDI/SPEEDE, secure-link, and postal adapters. The api_peer webhook (with document
                 reference) works either way.
               </p>
             </div>
           </div>
           {feesEnabled ? (
-            <div className="space-y-3 rounded-md border border-slate-200 p-3 dark:border-neutral-700">
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Fee schedule (USD)</h3>
+            <div className="space-y-3 rounded-md border border-border-default p-3 dark:border-border-default">
+              <h3 className="text-sm font-semibold text-fg-default">Fee schedule (USD)</h3>
               <div className="grid gap-3 sm:grid-cols-3">
                 <label className="text-sm">
                   Base fee
@@ -381,7 +381,7 @@ export function TranscriptsSettingsPanel() {
                     step="0.01"
                     value={baseFeeMajor}
                     onChange={(e) => setBaseFeeMajor(e.target.value)}
-                    className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 dark:border-neutral-700 dark:bg-neutral-950"
+                    className="mt-1 w-full rounded-md border border-border-strong px-2 py-1.5 dark:border-border-default dark:bg-surface-base"
                   />
                 </label>
                 <label className="text-sm">
@@ -392,7 +392,7 @@ export function TranscriptsSettingsPanel() {
                     step="0.01"
                     value={rushFeeMajor}
                     onChange={(e) => setRushFeeMajor(e.target.value)}
-                    className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 dark:border-neutral-700 dark:bg-neutral-950"
+                    className="mt-1 w-full rounded-md border border-border-strong px-2 py-1.5 dark:border-border-default dark:bg-surface-base"
                   />
                 </label>
                 <label className="text-sm">
@@ -403,12 +403,12 @@ export function TranscriptsSettingsPanel() {
                     step="0.01"
                     value={perRecipientMajor}
                     onChange={(e) => setPerRecipientMajor(e.target.value)}
-                    className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 dark:border-neutral-700 dark:bg-neutral-950"
+                    className="mt-1 w-full rounded-md border border-border-strong px-2 py-1.5 dark:border-border-default dark:bg-surface-base"
                   />
                 </label>
               </div>
               <div>
-                <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Waiver codes</h4>
+                <h4 className="text-xs font-semibold uppercase tracking-wide text-fg-muted">Waiver codes</h4>
                 <form
                   className="mt-2 flex flex-wrap gap-2"
                   onSubmit={(e) => {
@@ -429,16 +429,16 @@ export function TranscriptsSettingsPanel() {
                     value={newWaiverCode}
                     onChange={(e) => setNewWaiverCode(e.target.value)}
                     placeholder="FULLWAIVE"
-                    className="rounded-md border border-slate-300 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                    className="rounded-md border border-border-strong px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
                   />
                   <button
                     type="submit"
-                    className="rounded-md border border-slate-300 px-3 py-1.5 text-sm dark:border-neutral-700"
+                    className="rounded-md border border-border-strong px-3 py-1.5 text-sm dark:border-border-default"
                   >
                     Add full waiver code
                   </button>
                 </form>
-                <ul className="mt-2 space-y-1 text-xs text-slate-600 dark:text-neutral-400">
+                <ul className="mt-2 space-y-1 text-xs text-fg-muted">
                   {waiverCodes.map((wc) => (
                     <li key={wc.id}>
                       <span className="font-mono font-medium">{wc.code}</span> · {wc.kind}
@@ -450,7 +450,7 @@ export function TranscriptsSettingsPanel() {
             </div>
           ) : null}
           <div>
-            <label htmlFor={secretId} className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+            <label htmlFor={secretId} className="block text-sm font-medium text-fg-muted">
               Webhook secret (optional)
             </label>
             <input
@@ -460,9 +460,9 @@ export function TranscriptsSettingsPanel() {
               value={webhookSecret}
               onChange={(e) => setWebhookSecret(e.target.value)}
               placeholder={config?.hasWebhookSecret ? SECRET_PLACEHOLDER : 'HMAC signing secret'}
-              className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-50"
+              className="mt-1 block w-full rounded-md border border-border-strong bg-surface-raised px-3 py-2 text-sm text-fg-default focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-border-default dark:bg-surface-raised"
             />
-            <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+            <p className="mt-1 text-xs text-fg-muted">
               When set, outbound delivery webhooks and inbound SIS hold upserts use an{' '}
               <code className="font-mono">X-Lextures-Signature</code> header (HMAC-SHA256 of the body).
             </p>
@@ -470,7 +470,7 @@ export function TranscriptsSettingsPanel() {
           <button
             type="submit"
             disabled={saving}
-            className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
+            className="rounded-md bg-accent-solid px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
           >
             {saving ? 'Saving…' : 'Save configuration'}
           </button>
@@ -479,8 +479,8 @@ export function TranscriptsSettingsPanel() {
 
       {!loading && (
         <div className="mt-8">
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Recipient directory</h3>
-          <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+          <h3 className="text-sm font-semibold text-fg-default">Recipient directory</h3>
+          <p className="mt-1 text-xs text-fg-muted">
             Curate institutions and employers students can send transcripts to. Global seeded rows appear
             alongside your organization&apos;s entries.
           </p>
@@ -509,24 +509,24 @@ export function TranscriptsSettingsPanel() {
               value={newRecipientName}
               onChange={(e) => setNewRecipientName(e.target.value)}
               placeholder="Institution or employer name"
-              className="min-w-[16rem] flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+              className="min-w-[16rem] flex-1 rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-raised"
             />
             <button
               type="submit"
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium dark:border-neutral-700"
+              className="rounded-md border border-border-strong px-3 py-2 text-sm font-medium dark:border-border-default"
             >
               Add recipient
             </button>
           </form>
           {recipients.length === 0 ? (
-            <p className="mt-3 text-sm text-slate-500">No recipients yet.</p>
+            <p className="mt-3 text-sm text-fg-muted">No recipients yet.</p>
           ) : (
-            <ul className="mt-3 divide-y divide-slate-200 rounded-md border border-slate-200 dark:divide-neutral-800 dark:border-neutral-700">
+            <ul className="mt-3 divide-y divide-slate-200 rounded-md border border-border-default dark:divide-neutral-800 dark:border-border-default">
               {recipients.slice(0, 40).map((rec) => (
                 <li key={rec.id} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
                   <div>
-                    <p className="font-medium text-slate-900 dark:text-neutral-50">{rec.name}</p>
-                    <p className="text-xs text-slate-500">
+                    <p className="font-medium text-fg-default">{rec.name}</p>
+                    <p className="text-xs text-fg-muted">
                       {rec.type}
                       {rec.verified ? ' · verified' : ''}
                       {rec.active ? '' : ' · inactive'}
@@ -534,7 +534,7 @@ export function TranscriptsSettingsPanel() {
                   </div>
                   <button
                     type="button"
-                    className="text-xs font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+                    className="text-xs font-medium text-accent-fg hover:underline dark:text-indigo-400"
                     onClick={() => {
                       void updateAdminTranscriptRecipient(rec.id, { active: !rec.active, verified: rec.verified })
                         .then((updated) => {
@@ -556,37 +556,37 @@ export function TranscriptsSettingsPanel() {
 
       {!loading && failures.length > 0 && (
         <div className="mt-8">
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+          <h3 className="text-sm font-semibold text-fg-default">
             Delivery failures
           </h3>
-          <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+          <p className="mt-1 text-xs text-fg-muted">
             These requests failed to deliver to your webhook endpoint.
           </p>
-          <div className="mt-3 overflow-x-auto rounded-md border border-slate-200 dark:border-neutral-700">
+          <div className="mt-3 overflow-x-auto rounded-md border border-border-default">
             <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-neutral-700">
-              <thead className="bg-slate-50 dark:bg-neutral-800">
+              <thead className="bg-surface-sunken">
                 <tr>
-                  <th className="px-3 py-2 text-start text-xs font-medium text-slate-500 dark:text-neutral-400">
+                  <th className="px-3 py-2 text-start text-xs font-medium text-fg-muted">
                     Requested
                   </th>
-                  <th className="px-3 py-2 text-start text-xs font-medium text-slate-500 dark:text-neutral-400">
+                  <th className="px-3 py-2 text-start text-xs font-medium text-fg-muted">
                     Error
                   </th>
-                  <th className="px-3 py-2 text-start text-xs font-medium text-slate-500 dark:text-neutral-400">
+                  <th className="px-3 py-2 text-start text-xs font-medium text-fg-muted">
                     HTTP status
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 bg-white dark:divide-neutral-800 dark:bg-neutral-900">
+              <tbody className="divide-y divide-slate-100 bg-surface-raised dark:divide-neutral-800 dark:bg-surface-raised">
                 {failures.map((f) => (
                   <tr key={f.id}>
-                    <td className="whitespace-nowrap px-3 py-2 text-slate-700 dark:text-neutral-300">
+                    <td className="whitespace-nowrap px-3 py-2 text-fg-muted">
                       {new Date(f.requestedAt).toLocaleString()}
                     </td>
-                    <td className="px-3 py-2 text-red-600 dark:text-red-400">
+                    <td className="px-3 py-2 text-danger-fg">
                       {f.errorMessage ?? '—'}
                     </td>
-                    <td className="whitespace-nowrap px-3 py-2 text-slate-700 dark:text-neutral-300">
+                    <td className="whitespace-nowrap px-3 py-2 text-fg-muted">
                       {f.webhookResponseCode ?? '—'}
                     </td>
                   </tr>

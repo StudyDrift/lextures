@@ -40,7 +40,7 @@ export default function ConferenceScheduleGrid() {
   if (!ffConferenceScheduling) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-10">
-        <p className="text-sm text-neutral-600 dark:text-neutral-400">
+        <p className="text-sm text-neutral-600 dark:text-fg-muted">
           Conference scheduling is not enabled on this platform.
         </p>
       </div>
@@ -49,13 +49,13 @@ export default function ConferenceScheduleGrid() {
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8 md:px-8">
-      <header className="flex flex-col gap-2 border-b border-slate-200 pb-6 dark:border-neutral-800">
-        <div className="flex items-center gap-2 text-sm font-medium text-indigo-700 dark:text-indigo-300">
+      <header className="flex flex-col gap-2 border-b border-border-default pb-6 dark:border-border-subtle">
+        <div className="flex items-center gap-2 text-sm font-medium text-accent-fg">
           <LayoutGrid className="h-4 w-4" aria-hidden />
           Admin
         </div>
         <h1 className="text-2xl font-semibold tracking-tight">Conference schedule grid</h1>
-        <p className="text-sm text-slate-600 dark:text-neutral-400">
+        <p className="text-sm text-fg-muted">
           View all teacher bookings and room assignments for a conference day.
         </p>
       </header>
@@ -67,7 +67,7 @@ export default function ConferenceScheduleGrid() {
             type="text"
             value={orgUnitId}
             onChange={(e) => setOrgUnitId(e.target.value)}
-            className="min-w-[280px] rounded-lg border border-neutral-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-900"
+            className="min-w-[280px] rounded-lg border border-neutral-300 px-3 py-2 dark:border-border-default dark:bg-surface-raised"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
@@ -76,14 +76,14 @@ export default function ConferenceScheduleGrid() {
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="rounded-lg border border-neutral-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-900"
+            className="rounded-lg border border-neutral-300 px-3 py-2 dark:border-border-default dark:bg-surface-raised"
           />
         </label>
         <button
           type="button"
           onClick={() => void load()}
           disabled={loading}
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-60"
+          className="rounded-lg bg-accent-solid px-4 py-2 text-sm font-semibold text-white hover:bg-accent disabled:opacity-60"
         >
           {loading ? 'Loading…' : 'Load grid'}
         </button>
@@ -94,9 +94,9 @@ export default function ConferenceScheduleGrid() {
       )}
 
       {schedule && (
-        <div className="overflow-x-auto rounded-xl border border-neutral-200 dark:border-neutral-700">
+        <div className="overflow-x-auto rounded-xl border border-neutral-200 dark:border-border-default">
           <table className="min-w-full text-left text-sm">
-            <thead className="bg-neutral-50 text-neutral-600 dark:bg-neutral-900 dark:text-neutral-300">
+            <thead className="bg-neutral-50 text-neutral-600 dark:bg-surface-raised dark:text-fg-muted">
               <tr>
                 <th className="px-4 py-3 font-medium">Teacher</th>
                 <th className="px-4 py-3 font-medium">Time</th>
@@ -114,7 +114,7 @@ export default function ConferenceScheduleGrid() {
                 </tr>
               ) : (
                 schedule.map((row) => (
-                  <tr key={row.id} className="border-t border-neutral-200 dark:border-neutral-800">
+                  <tr key={row.id} className="border-t border-neutral-200 dark:border-border-subtle">
                     <td className="px-4 py-3">{row.teacherDisplayName ?? 'Teacher'}</td>
                     <td className="px-4 py-3">
                       <time dateTime={row.startAt}>{formatConferenceSlotTime(row)}</time>

@@ -120,12 +120,12 @@ export function ParameterExplorerEditor({
   return (
     <div className="space-y-4" data-testid="parameter-explorer-editor">
       <label className="block space-y-1 text-xs">
-        <span className="font-medium text-slate-700 dark:text-neutral-300">
+        <span className="font-medium text-fg-muted">
           {t('contentTools.tools.parameter_explorer.editor.prompt')}
         </span>
         <textarea
           id={`${idPrefix}-${baseId}-prompt`}
-          className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+          className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
           rows={2}
           disabled={disabled}
           value={typeof value.prompt === 'string' ? value.prompt : ''}
@@ -134,11 +134,11 @@ export function ParameterExplorerEditor({
       </label>
 
       <label className="block space-y-1 text-xs">
-        <span className="font-medium text-slate-700 dark:text-neutral-300">
+        <span className="font-medium text-fg-muted">
           {t('contentTools.tools.parameter_explorer.editor.hint')}
         </span>
         <input
-          className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+          className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
           disabled={disabled}
           value={typeof value.hint === 'string' ? value.hint : ''}
           onChange={(e) => patch({ hint: e.target.value })}
@@ -162,7 +162,7 @@ export function ParameterExplorerEditor({
         {parameters.map((p, idx) => (
           <div
             key={p.id}
-            className="grid gap-2 rounded border border-slate-200 p-2 text-xs dark:border-neutral-700 sm:grid-cols-6"
+            className="grid gap-2 rounded border border-border-default p-2 text-xs dark:border-border-default sm:grid-cols-6"
           >
             <label className="space-y-0.5">
               <span>id</span>
@@ -267,7 +267,7 @@ export function ParameterExplorerEditor({
             ) : null}
             <button
               type="button"
-              className="text-start text-red-700 underline sm:col-span-6"
+              className="text-start text-danger-fg underline sm:col-span-6"
               disabled={disabled}
               onClick={() => setParameters(parameters.filter((_, i) => i !== idx))}
             >
@@ -344,7 +344,7 @@ export function ParameterExplorerEditor({
               />
             </label>
             {exprError ? (
-              <p className="text-xs text-red-700" role="alert">
+              <p className="text-xs text-danger-fg" role="alert">
                 {exprError}
               </p>
             ) : null}

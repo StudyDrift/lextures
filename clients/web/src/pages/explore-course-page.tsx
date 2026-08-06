@@ -85,48 +85,48 @@ export default function ExploreCoursePage() {
   const course = detail?.course
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-neutral-950">
+    <div className="min-h-screen bg-surface-base">
       <div className="mx-auto max-w-4xl px-4 py-8">
         <Link
           to="/explore"
-          className="mb-6 inline-flex items-center gap-1 text-sm text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+          className="mb-6 inline-flex items-center gap-1 text-sm text-fg-muted hover:text-fg-default dark:text-fg-muted dark:hover:text-fg-default"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           Back to catalog
         </Link>
 
         {loading ? (
-          <p className="text-sm text-slate-600 dark:text-neutral-300">Loading…</p>
+          <p className="text-sm text-fg-muted">Loading…</p>
         ) : error ? (
           <div
             role="alert"
-            className="rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300"
+            className="rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-danger-fg dark:border-red-900 dark:bg-red-950 dark:text-red-300"
           >
             {error}
           </div>
         ) : course ? (
           <article>
-            <header className="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
+            <header className="overflow-hidden rounded-2xl border border-border-default bg-surface-raised dark:border-border-subtle dark:bg-surface-raised">
               {course.heroImageUrl ? (
                 <CourseHeroImage src={course.heroImageUrl} alt="" className="h-56 w-full object-cover" />
               ) : (
                 <div className="h-40 w-full bg-gradient-to-br from-indigo-100 to-sky-100 dark:from-indigo-950 dark:to-sky-950" />
               )}
               <div className="p-6">
-                <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-neutral-400">
+                <div className="flex flex-wrap items-center gap-2 text-xs text-fg-muted">
                   {course.category ? <span>{course.category}</span> : null}
                   {course.difficultyLevel ? (
-                    <span className="rounded-full bg-slate-100 px-2 py-0.5 capitalize dark:bg-neutral-800">
+                    <span className="rounded-full bg-surface-sunken px-2 py-0.5 capitalize dark:bg-surface-overlay">
                       {course.difficultyLevel}
                     </span>
                   ) : null}
                   <span className="uppercase">{course.language}</span>
                 </div>
-                <h1 className="mt-2 text-3xl font-bold text-slate-900 dark:text-neutral-100">
+                <h1 className="mt-2 text-3xl font-bold text-fg-default">
                   {course.title}
                 </h1>
                 {course.instructorName ? (
-                  <p className="mt-1 text-sm text-slate-600 dark:text-neutral-300">
+                  <p className="mt-1 text-sm text-fg-muted">
                     Taught by {course.instructorName}
                   </p>
                 ) : null}
@@ -136,26 +136,26 @@ export default function ExploreCoursePage() {
                       <>
                         <Star className="h-4 w-4 fill-current" aria-hidden="true" />
                         {course.averageRating.toFixed(1)}
-                        <span className="text-slate-500 dark:text-neutral-400">
+                        <span className="text-fg-muted">
                           ({course.ratingCount?.toLocaleString()} reviews)
                         </span>
                       </>
                     ) : (
-                      <span className="text-slate-400">Not yet rated</span>
+                      <span className="text-fg-subtle">Not yet rated</span>
                     )}
                   </span>
-                  <span className="text-slate-500 dark:text-neutral-400">
+                  <span className="text-fg-muted">
                     {course.enrollmentCount.toLocaleString()} learners enrolled
                   </span>
                 </div>
               </div>
             </header>
 
-            <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-neutral-100">
+            <section className="mt-6 rounded-2xl border border-border-default bg-surface-raised p-6 dark:border-border-subtle dark:bg-surface-raised">
+              <h2 className="text-lg font-semibold text-fg-default">
                 About this course
               </h2>
-              <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-slate-700 dark:text-neutral-300">
+              <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-fg-muted">
                 {course.description || 'No description provided yet.'}
               </p>
             </section>
@@ -164,14 +164,14 @@ export default function ExploreCoursePage() {
               <CourseReviewsSection summary={reviews.summary} reviews={reviews.reviews} />
             ) : null}
 
-            <div className="mt-6 flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
-              <span id={priceId} className="text-2xl font-bold text-slate-900 dark:text-neutral-100">
+            <div className="mt-6 flex items-center justify-between rounded-2xl border border-border-default bg-surface-raised p-6 dark:border-border-subtle dark:bg-surface-raised">
+              <span id={priceId} className="text-2xl font-bold text-fg-default">
                 {formatPrice(course.priceCents)}
               </span>
               <Link
                 to={`/marketplace/${encodeURIComponent(course.slug)}`}
                 aria-describedby={priceId}
-                className="rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500"
+                className="rounded-lg bg-accent-solid px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500"
               >
                 Enroll now
               </Link>

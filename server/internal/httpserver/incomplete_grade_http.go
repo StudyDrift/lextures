@@ -76,15 +76,6 @@ func incompleteRecordToJSON(rec *repo.Record) map[string]any {
 
 func (d Deps) handleIncompleteGradeGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.requireIncompleteGradeWorkflow(w) {
 			return
 		}
@@ -137,15 +128,6 @@ func (d Deps) handleIncompleteGradePost() http.HandlerFunc {
 		Notes              *string  `json:"notes"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.requireIncompleteGradeWorkflow(w) {
 			return
 		}
@@ -221,15 +203,6 @@ func (d Deps) handleIncompleteGradePatch() http.HandlerFunc {
 		ExtensionDeadline *string `json:"extensionDeadline"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.requireIncompleteGradeWorkflow(w) {
 			return
 		}
@@ -309,15 +282,6 @@ func (d Deps) handleAdminIncompletes() http.HandlerFunc {
 		Notes               *string  `json:"notes,omitempty"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.requireIncompleteGradeWorkflow(w) {
 			return
 		}

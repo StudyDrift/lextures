@@ -180,15 +180,6 @@ func shiftMaybe(shift *relativeschedule.Context, t *time.Time) *time.Time {
 // handleGetModuleAssignment is GET /api/v1/courses/{course_code}/assignments/{item_id}.
 func (d Deps) handleGetModuleAssignment() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -292,15 +283,6 @@ func (d Deps) handleGetModuleAssignment() http.HandlerFunc {
 // Full assignment write parity is in progress; this validates access and returns current assignment payload.
 func (d Deps) handlePatchModuleAssignment() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return

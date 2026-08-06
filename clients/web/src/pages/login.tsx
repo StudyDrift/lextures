@@ -211,14 +211,14 @@ export default function Login() {
         <div className="mb-5 flex justify-center px-2">
           <BrandLogo className="mx-auto h-14 w-auto max-w-[min(100%,240px)] object-contain" />
         </div>
-        <h1 className="lex-auth-display text-[1.7rem] leading-snug text-stone-900 dark:text-neutral-50">
+        <h1 className="lex-auth-display text-[1.7rem] leading-snug text-stone-900">
           {t('auth.login.title')}
         </h1>
-        <p className="mt-2 text-sm leading-relaxed text-stone-600 dark:text-neutral-400">{subtitle}</p>
+        <p className="mt-2 text-sm leading-relaxed text-stone-600 dark:text-fg-muted">{subtitle}</p>
         {orgSlug && (
-          <p className="mt-2 text-xs text-stone-500 dark:text-neutral-500">
+          <p className="mt-2 text-xs text-stone-500">
             {t('auth.login.orgSlugLabel')}:{' '}
-            <code className="rounded bg-stone-100 px-1.5 py-0.5 font-mono dark:bg-neutral-800">{orgSlug}</code>
+            <code className="rounded bg-stone-100 px-1.5 py-0.5 font-mono dark:bg-surface-overlay">{orgSlug}</code>
           </p>
         )}
       </header>
@@ -245,14 +245,14 @@ export default function Login() {
               </div>
             )}
             {saml?.enabled && saml.idp?.forceSaml && (
-              <p className="mb-4 text-center text-sm text-stone-600 dark:text-neutral-400">
+              <p className="mb-4 text-center text-sm text-stone-600 dark:text-fg-muted">
                 {t('auth.login.ssoRequired')}
               </p>
             )}
             {!saml?.idp?.forceSaml && (
               <form className="space-y-5" onSubmit={onSubmit}>
                 <div>
-                  <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-stone-800 dark:text-neutral-200">
+                  <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-stone-800 dark:text-fg-default">
                     {t('auth.login.email')}
                   </label>
                   <input
@@ -271,7 +271,7 @@ export default function Login() {
                 <div>
                   <label
                     htmlFor="password"
-                    className="mb-1.5 block text-sm font-medium text-stone-800 dark:text-neutral-200"
+                    className="mb-1.5 block text-sm font-medium text-stone-800 dark:text-fg-default"
                   >
                     {t('auth.login.password')}
                   </label>
@@ -316,7 +316,7 @@ export default function Login() {
             {!saml?.idp?.forceSaml && <MagicLinkRequestForm redirectTo={from} defaultEmail={email} />}
 
             {!saml?.idp?.forceSaml && (
-              <p className="mt-6 text-center text-sm text-stone-600 dark:text-neutral-400">
+              <p className="mt-6 text-center text-sm text-stone-600 dark:text-fg-muted">
                 {t('auth.login.newHere')}{' '}
                 <Link to="/signup" className={authMutedLinkClass}>
                   {t('auth.login.createAccount')}

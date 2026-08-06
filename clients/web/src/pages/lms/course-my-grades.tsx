@@ -303,10 +303,10 @@ export default function CourseMyGrades() {
       }
     >
       {loadState === 'loading' && (
-        <p className="mt-6 text-sm text-slate-600 dark:text-neutral-400">Loading grades…</p>
+        <p className="mt-6 text-sm text-fg-muted">Loading grades…</p>
       )}
       {loadState === 'error' && loadError && (
-        <p className="mt-6 text-sm text-red-600 dark:text-red-400" role="alert">
+        <p className="mt-6 text-sm text-danger-fg" role="alert">
           {loadError}
         </p>
       )}
@@ -331,42 +331,42 @@ export default function CourseMyGrades() {
               onTargetLetterChange={setTargetLetter}
             />
           ) : (
-            <div className="mt-6 rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-              <p className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-neutral-100">
+            <div className="mt-6 rounded-xl border border-border-default bg-surface-raised px-4 py-4 shadow-sm dark:border-border-default dark:bg-surface-raised">
+              <p className="text-2xl font-semibold tracking-tight text-fg-default">
                 Course grade: {formatFinalPercent(actualPct)}
               </p>
-              <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+              <p className="mt-1 text-sm text-fg-muted">
                 Weighted from assignment groups when your instructor has configured weights; otherwise
                 by points earned vs points possible.
               </p>
             </div>
           )}
           {columns.length === 0 ? (
-            <p className="mt-6 text-sm text-slate-600 dark:text-neutral-400">
+            <p className="mt-6 text-sm text-fg-muted">
               No graded assignments or quizzes are listed in this course yet.
             </p>
           ) : (
-            <div className="mt-6 overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
+            <div className="mt-6 overflow-x-auto rounded-xl border border-border-default bg-surface-raised shadow-sm dark:border-border-default dark:bg-surface-raised">
               <table className="min-w-full divide-y divide-slate-200 text-start text-sm dark:divide-neutral-700">
                 <thead>
-                  <tr className="bg-slate-50 dark:bg-neutral-800/80">
-                    <th className="px-4 py-3 font-semibold text-slate-900 dark:text-neutral-100">
+                  <tr className="bg-surface-sunken/80">
+                    <th className="px-4 py-3 font-semibold text-fg-default">
                       Assignment
                     </th>
-                    <th className="px-4 py-3 font-semibold text-slate-900 dark:text-neutral-100">
+                    <th className="px-4 py-3 font-semibold text-fg-default">
                       Type
                     </th>
-                    <th className="px-4 py-3 font-semibold text-slate-900 dark:text-neutral-100">
+                    <th className="px-4 py-3 font-semibold text-fg-default">
                       Earned
                     </th>
-                    <th className="px-4 py-3 font-semibold text-slate-900 dark:text-neutral-100">
+                    <th className="px-4 py-3 font-semibold text-fg-default">
                       Possible
                     </th>
-                    <th className="px-4 py-3 font-semibold text-slate-900 dark:text-neutral-100">
+                    <th className="px-4 py-3 font-semibold text-fg-default">
                       Item %
                     </th>
-                    <th className="px-4 py-3 font-semibold text-slate-900 dark:text-neutral-100">Policy</th>
-                    <th className="px-4 py-3 font-semibold text-slate-900 dark:text-neutral-100">History</th>
+                    <th className="px-4 py-3 font-semibold text-fg-default">Policy</th>
+                    <th className="px-4 py-3 font-semibold text-fg-default">History</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200 dark:divide-neutral-700">
@@ -393,21 +393,21 @@ export default function CourseMyGrades() {
                     return (
                       <tr
                         key={col.id}
-                        className={`hover:bg-slate-50/80 dark:hover:bg-neutral-800/80 ${dropped ? 'text-slate-500 dark:text-neutral-500' : ''}`}
+                        className={`hover:bg-slate-50/80 dark:hover:bg-neutral-800/80 ${dropped ? 'text-fg-subtle' : ''}`}
                       >
-                        <td className="px-4 py-3 font-medium text-slate-900 dark:text-neutral-100">
+                        <td className="px-4 py-3 font-medium text-fg-default">
                           <Link
                             to={href}
-                            className="text-indigo-600 hover:underline dark:text-indigo-400"
+                            className="text-accent-fg hover:underline dark:text-indigo-400"
                           >
                             {col.title}
                           </Link>
                         </td>
-                        <td className="px-4 py-3 capitalize text-slate-600 dark:text-neutral-400">
+                        <td className="px-4 py-3 capitalize text-fg-muted">
                           {col.kind === 'quiz' ? 'Quiz' : 'Assignment'}
                         </td>
                         <td
-                          className={`px-4 py-3 text-slate-800 dark:text-neutral-200 ${dropped ? 'line-through decoration-slate-400' : ''}`}
+                          className={`px-4 py-3 text-fg-default ${dropped ? 'line-through decoration-slate-400' : ''}`}
                           aria-label={
                             isHypothetical
                               ? `Hypothetical score ${whatIfOverrides[col.id]}`
@@ -425,7 +425,7 @@ export default function CourseMyGrades() {
                                 min={0}
                                 max={max ?? undefined}
                                 step="any"
-                                className="w-24 rounded-md border border-indigo-300 bg-white px-2 py-1 text-sm dark:border-indigo-700 dark:bg-neutral-900"
+                                className="w-24 rounded-md border border-indigo-300 bg-surface-raised px-2 py-1 text-sm dark:border-indigo-700 dark:bg-surface-raised"
                                 aria-label={`Hypothetical score for ${col.title}`}
                                 placeholder={held ? 'Hypothetical' : (earned ?? '').trim() || '—'}
                                 value={whatIfOverrides[col.id] ?? ''}
@@ -447,7 +447,7 @@ export default function CourseMyGrades() {
                             </span>
                           ) : excused ? (
                             <span
-                              className="inline-flex rounded-md border border-slate-200 bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-800 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200"
+                              className="inline-flex rounded-md border border-border-default bg-surface-sunken px-2 py-0.5 text-xs font-semibold text-fg-default dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
                               title="Excused — does not affect your course grade for this item."
                             >
                               {(display ?? '').trim() || 'EX'}
@@ -460,16 +460,16 @@ export default function CourseMyGrades() {
                             '—'
                           )}
                         </td>
-                        <td className="px-4 py-3 text-slate-800 dark:text-neutral-200">
+                        <td className="px-4 py-3 text-fg-default">
                           {max != null && max > 0 ? String(max) : '—'}
                         </td>
-                        <td className="px-4 py-3 text-slate-800 dark:text-neutral-200">
+                        <td className="px-4 py-3 text-fg-default">
                           {excused ? '—' : formatRowPercent(effectiveEarned, max)}
                         </td>
-                        <td className="px-4 py-3 text-slate-600 dark:text-neutral-400">
+                        <td className="px-4 py-3 text-fg-muted">
                           {excused ? (
                             <span
-                              className="inline-flex rounded-md border border-slate-200/90 bg-slate-50 px-1.5 py-0.5 text-xs font-medium text-slate-800 dark:border-neutral-600 dark:bg-neutral-800/60 dark:text-neutral-200"
+                              className="inline-flex rounded-md border border-slate-200/90 bg-surface-base px-1.5 py-0.5 text-xs font-medium text-fg-default dark:border-border-default/60 dark:text-fg-default"
                               title="Exempt from the course average; does not affect your final percentage."
                             >
                               Excused
@@ -488,7 +488,7 @@ export default function CourseMyGrades() {
                         <td className="px-4 py-3">
                           <button
                             type="button"
-                            className="text-sm text-indigo-600 hover:underline dark:text-indigo-400"
+                            className="text-sm text-accent-fg hover:underline dark:text-indigo-400"
                             onClick={() => openGradeHistory(col.id, col.title)}
                           >
                             View
@@ -517,12 +517,12 @@ export default function CourseMyGrades() {
           <div
             role="dialog"
             aria-modal="true"
-            className="relative z-[1] w-full max-w-md rounded-xl border border-slate-200 bg-white p-5 shadow-xl dark:border-neutral-700 dark:bg-neutral-900"
+            className="relative z-[1] w-full max-w-md rounded-xl border border-border-default bg-surface-raised p-5 shadow-xl dark:border-border-default dark:bg-surface-raised"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               type="button"
-              className="absolute end-3 top-3 rounded p-1 text-slate-500 hover:bg-slate-100 dark:hover:bg-neutral-800"
+              className="absolute end-3 top-3 rounded p-1 text-fg-muted hover:bg-surface-sunken dark:hover:bg-surface-overlay"
               onClick={() => closeGradeHistory()}
             >
               <span className="sr-only">Close</span>✕
@@ -536,7 +536,7 @@ export default function CourseMyGrades() {
             <div className="mt-4 flex justify-end">
               <button
                 type="button"
-                className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-800 hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800"
+                className="rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-sm text-fg-default hover:bg-surface-base dark:border-border-default dark:bg-surface-overlay"
                 onClick={() => closeGradeHistory()}
               >
                 Close

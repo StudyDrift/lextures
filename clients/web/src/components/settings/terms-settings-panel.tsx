@@ -148,9 +148,9 @@ export function TermsSettingsPanel() {
     }
     return (
       <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium text-slate-700 dark:text-neutral-200">Organization</span>
+        <span className="font-medium text-fg-default">Organization</span>
         <select
-          className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 dark:border-neutral-700 dark:bg-neutral-900"
+          className="rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 dark:border-border-default dark:bg-surface-raised"
           value={orgId}
           onChange={(e) => setOrgId(e.target.value)}
           aria-label="Organization for terms"
@@ -168,7 +168,7 @@ export function TermsSettingsPanel() {
 
   if (!canManageTerms) {
     return (
-      <p className="text-sm text-slate-600 dark:text-neutral-400">
+      <p className="text-sm text-fg-muted">
         You need org administrator permissions to manage academic terms.
       </p>
     )
@@ -177,12 +177,12 @@ export function TermsSettingsPanel() {
   return (
     <section className="space-y-6" aria-labelledby={headingId}>
       <div className="flex items-start gap-3">
-        <CalendarRange className="mt-1 h-5 w-5 text-indigo-600" aria-hidden />
+        <CalendarRange className="mt-1 h-5 w-5 text-accent-fg" aria-hidden />
         <div>
-          <h2 id={headingId} className="text-lg font-semibold text-slate-900 dark:text-neutral-100">
+          <h2 id={headingId} className="text-lg font-semibold text-fg-default">
             Academic terms
           </h2>
-          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+          <p className="mt-1 text-sm text-fg-muted">
             Create semesters or grading periods so courses can inherit schedule dates and learners can filter their
             catalog.
           </p>
@@ -192,15 +192,15 @@ export function TermsSettingsPanel() {
       {orgs.length > 0 ? orgSelect : null}
 
       <form
-        className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50/80 p-4 dark:border-neutral-700 dark:bg-neutral-900/40"
+        className="space-y-4 rounded-2xl border border-border-default bg-slate-50/80 p-4 dark:border-border-default/40"
         onSubmit={(e) => void createTerm(e)}
       >
-        <p className="text-sm font-medium text-slate-800 dark:text-neutral-100">Create term</p>
+        <p className="text-sm font-medium text-fg-default">Create term</p>
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="flex flex-col gap-1 text-sm">
             <span>Name</span>
             <input
-              className="rounded-lg border border-slate-200 bg-white px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+              className="rounded-lg border border-border-default bg-surface-raised px-3 py-2 dark:border-border-default dark:bg-surface-raised"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               placeholder="Fall 2026"
@@ -211,7 +211,7 @@ export function TermsSettingsPanel() {
           <label className="flex flex-col gap-1 text-sm">
             <span>Type</span>
             <select
-              className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 dark:border-neutral-700 dark:bg-neutral-900"
+              className="rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 dark:border-border-default dark:bg-surface-raised"
               value={newType}
               onChange={(e) => setNewType(e.target.value)}
               aria-label="Term type"
@@ -228,7 +228,7 @@ export function TermsSettingsPanel() {
             <span>Start</span>
             <input
               type="date"
-              className="rounded-lg border border-slate-200 bg-white px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+              className="rounded-lg border border-border-default bg-surface-raised px-3 py-2 dark:border-border-default dark:bg-surface-raised"
               value={newStart}
               onChange={(e) => setNewStart(e.target.value)}
               required
@@ -239,7 +239,7 @@ export function TermsSettingsPanel() {
             <span>End</span>
             <input
               type="date"
-              className="rounded-lg border border-slate-200 bg-white px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+              className="rounded-lg border border-border-default bg-surface-raised px-3 py-2 dark:border-border-default dark:bg-surface-raised"
               value={newEnd}
               onChange={(e) => setNewEnd(e.target.value)}
               required
@@ -250,7 +250,7 @@ export function TermsSettingsPanel() {
         <button
           type="submit"
           disabled={creating || !orgId}
-          className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50"
         >
           <Plus className="h-4 w-4" aria-hidden />
           Add term
@@ -267,9 +267,9 @@ export function TermsSettingsPanel() {
         </p>
       )}
 
-      <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-neutral-700">
+      <div className="overflow-x-auto rounded-2xl border border-border-default">
         <table className="min-w-full text-start text-sm">
-          <thead className="bg-slate-50 text-slate-700 dark:bg-neutral-900 dark:text-neutral-200">
+          <thead className="bg-surface-base text-fg-muted dark:bg-surface-raised dark:text-fg-default">
             <tr>
               <th className="px-4 py-3 font-semibold">Name</th>
               <th className="px-4 py-3 font-semibold">Dates</th>
@@ -280,30 +280,30 @@ export function TermsSettingsPanel() {
           <tbody>
             {loading && (
               <tr>
-                <td colSpan={4} className="px-4 py-6 text-slate-500">
+                <td colSpan={4} className="px-4 py-6 text-fg-muted">
                   Loading…
                 </td>
               </tr>
             )}
             {!loading && terms.length === 0 && orgId && (
               <tr>
-                <td colSpan={4} className="px-4 py-6 text-slate-600 dark:text-neutral-400">
+                <td colSpan={4} className="px-4 py-6 text-fg-muted">
                   No terms configured. Create your first term to organize courses by semester.
                 </td>
               </tr>
             )}
             {!loading &&
               terms.map((t) => (
-                <tr key={t.id} className="border-t border-slate-100 dark:border-neutral-800">
-                  <td className="px-4 py-3 font-medium text-slate-900 dark:text-neutral-100">{t.name}</td>
-                  <td className="px-4 py-3 text-slate-600 dark:text-neutral-400">
+                <tr key={t.id} className="border-t border-border-subtle">
+                  <td className="px-4 py-3 font-medium text-fg-default">{t.name}</td>
+                  <td className="px-4 py-3 text-fg-muted">
                     {t.startDate} — {t.endDate}
                   </td>
-                  <td className="px-4 py-3 capitalize text-slate-700 dark:text-neutral-300">{t.status}</td>
+                  <td className="px-4 py-3 capitalize text-fg-muted">{t.status}</td>
                   <td className="px-4 py-3">
                     <button
                       type="button"
-                      className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                      className="inline-flex items-center gap-1 rounded-lg border border-border-default px-2 py-1 text-xs font-medium text-fg-muted hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
                       onClick={() => void deleteTerm(t.id)}
                       aria-label={`Delete term ${t.name}`}
                     >

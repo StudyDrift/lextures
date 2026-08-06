@@ -28,7 +28,7 @@ export function EditorSidebar({
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div
-        className="flex shrink-0 border-b border-slate-200 dark:border-neutral-700"
+        className="flex shrink-0 border-b border-border-default"
         role="tablist"
         aria-label="Editor settings"
       >
@@ -36,11 +36,7 @@ export function EditorSidebar({
           type="button"
           role="tab"
           aria-selected={tab === 'document'}
-          className={`flex-1 px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wide transition-[background-color,color,border-color] ${
-            tab === 'document'
-              ? 'border-b-2 border-indigo-600 text-slate-900 dark:border-indigo-500 dark:text-neutral-100'
-              : 'border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:text-neutral-400 dark:hover:text-neutral-200'
-          }`}
+          className={`flex-1 px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wide transition-[background-color,color,border-color] ${ tab === 'document' ? 'border-b-2 border-indigo-600 text-fg-default dark:border-indigo-500 dark:text-fg-default' : 'border-b-2 border-transparent text-fg-muted hover:text-fg-default dark:text-fg-muted dark:hover:text-fg-default' }`}
           onClick={() => setTab('document')}
         >
           {documentLabel}
@@ -49,11 +45,7 @@ export function EditorSidebar({
           type="button"
           role="tab"
           aria-selected={tab === 'block'}
-          className={`flex-1 px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wide transition-[background-color,color,border-color] ${
-            tab === 'block'
-              ? 'border-b-2 border-indigo-600 text-slate-900 dark:border-indigo-500 dark:text-neutral-100'
-              : 'border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:text-neutral-400 dark:hover:text-neutral-200'
-          }`}
+          className={`flex-1 px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wide transition-[background-color,color,border-color] ${ tab === 'block' ? 'border-b-2 border-indigo-600 text-fg-default dark:border-indigo-500 dark:text-fg-default' : 'border-b-2 border-transparent text-fg-muted hover:text-fg-default dark:text-fg-muted dark:hover:text-fg-default' }`}
           onClick={() => setTab('block')}
         >
           {blockLabel}
@@ -63,7 +55,7 @@ export function EditorSidebar({
         {tab === 'document' && documentPanel}
         {tab === 'block' &&
           (blockDisabled ? (
-            <p className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 py-6 text-center text-sm text-slate-500 dark:border-neutral-600 dark:bg-neutral-800/80 dark:text-neutral-300">
+            <p className="rounded-lg border border-dashed border-border-default bg-surface-base px-3 py-6 text-center text-sm text-fg-muted dark:border-border-default/80 dark:text-fg-muted">
               {blockDisabledMessage}
             </p>
           ) : (

@@ -24,7 +24,7 @@ export function ToolPlaceholder({ reason, message, onRetry, retryLabel }: ToolPl
     <div
       role="status"
       data-content-tool-placeholder={reason}
-      className="rounded-md border border-slate-200 bg-slate-50/80 px-3 py-3 text-sm text-slate-600 dark:border-neutral-700 dark:bg-neutral-900/50 dark:text-neutral-300"
+      className="rounded-md border border-border-default bg-slate-50/80 px-3 py-3 text-sm text-fg-muted dark:border-border-default/50 dark:text-fg-muted"
     >
       <p>{message}</p>
       {onRetry && retryLabel ? (

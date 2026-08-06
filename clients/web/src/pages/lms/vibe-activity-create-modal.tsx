@@ -99,13 +99,13 @@ export function VibeActivityCreateModal({
 
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 p-2" role="dialog" aria-modal>
-      <div className="flex h-[96vh] w-[98vw] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
+      <div className="flex h-[96vh] w-[98vw] flex-col overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-2xl dark:border-border-default dark:bg-surface-raised">
 
         {/* Header */}
-        <div className="flex shrink-0 items-center justify-between border-b border-slate-200 px-4 py-2.5 dark:border-neutral-700">
+        <div className="flex shrink-0 items-center justify-between border-b border-border-default px-4 py-2.5 dark:border-border-default">
           <div className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-rose-600" />
-            <span className="font-semibold text-slate-950 dark:text-neutral-100">Vibe Activity Builder</span>
+            <span className="font-semibold text-slate-950 dark:text-fg-default">Vibe Activity Builder</span>
           </div>
           <div className="flex items-center gap-2">
             {phase === 'split' && (
@@ -114,7 +114,7 @@ export function VibeActivityCreateModal({
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Activity title…"
-                  className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                  className="rounded-lg border border-border-strong bg-surface-raised px-3 py-1.5 text-sm dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
                 />
                 <button
                   type="button"
@@ -127,10 +127,10 @@ export function VibeActivityCreateModal({
                 </button>
               </>
             )}
-            {error && <span className="text-xs text-red-600">{error}</span>}
+            {error && <span className="text-xs text-danger-fg">{error}</span>}
             <button
               onClick={onClose}
-              className="rounded p-1 text-slate-500 hover:bg-slate-100 dark:hover:bg-neutral-800"
+              className="rounded p-1 text-fg-muted hover:bg-surface-sunken dark:hover:bg-surface-overlay"
               aria-label="Close"
             >
               <X className="h-5 w-5" />
@@ -144,14 +144,14 @@ export function VibeActivityCreateModal({
           <div className="flex flex-1 flex-col items-center justify-center gap-6 p-8">
             <div className="text-center">
               <Sparkles className="mx-auto mb-3 h-10 w-10 text-rose-500" />
-              <h2 className="text-2xl font-semibold text-slate-900 dark:text-neutral-100">What should this activity do?</h2>
-              <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+              <h2 className="text-2xl font-semibold text-fg-default">What should this activity do?</h2>
+              <p className="mt-1 text-sm text-fg-muted">
                 Describe the interactive activity you want to create. The AI will generate it as a self-contained HTML page.
               </p>
             </div>
 
             <div className="w-full max-w-2xl">
-              <div className="flex flex-col gap-2 rounded-2xl border border-slate-300 bg-white p-3 shadow-sm dark:border-neutral-600 dark:bg-neutral-800">
+              <div className="flex flex-col gap-2 rounded-2xl border border-border-strong bg-surface-raised p-3 shadow-sm dark:border-border-default dark:bg-surface-overlay">
                 <textarea
                   ref={inputRef}
                   value={input}
@@ -159,10 +159,10 @@ export function VibeActivityCreateModal({
                   onKeyDown={handleKeyDown}
                   placeholder="e.g. A drag-and-drop cell labeling activity for biology students…"
                   rows={4}
-                  className="w-full resize-none bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400 dark:text-neutral-100 dark:placeholder:text-neutral-500"
+                  className="w-full resize-none bg-transparent text-sm text-fg-default outline-none placeholder:text-fg-subtle dark:text-fg-default dark:placeholder:text-neutral-500"
                 />
                 <div className="flex items-center justify-between">
-                  {genError && <span className="text-xs text-red-600">{genError}</span>}
+                  {genError && <span className="text-xs text-danger-fg">{genError}</span>}
                   <div className="ml-auto">
                     <button
                       type="button"
@@ -178,7 +178,7 @@ export function VibeActivityCreateModal({
               </div>
             </div>
 
-            <div className="text-xs text-slate-400 dark:text-neutral-500">
+            <div className="text-xs text-fg-subtle">
               Tip: Include Tailwind CSS, buttons, animations, and anything else to make it interactive. Press Shift+Enter for a new line.
             </div>
           </div>
@@ -186,7 +186,7 @@ export function VibeActivityCreateModal({
           /* ── SPLIT CHAT / PREVIEW STATE ── */
           <div className="flex min-h-0 flex-1">
             {/* Left: conversation */}
-            <div className="flex w-[38%] shrink-0 flex-col border-r border-slate-200 dark:border-neutral-700">
+            <div className="flex w-[38%] shrink-0 flex-col border-r border-border-default">
               {/* Chat messages */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {messages.map((m, i) => (
@@ -196,16 +196,16 @@ export function VibeActivityCreateModal({
                         {m.content}
                       </div>
                     ) : (
-                      <div className="max-w-[80%] rounded-2xl rounded-bl-sm bg-slate-100 px-3 py-2 text-xs text-slate-700 dark:bg-neutral-800 dark:text-neutral-300">
+                      <div className="max-w-[80%] rounded-2xl rounded-bl-sm bg-surface-sunken px-3 py-2 text-xs text-fg-muted dark:bg-surface-overlay dark:text-fg-muted">
                         <span className="font-medium text-rose-600">HTML generated</span>
-                        <span className="ml-1 text-slate-500 dark:text-neutral-500">— see preview →</span>
+                        <span className="ml-1 text-fg-subtle">— see preview →</span>
                       </div>
                     )}
                   </div>
                 ))}
                 {generating && (
                   <div className="flex justify-start">
-                    <div className="rounded-2xl rounded-bl-sm bg-slate-100 px-3 py-2 text-sm text-slate-500 dark:bg-neutral-800 dark:text-neutral-400">
+                    <div className="rounded-2xl rounded-bl-sm bg-surface-sunken px-3 py-2 text-sm text-fg-muted dark:bg-surface-overlay dark:text-fg-muted">
                       Generating…
                     </div>
                   </div>
@@ -214,16 +214,16 @@ export function VibeActivityCreateModal({
               </div>
 
               {/* Input */}
-              <div className="shrink-0 border-t border-slate-200 p-3 dark:border-neutral-700">
-                {genError && <p className="mb-2 text-xs text-red-600">{genError}</p>}
-                <div className="flex items-end gap-2 rounded-xl border border-slate-300 bg-white p-2 dark:border-neutral-600 dark:bg-neutral-800">
+              <div className="shrink-0 border-t border-border-default p-3 dark:border-border-default">
+                {genError && <p className="mb-2 text-xs text-danger-fg">{genError}</p>}
+                <div className="flex items-end gap-2 rounded-xl border border-border-strong bg-surface-raised p-2 dark:border-border-default dark:bg-surface-overlay">
                   <textarea
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder="Describe a change or addition… (Enter to send)"
                     rows={2}
-                    className="flex-1 resize-none bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400 dark:text-neutral-100 dark:placeholder:text-neutral-500"
+                    className="flex-1 resize-none bg-transparent text-sm text-fg-default outline-none placeholder:text-fg-subtle dark:text-fg-default dark:placeholder:text-neutral-500"
                   />
                   <button
                     type="button"
@@ -240,15 +240,11 @@ export function VibeActivityCreateModal({
             {/* Right: code / preview */}
             <div className="flex min-w-0 flex-1 flex-col">
               {/* Tab bar */}
-              <div className="flex shrink-0 items-center gap-1 border-b border-slate-200 px-4 py-2 dark:border-neutral-700">
+              <div className="flex shrink-0 items-center gap-1 border-b border-border-default px-4 py-2 dark:border-border-default">
                 <button
                   type="button"
                   onClick={() => setRightTab('preview')}
-                  className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-                    rightTab === 'preview'
-                      ? 'bg-slate-100 text-slate-900 dark:bg-neutral-700 dark:text-neutral-100'
-                      : 'text-slate-500 hover:text-slate-700 dark:text-neutral-400 dark:hover:text-neutral-200'
-                  }`}
+                  className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${ rightTab === 'preview' ? 'bg-surface-sunken text-fg-default dark:bg-neutral-700 dark:text-fg-default' : 'text-fg-muted hover:text-fg-muted dark:text-fg-muted dark:hover:text-fg-default' }`}
                 >
                   <Eye className="h-4 w-4" />
                   Preview
@@ -256,11 +252,7 @@ export function VibeActivityCreateModal({
                 <button
                   type="button"
                   onClick={() => setRightTab('code')}
-                  className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-                    rightTab === 'code'
-                      ? 'bg-slate-100 text-slate-900 dark:bg-neutral-700 dark:text-neutral-100'
-                      : 'text-slate-500 hover:text-slate-700 dark:text-neutral-400 dark:hover:text-neutral-200'
-                  }`}
+                  className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${ rightTab === 'code' ? 'bg-surface-sunken text-fg-default dark:bg-neutral-700 dark:text-fg-default' : 'text-fg-muted hover:text-fg-muted dark:text-fg-muted dark:hover:text-fg-default' }`}
                 >
                   <Code className="h-4 w-4" />
                   Code
@@ -268,7 +260,7 @@ export function VibeActivityCreateModal({
                 <button
                   type="button"
                   onClick={() => setHtml('')}
-                  className="ml-auto inline-flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-neutral-300"
+                  className="ml-auto inline-flex items-center gap-1 text-xs text-fg-subtle hover:text-fg-muted dark:hover:text-fg-muted"
                   title="Clear HTML"
                 >
                   <RotateCcw className="h-3.5 w-3.5" />
@@ -284,7 +276,7 @@ export function VibeActivityCreateModal({
                     title="vibe-preview"
                     sandbox="allow-scripts allow-forms allow-same-origin"
                     srcDoc={html || '<!doctype html><html><body style="padding:2rem;font-family:sans-serif;color:#888">No content yet — describe your activity on the left.</body></html>'}
-                    className="block h-full w-full bg-white"
+                    className="block h-full w-full bg-surface-raised"
                   />
                 ) : (
                   <textarea

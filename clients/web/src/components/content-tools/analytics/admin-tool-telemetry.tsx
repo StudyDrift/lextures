@@ -34,7 +34,7 @@ export function AdminToolTelemetry() {
 
   return (
     <section className="space-y-3" data-testid="admin-tool-telemetry">
-      <h2 className="text-lg font-semibold text-slate-900 dark:text-neutral-100">
+      <h2 className="text-lg font-semibold text-fg-default">
         {t('contentTools.analytics.adminTelemetryTitle')}
       </h2>
       <div className="flex flex-wrap gap-2 text-sm">
@@ -42,7 +42,7 @@ export function AdminToolTelemetry() {
           {t('contentTools.analytics.from')}
           <input
             type="date"
-            className="ml-2 rounded border border-slate-300 px-2 py-1 dark:border-neutral-600 dark:bg-neutral-950"
+            className="ml-2 rounded border border-border-strong px-2 py-1 dark:border-border-default dark:bg-surface-base"
             value={from}
             onChange={(e) => setFrom(e.target.value)}
           />
@@ -51,7 +51,7 @@ export function AdminToolTelemetry() {
           {t('contentTools.analytics.to')}
           <input
             type="date"
-            className="ml-2 rounded border border-slate-300 px-2 py-1 dark:border-neutral-600 dark:bg-neutral-950"
+            className="ml-2 rounded border border-border-strong px-2 py-1 dark:border-border-default dark:bg-surface-base"
             value={to}
             onChange={(e) => setTo(e.target.value)}
           />
@@ -64,7 +64,7 @@ export function AdminToolTelemetry() {
       ) : null}
       <table className="w-full text-left text-sm">
         <thead>
-          <tr className="border-b border-slate-200 dark:border-neutral-700">
+          <tr className="border-b border-border-default">
             <th className="py-1 pr-2">{t('contentTools.analytics.colTool')}</th>
             <th className="py-1 pr-2">{t('contentTools.analytics.colInstances')}</th>
             <th className="py-1 pr-2">{t('contentTools.analytics.colLearners')}</th>
@@ -75,7 +75,7 @@ export function AdminToolTelemetry() {
         </thead>
         <tbody>
           {rows.map((r) => (
-            <tr key={r.toolId} className="border-b border-slate-100 dark:border-neutral-800">
+            <tr key={r.toolId} className="border-b border-border-subtle">
               <td className="py-1 pr-2 font-medium">{r.toolId}</td>
               <td className="py-1 pr-2 tabular-nums">{r.instances}</td>
               <td className="py-1 pr-2 tabular-nums">{r.learners}</td>

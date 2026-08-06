@@ -49,11 +49,11 @@ function FieldShell({
 }) {
   return (
     <div className="space-y-1">
-      <label htmlFor={htmlFor} className="block text-xs font-medium text-slate-600 dark:text-neutral-300">
+      <label htmlFor={htmlFor} className="block text-xs font-medium text-fg-muted">
         {label}
       </label>
       {description ? (
-        <p className="text-[11px] leading-snug text-slate-500 dark:text-neutral-400">{description}</p>
+        <p className="text-[11px] leading-snug text-fg-muted">{description}</p>
       ) : null}
       {children}
       {errorMessage && errorId ? <FieldErrorText id={errorId} message={errorMessage} /> : null}
@@ -62,7 +62,7 @@ function FieldShell({
 }
 
 const inputClass =
-  'w-full rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-neutral-500 dark:focus:ring-neutral-500'
+  'w-full rounded-md border border-border-default bg-surface-raised px-2.5 py-1.5 text-sm text-fg-default placeholder:text-fg-subtle focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400 disabled:opacity-60 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:placeholder:text-neutral-500 dark:focus:border-neutral-500 dark:focus:ring-neutral-500'
 
 function setAtPath(
   root: Record<string, unknown>,
@@ -93,7 +93,7 @@ function renderPrimitive(
             const optId = `${opts.id}-opt-${i}`
             const str = String(opt)
             return (
-              <label key={optId} htmlFor={optId} className="inline-flex items-center gap-2 text-sm text-slate-700 dark:text-neutral-200">
+              <label key={optId} htmlFor={optId} className="inline-flex items-center gap-2 text-sm text-fg-default">
                 <input
                   id={optId}
                   type="radio"
@@ -101,7 +101,7 @@ function renderPrimitive(
                   checked={value === opt}
                   disabled={opts.disabled}
                   onChange={() => onChange(opt)}
-                  className="border-slate-300 text-slate-700 focus:ring-slate-400 dark:border-neutral-600"
+                  className="border-border-strong text-fg-muted focus:ring-slate-400 dark:border-border-default"
                 />
                 {str}
               </label>
@@ -142,7 +142,7 @@ function renderPrimitive(
         disabled={opts.disabled}
         aria-describedby={opts.describedBy}
         onChange={(e) => onChange(e.target.checked)}
-        className="rounded border-slate-300 text-slate-700 focus:ring-slate-400 dark:border-neutral-600"
+        className="rounded border-border-strong text-fg-muted focus:ring-slate-400 dark:border-border-default"
       />
     )
   }
@@ -200,7 +200,7 @@ function renderPrimitive(
   }
 
   return (
-    <p className="text-xs text-slate-500 dark:text-neutral-400">Unsupported field type: {String(t)}</p>
+    <p className="text-xs text-fg-muted">Unsupported field type: {String(t)}</p>
   )
 }
 
@@ -250,8 +250,8 @@ function ArrayOfObjectsField({
   }
 
   return (
-    <fieldset className="space-y-2 rounded-md border border-slate-200 p-2 dark:border-neutral-700">
-      <legend className="px-1 text-xs font-medium text-slate-600 dark:text-neutral-300">
+    <fieldset className="space-y-2 rounded-md border border-border-default p-2 dark:border-border-default">
+      <legend className="px-1 text-xs font-medium text-fg-muted">
         {labelForSchema(schema, fieldKey)}
       </legend>
       {rows.map((row, index) => {
@@ -262,7 +262,7 @@ function ArrayOfObjectsField({
         return (
           <div
             key={`${idPrefix}-${fieldKey}-${index}`}
-            className="rounded border border-slate-100 bg-slate-50/60 p-2 dark:border-neutral-700 dark:bg-neutral-900/40"
+            className="rounded border border-border-subtle bg-slate-50/60 p-2 dark:border-border-default/40"
           >
             <div className="mb-2 flex items-center justify-end gap-1">
               <button
@@ -270,7 +270,7 @@ function ArrayOfObjectsField({
                 disabled={disabled || index === 0}
                 aria-label="Move up"
                 onClick={() => move(index, -1)}
-                className="rounded p-1 text-slate-600 hover:bg-slate-200 disabled:opacity-40 dark:text-neutral-300 dark:hover:bg-neutral-700"
+                className="rounded p-1 text-fg-muted hover:bg-slate-200 disabled:opacity-40 dark:text-fg-muted dark:hover:bg-neutral-700"
               >
                 <ChevronUp className="h-3.5 w-3.5" aria-hidden />
               </button>
@@ -279,7 +279,7 @@ function ArrayOfObjectsField({
                 disabled={disabled || index === rows.length - 1}
                 aria-label="Move down"
                 onClick={() => move(index, 1)}
-                className="rounded p-1 text-slate-600 hover:bg-slate-200 disabled:opacity-40 dark:text-neutral-300 dark:hover:bg-neutral-700"
+                className="rounded p-1 text-fg-muted hover:bg-slate-200 disabled:opacity-40 dark:text-fg-muted dark:hover:bg-neutral-700"
               >
                 <ChevronDown className="h-3.5 w-3.5" aria-hidden />
               </button>
@@ -313,7 +313,7 @@ function ArrayOfObjectsField({
         type="button"
         disabled={disabled}
         onClick={add}
-        className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-40 dark:text-neutral-200 dark:hover:bg-neutral-800"
+        className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium text-fg-muted hover:bg-surface-sunken disabled:opacity-40 dark:text-fg-default dark:hover:bg-surface-overlay"
       >
         <Plus className="h-3.5 w-3.5" aria-hidden />
         Add item
@@ -362,9 +362,9 @@ export function SchemaForm({
             return (
               <fieldset
                 key={key}
-                className="space-y-2 rounded-md border border-slate-200 p-2 dark:border-neutral-700"
+                className="space-y-2 rounded-md border border-border-default p-2 dark:border-border-default"
               >
-                <legend className="px-1 text-xs font-medium text-slate-600 dark:text-neutral-300">
+                <legend className="px-1 text-xs font-medium text-fg-muted">
                   {label}
                 </legend>
                 <SchemaForm
@@ -451,7 +451,7 @@ export function SchemaForm({
   }
 
   return (
-    <p className="text-xs text-slate-500 dark:text-neutral-400">
+    <p className="text-xs text-fg-muted">
       Config schema must be an object with properties.
     </p>
   )

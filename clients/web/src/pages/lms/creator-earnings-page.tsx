@@ -70,13 +70,13 @@ export default function CreatorEarningsPage() {
   }
 
   if (featuresLoading) {
-    return <p className="p-6 text-sm text-slate-600">Loading…</p>
+    return <p className="p-6 text-sm text-fg-muted">Loading…</p>
   }
 
   if (!ffRevenueShare) {
     return (
       <div className="p-6">
-        <p className="text-sm text-slate-600">Creator earnings are not enabled on this platform.</p>
+        <p className="text-sm text-fg-muted">Creator earnings are not enabled on this platform.</p>
       </div>
     )
   }
@@ -87,14 +87,14 @@ export default function CreatorEarningsPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-8 p-6">
       <header>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-neutral-100">Creator earnings</h1>
-        <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+        <h1 className="text-2xl font-bold text-fg-default">Creator earnings</h1>
+        <p className="mt-1 text-sm text-fg-muted">
           Track sales revenue, affiliate commissions, and payouts.
         </p>
       </header>
 
       {error ? (
-        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-danger-fg">
           {error}
         </div>
       ) : null}
@@ -111,7 +111,7 @@ export default function CreatorEarningsPage() {
             type="button"
             disabled={busy}
             onClick={() => void handleConnect()}
-            className="mt-3 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
+            className="mt-3 rounded-lg bg-accent-solid px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
           >
             Set up payouts
           </button>
@@ -122,8 +122,8 @@ export default function CreatorEarningsPage() {
         <h2 id="earnings-summary-heading" className="sr-only">
           Earnings summary
         </h2>
-        <div className="rounded-xl border border-slate-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
-          <div className="flex items-center gap-2 text-sm text-slate-500">
+        <div className="rounded-xl border border-border-default bg-surface-raised p-5 dark:border-border-subtle dark:bg-surface-raised">
+          <div className="flex items-center gap-2 text-sm text-fg-muted">
             <Wallet className="h-4 w-4" aria-hidden="true" />
             Pending balance
           </div>
@@ -131,8 +131,8 @@ export default function CreatorEarningsPage() {
             {formatMoney(summary?.pendingCents ?? 0, currency)}
           </data>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
-          <div className="flex items-center gap-2 text-sm text-slate-500">
+        <div className="rounded-xl border border-border-default bg-surface-raised p-5 dark:border-border-subtle dark:bg-surface-raised">
+          <div className="flex items-center gap-2 text-sm text-fg-muted">
             <DollarSign className="h-4 w-4" aria-hidden="true" />
             Paid out
           </div>
@@ -143,7 +143,7 @@ export default function CreatorEarningsPage() {
       </section>
 
       {!hasEarnings ? (
-        <p className="text-sm text-slate-600 dark:text-neutral-400">
+        <p className="text-sm text-fg-muted">
           No earnings yet — publish a course and start selling!
         </p>
       ) : (
@@ -151,12 +151,12 @@ export default function CreatorEarningsPage() {
           <h2 id="ledger-heading" className="text-lg font-semibold">
             Recent activity
           </h2>
-          <div className="mt-3 overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-800">
+          <div className="mt-3 overflow-x-auto rounded-xl border border-border-default dark:border-border-subtle">
             <table className="min-w-full text-sm" aria-describedby={tableCaptionId}>
               <caption id={tableCaptionId} className="sr-only">
                 Earnings ledger with date, type, and amount
               </caption>
-              <thead className="bg-slate-50 text-start dark:bg-neutral-900">
+              <thead className="bg-surface-base text-start dark:bg-surface-raised">
                 <tr>
                   <th scope="col" className="px-4 py-2 font-medium">
                     Date
@@ -174,7 +174,7 @@ export default function CreatorEarningsPage() {
               </thead>
               <tbody>
                 {ledger.map((row) => (
-                  <tr key={row.id} className="border-t border-slate-100 dark:border-neutral-800">
+                  <tr key={row.id} className="border-t border-border-subtle">
                     <td className="px-4 py-2">{new Date(row.createdAt).toLocaleDateString()}</td>
                     <td className="px-4 py-2 capitalize">{row.entryType}</td>
                     <td className="px-4 py-2">
@@ -198,14 +198,14 @@ export default function CreatorEarningsPage() {
             type="button"
             disabled={busy}
             onClick={() => void handleNewCode()}
-            className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-700 dark:hover:bg-neutral-800"
+            className="inline-flex items-center gap-1 rounded-lg border border-border-strong px-3 py-1.5 text-sm font-medium hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:hover:bg-surface-overlay"
           >
             <Link2 className="h-4 w-4" aria-hidden="true" />
             New link
           </button>
         </div>
         {codes.length === 0 ? (
-          <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
+          <p className="mt-2 text-sm text-fg-muted">
             Generate a referral link to earn commission when others purchase through your link.
           </p>
         ) : (
@@ -213,19 +213,19 @@ export default function CreatorEarningsPage() {
             {codes.map((code) => (
               <li
                 key={code.id}
-                className="rounded-xl border border-slate-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900"
+                className="rounded-xl border border-border-default bg-surface-raised p-4 dark:border-border-subtle dark:bg-surface-raised"
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <code className="text-xs text-slate-600 dark:text-neutral-400">{code.url}</code>
+                  <code className="text-xs text-fg-muted">{code.url}</code>
                   <button
                     type="button"
-                    className="text-sm font-medium text-indigo-600 hover:underline"
+                    className="text-sm font-medium text-accent-fg hover:underline"
                     onClick={() => void navigator.clipboard.writeText(code.url)}
                   >
                     Copy
                   </button>
                 </div>
-                <p className="mt-2 text-xs text-slate-500">
+                <p className="mt-2 text-xs text-fg-muted">
                   {code.clickCount} clicks · {code.conversions} conversions
                 </p>
               </li>

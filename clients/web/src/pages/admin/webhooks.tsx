@@ -172,7 +172,7 @@ export default function WebhooksAdminPage() {
   }
 
   if (featuresLoading) {
-    return <p className="text-sm text-slate-600 dark:text-neutral-400">Loading platform features…</p>
+    return <p className="text-sm text-fg-muted">Loading platform features…</p>
   }
 
   if (!ffWebhooks) {
@@ -186,7 +186,7 @@ export default function WebhooksAdminPage() {
 
   if (!orgId) {
     return (
-      <p className="text-sm text-slate-600 dark:text-neutral-400">
+      <p className="text-sm text-fg-muted">
         Open this page from Admin with an organization selected (add <code>?orgId=…</code> to the URL).
       </p>
     )
@@ -195,10 +195,10 @@ export default function WebhooksAdminPage() {
   return (
     <div className="space-y-8">
       <header>
-        <h1 id={titleId} className="text-xl font-semibold text-slate-900 dark:text-neutral-100">
+        <h1 id={titleId} className="text-xl font-semibold text-fg-default">
           Webhooks
         </h1>
-        <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+        <p className="mt-1 text-sm text-fg-muted">
           Register HTTPS endpoints to receive signed LMS event notifications.
         </p>
       </header>
@@ -216,17 +216,17 @@ export default function WebhooksAdminPage() {
       {signingKeyReveal ? (
         <div className="rounded-md border border-sky-200 bg-sky-50 p-3 text-sm dark:border-sky-900/50 dark:bg-sky-950/30">
           <p className="font-medium text-sky-900 dark:text-sky-100">Signing key (shown once)</p>
-          <code className="mt-2 block break-all rounded bg-white/80 px-2 py-1 font-mono text-xs dark:bg-neutral-900">
+          <code className="mt-2 block break-all rounded bg-white/80 px-2 py-1 font-mono text-xs dark:bg-surface-raised">
             {signingKeyReveal}
           </code>
         </div>
       ) : null}
 
-      <section aria-labelledby={titleId} className="rounded-xl border border-slate-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
-        <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Create subscription</h2>
+      <section aria-labelledby={titleId} className="rounded-xl border border-border-default bg-surface-raised p-4 dark:border-border-subtle dark:bg-surface-raised">
+        <h2 className="text-base font-semibold text-fg-default">Create subscription</h2>
         <form className="mt-4 space-y-4" onSubmit={(e) => void handleCreate(e)}>
           <div>
-            <label htmlFor={labelId} className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+            <label htmlFor={labelId} className="block text-sm font-medium text-fg-muted">
               Label
             </label>
             <input
@@ -234,11 +234,11 @@ export default function WebhooksAdminPage() {
               required
               value={label}
               onChange={(e) => setLabel(e.target.value)}
-              className="mt-1 w-full max-w-lg rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+              className="mt-1 w-full max-w-lg rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
             />
           </div>
           <div>
-            <label htmlFor={urlId} className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+            <label htmlFor={urlId} className="block text-sm font-medium text-fg-muted">
               Endpoint URL (HTTPS only)
             </label>
             <input
@@ -247,15 +247,15 @@ export default function WebhooksAdminPage() {
               type="url"
               value={endpointUrl}
               onChange={(e) => setEndpointUrl(e.target.value)}
-              className="mt-1 w-full max-w-2xl rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+              className="mt-1 w-full max-w-2xl rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
             />
           </div>
           <fieldset>
-            <legend className="text-sm font-medium text-slate-700 dark:text-neutral-300">Event types</legend>
+            <legend className="text-sm font-medium text-fg-muted">Event types</legend>
             <div className="mt-2 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {groups.map((group) => (
                 <div key={group.domain}>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-500">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-fg-subtle">
                     {group.domain}
                   </p>
                   <ul className="mt-2 space-y-2">
@@ -286,13 +286,13 @@ export default function WebhooksAdminPage() {
         </form>
       </section>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
-        <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Subscriptions</h2>
-        {loading ? <p className="mt-3 text-sm text-slate-600">Loading…</p> : null}
+      <section className="rounded-xl border border-border-default bg-surface-raised p-4 dark:border-border-subtle dark:bg-surface-raised">
+        <h2 className="text-base font-semibold text-fg-default">Subscriptions</h2>
+        {loading ? <p className="mt-3 text-sm text-fg-muted">Loading…</p> : null}
         <div className="mt-3 overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-neutral-800">
+              <tr className="border-b border-border-default dark:border-border-subtle">
                 <th scope="col" className="px-2 py-2 font-medium">Label</th>
                 <th scope="col" className="px-2 py-2 font-medium">Status</th>
                 <th scope="col" className="px-2 py-2 font-medium">Events</th>
@@ -302,7 +302,7 @@ export default function WebhooksAdminPage() {
             </thead>
             <tbody>
               {subscriptions.map((sub) => (
-                <tr key={sub.id} className="border-b border-slate-100 dark:border-neutral-800/80">
+                <tr key={sub.id} className="border-b border-border-subtle/80">
                   <td className="px-2 py-2">{sub.label}</td>
                   <td className="px-2 py-2">
                     <span
@@ -346,7 +346,7 @@ export default function WebhooksAdminPage() {
                       ) : null}
                       <button
                         type="button"
-                        className="text-red-700 underline dark:text-red-300"
+                        className="text-danger-fg underline dark:text-red-300"
                         disabled={busyId === `delete-${sub.id}`}
                         onClick={() => void handleDelete(sub)}
                       >
@@ -358,7 +358,7 @@ export default function WebhooksAdminPage() {
               ))}
               {!loading && subscriptions.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-2 py-4 text-slate-500">
+                  <td colSpan={5} className="px-2 py-4 text-fg-muted">
                     No webhook subscriptions yet.
                   </td>
                 </tr>
@@ -369,15 +369,15 @@ export default function WebhooksAdminPage() {
       </section>
 
       {selectedId ? (
-        <section className="rounded-xl border border-slate-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+        <section className="rounded-xl border border-border-default bg-surface-raised p-4 dark:border-border-subtle dark:bg-surface-raised">
           <div className="flex flex-wrap items-end gap-3">
-            <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Delivery log</h2>
+            <h2 className="text-base font-semibold text-fg-default">Delivery log</h2>
             <label className="text-sm">
               Test event type{' '}
               <select
                 value={testEventType}
                 onChange={(e) => setTestEventType(e.target.value)}
-                className="ml-1 rounded border border-slate-300 px-2 py-1 dark:border-neutral-700 dark:bg-neutral-950"
+                className="ml-1 rounded border border-border-strong px-2 py-1 dark:border-border-default dark:bg-surface-base"
               >
                 {groups.flatMap((g) => g.types).map((t) => (
                   <option key={t} value={t}>
@@ -390,7 +390,7 @@ export default function WebhooksAdminPage() {
           <div className="mt-3 overflow-x-auto">
             <table className="min-w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-neutral-800">
+                <tr className="border-b border-border-default dark:border-border-subtle">
                   <th scope="col" className="px-2 py-2 font-medium">Time</th>
                   <th scope="col" className="px-2 py-2 font-medium">Event</th>
                   <th scope="col" className="px-2 py-2 font-medium">Status</th>
@@ -401,7 +401,7 @@ export default function WebhooksAdminPage() {
               </thead>
               <tbody>
                 {deliveries.map((row) => (
-                  <tr key={row.id} className="border-b border-slate-100 dark:border-neutral-800/80">
+                  <tr key={row.id} className="border-b border-border-subtle/80">
                     <td className="whitespace-nowrap px-2 py-2">{new Date(row.createdAt).toLocaleString()}</td>
                     <td className="px-2 py-2">{eventTypeLabel(row.eventType)}{row.test ? ' (test)' : ''}</td>
                     <td className="px-2 py-2">{row.status}</td>
@@ -414,7 +414,7 @@ export default function WebhooksAdminPage() {
                 ))}
                 {deliveries.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-2 py-4 text-slate-500">
+                    <td colSpan={6} className="px-2 py-4 text-fg-muted">
                       No deliveries recorded yet.
                     </td>
                   </tr>

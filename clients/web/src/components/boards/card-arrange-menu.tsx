@@ -77,19 +77,19 @@ export function CardArrangeMenu({
           e.stopPropagation()
           setOpen((o) => !o)
         }}
-        className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+        className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-fg-subtle hover:bg-surface-sunken hover:text-fg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:hover:bg-surface-overlay dark:hover:text-fg-default"
       >
         <MoreVertical className="size-4 shrink-0" strokeWidth={2} aria-hidden />
       </button>
       {open ? (
         <div
           role="menu"
-          className="absolute end-0 z-20 mt-1 w-56 rounded-md border border-slate-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-900"
+          className="absolute end-0 z-20 mt-1 w-56 rounded-md border border-border-default bg-surface-raised py-1 shadow-lg dark:border-border-default dark:bg-surface-raised"
         >
           <button
             type="button"
             role="menuitem"
-            className="block w-full px-3 py-1.5 text-start text-sm hover:bg-slate-50 disabled:opacity-40 dark:hover:bg-neutral-800"
+            className="block w-full px-3 py-1.5 text-start text-sm hover:bg-surface-base disabled:opacity-40 dark:hover:bg-surface-overlay"
             onClick={moveUp}
             disabled={idx <= 0}
           >
@@ -98,21 +98,21 @@ export function CardArrangeMenu({
           <button
             type="button"
             role="menuitem"
-            className="block w-full px-3 py-1.5 text-start text-sm hover:bg-slate-50 disabled:opacity-40 dark:hover:bg-neutral-800"
+            className="block w-full px-3 py-1.5 text-start text-sm hover:bg-surface-base disabled:opacity-40 dark:hover:bg-surface-overlay"
             onClick={moveDown}
             disabled={idx < 0 || idx >= ordered.length - 1}
           >
             {t('boards.arrange.moveDown')}
           </button>
           {sections.length > 0 ? (
-            <div className="border-t border-slate-100 px-3 py-1.5 dark:border-neutral-800">
-              <p className="mb-1 text-xs font-medium text-slate-500">{t('boards.arrange.moveToSection')}</p>
+            <div className="border-t border-border-subtle px-3 py-1.5 dark:border-border-subtle">
+              <p className="mb-1 text-xs font-medium text-fg-muted">{t('boards.arrange.moveToSection')}</p>
               {sections.map((s) => (
                 <button
                   key={s.id}
                   type="button"
                   role="menuitem"
-                  className="block w-full truncate px-1 py-1 text-start text-sm hover:bg-slate-50 disabled:opacity-40 dark:hover:bg-neutral-800"
+                  className="block w-full truncate px-1 py-1 text-start text-sm hover:bg-surface-base disabled:opacity-40 dark:hover:bg-surface-overlay"
                   onClick={() => {
                     onMoveToSection(s.id)
                     setOpen(false)
@@ -125,14 +125,14 @@ export function CardArrangeMenu({
             </div>
           ) : null}
           {showTimeline && onSetEventDate ? (
-            <div className="border-t border-slate-100 px-3 py-1.5 dark:border-neutral-800">
-              <label className="block text-xs font-medium text-slate-500" htmlFor={`event-${post.id}`}>
+            <div className="border-t border-border-subtle px-3 py-1.5 dark:border-border-subtle">
+              <label className="block text-xs font-medium text-fg-muted" htmlFor={`event-${post.id}`}>
                 {t('boards.arrange.eventDate')}
               </label>
               <input
                 id={`event-${post.id}`}
                 type="date"
-                className="mt-1 w-full rounded border border-slate-200 px-2 py-1 text-sm dark:border-neutral-700 dark:bg-neutral-800"
+                className="mt-1 w-full rounded border border-border-default px-2 py-1 text-sm dark:border-border-default dark:bg-surface-overlay"
                 defaultValue={post.eventDate ? post.eventDate.slice(0, 10) : ''}
                 onChange={(e) => {
                   onSetEventDate(e.target.value || null)
@@ -142,11 +142,11 @@ export function CardArrangeMenu({
             </div>
           ) : null}
           {showMap && onSetCoords ? (
-            <div className="border-t border-slate-100 px-3 py-1.5 dark:border-neutral-800">
-              <p className="mb-1 text-xs font-medium text-slate-500">{t('boards.arrange.setCoords')}</p>
+            <div className="border-t border-border-subtle px-3 py-1.5 dark:border-border-subtle">
+              <p className="mb-1 text-xs font-medium text-fg-muted">{t('boards.arrange.setCoords')}</p>
               {coordsOpen ? (
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs text-slate-500" htmlFor={`lat-${post.id}`}>
+                  <label className="text-xs text-fg-muted" htmlFor={`lat-${post.id}`}>
                     {t('boards.arrange.latPrompt')}
                   </label>
                   <input
@@ -157,9 +157,9 @@ export function CardArrangeMenu({
                     max={90}
                     value={latDraft}
                     onChange={(e) => setLatDraft(e.target.value)}
-                    className="w-full rounded border border-slate-200 px-2 py-1 text-sm dark:border-neutral-700 dark:bg-neutral-800"
+                    className="w-full rounded border border-border-default px-2 py-1 text-sm dark:border-border-default dark:bg-surface-overlay"
                   />
-                  <label className="text-xs text-slate-500" htmlFor={`lng-${post.id}`}>
+                  <label className="text-xs text-fg-muted" htmlFor={`lng-${post.id}`}>
                     {t('boards.arrange.lngPrompt')}
                   </label>
                   <input
@@ -170,11 +170,11 @@ export function CardArrangeMenu({
                     max={180}
                     value={lngDraft}
                     onChange={(e) => setLngDraft(e.target.value)}
-                    className="w-full rounded border border-slate-200 px-2 py-1 text-sm dark:border-neutral-700 dark:bg-neutral-800"
+                    className="w-full rounded border border-border-default px-2 py-1 text-sm dark:border-border-default dark:bg-surface-overlay"
                   />
                   <button
                     type="button"
-                    className="rounded bg-indigo-600 px-2 py-1 text-xs font-medium text-white"
+                    className="rounded bg-accent-solid px-2 py-1 text-xs font-medium text-white"
                     onClick={saveCoords}
                   >
                     {t('boards.arrange.saveCoords')}
@@ -184,7 +184,7 @@ export function CardArrangeMenu({
                 <button
                   type="button"
                   role="menuitem"
-                  className="block w-full px-1 py-1 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                  className="block w-full px-1 py-1 text-start text-sm hover:bg-surface-base dark:hover:bg-surface-overlay"
                   onClick={() => {
                     setLatDraft(String(post.lat ?? ''))
                     setLngDraft(String(post.lng ?? ''))

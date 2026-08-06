@@ -37,16 +37,16 @@ export function ToolPaletteList({
   if (loading) {
     return (
       <div className="space-y-2 p-2" aria-busy="true">
-        <div className="h-8 motion-safe:animate-pulse rounded bg-slate-100 dark:bg-neutral-800" />
-        <div className="h-10 motion-safe:animate-pulse rounded bg-slate-100 dark:bg-neutral-800" />
-        <div className="h-10 motion-safe:animate-pulse rounded bg-slate-100 dark:bg-neutral-800" />
+        <div className="h-8 motion-safe:animate-pulse rounded bg-surface-sunken" />
+        <div className="h-10 motion-safe:animate-pulse rounded bg-surface-sunken" />
+        <div className="h-10 motion-safe:animate-pulse rounded bg-surface-sunken" />
       </div>
     )
   }
 
   return (
     <div className="flex max-h-72 flex-col">
-      <div className="shrink-0 border-b border-slate-200 p-2 dark:border-neutral-700">
+      <div className="shrink-0 border-b border-border-default p-2 dark:border-border-default">
         <label htmlFor={searchId} className="sr-only">
           {searchPlaceholder ?? t('contentTools.authoring.searchTools')}
         </label>
@@ -57,18 +57,18 @@ export function ToolPaletteList({
           autoComplete="off"
           placeholder={searchPlaceholder ?? t('contentTools.authoring.searchTools')}
           onChange={(e) => setQuery(e.target.value)}
-          className="w-full rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:placeholder:text-neutral-500"
+          className="w-full rounded-md border border-border-default bg-surface-raised px-2.5 py-1.5 text-sm text-fg-default placeholder:text-fg-subtle focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:placeholder:text-neutral-500"
         />
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto p-1" role="listbox">
         {groups.length === 0 ? (
-          <p className="px-2 py-3 text-xs text-slate-500 dark:text-neutral-400">
+          <p className="px-2 py-3 text-xs text-fg-muted">
             {emptyMessage ?? t('contentTools.authoring.noToolsMatch')}
           </p>
         ) : (
           groups.map((group) => (
             <div key={group.category} className="mb-1">
-              <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+              <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-fg-muted">
                 {group.category}
               </p>
               <ul className="space-y-0.5">
@@ -91,13 +91,13 @@ export function ToolPaletteList({
                         onMouseEnter={() => setHighlightedId(tool.id)}
                         onFocus={() => setHighlightedId(tool.id)}
                         onClick={() => onSelect(tool.id)}
-                        className="flex w-full flex-col rounded-md px-2 py-1.5 text-start hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-neutral-800"
+                        className="flex w-full flex-col rounded-md px-2 py-1.5 text-start hover:bg-surface-sunken disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-surface-overlay"
                       >
-                        <span className="text-sm font-medium text-slate-800 dark:text-neutral-100">
+                        <span className="text-sm font-medium text-fg-default">
                           {label}
                         </span>
                         {description ? (
-                          <span className="text-xs text-slate-500 dark:text-neutral-400">
+                          <span className="text-xs text-fg-muted">
                             {description}
                           </span>
                         ) : null}

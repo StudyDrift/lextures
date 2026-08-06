@@ -37,7 +37,7 @@ type GradingBacklogListProps = {
 export function GradingBacklogList({ items, showCourse = false, emptyMessage }: GradingBacklogListProps) {
   if (items.length === 0) {
     if (!emptyMessage) return null
-    return <p className="text-sm text-slate-500 dark:text-neutral-400">{emptyMessage}</p>
+    return <p className="text-sm text-fg-muted">{emptyMessage}</p>
   }
 
   return (
@@ -54,12 +54,12 @@ export function GradingBacklogList({ items, showCourse = false, emptyMessage }: 
             >
               <span className="min-w-0">
                 {showCourse && item.courseTitle ? (
-                  <span className="block text-xs font-medium text-slate-500 dark:text-neutral-400">
+                  <span className="block text-xs font-medium text-fg-muted">
                     {item.courseTitle}
                   </span>
                 ) : null}
-                <span className="flex items-center gap-1.5 font-semibold text-slate-900 dark:text-neutral-100">
-                  <ClipboardCheck className="h-3.5 w-3.5 shrink-0 text-amber-700 dark:text-amber-300" aria-hidden />
+                <span className="flex items-center gap-1.5 font-semibold text-fg-default">
+                  <ClipboardCheck className="h-3.5 w-3.5 shrink-0 text-warning-fg" aria-hidden />
                   <span className="truncate">{item.assignmentTitle}</span>
                   {item.itemType === 'quiz' ? (
                     <span className="shrink-0 rounded bg-amber-200/70 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-950 dark:bg-amber-900/50 dark:text-amber-100">

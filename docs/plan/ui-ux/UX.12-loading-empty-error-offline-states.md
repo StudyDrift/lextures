@@ -306,7 +306,7 @@ fail.
 ## 13. Dependencies & Sequencing
 
 - **Must ship after** — [UX.1](UX.1-semantic-design-token-system.md),
-  [UX.2](UX.2-core-component-library-and-adoption-ratchet.md).
+  [UX.2](../../completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md).
 - **Should coordinate with** — [`TD.13`](../tech_debt/TD.13-adopt-server-state-management.md);
   if a server-state library is adopted, loading/error/retry semantics come largely
   for free and this plan should consume rather than duplicate them.
@@ -418,7 +418,7 @@ fail.
 - Audit: [audit.md](audit.md) G-9, G-13, G-2
 - External: [NN/g — Skeleton Screens 101](https://www.nngroup.com/articles/skeleton-screens/),
   [LogRocket — Skeleton loading screen design](https://blog.logrocket.com/ux-design/skeleton-loading-screen-design/)
-- Related plans: [UX.2](UX.2-core-component-library-and-adoption-ratchet.md),
+- Related plans: [UX.2](../../completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md),
   [UX.9](UX.9-role-aware-dashboard.md),
   [UX.13](UX.13-feedback-undo-and-destructive-actions.md),
   [UX.17](UX.17-perceived-performance-and-web-vitals-budget.md),

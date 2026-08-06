@@ -141,22 +141,22 @@ export function BoardShareDialog({ open, onClose, courseCode, board, onBoardUpda
       onClick={onClose}
     >
       <div
-        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-t-xl bg-white p-5 shadow-xl sm:rounded-xl dark:bg-neutral-900"
+        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-t-xl bg-surface-raised p-5 shadow-xl sm:rounded-xl dark:bg-surface-raised"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 id={titleId} className="text-lg font-semibold text-slate-900 dark:text-neutral-100">
+        <h2 id={titleId} className="text-lg font-semibold text-fg-default">
           {t('boards.share.title')}
         </h2>
-        <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">{t('boards.share.subtitle')}</p>
+        <p className="mt-1 text-sm text-fg-muted">{t('boards.share.subtitle')}</p>
 
         <fieldset className="mt-4 space-y-2">
-          <legend className="text-sm font-medium text-slate-800 dark:text-neutral-200">
+          <legend className="text-sm font-medium text-fg-default">
             {t('boards.access.visibility')}
           </legend>
           <select
             value={visibility}
             onChange={(e) => setVisibility(e.target.value as BoardVisibility)}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+            className="w-full rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
             aria-label={t('boards.access.visibility')}
           >
             {visibilityOptions.map((v) => (
@@ -170,26 +170,26 @@ export function BoardShareDialog({ open, onClose, courseCode, board, onBoardUpda
               value={visibilityTarget}
               onChange={(e) => setVisibilityTarget(e.target.value)}
               placeholder={t('boards.access.visibilityTargetPlaceholder')}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+              className="w-full rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
               aria-label={t('boards.access.visibilityTarget')}
             />
           )}
           {!ffBoardsExternalSharing ? (
-            <p className="text-xs text-slate-500 dark:text-neutral-400">{t('boards.share.externalDisabled')}</p>
+            <p className="text-xs text-fg-muted">{t('boards.share.externalDisabled')}</p>
           ) : null}
           {externalBlockedReason === 'minors' ? (
-            <p className="text-xs text-amber-700 dark:text-amber-400">{t('boards.share.minorsBlocked')}</p>
+            <p className="text-xs text-warning-fg dark:text-amber-400">{t('boards.share.minorsBlocked')}</p>
           ) : null}
         </fieldset>
 
         <fieldset className="mt-4 space-y-2">
-          <legend className="text-sm font-medium text-slate-800 dark:text-neutral-200">
+          <legend className="text-sm font-medium text-fg-default">
             {t('boards.access.attribution')}
           </legend>
           <select
             value={attribution}
             onChange={(e) => setAttribution(e.target.value as BoardAttribution)}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+            className="w-full rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
             aria-label={t('boards.access.attribution')}
           >
             {(['named', 'anon_to_peers', 'anonymous'] as BoardAttribution[]).map((a) => (
@@ -201,7 +201,7 @@ export function BoardShareDialog({ open, onClose, courseCode, board, onBoardUpda
         </fieldset>
 
         <fieldset className="mt-4 space-y-2">
-          <legend className="text-sm font-medium text-slate-800 dark:text-neutral-200">
+          <legend className="text-sm font-medium text-fg-default">
             {t('boards.access.contributorPolicy')}
           </legend>
           <label className="flex items-center gap-2 text-sm">
@@ -231,7 +231,7 @@ export function BoardShareDialog({ open, onClose, courseCode, board, onBoardUpda
             type="button"
             disabled={saving}
             onClick={() => void saveAccess()}
-            className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+            className="rounded-md bg-accent-solid px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
           >
             {t('boards.share.saveAccess')}
           </button>
@@ -245,12 +245,12 @@ export function BoardShareDialog({ open, onClose, courseCode, board, onBoardUpda
                 value={memberUserId}
                 onChange={(e) => setMemberUserId(e.target.value)}
                 placeholder={t('boards.share.memberUserId')}
-                className="flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+                className="flex-1 rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
               />
               <button
                 type="button"
                 onClick={() => void addMember()}
-                className="rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600"
+                className="rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default"
               >
                 {t('boards.share.addMember')}
               </button>
@@ -263,7 +263,7 @@ export function BoardShareDialog({ open, onClose, courseCode, board, onBoardUpda
                   </span>
                   <button
                     type="button"
-                    className="text-red-600 dark:text-red-400"
+                    className="text-danger-fg"
                     onClick={() =>
                       void removeBoardMember(courseCode, board.id, m.userId)
                         .then(() => setMembers((prev) => prev.filter((x) => x.userId !== m.userId)))
@@ -285,7 +285,7 @@ export function BoardShareDialog({ open, onClose, courseCode, board, onBoardUpda
               <select
                 value={shareCap}
                 onChange={(e) => setShareCap(e.target.value as BoardShareCapability)}
-                className="rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+                className="rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
                 aria-label={t('boards.share.capability')}
               >
                 <option value="view">{t('boards.share.capability.view')}</option>
@@ -297,12 +297,12 @@ export function BoardShareDialog({ open, onClose, courseCode, board, onBoardUpda
                   value={sharePassword}
                   onChange={(e) => setSharePassword(e.target.value)}
                   placeholder={t('boards.share.passwordOptional')}
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 pe-16 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+                  className="w-full rounded-md border border-border-strong px-3 py-2 pe-16 text-sm dark:border-border-default dark:bg-surface-overlay"
                   aria-label={t('boards.share.passwordOptional')}
                 />
                 <button
                   type="button"
-                  className="absolute end-2 top-1/2 -translate-y-1/2 text-xs text-slate-500"
+                  className="absolute end-2 top-1/2 -translate-y-1/2 text-xs text-fg-muted"
                   onClick={() => setShowPassword((v) => !v)}
                 >
                   {showPassword ? t('boards.share.hidePassword') : t('boards.share.showPassword')}
@@ -317,7 +317,7 @@ export function BoardShareDialog({ open, onClose, courseCode, board, onBoardUpda
               </button>
             </div>
             {createdTokenUrl ? (
-              <p className="break-all rounded-md bg-slate-50 p-2 text-xs dark:bg-neutral-800">
+              <p className="break-all rounded-md bg-surface-base p-2 text-xs dark:bg-surface-overlay">
                 {createdTokenUrl}
               </p>
             ) : null}
@@ -332,7 +332,7 @@ export function BoardShareDialog({ open, onClose, courseCode, board, onBoardUpda
                   {!s.revokedAt ? (
                     <button
                       type="button"
-                      className="text-red-600 dark:text-red-400"
+                      className="text-danger-fg"
                       onClick={() =>
                         void revokeBoardShare(courseCode, board.id, s.id)
                           .then(() =>
@@ -360,7 +360,7 @@ export function BoardShareDialog({ open, onClose, courseCode, board, onBoardUpda
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md px-3 py-1.5 text-sm text-slate-600 dark:text-neutral-300"
+            className="rounded-md px-3 py-1.5 text-sm text-fg-muted"
           >
             {t('dialogs.close')}
           </button>

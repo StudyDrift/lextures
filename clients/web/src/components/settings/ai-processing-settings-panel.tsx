@@ -58,29 +58,29 @@ export function AiProcessingSettingsPanel({ embedded = false }: Props) {
   }, [optOut])
 
   if (loading) {
-    return <p className="text-sm text-slate-500">Loading AI settings…</p>
+    return <p className="text-sm text-fg-muted">Loading AI settings…</p>
   }
 
   return (
     <section
-      className={embedded ? '' : 'mt-8 border-t border-slate-200 pt-8 dark:border-neutral-600'}
+      className={embedded ? '' : 'mt-8 border-t border-border-default pt-8 dark:border-border-default'}
       aria-labelledby="ai-processing-heading"
     >
-      <h3 id="ai-processing-heading" className="text-sm font-medium text-slate-700 dark:text-neutral-200">
+      <h3 id="ai-processing-heading" className="text-sm font-medium text-fg-default">
         {aiDisclosureI18n.optOutTitle}
       </h3>
-      <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">{aiDisclosureI18n.optOutDescription}</p>
+      <p className="mt-1 text-sm text-fg-muted">{aiDisclosureI18n.optOutDescription}</p>
       <label className="mt-4 flex cursor-pointer items-start gap-3">
         <input
           type="checkbox"
-          className="mt-1 h-4 w-4 rounded border-slate-300"
+          className="mt-1 h-4 w-4 rounded border-border-strong"
           checked={optOut}
           onChange={(e) => setOptOut(e.target.checked)}
         />
-        <span className="text-sm text-slate-700 dark:text-neutral-200">{aiDisclosureI18n.optOutLabel}</span>
+        <span className="text-sm text-fg-default">{aiDisclosureI18n.optOutLabel}</span>
       </label>
       <p className="mt-2 text-sm">
-        <Link to="/ai-disclosure" className="text-indigo-700 underline dark:text-indigo-300">
+        <Link to="/ai-disclosure" className="text-accent-fg underline dark:text-indigo-300">
           {aiDisclosureI18n.fullDisclosureLink}
         </Link>
       </p>
@@ -88,7 +88,7 @@ export function AiProcessingSettingsPanel({ embedded = false }: Props) {
         type="button"
         disabled={saving}
         onClick={() => void save()}
-        className="mt-4 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+        className="mt-4 rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
       >
         {saving ? 'Saving…' : 'Save'}
       </button>

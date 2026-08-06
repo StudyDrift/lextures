@@ -170,19 +170,19 @@ export function FlashcardsModal({ open, notes, pageTitle, onClose }: FlashcardsM
       />
 
       {/* Modal Card */}
-      <div className="relative flex flex-col w-full max-w-2xl h-[580px] bg-slate-50 dark:bg-neutral-900 rounded-3xl border border-slate-200 dark:border-neutral-800 shadow-2xl overflow-hidden">
+      <div className="relative flex flex-col w-full max-w-2xl h-[580px] bg-surface-base rounded-3xl border border-border-default dark:border-border-subtle shadow-2xl overflow-hidden">
         
         {/* Header */}
-        <div className="flex items-center justify-between shrink-0 px-6 py-4 bg-white dark:bg-neutral-950 border-b border-slate-100 dark:border-neutral-800/80">
+        <div className="flex items-center justify-between shrink-0 px-6 py-4 bg-surface-raised border-b border-border-subtle/80">
           <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-700 dark:bg-indigo-950/80 dark:text-indigo-300">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-accent-fg dark:bg-indigo-950/80 dark:text-indigo-300">
               <Sparkles className="h-4 w-4" aria-hidden />
             </span>
             <div>
-              <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">
+              <h2 className="text-base font-semibold text-fg-default">
                 AI Study Flashcards
               </h2>
-              <p className="text-xs text-slate-500 dark:text-neutral-400 max-w-[280px] sm:max-w-md truncate">
+              <p className="text-xs text-fg-muted max-w-[280px] sm:max-w-md truncate">
                 Based on notes: <span className="font-medium">{pageTitle || 'Untitled page'}</span>
               </p>
             </div>
@@ -191,7 +191,7 @@ export function FlashcardsModal({ open, notes, pageTitle, onClose }: FlashcardsM
             type="button"
             onClick={onClose}
             aria-label="Close flashcards panel"
-            className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 transition-[background-color,color,border-color] hover:bg-slate-100 hover:text-slate-800 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
+            className="flex h-9 w-9 items-center justify-center rounded-xl text-fg-muted transition-[background-color,color,border-color] hover:bg-surface-sunken hover:text-fg-default dark:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-fg-default"
           >
             <X className="h-5 w-5" aria-hidden />
           </button>
@@ -209,14 +209,14 @@ export function FlashcardsModal({ open, notes, pageTitle, onClose }: FlashcardsM
           {loading && (
             <div className="flex flex-col items-center justify-center space-y-6 text-center">
               <div className="relative flex items-center justify-center">
-                <div className="h-16 w-16 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-600 dark:border-neutral-700 dark:border-t-indigo-400" />
-                <Sparkles className="absolute h-6 w-6 text-indigo-600 dark:text-indigo-400 animate-pulse" />
+                <div className="h-16 w-16 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-600 dark:border-border-default dark:border-t-indigo-400" />
+                <Sparkles className="absolute h-6 w-6 text-accent-fg animate-pulse" />
               </div>
               <div className="space-y-2">
-                <p className="text-sm font-semibold text-slate-800 dark:text-neutral-200">
+                <p className="text-sm font-semibold text-fg-default">
                   Formulating study deck...
                 </p>
-                <p className="text-xs text-slate-500 dark:text-neutral-400 max-w-xs mx-auto animate-fade-in">
+                <p className="text-xs text-fg-muted max-w-xs mx-auto animate-fade-in">
                   Tip: {STUDY_TIPS[tipIndex]}
                 </p>
               </div>
@@ -229,17 +229,17 @@ export function FlashcardsModal({ open, notes, pageTitle, onClose }: FlashcardsM
                 <HelpCircle className="h-6 w-6" aria-hidden />
               </div>
               <div className="space-y-2">
-                <p className="text-sm font-semibold text-slate-800 dark:text-neutral-200">
+                <p className="text-sm font-semibold text-fg-default">
                   Flashcard Generation Failed
                 </p>
-                <p className="text-xs text-slate-500 dark:text-neutral-400 max-w-md">
+                <p className="text-xs text-fg-muted max-w-md">
                   {error}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={generateFlashcards}
-                className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+                className="inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2 text-sm font-medium text-white shadow-sm transition-[background-color,color,border-color] hover:bg-accent dark:bg-indigo-500 dark:hover:bg-indigo-400"
               >
                 <RefreshCw className="h-4 w-4" aria-hidden />
                 Try again
@@ -249,7 +249,7 @@ export function FlashcardsModal({ open, notes, pageTitle, onClose }: FlashcardsM
 
           {!loading && !error && totalCards === 0 && (
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
-              <p className="text-sm text-slate-500 dark:text-neutral-400">
+              <p className="text-sm text-fg-muted">
                 Write some notes in this notebook first to create flashcards!
               </p>
             </div>
@@ -266,10 +266,10 @@ export function FlashcardsModal({ open, notes, pageTitle, onClose }: FlashcardsM
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <h3 className="text-xl font-bold text-slate-900 dark:text-neutral-100">
+                    <h3 className="text-xl font-bold text-fg-default">
                       Excellent Job! 🎉
                     </h3>
-                    <p className="text-sm text-slate-600 dark:text-neutral-300 max-w-sm">
+                    <p className="text-sm text-fg-muted max-w-sm">
                       You've mastered all {totalCards} study cards in this notebook page!
                     </p>
                   </div>
@@ -277,7 +277,7 @@ export function FlashcardsModal({ open, notes, pageTitle, onClose }: FlashcardsM
                     <button
                       type="button"
                       onClick={handleResetStudy}
-                      className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700"
+                      className="inline-flex items-center gap-2 rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700"
                     >
                       <RotateCw className="h-4 w-4" aria-hidden />
                       Study again
@@ -285,7 +285,7 @@ export function FlashcardsModal({ open, notes, pageTitle, onClose }: FlashcardsM
                     <button
                       type="button"
                       onClick={generateFlashcards}
-                      className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+                      className="inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-[background-color,color,border-color] hover:bg-accent dark:bg-indigo-500 dark:hover:bg-indigo-400"
                     >
                       <RefreshCw className="h-4 w-4" aria-hidden />
                       Regenerate
@@ -306,14 +306,14 @@ export function FlashcardsModal({ open, notes, pageTitle, onClose }: FlashcardsM
                     <div className={`relative w-full h-full duration-500 transform-style-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
                       
                       {/* Front Side */}
-                      <div className="absolute inset-0 w-full h-full flex flex-col justify-center items-center p-6 text-center bg-white dark:bg-neutral-950 border-2 border-slate-200 dark:border-neutral-800 rounded-2xl shadow-md backface-hidden group-hover:border-indigo-400 dark:group-hover:border-indigo-500/50 transition-colors overflow-y-auto">
-                        <span className="absolute top-3 right-4 text-[10px] uppercase font-bold tracking-wider text-slate-400 dark:text-neutral-500">
+                      <div className="absolute inset-0 w-full h-full flex flex-col justify-center items-center p-6 text-center bg-surface-raised border-2 border-border-default dark:border-border-subtle rounded-2xl shadow-md backface-hidden group-hover:border-indigo-400 dark:group-hover:border-indigo-500/50 transition-colors overflow-y-auto">
+                        <span className="absolute top-3 right-4 text-[10px] uppercase font-bold tracking-wider text-fg-subtle">
                           Front
                         </span>
-                        <p className="text-base font-semibold text-slate-800 dark:text-neutral-100 select-text leading-relaxed">
+                        <p className="text-base font-semibold text-fg-default select-text leading-relaxed">
                           {flashcards[currentIndex]?.front}
                         </p>
-                        <p className="absolute bottom-3 text-[10px] text-slate-400 dark:text-neutral-500">
+                        <p className="absolute bottom-3 text-[10px] text-fg-subtle">
                           Click card or press Space to flip
                         </p>
                       </div>
@@ -323,7 +323,7 @@ export function FlashcardsModal({ open, notes, pageTitle, onClose }: FlashcardsM
                         <span className="absolute top-3 right-4 text-[10px] uppercase font-bold tracking-wider text-indigo-500/80 dark:text-indigo-400/80">
                           Back
                         </span>
-                        <p className="text-sm text-slate-800 dark:text-neutral-200 select-text leading-relaxed whitespace-pre-line">
+                        <p className="text-sm text-fg-default select-text leading-relaxed whitespace-pre-line">
                           {flashcards[currentIndex]?.back}
                         </p>
                         <p className="absolute bottom-3 text-[10px] text-indigo-500/60 dark:text-indigo-400/50">
@@ -342,11 +342,7 @@ export function FlashcardsModal({ open, notes, pageTitle, onClose }: FlashcardsM
                       <button
                         type="button"
                         onClick={handleToggleLearned}
-                        className={`inline-flex items-center gap-2 rounded-full px-5 py-1.5 text-xs font-semibold shadow-sm transition-[background-color,color,border-color] ${
-                          learned[currentIndex]
-                            ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200 dark:bg-emerald-950 dark:text-emerald-300 dark:hover:bg-emerald-900/60'
-                            : 'bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700'
-                        }`}
+                        className={`inline-flex items-center gap-2 rounded-full px-5 py-1.5 text-xs font-semibold shadow-sm transition-[background-color,color,border-color] ${ learned[currentIndex] ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200 dark:bg-emerald-950 dark:text-emerald-300 dark:hover:bg-emerald-900/60' : 'bg-slate-200 text-fg-muted hover:bg-slate-300 dark:bg-surface-overlay dark:text-fg-muted dark:hover:bg-neutral-700' }`}
                       >
                         <CheckCircle2 className={`h-4 w-4 ${learned[currentIndex] ? 'fill-emerald-500 text-white dark:fill-emerald-400 dark:text-neutral-950' : ''}`} />
                         {learned[currentIndex] ? 'Marked as Learned' : 'Mark as Learned'}
@@ -359,17 +355,17 @@ export function FlashcardsModal({ open, notes, pageTitle, onClose }: FlashcardsM
                         type="button"
                         onClick={handlePrev}
                         disabled={currentIndex === 0}
-                        className="flex h-10 w-10 items-center justify-center rounded-full bg-white border border-slate-200 text-slate-700 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:pointer-events-none disabled:opacity-40 dark:bg-neutral-950 dark:border-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                        className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-raised border border-border-default text-fg-muted shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base disabled:pointer-events-none disabled:opacity-40 dark:bg-surface-base dark:border-border-subtle dark:text-fg-muted dark:hover:bg-surface-overlay"
                         aria-label="Previous card"
                       >
                         <ArrowLeft className="h-5 w-5" aria-hidden />
                       </button>
 
                       <div className="text-center">
-                        <span className="text-xs font-semibold text-slate-500 dark:text-neutral-400">
+                        <span className="text-xs font-semibold text-fg-muted">
                           Card {currentIndex + 1} of {totalCards}
                         </span>
-                        <span className="hidden sm:inline-block ml-1.5 text-[10px] text-slate-400 dark:text-neutral-500">
+                        <span className="hidden sm:inline-block ml-1.5 text-[10px] text-fg-subtle">
                           (Use Left/Right arrows)
                         </span>
                       </div>
@@ -378,7 +374,7 @@ export function FlashcardsModal({ open, notes, pageTitle, onClose }: FlashcardsM
                         type="button"
                         onClick={handleNext}
                         disabled={currentIndex === totalCards - 1}
-                        className="flex h-10 w-10 items-center justify-center rounded-full bg-white border border-slate-200 text-slate-700 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:pointer-events-none disabled:opacity-40 dark:bg-neutral-950 dark:border-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                        className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-raised border border-border-default text-fg-muted shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base disabled:pointer-events-none disabled:opacity-40 dark:bg-surface-base dark:border-border-subtle dark:text-fg-muted dark:hover:bg-surface-overlay"
                         aria-label="Next card"
                       >
                         <ArrowRight className="h-5 w-5" aria-hidden />
@@ -395,19 +391,19 @@ export function FlashcardsModal({ open, notes, pageTitle, onClose }: FlashcardsM
 
         {/* Footer / Progress Bar */}
         {!loading && !error && totalCards > 0 && (
-          <div className="shrink-0 bg-white dark:bg-neutral-950 border-t border-slate-100 dark:border-neutral-800/80 px-6 py-4 flex items-center justify-between gap-4">
+          <div className="shrink-0 bg-surface-raised border-t border-border-subtle/80 px-6 py-4 flex items-center justify-between gap-4">
             <div className="flex-1">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-semibold text-slate-700 dark:text-neutral-300">
+                <span className="text-xs font-semibold text-fg-muted">
                   Study Deck Mastery Progress
                 </span>
-                <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">
+                <span className="text-xs font-bold text-accent-fg">
                   {percentComplete}% ({learnedCount}/{totalCards})
                 </span>
               </div>
-              <div className="w-full bg-slate-100 dark:bg-neutral-800 h-2 rounded-full overflow-hidden">
+              <div className="w-full bg-surface-sunken h-2 rounded-full overflow-hidden">
                 <div 
-                  className="bg-indigo-600 dark:bg-indigo-500 h-full rounded-full motion-safe:transition-[width] motion-safe:duration-300"
+                  className="bg-accent-solid dark:bg-indigo-500 h-full rounded-full motion-safe:transition-[width] motion-safe:duration-300"
                   style={{ width: `${percentComplete}%` }}
                 />
               </div>
@@ -416,7 +412,7 @@ export function FlashcardsModal({ open, notes, pageTitle, onClose }: FlashcardsM
             <button
               type="button"
               onClick={generateFlashcards}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700 shrink-0"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-xs font-semibold text-fg-muted shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:bg-surface-overlay dark:text-fg-muted dark:hover:bg-neutral-700 shrink-0"
               title="Regenerate flashcards"
             >
               <RefreshCw className="h-3.5 w-3.5" />

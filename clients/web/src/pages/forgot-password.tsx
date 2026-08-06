@@ -57,10 +57,10 @@ export default function ForgotPassword() {
         <div className="mb-5 flex justify-center px-2">
           <BrandLogo className="mx-auto h-14 w-auto max-w-[min(100%,240px)] object-contain" />
         </div>
-        <h1 className="lex-auth-display text-[1.7rem] leading-snug text-stone-900 dark:text-neutral-50">
+        <h1 className="lex-auth-display text-[1.7rem] leading-snug text-stone-900">
           Forgot password
         </h1>
-        <p className="mt-2 text-sm leading-relaxed text-stone-600 dark:text-neutral-400">
+        <p className="mt-2 text-sm leading-relaxed text-stone-600 dark:text-fg-muted">
           Enter your email. If there is an account for it, you will receive a reset link shortly.
         </p>
       </header>
@@ -68,7 +68,7 @@ export default function ForgotPassword() {
       <div className={authCardClass}>
         {status === 'sent' ? (
           <div className="space-y-4 text-center">
-            <p className="text-sm text-stone-700 dark:text-neutral-300" role="status">
+            <p className="text-sm text-stone-700 dark:text-fg-muted" role="status">
               {message}
             </p>
             <Link to="/login" className={`inline-block text-sm ${authMutedLinkClass}`}>
@@ -78,7 +78,7 @@ export default function ForgotPassword() {
         ) : (
           <form className="space-y-5" onSubmit={onSubmit}>
             <div>
-              <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-stone-800 dark:text-neutral-200">
+              <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-stone-800 dark:text-fg-default">
                 Email
               </label>
               <input
@@ -107,7 +107,7 @@ export default function ForgotPassword() {
         )}
 
         {status !== 'sent' && (
-          <p className="mt-6 text-center text-sm text-stone-600 dark:text-neutral-400">
+          <p className="mt-6 text-center text-sm text-stone-600 dark:text-fg-muted">
             <Link to="/login" className={authMutedLinkClass}>
               Back to sign in
             </Link>

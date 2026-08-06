@@ -7,7 +7,7 @@ export function RouteFallback() {
     >
       <span className="sr-only">Loading page.</span>
       <div
-        className="h-8 w-8 motion-safe:animate-spin rounded-full border-2 border-indigo-200 border-t-indigo-600 dark:border-neutral-700 dark:border-t-indigo-400"
+        className="h-8 w-8 motion-safe:animate-spin rounded-full border-2 border-indigo-200 border-t-indigo-600 dark:border-border-default dark:border-t-indigo-400"
         aria-hidden
       />
     </div>

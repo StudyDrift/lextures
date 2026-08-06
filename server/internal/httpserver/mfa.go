@@ -45,11 +45,6 @@ func (d Deps) webAuthnInstance(w http.ResponseWriter) (*webauthnlib.WebAuthn, bo
 
 func (d Deps) handleMFATOTPEnrol() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.Pool == nil || d.JWTSigner == nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Server misconfigured.")
 			return
@@ -92,11 +87,6 @@ type mfaTotpVerifyEnrolBody struct {
 
 func (d Deps) handleMFATOTPVerifyEnrol() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.Pool == nil || d.JWTSigner == nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Server misconfigured.")
 			return
@@ -148,11 +138,6 @@ type mfaTotpChallengeBody struct {
 
 func (d Deps) handleMFATOTPChallenge() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.Pool == nil || d.JWTSigner == nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Server misconfigured.")
 			return
@@ -206,11 +191,6 @@ type mfaBackupChallengeBody struct {
 
 func (d Deps) handleMFABackupChallenge() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.Pool == nil || d.JWTSigner == nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Server misconfigured.")
 			return
@@ -260,11 +240,6 @@ func (d Deps) handleMFABackupChallenge() http.HandlerFunc {
 
 func (d Deps) handleMFAWebAuthnRegisterBegin() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.Pool == nil || d.JWTSigner == nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Server misconfigured.")
 			return
@@ -308,11 +283,6 @@ type mfaWebAuthnRegisterCompleteBody struct {
 
 func (d Deps) handleMFAWebAuthnRegisterComplete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.Pool == nil || d.JWTSigner == nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Server misconfigured.")
 			return
@@ -366,11 +336,6 @@ func (d Deps) handleMFAWebAuthnRegisterComplete() http.HandlerFunc {
 
 func (d Deps) handleMFAWebAuthnAuthBegin() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.Pool == nil || d.JWTSigner == nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Server misconfigured.")
 			return
@@ -406,11 +371,6 @@ type mfaWebAuthnAuthCompleteBody struct {
 
 func (d Deps) handleMFAWebAuthnAuthComplete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.Pool == nil || d.JWTSigner == nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Server misconfigured.")
 			return
@@ -472,11 +432,6 @@ func (d Deps) handleMFAWebAuthnAuthComplete() http.HandlerFunc {
 // handleMFASetupComplete exchanges an MFA setup pending token for a full session after the user enrolled MFA.
 func (d Deps) handleMFASetupComplete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.Pool == nil || d.JWTSigner == nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Server misconfigured.")
 			return
@@ -525,11 +480,6 @@ func (d Deps) handleMFASetupComplete() http.HandlerFunc {
 
 func (d Deps) handleListMyMFA() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.Pool == nil || d.JWTSigner == nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Server misconfigured.")
 			return
@@ -556,11 +506,6 @@ func (d Deps) handleListMyMFA() http.HandlerFunc {
 
 func (d Deps) handleDeleteMyMFA() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodDelete {
-			w.Header().Set("Allow", http.MethodDelete)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.Pool == nil || d.JWTSigner == nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Server misconfigured.")
 			return

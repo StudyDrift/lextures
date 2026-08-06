@@ -102,7 +102,7 @@ export function DiagramBoard({
   return (
     <div
       ref={surfaceRef}
-      className="relative overflow-hidden rounded border border-slate-300 bg-slate-100 dark:border-neutral-600 dark:bg-neutral-900"
+      className="relative overflow-hidden rounded border border-border-strong bg-surface-sunken dark:border-border-default dark:bg-surface-raised"
       data-testid="diagram-board"
       style={{ aspectRatio: `${naturalWidth} / ${naturalHeight}`, maxHeight: '28rem' }}
       onClick={(e) => onPointerSelect(e.clientX, e.clientY)}
@@ -129,13 +129,7 @@ export function DiagramBoard({
               type="button"
               data-testid={`diagram-region-${region.id}`}
               aria-label={`${region.label}: ${region.description}`}
-              className={`absolute border-2 bg-sky-500/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${
-                selected
-                  ? 'border-sky-700 dark:border-sky-300'
-                  : focused
-                    ? 'border-amber-500'
-                    : 'border-teal-700/80 dark:border-teal-300/80'
-              } ${visible ? 'opacity-100' : 'opacity-0 focus-visible:opacity-100'}`}
+              className={`absolute border-2 bg-sky-500/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${ selected ? 'border-sky-700 dark:border-sky-300' : focused ? 'border-amber-500' : 'border-teal-700/80 dark:border-teal-300/80' } ${visible ? 'opacity-100' : 'opacity-0 focus-visible:opacity-100'}`}
               style={shapeStyle(region)}
               onClick={(e) => {
                 e.stopPropagation()
@@ -145,7 +139,7 @@ export function DiagramBoard({
             >
               {placedLabel ? (
                 <span
-                  className="absolute rounded bg-white/90 px-1 text-[10px] font-medium text-slate-800 shadow dark:bg-neutral-900/90 dark:text-neutral-100"
+                  className="absolute rounded bg-white/90 px-1 text-[10px] font-medium text-fg-default shadow/90 dark:text-fg-default"
                   style={{ left: 4, top: 4 }}
                 >
                   {placedLabel}

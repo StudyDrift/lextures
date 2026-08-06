@@ -94,13 +94,13 @@ export function CreateGradingAgentFromTemplateModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-neutral-900"
+        className="w-full max-w-md rounded-2xl bg-surface-raised p-6 shadow-xl dark:bg-surface-raised"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 id={titleId} className="text-lg font-semibold text-slate-900 dark:text-neutral-100">
+        <h2 id={titleId} className="text-lg font-semibold text-fg-default">
           {t('gradingAgent.settings.fromTemplate.title', { template: template.name })}
         </h2>
-        <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
+        <p className="mt-2 text-sm text-fg-muted">
           {t('gradingAgent.settings.fromTemplate.description')}
         </p>
 
@@ -108,7 +108,7 @@ export function CreateGradingAgentFromTemplateModal({
           <div>
             <label
               htmlFor={nameInputId}
-              className="mb-1.5 block text-xs font-medium text-slate-600 dark:text-neutral-400"
+              className="mb-1.5 block text-xs font-medium text-fg-muted"
             >
               {t('gradingAgent.settings.fromTemplate.nameLabel')}
             </label>
@@ -119,12 +119,12 @@ export function CreateGradingAgentFromTemplateModal({
               disabled={submitting}
               onChange={(e) => setName(e.target.value)}
               placeholder={t('gradingAgent.settings.fromTemplate.namePlaceholder')}
-              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+              className="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-sm text-fg-default focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-60 dark:border-border-default dark:bg-surface-base dark:text-fg-default"
             />
           </div>
 
           <div>
-            <p className="mb-1.5 text-xs font-medium text-slate-600 dark:text-neutral-400">
+            <p className="mb-1.5 text-xs font-medium text-fg-muted">
               {t('gradingAgent.settings.fromTemplate.assignmentsLabel')}
             </p>
             <AssignmentMultiPicker
@@ -142,11 +142,11 @@ export function CreateGradingAgentFromTemplateModal({
               onChange={setSelectedAssignmentIds}
             />
             {selectedAssignmentIds.size === 1 ? (
-              <p className="mt-2 text-xs text-slate-500 dark:text-neutral-400">
+              <p className="mt-2 text-xs text-fg-muted">
                 {t('gradingAgent.settings.fromTemplate.singleAssignmentHint')}
               </p>
             ) : selectedAssignmentIds.size > 1 ? (
-              <p className="mt-2 text-xs text-slate-500 dark:text-neutral-400">
+              <p className="mt-2 text-xs text-fg-muted">
                 {t('gradingAgent.settings.fromTemplate.multiAssignmentHint')}
               </p>
             ) : null}
@@ -164,7 +164,7 @@ export function CreateGradingAgentFromTemplateModal({
             type="button"
             disabled={submitting}
             onClick={onClose}
-            className="rounded-lg px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100 disabled:opacity-60 dark:text-neutral-400 dark:hover:bg-neutral-800"
+            className="rounded-lg px-3 py-1.5 text-sm text-fg-muted hover:bg-surface-sunken disabled:opacity-60 dark:text-fg-muted dark:hover:bg-surface-overlay"
           >
             {t('gradingAgent.save.templateCancel')}
           </button>
@@ -172,7 +172,7 @@ export function CreateGradingAgentFromTemplateModal({
             type="button"
             disabled={!canCreate}
             onClick={() => void submit()}
-            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-lg bg-accent-solid px-3 py-1.5 text-sm font-medium text-white hover:bg-accent disabled:opacity-50"
           >
             {submitting ? (
               <>

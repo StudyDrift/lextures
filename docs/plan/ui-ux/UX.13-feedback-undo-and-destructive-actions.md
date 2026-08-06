@@ -304,7 +304,7 @@ audit log, so a human can always reverse an automated change.
 
 ## 13. Dependencies & Sequencing
 
-- **Must ship after** — [UX.2](UX.2-core-component-library-and-adoption-ratchet.md)
+- **Must ship after** — [UX.2](../../completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md)
   (`AlertDialog`, `Toast`), [UX.12](UX.12-loading-empty-error-offline-states.md)
   (error classification and inline error surfaces).
 - **Must ship before** — [UX.11](UX.11-data-table-and-gradebook-system.md), which
@@ -415,7 +415,7 @@ audit log, so a human can always reverse an automated change.
 - External: [NN/g — Confirmation Dialogs Can Prevent User Errors (If Not Overused)](https://www.nngroup.com/articles/confirmation-dialog/),
   [Confirm or undo? — Josh Wayne](https://joshwayne.com/posts/confirm-or-undo/),
   [SaaS Destructive Actions & Confirmation UX Patterns](https://www.saasui.design/blog/saas-destructive-actions-confirmation-ux-patterns)
-- Related plans: [UX.2](UX.2-core-component-library-and-adoption-ratchet.md),
+- Related plans: [UX.2](../../completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md),
   [UX.11](UX.11-data-table-and-gradebook-system.md),
   [UX.12](UX.12-loading-empty-error-offline-states.md),
   `../standards/S09-ferpa-hardening.md`

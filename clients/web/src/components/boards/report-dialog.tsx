@@ -58,18 +58,18 @@ export function BoardReportDialog({ open, onClose, courseCode, boardId, postId, 
         if (e.key === 'Escape') onClose()
       }}
     >
-      <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-4 shadow-xl dark:border-neutral-700 dark:bg-neutral-900">
-        <h2 id={titleId} className="text-lg font-semibold text-slate-900 dark:text-neutral-100">
+      <div className="w-full max-w-md rounded-lg border border-border-default bg-surface-raised p-4 shadow-xl dark:border-border-default dark:bg-surface-raised">
+        <h2 id={titleId} className="text-lg font-semibold text-fg-default">
           {t('boards.report.title')}
         </h2>
-        <p className="mt-1 text-sm text-slate-600 dark:text-neutral-300">{t('boards.report.subtitle')}</p>
+        <p className="mt-1 text-sm text-fg-muted">{t('boards.report.subtitle')}</p>
         <label className="mt-4 flex flex-col gap-1 text-sm">
           <span className="font-medium">{t('boards.report.reasonLabel')}</span>
           <select
             ref={firstRef}
             value={reasonKey}
             onChange={(e) => setReasonKey(e.target.value as (typeof REASONS)[number])}
-            className="rounded-md border border-slate-300 px-2 py-1.5 dark:border-neutral-600 dark:bg-neutral-800"
+            className="rounded-md border border-border-strong px-2 py-1.5 dark:border-border-default dark:bg-surface-overlay"
           >
             {REASONS.map((key) => (
               <option key={key} value={key}>
@@ -84,14 +84,14 @@ export function BoardReportDialog({ open, onClose, courseCode, boardId, postId, 
             value={details}
             onChange={(e) => setDetails(e.target.value)}
             rows={3}
-            className="rounded-md border border-slate-300 px-2 py-1.5 dark:border-neutral-600 dark:bg-neutral-800"
+            className="rounded-md border border-border-strong px-2 py-1.5 dark:border-border-default dark:bg-surface-overlay"
           />
         </label>
         <div className="mt-4 flex justify-end gap-2">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md px-3 py-1.5 text-sm text-slate-600 dark:text-neutral-300"
+            className="rounded-md px-3 py-1.5 text-sm text-fg-muted"
           >
             {t('dialogs.cancel')}
           </button>
@@ -99,7 +99,7 @@ export function BoardReportDialog({ open, onClose, courseCode, boardId, postId, 
             type="button"
             disabled={submitting}
             onClick={() => void submit()}
-            className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+            className="rounded-md bg-accent-solid px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
           >
             {t('boards.report.submit')}
           </button>

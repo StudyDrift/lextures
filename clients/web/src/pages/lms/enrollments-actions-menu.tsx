@@ -50,7 +50,7 @@ export function EnrollmentsActionsMenu({
           if (disabled) return
           setOpen((o) => !o)
         }}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-2 py-1.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:justify-start sm:px-3 sm:py-2"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent-solid px-2 py-1.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:justify-start sm:px-3 sm:py-2"
       >
         <span>Actions</span>
         <ChevronDown
@@ -64,7 +64,7 @@ export function EnrollmentsActionsMenu({
           id={menuId}
           role="menu"
           aria-label="Enrollments actions"
-          className="absolute end-0 z-50 mt-1 min-w-[14rem] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-800 dark:shadow-black/40"
+          className="absolute end-0 z-50 mt-1 min-w-[14rem] overflow-hidden rounded-xl border border-border-default bg-surface-raised py-1 shadow-lg shadow-slate-900/10 dark:border-border-default dark:bg-surface-overlay dark:shadow-black/40"
         >
           {canEnrollSelfAsStudent ? (
             <button
@@ -75,7 +75,7 @@ export function EnrollmentsActionsMenu({
                 onEnrollAsStudent()
                 setOpen(false)
               }}
-              className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+              className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-fg-default transition-[background-color,color,border-color] hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-60 dark:text-fg-default dark:hover:bg-neutral-700/80"
             >
               <GraduationCap className="h-4 w-4 shrink-0" aria-hidden />
               {enrollAsStudentBusy ? 'Enrolling…' : 'Enroll as Student'}
@@ -89,14 +89,14 @@ export function EnrollmentsActionsMenu({
               onAddEnrollment()
               setOpen(false)
             }}
-            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-fg-default transition-[background-color,color,border-color] hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-60 dark:text-fg-default dark:hover:bg-neutral-700/80"
           >
             <UserPlus className="h-4 w-4 shrink-0" aria-hidden />
             Add enrollment
           </button>
           {canToggleGroups ? (
             <>
-              <div className="my-1 border-t border-slate-100 dark:border-neutral-700" role="separator" />
+              <div className="my-1 border-t border-border-subtle dark:border-border-default" role="separator" />
               <button
                 type="button"
                 role="menuitemcheckbox"
@@ -107,24 +107,20 @@ export function EnrollmentsActionsMenu({
                   onEnableGroups()
                   setOpen(false)
                 }}
-                className="flex w-full items-start gap-2 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-neutral-700/80"
+                className="flex w-full items-start gap-2 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-neutral-700/80"
               >
                 <span
-                  className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
-                    groupsEnabled
-                      ? 'border-indigo-600 bg-indigo-600 text-white dark:border-indigo-500 dark:bg-indigo-500'
-                      : 'border-slate-300 bg-white dark:border-neutral-500 dark:bg-neutral-800'
-                  }`}
+                  className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border ${ groupsEnabled ? 'border-indigo-600 bg-accent-solid text-white dark:border-indigo-500 dark:bg-indigo-500' : 'border-border-strong bg-surface-raised dark:border-neutral-500 dark:bg-surface-overlay' }`}
                   aria-hidden
                 >
                   {groupsEnabled ? <Check className="h-3 w-3" strokeWidth={3} /> : null}
                 </span>
                 <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                  <span className="inline-flex items-center gap-1.5 font-semibold text-slate-950 dark:text-neutral-100">
+                  <span className="inline-flex items-center gap-1.5 font-semibold text-slate-950 dark:text-fg-default">
                     <Users className="h-4 w-4 shrink-0" aria-hidden />
                     Enable groups
                   </span>
-                  <span className="text-xs text-slate-500 dark:text-neutral-400">
+                  <span className="text-xs text-fg-muted">
                     {groupsEnabled
                       ? 'Group sets and the Groups tab are on.'
                       : 'Sort students into named groups (an empty default set is created for you).'}

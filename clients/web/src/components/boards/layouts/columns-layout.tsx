@@ -98,17 +98,15 @@ function SectionColumn({
   return (
     <div
       ref={setNodeRef}
-      className={`flex w-72 shrink-0 flex-col gap-2 rounded-lg border bg-white/80 p-2 dark:bg-neutral-900/60 ${
-        isOver ? 'border-indigo-400 ring-2 ring-indigo-300/50' : 'border-slate-200 dark:border-neutral-700'
-      }`}
+      className={`flex w-72 shrink-0 flex-col gap-2 rounded-lg border bg-white/80 p-2/60 ${ isOver ? 'border-indigo-400 ring-2 ring-indigo-300/50' : 'border-border-default' }`}
     >
       <div className="flex items-center justify-between gap-2 px-1">
-        <h3 className="truncate text-sm font-semibold text-slate-800 dark:text-neutral-100">{section.title}</h3>
+        <h3 className="truncate text-sm font-semibold text-fg-default">{section.title}</h3>
         {props.canManageBoard && section.title !== 'Unsorted' ? (
           <button
             type="button"
             aria-label={t('boards.section.delete')}
-            className="rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30"
+            className="rounded p-1 text-fg-subtle hover:bg-red-50 hover:text-danger-fg dark:hover:bg-red-950/30"
             onClick={() => {
               void props.onDeleteSection(section.id).catch((err: unknown) => {
                 toastMutationError(err instanceof Error ? err.message : String(err))
@@ -122,7 +120,7 @@ function SectionColumn({
       <SortableContext items={posts.map((p) => p.id)} strategy={verticalListSortingStrategy}>
         <div className="flex min-h-24 flex-col gap-2">
           {posts.length === 0 ? (
-            <p className="px-1 py-6 text-center text-xs text-slate-400">{t('boards.section.dropHere')}</p>
+            <p className="px-1 py-6 text-center text-xs text-fg-subtle">{t('boards.section.dropHere')}</p>
           ) : (
             posts.map((post) => (
               <SortableCard
@@ -233,25 +231,25 @@ export function ColumnsLayout(props: LayoutRendererProps) {
           {props.canManageBoard ? (
             <div className="w-64 shrink-0">
               {creating ? (
-                <div className="flex flex-col gap-2 rounded-lg border border-dashed border-slate-300 p-2 dark:border-neutral-600">
+                <div className="flex flex-col gap-2 rounded-lg border border-dashed border-border-strong p-2 dark:border-border-default">
                   <input
                     value={titleDraft}
                     onChange={(e) => setTitleDraft(e.target.value)}
                     placeholder={t('boards.section.titlePlaceholder')}
-                    className="rounded border border-slate-200 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-800"
+                    className="rounded border border-border-default px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-overlay"
                     aria-label={t('boards.section.titlePlaceholder')}
                   />
                   <div className="flex gap-2">
                     <button
                       type="button"
-                      className="rounded bg-indigo-600 px-2 py-1 text-xs font-medium text-white"
+                      className="rounded bg-accent-solid px-2 py-1 text-xs font-medium text-white"
                       onClick={() => void addSection()}
                     >
                       {t('boards.section.add')}
                     </button>
                     <button
                       type="button"
-                      className="rounded px-2 py-1 text-xs text-slate-600"
+                      className="rounded px-2 py-1 text-xs text-fg-muted"
                       onClick={() => setCreating(false)}
                     >
                       {t('dialogs.cancel')}
@@ -262,7 +260,7 @@ export function ColumnsLayout(props: LayoutRendererProps) {
                 <button
                   type="button"
                   onClick={() => setCreating(true)}
-                  className="flex w-full items-center justify-center gap-1 rounded-lg border border-dashed border-slate-300 px-3 py-6 text-sm text-slate-500 hover:border-indigo-400 hover:text-indigo-600 dark:border-neutral-600"
+                  className="flex w-full items-center justify-center gap-1 rounded-lg border border-dashed border-border-strong px-3 py-6 text-sm text-fg-muted hover:border-indigo-400 hover:text-accent-fg dark:border-border-default"
                 >
                   <Plus className="size-4" aria-hidden />
                   {t('boards.section.add')}

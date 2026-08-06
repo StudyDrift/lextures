@@ -26,11 +26,6 @@ type notebookRagJSON struct {
 
 func (d Deps) handleNotebookQuery() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		// No DB pool: match legacy behavior for misconfigured dev/test handlers (503 before auth).
 		if d.Pool == nil && !d.aiConfigured(r.Context(), nil) {
 			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, aiNotConfiguredMsg)
@@ -97,11 +92,6 @@ func (d Deps) handleNotebookQuery() http.HandlerFunc {
 
 func (d Deps) handleGenerateNotebookFlashcards() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.Pool == nil && !d.aiConfigured(r.Context(), nil) {
 			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, aiNotConfiguredMsg)
 			return

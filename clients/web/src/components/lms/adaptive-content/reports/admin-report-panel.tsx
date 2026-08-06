@@ -42,8 +42,8 @@ export function AdminAdaptiveContentReportPanel() {
   if (loading) {
     return (
       <div className="mt-8 space-y-2" aria-busy="true">
-        <div className="h-10 animate-pulse rounded-xl bg-slate-100 dark:bg-neutral-800" />
-        <div className="h-24 animate-pulse rounded-xl bg-slate-100 dark:bg-neutral-800" />
+        <div className="h-10 animate-pulse rounded-xl bg-surface-sunken" />
+        <div className="h-24 animate-pulse rounded-xl bg-surface-sunken" />
       </div>
     )
   }
@@ -68,15 +68,15 @@ export function AdminAdaptiveContentReportPanel() {
         <div>
           <h2
             id="ace-admin-report-heading"
-            className="text-base font-semibold text-slate-900 dark:text-neutral-100"
+            className="text-base font-semibold text-fg-default"
           >
             Adaptive content org report
           </h2>
-          <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+          <p className="mt-1 text-sm text-fg-muted">
             Adoption, spend, aggregate lift, disparity flags, and incident state across courses.
           </p>
           {report.dataAsOf ? (
-            <p className="mt-0.5 text-xs text-slate-500">
+            <p className="mt-0.5 text-xs text-fg-muted">
               Data as of {new Date(report.dataAsOf).toLocaleString()}
             </p>
           ) : null}
@@ -85,7 +85,7 @@ export function AdminAdaptiveContentReportPanel() {
           <button
             type="button"
             disabled={busy}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-3 py-1.5 text-sm font-medium dark:border-neutral-600"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-border-default px-3 py-1.5 text-sm font-medium dark:border-border-default"
             onClick={() => {
               void (async () => {
                 setBusy(true)
@@ -139,21 +139,21 @@ export function AdminAdaptiveContentReportPanel() {
         ].map(([label, value]) => (
           <div
             key={label}
-            className="rounded-lg border border-slate-200 px-3 py-2 dark:border-neutral-700"
+            className="rounded-lg border border-border-default px-3 py-2 dark:border-border-default"
           >
-            <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</dt>
-            <dd className="mt-0.5 text-sm font-semibold text-slate-900 dark:text-neutral-100">
+            <dt className="text-xs font-medium uppercase tracking-wide text-fg-muted">{label}</dt>
+            <dd className="mt-0.5 text-sm font-semibold text-fg-default">
               {value}
             </dd>
           </div>
         ))}
       </dl>
 
-      <h3 className="mt-6 text-sm font-semibold text-slate-900 dark:text-neutral-100">
+      <h3 className="mt-6 text-sm font-semibold text-fg-default">
         Courses
       </h3>
       {report.courses.length === 0 ? (
-        <p className="mt-2 text-sm text-slate-500" data-testid="ace-admin-report-empty">
+        <p className="mt-2 text-sm text-fg-muted" data-testid="ace-admin-report-empty">
           No courses have Adaptive Content enabled yet.
         </p>
       ) : (
@@ -161,7 +161,7 @@ export function AdminAdaptiveContentReportPanel() {
           <table className="w-full min-w-[40rem] text-left text-sm">
             <caption className="sr-only">Adaptive content courses</caption>
             <thead>
-              <tr className="border-b border-slate-200 dark:border-neutral-700">
+              <tr className="border-b border-border-default">
                 <th scope="col" className="py-2 pe-2 font-medium">
                   Course
                 </th>
@@ -186,12 +186,12 @@ export function AdminAdaptiveContentReportPanel() {
               {report.courses.map((c) => (
                 <tr
                   key={c.courseId}
-                  className="border-b border-slate-100 dark:border-neutral-800"
+                  className="border-b border-border-subtle"
                   data-testid="ace-admin-report-course-row"
                 >
                   <td className="py-2 pe-2">
                     <span className="font-medium">{c.courseCode}</span>
-                    <span className="ms-2 text-slate-500">{c.title}</span>
+                    <span className="ms-2 text-fg-muted">{c.title}</span>
                   </td>
                   <td className="py-2 pe-2 tabular-nums">{c.coveragePct.toFixed(0)}%</td>
                   <td className="py-2 pe-2 tabular-nums">{formatLift(c.meanLiftVsControl)}</td>
@@ -200,7 +200,7 @@ export function AdminAdaptiveContentReportPanel() {
                   <td className="py-2">
                     <Link
                       to={`/courses/${encodeURIComponent(c.courseCode)}/settings/adaptive-content?tab=report`}
-                      className="font-medium text-indigo-700 hover:underline dark:text-indigo-300"
+                      className="font-medium text-accent-fg hover:underline dark:text-indigo-300"
                     >
                       Open report
                     </Link>

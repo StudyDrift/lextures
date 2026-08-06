@@ -24,8 +24,8 @@ export function LocaleFormatSettingsPanel({
   return (
     <div className={embedded ? 'space-y-4' : 'mt-8 space-y-4'}>
       <div>
-        <p className="text-sm font-medium text-slate-700 dark:text-neutral-200">Time zone</p>
-        <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+        <p className="text-sm font-medium text-fg-default">Time zone</p>
+        <p className="mt-1 text-sm text-fg-muted">
           Due dates and deadlines are shown in this zone. Browser default:{' '}
           <span className="font-mono text-xs">{browserTz}</span>.
         </p>
@@ -37,7 +37,7 @@ export function LocaleFormatSettingsPanel({
           value={timezone}
           disabled={disabled}
           onChange={(e) => onTimezoneChange(e.target.value)}
-          className="mt-3 w-full max-w-md rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+          className="mt-3 w-full max-w-md rounded-xl border border-border-default bg-surface-raised px-2 py-1.5 text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
           data-testid="settings-timezone-select"
         >
           {TIMEZONE_OPTIONS.map((o) => (
@@ -48,12 +48,12 @@ export function LocaleFormatSettingsPanel({
         </select>
       </div>
 
-      <p className="text-sm text-slate-600 dark:text-neutral-400">
+      <p className="text-sm text-fg-muted">
         Sample due date:{' '}
         <LocaleTime
           date={SAMPLE_ISO}
           data-testid="settings-locale-sample-date"
-          className="font-medium text-slate-900 dark:text-neutral-100"
+          className="font-medium text-fg-default"
         />
       </p>
     </div>

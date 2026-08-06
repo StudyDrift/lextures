@@ -63,10 +63,10 @@ export default function ContentToolsAdminPage() {
 
   return (
     <div className="mx-auto max-w-5xl p-6">
-      <h1 id={titleId} className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+      <h1 id={titleId} className="text-xl font-semibold text-fg-default dark:text-slate-100">
         {t('contentTools.admin.title')}
       </h1>
-      <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+      <p className="mt-1 text-sm text-fg-muted dark:text-fg-subtle">
         {t('contentTools.admin.help')} · sandbox mode: {sandboxMode}
       </p>
       {loading ? <p className="mt-4 text-sm">{t('contentTools.admin.loading')}</p> : null}
@@ -82,7 +82,7 @@ export default function ContentToolsAdminPage() {
         <div className="mt-4 overflow-x-auto">
           <table className="min-w-full text-left text-sm" aria-labelledby={titleId}>
             <thead>
-              <tr className="border-b border-slate-200 dark:border-neutral-700">
+              <tr className="border-b border-border-default">
                 <th className="px-2 py-2 font-medium">{t('contentTools.admin.colTool')}</th>
                 <th className="px-2 py-2 font-medium">{t('contentTools.admin.colVersion')}</th>
                 <th className="px-2 py-2 font-medium">{t('contentTools.admin.colStatus')}</th>
@@ -97,7 +97,7 @@ export default function ContentToolsAdminPage() {
                 return (
                   <tr
                     key={key}
-                    className="border-b border-slate-100 dark:border-neutral-800"
+                    className="border-b border-border-subtle"
                     data-tool-version={key}
                   >
                     <td className="px-2 py-2">{row.toolId}</td>
@@ -200,9 +200,9 @@ export default function ContentToolsAdminPage() {
           ))}
         </ul>
       ) : null}
-      <div className="mt-8 border-t border-slate-200 pt-6 dark:border-neutral-700">
+      <div className="mt-8 border-t border-border-default pt-6 dark:border-border-default">
         <h2 className="text-lg font-semibold">{t('contentTools.governance.killTitle')}</h2>
-        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+        <p className="mt-1 text-sm text-fg-muted dark:text-fg-subtle">
           {t('contentTools.governance.killHelp')}
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
@@ -247,10 +247,10 @@ export default function ContentToolsAdminPage() {
           </button>
         </div>
       </div>
-      <div className="mt-8 border-t border-slate-200 pt-6 dark:border-neutral-700">
+      <div className="mt-8 border-t border-border-default pt-6 dark:border-border-default">
         <DataSheetsPanel />
       </div>
-      <div className="mt-8 border-t border-slate-200 pt-6 dark:border-neutral-700">
+      <div className="mt-8 border-t border-border-default pt-6 dark:border-border-default">
         <AdminToolTelemetry />
       </div>
     </div>

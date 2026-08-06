@@ -4,7 +4,7 @@ import { shortcutHint } from '../layout/top-bar-utils'
 
 function Kbd({ children }: { children: string }) {
   return (
-    <kbd className="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 font-mono text-[11px] font-medium text-slate-600 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
+    <kbd className="rounded-md border border-border-default bg-surface-base px-2 py-0.5 font-mono text-[11px] font-medium text-fg-muted dark:border-border-default dark:bg-surface-overlay dark:text-fg-muted">
       {children}
     </kbd>
   )
@@ -70,16 +70,16 @@ export function KeyboardShortcutsSheet({
     >
       <button
         type="button"
-        className="absolute inset-0 cursor-default bg-slate-950/55 backdrop-blur-md dark:bg-neutral-950/75"
+        className="absolute inset-0 cursor-default bg-slate-950/55 backdrop-blur-md/75"
         aria-label="Close keyboard shortcuts"
         onClick={() => onClose()}
       />
-      <div className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-2xl shadow-slate-900/20 dark:border-neutral-700 dark:bg-neutral-900 dark:shadow-black/50">
-        <div className="border-b border-slate-200 px-5 py-4 dark:border-neutral-700">
-          <h2 id="keyboard-shortcuts-title" className="text-lg font-semibold tracking-tight text-slate-900 dark:text-neutral-100">
+      <div className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-slate-200/80 bg-surface-raised shadow-2xl shadow-slate-900/20 dark:border-border-default dark:bg-surface-raised dark:shadow-black/50">
+        <div className="border-b border-border-default px-5 py-4 dark:border-border-default">
+          <h2 id="keyboard-shortcuts-title" className="text-lg font-semibold tracking-tight text-fg-default">
             Keyboard shortcuts
           </h2>
-          <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+          <p className="mt-1 text-sm text-fg-muted">
             Press <Kbd>?</Kbd> anytime (outside of a text field) to open this list.
           </p>
         </div>
@@ -87,19 +87,19 @@ export function KeyboardShortcutsSheet({
           {rows().map((row) => (
             <li
               key={row.action}
-              className="flex flex-wrap items-center justify-between gap-3 px-3 py-3 text-sm text-slate-800 dark:text-neutral-200"
+              className="flex flex-wrap items-center justify-between gap-3 px-3 py-3 text-sm text-fg-default"
             >
               <span className="min-w-0 flex-1 leading-snug">{row.action}</span>
-              <span className="shrink-0 font-medium text-slate-600 dark:text-neutral-300">{row.keys}</span>
+              <span className="shrink-0 font-medium text-fg-muted">{row.keys}</span>
             </li>
           ))}
         </ul>
-        <div className="border-t border-slate-100 px-4 py-3 dark:border-neutral-700">
+        <div className="border-t border-border-subtle px-4 py-3 dark:border-border-default">
           <button
             ref={closeBtnRef}
             type="button"
             onClick={() => onClose()}
-            className="w-full rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+            className="w-full rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40 dark:bg-indigo-500 dark:hover:bg-indigo-400"
           >
             Close
           </button>

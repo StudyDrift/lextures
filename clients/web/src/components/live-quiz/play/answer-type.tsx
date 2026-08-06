@@ -20,7 +20,7 @@ export function AnswerType({
         onSubmit(value.trim())
       }}
     >
-      <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
+      <label className="block text-sm font-medium text-fg-default">
         {t('liveQuiz.answer.typeLabel')}
         <input
           type="text"
@@ -28,13 +28,13 @@ export function AnswerType({
           disabled={locked}
           autoComplete="off"
           onChange={(e) => setValue(e.target.value)}
-          className="mt-1 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-3 text-lg dark:border-neutral-700 dark:bg-neutral-900"
+          className="mt-1 min-h-12 w-full rounded-xl border border-border-strong bg-surface-raised px-3 text-lg dark:border-border-default dark:bg-surface-raised"
         />
       </label>
       <button
         type="submit"
         disabled={locked || !value.trim()}
-        className="min-h-12 w-full rounded-xl bg-indigo-600 px-4 py-3 text-base font-semibold text-white disabled:opacity-40"
+        className="min-h-12 w-full rounded-xl bg-accent-solid px-4 py-3 text-base font-semibold text-white disabled:opacity-40"
       >
         {t('liveQuiz.answer.submit')}
       </button>

@@ -260,7 +260,7 @@ Not AI-touching.
 
 ## 13. Dependencies & Sequencing
 
-- **Must ship after** — [UX.2](UX.2-core-component-library-and-adoption-ratchet.md)
+- **Must ship after** — [UX.2](../../completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md)
   (target size by construction), [UX.4](UX.4-aria-widget-and-focus-management-remediation.md)
   (focus management is a precondition for 2.4.11).
 - **Must ship before** — VPAT re-attestation and any EU RFP response claiming
@@ -369,7 +369,7 @@ Not AI-touching.
   [What's new in WCAG 2.2 — TetraLogical](https://tetralogical.com/blog/2023/10/05/whats-new-wcag-2.2/),
   [EAA June 2025 deadline](https://www.insideglobaltech.com/2025/06/10/european-accessibility-act-june-2025-deadline-has-arrived/),
   [EN 301 549](https://www.deque.com/en-301-549-compliance/)
-- Related plans: [UX.2](UX.2-core-component-library-and-adoption-ratchet.md),
+- Related plans: [UX.2](../../completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md),
   [UX.4](UX.4-aria-widget-and-focus-management-remediation.md),
   [`../standards/S20-accessibility-legal-mandates.md`](../standards/S20-accessibility-legal-mandates.md),
   `../../completed/12-accessibility/`

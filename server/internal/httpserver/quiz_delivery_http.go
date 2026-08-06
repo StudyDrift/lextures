@@ -39,11 +39,6 @@ func (d Deps) ffAccommodationsAuditEnabled() bool {
 
 func (d Deps) handleQuizStart() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -223,11 +218,6 @@ func (d Deps) writeQuizStartResponse(
 
 func (d Deps) handleQuizCurrentQuestion() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -341,11 +331,6 @@ func (d Deps) parseQuizAttemptForViewer(
 // handleQuizFocusLossPost is POST .../attempts/{attempt_id}/focus-loss — learner reports tab blur / visibility change.
 func (d Deps) handleQuizFocusLossPost() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -383,11 +368,6 @@ func (d Deps) handleQuizFocusLossPost() http.HandlerFunc {
 // handleQuizFocusLossEventsGet is GET .../attempts/{attempt_id}/focus-loss-events — instructor review.
 func (d Deps) handleQuizFocusLossEventsGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return

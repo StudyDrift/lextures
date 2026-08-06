@@ -35,12 +35,12 @@ const STATUS_STYLES: Record<
   },
   wont_fix: {
     className:
-      'border-slate-300 bg-slate-100 text-slate-700 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300',
+      'border-border-strong bg-surface-sunken text-fg-muted dark:border-border-default dark:bg-surface-overlay dark:text-fg-muted',
     Icon: MinusCircle,
   },
   archived: {
     className:
-      'border-slate-200 bg-slate-50 text-slate-600 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-400',
+      'border-border-default bg-surface-base text-fg-muted dark:border-border-default dark:bg-surface-raised dark:text-fg-muted',
     Icon: Archive,
   },
 }

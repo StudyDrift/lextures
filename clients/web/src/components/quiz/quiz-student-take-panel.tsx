@@ -916,7 +916,7 @@ export function QuizStudentTakePanel({
       }
     >
       <div
-        className={`flex w-full flex-col overflow-hidden border border-slate-200 bg-white shadow-xl dark:border-neutral-600 dark:bg-neutral-900 ${
+        className={`flex w-full flex-col overflow-hidden border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-raised ${
           pageLayout
             ? `min-h-0 flex-1 border-0 shadow-none ${reducedTake ? 'lex-quiz-reduced-distract' : ''}`
             : immersiveChrome
@@ -928,9 +928,7 @@ export function QuizStudentTakePanel({
       >
         {showPanelHeader ? (
           <div
-            className={`flex shrink-0 items-start justify-between gap-3 border-b border-slate-200 px-4 py-3 dark:border-neutral-600 ${
-              immersiveChrome ? 'py-2' : ''
-            }`}
+            className={`flex shrink-0 items-start justify-between gap-3 border-b border-border-default px-4 py-3 dark:border-border-default ${ immersiveChrome ? 'py-2' : '' }`}
           >
             <div className="min-w-0">
               {immersiveChrome && !pageLayout ? (
@@ -939,11 +937,11 @@ export function QuizStudentTakePanel({
                 </h2>
               ) : (
                 <>
-                  <h2 id="quiz-take-title" className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+                  <h2 id="quiz-take-title" className="text-sm font-semibold text-fg-default">
                     {reducedTake ? 'Quiz' : pageLayout && uiPhase.kind === 'idle' ? 'Begin quiz' : 'Take quiz'}
                   </h2>
                   {!reducedTake ? (
-                    <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-neutral-400" title={quiz.title}>
+                    <p className="mt-0.5 truncate text-xs text-fg-muted" title={quiz.title}>
                       {quiz.title || 'Quiz'}
                     </p>
                   ) : null}
@@ -955,7 +953,7 @@ export function QuizStudentTakePanel({
                 <button
                   type="button"
                   onClick={() => setHighContrastQuiz((v) => !v)}
-                  className="rounded-lg border border-slate-200 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                  className="rounded-lg border border-border-default px-2 py-1 text-xs font-medium text-fg-muted hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
                 >
                   {highContrastQuiz ? 'Contrast: on' : 'Contrast: off'}
                 </button>
@@ -965,7 +963,7 @@ export function QuizStudentTakePanel({
                   type="button"
                   onClick={requestClose}
                   disabled={leavingBusy}
-                  className="shrink-0 rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:opacity-50 dark:hover:bg-neutral-800"
+                  className="shrink-0 rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken hover:text-fg-default disabled:opacity-50 dark:hover:bg-surface-overlay"
                   aria-label={takeInProgress ? 'Leave quiz' : 'Close'}
                 >
                   <X className="h-5 w-5" aria-hidden />
@@ -979,7 +977,7 @@ export function QuizStudentTakePanel({
           </h2>
         )}
 
-        <div className="min-h-0 flex-1 overflow-y-auto bg-slate-50/60 p-4 dark:bg-neutral-950/80">
+        <div className="min-h-0 flex-1 overflow-y-auto bg-slate-50/60 p-4/80">
           {lockdownModalOpen && (
             <div
               className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-100"
@@ -999,7 +997,7 @@ export function QuizStudentTakePanel({
               <div className="mt-3 flex flex-wrap gap-2">
                 <button
                   type="button"
-                  className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
+                  className="rounded-lg bg-accent-solid px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
                   onClick={() => {
                     setLockdownModalOpen(false)
                     void beginAttempt()
@@ -1009,7 +1007,7 @@ export function QuizStudentTakePanel({
                 </button>
                 <button
                   type="button"
-                  className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 dark:border-neutral-600 dark:text-neutral-200"
+                  className="rounded-lg border border-border-strong px-3 py-2 text-sm text-fg-muted dark:border-border-default dark:text-fg-default"
                   onClick={() => setLockdownModalOpen(false)}
                 >
                   Cancel
@@ -1045,7 +1043,7 @@ export function QuizStudentTakePanel({
 
           {startMeta && uiPhase.kind === 'static' ? (
             <div
-              className="mb-4 space-y-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800 dark:border-neutral-600 dark:bg-neutral-900/60 dark:text-neutral-100"
+              className="mb-4 space-y-1 rounded-lg border border-border-default bg-surface-base px-3 py-2 text-sm text-fg-default dark:border-border-default/60 dark:text-fg-default"
               aria-live="polite"
               aria-label={[
                 startMeta.maxAttempts != null
@@ -1059,31 +1057,25 @@ export function QuizStudentTakePanel({
                 .filter(Boolean)
                 .join('. ')}
             >
-              <p className="font-medium text-slate-900 dark:text-neutral-50">
+              <p className="font-medium text-fg-default">
                 {startMeta.maxAttempts != null
                   ? `Attempt ${startMeta.attemptNumber} of ${startMeta.maxAttempts}`
                   : `Attempt ${startMeta.attemptNumber} (unlimited attempts)`}
               </p>
               {startMeta.maxAttempts != null && typeof startMeta.remainingAttempts === 'number' ? (
-                <p className="text-slate-600 dark:text-neutral-300">
+                <p className="text-fg-muted">
                   {startMeta.remainingAttempts === 0
                     ? 'This is your last allowed attempt for this quiz.'
                     : `${startMeta.remainingAttempts} more attempt${startMeta.remainingAttempts === 1 ? '' : 's'} allowed after this one.`}
                 </p>
               ) : null}
-              <p className="text-slate-600 dark:text-neutral-300">{formatRetakePolicyNotice(startMeta.retakePolicy)}</p>
+              <p className="text-fg-muted">{formatRetakePolicyNotice(startMeta.retakePolicy)}</p>
             </div>
           ) : null}
 
           {timeLabel != null && uiPhase.kind === 'static' && !immersiveChrome && (
             <div
-              className={`mb-4 rounded-lg border px-3 py-2 text-sm font-medium tabular-nums ${
-                timeLeftSec !== null && timeLeftSec <= 300
-                  ? 'border-rose-300 bg-rose-50 text-rose-900 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-100'
-                  : timeLeftSec !== null && timeLeftSec <= 900
-                    ? 'border-amber-300 bg-amber-50 text-amber-950 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-50'
-                  : 'border-slate-200 bg-white text-slate-800 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100'
-              }`}
+              className={`mb-4 rounded-lg border px-3 py-2 text-sm font-medium tabular-nums ${ timeLeftSec !== null && timeLeftSec <= 300 ? 'border-rose-300 bg-rose-50 text-rose-900 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-100' : timeLeftSec !== null && timeLeftSec <= 900 ? 'border-amber-300 bg-amber-50 text-amber-950 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-50' : 'border-border-default bg-surface-raised text-fg-default dark:border-border-default dark:bg-surface-raised dark:text-fg-default' }`}
               role="status"
               aria-live={(timeLeftSec ?? 0) <= 60 ? 'assertive' : 'polite'}
             >
@@ -1108,7 +1100,7 @@ export function QuizStudentTakePanel({
 
           {uiPhase.kind === 'idle' && (
             <div className="space-y-4">
-              <p className="text-sm text-slate-600 dark:text-neutral-300">
+              <p className="text-sm text-fg-muted">
                 {quiz.isAdaptive
                   ? 'You will answer up to the configured number of AI-generated questions. Your attempt is saved when you finish.'
                   : 'Answer each question, then submit. Your score is recorded for this course.'}
@@ -1119,14 +1111,14 @@ export function QuizStudentTakePanel({
               </p>
               {advanced.requiresQuizAccessCode ? (
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-neutral-400">
+                  <label className="mb-1 block text-xs font-medium text-fg-muted">
                     Access code
                   </label>
                   <input
                     type="password"
                     value={accessCode}
                     onChange={(e) => setAccessCode(e.target.value)}
-                    className="w-full max-w-sm rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+                    className="w-full max-w-sm rounded-lg border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-raised"
                     placeholder="Enter code"
                   />
                 </div>
@@ -1137,7 +1129,7 @@ export function QuizStudentTakePanel({
                   if (needsLockdownWarning) setLockdownModalOpen(true)
                   else void beginAttempt()
                 }}
-                className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+                className="rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
               >
                 Begin
               </button>
@@ -1145,7 +1137,7 @@ export function QuizStudentTakePanel({
           )}
 
           {uiPhase.kind === 'starting' && (
-            <div className="flex items-center gap-3 text-sm text-slate-600 dark:text-neutral-300">
+            <div className="flex items-center gap-3 text-sm text-fg-muted">
               <span className="inline-flex shrink-0 origin-left scale-[0.32]">
                 <BookLoader />
               </span>
@@ -1157,7 +1149,7 @@ export function QuizStudentTakePanel({
             <div className="space-y-4">
               {!immersiveChrome ? (
                 <p
-                  className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400"
+                  className="text-xs font-semibold uppercase tracking-wide text-fg-muted"
                   aria-live="polite"
                   aria-label={
                     srvCompleted
@@ -1193,7 +1185,7 @@ export function QuizStudentTakePanel({
                 />
               ) : null}
               {srvCompleted ? (
-                <p className="text-sm text-slate-600 dark:text-neutral-300">
+                <p className="text-sm text-fg-muted">
                   Your answers are locked. Submit the quiz to finish.
                 </p>
               ) : null}
@@ -1201,7 +1193,7 @@ export function QuizStudentTakePanel({
                 <button
                   type="button"
                   onClick={() => void submitStatic()}
-                  className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+                  className="rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
                 >
                   Submit quiz
                 </button>
@@ -1238,7 +1230,7 @@ export function QuizStudentTakePanel({
           {uiPhase.kind === 'static' && quiz.isAdaptive && (
             <div className="space-y-4">
               {adPhase === 'loading' && (
-                <div className="flex items-center gap-3 text-sm text-slate-600 dark:text-neutral-300">
+                <div className="flex items-center gap-3 text-sm text-fg-muted">
                   <span className="inline-flex shrink-0 origin-left scale-[0.32]">
                     <BookLoader />
                   </span>
@@ -1248,18 +1240,18 @@ export function QuizStudentTakePanel({
               {adPhase === 'question' && currentAdaptive && (
                 <div className="space-y-4">
                   {!immersiveChrome ? (
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
                       Question {Math.min(adHistory.length + 1, maxAdaptive)} of {maxAdaptive}
                     </p>
                   ) : null}
-                  <p className="text-sm font-medium text-slate-900 dark:text-neutral-100">
+                  <p className="text-sm font-medium text-fg-default">
                     <MathPlainText text={currentAdaptive.prompt} />
                   </p>
                   <div className="space-y-2">
                     {currentAdaptive.choices.map((label, i) => (
                       <label
                         key={`ad-${i}`}
-                        className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+                        className="flex cursor-pointer items-start gap-3 rounded-lg border border-border-default bg-surface-raised px-3 py-2.5 text-sm text-fg-default dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
                       >
                         <input
                           type="radio"
@@ -1269,7 +1261,7 @@ export function QuizStudentTakePanel({
                             setAdSelected(i)
                             setError(null)
                           }}
-                          className="mt-0.5 border-slate-300 text-indigo-600"
+                          className="mt-0.5 border-border-strong text-accent-fg"
                         />
                         <span className="min-w-0 flex-1">
                           <MathPlainText text={label} />
@@ -1280,21 +1272,21 @@ export function QuizStudentTakePanel({
                   <button
                     type="button"
                     onClick={() => void submitAdaptiveAnswer()}
-                    className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+                    className="rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
                   >
                     Submit answer
                   </button>
                 </div>
               )}
               {adPhase === 'submitting' && (
-                <p className="text-sm text-slate-600 dark:text-neutral-300">Submitting your quiz…</p>
+                <p className="text-sm text-fg-muted">Submitting your quiz…</p>
               )}
             </div>
           )}
 
           {uiPhase.kind === 'done' && (
             <div className="space-y-3">
-              <p className="text-sm text-slate-800 dark:text-neutral-200">{uiPhase.summary}</p>
+              <p className="text-sm text-fg-default">{uiPhase.summary}</p>
               {postSubmitResults?.questions &&
               postSubmitResults.questions.some((q) => q.misconception) &&
               !understandingCheckDismissed && (
@@ -1309,7 +1301,7 @@ export function QuizStudentTakePanel({
                     <button
                       type="button"
                       onClick={() => setUnderstandingCheckDismissed(true)}
-                      className="shrink-0 rounded-lg border border-amber-300/80 bg-white/80 px-2 py-1 text-xs font-medium text-amber-950 hover:bg-white dark:border-amber-800 dark:bg-black/30 dark:text-amber-50 dark:hover:bg-black/50"
+                      className="shrink-0 rounded-lg border border-amber-300/80 bg-white/80 px-2 py-1 text-xs font-medium text-amber-950 hover:bg-surface-raised dark:border-amber-800 dark:bg-black/30 dark:text-amber-50 dark:hover:bg-black/50"
                     >
                       Hide reminder
                     </button>
@@ -1331,7 +1323,7 @@ export function QuizStudentTakePanel({
                               </p>
                             )}
                             {m.remediationBody && (
-                              <p className="mt-2 whitespace-pre-wrap text-slate-800 dark:text-neutral-100">
+                              <p className="mt-2 whitespace-pre-wrap text-fg-default">
                                 {m.remediationBody}
                               </p>
                             )}
@@ -1340,7 +1332,7 @@ export function QuizStudentTakePanel({
                                 href={m.remediationUrl}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="mt-2 inline-flex text-sm font-medium text-indigo-700 underline underline-offset-2 dark:text-indigo-300"
+                                className="mt-2 inline-flex text-sm font-medium text-accent-fg underline underline-offset-2 dark:text-indigo-300"
                               >
                                 Open resource
                               </a>
@@ -1354,7 +1346,7 @@ export function QuizStudentTakePanel({
               <button
                 type="button"
                 onClick={requestClose}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200"
+                className="rounded-xl border border-border-default bg-surface-raised px-4 py-2 text-sm font-medium text-fg-default dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
               >
                 {pageLayout ? 'Return to quiz' : 'Close'}
               </button>
@@ -1370,11 +1362,11 @@ export function QuizStudentTakePanel({
           aria-modal="true"
           aria-labelledby="quiz-leave-title"
         >
-          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-xl dark:border-neutral-600 dark:bg-neutral-900">
-            <h3 id="quiz-leave-title" className="text-base font-semibold text-slate-900 dark:text-neutral-100">
+          <div className="w-full max-w-md rounded-2xl border border-border-default bg-surface-raised p-5 shadow-xl dark:border-border-default dark:bg-surface-raised">
+            <h3 id="quiz-leave-title" className="text-base font-semibold text-fg-default">
               Leave this quiz?
             </h3>
-            <p className="mt-2 text-sm text-slate-600 dark:text-neutral-300">
+            <p className="mt-2 text-sm text-fg-muted">
               Your attempt is in progress. Leaving now will submit whatever you have answered so far.
             </p>
             <div className="mt-4 flex flex-wrap justify-end gap-2">
@@ -1382,7 +1374,7 @@ export function QuizStudentTakePanel({
                 type="button"
                 onClick={cancelLeave}
                 disabled={leavingBusy}
-                className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 dark:border-neutral-600 dark:text-neutral-200"
+                className="rounded-lg border border-border-default px-3 py-2 text-sm font-medium text-fg-muted dark:border-border-default dark:text-fg-default"
               >
                 Stay on quiz
               </button>
@@ -1555,12 +1547,12 @@ function StaticTakeBody({
     return (
       <section
         key={q.id}
-        className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-sm dark:border-neutral-600 dark:bg-neutral-900"
+        className="rounded-xl border border-slate-200/90 bg-surface-raised p-5 shadow-sm dark:border-border-default dark:bg-surface-raised"
       >
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+        <p className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
           Question {index + 1}
         </p>
-        <p className="mt-2 text-sm font-medium text-slate-900 dark:text-neutral-100">
+        <p className="mt-2 text-sm font-medium text-fg-default">
           <MathPlainText text={q.prompt || '—'} />
         </p>
         {showChoices && (
@@ -1568,7 +1560,7 @@ function StaticTakeBody({
             {choices.map((label, i) => (
               <label
                 key={`${q.id}-c-${i}`}
-                className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm dark:border-neutral-600 dark:bg-neutral-800/50"
+                className="flex cursor-pointer items-start gap-3 rounded-lg border border-border-default bg-slate-50/50 px-3 py-2.5 text-sm dark:border-border-default/50"
               >
                 <input
                   type="radio"
@@ -1580,7 +1572,7 @@ function StaticTakeBody({
                       [q.id]: { ...prev[q.id], choice: i },
                     }))
                   }
-                  className="mt-0.5 border-slate-300 text-indigo-600"
+                  className="mt-0.5 border-border-strong text-accent-fg"
                 />
                 <span className="min-w-0 flex-1">
                   <MathPlainText text={label} />
@@ -1596,7 +1588,7 @@ function StaticTakeBody({
                 textInputRefs.current[q.id] = el
               }}
               type="text"
-              className="mt-4 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+              className="mt-4 w-full rounded-lg border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-raised"
               value={a.text ?? ''}
               onChange={(e) =>
                 setAnswers((prev) => ({
@@ -1639,7 +1631,7 @@ function StaticTakeBody({
                 textInputRefs.current[q.id] = el
               }}
               rows={q.questionType === 'essay' ? 8 : 3}
-              className="mt-4 w-full resize-y rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+              className="mt-4 w-full resize-y rounded-lg border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-raised"
               value={a.text ?? ''}
               onChange={(e) =>
                 setAnswers((prev) => ({
@@ -1693,7 +1685,7 @@ function StaticTakeBody({
           <div className="mt-4 space-y-2">
             <input
               type="number"
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+              className="w-full rounded-lg border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-raised"
               value={a.numeric ?? ''}
               onChange={(e) => {
                 const raw = e.target.value
@@ -1705,7 +1697,7 @@ function StaticTakeBody({
               placeholder="Enter a numeric value"
             />
             {configuredUnit && configuredUnit.trim().length > 0 ? (
-              <p className="text-xs text-slate-500 dark:text-neutral-400">Expected unit: {configuredUnit}</p>
+              <p className="text-xs text-fg-muted">Expected unit: {configuredUnit}</p>
             ) : null}
           </div>
         )}
@@ -1716,7 +1708,7 @@ function StaticTakeBody({
                 textInputRefs.current[q.id] = el
               }}
               type="text"
-              className="mt-4 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+              className="mt-4 w-full rounded-lg border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-raised"
               value={a.text ?? ''}
               onChange={(e) =>
                 setAnswers((prev) => ({
@@ -1751,7 +1743,7 @@ function StaticTakeBody({
           <div className="mt-4 space-y-3">
             <textarea
               rows={8}
-              className="w-full resize-y rounded-lg border border-slate-200 px-3 py-2 font-mono text-sm dark:border-neutral-600 dark:bg-neutral-900"
+              className="w-full resize-y rounded-lg border border-border-default px-3 py-2 font-mono text-sm dark:border-border-default dark:bg-surface-raised"
               value={a.text ?? ''}
               onChange={(e) =>
                 setAnswers((prev) => ({
@@ -1765,14 +1757,14 @@ function StaticTakeBody({
               type="button"
               onClick={() => void runCodeQuestion(q)}
               disabled={!attemptId || runningCodeQuestionId === q.id}
-              className="rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 disabled:cursor-not-allowed disabled:opacity-60 dark:border-indigo-800 dark:bg-indigo-950/30 dark:text-indigo-200"
+              className="rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-accent-fg disabled:cursor-not-allowed disabled:opacity-60 dark:border-indigo-800 dark:bg-indigo-950/30 dark:text-indigo-200"
             >
               {runningCodeQuestionId === q.id ? 'Running…' : 'Run public tests'}
             </button>
             {codeRunByQuestion[q.id] ? (
-              <div className="overflow-x-auto rounded-lg border border-slate-200 dark:border-neutral-700" role="table">
+              <div className="overflow-x-auto rounded-lg border border-border-default" role="table">
                 <table className="min-w-full text-start text-xs">
-                  <thead className="bg-slate-50 dark:bg-neutral-800">
+                  <thead className="bg-surface-sunken">
                     <tr>
                       <th className="px-2 py-1.5 font-semibold">Test</th>
                       <th className="px-2 py-1.5 font-semibold">Status</th>
@@ -1782,7 +1774,7 @@ function StaticTakeBody({
                   </thead>
                   <tbody>
                     {codeRunByQuestion[q.id].results.map((r, idx) => (
-                      <tr key={`${q.id}-run-${idx}`} className="border-t border-slate-100 dark:border-neutral-800">
+                      <tr key={`${q.id}-run-${idx}`} className="border-t border-border-subtle">
                         <td className="px-2 py-1.5">#{idx + 1}</td>
                         <td className="px-2 py-1.5">{r.passed ? 'Pass' : r.status.toUpperCase()}</td>
                         <td className="px-2 py-1.5 font-mono">{r.expectedOutput || '(empty)'}</td>
@@ -1798,7 +1790,7 @@ function StaticTakeBody({
         {q.questionType === 'ordering' && (
           <div className="mt-4 space-y-2">
             {orderingItems.length === 0 ? (
-              <p className="text-sm italic text-slate-500 dark:text-neutral-400">
+              <p className="text-sm italic text-fg-muted">
                 No ordering items are configured.
               </p>
             ) : (
@@ -1823,12 +1815,12 @@ function StaticTakeBody({
                         return { ...prev, [q.id]: { ...prev[q.id], ordering: next } }
                       })
                     }}
-                    className="flex flex-1 cursor-grab items-center justify-between rounded-lg border border-slate-200 bg-slate-50/70 px-3 py-2 text-sm text-slate-800 dark:border-neutral-600 dark:bg-neutral-800/50 dark:text-neutral-100"
+                    className="flex flex-1 cursor-grab items-center justify-between rounded-lg border border-border-default bg-slate-50/70 px-3 py-2 text-sm text-fg-default dark:border-border-default/50 dark:text-fg-default"
                   >
                     <span>
                       {(baseOrderingItems.findIndex((x) => x === item) + 1 || i + 1)}. {item}
                     </span>
-                    <span className="text-xs text-slate-400 dark:text-neutral-500">Drag</span>
+                    <span className="text-xs text-fg-subtle">Drag</span>
                   </div>
                   <div className="flex flex-col gap-0.5" role="group" aria-label={`Reorder item ${i + 1}`}>
                     <button
@@ -1844,7 +1836,7 @@ function StaticTakeBody({
                           return { ...prev, [q.id]: { ...prev[q.id], ordering: next } }
                         })
                       }
-                      className="flex h-7 w-7 items-center justify-center rounded border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 dark:border-neutral-600 dark:text-neutral-400 dark:hover:bg-neutral-700"
+                      className="flex h-7 w-7 items-center justify-center rounded border border-border-default text-fg-muted hover:bg-surface-sunken disabled:cursor-not-allowed disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 dark:border-border-default dark:text-fg-muted dark:hover:bg-neutral-700"
                     >
                       <ChevronUp className="h-3.5 w-3.5" aria-hidden />
                     </button>
@@ -1861,7 +1853,7 @@ function StaticTakeBody({
                           return { ...prev, [q.id]: { ...prev[q.id], ordering: next } }
                         })
                       }
-                      className="flex h-7 w-7 items-center justify-center rounded border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 dark:border-neutral-600 dark:text-neutral-400 dark:hover:bg-neutral-700"
+                      className="flex h-7 w-7 items-center justify-center rounded border border-border-default text-fg-muted hover:bg-surface-sunken disabled:cursor-not-allowed disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 dark:border-border-default dark:text-fg-muted dark:hover:bg-neutral-700"
                     >
                       <ChevronDown className="h-3.5 w-3.5" aria-hidden />
                     </button>
@@ -1874,7 +1866,7 @@ function StaticTakeBody({
         {q.questionType === 'matching' && (
           <div className="mt-4 space-y-2">
             {matchingPairsForQuestion(q).length === 0 ? (
-              <p className="text-sm italic text-slate-500 dark:text-neutral-400">
+              <p className="text-sm italic text-fg-muted">
                 No matching pairs are configured.
               </p>
             ) : (
@@ -1884,7 +1876,7 @@ function StaticTakeBody({
                 const rightOptions = sortedRightOptionsForMatching(matchingPairsForQuestion(q))
                 return (
                   <div key={`${q.id}-match-${i}`} className="grid gap-2 md:grid-cols-2">
-                    <p className="rounded-lg border border-slate-200 bg-slate-50/70 px-3 py-2 text-sm text-slate-800 dark:border-neutral-600 dark:bg-neutral-800/50 dark:text-neutral-100">
+                    <p className="rounded-lg border border-border-default bg-slate-50/70 px-3 py-2 text-sm text-fg-default dark:border-border-default/50 dark:text-fg-default">
                       <MathPlainText text={leftLabel} />
                     </p>
                     <select
@@ -1898,7 +1890,7 @@ function StaticTakeBody({
                           },
                         }))
                       }
-                      className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+                      className="rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm text-fg-default dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
                     >
                       <option value="">Select match…</option>
                       {rightOptions.map((opt) => (
@@ -1917,7 +1909,7 @@ function StaticTakeBody({
           <div className="mt-4 space-y-2">
             {typeof q.typeConfig?.imageUrl === 'string' && q.typeConfig.imageUrl.trim().length > 0 ? (
               <div
-                className="relative cursor-crosshair overflow-hidden rounded-lg border border-slate-200 bg-slate-50 dark:border-neutral-600 dark:bg-neutral-900"
+                className="relative cursor-crosshair overflow-hidden rounded-lg border border-border-default bg-surface-base dark:border-border-default dark:bg-surface-raised"
                 onClick={(e) => {
                   const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect()
                   const x = Math.round(e.clientX - rect.left)
@@ -1935,38 +1927,38 @@ function StaticTakeBody({
                 />
                 {a.hotspot ? (
                   <span
-                    className="pointer-events-none absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-600 ring-2 ring-white"
+                    className="pointer-events-none absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent-solid ring-2 ring-white"
                     style={{ left: a.hotspot.x, top: a.hotspot.y }}
                   />
                 ) : null}
               </div>
             ) : (
-              <p className="text-sm italic text-slate-500 dark:text-neutral-400">
+              <p className="text-sm italic text-fg-muted">
                 No image URL is configured for this hotspot.
               </p>
             )}
             {a.hotspot ? (
-              <p className="text-xs text-slate-500 dark:text-neutral-400">
+              <p className="text-xs text-fg-muted">
                 Selected point: ({a.hotspot.x}, {a.hotspot.y})
               </p>
             ) : (
-              <p className="text-xs text-slate-500 dark:text-neutral-400">Click the image to place your answer.</p>
+              <p className="text-xs text-fg-muted">Click the image to place your answer.</p>
             )}
           </div>
         )}
         {q.questionType === 'file_upload' && (
           <div className="mt-4 space-y-2">
-            <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
+            <label className="block text-sm font-medium text-fg-default">
               Upload a file
               {typeof q.typeConfig?.maxMb === 'number' ? (
-                <span className="ms-1 font-normal text-slate-500 dark:text-neutral-400">
+                <span className="ms-1 font-normal text-fg-muted">
                   (max {q.typeConfig.maxMb} MB)
                 </span>
               ) : null}
             </label>
             <input
               type="file"
-              className="block w-full text-sm text-slate-600 file:me-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-indigo-700 hover:file:bg-indigo-100 dark:border-neutral-600 dark:text-neutral-300 dark:file:bg-indigo-950/40 dark:file:text-indigo-200"
+              className="block w-full text-sm text-fg-muted file:me-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-accent-fg hover:file:bg-indigo-100 dark:border-border-default dark:text-fg-muted dark:file:bg-indigo-950/40 dark:file:text-indigo-200"
               onChange={(e) => {
                 const f = e.target.files?.[0]
                 setAnswers((prev) => ({
@@ -1976,16 +1968,16 @@ function StaticTakeBody({
               }}
             />
             {a.text ? (
-              <p className="text-xs text-slate-600 dark:text-neutral-400">Selected: {a.text}</p>
+              <p className="text-xs text-fg-muted">Selected: {a.text}</p>
             ) : null}
           </div>
         )}
         {q.questionType === 'audio_response' && (
           <div className="mt-4 space-y-2">
-            <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
+            <label className="block text-sm font-medium text-fg-default">
               Upload audio
               {typeof q.typeConfig?.maxDurationS === 'number' ? (
-                <span className="ms-1 font-normal text-slate-500 dark:text-neutral-400">
+                <span className="ms-1 font-normal text-fg-muted">
                   (max {q.typeConfig.maxDurationS}s)
                 </span>
               ) : null}
@@ -1993,7 +1985,7 @@ function StaticTakeBody({
             <input
               type="file"
               accept="audio/*"
-              className="block w-full text-sm text-slate-600 file:me-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-indigo-700 hover:file:bg-indigo-100 dark:border-neutral-600 dark:text-neutral-300 dark:file:bg-indigo-950/40 dark:file:text-indigo-200"
+              className="block w-full text-sm text-fg-muted file:me-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-accent-fg hover:file:bg-indigo-100 dark:border-border-default dark:text-fg-muted dark:file:bg-indigo-950/40 dark:file:text-indigo-200"
               onChange={(e) => {
                 const f = e.target.files?.[0]
                 setAnswers((prev) => ({
@@ -2003,16 +1995,16 @@ function StaticTakeBody({
               }}
             />
             {a.text ? (
-              <p className="text-xs text-slate-600 dark:text-neutral-400">Selected: {a.text}</p>
+              <p className="text-xs text-fg-muted">Selected: {a.text}</p>
             ) : null}
           </div>
         )}
         {q.questionType === 'video_response' && (
           <div className="mt-4 space-y-2">
-            <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
+            <label className="block text-sm font-medium text-fg-default">
               Upload video
               {typeof q.typeConfig?.maxMb === 'number' ? (
-                <span className="ms-1 font-normal text-slate-500 dark:text-neutral-400">
+                <span className="ms-1 font-normal text-fg-muted">
                   (max {q.typeConfig.maxMb} MB)
                 </span>
               ) : null}
@@ -2020,7 +2012,7 @@ function StaticTakeBody({
             <input
               type="file"
               accept="video/*"
-              className="block w-full text-sm text-slate-600 file:me-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-indigo-700 hover:file:bg-indigo-100 dark:border-neutral-600 dark:text-neutral-300 dark:file:bg-indigo-950/40 dark:file:text-indigo-200"
+              className="block w-full text-sm text-fg-muted file:me-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-accent-fg hover:file:bg-indigo-100 dark:border-border-default dark:text-fg-muted dark:file:bg-indigo-950/40 dark:file:text-indigo-200"
               onChange={(e) => {
                 const f = e.target.files?.[0]
                 setAnswers((prev) => ({
@@ -2030,17 +2022,17 @@ function StaticTakeBody({
               }}
             />
             {a.text ? (
-              <p className="text-xs text-slate-600 dark:text-neutral-400">Selected: {a.text}</p>
+              <p className="text-xs text-fg-muted">Selected: {a.text}</p>
             ) : null}
           </div>
         )}
         {hintToolsEnabled && attemptId && isBankQuestionId(q.id) ? (
           <div
-            className="mt-4 border-t border-slate-200 pt-4 dark:border-neutral-700"
+            className="mt-4 border-t border-border-default pt-4 dark:border-border-default"
             role="region"
             aria-label="Hints and worked example"
           >
-            <p className="text-xs text-slate-500 dark:text-neutral-400">
+            <p className="text-xs text-fg-muted">
               Using hints may reduce your score if your instructor configured per-hint penalties.
             </p>
             <div className="mt-2 flex flex-wrap gap-2">
@@ -2048,7 +2040,7 @@ function StaticTakeBody({
                 type="button"
                 disabled={hintBusy === q.id || (hintByQ[q.id]?.noMore ?? false)}
                 onClick={() => void requestHintForQuestion(q)}
-                className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-800 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+                className="rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-fg-default shadow-sm hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-50 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
               >
                 {hintByQ[q.id]?.bodies?.length ? 'Another hint' : 'Get a hint'}
               </button>
@@ -2056,26 +2048,26 @@ function StaticTakeBody({
                 type="button"
                 disabled={hintBusy === q.id}
                 onClick={() => void openWorkedExample(q)}
-                className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-800 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+                className="rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-fg-default shadow-sm hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-50 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
               >
                 Show worked example
               </button>
             </div>
             {(hintByQ[q.id]?.bodies?.length ?? 0) > 0 ? (
               <div
-                className="mt-3 rounded-lg bg-slate-50 p-3 text-sm text-slate-800 dark:bg-neutral-800/60 dark:text-neutral-100"
+                className="mt-3 rounded-lg bg-surface-base p-3 text-sm text-fg-default/60 dark:text-fg-default"
                 role="status"
                 aria-live="polite"
               >
                 {hintByQ[q.id]?.bodies.map((line, i) => (
-                  <p key={`${q.id}-h-${i}`} className={i > 0 ? 'mt-2 border-t border-slate-200 pt-2 dark:border-neutral-600' : ''}>
+                  <p key={`${q.id}-h-${i}`} className={i > 0 ? 'mt-2 border-t border-border-default pt-2 dark:border-border-default' : ''}>
                     <MathPlainText text={line} />
                   </p>
                 ))}
               </div>
             ) : null}
             {hintByQ[q.id]?.noMore ? (
-              <p className="mt-2 text-xs text-slate-500 dark:text-neutral-400">No more hints for this question.</p>
+              <p className="mt-2 text-xs text-fg-muted">No more hints for this question.</p>
             ) : null}
           </div>
         ) : null}
@@ -2093,31 +2085,31 @@ function StaticTakeBody({
         aria-modal="true"
         aria-labelledby="worked-example-title"
       >
-        <div className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-slate-200 bg-white p-5 shadow-xl dark:border-neutral-700 dark:bg-neutral-950">
+        <div className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-border-default bg-surface-raised p-5 shadow-xl dark:border-border-default dark:bg-surface-base">
           <div className="flex items-start justify-between gap-3">
-            <h2 id="worked-example-title" className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+            <h2 id="worked-example-title" className="text-sm font-semibold text-fg-default">
               {data.title?.trim() || 'Worked example'}
             </h2>
             <button
               type="button"
               onClick={() => setWeModal(null)}
-              className="rounded-lg border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-300 dark:hover:bg-neutral-800"
+              className="rounded-lg border border-border-default px-2 py-1 text-xs text-fg-muted hover:bg-surface-base dark:border-border-default dark:text-fg-muted dark:hover:bg-surface-overlay"
             >
               Close
             </button>
           </div>
           {data.body?.trim() ? (
-            <p className="mt-3 text-sm text-slate-700 dark:text-neutral-200">
+            <p className="mt-3 text-sm text-fg-default">
               <MathPlainText text={data.body.trim()} />
             </p>
           ) : null}
-          <ol className="mt-4 list-decimal space-y-3 ps-5 text-sm text-slate-800 dark:text-neutral-100">
+          <ol className="mt-4 list-decimal space-y-3 ps-5 text-sm text-fg-default">
             {data.steps.map((s) => (
               <li key={s.number}>
                 <span className="font-medium">Step {s.number}.</span>{' '}
                 <MathPlainText text={s.explanation} />
                 {s.expression?.trim() ? (
-                  <div className="mt-1 text-xs text-slate-600 dark:text-neutral-400">
+                  <div className="mt-1 text-xs text-fg-muted">
                     <MathPlainText text={s.expression.trim()} />
                   </div>
                 ) : null}
@@ -2138,7 +2130,7 @@ function StaticTakeBody({
         <button
           type="button"
           onClick={onSubmit}
-          className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+          className="rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
         >
           Submit quiz
         </button>
@@ -2157,7 +2149,7 @@ function StaticTakeBody({
       {workedExampleModal()}
       <div className="space-y-4">
       {!advanceOnly && !suppressInlineQuestionProgress ? (
-        <p className="text-xs font-semibold text-slate-500 dark:text-neutral-400">
+        <p className="text-xs font-semibold text-fg-muted">
           Question {step + 1} of {questions.length}
         </p>
       ) : null}
@@ -2167,7 +2159,7 @@ function StaticTakeBody({
           <button
             type="button"
             onClick={() => setStep((s) => Math.max(0, s - 1))}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+            className="rounded-xl border border-border-default bg-surface-raised px-4 py-2 text-sm dark:border-border-default dark:bg-surface-raised"
           >
             Back
           </button>
@@ -2185,7 +2177,7 @@ function StaticTakeBody({
               setStep((s) => s + 1)
             }
           }}
-          className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+          className="rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
         >
           {primaryLabel}
         </button>

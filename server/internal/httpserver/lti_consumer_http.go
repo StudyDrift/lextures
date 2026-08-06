@@ -30,15 +30,6 @@ type ltiLaunchBody struct {
 
 func (d Deps) handleLtiPlatformLaunch() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.requireLtiHandler(w) {
 			return
 		}
@@ -147,15 +138,6 @@ func (d Deps) handleLtiPlatformLaunch() http.HandlerFunc {
 
 func (d Deps) handleLtiConsumerCallback() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.requireLtiHandler(w) {
 			return
 		}
@@ -260,15 +242,6 @@ func (d Deps) handleLtiConsumerCallback() http.HandlerFunc {
 
 func (d Deps) handleLtiDeepLink() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.requireLtiHandler(w) {
 			return
 		}
@@ -376,10 +349,6 @@ func (d Deps) handleLtiDeepLink() http.HandlerFunc {
 
 func (d Deps) handleLtiConsumerTarget() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		if !d.requireLtiHandler(w) {
 			return
 		}

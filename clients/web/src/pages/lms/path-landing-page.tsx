@@ -109,10 +109,10 @@ export default function PathLandingPage() {
       : 0
 
   return (
-    <div className="min-h-screen bg-slate-50/50 text-slate-900 dark:bg-neutral-950 dark:text-neutral-100">
-      <header className="border-b bg-white dark:border-neutral-800 dark:bg-neutral-900/50">
+    <div className="min-h-screen bg-slate-50/50 text-fg-default dark:bg-surface-base dark:text-fg-default">
+      <header className="border-b bg-surface-raised dark:border-border-subtle/50">
         <div className="mx-auto max-w-3xl px-4 py-10">
-          <p className="text-sm font-medium text-indigo-600 dark:text-indigo-400">Learning path</p>
+          <p className="text-sm font-medium text-accent-fg">Learning path</p>
           <h1 className="mt-1 text-3xl font-bold tracking-tight">{detail.path.title}</h1>
           {detail.path.description ? (
             <p className="mt-3 text-base text-muted-foreground">{detail.path.description}</p>
@@ -130,7 +130,7 @@ export default function PathLandingPage() {
           {detail.skillTags.length > 0 ? (
             <ul className="mt-4 flex flex-wrap gap-2" aria-label="Skills covered">
               {detail.skillTags.map((tag) => (
-                <li key={tag} className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium dark:bg-neutral-800">
+                <li key={tag} className="rounded-full bg-surface-sunken px-3 py-1 text-xs font-medium dark:bg-surface-overlay">
                   {tag}
                 </li>
               ))}
@@ -148,10 +148,10 @@ export default function PathLandingPage() {
             {detail.courses.map((course, index) => (
               <li
                 key={course.courseId}
-                className="flex gap-3 rounded-lg border bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900/40"
+                className="flex gap-3 rounded-lg border bg-surface-raised p-4 dark:border-border-subtle/40"
               >
                 <span
-                  className="flex size-8 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-sm font-semibold text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300"
+                  className="flex size-8 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-sm font-semibold text-accent-fg dark:bg-indigo-950 dark:text-indigo-300"
                   aria-hidden
                 >
                   {index + 1}
@@ -183,7 +183,7 @@ export default function PathLandingPage() {
           </ol>
         </section>
 
-        <aside className="mt-8 rounded-xl border bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900/40">
+        <aside className="mt-8 rounded-xl border bg-surface-raised p-6 dark:border-border-subtle/40">
           <h2 className="text-lg font-semibold">Enroll in this path</h2>
           <div className="mt-3 space-y-1">
             {bundle != null ? (

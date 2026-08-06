@@ -19,11 +19,11 @@ function KpiCard({
   icon: typeof Users
 }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
+    <div className="rounded-xl border border-border-default bg-surface-raised p-4 shadow-sm dark:border-border-subtle dark:bg-surface-raised">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <p className="text-sm text-slate-500 dark:text-slate-400">{label}</p>
-          <p className="mt-1 text-2xl font-semibold tabular-nums text-slate-900 dark:text-slate-100">
+          <p className="text-sm text-fg-muted dark:text-fg-subtle">{label}</p>
+          <p className="mt-1 text-2xl font-semibold tabular-nums text-fg-default dark:text-slate-100">
             {value}
           </p>
         </div>
@@ -70,23 +70,23 @@ export default function AdminOverview() {
 
   return (
     <div>
-      <h1 id={titleId} className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+      <h1 id={titleId} className="text-xl font-semibold text-fg-default dark:text-slate-100">
         Overview
       </h1>
-      <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+      <p className="mt-1 text-sm text-fg-muted dark:text-fg-subtle">
         Organization utilization and recent administrative activity.
       </p>
 
       {contractBanner}
 
       {error ? (
-        <p role="alert" className="mt-4 text-sm text-red-600 dark:text-red-400">
+        <p role="alert" className="mt-4 text-sm text-danger-fg">
           {error}
         </p>
       ) : null}
 
       {loading ? (
-        <p className="mt-6 text-sm text-slate-500">Loading…</p>
+        <p className="mt-6 text-sm text-fg-muted">Loading…</p>
       ) : data ? (
         <>
           <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -107,13 +107,13 @@ export default function AdminOverview() {
           ) : null}
 
           <section className="mt-8" aria-labelledby={`${titleId}-audit`}>
-            <h2 id={`${titleId}-audit`} className="text-base font-semibold text-slate-900 dark:text-slate-100">
+            <h2 id={`${titleId}-audit`} className="text-base font-semibold text-fg-default dark:text-slate-100">
               Recent audit events
             </h2>
-            <div className="mt-3 overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-800">
+            <div className="mt-3 overflow-x-auto rounded-xl border border-border-default dark:border-border-subtle">
               <table className="min-w-full text-left text-sm">
                 <caption className="sr-only">Recent administrative audit log entries</caption>
-                <thead className="bg-slate-50 text-slate-600 dark:bg-neutral-950 dark:text-slate-400">
+                <thead className="bg-surface-base text-fg-muted dark:bg-surface-base dark:text-fg-subtle">
                   <tr>
                     <th scope="col" className="px-4 py-2 font-medium">
                       Time
@@ -132,7 +132,7 @@ export default function AdminOverview() {
                 <tbody>
                   {data.recentAuditEvents.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="px-4 py-6 text-center text-slate-500">
+                      <td colSpan={4} className="px-4 py-6 text-center text-fg-muted">
                         No recent audit events.
                       </td>
                     </tr>
@@ -140,7 +140,7 @@ export default function AdminOverview() {
                     data.recentAuditEvents.map((e: AuditEvent) => (
                       <tr
                         key={e.eventId}
-                        className="border-t border-slate-100 dark:border-neutral-800"
+                        className="border-t border-border-subtle"
                       >
                         <td className="px-4 py-2 whitespace-nowrap">
                           {new Date(e.timestamp).toLocaleString()}

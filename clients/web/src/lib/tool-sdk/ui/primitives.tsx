@@ -38,7 +38,7 @@ export function ToolFeedback({
       ? 'text-emerald-700 dark:text-emerald-300'
       : tone === 'error'
         ? 'text-rose-700 dark:text-rose-300'
-        : 'text-slate-600 dark:text-neutral-300'
+        : 'text-fg-muted'
   return (
     <p className={`lex-tool-feedback text-xs ${cls}`} role="status" data-tool-feedback={tone}>
       {children}
@@ -48,7 +48,7 @@ export function ToolFeedback({
 
 export function ToolScore({ raw, max }: { raw: number; max: number }) {
   return (
-    <p className="lex-tool-score text-xs text-slate-600 dark:text-neutral-300" data-tool-score>
+    <p className="lex-tool-score text-xs text-fg-muted" data-tool-score>
       {raw}/{max}
     </p>
   )

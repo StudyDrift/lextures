@@ -66,7 +66,7 @@ export function CourseCatalogViewMenu({ value, onChange }: Props) {
         aria-controls={open ? menuId : undefined}
         aria-label={`View courses as ${activeOption.label}. Open menu to change catalog layout.`}
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-neutral-600 dark:hover:bg-neutral-800 sm:w-auto"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:border-border-strong hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:border-border-default dark:hover:bg-surface-overlay sm:w-auto"
       >
         <ActiveIcon className="h-4 w-4 shrink-0" aria-hidden />
         <span>View</span>
@@ -81,7 +81,7 @@ export function CourseCatalogViewMenu({ value, onChange }: Props) {
           id={menuId}
           role="menu"
           aria-label="Course catalog view"
-          className="absolute start-0 end-0 z-50 mt-1 min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10 sm:left-auto sm:end-0 sm:min-w-[16rem] dark:border-neutral-600 dark:bg-neutral-800 dark:shadow-black/40"
+          className="absolute start-0 end-0 z-50 mt-1 min-w-0 overflow-hidden rounded-xl border border-border-default bg-surface-raised py-1 shadow-lg shadow-slate-900/10 sm:left-auto sm:end-0 sm:min-w-[16rem] dark:border-border-default dark:bg-surface-overlay dark:shadow-black/40"
         >
           {VIEW_OPTIONS.map((option) => {
             const Icon = option.icon
@@ -96,16 +96,16 @@ export function CourseCatalogViewMenu({ value, onChange }: Props) {
                   setOpen(false)
                 }}
                 className={[
-                  'flex w-full items-start gap-2.5 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:hover:bg-neutral-700',
-                  value === option.id ? 'bg-indigo-50 dark:bg-neutral-800' : '',
+                  'flex w-full items-start gap-2.5 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:hover:bg-neutral-700',
+                  value === option.id ? 'bg-indigo-50 dark:bg-surface-overlay' : '',
                 ]
                   .filter(Boolean)
                   .join(' ')}
               >
-                <Icon className="mt-0.5 h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
+                <Icon className="mt-0.5 h-4 w-4 shrink-0 text-fg-muted" aria-hidden />
                 <span className="flex min-w-0 flex-col gap-0.5">
-                  <span className="font-semibold text-slate-950 dark:text-neutral-100">{option.label}</span>
-                  <span className="text-xs text-slate-500 dark:text-neutral-400">{option.hint}</span>
+                  <span className="font-semibold text-slate-950 dark:text-fg-default">{option.label}</span>
+                  <span className="text-xs text-fg-muted">{option.hint}</span>
                 </span>
               </button>
             )

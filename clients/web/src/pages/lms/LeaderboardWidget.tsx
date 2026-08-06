@@ -36,16 +36,16 @@ export function LeaderboardWidget({ courseCode }: Props) {
   return (
     <aside
       aria-label="Course leaderboard"
-      className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-900"
+      className="mt-6 rounded-2xl border border-border-default bg-surface-raised p-4 shadow-sm dark:border-border-default dark:bg-surface-raised"
     >
       <div className="flex items-center gap-2">
         <Trophy className="h-4 w-4 text-amber-600 dark:text-amber-400" aria-hidden />
-        <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Leaderboard</h2>
+        <h2 className="text-sm font-semibold text-fg-default">Leaderboard</h2>
       </div>
       <div className="mt-3 overflow-x-auto">
         <table className="w-full min-w-[16rem] text-left text-sm">
           <thead>
-            <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500 dark:border-neutral-700 dark:text-neutral-400">
+            <tr className="border-b border-border-default text-xs uppercase tracking-wide text-fg-muted dark:border-border-default dark:text-fg-muted">
               <th scope="col" className="py-2 pe-2">
                 Rank
               </th>
@@ -64,7 +64,7 @@ export function LeaderboardWidget({ courseCode }: Props) {
                 className={
                   row.isCurrentUser
                     ? 'bg-amber-50 font-semibold dark:bg-amber-950/30'
-                    : 'border-b border-slate-100 dark:border-neutral-800'
+                    : 'border-b border-border-subtle'
                 }
               >
                 <td className="py-2 pe-2 tabular-nums">{row.rank}</td>
@@ -77,7 +77,7 @@ export function LeaderboardWidget({ courseCode }: Props) {
       </div>
       {board.currentUser &&
       !board.topEntries.some((e) => e.isCurrentUser) ? (
-        <p className="mt-3 border-t border-slate-200 pt-3 text-xs text-slate-600 dark:border-neutral-700 dark:text-neutral-400">
+        <p className="mt-3 border-t border-border-default pt-3 text-xs text-fg-muted dark:border-border-default dark:text-fg-muted">
           Your rank: #{board.currentUser.rank} · {board.currentUser.xpEarned.toLocaleString()} XP
         </p>
       ) : null}

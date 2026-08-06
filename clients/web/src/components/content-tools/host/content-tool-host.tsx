@@ -203,7 +203,7 @@ function ContentToolHostMounted({
           onOptOut={() => setAiOptedOut(true)}
         />
         {aiOptedOut ? (
-          <p className="mb-2 text-sm text-slate-600 dark:text-slate-300" role="status">
+          <p className="mb-2 text-sm text-fg-muted dark:text-slate-300" role="status">
             {t('contentTools.governance.nonAiPath')}
           </p>
         ) : null}
@@ -264,7 +264,7 @@ function ContentToolHostMounted({
           )}
         </ToolErrorBoundary>
         {toolState.score ? (
-          <p className="mt-2 text-xs text-slate-600 dark:text-neutral-300">
+          <p className="mt-2 text-xs text-fg-muted">
             {t('contentTools.runtime.score')}: {toolState.score.raw}/{toolState.score.max}
           </p>
         ) : null}
@@ -276,7 +276,7 @@ function ContentToolHostMounted({
         {!canManage && !readOnly ? (
           <button
             type="button"
-            className="mt-2 text-xs text-slate-600 underline dark:text-slate-300"
+            className="mt-2 text-xs text-fg-muted underline dark:text-slate-300"
             disabled={reportBusy}
             data-testid="content-tool-report"
             onClick={() => {

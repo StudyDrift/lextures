@@ -24,7 +24,7 @@ function ProgressRing({ percent }: { percent: number }) {
       aria-label={formatProgressLabel(clamped)}
       className="shrink-0"
     >
-      <circle cx={22} cy={22} r={r} fill="none" stroke="currentColor" strokeWidth={4} className="text-slate-200 dark:text-slate-700" />
+      <circle cx={22} cy={22} r={r} fill="none" stroke="currentColor" strokeWidth={4} className="text-slate-200 dark:text-fg-muted" />
       <circle
         cx={22}
         cy={22}
@@ -70,21 +70,21 @@ export function SelfPacedDashboardSection() {
 
   return (
     <section aria-label="Self-paced courses">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-fg-muted">
         Self-paced
       </h2>
       <ul className="mt-3 space-y-3">
         {rows.map((row) => (
           <li
             key={row.enrollmentId}
-            className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800"
+            className="flex items-center gap-4 rounded-2xl border border-border-default bg-surface-raised p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800"
           >
             <ProgressRing percent={row.progressPercent} />
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-slate-900 dark:text-neutral-50">
+              <p className="truncate text-sm font-semibold text-fg-default">
                 {row.title}
               </p>
-              <p className="text-xs text-slate-500 dark:text-neutral-400">
+              <p className="text-xs text-fg-muted">
                 {row.completed
                   ? 'Completed'
                   : `${row.completedItems} of ${row.totalItems} items`}

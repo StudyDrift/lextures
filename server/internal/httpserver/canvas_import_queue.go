@@ -25,11 +25,6 @@ const canvasImportMaxAttempts int16 = 3
 // handleCourseImportCanvasPost is POST /api/v1/courses/{course_code}/import/canvas.
 func (d Deps) handleCourseImportCanvasPost() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.Pool == nil || d.CanvasImportQueue == nil {
 			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "Server misconfiguration.")
 			return

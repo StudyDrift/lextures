@@ -35,13 +35,13 @@ export function PageToolsOverview({ courseCode, itemId, onOpenInstance }: PageTo
   }, [courseCode, itemId])
 
   if (loading) {
-    return <p className="text-sm text-slate-500">{t('contentTools.runtime.loading')}</p>
+    return <p className="text-sm text-fg-muted">{t('contentTools.runtime.loading')}</p>
   }
   if (instances.length === 0) return null
 
   return (
     <section className="space-y-3" data-testid="page-tools-overview">
-      <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+      <h3 className="text-sm font-semibold text-fg-default">
         {t('contentTools.analytics.pageOverviewTitle')}
       </h3>
       <ul className="space-y-2">
@@ -52,15 +52,15 @@ export function PageToolsOverview({ courseCode, itemId, onOpenInstance }: PageTo
             <li key={inst.instanceId}>
               <button
                 type="button"
-                className="flex w-full items-center gap-3 rounded border border-slate-200 px-3 py-2 text-left text-sm hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-900"
+                className="flex w-full items-center gap-3 rounded border border-border-default px-3 py-2 text-left text-sm hover:bg-surface-base dark:border-border-default dark:hover:bg-surface-raised"
                 onClick={() => onOpenInstance?.(inst.instanceId)}
               >
-                <span className="min-w-0 flex-1 truncate font-medium text-slate-800 dark:text-neutral-100">
+                <span className="min-w-0 flex-1 truncate font-medium text-fg-default">
                   {inst.title || inst.toolId}
                 </span>
                 <span className="w-24 shrink-0">
-                  <span className="mb-0.5 block text-xs text-slate-500">{pct}%</span>
-                  <span className="block h-1.5 rounded bg-slate-100 dark:bg-neutral-800">
+                  <span className="mb-0.5 block text-xs text-fg-muted">{pct}%</span>
+                  <span className="block h-1.5 rounded bg-surface-sunken">
                     <span
                       className="block h-1.5 rounded bg-sky-600"
                       style={{ width: `${pct}%` }}

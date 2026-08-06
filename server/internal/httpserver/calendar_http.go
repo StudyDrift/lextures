@@ -33,6 +33,8 @@ func (d Deps) requireCalendarFeedsEnabled(w http.ResponseWriter) bool {
 func (d Deps) registerCalendarFeedRoutes(r chi.Router) {
 	r.Get("/api/v1/me/calendar.ics", d.handleMeCalendarICS())
 	r.Get("/.well-known/caldav", d.handleCalDAVWellKnown())
+	// TD.5 FR-4: HandleFunc is method-agnostic (OPTIONS/PROPFIND/GET). In-handler
+	// method dispatch in handleCalDAVCollection is load-bearing — do not strip.
 	r.HandleFunc("/caldav/users/{user_id}/", d.handleCalDAVCollection())
 }
 
@@ -52,11 +54,6 @@ func (d Deps) calendarFeedUserID(w http.ResponseWriter, r *http.Request) (uuid.U
 // handleMeCalendarICS is GET /api/v1/me/calendar.ics?token= — personal iCal feed for all enrolled courses.
 func (d Deps) handleMeCalendarICS() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.requireCalendarFeedsEnabled(w) {
 			return
 		}
@@ -71,11 +68,6 @@ func (d Deps) handleMeCalendarICS() http.HandlerFunc {
 // handleCourseCalendarICS is GET /api/v1/courses/{course_code}/calendar.ics?token=
 func (d Deps) handleCourseCalendarICS() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode := chi.URLParam(r, "course_code")
 		if courseCode == "" {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Missing course code.")
@@ -387,6 +379,9 @@ func (d Deps) handleCalDAVWellKnown() http.HandlerFunc {
 	}
 }
 
+// handleCalDAVCollection serves CalDAV collection discovery. Registered via
+// HandleFunc (method-agnostic). TD.5: method dispatch below is load-bearing —
+// clients send PROPFIND and OPTIONS, not only GET.
 func (d Deps) handleCalDAVCollection() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !d.calendarFeedsEnabled() {

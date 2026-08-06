@@ -410,7 +410,7 @@ export function CommandPaletteDialog({
     >
       <button
         type="button"
-        className={`absolute inset-0 cursor-default bg-slate-950/55 backdrop-blur-md dark:bg-neutral-950/75 ${motion.scrim}`}
+        className={`absolute inset-0 cursor-default bg-slate-950/55 backdrop-blur-md/75 ${motion.scrim}`}
         aria-label="Close search"
         tabIndex={-1}
         disabled={exiting}
@@ -418,9 +418,9 @@ export function CommandPaletteDialog({
           if (!exiting) close()
         }}
       />
-      <div className={`relative z-10 w-full max-w-xl overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-2xl shadow-slate-900/20 dark:border-neutral-700 dark:bg-neutral-900 dark:shadow-black/50 ${motion.panel}`}>
-        <div className="flex items-center gap-3 border-b border-slate-200 px-4 py-3 dark:border-neutral-700">
-          <Search className="h-5 w-5 shrink-0 text-slate-400 dark:text-neutral-500" aria-hidden />
+      <div className={`relative z-10 w-full max-w-xl overflow-hidden rounded-2xl border border-slate-200/80 bg-surface-raised shadow-2xl shadow-slate-900/20 dark:border-border-default dark:bg-surface-raised dark:shadow-black/50 ${motion.panel}`}>
+        <div className="flex items-center gap-3 border-b border-border-default px-4 py-3 dark:border-border-default">
+          <Search className="h-5 w-5 shrink-0 text-fg-subtle" aria-hidden />
           <input
             ref={inputRef}
             type="search"
@@ -432,7 +432,7 @@ export function CommandPaletteDialog({
             onKeyDown={onInputKeyDown}
             placeholder="Search courses, content, people… (@course to scope)"
             aria-label="Search"
-            className="min-w-0 flex-1 border-0 bg-transparent text-base text-slate-900 outline-none placeholder:text-slate-600 dark:text-neutral-100 dark:placeholder:text-neutral-400"
+            className="min-w-0 flex-1 border-0 bg-transparent text-base text-fg-default outline-none placeholder:text-fg-muted dark:text-fg-default dark:placeholder:text-fg-muted"
             autoComplete="off"
             autoCorrect="off"
             spellCheck={false}
@@ -447,7 +447,7 @@ export function CommandPaletteDialog({
                   : undefined
             }
           />
-          <kbd className="hidden shrink-0 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 font-mono text-[11px] text-slate-600 sm:inline dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
+          <kbd className="hidden shrink-0 rounded-md border border-border-default bg-surface-base px-2 py-1 font-mono text-[11px] text-fg-muted sm:inline dark:border-border-default dark:bg-surface-overlay dark:text-fg-muted">
             esc
           </kbd>
         </div>
@@ -461,7 +461,7 @@ export function CommandPaletteDialog({
           className="max-h-[min(60vh,420px)] overflow-y-auto px-2 py-2"
         >
           {loadState === 'loading' && (
-            <p className="px-3 py-8 text-center text-sm text-slate-600 dark:text-neutral-400">Loading…</p>
+            <p className="px-3 py-8 text-center text-sm text-fg-muted">Loading…</p>
           )}
           {loadState === 'error' && (
             <p className="px-3 py-8 text-center text-sm text-rose-600 dark:text-rose-400">
@@ -471,13 +471,13 @@ export function CommandPaletteDialog({
           {loadState === 'ready' && coursePicker.active && (
             <>
               <div
-                className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-400"
+                className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-fg-muted"
                 aria-hidden="true"
               >
                 Scope to course
               </div>
               {pickerCourses.length === 0 && (
-                <p className="px-3 py-8 text-center text-sm text-slate-600 dark:text-neutral-400">
+                <p className="px-3 py-8 text-center text-sm text-fg-muted">
                   No matching courses.
                 </p>
               )}
@@ -491,27 +491,18 @@ export function CommandPaletteDialog({
                     role="option"
                     aria-selected={selected}
                     ref={selected ? activeRowRef : undefined}
-                    className={`flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-start text-sm transition-[background-color,color,border-color] ${selected
-                      ? 'bg-indigo-50 text-slate-900 dark:bg-indigo-950/70 dark:text-neutral-100'
-                      : 'text-slate-700 hover:bg-slate-50 dark:text-neutral-300 dark:hover:bg-neutral-800/80'
-                      }`}
+                    className={`flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-start text-sm transition-[background-color,color,border-color] ${selected ? 'bg-indigo-50 text-fg-default dark:bg-indigo-950/70 dark:text-fg-default' : 'text-fg-muted hover:bg-surface-base dark:text-fg-muted dark:hover:bg-neutral-800/80' }`}
                     onMouseEnter={() => setCursor(idx)}
                     onClick={() => selectPickerCourse(course)}
                   >
                     <BookOpen
-                      className={`mt-0.5 h-4 w-4 shrink-0 ${selected
-                        ? 'text-indigo-600 dark:text-indigo-400'
-                        : 'text-slate-400 dark:text-neutral-500'
-                        }`}
+                      className={`mt-0.5 h-4 w-4 shrink-0 ${selected ? 'text-accent-fg' : 'text-fg-subtle' }`}
                       aria-hidden
                     />
                     <span className="min-w-0 flex-1">
                       <span className="block font-medium leading-snug">{course.title}</span>
                       <span
-                        className={`block text-xs ${selected
-                          ? 'text-slate-600 dark:text-neutral-300'
-                          : 'text-slate-600 dark:text-neutral-400'
-                          }`}
+                        className={`block text-xs ${selected ? 'text-fg-muted' : 'text-fg-muted' }`}
                       >
                         {course.courseCode}
                       </span>
@@ -522,10 +513,10 @@ export function CommandPaletteDialog({
             </>
           )}
           {loadState === 'ready' && !coursePicker.active && activeServerLoading && filtered.length === 0 && !isHubMode && (
-            <p className="px-3 py-8 text-center text-sm text-slate-600 dark:text-neutral-400">Searching…</p>
+            <p className="px-3 py-8 text-center text-sm text-fg-muted">Searching…</p>
           )}
           {loadState === 'ready' && !coursePicker.active && !activeServerLoading && filtered.length === 0 && (
-            <p className="px-3 py-8 text-center text-sm text-slate-600 dark:text-neutral-400">No results.</p>
+            <p className="px-3 py-8 text-center text-sm text-fg-muted">No results.</p>
           )}
           {loadState === 'ready' && !coursePicker.active &&
             filtered.map((item, idx) => {
@@ -536,7 +527,7 @@ export function CommandPaletteDialog({
                 <div key={item.id}>
                   {showHeader && (
                     <div
-                      className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-400"
+                      className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-fg-muted"
                       aria-hidden="true"
                     >
                       {SEARCH_GROUP_LABEL[item.group]}
@@ -548,27 +539,18 @@ export function CommandPaletteDialog({
                     role="option"
                     aria-selected={selected}
                     ref={selected ? activeRowRef : undefined}
-                    className={`flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-start text-sm transition-[background-color,color,border-color] ${selected
-                      ? 'bg-indigo-50 text-slate-900 dark:bg-indigo-950/70 dark:text-neutral-100'
-                      : 'text-slate-700 hover:bg-slate-50 dark:text-neutral-300 dark:hover:bg-neutral-800/80'
-                      }`}
+                    className={`flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-start text-sm transition-[background-color,color,border-color] ${selected ? 'bg-indigo-50 text-fg-default dark:bg-indigo-950/70 dark:text-fg-default' : 'text-fg-muted hover:bg-surface-base dark:text-fg-muted dark:hover:bg-neutral-800/80' }`}
                     onMouseEnter={() => setCursor(idx)}
                     onClick={() => go(item)}
                   >
                     <Icon
-                      className={`mt-0.5 h-4 w-4 shrink-0 ${selected
-                        ? 'text-indigo-600 dark:text-indigo-400'
-                        : 'text-slate-400 dark:text-neutral-500'
-                        }`}
+                      className={`mt-0.5 h-4 w-4 shrink-0 ${selected ? 'text-accent-fg' : 'text-fg-subtle' }`}
                       aria-hidden
                     />
                     <span className="min-w-0 flex-1">
                       <span className="block font-medium leading-snug">{item.title}</span>
                       <span
-                        className={`block text-xs ${selected
-                          ? 'text-slate-600 dark:text-neutral-300'
-                          : 'text-slate-600 dark:text-neutral-400'
-                          }`}
+                        className={`block text-xs ${selected ? 'text-fg-muted' : 'text-fg-muted' }`}
                       >
                         {item.subtitle}
                       </span>
@@ -579,7 +561,7 @@ export function CommandPaletteDialog({
             })}
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 px-4 py-2 text-[11px] text-slate-600 dark:border-neutral-700 dark:text-neutral-400">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border-subtle px-4 py-2 text-[11px] text-fg-muted dark:border-border-default dark:text-fg-muted">
           <span className="flex items-center gap-3">
             <span className="inline-flex items-center gap-1">
               <ArrowUp className="h-3.5 w-3.5 opacity-90" aria-hidden />
@@ -587,7 +569,7 @@ export function CommandPaletteDialog({
               Navigate
             </span>
             <span className="inline-flex items-center gap-1">
-              <kbd className="rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
+              <kbd className="rounded border border-border-default bg-surface-base px-1.5 py-0.5 font-mono dark:border-border-default dark:bg-surface-overlay dark:text-fg-muted">
                 ↵
               </kbd>
               Open

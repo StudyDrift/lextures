@@ -43,10 +43,10 @@ export function StartHereCard() {
           <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
           <span>Start here</span>
         </div>
-        <h2 className="mt-2 text-lg font-semibold tracking-tight text-slate-900 dark:text-neutral-50">
+        <h2 className="mt-2 text-lg font-semibold tracking-tight text-fg-default">
           {courseTitle}
         </h2>
-        <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+        <p className="mt-1 text-sm text-fg-muted">
           Based on your goal to learn {topicLabel}
           {goals.goalText ? `: ${goals.goalText}` : ''}.
         </p>

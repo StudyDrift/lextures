@@ -23,7 +23,7 @@ export function InspectorTextareaExpandButton({
     <button
       type="button"
       onClick={onClick}
-      className="absolute bottom-1.5 end-7 z-10 inline-flex items-center justify-center rounded-md bg-white/90 p-1 text-slate-500 shadow-sm ring-1 ring-slate-200/80 hover:bg-slate-100 hover:text-slate-700 dark:bg-neutral-950/90 dark:text-neutral-400 dark:ring-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+      className="absolute bottom-1.5 end-7 z-10 inline-flex items-center justify-center rounded-md bg-white/90 p-1 text-fg-muted shadow-sm ring-1 ring-slate-200/80 hover:bg-surface-sunken hover:text-fg-muted/90 dark:text-fg-muted dark:ring-neutral-700 dark:hover:bg-surface-overlay dark:hover:text-fg-default"
       aria-label={label}
     >
       <Maximize2 className="h-3.5 w-3.5" aria-hidden="true" />
@@ -75,27 +75,27 @@ export function InspectorTextareaExpandModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="flex h-[min(80vh,640px)] w-full max-w-2xl flex-col rounded-2xl bg-white shadow-xl dark:bg-neutral-900"
+        className="flex h-[min(80vh,640px)] w-full max-w-2xl flex-col rounded-2xl bg-surface-raised shadow-xl dark:bg-surface-raised"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="shrink-0 border-b border-slate-200 px-5 py-4 dark:border-neutral-700">
-          <h3 id={titleId} className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+        <div className="shrink-0 border-b border-border-default px-5 py-4 dark:border-border-default">
+          <h3 id={titleId} className="text-sm font-semibold text-fg-default">
             {title}
           </h3>
         </div>
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-5 py-4">{children}</div>
-        <div className="flex shrink-0 justify-end gap-2 border-t border-slate-200 px-5 py-3 dark:border-neutral-700">
+        <div className="flex shrink-0 justify-end gap-2 border-t border-border-default px-5 py-3 dark:border-border-default">
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-lg px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
+            className="rounded-lg px-3 py-1.5 text-sm text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay"
           >
             {t('gradingAgent.canvas.inspector.expandTextareaCancel')}
           </button>
           <button
             type="button"
             onClick={onDone}
-            className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700"
+            className="rounded-lg bg-accent-solid px-3 py-1.5 text-sm font-medium text-white hover:bg-accent"
           >
             {t('gradingAgent.canvas.inspector.expandTextareaDone')}
           </button>

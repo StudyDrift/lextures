@@ -60,9 +60,9 @@ const TONE_STYLES: Record<
     card: 'border-indigo-100/80 bg-gradient-to-br from-indigo-50/90 via-white to-white dark:border-indigo-900/40 dark:from-indigo-950/40 dark:via-neutral-900 dark:to-neutral-900',
     cardSelected:
       'border-indigo-400 ring-2 ring-indigo-500/30 dark:border-indigo-500 dark:ring-indigo-400/30',
-    iconWrap: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-950/80 dark:text-indigo-300',
-    icon: 'text-indigo-600 dark:text-indigo-300',
-    value: 'text-slate-900 dark:text-neutral-50',
+    iconWrap: 'bg-indigo-100 text-accent-fg dark:bg-indigo-950/80 dark:text-indigo-300',
+    icon: 'text-accent-fg dark:text-indigo-300',
+    value: 'text-fg-default',
   },
   emerald: {
     card: 'border-emerald-100/80 bg-gradient-to-br from-emerald-50/90 via-white to-white dark:border-emerald-900/40 dark:from-emerald-950/40 dark:via-neutral-900 dark:to-neutral-900',
@@ -70,7 +70,7 @@ const TONE_STYLES: Record<
       'border-emerald-400 ring-2 ring-emerald-500/30 dark:border-emerald-500 dark:ring-emerald-400/30',
     iconWrap: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-950/80 dark:text-emerald-300',
     icon: 'text-emerald-600 dark:text-emerald-300',
-    value: 'text-slate-900 dark:text-neutral-50',
+    value: 'text-fg-default',
   },
   sky: {
     card: 'border-sky-100/80 bg-gradient-to-br from-sky-50/90 via-white to-white dark:border-sky-900/40 dark:from-sky-950/40 dark:via-neutral-900 dark:to-neutral-900',
@@ -78,15 +78,15 @@ const TONE_STYLES: Record<
       'border-sky-400 ring-2 ring-sky-500/30 dark:border-sky-500 dark:ring-sky-400/30',
     iconWrap: 'bg-sky-100 text-sky-600 dark:bg-sky-950/80 dark:text-sky-300',
     icon: 'text-sky-600 dark:text-sky-300',
-    value: 'text-slate-900 dark:text-neutral-50',
+    value: 'text-fg-default',
   },
   slate: {
-    card: 'border-slate-200/90 bg-gradient-to-br from-slate-50/90 via-white to-white dark:border-neutral-700 dark:from-neutral-800/60 dark:via-neutral-900 dark:to-neutral-900',
+    card: 'border-slate-200/90 bg-gradient-to-br from-slate-50/90 via-white to-white dark:border-border-default dark:from-neutral-800/60 dark:via-neutral-900 dark:to-neutral-900',
     cardSelected:
       'border-slate-400 ring-2 ring-slate-400/40 dark:border-neutral-500 dark:ring-neutral-400/30',
-    iconWrap: 'bg-slate-100 text-slate-600 dark:bg-neutral-800 dark:text-neutral-300',
-    icon: 'text-slate-600 dark:text-neutral-300',
-    value: 'text-slate-900 dark:text-neutral-50',
+    iconWrap: 'bg-surface-sunken text-fg-muted dark:bg-surface-overlay dark:text-fg-muted',
+    icon: 'text-fg-muted',
+    value: 'text-fg-default',
   },
   rose: {
     card: 'border-rose-100/80 bg-gradient-to-br from-rose-50/90 via-white to-white dark:border-rose-900/40 dark:from-rose-950/40 dark:via-neutral-900 dark:to-neutral-900',
@@ -94,7 +94,7 @@ const TONE_STYLES: Record<
       'border-rose-400 ring-2 ring-rose-500/30 dark:border-rose-500 dark:ring-rose-400/30',
     iconWrap: 'bg-rose-100 text-rose-600 dark:bg-rose-950/80 dark:text-rose-300',
     icon: 'text-rose-600 dark:text-rose-300',
-    value: 'text-slate-900 dark:text-neutral-50',
+    value: 'text-fg-default',
   },
 }
 
@@ -186,13 +186,11 @@ function CoursesStatsCard({
       onClick={onSelect}
       aria-pressed={selected}
       aria-label={`${selected ? 'Hide' : 'Show'} ${label}: ${countLabel}`}
-      className={`relative flex h-full w-full flex-col overflow-hidden rounded-2xl border px-4 py-4 text-left shadow-sm transition-all hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40 ${styles.card} ${
-        selected ? styles.cardSelected : ''
-      }`}
+      className={`relative flex h-full w-full flex-col overflow-hidden rounded-2xl border px-4 py-4 text-left shadow-sm transition-all hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40 ${styles.card} ${ selected ? styles.cardSelected : '' }`}
     >
       <div className="flex items-start justify-between gap-3">
         {/* Fixed 2-line label band so values line up across cards */}
-        <p className="min-h-[2.5rem] min-w-0 flex-1 text-[11px] font-semibold uppercase leading-tight tracking-wider text-slate-500 dark:text-neutral-400">
+        <p className="min-h-[2.5rem] min-w-0 flex-1 text-[11px] font-semibold uppercase leading-tight tracking-wider text-fg-muted">
           {label}
         </p>
         <span
@@ -215,10 +213,10 @@ function CoursesStatsCard({
         </p>
       )}
       {/* Fixed 2-line hint band (empty when no hint) keeps footers aligned */}
-      <p className="mt-1.5 min-h-[2rem] text-xs leading-snug text-slate-500 dark:text-neutral-500">
+      <p className="mt-1.5 min-h-[2rem] text-xs leading-snug text-fg-subtle">
         {hint ?? '\u00a0'}
       </p>
-      <p className="mt-auto pt-2 inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 dark:text-neutral-400">
+      <p className="mt-auto pt-2 inline-flex items-center gap-1 text-[11px] font-medium text-fg-muted">
         {selected ? 'Hide list' : 'View list'}
         <ChevronDown
           className={`h-3.5 w-3.5 transition-transform ${selected ? 'rotate-180' : ''}`}
@@ -246,7 +244,7 @@ function CoursesDashboardCards({
     return (
       <p
         role="alert"
-        className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300"
+        className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-danger-fg dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300"
       >
         {error}
       </p>
@@ -262,7 +260,7 @@ function CoursesDashboardCards({
         <h3 id="courses-dashboard-heading" className="sr-only">
           Courses overview
         </h3>
-        <p className="text-xs text-slate-500 dark:text-neutral-500">
+        <p className="text-xs text-fg-subtle">
           Click a metric to inspect matching courses.
         </p>
       </div>
@@ -324,7 +322,7 @@ function CourseStatusBadge({ status }: { status: string }) {
     )
   }
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700 ring-1 ring-inset ring-slate-500/15 dark:bg-neutral-800 dark:text-neutral-300 dark:ring-neutral-600/40">
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-sunken px-2.5 py-0.5 text-xs font-medium text-fg-muted ring-1 ring-inset ring-slate-500/15 dark:bg-surface-overlay dark:text-fg-muted dark:ring-neutral-600/40">
       {statusLabel(status)}
     </span>
   )
@@ -346,11 +344,11 @@ function CourseReportView({
   onOpen: (path: string) => void
 }) {
   if (loading) {
-    return <p className="mt-6 text-sm text-slate-500 dark:text-neutral-400">Loading course…</p>
+    return <p className="mt-6 text-sm text-fg-muted">Loading course…</p>
   }
   if (error) {
     return (
-      <p role="alert" className="mt-6 text-sm text-red-600 dark:text-red-400">
+      <p role="alert" className="mt-6 text-sm text-danger-fg">
         {error}
       </p>
     )
@@ -364,46 +362,46 @@ function CourseReportView({
       <button
         type="button"
         onClick={onBack}
-        className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+        className="inline-flex items-center gap-2 text-sm font-medium text-fg-muted hover:text-fg-default dark:text-fg-muted dark:hover:text-fg-default"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden />
         Back to search
       </button>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
+      <div className="rounded-xl border border-border-default bg-surface-raised p-5 dark:border-border-subtle dark:bg-surface-raised">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-neutral-100">{report.title}</h3>
-            <p className="mt-1 font-mono text-sm text-slate-600 dark:text-neutral-400">{report.courseCode}</p>
+            <h3 className="text-lg font-semibold text-fg-default">{report.title}</h3>
+            <p className="mt-1 font-mono text-sm text-fg-muted">{report.courseCode}</p>
             {report.description ? (
-              <p className="mt-3 text-sm text-slate-600 dark:text-neutral-400">{report.description}</p>
+              <p className="mt-3 text-sm text-fg-muted">{report.description}</p>
             ) : null}
             <dl className="mt-4 grid gap-2 text-sm sm:grid-cols-2">
               <div>
-                <dt className="text-slate-500 dark:text-neutral-500">Organization</dt>
-                <dd className="text-slate-900 dark:text-neutral-100">{report.orgName}</dd>
+                <dt className="text-fg-subtle">Organization</dt>
+                <dd className="text-fg-default">{report.orgName}</dd>
               </div>
               <div>
-                <dt className="text-slate-500 dark:text-neutral-500">Status</dt>
+                <dt className="text-fg-subtle">Status</dt>
                 <dd className="mt-0.5">
                   <CourseStatusBadge status={report.status} />
                 </dd>
               </div>
               <div>
-                <dt className="text-slate-500 dark:text-neutral-500">Instructor</dt>
-                <dd className="text-slate-900 dark:text-neutral-100">{report.instructorName ?? '—'}</dd>
+                <dt className="text-fg-subtle">Instructor</dt>
+                <dd className="text-fg-default">{report.instructorName ?? '—'}</dd>
               </div>
               <div>
-                <dt className="text-slate-500 dark:text-neutral-500">Term</dt>
-                <dd className="text-slate-900 dark:text-neutral-100">{report.termName ?? '—'}</dd>
+                <dt className="text-fg-subtle">Term</dt>
+                <dd className="text-fg-default">{report.termName ?? '—'}</dd>
               </div>
               <div>
-                <dt className="text-slate-500 dark:text-neutral-500">Enrollments</dt>
-                <dd className="text-slate-900 dark:text-neutral-100">{report.enrollmentCount}</dd>
+                <dt className="text-fg-subtle">Enrollments</dt>
+                <dd className="text-fg-default">{report.enrollmentCount}</dd>
               </div>
               <div>
-                <dt className="text-slate-500 dark:text-neutral-500">Last updated</dt>
-                <dd className="text-slate-900 dark:text-neutral-100">{formatDateTime(report.updatedAt)}</dd>
+                <dt className="text-fg-subtle">Last updated</dt>
+                <dd className="text-fg-default">{formatDateTime(report.updatedAt)}</dd>
               </div>
             </dl>
           </div>
@@ -412,7 +410,7 @@ function CourseReportView({
               type="button"
               disabled={busy}
               onClick={() => onOpen(`/courses/${code}`)}
-              className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-white"
+              className="inline-flex items-center gap-2 rounded-lg bg-accent-solid px-3 py-2 text-sm font-medium text-white hover:bg-accent disabled:opacity-50 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-surface-raised"
             >
               {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <ExternalLink className="h-4 w-4" aria-hidden />}
               Open course
@@ -421,7 +419,7 @@ function CourseReportView({
               type="button"
               disabled={busy}
               onClick={() => onOpen(`/courses/${code}/settings`)}
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800"
+              className="inline-flex items-center gap-2 rounded-lg border border-border-strong px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
             >
               <Settings className="h-4 w-4" aria-hidden />
               Settings
@@ -430,7 +428,7 @@ function CourseReportView({
               type="button"
               disabled={busy}
               onClick={() => onOpen(`/courses/${code}/enrollments`)}
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800"
+              className="inline-flex items-center gap-2 rounded-lg border border-border-strong px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
             >
               <Users className="h-4 w-4" aria-hidden />
               Enrollments
@@ -460,7 +458,7 @@ function CoursesResultsTable({
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full text-left text-sm">
-        <thead className="bg-slate-50/80 text-slate-500 dark:bg-neutral-950/60 dark:text-neutral-400">
+        <thead className="bg-slate-50/80 text-fg-muted/60 dark:text-fg-muted">
           <tr>
             <th scope="col" className="px-5 py-2.5 text-xs font-semibold uppercase tracking-wide">
               Title
@@ -487,7 +485,7 @@ function CoursesResultsTable({
             <tr>
               <td colSpan={6} className="px-5 py-12 text-center">
                 <Loader2 className="mx-auto h-5 w-5 animate-spin text-indigo-500" aria-hidden />
-                <p className="mt-2 text-sm text-slate-500">{loadingLabel}</p>
+                <p className="mt-2 text-sm text-fg-muted">{loadingLabel}</p>
               </td>
             </tr>
           ) : !data?.items.length ? (
@@ -497,10 +495,10 @@ function CoursesResultsTable({
                   className="mx-auto h-8 w-8 text-slate-300 dark:text-neutral-600"
                   aria-hidden
                 />
-                <p className="mt-2 text-sm font-medium text-slate-700 dark:text-neutral-300">
+                <p className="mt-2 text-sm font-medium text-fg-muted">
                   {emptyTitle}
                 </p>
-                <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">{emptyHint}</p>
+                <p className="mt-1 text-sm text-fg-muted">{emptyHint}</p>
               </td>
             </tr>
           ) : (
@@ -513,22 +511,22 @@ function CoursesResultsTable({
                   <button
                     type="button"
                     onClick={() => onOpen(course.id)}
-                    className="font-medium text-slate-900 hover:text-indigo-600 dark:text-neutral-100 dark:hover:text-indigo-400"
+                    className="font-medium text-fg-default hover:text-accent-fg dark:text-fg-default dark:hover:text-indigo-400"
                   >
                     {course.title}
                   </button>
                 </td>
-                <td className="px-5 py-3 font-mono text-xs text-slate-600 dark:text-neutral-400">
+                <td className="px-5 py-3 font-mono text-xs text-fg-muted">
                   {course.courseCode}
                 </td>
-                <td className="px-5 py-3 text-slate-700 dark:text-neutral-300">{course.orgName}</td>
-                <td className="px-5 py-3 text-slate-600 dark:text-neutral-400">
+                <td className="px-5 py-3 text-fg-muted">{course.orgName}</td>
+                <td className="px-5 py-3 text-fg-muted">
                   {course.instructorName ?? '—'}
                 </td>
                 <td className="px-5 py-3">
                   <CourseStatusBadge status={course.status} />
                 </td>
-                <td className="px-5 py-3 tabular-nums text-slate-700 dark:text-neutral-300">
+                <td className="px-5 py-3 tabular-nums text-fg-muted">
                   {formatCount(course.enrollmentCount)}
                 </td>
               </tr>
@@ -557,24 +555,24 @@ function PaginationNav({
   return (
     <nav
       aria-label={label}
-      className="flex items-center justify-between gap-3 border-t border-slate-100 px-5 py-3 dark:border-neutral-800"
+      className="flex items-center justify-between gap-3 border-t border-border-subtle px-5 py-3 dark:border-border-subtle"
     >
       <button
         type="button"
         disabled={page <= 1}
         onClick={onPrev}
-        className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800"
+        className="rounded-lg border border-border-default px-3 py-1.5 text-sm font-medium text-fg-muted transition-colors hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
       >
         Previous
       </button>
-      <span className="text-sm text-slate-600 dark:text-neutral-400">
+      <span className="text-sm text-fg-muted">
         Page {page} of {totalPages}
       </span>
       <button
         type="button"
         disabled={page >= totalPages}
         onClick={onNext}
-        className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800"
+        className="rounded-lg border border-border-default px-3 py-1.5 text-sm font-medium text-fg-muted transition-colors hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
       >
         Next
       </button>
@@ -775,19 +773,19 @@ export function CoursesPanel() {
         <section
           id={filterPanelId}
           aria-label={activeStat.tableTitle}
-          className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900"
+          className="overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-sm dark:border-border-subtle dark:bg-surface-raised"
         >
-          <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-100 px-5 py-4 dark:border-neutral-800">
+          <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border-subtle px-5 py-4 dark:border-border-subtle">
             <div>
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+              <h3 className="text-sm font-semibold text-fg-default">
                 {activeStat.tableTitle}
               </h3>
-              <p className="mt-0.5 text-sm text-slate-500 dark:text-neutral-400">
+              <p className="mt-0.5 text-sm text-fg-muted">
                 {activeStat.tableDescription}
                 {filterCount != null && !filterLoading ? (
                   <>
                     {' '}
-                    <span className="font-medium text-slate-700 dark:text-neutral-300">
+                    <span className="font-medium text-fg-muted">
                       {formatCount(filterCount)}
                     </span>{' '}
                     {filterCount === 1 ? 'course' : 'courses'}.
@@ -796,7 +794,7 @@ export function CoursesPanel() {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-neutral-400">
+              <label className="flex items-center gap-2 text-sm text-fg-muted">
                 <span className="text-xs font-medium uppercase tracking-wide">Page size</span>
                 <select
                   value={filterPerPage}
@@ -804,7 +802,7 @@ export function CoursesPanel() {
                     setFilterPerPage(Number(e.target.value))
                     setFilterPage(1)
                   }}
-                  className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                  className="rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
                 >
                   {PAGE_SIZES.map((n) => (
                     <option key={n} value={n}>
@@ -816,7 +814,7 @@ export function CoursesPanel() {
               <button
                 type="button"
                 onClick={() => toggleFilter(selectedFilter)}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border-default px-3 py-1.5 text-sm font-medium text-fg-muted transition-colors hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
               >
                 <X className="h-4 w-4" aria-hidden />
                 Close
@@ -825,10 +823,10 @@ export function CoursesPanel() {
           </div>
 
           {filterError ? (
-            <div className="border-b border-slate-100 px-5 py-3 dark:border-neutral-800">
+            <div className="border-b border-border-subtle px-5 py-3 dark:border-border-subtle">
               <p
                 role="alert"
-                className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300"
+                className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-danger-fg dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300"
               >
                 {filterError}
               </p>
@@ -856,11 +854,11 @@ export function CoursesPanel() {
         </section>
       ) : null}
 
-      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-4 dark:border-neutral-800">
+      <section className="overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-sm dark:border-border-subtle dark:bg-surface-raised">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-subtle px-5 py-4 dark:border-border-subtle">
           <div>
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Find courses</h3>
-            <p className="mt-0.5 text-sm text-slate-500 dark:text-neutral-400">
+            <h3 className="text-sm font-semibold text-fg-default">Find courses</h3>
+            <p className="mt-0.5 text-sm text-fg-muted">
               Search by course code or title. Results appear after you search.
             </p>
           </div>
@@ -868,12 +866,12 @@ export function CoursesPanel() {
 
         <form onSubmit={onSearchSubmit} className="flex flex-wrap items-end gap-3 px-5 py-4">
           <label className="flex min-w-[16rem] flex-1 flex-col text-sm">
-            <span className="mb-1.5 text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+            <span className="mb-1.5 text-xs font-medium uppercase tracking-wide text-fg-muted">
               Search
             </span>
             <div className="relative">
               <Search
-                className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+                className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-subtle"
                 aria-hidden
               />
               <input
@@ -881,12 +879,12 @@ export function CoursesPanel() {
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Course code or title"
-                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-2.5 pl-10 pr-3 text-sm text-slate-900 shadow-inner transition-colors placeholder:text-slate-400 focus:border-indigo-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-indigo-500/50 dark:focus:bg-neutral-950"
+                className="w-full rounded-xl border border-border-default bg-slate-50/50 py-2.5 pl-10 pr-3 text-sm text-fg-default shadow-inner transition-colors placeholder:text-fg-subtle focus:border-indigo-300 focus:bg-surface-raised focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:placeholder:text-neutral-500 dark:focus:border-indigo-500/50 dark:focus:bg-surface-base"
               />
             </div>
           </label>
           <label className="flex flex-col text-sm">
-            <span className="mb-1.5 text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+            <span className="mb-1.5 text-xs font-medium uppercase tracking-wide text-fg-muted">
               Status
             </span>
             <select
@@ -895,7 +893,7 @@ export function CoursesPanel() {
                 setStatus(e.target.value as PlatformCourseSearchStatus)
                 setPage(1)
               }}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+              className="rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm dark:border-border-default dark:bg-surface-base"
             >
               {STATUS_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -905,7 +903,7 @@ export function CoursesPanel() {
             </select>
           </label>
           <label className="flex flex-col text-sm">
-            <span className="mb-1.5 text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+            <span className="mb-1.5 text-xs font-medium uppercase tracking-wide text-fg-muted">
               Page size
             </span>
             <select
@@ -914,7 +912,7 @@ export function CoursesPanel() {
                 setPerPage(Number(e.target.value))
                 setPage(1)
               }}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+              className="rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm dark:border-border-default dark:bg-surface-base"
             >
               {PAGE_SIZES.map((n) => (
                 <option key={n} value={n}>
@@ -926,7 +924,7 @@ export function CoursesPanel() {
           <button
             type="submit"
             disabled={!q.trim() || loading}
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            className="inline-flex items-center gap-2 rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm font-medium text-fg-muted shadow-sm transition-colors hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
           >
             {loading ? (
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
@@ -938,10 +936,10 @@ export function CoursesPanel() {
         </form>
 
         {error ? (
-          <div className="border-t border-slate-100 px-5 py-3 dark:border-neutral-800">
+          <div className="border-t border-border-subtle px-5 py-3 dark:border-border-subtle">
             <p
               role="alert"
-              className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300"
+              className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-danger-fg dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300"
             >
               {error}
             </p>
@@ -949,38 +947,38 @@ export function CoursesPanel() {
         ) : null}
 
         {!submittedQ.trim() ? (
-          <div className="border-t border-slate-100 px-5 py-12 dark:border-neutral-800">
+          <div className="border-t border-border-subtle px-5 py-12 dark:border-border-subtle">
             <div className="mx-auto flex max-w-sm flex-col items-center text-center">
-              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 ring-1 ring-indigo-100 dark:bg-indigo-950/50 dark:text-indigo-300 dark:ring-indigo-900/50">
+              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-accent-fg ring-1 ring-indigo-100 dark:bg-indigo-950/50 dark:text-indigo-300 dark:ring-indigo-900/50">
                 <Sparkles className="h-6 w-6" aria-hidden />
               </span>
-              <p className="mt-4 text-sm font-medium text-slate-900 dark:text-neutral-100">
+              <p className="mt-4 text-sm font-medium text-fg-default">
                 Search to manage courses
               </p>
-              <p className="mt-1.5 text-sm leading-relaxed text-slate-500 dark:text-neutral-400">
+              <p className="mt-1.5 text-sm leading-relaxed text-fg-muted">
                 Enter a course code or title above, or click a metric card above.
               </p>
             </div>
           </div>
         ) : (
-          <div className="border-t border-slate-100 dark:border-neutral-800">
+          <div className="border-t border-border-subtle">
             {data && !loading ? (
-              <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-2.5 dark:border-neutral-800">
-                <p className="text-xs text-slate-500 dark:text-neutral-400">
+              <div className="flex items-center justify-between gap-3 border-b border-border-subtle px-5 py-2.5 dark:border-border-subtle">
+                <p className="text-xs text-fg-muted">
                   {resultCount != null ? (
                     <>
-                      <span className="font-medium text-slate-700 dark:text-neutral-300">
+                      <span className="font-medium text-fg-muted">
                         {formatCount(resultCount)}
                       </span>{' '}
                       {resultCount === 1 ? 'result' : 'results'} for{' '}
-                      <span className="font-medium text-slate-700 dark:text-neutral-300">
+                      <span className="font-medium text-fg-muted">
                         “{submittedQ}”
                       </span>
                     </>
                   ) : (
                     <>
                       Results for{' '}
-                      <span className="font-medium text-slate-700 dark:text-neutral-300">
+                      <span className="font-medium text-fg-muted">
                         “{submittedQ}”
                       </span>
                     </>

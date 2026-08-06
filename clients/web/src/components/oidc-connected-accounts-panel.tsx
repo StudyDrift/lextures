@@ -92,11 +92,11 @@ export function OidcConnectedAccountsPanel({ embedded = false }: Props) {
   if (!status?.enabled) return null
 
   return (
-    <div className={embedded ? '' : 'mt-10 border-t border-slate-200 pt-8 dark:border-neutral-600'}>
-      <h3 className="text-sm font-medium text-slate-700 dark:text-neutral-200">
+    <div className={embedded ? '' : 'mt-10 border-t border-border-default pt-8 dark:border-border-default'}>
+      <h3 className="text-sm font-medium text-fg-default">
         {embedded ? 'Sign-in providers' : 'Connected accounts'}
       </h3>
-      <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+      <p className="mt-1 text-sm text-fg-muted">
         Sign-in methods linked to this Lextures account (OpenID Connect).
       </p>
       {msg && (
@@ -109,11 +109,11 @@ export function OidcConnectedAccountsPanel({ embedded = false }: Props) {
           {ids.map((i) => (
             <li
               key={i.id}
-              className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800/50"
+              className="flex items-center justify-between rounded-lg border border-border-default bg-surface-base px-3 py-2 text-sm dark:border-border-default/50"
             >
               <span>
-                <span className="font-medium capitalize text-slate-800 dark:text-neutral-100">{i.provider}</span>
-                {i.email && <span className="text-slate-500 dark:text-neutral-400"> — {i.email}</span>}
+                <span className="font-medium capitalize text-fg-default">{i.provider}</span>
+                {i.email && <span className="text-fg-muted"> — {i.email}</span>}
               </span>
               <button
                 type="button"
@@ -130,7 +130,7 @@ export function OidcConnectedAccountsPanel({ embedded = false }: Props) {
         {status.google && (
           <button
             type="button"
-            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+            className="rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-fg-muted hover:bg-surface-base dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
             onClick={() => void connect('google')}
           >
             Link Google
@@ -139,7 +139,7 @@ export function OidcConnectedAccountsPanel({ embedded = false }: Props) {
         {status.microsoft && (
           <button
             type="button"
-            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+            className="rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-fg-muted hover:bg-surface-base dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
             onClick={() => void connect('microsoft')}
           >
             Link Microsoft
@@ -148,7 +148,7 @@ export function OidcConnectedAccountsPanel({ embedded = false }: Props) {
         {status.apple && (
           <button
             type="button"
-            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+            className="rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-fg-muted hover:bg-surface-base dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
             onClick={() => void connect('apple')}
           >
             Link Apple
@@ -158,7 +158,7 @@ export function OidcConnectedAccountsPanel({ embedded = false }: Props) {
           <button
             key={c.id}
             type="button"
-            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+            className="rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-fg-muted hover:bg-surface-base dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
             onClick={() => void connect('custom', c.id)}
           >
             Link {c.displayName}

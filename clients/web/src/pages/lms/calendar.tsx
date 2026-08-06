@@ -257,24 +257,24 @@ export default function Calendar() {
         </p>
       )}
       {courses === null && !coursesError && (
-        <p className="mt-8 text-sm text-slate-500 dark:text-neutral-400">Loading…</p>
+        <p className="mt-8 text-sm text-fg-muted">Loading…</p>
       )}
       {courses && courses.length === 0 && !coursesError && (
-        <p className="mt-8 text-sm text-slate-600 dark:text-neutral-300">No courses on your account yet.</p>
+        <p className="mt-8 text-sm text-fg-muted">No courses on your account yet.</p>
       )}
       {courses && courses.length > 0 && eligibleCourses.length === 0 && !coursesError && (
-        <p className="mt-8 text-sm text-slate-600 dark:text-neutral-300">
+        <p className="mt-8 text-sm text-fg-muted">
           No enrolled courses have the calendar tool enabled.
         </p>
       )}
       {eligibleCourses.length > 0 ? (
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           {enabledCourses.length === 0 ? (
-            <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50/80 px-4 py-8 text-center text-sm text-slate-600 dark:border-neutral-700 dark:bg-neutral-950/40 dark:text-neutral-300">
+            <p className="rounded-xl border border-dashed border-border-default bg-slate-50/80 px-4 py-8 text-center text-sm text-fg-muted dark:border-border-default/40 dark:text-fg-muted">
               Turn on at least one course to load its schedule.
             </p>
           ) : structuresLoading && !hasAnyLoadedStructure ? (
-            <p className="text-sm text-slate-500 dark:text-neutral-400">Loading calendars…</p>
+            <p className="text-sm text-fg-muted">Loading calendars…</p>
           ) : (
             <CourseCalendar
               courseCode={representativeCourseCode}

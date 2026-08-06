@@ -22,8 +22,8 @@ export function ChecklistProgressBar({
 
   return (
     <div className={className}>
-      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm text-slate-600 dark:text-neutral-400">
-        <span className="font-medium text-slate-800 dark:text-neutral-200">{label}</span>
+      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm text-fg-muted">
+        <span className="font-medium text-fg-default">{label}</span>
         {outstandingTotal != null && outstandingTotal > 0 ? (
           <span>· {courseChecklistI18n.needAttention(outstandingTotal)}</span>
         ) : null}

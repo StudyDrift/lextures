@@ -34,7 +34,7 @@ function slotStatusBadge(status: AppointmentSlot['status']) {
       )
     case 'completed':
       return (
-        <span className="inline-flex rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400">
+        <span className="inline-flex rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-neutral-600 dark:bg-surface-overlay dark:text-fg-muted">
           Completed
         </span>
       )
@@ -64,20 +64,14 @@ function SlotCard({ slot, window: win, isStaff, myUserId, onBook, onCancel }: Sl
   return (
     <div
       role="gridcell"
-      className={`rounded-xl border p-4 transition-colors ${
-        isMyBooking
-          ? 'border-sky-300 bg-sky-50/60 dark:border-sky-700 dark:bg-sky-950/30'
-          : slot.status === 'available'
-            ? 'border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800/50'
-            : 'border-neutral-200 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900/30'
-      }`}
+      className={`rounded-xl border p-4 transition-colors ${ isMyBooking ? 'border-sky-300 bg-sky-50/60 dark:border-sky-700 dark:bg-sky-950/30' : slot.status === 'available' ? 'border-neutral-200 bg-surface-raised dark:border-border-default/50' : 'border-neutral-200 bg-neutral-50 dark:border-border-default/30' }`}
     >
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <time
               dateTime={slot.slotStart}
-              className="text-sm font-semibold text-neutral-900 dark:text-neutral-100"
+              className="text-sm font-semibold text-neutral-900 dark:text-fg-default"
               aria-label={formatSlotTime(slot)}
             >
               {formatSlotTime(slot)}
@@ -85,18 +79,18 @@ function SlotCard({ slot, window: win, isStaff, myUserId, onBook, onCancel }: Sl
             {slotStatusBadge(isMyBooking ? 'booked' : slot.status)}
           </div>
           {location && (
-            <p className="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">
+            <p className="mt-0.5 text-xs text-neutral-500 dark:text-fg-muted">
               {isVirtual ? '🖥 ' : '📍 '}
               {location}
             </p>
           )}
           {isStaff && slot.status === 'booked' && slot.studentNote && (
-            <p className="mt-1 text-xs italic text-neutral-500 dark:text-neutral-400">
+            <p className="mt-1 text-xs italic text-neutral-500 dark:text-fg-muted">
               Note: {slot.studentNote}
             </p>
           )}
           {isMyBooking && slot.studentNote && (
-            <p className="mt-1 text-xs italic text-neutral-500 dark:text-neutral-400">
+            <p className="mt-1 text-xs italic text-neutral-500 dark:text-fg-muted">
               Your note: {slot.studentNote}
             </p>
           )}
@@ -117,7 +111,7 @@ function SlotCard({ slot, window: win, isStaff, myUserId, onBook, onCancel }: Sl
               <a
                 href={getSlotIcalUrl(slot.id)}
                 aria-label="Add appointment to calendar"
-                className="rounded-lg px-2 py-1.5 text-xs text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
+                className="rounded-lg px-2 py-1.5 text-xs text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:text-fg-muted dark:hover:bg-neutral-700 dark:hover:text-fg-default"
               >
                 📅
               </a>
@@ -135,7 +129,7 @@ function SlotCard({ slot, window: win, isStaff, myUserId, onBook, onCancel }: Sl
             <a
               href={getSlotIcalUrl(slot.id)}
               aria-label="Download iCal for this appointment"
-              className="rounded-lg px-2 py-1.5 text-xs text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
+              className="rounded-lg px-2 py-1.5 text-xs text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 dark:text-fg-muted dark:hover:bg-neutral-700 dark:hover:text-fg-default"
             >
               📅
             </a>
@@ -186,21 +180,21 @@ function BookingModal({ slot, onClose, onBooked }: BookingModalProps) {
       aria-label="Book office hours appointment"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-neutral-900">
-        <h2 className="mb-1 text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+      <div className="w-full max-w-md rounded-2xl bg-surface-raised p-6 shadow-xl dark:bg-surface-raised">
+        <h2 className="mb-1 text-lg font-semibold text-neutral-900 dark:text-fg-default">
           Book Appointment
         </h2>
-        <p className="mb-4 text-sm text-neutral-500 dark:text-neutral-400">
+        <p className="mb-4 text-sm text-neutral-500 dark:text-fg-muted">
           {formatSlotTime(slot)}
         </p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label
               htmlFor="booking-note"
-              className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+              className="mb-1 block text-sm font-medium text-neutral-700 dark:text-fg-muted"
             >
               Note for instructor{' '}
-              <span className="font-normal text-neutral-400">(optional)</span>
+              <span className="font-normal text-fg-muted">(optional)</span>
             </label>
             <textarea
               id="booking-note"
@@ -209,7 +203,7 @@ function BookingModal({ slot, onClose, onBooked }: BookingModalProps) {
               onChange={(e) => setNote(e.target.value)}
               rows={3}
               placeholder="e.g. I have a question about Assignment 2…"
-              className="w-full rounded-lg border border-neutral-300 px-2 py-1.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+              className="w-full rounded-lg border border-neutral-300 px-2 py-1.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
             />
           </div>
           {error && <p className="text-sm text-rose-600 dark:text-rose-400">{error}</p>}
@@ -217,7 +211,7 @@ function BookingModal({ slot, onClose, onBooked }: BookingModalProps) {
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg px-4 py-2 text-sm text-neutral-600 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+              className="rounded-lg px-4 py-2 text-sm text-neutral-600 hover:bg-neutral-100 dark:text-fg-muted dark:hover:bg-surface-overlay"
             >
               Cancel
             </button>
@@ -289,8 +283,8 @@ function CreateWindowModal({ courseCode, onClose, onCreated }: CreateWindowModal
       aria-label="Set up office hours availability"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl dark:bg-neutral-900">
-        <h2 className="mb-4 text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+      <div className="w-full max-w-lg rounded-2xl bg-surface-raised p-6 shadow-xl dark:bg-surface-raised">
+        <h2 className="mb-4 text-lg font-semibold text-neutral-900 dark:text-fg-default">
           Add Office Hours Window
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -298,22 +292,14 @@ function CreateWindowModal({ courseCode, onClose, onCreated }: CreateWindowModal
             <button
               type="button"
               onClick={() => setMode('recurring')}
-              className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-[background-color,color,border-color] ${
-                mode === 'recurring'
-                  ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'
-                  : 'border-neutral-300 text-neutral-600 hover:border-neutral-400 dark:border-neutral-600 dark:text-neutral-300'
-              }`}
+              className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-[background-color,color,border-color] ${ mode === 'recurring' ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300' : 'border-neutral-300 text-neutral-600 hover:border-neutral-400 dark:border-border-default dark:text-fg-muted' }`}
             >
               Recurring (weekly)
             </button>
             <button
               type="button"
               onClick={() => setMode('oneoff')}
-              className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-[background-color,color,border-color] ${
-                mode === 'oneoff'
-                  ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'
-                  : 'border-neutral-300 text-neutral-600 hover:border-neutral-400 dark:border-neutral-600 dark:text-neutral-300'
-              }`}
+              className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-[background-color,color,border-color] ${ mode === 'oneoff' ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300' : 'border-neutral-300 text-neutral-600 hover:border-neutral-400 dark:border-border-default dark:text-fg-muted' }`}
             >
               One-off date
             </button>
@@ -321,13 +307,13 @@ function CreateWindowModal({ courseCode, onClose, onCreated }: CreateWindowModal
 
           {mode === 'recurring' ? (
             <div>
-              <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-fg-muted">
                 Day of week
               </label>
               <select
                 value={dayOfWeek}
                 onChange={(e) => setDayOfWeek(Number(e.target.value))}
-                className="w-full rounded-lg border border-neutral-300 px-2 py-1.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                className="w-full rounded-lg border border-neutral-300 px-2 py-1.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
               >
                 {DAY_NAMES.map((name, i) => (
                   <option key={name} value={i}>
@@ -338,7 +324,7 @@ function CreateWindowModal({ courseCode, onClose, onCreated }: CreateWindowModal
             </div>
           ) : (
             <div>
-              <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-fg-muted">
                 Date
               </label>
               <input
@@ -346,14 +332,14 @@ function CreateWindowModal({ courseCode, onClose, onCreated }: CreateWindowModal
                 value={windowDate}
                 onChange={(e) => setWindowDate(e.target.value)}
                 required
-                className="w-full rounded-lg border border-neutral-300 px-2 py-1.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                className="w-full rounded-lg border border-neutral-300 px-2 py-1.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
               />
             </div>
           )}
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-fg-muted">
                 Start time
               </label>
               <input
@@ -361,11 +347,11 @@ function CreateWindowModal({ courseCode, onClose, onCreated }: CreateWindowModal
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
                 required
-                className="w-full rounded-lg border border-neutral-300 px-2 py-1.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                className="w-full rounded-lg border border-neutral-300 px-2 py-1.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-fg-muted">
                 End time
               </label>
               <input
@@ -373,19 +359,19 @@ function CreateWindowModal({ courseCode, onClose, onCreated }: CreateWindowModal
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
                 required
-                className="w-full rounded-lg border border-neutral-300 px-2 py-1.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                className="w-full rounded-lg border border-neutral-300 px-2 py-1.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
               />
             </div>
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+            <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-fg-muted">
               Slot duration (minutes)
             </label>
             <select
               value={slotDuration}
               onChange={(e) => setSlotDuration(Number(e.target.value))}
-              className="w-full rounded-lg border border-neutral-300 px-2 py-1.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+              className="w-full rounded-lg border border-neutral-300 px-2 py-1.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
             >
               <option value={10}>10 minutes</option>
               <option value={15}>15 minutes</option>
@@ -397,16 +383,16 @@ function CreateWindowModal({ courseCode, onClose, onCreated }: CreateWindowModal
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+            <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-fg-muted">
               Location / URL{' '}
-              <span className="font-normal text-neutral-400">(optional)</span>
+              <span className="font-normal text-fg-muted">(optional)</span>
             </label>
             <input
               type="text"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder="e.g. Room 204 or https://meet.example.com/…"
-              className="w-full rounded-lg border border-neutral-300 px-2 py-1.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+              className="w-full rounded-lg border border-neutral-300 px-2 py-1.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
             />
           </div>
 
@@ -416,17 +402,13 @@ function CreateWindowModal({ courseCode, onClose, onCreated }: CreateWindowModal
               role="switch"
               aria-checked={isVirtual}
               onClick={() => setIsVirtual((v) => !v)}
-              className={`relative inline-flex h-6 w-10 shrink-0 rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
-                isVirtual ? 'bg-emerald-600' : 'bg-neutral-300 dark:bg-neutral-600'
-              }`}
+              className={`relative inline-flex h-6 w-10 shrink-0 rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${ isVirtual ? 'bg-emerald-600' : 'bg-neutral-300 dark:bg-neutral-600' }`}
             >
               <span
-                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition-transform ${
-                  isVirtual ? 'translate-x-4' : 'translate-x-0'
-                }`}
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-surface-raised shadow ring-0 transition-transform ${ isVirtual ? 'translate-x-4' : 'translate-x-0' }`}
               />
             </button>
-            <span className="text-sm text-neutral-700 dark:text-neutral-300">Virtual office hours</span>
+            <span className="text-sm text-neutral-700 dark:text-fg-muted">Virtual office hours</span>
           </div>
 
           {error && <p className="text-sm text-rose-600 dark:text-rose-400">{error}</p>}
@@ -435,7 +417,7 @@ function CreateWindowModal({ courseCode, onClose, onCreated }: CreateWindowModal
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg px-4 py-2 text-sm text-neutral-600 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+              className="rounded-lg px-4 py-2 text-sm text-neutral-600 hover:bg-neutral-100 dark:text-fg-muted dark:hover:bg-surface-overlay"
             >
               Cancel
             </button>
@@ -552,7 +534,7 @@ export default function CourseOfficeHoursPage() {
           {[0, 1, 2].map((i) => (
             <div
               key={i}
-              className="h-16 animate-pulse rounded-xl bg-neutral-100 dark:bg-neutral-800"
+              className="h-16 animate-pulse rounded-xl bg-neutral-100 dark:bg-surface-overlay"
             />
           ))}
         </div>
@@ -565,8 +547,8 @@ export default function CourseOfficeHoursPage() {
       )}
 
       {!loading && !error && slots.length === 0 && (
-        <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-neutral-300 py-12 text-center dark:border-neutral-700">
-          <p className="text-sm text-neutral-500 dark:text-neutral-400">
+        <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-neutral-300 py-12 text-center dark:border-border-default">
+          <p className="text-sm text-neutral-500 dark:text-fg-muted">
             No office hours available yet.
           </p>
           {!rolesLoading && isStaff && (

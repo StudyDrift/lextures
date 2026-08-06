@@ -19,7 +19,7 @@ export function ConnectionBadge({ conn }: { conn: ConnStatus }) {
       ? 'bg-amber-500/20 text-amber-800 dark:text-amber-200'
       : conn === 'kicked'
         ? 'bg-red-500/20 text-red-800 dark:text-red-200'
-        : 'bg-slate-500/20 text-slate-700 dark:text-slate-200'
+        : 'bg-slate-500/20 text-fg-muted dark:text-slate-200'
   return (
     <p className={`rounded-md px-3 py-1.5 text-sm ${tone}`} role="status" aria-live="polite">
       {label}

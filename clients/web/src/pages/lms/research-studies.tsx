@@ -85,7 +85,7 @@ export default function ResearchStudiesPage() {
   if (featuresLoading || loading) {
     return (
       <LmsPage title="Research studies">
-        <p className="text-sm text-slate-500">Loading…</p>
+        <p className="text-sm text-fg-muted">Loading…</p>
       </LmsPage>
     )
   }
@@ -93,7 +93,7 @@ export default function ResearchStudiesPage() {
   if (!ffResearchConsent) {
     return (
       <LmsPage title="Research studies">
-        <p className="text-sm text-slate-600 dark:text-neutral-400">
+        <p className="text-sm text-fg-muted">
           Research consent features are not enabled on this platform.
         </p>
       </LmsPage>
@@ -104,20 +104,20 @@ export default function ResearchStudiesPage() {
 
   return (
     <LmsPage title="Research studies">
-      <p className="text-sm text-slate-600 dark:text-neutral-400">
+      <p className="text-sm text-fg-muted">
         Manage your participation in IRB-approved research studies. You may withdraw your consent at
         any time; withdrawing removes your data from future research exports.
       </p>
 
       {error && (
-        <p role="alert" className="mt-4 text-sm text-red-600 dark:text-red-400">
+        <p role="alert" className="mt-4 text-sm text-danger-fg">
           {error}
         </p>
       )}
 
       {pending.length > 0 && (
         <section aria-label="Studies awaiting your response" className="mt-6">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-fg-muted">
             Awaiting your response
           </h2>
           <ul className="mt-2 space-y-2">
@@ -127,15 +127,15 @@ export default function ResearchStudiesPage() {
                 className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-violet-100 bg-violet-50/70 px-4 py-3 dark:border-violet-900/40 dark:bg-violet-950/30"
               >
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-slate-900 dark:text-neutral-100">{s.title}</p>
-                  <p className="text-xs text-slate-500">IRB protocol {s.irbProtocol}</p>
+                  <p className="text-sm font-medium text-fg-default">{s.title}</p>
+                  <p className="text-xs text-fg-muted">IRB protocol {s.irbProtocol}</p>
                 </div>
                 <div className="flex gap-2">
                   <button
                     type="button"
                     disabled={busyId === s.id}
                     onClick={() => void respondToConsentStudy(s.id, 'declined').then(load)}
-                    className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 disabled:opacity-50 dark:border-neutral-700 dark:text-neutral-200"
+                    className="rounded-lg border border-border-strong px-3 py-1.5 text-xs font-medium text-fg-muted disabled:opacity-50 dark:border-border-default dark:text-fg-default"
                   >
                     Decline
                   </button>
@@ -155,24 +155,24 @@ export default function ResearchStudiesPage() {
       )}
 
       <section aria-label="Your consent decisions" className="mt-6">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-fg-muted">
           Your consent decisions
         </h2>
         {decisions.length === 0 ? (
-          <p className="mt-2 text-sm text-slate-500">You have not responded to any research studies yet.</p>
+          <p className="mt-2 text-sm text-fg-muted">You have not responded to any research studies yet.</p>
         ) : (
           <ul className="mt-2 space-y-2">
             {decisions.map((entry) => (
               <li
                 key={entry.studyId}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 px-4 py-3 dark:border-neutral-800"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border-default px-4 py-3 dark:border-border-subtle"
               >
                 <div className="min-w-0">
-                  <p className="flex items-center gap-2 text-sm font-medium text-slate-900 dark:text-neutral-100">
+                  <p className="flex items-center gap-2 text-sm font-medium text-fg-default">
                     <ShieldCheck className="h-4 w-4 text-violet-500" aria-hidden="true" />
                     {entry.studyTitle || 'Research study'}
                   </p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-fg-muted">
                     {decisionLabel(entry.decision)} · {formatDateTime(entry.createdAt)}
                   </p>
                 </div>
@@ -181,7 +181,7 @@ export default function ResearchStudiesPage() {
                     type="button"
                     disabled={busyId === entry.studyId}
                     onClick={() => void withdraw(entry.studyId)}
-                    className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-50 disabled:opacity-50 dark:border-red-900/40 dark:text-red-400"
+                    className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-danger-fg hover:bg-red-50 disabled:opacity-50 dark:border-red-900/40 dark:text-red-400"
                   >
                     Withdraw consent
                   </button>

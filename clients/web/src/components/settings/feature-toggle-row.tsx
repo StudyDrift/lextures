@@ -37,7 +37,7 @@ export function FeatureToggleRow({
   return (
     <div className="flex flex-wrap items-start justify-between gap-4 py-4">
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+        <p className="text-sm font-semibold text-fg-default">
           {label}
           {meta ? <span className="font-normal">{meta}</span> : null}
           {deriveFrom ? (
@@ -49,10 +49,10 @@ export function FeatureToggleRow({
             </span>
           ) : null}
         </p>
-        <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">{description}</p>
+        <p className="mt-1 text-sm text-fg-muted">{description}</p>
         {deriveFrom ? (
           <p
-            className="mt-1 text-xs text-slate-400 dark:text-neutral-500"
+            className="mt-1 text-xs text-fg-subtle"
             data-testid="feature-toggle-derive-note"
           >
             Requires: {deriveFrom}
@@ -86,14 +86,14 @@ export function FeatureToggleRow({
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2',
           'disabled:cursor-not-allowed disabled:opacity-50',
           press,
-          enabled ? 'bg-indigo-600' : 'bg-slate-200 dark:bg-neutral-700',
+          enabled ? 'bg-accent-solid' : 'bg-slate-200 dark:bg-neutral-700',
         ]
           .filter(Boolean)
           .join(' ')}
       >
         <span
           className={[
-            'lx-control-switch-thumb pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0',
+            'lx-control-switch-thumb pointer-events-none inline-block h-6 w-6 transform rounded-full bg-surface-raised shadow ring-0',
             enabled ? 'translate-x-5' : 'translate-x-0.5',
           ]
             .filter(Boolean)

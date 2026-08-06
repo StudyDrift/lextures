@@ -73,15 +73,6 @@ func (d Deps) quizGenerationSystemPrompt(r *http.Request, key, fallback string) 
 // handleGenerateModuleQuizQuestions is POST .../quizzes/{item_id}/generate-questions
 func (d Deps) handleGenerateModuleQuizQuestions() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, courseID, _, viewer, ok := d.requireQuizItemEdit(w, r)
 		if !ok {
 			return
@@ -131,15 +122,6 @@ func (d Deps) handleImportModuleQuizQuestionsMarkdown() http.HandlerFunc {
 		Markdown string `json:"markdown"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, courseID, _, viewer, ok := d.requireQuizItemEdit(w, r)
 		if !ok {
 			return

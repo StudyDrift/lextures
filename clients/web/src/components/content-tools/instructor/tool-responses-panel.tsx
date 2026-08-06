@@ -79,11 +79,11 @@ export function ToolResponsesPanel({
       aria-labelledby="tool-responses-title"
       data-testid="tool-responses-panel"
     >
-      <div className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-t-2xl border border-slate-200 bg-white p-4 shadow-xl sm:rounded-lg dark:border-neutral-700 dark:bg-neutral-900">
+      <div className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-t-2xl border border-border-default bg-surface-raised p-4 shadow-xl sm:rounded-lg dark:border-border-default dark:bg-surface-raised">
         <div className="flex items-start justify-between gap-2">
           <h2
             id="tool-responses-title"
-            className="text-sm font-semibold text-slate-900 dark:text-neutral-100"
+            className="text-sm font-semibold text-fg-default"
           >
             {t('contentTools.instructor.responsesTitle')}
           </h2>
@@ -101,7 +101,7 @@ export function ToolResponsesPanel({
             </button>
             <button
               type="button"
-              className="rounded-md border border-slate-200 px-3 py-1.5 text-xs dark:border-neutral-600"
+              className="rounded-md border border-border-default px-3 py-1.5 text-xs dark:border-border-default"
               onClick={onClose}
             >
               {t('contentTools.instructor.close')}

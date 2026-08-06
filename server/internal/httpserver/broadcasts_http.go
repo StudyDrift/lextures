@@ -146,11 +146,6 @@ func (d Deps) handleOrgBroadcastDeliveryReport() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "Broadcasts feature is not enabled.")
 			return
 		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		orgID, err := uuid.Parse(strings.TrimSpace(chi.URLParam(r, "orgId")))
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid org id.")
@@ -204,11 +199,6 @@ func (d Deps) handleBroadcastAcknowledge() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "Broadcasts feature is not enabled.")
 			return
 		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		broadcastID, err := uuid.Parse(strings.TrimSpace(chi.URLParam(r, "broadcastId")))
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid broadcast id.")
@@ -230,11 +220,6 @@ func (d Deps) handleMeBroadcasts() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !d.effectiveConfig().FFBroadcasts {
 			apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "Broadcasts feature is not enabled.")
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
 		actor, ok := d.meUserID(w, r)

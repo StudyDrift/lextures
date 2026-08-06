@@ -182,11 +182,7 @@ function CourseImageNodeView(props: NodeViewProps) {
             alt={decorative ? '' : alt}
             draggable={false}
             data-drag-handle=""
-            className={`box-border max-w-full rounded-lg object-contain ${
-              showMissingBadge
-                ? 'border border-amber-400 ring-2 ring-amber-300/60 dark:border-amber-600'
-                : 'lex-content-img'
-            }`}
+            className={`box-border max-w-full rounded-lg object-contain ${ showMissingBadge ? 'border border-amber-400 ring-2 ring-amber-300/60 dark:border-amber-600' : 'lex-content-img' }`}
             style={
               typeof effectiveW === 'number' && typeof effectiveH === 'number'
                 ? {
@@ -199,7 +195,7 @@ function CourseImageNodeView(props: NodeViewProps) {
             }
           />
         ) : (
-          <span className="text-sm text-slate-500 dark:text-neutral-400">Loading image…</span>
+          <span className="text-sm text-fg-muted">Loading image…</span>
         )}
 
         {showMissingBadge ? (
@@ -228,7 +224,7 @@ function CourseImageNodeView(props: NodeViewProps) {
                 setPanelDismissed(false)
                 setPanelForcedOpen(true)
               }}
-              className="absolute -top-2 end-2 z-10 rounded-md bg-white px-2 py-0.5 text-[10px] font-medium text-indigo-700 shadow ring-1 ring-slate-200 dark:bg-neutral-900 dark:text-indigo-300 dark:ring-neutral-600"
+              className="absolute -top-2 end-2 z-10 rounded-md bg-surface-raised px-2 py-0.5 text-[10px] font-medium text-accent-fg shadow ring-1 ring-slate-200 dark:bg-surface-raised dark:text-indigo-300 dark:ring-neutral-600"
             >
               Alt text
             </button>

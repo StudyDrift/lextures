@@ -50,10 +50,6 @@ func (d Deps) contentToolsActionRateLimited(
 
 func (d Deps) handleContentToolsActionRun() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, viewer, courseID, ok := d.requireContentToolsCourse(w, r)
 		if !ok {
 			return

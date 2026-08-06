@@ -35,10 +35,6 @@ func (d Deps) registerAdaptiveContentGenerateRoutes(r chi.Router) {
 // handleAdaptiveContentVariantPreview is POST .../units/{id}/variants/preview (instructor).
 func (d Deps) handleAdaptiveContentVariantPreview() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		if acsvc.KillSwitchEngaged() {
 			writeACEKillSwitch(w)
 			return
@@ -294,10 +290,6 @@ func (d Deps) handleAdaptiveContentVariantPreview() http.HandlerFunc {
 // handleAdaptiveContentVariantsList is GET .../units/{id}/variants (instructor|reviewer).
 func (d Deps) handleAdaptiveContentVariantsList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, _, _, ok := d.requireAdaptiveContentReview(w, r)
 		if !ok {
 			return
@@ -349,10 +341,6 @@ func (d Deps) handleAdaptiveContentVariantsList() http.HandlerFunc {
 // handleAdaptiveContentKeyTermsList is GET .../units/{id}/key-terms (instructor).
 func (d Deps) handleAdaptiveContentKeyTermsList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, _, ok := d.requireCourseItemCreate(w, r)
 		if !ok {
 			return
@@ -395,10 +383,6 @@ func (d Deps) handleAdaptiveContentKeyTermsList() http.HandlerFunc {
 // handleAdaptiveContentKeyTermsPut is PUT .../units/{id}/key-terms (instructor).
 func (d Deps) handleAdaptiveContentKeyTermsPut() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		if acsvc.KillSwitchEngaged() {
 			writeACEKillSwitch(w)
 			return

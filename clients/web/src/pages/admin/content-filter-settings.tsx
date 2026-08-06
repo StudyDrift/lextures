@@ -77,7 +77,7 @@ export default function ContentFilterSettingsPage() {
   if (featuresLoading) {
     return (
       <main className="mx-auto max-w-3xl p-6">
-        <h1 className="text-xl font-bold text-slate-900 dark:text-neutral-100">
+        <h1 className="text-xl font-bold text-fg-default">
           Content filter integration
         </h1>
         <p className="mt-6 text-sm" role="status">
@@ -90,7 +90,7 @@ export default function ContentFilterSettingsPage() {
   if (!ffContentFilterIntegration) {
     return (
       <main className="mx-auto max-w-3xl p-6">
-        <p className="text-sm text-slate-600 dark:text-neutral-400">
+        <p className="text-sm text-fg-muted">
           Content filter integration is not enabled on this platform. Enable{' '}
           <strong>Content filter integration</strong> in Settings → Global platform.
         </p>
@@ -101,7 +101,7 @@ export default function ContentFilterSettingsPage() {
   if (!orgId) {
     return (
       <main className="mx-auto max-w-3xl p-6">
-        <p className="text-sm text-slate-600 dark:text-neutral-400">
+        <p className="text-sm text-fg-muted">
           Add an <code className="text-xs">?orgId=</code> query parameter with your district organization
           id.
         </p>
@@ -111,10 +111,10 @@ export default function ContentFilterSettingsPage() {
 
   return (
     <main className="mx-auto max-w-3xl p-6">
-      <h1 id={titleId} className="text-xl font-bold text-slate-900 dark:text-neutral-100">
+      <h1 id={titleId} className="text-xl font-bold text-fg-default">
         Content filter integration
       </h1>
-      <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
+      <p className="mt-2 text-sm text-fg-muted">
         Configure GoGuardian and Securly so Lextures loads on district Chromebooks without being
         blocked by web-content filters.
       </p>
@@ -126,21 +126,21 @@ export default function ContentFilterSettingsPage() {
       ) : null}
 
       {error ? (
-        <p className="mt-4 text-sm text-red-700 dark:text-red-400" role="alert">
+        <p className="mt-4 text-sm text-danger-fg dark:text-red-400" role="alert">
           {error}
         </p>
       ) : null}
 
       {saved ? (
-        <p className="mt-4 text-sm text-green-700 dark:text-green-400" role="status">
+        <p className="mt-4 text-sm text-success-fg" role="status">
           Settings saved.
         </p>
       ) : null}
 
       <section className="mt-8 space-y-6" aria-labelledby={titleId}>
-        <div className="rounded-lg border border-slate-200 p-4 dark:border-neutral-700">
-          <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">URL allowlist</h2>
-          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+        <div className="rounded-lg border border-border-default p-4 dark:border-border-default">
+          <h2 className="text-sm font-semibold text-fg-default">URL allowlist</h2>
+          <p className="mt-1 text-sm text-fg-muted">
             Share this JSON document with your district IT team to allowlist Lextures domains in
             GoGuardian, Securly, or other filters.
           </p>
@@ -148,15 +148,15 @@ export default function ContentFilterSettingsPage() {
             href={allowlistHref}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-3 inline-block text-sm font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+            className="mt-3 inline-block text-sm font-medium text-accent-fg hover:underline dark:text-indigo-400"
           >
             Download allowlist JSON
           </a>
         </div>
 
-        <div className="rounded-lg border border-slate-200 p-4 dark:border-neutral-700">
-          <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">GoGuardian</h2>
-          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+        <div className="rounded-lg border border-border-default p-4 dark:border-border-default">
+          <h2 className="text-sm font-semibold text-fg-default">GoGuardian</h2>
+          <p className="mt-1 text-sm text-fg-muted">
             When enabled, Lextures emits educational activity events with a hashed student id so
             GoGuardian can apply per-student policies.
           </p>
@@ -169,7 +169,7 @@ export default function ContentFilterSettingsPage() {
             Enable GoGuardian integration
           </label>
           <div className="mt-4">
-            <label htmlFor={ggKeyId} className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+            <label htmlFor={ggKeyId} className="block text-sm font-medium text-fg-muted">
               GoGuardian API key
             </label>
             <input
@@ -179,19 +179,19 @@ export default function ContentFilterSettingsPage() {
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               placeholder="Paste API key from GoGuardian admin console"
-              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+              className="mt-1 w-full rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay"
             />
             {settings?.hasGoGuardianApiKey ? (
-              <p className="mt-1 text-xs text-slate-500 dark:text-neutral-500">
+              <p className="mt-1 text-xs text-fg-subtle">
                 A key is stored. Leave the placeholder to keep it, or clear the field to remove.
               </p>
             ) : null}
           </div>
         </div>
 
-        <div className="rounded-lg border border-slate-200 p-4 dark:border-neutral-700">
-          <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Securly</h2>
-          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+        <div className="rounded-lg border border-border-default p-4 dark:border-border-default">
+          <h2 className="text-sm font-semibold text-fg-default">Securly</h2>
+          <p className="mt-1 text-sm text-fg-muted">
             Include Lextures in the Securly educational app catalog via the allowlist document.
           </p>
           <label className="mt-4 flex items-center gap-2 text-sm">
@@ -208,7 +208,7 @@ export default function ContentFilterSettingsPage() {
           type="button"
           onClick={() => void handleSave()}
           disabled={saving || loading}
-          className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+          className="rounded-md bg-accent-solid px-4 py-2 text-sm font-medium text-white hover:bg-accent disabled:opacity-50"
         >
           {saving ? 'Saving…' : 'Save settings'}
         </button>

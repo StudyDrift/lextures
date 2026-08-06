@@ -285,11 +285,6 @@ func (d Deps) handleParentAssignResend() http.HandlerFunc {
 
 func (d Deps) handleParentInviteConsume() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.parentPortalFeatureOff(w) {
 			return
 		}

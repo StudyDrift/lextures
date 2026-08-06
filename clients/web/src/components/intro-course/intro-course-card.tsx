@@ -19,8 +19,8 @@ function IntroCourseCardSkeleton() {
       className="rounded-2xl border border-sky-100 bg-gradient-to-br from-sky-50/90 to-white p-5 shadow-sm dark:border-sky-900/40 dark:from-sky-950/30 dark:to-neutral-900"
     >
       <div className="h-4 w-24 animate-pulse rounded bg-sky-100 dark:bg-sky-900/40" />
-      <div className="mt-3 h-6 w-2/3 max-w-sm animate-pulse rounded bg-slate-100 dark:bg-neutral-800" />
-      <div className="mt-4 h-2 w-full animate-pulse rounded-full bg-slate-100 dark:bg-neutral-800" />
+      <div className="mt-3 h-6 w-2/3 max-w-sm animate-pulse rounded bg-surface-sunken" />
+      <div className="mt-4 h-2 w-full animate-pulse rounded-full bg-surface-sunken" />
       <div className="mt-4 h-10 w-36 animate-pulse rounded-xl bg-sky-100 dark:bg-sky-900/40" />
     </section>
   )
@@ -35,8 +35,8 @@ function IntroCourseCardContent({ progress }: { progress: IntroCourseProgress })
   if (state === 'completed') {
     return (
       <section aria-label={t('introCourse.card.completedAria')}>
-        <article className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3 dark:border-neutral-700 dark:bg-neutral-900/50">
-          <div className="flex min-w-0 items-center gap-2 text-sm text-slate-700 dark:text-neutral-200">
+        <article className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border-default bg-slate-50/80 px-4 py-3 dark:border-border-default/50">
+          <div className="flex min-w-0 items-center gap-2 text-sm text-fg-default">
             <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden />
             <span>{t('introCourse.card.completedLabel')}</span>
           </div>
@@ -62,15 +62,15 @@ function IntroCourseCardContent({ progress }: { progress: IntroCourseProgress })
           <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
           <span>{isNotStarted ? t('introCourse.card.startHere') : t('introCourse.card.continueOnboarding')}</span>
         </div>
-        <h2 className="mt-2 text-lg font-semibold tracking-tight text-slate-900 dark:text-neutral-50">
+        <h2 className="mt-2 text-lg font-semibold tracking-tight text-fg-default">
           {t('introCourse.card.title')}
         </h2>
         {progress.nextItem?.title && !isNotStarted ? (
-          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+          <p className="mt-1 text-sm text-fg-muted">
             {t('introCourse.card.nextUp', { title: progress.nextItem.title })}
           </p>
         ) : (
-          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+          <p className="mt-1 text-sm text-fg-muted">
             {t('introCourse.card.subtitle')}
           </p>
         )}
@@ -98,8 +98,8 @@ function IntroCourseCardError() {
   const { t } = useTranslation('introCourse')
   return (
     <section aria-label={t('introCourse.card.ariaLabel')}>
-      <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-        <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-slate-600 dark:text-neutral-300">
+      <article className="rounded-2xl border border-border-default bg-surface-raised p-5 shadow-sm dark:border-border-default dark:bg-surface-raised">
+        <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-fg-muted">
           <BookOpen className="h-4 w-4 shrink-0" aria-hidden />
           <span>{t('introCourse.card.fallbackLabel')}</span>
         </div>

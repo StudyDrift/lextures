@@ -45,9 +45,9 @@ export default function NoopProbeRenderer({
 
   return (
     <div className="space-y-3" data-content-tool="noop_probe">
-      <p className="text-sm text-slate-800 dark:text-neutral-200">{prompt}</p>
+      <p className="text-sm text-fg-default">{prompt}</p>
       <label className="block space-y-1">
-        <span className="text-xs font-medium text-slate-600 dark:text-neutral-300">
+        <span className="text-xs font-medium text-fg-muted">
           {t('contentTools.runtime.yourAnswer')}
         </span>
         <textarea
@@ -59,7 +59,7 @@ export default function NoopProbeRenderer({
             setResponse(value)
             void save({ response: value })
           }}
-          className="w-full rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-900 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+          className="w-full rounded-md border border-border-default bg-surface-raised px-2.5 py-1.5 text-sm text-fg-default dark:border-border-default dark:bg-surface-base dark:text-fg-default"
         />
       </label>
       <div className="flex flex-wrap items-center gap-2">

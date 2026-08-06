@@ -18,11 +18,6 @@ import (
 // Requires course staff (instructor) role.
 func (d Deps) handleCourseMasteryHeatmap() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -66,11 +61,6 @@ func (d Deps) handleCourseMasteryHeatmap() http.HandlerFunc {
 // GET /api/v1/courses/{course_code}/analytics/mastery-heatmap/concepts/{concept_id}.
 func (d Deps) handleCourseMasteryHeatmapConceptDrillDown() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -124,11 +114,6 @@ func (d Deps) handleCourseMasteryHeatmapConceptDrillDown() http.HandlerFunc {
 // Accessible by course staff or the enrolled student themselves.
 func (d Deps) handleCourseEnrollmentMastery() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -188,11 +173,6 @@ func (d Deps) handleCourseEnrollmentMastery() http.HandlerFunc {
 // POST /api/v1/courses/{course_code}/analytics/mastery-heatmap/refresh.
 func (d Deps) handleCourseMasteryHeatmapRefresh() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return

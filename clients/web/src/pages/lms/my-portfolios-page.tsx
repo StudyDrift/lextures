@@ -13,9 +13,9 @@ import { EmptyState } from '../../components/ui/empty-state'
 import { IconSwap } from '../../components/ui/icon-swap'
 
 const iconGhostPublished =
-  'lex-icon-hit rounded-md text-indigo-600 transition-colors hover:bg-indigo-50/90 hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 dark:text-indigo-400 dark:hover:bg-indigo-950/45 dark:hover:text-indigo-300'
+  'lex-icon-hit rounded-md text-accent-fg transition-colors hover:bg-indigo-50/90 hover:text-accent-fg disabled:cursor-not-allowed disabled:opacity-50 dark:text-indigo-400 dark:hover:bg-indigo-950/45 dark:hover:text-indigo-300'
 const iconGhostDraft =
-  'lex-icon-hit rounded-md text-slate-400 transition-colors hover:bg-slate-200/45 hover:text-slate-600 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-500 dark:hover:bg-neutral-700/35 dark:hover:text-neutral-300'
+  'lex-icon-hit rounded-md text-fg-subtle transition-colors hover:bg-slate-200/45 hover:text-fg-muted disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-700/35 dark:hover:text-fg-muted'
 
 export default function MyPortfoliosPage() {
   const { ffEportfolio } = usePlatformFeatures()
@@ -104,12 +104,12 @@ export default function MyPortfoliosPage() {
         {showAdd && (
           <form
             onSubmit={(e) => void handleCreate(e)}
-            className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-900"
+            className="space-y-4 rounded-2xl border border-border-default bg-surface-raised p-5 shadow-sm dark:border-border-subtle dark:bg-surface-raised"
           >
-            <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Create a Portfolio</h2>
+            <h2 className="text-base font-semibold text-fg-default">Create a Portfolio</h2>
             {formError && <p className="text-sm text-destructive">{formError}</p>}
             <div>
-              <label htmlFor="pf-title" className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-neutral-300">
+              <label htmlFor="pf-title" className="mb-1.5 block text-sm font-medium text-fg-muted">
                 Title *
               </label>
               <input
@@ -117,13 +117,13 @@ export default function MyPortfoliosPage() {
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+                className="w-full rounded-xl border border-border-default bg-surface-raised px-3.5 py-2.5 text-sm text-fg-default focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none dark:border-border-default dark:bg-surface-base dark:text-fg-default"
                 placeholder="e.g. Teaching Capstone Portfolio"
                 required
               />
             </div>
             <div>
-              <label htmlFor="pf-intro" className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-neutral-300">
+              <label htmlFor="pf-intro" className="mb-1.5 block text-sm font-medium text-fg-muted">
                 Introduction <span className="text-xs text-muted-foreground">(optional)</span>
               </label>
               <textarea
@@ -131,7 +131,7 @@ export default function MyPortfoliosPage() {
                 rows={3}
                 value={intro}
                 onChange={(e) => setIntro(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+                className="w-full rounded-xl border border-border-default bg-surface-raised px-3.5 py-2.5 text-sm text-fg-default focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none dark:border-border-default dark:bg-surface-base dark:text-fg-default"
                 placeholder="A short introduction shown at the top of your portfolio."
               />
             </div>
@@ -149,7 +149,7 @@ export default function MyPortfoliosPage() {
                   setShowAdd(false)
                   setFormError(null)
                 }}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-[background-color,color,border-color] dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                className="rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm font-medium text-fg-muted hover:bg-surface-base transition-[background-color,color,border-color] dark:border-border-default dark:bg-surface-raised dark:text-fg-muted dark:hover:bg-surface-overlay"
               >
                 Cancel
               </button>
@@ -180,12 +180,12 @@ export default function MyPortfoliosPage() {
               <li key={p.id} className="group">
                 <Link
                   to={`/portfolios/${p.id}`}
-                  className="block w-full rounded-2xl border border-slate-200/70 bg-slate-50/60 p-4 shadow-sm transition-[background-color,color,border-color] hover:border-slate-300/80 hover:bg-slate-100/60 dark:border-neutral-700/80 dark:bg-neutral-800/85 dark:hover:border-neutral-600/80 dark:hover:bg-neutral-800"
+                  className="block w-full rounded-2xl border border-slate-200/70 bg-slate-50/60 p-4 shadow-sm transition-[background-color,color,border-color] hover:border-slate-300/80 hover:bg-slate-100/60/80/85 dark:hover:border-neutral-600/80 dark:hover:bg-surface-overlay"
                 >
                   <div className="flex items-center gap-3">
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-slate-950 dark:text-neutral-100">{p.title}</p>
-                      <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-neutral-400">
+                      <p className="text-sm font-semibold text-slate-950 dark:text-fg-default">{p.title}</p>
+                      <p className="mt-0.5 truncate text-xs text-fg-muted">
                         {p.introText
                           ? p.introText
                           : p.isPublic
@@ -212,7 +212,7 @@ export default function MyPortfoliosPage() {
                           inactiveIcon={EyeOff}
                         />
                       </button>
-                      <ChevronRight className="h-4 w-4 text-slate-400 dark:text-neutral-500" aria-hidden />
+                      <ChevronRight className="h-4 w-4 text-fg-subtle" aria-hidden />
                     </div>
                   </div>
                 </Link>

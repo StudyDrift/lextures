@@ -27,10 +27,6 @@ func (d Deps) registerAdaptiveContentPipelineRoutes(r chi.Router) {
 // Accepts generationPaused and/or maxPrewarmVariants without requiring full settings body.
 func (d Deps) handleAdaptiveContentSettingsPatch() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		if acsvc.KillSwitchEngaged() {
 			writeACEKillSwitch(w)
 			return
@@ -81,10 +77,6 @@ func (d Deps) handleAdaptiveContentSettingsPatch() http.HandlerFunc {
 // handleAdaptiveContentBudgetGet is GET .../adaptive-content/budget (instructor).
 func (d Deps) handleAdaptiveContentBudgetGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, _, ok := d.requireCourseItemCreate(w, r)
 		if !ok {
 			return
@@ -119,10 +111,6 @@ func (d Deps) handleAdaptiveContentBudgetGet() http.HandlerFunc {
 // handleAdaptiveContentUnitPrewarm is POST .../units/{id}/prewarm (instructor).
 func (d Deps) handleAdaptiveContentUnitPrewarm() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		if acsvc.KillSwitchEngaged() {
 			writeACEKillSwitch(w)
 			return
@@ -195,10 +183,6 @@ func (d Deps) handleAdaptiveContentUnitPrewarm() http.HandlerFunc {
 // handleAdminAdaptiveContentGet is GET /api/v1/admin/adaptive-content.
 func (d Deps) handleAdminAdaptiveContentGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -225,10 +209,6 @@ func (d Deps) handleAdminAdaptiveContentGet() http.HandlerFunc {
 // handleAdminAdaptiveContentPatch is PATCH /api/v1/admin/adaptive-content { generationPaused }.
 func (d Deps) handleAdminAdaptiveContentPatch() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		actor, ok := d.adminRbacUser(w, r)
 		if !ok {
 			return

@@ -1,0 +1,59 @@
+/*
+ * UX.1 — Component tokens (defaults for UX.2 primitives).
+ * Map to semantic tokens so components inherit theme/brand automatically.
+ */
+
+:root,
+[data-theme] {
+  /* Button — primary */
+  --lx-button-primary-bg: var(--lx-accent-solid);
+  --lx-button-primary-bg-hover: var(--lx-accent-solid-hover);
+  --lx-button-primary-fg: var(--lx-fg-on-accent);
+  --lx-button-primary-border: transparent;
+
+  /* Button — secondary */
+  --lx-button-secondary-bg: var(--lx-surface-raised);
+  --lx-button-secondary-bg-hover: var(--lx-surface-sunken);
+  --lx-button-secondary-fg: var(--lx-fg-default);
+  --lx-button-secondary-border: var(--lx-border-default);
+
+  /* Button — danger */
+  --lx-button-danger-bg: var(--lx-danger-600, var(--lx-danger-fg));
+  --lx-button-danger-fg: var(--lx-fg-on-accent);
+  --lx-button-danger-border: transparent;
+
+  /* Button — ghost */
+  --lx-button-ghost-bg: transparent;
+  --lx-button-ghost-bg-hover: var(--lx-surface-sunken);
+  --lx-button-ghost-fg: var(--lx-fg-default);
+
+  /* Input */
+  --lx-input-bg: var(--lx-surface-raised);
+  --lx-input-fg: var(--lx-fg-default);
+  --lx-input-border: var(--lx-border-default);
+  --lx-input-border-focus: var(--lx-border-focus);
+  --lx-input-placeholder: var(--lx-fg-subtle);
+
+  /* Card */
+  --lx-card-bg: var(--lx-surface-raised);
+  --lx-card-border: var(--lx-border-default);
+  --lx-card-shadow: var(--lx-elevation-1);
+
+  /* Nav / sidebar */
+  --lx-nav-bg: var(--lx-surface-raised);
+  --lx-nav-fg: var(--lx-fg-default);
+  --lx-nav-fg-muted: var(--lx-fg-muted);
+  --lx-nav-item-active-bg: var(--lx-accent-surface);
+  --lx-nav-item-active-fg: var(--lx-accent-fg);
+  --lx-nav-item-hover-bg: var(--lx-surface-sunken);
+
+  /* Link */
+  --lx-link-fg: var(--lx-accent-fg);
+  --lx-link-fg-hover: var(--lx-accent-solid-hover);
+
+  /* Badge / chip */
+  --lx-badge-neutral-bg: var(--lx-surface-sunken);
+  --lx-badge-neutral-fg: var(--lx-fg-muted);
+  --lx-badge-accent-bg: var(--lx-accent-surface);
+  --lx-badge-accent-fg: var(--lx-accent-fg);
+}

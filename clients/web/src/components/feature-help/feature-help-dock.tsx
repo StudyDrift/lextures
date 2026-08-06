@@ -34,16 +34,16 @@ export function FeatureHelpDock() {
         aria-label="Close help"
         onClick={() => closeHelp()}
       />
-      <aside className="relative z-10 flex h-full w-full max-w-md flex-col border-s border-slate-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
-        <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-4 py-3 dark:border-neutral-800">
+      <aside className="relative z-10 flex h-full w-full max-w-md flex-col border-s border-border-default bg-surface-raised shadow-2xl dark:border-border-default dark:bg-surface-raised">
+        <div className="flex items-start justify-between gap-3 border-b border-border-subtle px-4 py-3 dark:border-border-subtle">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">Help</p>
-            <h2 className="mt-0.5 text-lg font-semibold tracking-tight text-slate-900 dark:text-neutral-100">{title}</h2>
+            <p className="text-xs font-semibold uppercase tracking-wide text-accent-fg">Help</p>
+            <h2 className="mt-0.5 text-lg font-semibold tracking-tight text-fg-default">{title}</h2>
           </div>
           <button
             type="button"
             onClick={() => closeHelp()}
-            className="rounded-lg p-2 text-slate-500 transition-[background-color,color,border-color] hover:bg-slate-100 hover:text-slate-800 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
+            className="rounded-lg p-2 text-fg-muted transition-[background-color,color,border-color] hover:bg-surface-sunken hover:text-fg-default dark:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-fg-default"
             aria-label="Close"
           >
             <X className="h-5 w-5" aria-hidden />
@@ -51,7 +51,7 @@ export function FeatureHelpDock() {
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
           {media ? <FeatureHelpMediaRegion media={media} active={open} /> : null}
-          <p className="text-sm leading-relaxed text-slate-700 dark:text-neutral-300">{body}</p>
+          <p className="text-sm leading-relaxed text-fg-muted">{body}</p>
         </div>
       </aside>
     </div>,

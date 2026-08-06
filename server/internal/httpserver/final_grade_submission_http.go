@@ -125,11 +125,6 @@ func (d Deps) handleFinalGradesSubmit() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "Final grade submission is not enabled.")
 			return
 		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return

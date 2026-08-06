@@ -78,18 +78,18 @@ export function MarkdownTableControls({ editor, disabled }: MarkdownTableControl
   }
 
   const btn =
-    'flex h-7 w-7 shrink-0 items-center justify-center rounded text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:text-neutral-300 dark:hover:bg-neutral-700'
+    'flex h-7 w-7 shrink-0 items-center justify-center rounded text-fg-muted hover:bg-surface-sunken disabled:cursor-not-allowed disabled:opacity-40 dark:text-fg-muted dark:hover:bg-neutral-700'
 
   return createPortal(
     <div
       data-toolbar-anchor
       role="toolbar"
       aria-label="Table controls"
-      className="pointer-events-auto flex h-9 w-max max-w-[calc(100vw-1rem)] items-center gap-0.5 rounded-lg border border-slate-200 bg-white px-1 py-0.5 shadow-md shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-800 dark:shadow-black/40"
+      className="pointer-events-auto flex h-9 w-max max-w-[calc(100vw-1rem)] items-center gap-0.5 rounded-lg border border-border-default bg-surface-raised px-1 py-0.5 shadow-md shadow-slate-900/10 dark:border-border-default dark:bg-surface-overlay dark:shadow-black/40"
       style={{ position: 'fixed', left: anchor.left, top: anchor.top, zIndex: 55 }}
       onMouseDown={(e) => e.stopPropagation()}
     >
-      <span className="me-0.5 flex items-center gap-1 px-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-neutral-500">
+      <span className="me-0.5 flex items-center gap-1 px-1 text-[10px] font-semibold uppercase tracking-wide text-fg-subtle">
         <TableProperties className="h-3.5 w-3.5" aria-hidden />
         Table
       </span>

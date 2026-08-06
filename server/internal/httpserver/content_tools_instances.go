@@ -17,10 +17,6 @@ import (
 
 func (d Deps) handleContentToolsInstancesList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, viewer, courseID, ok := d.requireContentToolsCourse(w, r)
 		if !ok {
 			return
@@ -99,10 +95,6 @@ func (d Deps) handleContentToolsInstancesList() http.HandlerFunc {
 
 func (d Deps) handleContentToolsInstancesCreate() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, viewer, courseID, ok := d.requireContentToolsCourse(w, r)
 		if !ok {
 			return
@@ -223,10 +215,6 @@ func (d Deps) handleContentToolsInstancesCreate() http.HandlerFunc {
 
 func (d Deps) handleContentToolsInstancePatch() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, viewer, courseID, ok := d.requireContentToolsCourse(w, r)
 		if !ok {
 			return
@@ -318,10 +306,6 @@ func (d Deps) handleContentToolsInstancePatch() http.HandlerFunc {
 
 func (d Deps) handleContentToolsInstanceDelete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, viewer, courseID, ok := d.requireContentToolsCourse(w, r)
 		if !ok {
 			return

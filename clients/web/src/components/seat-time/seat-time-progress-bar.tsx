@@ -41,7 +41,7 @@ export function SeatTimeProgressBar({ courseId, compact = false }: Props) {
   if (!courseId || loading) {
     return (
       <div
-        className="animate-pulse rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900/50"
+        className="animate-pulse rounded-lg border border-border-default bg-surface-base px-3 py-2 dark:border-border-default/50"
         aria-hidden
       >
         <div className="h-3 w-32 rounded bg-slate-200 dark:bg-neutral-700" />
@@ -61,7 +61,7 @@ export function SeatTimeProgressBar({ courseId, compact = false }: Props) {
 
   if (compact) {
     return (
-      <p className="text-xs text-slate-600 dark:text-neutral-400" aria-live="polite">
+      <p className="text-xs text-fg-muted" aria-live="polite">
         CE: <span className="lex-num">{contactHours}</span>/<span className="lex-num">{required}</span>h
       </p>
     )
@@ -72,10 +72,10 @@ export function SeatTimeProgressBar({ courseId, compact = false }: Props) {
       className="rounded-xl border border-teal-100 bg-teal-50/60 px-4 py-3 dark:border-teal-900/40 dark:bg-teal-950/20"
       aria-labelledby={labelId}
     >
-      <p id={labelId} className="text-sm font-medium text-slate-900 dark:text-neutral-100">
+      <p id={labelId} className="text-sm font-medium text-fg-default">
         Continuing education progress
       </p>
-      <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">
+      <p className="mt-1 text-xs text-fg-muted">
         Contact hours: <span className="lex-num">{contactHours}</span> / <span className="lex-num">{required}</span>
       </p>
       <div

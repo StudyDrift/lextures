@@ -144,10 +144,10 @@ export function CourseMarketplaceSettingsSection({
   if (loading) {
     return (
       <section
-        className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-800 dark:bg-neutral-900"
+        className="rounded-2xl border border-border-default bg-surface-raised p-5 shadow-sm shadow-slate-900/5 dark:border-border-subtle dark:bg-surface-raised"
         aria-busy="true"
       >
-        <p className="flex items-center gap-2 text-sm text-slate-600 dark:text-neutral-300">
+        <p className="flex items-center gap-2 text-sm text-fg-muted">
           <Loader2 className="h-4 w-4 motion-safe:animate-spin" aria-hidden />
           {t('course.settings.marketplace.loading')}
         </p>
@@ -163,21 +163,21 @@ export function CourseMarketplaceSettingsSection({
     <>
       <form
         onSubmit={(e) => void onSubmit(e)}
-        className="space-y-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-800 dark:bg-neutral-900"
+        className="space-y-6 rounded-2xl border border-border-default bg-surface-raised p-5 shadow-sm shadow-slate-900/5 dark:border-border-subtle dark:bg-surface-raised"
       >
         <div>
-          <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-50">
+          <h2 className="text-sm font-semibold text-fg-default">
             {t('course.settings.marketplace.title')}
           </h2>
-          <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+          <p className="mt-1 text-sm text-fg-muted">
             {t('course.settings.marketplace.description')}
           </p>
         </div>
 
-        <div className="border-t border-slate-100 pt-4 dark:border-neutral-800">
+        <div className="border-t border-border-subtle pt-4 dark:border-border-subtle">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+              <p className="text-sm font-semibold text-fg-default">
                 {t('course.settings.marketplace.listToggle')}
               </p>
               {isDraft ? (
@@ -185,7 +185,7 @@ export function CourseMarketplaceSettingsSection({
                   {t('course.settings.marketplace.publishFirst')}
                 </p>
               ) : (
-                <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+                <p className="mt-1 text-sm text-fg-muted">
                   {t('course.settings.marketplace.listHelp')}
                 </p>
               )}
@@ -198,14 +198,10 @@ export function CourseMarketplaceSettingsSection({
               aria-describedby={isDraft ? feeHelpId : undefined}
               disabled={!canEdit || saving || isDraft}
               onClick={() => setMarketplaceListed((v) => !v)}
-              className={`relative mt-0.5 inline-flex h-7 w-12 shrink-0 rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
-                marketplaceListed ? 'bg-indigo-600' : 'bg-slate-200 dark:bg-neutral-700'
-              }`}
+              className={`relative mt-0.5 inline-flex h-7 w-12 shrink-0 rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${ marketplaceListed ? 'bg-accent-solid' : 'bg-slate-200 dark:bg-neutral-700' }`}
             >
               <span
-                className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition-transform ${
-                  marketplaceListed ? 'translate-x-5' : 'translate-x-0.5'
-                }`}
+                className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-surface-raised shadow ring-0 transition-transform ${ marketplaceListed ? 'translate-x-5' : 'translate-x-0.5' }`}
               />
             </button>
           </div>
@@ -213,7 +209,7 @@ export function CourseMarketplaceSettingsSection({
 
         <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_10rem]">
           <label className="block">
-            <span className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-neutral-300">
+            <span className="mb-1.5 block text-sm font-medium text-fg-muted">
               {t('course.settings.marketplace.fee')}
             </span>
             <input
@@ -228,9 +224,9 @@ export function CourseMarketplaceSettingsSection({
               placeholder={t('course.settings.marketplace.free')}
               aria-describedby={amountError ? `${feeHelpId} ${feeErrorId}` : feeHelpId}
               aria-invalid={amountError ? true : undefined}
-              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 placeholder:text-slate-400 focus:border-indigo-400 focus:ring-2 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-50"
+              className="w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm text-fg-default outline-none ring-indigo-500/20 placeholder:text-fg-subtle focus:border-indigo-400 focus:ring-2 dark:border-border-default dark:bg-surface-base"
             />
-            <p id={feeHelpId} className="mt-1.5 text-xs text-slate-500 dark:text-neutral-400">
+            <p id={feeHelpId} className="mt-1.5 text-xs text-fg-muted">
               {t('course.settings.marketplace.feeHelp')}
             </p>
             {amountError ? (
@@ -240,14 +236,14 @@ export function CourseMarketplaceSettingsSection({
             ) : null}
           </label>
           <label className="block">
-            <span className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-neutral-300">
+            <span className="mb-1.5 block text-sm font-medium text-fg-muted">
               {t('course.settings.marketplace.currency')}
             </span>
             <select
               value={currency}
               onChange={(e) => setCurrency(e.target.value)}
               disabled={!canEdit || saving}
-              className="w-full rounded-xl border border-slate-200 bg-white px-2 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-50"
+              className="w-full rounded-xl border border-border-default bg-surface-raised px-2 py-2.5 text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-border-default dark:bg-surface-base"
             >
               {MARKETPLACE_CURRENCIES.map((c) => (
                 <option key={c.code} value={c.code}>
@@ -259,14 +255,14 @@ export function CourseMarketplaceSettingsSection({
         </div>
 
         <div>
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-50">
+          <h3 className="text-sm font-semibold text-fg-default">
             {t('course.settings.marketplace.preview')}
           </h3>
-          <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+          <p className="mt-1 text-sm text-fg-muted">
             {t('course.settings.marketplace.previewHelp')}
           </p>
           <article
-            className="relative mt-4 flex max-w-sm flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950"
+            className="relative mt-4 flex max-w-sm flex-col overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-sm dark:border-border-subtle dark:bg-surface-base"
             aria-label={t('course.settings.marketplace.preview')}
           >
             {heroImageUrl ? (
@@ -280,16 +276,16 @@ export function CourseMarketplaceSettingsSection({
               <div className="h-32 w-full bg-gradient-to-br from-indigo-100 to-sky-100 dark:from-indigo-950 dark:to-sky-950" />
             )}
             <div className="flex flex-1 flex-col gap-2 p-4">
-              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-neutral-400">
+              <div className="flex flex-wrap items-center gap-2 text-xs text-fg-muted">
                 {listing.category ? <span>{listing.category}</span> : null}
                 {listing.difficultyLevel ? (
-                  <span className="rounded-full bg-slate-100 px-2 py-0.5 capitalize dark:bg-neutral-800">
+                  <span className="rounded-full bg-surface-sunken px-2 py-0.5 capitalize dark:bg-surface-overlay">
                     {listing.difficultyLevel}
                   </span>
                 ) : null}
               </div>
-              <h4 className="text-base font-semibold text-slate-900 dark:text-neutral-100">{courseTitle}</h4>
-              <p className="mt-auto text-sm font-semibold text-slate-900 dark:text-neutral-100" aria-live="polite">
+              <h4 className="text-base font-semibold text-fg-default">{courseTitle}</h4>
+              <p className="mt-auto text-sm font-semibold text-fg-default" aria-live="polite">
                 {previewPriceLabel}
               </p>
             </div>
@@ -297,11 +293,11 @@ export function CourseMarketplaceSettingsSection({
         </div>
 
         {canEdit ? (
-          <div className="flex flex-wrap items-center gap-3 border-t border-slate-100 pt-4 dark:border-neutral-800">
+          <div className="flex flex-wrap items-center gap-3 border-t border-border-subtle pt-4 dark:border-border-subtle">
             <button
               type="submit"
               disabled={saving || !isDirty}
-              className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-lg bg-accent-solid px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {saving ? (
                 <Loader2 className="h-4 w-4 motion-safe:animate-spin" aria-hidden />

@@ -36,7 +36,7 @@ export default function AdvisingNotesPage() {
   if (featuresLoading) {
     return (
       <LmsPage title="Advising notes">
-        <p className="text-sm text-slate-500">Loading…</p>
+        <p className="text-sm text-fg-muted">Loading…</p>
       </LmsPage>
     )
   }
@@ -44,7 +44,7 @@ export default function AdvisingNotesPage() {
   if (!ffAdvisingIntegration) {
     return (
       <LmsPage title="Advising notes">
-        <p className="text-sm text-slate-600 dark:text-neutral-400">
+        <p className="text-sm text-fg-muted">
           Advising features are not enabled on this platform.
         </p>
       </LmsPage>
@@ -53,12 +53,12 @@ export default function AdvisingNotesPage() {
 
   return (
     <LmsPage title="Advising notes">
-      <p className="text-sm text-slate-600 dark:text-neutral-400">
+      <p className="text-sm text-fg-muted">
         Notes from your academic advisor about follow-up items and degree planning.
       </p>
 
       {error && (
-        <p role="alert" className="mt-4 text-sm text-red-600 dark:text-red-400">
+        <p role="alert" className="mt-4 text-sm text-danger-fg">
           {error}
         </p>
       )}
@@ -66,22 +66,22 @@ export default function AdvisingNotesPage() {
       {loading ? (
         <div className="mt-6 space-y-4" aria-busy="true">
           {[1, 2].map((i) => (
-            <div key={i} className="h-24 animate-pulse rounded-2xl bg-slate-100 dark:bg-neutral-800" />
+            <div key={i} className="h-24 animate-pulse rounded-2xl bg-surface-sunken" />
           ))}
         </div>
       ) : notes.length === 0 ? (
-        <div className="mt-8 rounded-2xl border border-dashed border-slate-200 px-6 py-12 text-center dark:border-neutral-700">
+        <div className="mt-8 rounded-2xl border border-dashed border-border-default px-6 py-12 text-center dark:border-border-default">
           <GraduationCap className="mx-auto h-10 w-10 text-slate-300 dark:text-neutral-600" aria-hidden />
-          <p className="mt-3 text-sm text-slate-600 dark:text-neutral-400">No advising notes yet.</p>
+          <p className="mt-3 text-sm text-fg-muted">No advising notes yet.</p>
         </div>
       ) : (
         <ol className="mt-6 space-y-4" aria-label="Advising notes timeline">
           {notes.map((note) => (
             <li
               key={note.id}
-              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-900"
+              className="rounded-2xl border border-border-default bg-surface-raised p-5 shadow-sm dark:border-border-default dark:bg-surface-raised"
             >
-              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-neutral-400">
+              <div className="flex flex-wrap items-center gap-2 text-xs text-fg-muted">
                 <CalendarClock className="h-4 w-4" aria-hidden />
                 <time dateTime={note.createdAt}>{formatDateTime(note.createdAt)}</time>
                 <span aria-hidden>·</span>
@@ -89,7 +89,7 @@ export default function AdvisingNotesPage() {
                   {note.advisorDisplayName?.trim() || note.advisorEmail || 'Your advisor'}
                 </span>
               </div>
-              <p className="mt-3 whitespace-pre-wrap text-sm text-slate-800 dark:text-neutral-100">
+              <p className="mt-3 whitespace-pre-wrap text-sm text-fg-default">
                 {note.content}
               </p>
             </li>
@@ -97,9 +97,9 @@ export default function AdvisingNotesPage() {
         </ol>
       )}
 
-      <p className="mt-8 text-xs text-slate-500 dark:text-neutral-400">
+      <p className="mt-8 text-xs text-fg-muted">
         Need to meet with your advisor?{' '}
-        <Link to="/" className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">
+        <Link to="/" className="font-medium text-accent-fg hover:text-indigo-500 dark:text-indigo-400">
           Return to your dashboard
         </Link>{' '}
         to schedule an appointment.

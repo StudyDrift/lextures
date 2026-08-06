@@ -34,10 +34,10 @@ export function StudentProgressStrip({ courseCode, itemId }: StudentProgressStri
 
   return (
     <div
-      className="mb-3 flex flex-wrap items-center gap-3 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+      className="mb-3 flex flex-wrap items-center gap-3 rounded-md border border-border-default bg-surface-base px-3 py-2 text-sm dark:border-border-default dark:bg-surface-raised"
       data-testid="student-progress-strip"
     >
-      <span className="font-medium text-slate-800 dark:text-neutral-100">
+      <span className="font-medium text-fg-default">
         {t('contentTools.analytics.progressSummary', {
           completed: progress.completed,
           total: progress.total,

@@ -52,15 +52,15 @@ export class ApiErrorBoundary extends Component<Props, State> {
   override render() {
     if (this.state.error) {
       return (
-        <div className="flex min-h-dvh items-center justify-center bg-slate-50 p-6 dark:bg-neutral-950">
-          <div className="max-w-md rounded-xl border border-slate-200 bg-white p-8 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-            <h1 className="text-lg font-semibold text-slate-900 dark:text-neutral-100">Something went wrong</h1>
-            <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
+        <div className="flex min-h-dvh items-center justify-center bg-surface-base p-6 dark:bg-surface-base">
+          <div className="max-w-md rounded-xl border border-border-default bg-surface-raised p-8 shadow-sm dark:border-border-default dark:bg-surface-raised">
+            <h1 className="text-lg font-semibold text-fg-default">Something went wrong</h1>
+            <p className="mt-2 text-sm text-fg-muted">
               An unexpected error occurred while loading this view. You can try again, or refresh the page.
             </p>
             <button
               type="button"
-              className="mt-6 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-white"
+              className="mt-6 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-surface-raised"
               onClick={() => {
                 if (isStaleChunkError(this.state.error)) {
                   window.location.reload()

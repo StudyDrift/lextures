@@ -98,7 +98,7 @@ export function ParameterExplorerPromptsEditor({
             </label>
             <button
               type="button"
-              className="text-red-700 underline"
+              className="text-danger-fg underline"
               disabled={disabled}
               onClick={() => patch({ noticingPrompts: prompts.filter((_, i) => i !== idx) })}
             >
@@ -126,7 +126,7 @@ export function ParameterExplorerPromptsEditor({
               </label>
             ))}
         </div>
-        <p className="text-slate-500">
+        <p className="text-fg-muted">
           {t('contentTools.tools.parameter_explorer.editor.testValuesHelp')}
         </p>
       </div>

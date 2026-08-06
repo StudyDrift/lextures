@@ -90,7 +90,7 @@ export default function AdminImport() {
 
   if (!bulkCsvImportEnabled) {
     return (
-      <div className="p-6 text-sm text-slate-600 dark:text-slate-400">
+      <div className="p-6 text-sm text-fg-muted dark:text-fg-subtle">
         Bulk user CSV import is not enabled for this platform.
       </div>
     )
@@ -101,8 +101,8 @@ export default function AdminImport() {
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-4 md:p-6">
       <header>
-        <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Import users</h1>
-        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+        <h1 className="text-xl font-semibold text-fg-default dark:text-slate-100">Import users</h1>
+        <p className="mt-1 text-sm text-fg-muted dark:text-fg-subtle">
           Upload a CSV to create, update, or deactivate users in your organization.
         </p>
       </header>
@@ -111,12 +111,12 @@ export default function AdminImport() {
         {liveMessage}
       </div>
 
-      <section className="rounded-lg border border-slate-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+      <section className="rounded-lg border border-border-default bg-surface-raised p-4 dark:border-border-subtle dark:bg-surface-raised">
         <div className="grid gap-4 md:grid-cols-2">
           <label className="block text-sm">
-            <span className="mb-1 block font-medium text-slate-700 dark:text-slate-300">Import profile</span>
+            <span className="mb-1 block font-medium text-fg-muted dark:text-slate-300">Import profile</span>
             <select
-              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+              className="w-full rounded-md border border-border-strong bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
               value={profile}
               onChange={(e) => setProfile(e.target.value as ImportProfile)}
             >
@@ -125,9 +125,9 @@ export default function AdminImport() {
             </select>
           </label>
           <label className="block text-sm">
-            <span className="mb-1 block font-medium text-slate-700 dark:text-slate-300">Merge strategy</span>
+            <span className="mb-1 block font-medium text-fg-muted dark:text-slate-300">Merge strategy</span>
             <select
-              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+              className="w-full rounded-md border border-border-strong bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
               value={mergeStrategy}
               onChange={(e) => setMergeStrategy(e.target.value as MergeStrategy)}
             >
@@ -139,7 +139,7 @@ export default function AdminImport() {
         </div>
 
         <div className="mt-4">
-          <label htmlFor={fileInputId} className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          <label htmlFor={fileInputId} className="mb-1 block text-sm font-medium text-fg-muted dark:text-slate-300">
             CSV file
           </label>
           <input
@@ -150,7 +150,7 @@ export default function AdminImport() {
             className="block w-full text-sm"
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
           />
-          <p className="mt-2 text-xs text-slate-500">
+          <p className="mt-2 text-xs text-fg-muted">
             No imports yet?{' '}
             <button type="button" className="text-blue-600 underline" onClick={downloadTemplate}>
               Download CSV template
@@ -159,7 +159,7 @@ export default function AdminImport() {
         </div>
 
         {error ? (
-          <p className="mt-3 text-sm text-red-600" role="alert">
+          <p className="mt-3 text-sm text-danger-fg" role="alert">
             {error}
           </p>
         ) : null}
@@ -168,7 +168,7 @@ export default function AdminImport() {
           <button
             type="button"
             disabled={busy}
-            className="inline-flex items-center gap-2 rounded-md bg-slate-100 px-3 py-2 text-sm font-medium text-slate-900 hover:bg-slate-200 disabled:opacity-50 dark:bg-neutral-800 dark:text-slate-100"
+            className="inline-flex items-center gap-2 rounded-md bg-surface-sunken px-3 py-2 text-sm font-medium text-fg-default hover:bg-slate-200 disabled:opacity-50 dark:bg-surface-overlay dark:text-slate-100"
             onClick={() => void runImport(true)}
           >
             {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <FileUp className="h-4 w-4" aria-hidden />}
@@ -187,14 +187,14 @@ export default function AdminImport() {
       </section>
 
       {job ? (
-        <section className="rounded-lg border border-slate-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
-          <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Job status</h2>
-          <p className="mt-1 text-sm capitalize text-slate-600 dark:text-slate-400">
+        <section className="rounded-lg border border-border-default bg-surface-raised p-4 dark:border-border-subtle dark:bg-surface-raised">
+          <h2 className="text-sm font-semibold text-fg-default dark:text-slate-100">Job status</h2>
+          <p className="mt-1 text-sm capitalize text-fg-muted dark:text-fg-subtle">
             {job.status}
             {job.totalRows != null ? ` — ${job.processedRows} / ${job.totalRows} rows` : ''}
           </p>
           {job.status !== 'complete' && job.status !== 'failed' ? (
-            <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-neutral-800">
+            <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-surface-overlay">
               <div
                 className="h-full bg-blue-600 transition-all"
                 style={{
@@ -211,19 +211,19 @@ export default function AdminImport() {
           {job.status === 'complete' ? (
             <dl className="mt-3 grid grid-cols-2 gap-2 text-sm md:grid-cols-4">
               <div>
-                <dt className="text-slate-500">Created</dt>
+                <dt className="text-fg-muted">Created</dt>
                 <dd className="font-medium">{job.createdCount}</dd>
               </div>
               <div>
-                <dt className="text-slate-500">Updated</dt>
+                <dt className="text-fg-muted">Updated</dt>
                 <dd className="font-medium">{job.updatedCount}</dd>
               </div>
               <div>
-                <dt className="text-slate-500">Deactivated</dt>
+                <dt className="text-fg-muted">Deactivated</dt>
                 <dd className="font-medium">{job.deactivatedCount}</dd>
               </div>
               <div>
-                <dt className="text-slate-500">Errors</dt>
+                <dt className="text-fg-muted">Errors</dt>
                 <dd className="font-medium">{job.errorRows}</dd>
               </div>
             </dl>
@@ -241,10 +241,10 @@ export default function AdminImport() {
       ) : null}
 
       {allErrors.length > 0 ? (
-        <section className="overflow-x-auto rounded-lg border border-slate-200 dark:border-neutral-800">
+        <section className="overflow-x-auto rounded-lg border border-border-default dark:border-border-subtle">
           <table className="min-w-full text-left text-sm">
             <caption className="sr-only">Import validation errors</caption>
-            <thead className="sticky top-0 bg-slate-50 dark:bg-neutral-900">
+            <thead className="sticky top-0 bg-surface-base">
               <tr>
                 <th scope="col" className="px-3 py-2 font-medium">
                   Row
@@ -259,7 +259,7 @@ export default function AdminImport() {
             </thead>
             <tbody>
               {allErrors.map((e, i) => (
-                <tr key={`${e.row}-${e.column}-${i}`} className="border-t border-slate-100 dark:border-neutral-800">
+                <tr key={`${e.row}-${e.column}-${i}`} className="border-t border-border-subtle">
                   <td className="px-3 py-2">{e.row}</td>
                   <td className="px-3 py-2">{e.column}</td>
                   <td className="px-3 py-2">{e.message}</td>

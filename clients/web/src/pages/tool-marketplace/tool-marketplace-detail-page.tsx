@@ -53,7 +53,7 @@ export default function ToolMarketplaceDetailPage() {
 
   return (
     <div className="mx-auto max-w-3xl p-6" data-testid="tool-marketplace-detail">
-      <h1 id={titleId} className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
+      <h1 id={titleId} className="text-2xl font-semibold text-fg-default dark:text-slate-100">
         {preview?.displayName || toolId}
       </h1>
       {error ? (
@@ -64,7 +64,7 @@ export default function ToolMarketplaceDetailPage() {
       {preview ? (
         <section className="mt-6" aria-labelledby={titleId}>
           <h2 className="text-base font-medium">{t('contentTools.marketplace.consentTitle')}</h2>
-          <p className="mt-1 text-sm text-slate-600">{t('contentTools.marketplace.consentHelp')}</p>
+          <p className="mt-1 text-sm text-fg-muted">{t('contentTools.marketplace.consentHelp')}</p>
           <ul className="mt-3 list-disc space-y-1 ps-5 text-sm" data-testid="tool-consent-capabilities">
             {preview.capabilities.map((c) => (
               <li key={c.capability}>{c.plainLanguage}</li>
@@ -82,7 +82,7 @@ export default function ToolMarketplaceDetailPage() {
           ) : null}
           <button
             type="button"
-            className="mt-6 rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-slate-100 dark:text-slate-900"
+            className="mt-6 rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-surface-sunken dark:text-fg-default"
             data-testid="tool-install-confirm"
             disabled={busy || !orgId || installed}
             onClick={() => {

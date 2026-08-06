@@ -105,13 +105,13 @@ export function TextFilePreview({ filePath, filename, mimeType, errorVariant = '
   }
 
   return (
-    <div className="flex h-full flex-col overflow-hidden bg-slate-50 dark:bg-neutral-950">
+    <div className="flex h-full flex-col overflow-hidden bg-surface-base">
       {markdownFile && (
         <div
           id={tablistId}
           role="tablist"
           aria-label="Text preview mode"
-          className="flex shrink-0 gap-1 border-b border-slate-200 bg-white px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+          className="flex shrink-0 gap-1 border-b border-border-default bg-surface-raised px-3 py-2 dark:border-border-default dark:bg-surface-raised"
         >
           <TabButton
             active={tab === 'preview'}
@@ -168,7 +168,7 @@ export function TextFilePreview({ filePath, filename, mimeType, errorVariant = '
           ref={(el) => {
             panelRef.current = el
           }}
-          className="relative min-h-0 flex-1 overflow-auto whitespace-pre-wrap break-words p-4 font-mono text-sm leading-relaxed text-slate-800 dark:text-neutral-200"
+          className="relative min-h-0 flex-1 overflow-auto whitespace-pre-wrap break-words p-4 font-mono text-sm leading-relaxed text-fg-default"
         >
           {content ?? ''}
           {annotation ? (
@@ -208,8 +208,8 @@ function TabButton({
       onClick={onClick}
       className={
         active
-          ? 'rounded-lg bg-indigo-50 px-3 py-1.5 text-sm font-semibold text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300'
-          : 'rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-neutral-400 dark:hover:bg-neutral-800'
+          ? 'rounded-lg bg-indigo-50 px-3 py-1.5 text-sm font-semibold text-accent-fg dark:bg-indigo-950 dark:text-indigo-300'
+          : 'rounded-lg px-3 py-1.5 text-sm font-medium text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay'
       }
     >
       {children}

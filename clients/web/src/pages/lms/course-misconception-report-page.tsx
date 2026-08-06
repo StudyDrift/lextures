@@ -69,8 +69,8 @@ export default function CourseMisconceptionReportPage() {
         onConfirm={() => void runImport(true)}
       />
       <div>
-        <h1 className="text-lg font-semibold text-slate-900 dark:text-neutral-100">Misconception report</h1>
-        <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+        <h1 className="text-lg font-semibold text-fg-default">Misconception report</h1>
+        <p className="mt-1 text-sm text-fg-muted">
           Trigger counts for tagged distractors across submitted quiz attempts in this course.
         </p>
         {canManage ? (
@@ -79,7 +79,7 @@ export default function CourseMisconceptionReportPage() {
               type="button"
               disabled={importBusy}
               onClick={() => void runImport(false)}
-              className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+              className="rounded-md border border-border-strong bg-surface-raised px-3 py-1.5 text-sm font-medium text-fg-default hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
             >
               {importBusy ? 'Working…' : 'Import seed library'}
             </button>
@@ -100,28 +100,28 @@ export default function CourseMisconceptionReportPage() {
         </p>
       )}
       {rows && rows.length === 0 && !error && (
-        <p className="text-sm text-slate-600 dark:text-neutral-400">No misconception events recorded yet.</p>
+        <p className="text-sm text-fg-muted">No misconception events recorded yet.</p>
       )}
       {rows && rows.length > 0 && (
-        <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-800">
+        <div className="overflow-x-auto rounded-xl border border-border-default dark:border-border-subtle">
           <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-neutral-800">
-            <thead className="bg-slate-50 dark:bg-neutral-900">
+            <thead className="bg-surface-base">
               <tr>
-                <th className="px-3 py-2 text-start font-medium text-slate-700 dark:text-neutral-200">Misconception</th>
-                <th className="px-3 py-2 text-start font-medium text-slate-700 dark:text-neutral-200">Question</th>
-                <th className="px-3 py-2 text-end font-medium text-slate-700 dark:text-neutral-200">Triggers</th>
-                <th className="px-3 py-2 text-end font-medium text-slate-700 dark:text-neutral-200">Students</th>
+                <th className="px-3 py-2 text-start font-medium text-fg-default">Misconception</th>
+                <th className="px-3 py-2 text-start font-medium text-fg-default">Question</th>
+                <th className="px-3 py-2 text-end font-medium text-fg-default">Triggers</th>
+                <th className="px-3 py-2 text-end font-medium text-fg-default">Students</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-neutral-800">
               {rows.map((r) => (
                 <tr key={`${r.misconceptionId}-${r.questionId}`}>
-                  <td className="px-3 py-2 text-slate-900 dark:text-neutral-100">{r.misconceptionName}</td>
-                  <td className="max-w-md px-3 py-2 text-slate-700 dark:text-neutral-300">{r.questionStem}</td>
-                  <td className="px-3 py-2 text-end tabular-nums text-slate-800 dark:text-neutral-200">
+                  <td className="px-3 py-2 text-fg-default">{r.misconceptionName}</td>
+                  <td className="max-w-md px-3 py-2 text-fg-muted">{r.questionStem}</td>
+                  <td className="px-3 py-2 text-end tabular-nums text-fg-default">
                     {r.triggerCount}
                   </td>
-                  <td className="px-3 py-2 text-end tabular-nums text-slate-800 dark:text-neutral-200">
+                  <td className="px-3 py-2 text-end tabular-nums text-fg-default">
                     {r.affectedStudents}
                   </td>
                 </tr>

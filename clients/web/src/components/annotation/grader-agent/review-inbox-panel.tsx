@@ -31,7 +31,7 @@ export function ReviewInboxPanel({
   if (loading && held.length === 0 && flagged.length === 0) {
     return (
       <div
-        className="mt-4 rounded-xl border border-slate-200 bg-slate-50/70 p-4 text-sm text-slate-600 dark:border-neutral-700 dark:bg-neutral-900/40 dark:text-neutral-300"
+        className="mt-4 rounded-xl border border-border-default bg-slate-50/70 p-4 text-sm text-fg-muted dark:border-border-default/40 dark:text-fg-muted"
         aria-busy="true"
       >
         {t('gradingAgent.review.inbox.loading')}
@@ -49,7 +49,7 @@ export function ReviewInboxPanel({
 
   if (!loading && held.length === 0 && flagged.length === 0) {
     return (
-      <p className="mt-4 text-sm text-slate-600 dark:text-neutral-400" aria-live="polite">
+      <p className="mt-4 text-sm text-fg-muted" aria-live="polite">
         {t('gradingAgent.review.inbox.empty')}
       </p>
     )

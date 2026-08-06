@@ -77,7 +77,7 @@ function DraggableChip({
       style={style}
       {...listeners}
       {...attributes}
-      className="cursor-grab rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-800 active:cursor-grabbing dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+      className="cursor-grab rounded-lg border border-border-default bg-surface-raised px-2.5 py-1.5 text-xs font-medium text-fg-default active:cursor-grabbing dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
     >
       {label}
     </div>
@@ -111,41 +111,35 @@ function DroppableColumn({
   return (
     <div
       ref={setNodeRef}
-      className={`flex min-w-[11rem] w-full flex-col rounded-xl border bg-slate-50/80 p-2 dark:bg-neutral-900/50 ${
-        isOver || highlight
-          ? 'border-indigo-400 ring-1 ring-indigo-400/40'
-          : 'border-slate-200 dark:border-neutral-700'
-      } ${expanded ? 'min-h-[10rem]' : 'min-h-[3.5rem]'}`}
+      className={`flex min-w-[11rem] w-full flex-col rounded-xl border bg-slate-50/80 p-2/50 ${ isOver || highlight ? 'border-indigo-400 ring-1 ring-indigo-400/40' : 'border-border-default' } ${expanded ? 'min-h-[10rem]' : 'min-h-[3.5rem]'}`}
     >
       {collapsible ? (
         <button
           type="button"
           onClick={onToggle}
-          className="mb-2 flex w-full items-start justify-between gap-2 shrink-0 border-b border-slate-200 pb-2 text-start dark:border-neutral-700"
+          className="mb-2 flex w-full items-start justify-between gap-2 shrink-0 border-b border-border-default pb-2 text-start dark:border-border-default"
           aria-expanded={expanded}
         >
           <span>
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+            <p className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
               {title}
             </p>
             {subtitle ? (
-              <p className="mt-0.5 text-[11px] text-slate-500 dark:text-neutral-500">{subtitle}</p>
+              <p className="mt-0.5 text-[11px] text-fg-subtle">{subtitle}</p>
             ) : null}
           </span>
           <ChevronDown
-            className={`mt-0.5 h-4 w-4 shrink-0 text-slate-500 transition-transform dark:text-neutral-400 ${
-              expanded ? 'rotate-0' : '-rotate-90'
-            }`}
+            className={`mt-0.5 h-4 w-4 shrink-0 text-fg-muted transition-transform dark:text-fg-muted ${ expanded ? 'rotate-0' : '-rotate-90' }`}
             aria-hidden
           />
         </button>
       ) : (
-        <div className="mb-2 shrink-0 border-b border-slate-200 pb-2 dark:border-neutral-700">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+        <div className="mb-2 shrink-0 border-b border-border-default pb-2 dark:border-border-default">
+          <p className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
             {title}
           </p>
           {subtitle ? (
-            <p className="mt-0.5 text-[11px] text-slate-500 dark:text-neutral-500">{subtitle}</p>
+            <p className="mt-0.5 text-[11px] text-fg-subtle">{subtitle}</p>
           ) : null}
         </div>
       )}
@@ -200,7 +194,7 @@ function GroupSetActionsMenu({
           if (disabled) return
           setOpen((o) => !o)
         }}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-2 py-1.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:justify-start sm:px-3 sm:py-2"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent-solid px-2 py-1.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:justify-start sm:px-3 sm:py-2"
       >
         <span>Actions</span>
         <ChevronDown className={`h-4 w-4 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden />
@@ -211,7 +205,7 @@ function GroupSetActionsMenu({
           id={menuId}
           role="menu"
           aria-label="Group set actions"
-          className="absolute end-0 z-50 mt-1 min-w-[14rem] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-800 dark:shadow-black/40"
+          className="absolute end-0 z-50 mt-1 min-w-[14rem] overflow-hidden rounded-xl border border-border-default bg-surface-raised py-1 shadow-lg shadow-slate-900/10 dark:border-border-default dark:bg-surface-overlay dark:shadow-black/40"
         >
           <button
             type="button"
@@ -221,7 +215,7 @@ function GroupSetActionsMenu({
               onNewSet()
               setOpen(false)
             }}
-            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-fg-default transition-[background-color,color,border-color] hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-60 dark:text-fg-default dark:hover:bg-neutral-700/80"
           >
             <Plus className="h-4 w-4 shrink-0" aria-hidden />
             New set
@@ -236,7 +230,7 @@ function GroupSetActionsMenu({
                   onRenameSet()
                   setOpen(false)
                 }}
-                className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+                className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-fg-default transition-[background-color,color,border-color] hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-60 dark:text-fg-default dark:hover:bg-neutral-700/80"
               >
                 Rename set
               </button>
@@ -253,7 +247,7 @@ function GroupSetActionsMenu({
                 <Trash2 className="h-4 w-4 shrink-0" aria-hidden />
                 Delete set
               </button>
-              <div className="my-1 border-t border-slate-100 dark:border-neutral-700" role="separator" />
+              <div className="my-1 border-t border-border-subtle dark:border-border-default" role="separator" />
               <button
                 type="button"
                 role="menuitem"
@@ -262,7 +256,7 @@ function GroupSetActionsMenu({
                   onNewGroup()
                   setOpen(false)
                 }}
-                className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+                className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-fg-default transition-[background-color,color,border-color] hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-60 dark:text-fg-default dark:hover:bg-neutral-700/80"
               >
                 <Plus className="h-4 w-4 shrink-0" aria-hidden />
                 New group
@@ -276,7 +270,7 @@ function GroupSetActionsMenu({
                   onAssignUnassigned()
                   setOpen(false)
                 }}
-                className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+                className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-fg-default transition-[background-color,color,border-color] hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-60 dark:text-fg-default dark:hover:bg-neutral-700/80"
               >
                 <Shuffle className="h-4 w-4 shrink-0" aria-hidden />
                 Assign unassigned students
@@ -576,7 +570,7 @@ export function EnrollmentGroupsPanel({ courseCode, enrollments, canEdit }: Prop
   }
 
   if (loading && !tree) {
-    return <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">Loading groups…</p>
+    return <p className="mt-4 text-sm text-fg-muted">Loading groups…</p>
   }
 
   if (loadError) {
@@ -590,7 +584,7 @@ export function EnrollmentGroupsPanel({ courseCode, enrollments, canEdit }: Prop
   if (!tree?.groupSets.length) {
     return (
       <div className="mt-6">
-        <p className="text-sm text-slate-600 dark:text-neutral-400">
+        <p className="text-sm text-fg-muted">
           No group sets yet. Use &quot;New group set&quot; to create one.
         </p>
         {canEdit ? (
@@ -600,7 +594,7 @@ export function EnrollmentGroupsPanel({ courseCode, enrollments, canEdit }: Prop
             onClick={() =>
               setDialog({ kind: 'new-set', name: 'New group set', error: null })
             }
-            className="mt-4 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm hover:border-indigo-200 hover:bg-indigo-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-indigo-500/40 dark:hover:bg-neutral-800"
+            className="mt-4 inline-flex items-center gap-2 rounded-xl border border-border-default bg-surface-raised px-4 py-2 text-sm font-semibold text-fg-default shadow-sm hover:border-indigo-200 hover:bg-indigo-50 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:border-indigo-500/40 dark:hover:bg-surface-overlay"
           >
             <Plus className="h-4 w-4" aria-hidden />
             New group set
@@ -634,14 +628,14 @@ export function EnrollmentGroupsPanel({ courseCode, enrollments, canEdit }: Prop
 
       <div className="flex flex-wrap items-end gap-3">
         <div className="min-w-[12rem] flex-1">
-          <label htmlFor="enrollment-group-set" className="text-xs font-medium text-slate-600 dark:text-neutral-400">
+          <label htmlFor="enrollment-group-set" className="text-xs font-medium text-fg-muted">
             Group set
           </label>
           <select
             id="enrollment-group-set"
             value={selectedSetId ?? ''}
             onChange={(e) => setSelectedSetId(e.target.value || null)}
-            className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+            className="mt-1 w-full rounded-xl border border-border-default bg-surface-raised px-2 py-1.5 text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
           >
             {tree.groupSets.map((s) => (
               <option key={s.id} value={s.id}>
@@ -739,7 +733,7 @@ export function EnrollmentGroupsPanel({ courseCode, enrollments, canEdit }: Prop
                                 error: null,
                               })
                             }
-                            className="rounded-lg px-2 py-1 text-[11px] font-medium text-indigo-700 hover:bg-indigo-50 dark:text-indigo-300 dark:hover:bg-indigo-950/40"
+                            className="rounded-lg px-2 py-1 text-[11px] font-medium text-accent-fg hover:bg-indigo-50 dark:text-indigo-300 dark:hover:bg-indigo-950/40"
                           >
                             Rename
                           </button>
@@ -792,7 +786,7 @@ export function EnrollmentGroupsPanel({ courseCode, enrollments, canEdit }: Prop
       ) : null}
 
       {!canEdit ? (
-        <p className="mt-4 text-xs text-slate-500 dark:text-neutral-500">
+        <p className="mt-4 text-xs text-fg-subtle">
           You can view groups but only people with roster edit access can change them.
         </p>
       ) : null}
@@ -866,7 +860,7 @@ function GroupsDialog({
     primaryAction = onSubmitNewSet
     body = (
       <>
-        <label htmlFor="dlg-new-set-name" className="text-xs font-medium text-slate-600 dark:text-neutral-400">
+        <label htmlFor="dlg-new-set-name" className="text-xs font-medium text-fg-muted">
           Name
         </label>
         <input
@@ -877,7 +871,7 @@ function GroupsDialog({
           onChange={(e) =>
             onDialogChange({ kind: 'new-set', name: e.target.value, error: null })
           }
-          className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+          className="mt-1 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
           disabled={dialogBusy}
           onKeyDown={onInputKeyDown}
         />
@@ -889,7 +883,7 @@ function GroupsDialog({
     primaryAction = onSubmitRenameSet
     body = (
       <>
-        <label htmlFor="dlg-rename-set-name" className="text-xs font-medium text-slate-600 dark:text-neutral-400">
+        <label htmlFor="dlg-rename-set-name" className="text-xs font-medium text-fg-muted">
           Name
         </label>
         <input
@@ -905,7 +899,7 @@ function GroupsDialog({
               error: null,
             })
           }
-          className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+          className="mt-1 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
           disabled={dialogBusy}
           onKeyDown={onInputKeyDown}
         />
@@ -917,8 +911,8 @@ function GroupsDialog({
     primaryVariant = 'danger'
     primaryAction = onSubmitDeleteSet
     body = (
-      <p className="text-sm text-slate-600 dark:text-neutral-400">
-        This will remove <span className="font-semibold text-slate-900 dark:text-neutral-100">{dialog.displayName}</span>{' '}
+      <p className="text-sm text-fg-muted">
+        This will remove <span className="font-semibold text-fg-default">{dialog.displayName}</span>{' '}
         and every group inside it. Student memberships in this set will be cleared. This cannot be undone.
       </p>
     )
@@ -928,7 +922,7 @@ function GroupsDialog({
     primaryAction = onSubmitNewGroup
     body = (
       <>
-        <label htmlFor="dlg-new-group-name" className="text-xs font-medium text-slate-600 dark:text-neutral-400">
+        <label htmlFor="dlg-new-group-name" className="text-xs font-medium text-fg-muted">
           Name
         </label>
         <input
@@ -939,7 +933,7 @@ function GroupsDialog({
           onChange={(e) =>
             onDialogChange({ kind: 'new-group', name: e.target.value, error: null })
           }
-          className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+          className="mt-1 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
           disabled={dialogBusy}
           onKeyDown={onInputKeyDown}
         />
@@ -951,7 +945,7 @@ function GroupsDialog({
     primaryAction = onSubmitRenameGroup
     body = (
       <>
-        <label htmlFor="dlg-rename-group-name" className="text-xs font-medium text-slate-600 dark:text-neutral-400">
+        <label htmlFor="dlg-rename-group-name" className="text-xs font-medium text-fg-muted">
           Name
         </label>
         <input
@@ -967,7 +961,7 @@ function GroupsDialog({
               error: null,
             })
           }
-          className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+          className="mt-1 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
           disabled={dialogBusy}
           onKeyDown={onInputKeyDown}
         />
@@ -979,8 +973,8 @@ function GroupsDialog({
     primaryVariant = 'danger'
     primaryAction = onSubmitDeleteGroup
     body = (
-      <p className="text-sm text-slate-600 dark:text-neutral-400">
-        Remove <span className="font-semibold text-slate-900 dark:text-neutral-100">{dialog.displayName}</span>? Students
+      <p className="text-sm text-fg-muted">
+        Remove <span className="font-semibold text-fg-default">{dialog.displayName}</span>? Students
         in this group become unassigned for this set.
       </p>
     )
@@ -998,16 +992,16 @@ function GroupsDialog({
         if (e.target === e.currentTarget && !dialogBusy) onClose()
       }}
     >
-      <div className="w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-900">
-        <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-neutral-700">
-          <h2 id="enrollment-groups-dlg-title" className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+      <div className="w-full max-w-md overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-raised">
+        <div className="flex items-center justify-between border-b border-border-default px-4 py-3 dark:border-border-default">
+          <h2 id="enrollment-groups-dlg-title" className="text-sm font-semibold text-fg-default">
             {title}
           </h2>
           <button
             type="button"
             onClick={() => onClose()}
             disabled={dialogBusy}
-            className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-800"
+            className="rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken hover:text-fg-default disabled:opacity-50 dark:text-fg-muted dark:hover:bg-surface-overlay"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
@@ -1025,7 +1019,7 @@ function GroupsDialog({
               type="button"
               onClick={() => onClose()}
               disabled={dialogBusy}
-              className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+              className="rounded-xl px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay"
             >
               Cancel
             </button>
@@ -1036,7 +1030,7 @@ function GroupsDialog({
               className={
                 primaryVariant === 'danger'
                   ? 'rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-rose-500 disabled:cursor-not-allowed disabled:opacity-60'
-                  : 'rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60'
+                  : 'rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60'
               }
             >
               {dialogBusy ? 'Working…' : primaryLabel}

@@ -25,11 +25,6 @@ func (d Deps) handleEnrollmentInvitationDecline() http.HandlerFunc {
 
 func (d Deps) handleEnrollmentInvitationDecision(approve bool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		viewer, ok := d.meUserID(w, r)
 		if !ok {
 			return

@@ -143,12 +143,12 @@ export function ModulesAiPanel({
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}
-      className="fixed inset-y-0 end-0 z-50 flex w-full flex-col border-s border-slate-200 bg-white shadow-2xl dark:border-neutral-800 dark:bg-neutral-900 sm:w-96"
+      className="fixed inset-y-0 end-0 z-50 flex w-full flex-col border-s border-border-default bg-surface-raised shadow-2xl dark:border-border-subtle dark:bg-surface-raised sm:w-96"
     >
-      <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-neutral-800">
+      <div className="flex items-center justify-between border-b border-border-default px-4 py-3 dark:border-border-subtle">
         <div className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-indigo-600" aria-hidden />
-          <h2 id={titleId} className="font-semibold text-slate-900 dark:text-neutral-100">
+          <Sparkles className="h-5 w-5 text-accent-fg" aria-hidden />
+          <h2 id={titleId} className="font-semibold text-fg-default">
             Modules AI
           </h2>
         </div>
@@ -156,7 +156,7 @@ export function ModulesAiPanel({
           type="button"
           aria-label="Close Modules AI"
           onClick={() => onOpenChange(false)}
-          className="rounded p-1 text-slate-500 hover:bg-slate-100 dark:hover:bg-neutral-800"
+          className="rounded p-1 text-fg-muted hover:bg-surface-sunken dark:hover:bg-surface-overlay"
         >
           <X className="h-5 w-5" />
         </button>
@@ -169,9 +169,9 @@ export function ModulesAiPanel({
         className="flex-1 overflow-y-auto px-4 py-4"
       >
         {messages.length === 0 && !busy && (
-          <div className="rounded-xl bg-slate-50 px-3 py-3 text-sm text-slate-600 dark:bg-neutral-800 dark:text-neutral-300">
+          <div className="rounded-xl bg-surface-base px-3 py-3 text-sm text-fg-muted dark:bg-surface-overlay dark:text-fg-muted">
             <p className="flex items-start gap-2">
-              <Bot className="mt-0.5 h-4 w-4 shrink-0 text-indigo-600" aria-hidden />
+              <Bot className="mt-0.5 h-4 w-4 shrink-0 text-accent-fg" aria-hidden />
               <span>
                 Ask for outline changes — for example “Add a Week 3 module with a quiz” or “Rename
                 Module 1 to Introduction”. Proposed changes appear for your review before they are
@@ -186,16 +186,12 @@ export function ModulesAiPanel({
             className={`mb-3 flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`max-w-[90%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
-                msg.role === 'user'
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-slate-100 text-slate-900 dark:bg-neutral-800 dark:text-neutral-100'
-              }`}
+              className={`max-w-[90%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${ msg.role === 'user' ? 'bg-accent-solid text-white' : 'bg-surface-sunken text-fg-default dark:bg-surface-overlay dark:text-fg-default' }`}
             >
               {msg.content}
               {msg.role === 'assistant' && msg.proposals && msg.proposals.length > 0 ? (
-                <div className="mt-3 space-y-2 border-t border-slate-200/70 pt-2 dark:border-neutral-700">
-                  <p className="text-xs font-medium text-slate-500 dark:text-neutral-400">
+                <div className="mt-3 space-y-2 border-t border-slate-200/70 pt-2 dark:border-border-default">
+                  <p className="text-xs font-medium text-fg-muted">
                     Proposed changes
                   </p>
                   <ul className="space-y-1.5">
@@ -204,16 +200,16 @@ export function ModulesAiPanel({
                       return (
                         <li
                           key={key}
-                          className="flex items-start justify-between gap-2 rounded-lg bg-white/70 px-2 py-1.5 dark:bg-neutral-900/50"
+                          className="flex items-start justify-between gap-2 rounded-lg bg-white/70 px-2 py-1.5/50"
                         >
-                          <span className="text-xs text-slate-700 dark:text-neutral-200">
+                          <span className="text-xs text-fg-default">
                             {describeModulesAiProposal(p)}
                           </span>
                           <button
                             type="button"
                             disabled={busy || applyingKey !== null}
                             onClick={() => void applyOne(p, key, msg.proposals ?? [])}
-                            className="shrink-0 text-xs font-semibold text-indigo-600 hover:underline disabled:opacity-50 dark:text-indigo-400"
+                            className="shrink-0 text-xs font-semibold text-accent-fg hover:underline disabled:opacity-50 dark:text-indigo-400"
                           >
                             {applyingKey === key ? '…' : 'Apply'}
                           </button>
@@ -226,7 +222,7 @@ export function ModulesAiPanel({
                       type="button"
                       disabled={busy || applyingKey !== null}
                       onClick={() => void applyAll(msg.proposals!, i)}
-                      className="text-xs font-semibold text-indigo-600 hover:underline disabled:opacity-50 dark:text-indigo-400"
+                      className="text-xs font-semibold text-accent-fg hover:underline disabled:opacity-50 dark:text-indigo-400"
                     >
                       {applyingKey === `all-${i}` ? 'Applying…' : 'Apply all'}
                     </button>
@@ -237,7 +233,7 @@ export function ModulesAiPanel({
           </div>
         ))}
         {busy && (
-          <p className="mb-3 text-sm text-slate-400 dark:text-neutral-500">Thinking…</p>
+          <p className="mb-3 text-sm text-fg-subtle">Thinking…</p>
         )}
         {error && (
           <div className="mb-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:border-rose-800 dark:bg-rose-950 dark:text-rose-300">
@@ -247,7 +243,7 @@ export function ModulesAiPanel({
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="border-t border-slate-200 px-4 py-3 dark:border-neutral-800">
+      <div className="border-t border-border-default px-4 py-3 dark:border-border-subtle">
         <div className="flex items-end gap-2">
           <textarea
             ref={inputRef}
@@ -263,19 +259,19 @@ export function ModulesAiPanel({
               }
             }}
             disabled={busy}
-            className="flex-1 resize-none rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-800"
+            className="flex-1 resize-none rounded-xl border border-border-default bg-surface-base px-3 py-2 text-sm disabled:opacity-50 dark:border-border-default dark:bg-surface-overlay"
           />
           <button
             type="button"
             aria-label="Send message"
             onClick={() => void sendMessage()}
             disabled={!input.trim() || busy}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-white disabled:opacity-50"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-solid text-white disabled:opacity-50"
           >
             <Send className="h-4 w-4" />
           </button>
         </div>
-        <p className="mt-1.5 text-center text-xs text-slate-400 dark:text-neutral-500">
+        <p className="mt-1.5 text-center text-xs text-fg-subtle">
           Proposals are reviewed before they change the course outline.
         </p>
       </div>

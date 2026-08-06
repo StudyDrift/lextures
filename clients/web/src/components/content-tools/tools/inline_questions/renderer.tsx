@@ -184,7 +184,7 @@ export default function InlineQuestionsRenderer({
 
   return (
     <div className="space-y-4" data-content-tool="inline_questions">
-      <p id={labelId} className="text-sm font-semibold text-slate-800 dark:text-neutral-100">
+      <p id={labelId} className="text-sm font-semibold text-fg-default">
         {label}
       </p>
       {questions.length > 1 ? (
@@ -243,11 +243,11 @@ export default function InlineQuestionsRenderer({
             }
             data-question-id={q.id}
           >
-            <legend className="text-sm font-medium text-slate-800 dark:text-neutral-100">
+            <legend className="text-sm font-medium text-fg-default">
               {legend}
             </legend>
             {locked ? (
-              <p className="text-xs text-slate-500 dark:text-neutral-400">
+              <p className="text-xs text-fg-muted">
                 {t('contentTools.tools.inline_questions.sequentialLocked')}
               </p>
             ) : null}
@@ -261,7 +261,7 @@ export default function InlineQuestionsRenderer({
                   return (
                     <label
                       key={opt.id}
-                      className="flex min-h-11 cursor-pointer items-center gap-2 rounded-md px-1 text-sm text-slate-800 dark:text-neutral-100"
+                      className="flex min-h-11 cursor-pointer items-center gap-2 rounded-md px-1 text-sm text-fg-default"
                     >
                       <input
                         type="radio"
@@ -290,7 +290,7 @@ export default function InlineQuestionsRenderer({
                   return (
                     <label
                       key={opt.id}
-                      className="flex min-h-11 cursor-pointer items-center gap-2 rounded-md px-1 text-sm text-slate-800 dark:text-neutral-100"
+                      className="flex min-h-11 cursor-pointer items-center gap-2 rounded-md px-1 text-sm text-fg-default"
                     >
                       <input
                         type="checkbox"
@@ -325,7 +325,7 @@ export default function InlineQuestionsRenderer({
                   }
                   disabled={readOnly || locked}
                   onChange={(e) => setDraft(q.id, e.target.value)}
-                  className="w-full min-h-11 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-900 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+                  className="w-full min-h-11 rounded-md border border-border-default bg-surface-raised px-2.5 py-1.5 text-sm text-fg-default dark:border-border-default dark:bg-surface-base dark:text-fg-default"
                 />
               </label>
             )}
@@ -345,10 +345,10 @@ export default function InlineQuestionsRenderer({
                   }
                   disabled={readOnly || locked}
                   onChange={(e) => setDraft(q.id, e.target.value)}
-                  className="w-40 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-900 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+                  className="w-40 rounded-md border border-border-default bg-surface-raised px-2.5 py-1.5 text-sm text-fg-default dark:border-border-default dark:bg-surface-base dark:text-fg-default"
                 />
                 {q.unit ? (
-                  <span className="text-xs text-slate-500 dark:text-neutral-400">{q.unit}</span>
+                  <span className="text-xs text-fg-muted">{q.unit}</span>
                 ) : null}
               </label>
             )}
@@ -397,13 +397,13 @@ export default function InlineQuestionsRenderer({
                       : t('contentTools.tools.inline_questions.incorrect')}
                 </p>
                 {result?.feedback ? (
-                  <p className="text-slate-700 dark:text-neutral-300">{result.feedback}</p>
+                  <p className="text-fg-muted">{result.feedback}</p>
                 ) : null}
                 {result?.explanation ? (
-                  <p className="text-slate-600 dark:text-neutral-400">{result.explanation}</p>
+                  <p className="text-fg-muted">{result.explanation}</p>
                 ) : null}
                 {typeof result?.attemptsRemaining === 'number' && result.attemptsRemaining >= 0 ? (
-                  <p className="text-xs text-slate-500 dark:text-neutral-400">
+                  <p className="text-xs text-fg-muted">
                     {t('contentTools.tools.inline_questions.attemptsLeft', {
                       count: result.attemptsRemaining,
                     })}
@@ -421,8 +421,8 @@ export default function InlineQuestionsRenderer({
       })}
 
       {pagingEnabled ? (
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 pt-3 dark:border-neutral-700">
-          <p className="text-xs text-slate-500 dark:text-neutral-400">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border-default pt-3 dark:border-border-default">
+          <p className="text-xs text-fg-muted">
             {t('contentTools.tools.inline_questions.pageOf', {
               from: pageStart + 1,
               to: pageEnd,
@@ -434,7 +434,7 @@ export default function InlineQuestionsRenderer({
               type="button"
               disabled={safePage <= 0}
               onClick={() => setPageIndex((p) => Math.max(0, p - 1))}
-              className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-40 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+              className="rounded-md border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-fg-default hover:bg-surface-base disabled:opacity-40 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
             >
               {t('contentTools.tools.inline_questions.previous')}
             </button>
@@ -442,7 +442,7 @@ export default function InlineQuestionsRenderer({
               type="button"
               disabled={!canAdvancePage()}
               onClick={() => setPageIndex((p) => Math.min(pageCount - 1, p + 1))}
-              className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-40 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+              className="rounded-md border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-fg-default hover:bg-surface-base disabled:opacity-40 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
             >
               {t('contentTools.tools.inline_questions.next')}
             </button>

@@ -127,14 +127,14 @@ export function NotebookTaskNodeView(props: NodeViewProps) {
   const textClass = [
     'min-w-0 flex-1 outline-none [&_p]:my-0',
     checked
-      ? 'text-slate-500 line-through decoration-slate-400 dark:text-neutral-500 dark:decoration-neutral-500'
-      : 'text-slate-800 dark:text-neutral-200',
+      ? 'text-fg-muted line-through decoration-slate-400 dark:decoration-neutral-500'
+      : 'text-fg-default',
   ].join(' ')
 
   return (
     <NodeViewWrapper
       as="div"
-      className="lex-notebook-task group my-2 flex items-start gap-2 rounded-lg border border-transparent px-1 py-1 transition-[background-color,color,border-color] hover:border-slate-200 dark:hover:border-neutral-700"
+      className="lex-notebook-task group my-2 flex items-start gap-2 rounded-lg border border-transparent px-1 py-1 transition-[background-color,color,border-color] hover:border-border-default dark:hover:border-border-default"
       data-type="notebook-task"
     >
       <div className="min-w-0 flex-1">
@@ -144,13 +144,13 @@ export function NotebookTaskNodeView(props: NodeViewProps) {
             checked={checked}
             disabled={!editable}
             onChange={onToggleChecked}
-            className="h-4 w-4 shrink-0 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 dark:border-neutral-600"
+            className="h-4 w-4 shrink-0 rounded border-border-strong text-accent-fg focus:ring-indigo-500 dark:border-border-default"
             aria-label={checked ? 'Mark task incomplete' : 'Mark task complete'}
           />
           <NodeViewContent as="div" className={textClass} />
         </div>
         {dueAt ? (
-          <p className="mt-0.5 flex items-center gap-1 ps-6 text-xs text-slate-500 dark:text-neutral-400">
+          <p className="mt-0.5 flex items-center gap-1 ps-6 text-xs text-fg-muted">
             <CalendarDays className="h-3 w-3 shrink-0" aria-hidden />
             Due {formatDate(dueAt, { dateStyle: 'medium' })}
           </p>
@@ -161,7 +161,7 @@ export function NotebookTaskNodeView(props: NodeViewProps) {
           <button
             type="button"
             onClick={onOpenDueMenu}
-            className="inline-flex items-center rounded-md p-1 text-slate-400 transition-[background-color,color,border-color] hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
+            className="inline-flex items-center rounded-md p-1 text-fg-subtle transition-[background-color,color,border-color] hover:bg-surface-sunken hover:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-fg-muted"
             aria-expanded={menuOpen}
             aria-haspopup="menu"
             aria-controls={menuId}
@@ -173,15 +173,15 @@ export function NotebookTaskNodeView(props: NodeViewProps) {
             <div
               id={menuId}
               role="menu"
-              className="absolute right-0 top-full z-30 mt-1 w-52 rounded-xl border border-slate-200 bg-white p-3 shadow-lg dark:border-neutral-700 dark:bg-neutral-900"
+              className="absolute right-0 top-full z-30 mt-1 w-52 rounded-xl border border-border-default bg-surface-raised p-3 shadow-lg dark:border-border-default dark:bg-surface-raised"
             >
-              <label className="block text-xs font-medium text-slate-600 dark:text-neutral-400">
+              <label className="block text-xs font-medium text-fg-muted">
                 Due date
                 <input
                   type="date"
                   value={dateDraft}
                   onChange={(e) => setDateDraft(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm text-slate-800 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+                  className="mt-1 w-full rounded-lg border border-border-default px-2 py-1.5 text-sm text-fg-default dark:border-border-default dark:bg-surface-base dark:text-fg-default"
                 />
               </label>
               <div className="mt-2 flex gap-2">
@@ -189,7 +189,7 @@ export function NotebookTaskNodeView(props: NodeViewProps) {
                   type="button"
                   role="menuitem"
                   onClick={onSaveDueDate}
-                  className="flex-1 rounded-lg bg-indigo-600 px-2 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500"
+                  className="flex-1 rounded-lg bg-accent-solid px-2 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500"
                 >
                   Save
                 </button>
@@ -198,7 +198,7 @@ export function NotebookTaskNodeView(props: NodeViewProps) {
                     type="button"
                     role="menuitem"
                     onClick={onClearDueDate}
-                    className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2 py-1.5 text-xs text-slate-600 hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                    className="inline-flex items-center gap-1 rounded-lg border border-border-default px-2 py-1.5 text-xs text-fg-muted hover:bg-surface-base dark:border-border-default dark:text-fg-muted dark:hover:bg-surface-overlay"
                     aria-label="Clear due date"
                   >
                     <X className="h-3 w-3" aria-hidden />

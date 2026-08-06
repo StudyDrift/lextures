@@ -57,15 +57,6 @@ func (d Deps) handleCourseSelfEnroll() http.HandlerFunc {
 		FirstItemID  *string `json:"firstItemId,omitempty"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.effectiveConfig().FFSelfPacedMode {
 			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "Self-paced enrollment is not enabled.")
 			return
@@ -165,11 +156,6 @@ type progressResponse struct {
 // handleCourseMyProgress returns the viewer's self-paced progress for a course (FR-4, FR-5, AC-2).
 func (d Deps) handleCourseMyProgress() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		viewer, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -226,15 +212,6 @@ func (d Deps) handleCourseMyProgress() http.HandlerFunc {
 // module gating and triggering the completion flow on the final item (FR-3, FR-6, FR-8, AC-3, AC-5).
 func (d Deps) handleCourseItemComplete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		viewer, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -364,11 +341,6 @@ func (d Deps) handleMySelfPacedEnrollments() http.HandlerFunc {
 		Enrollments []selfPacedEnrollmentRow `json:"enrollments"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		viewer, ok := d.meUserID(w, r)
 		if !ok {
 			return

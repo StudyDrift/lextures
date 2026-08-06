@@ -42,10 +42,10 @@ export function IntroWelcomeBanner() {
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-slate-900 dark:text-neutral-50">
+          <p className="text-sm font-semibold text-fg-default">
             {t('introCourse.banner.title')}
           </p>
-          <p className="mt-1 text-sm text-slate-600 dark:text-neutral-300">
+          <p className="mt-1 text-sm text-fg-muted">
             {t('introCourse.banner.body')}
           </p>
           <Link
@@ -62,7 +62,7 @@ export function IntroWelcomeBanner() {
           type="button"
           onClick={handleDismiss}
           aria-label={t('introCourse.banner.dismiss')}
-          className="inline-flex shrink-0 items-center justify-center rounded-lg p-2 text-slate-500 transition-[background-color,color,border-color] hover:bg-slate-100 hover:text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
+          className="inline-flex shrink-0 items-center justify-center rounded-lg p-2 text-fg-muted transition-[background-color,color,border-color] hover:bg-surface-sunken hover:text-fg-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 dark:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-fg-default"
         >
           <X className="h-4 w-4" aria-hidden />
         </button>

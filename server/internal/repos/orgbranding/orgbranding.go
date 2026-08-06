@@ -28,7 +28,11 @@ type Row struct {
 	SecondaryColor         string
 	CustomDomain           *string
 	CustomEmailDisplayName *string
-	UpdatedAt              time.Time
+	// BrandAccentOklch is UX.1 org accent (NULL = product default).
+	BrandAccentOklch *string
+	// BrandTokensVersion increments when brand accent changes.
+	BrandTokensVersion int
+	UpdatedAt          time.Time
 }
 
 func strPtr(ns sql.NullString) *string {
@@ -45,7 +49,8 @@ func strPtr(ns sql.NullString) *string {
 // Get returns branding for an org, or (nil, nil) if the org has no row yet.
 func Get(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID) (*Row, error) {
 	row := pool.QueryRow(ctx, `
-SELECT org_id, logo_url, favicon_url, primary_color, secondary_color, custom_domain, custom_email_display_name, updated_at
+SELECT org_id, logo_url, favicon_url, primary_color, secondary_color, custom_domain, custom_email_display_name,
+       brand_accent_oklch, COALESCE(brand_tokens_version, 1), updated_at
 FROM tenant.org_branding
 WHERE org_id = $1
 `, orgID)
@@ -54,8 +59,8 @@ WHERE org_id = $1
 
 func scanRow(row pgx.Row) (*Row, error) {
 	var r Row
-	var logo, fav, dom, email sql.NullString
-	err := row.Scan(&r.OrgID, &logo, &fav, &r.PrimaryColor, &r.SecondaryColor, &dom, &email, &r.UpdatedAt)
+	var logo, fav, dom, email, accent sql.NullString
+	err := row.Scan(&r.OrgID, &logo, &fav, &r.PrimaryColor, &r.SecondaryColor, &dom, &email, &accent, &r.BrandTokensVersion, &r.UpdatedAt)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, nil
@@ -66,11 +71,21 @@ func scanRow(row pgx.Row) (*Row, error) {
 	r.FaviconURL = strPtr(fav)
 	r.CustomDomain = strPtr(dom)
 	r.CustomEmailDisplayName = strPtr(email)
+	r.BrandAccentOklch = strPtr(accent)
+	if r.BrandTokensVersion == 0 {
+		r.BrandTokensVersion = 1
+	}
 	return &r, nil
 }
 
 // UpsertReplace inserts or replaces all branding columns for an org.
 func UpsertReplace(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID, logoURL, faviconURL *string, primaryHex, secondaryHex string, customDomain, emailDisplay *string) error {
+	return UpsertReplaceWithAccent(ctx, pool, orgID, logoURL, faviconURL, primaryHex, secondaryHex, customDomain, emailDisplay, nil, false)
+}
+
+// UpsertReplaceWithAccent is UpsertReplace plus optional brand accent (UX.1).
+// When setAccent is true, brand_accent_oklch is written (nil clears) and brand_tokens_version increments.
+func UpsertReplaceWithAccent(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID, logoURL, faviconURL *string, primaryHex, secondaryHex string, customDomain, emailDisplay *string, brandAccent *string, setAccent bool) error {
 	p1 := strings.TrimSpace(primaryHex)
 	if p1 == "" {
 		p1 = DefaultPrimaryHex
@@ -89,6 +104,23 @@ func UpsertReplace(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID, log
 		}
 	} else {
 		dom = nil
+	}
+	if setAccent {
+		_, err := pool.Exec(ctx, `
+INSERT INTO tenant.org_branding (org_id, logo_url, favicon_url, primary_color, secondary_color, custom_domain, custom_email_display_name, brand_accent_oklch, brand_tokens_version, updated_at)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 1, NOW())
+ON CONFLICT (org_id) DO UPDATE SET
+  logo_url = EXCLUDED.logo_url,
+  favicon_url = EXCLUDED.favicon_url,
+  primary_color = EXCLUDED.primary_color,
+  secondary_color = EXCLUDED.secondary_color,
+  custom_domain = EXCLUDED.custom_domain,
+  custom_email_display_name = EXCLUDED.custom_email_display_name,
+  brand_accent_oklch = EXCLUDED.brand_accent_oklch,
+  brand_tokens_version = tenant.org_branding.brand_tokens_version + 1,
+  updated_at = NOW()
+`, orgID, strOrNil(logoURL), strOrNil(faviconURL), p1, p2, dom, strOrNil(emailDisplay), strOrNil(brandAccent))
+		return err
 	}
 	_, err := pool.Exec(ctx, `
 INSERT INTO tenant.org_branding (org_id, logo_url, favicon_url, primary_color, secondary_color, custom_domain, custom_email_display_name, updated_at)

@@ -138,24 +138,24 @@ export function GenerateWithAiPanel({
       aria-modal="true"
       aria-labelledby="live-quiz-ai-title"
     >
-      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg bg-white p-4 shadow-lg dark:bg-neutral-900">
+      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg bg-surface-raised p-4 shadow-lg dark:bg-surface-raised">
         <div className="mb-3 flex items-start justify-between gap-2">
           <div>
             <h2
               id="live-quiz-ai-title"
-              className="flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-neutral-100"
+              className="flex items-center gap-2 text-lg font-semibold text-fg-default"
             >
               <Sparkles className="h-5 w-5" aria-hidden />
               {t('liveQuiz.ai.title')}
             </h2>
-            <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+            <p className="mt-1 text-sm text-fg-muted">
               {t('liveQuiz.ai.subtitle')}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="min-h-11 min-w-11 rounded-md p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-neutral-800"
+            className="min-h-11 min-w-11 rounded-md p-2 text-fg-muted hover:bg-surface-sunken dark:hover:bg-surface-overlay"
             aria-label={t('liveQuiz.ai.close')}
           >
             <X className="h-5 w-5" />
@@ -170,11 +170,11 @@ export function GenerateWithAiPanel({
         </div>
 
         {unavailableReason ? (
-          <p className="text-sm text-slate-600 dark:text-neutral-400">{unavailableReason}</p>
+          <p className="text-sm text-fg-muted">{unavailableReason}</p>
         ) : (
           <div className="space-y-3">
             <fieldset>
-              <legend className="mb-1 text-sm font-medium text-slate-800 dark:text-neutral-200">
+              <legend className="mb-1 text-sm font-medium text-fg-default">
                 {t('liveQuiz.ai.sourceLabel')}
               </legend>
               <div className="flex flex-wrap gap-2">
@@ -187,7 +187,7 @@ export function GenerateWithAiPanel({
                 ).map(([value, key]) => (
                   <label
                     key={value}
-                    className="inline-flex min-h-11 items-center gap-2 rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600"
+                    className="inline-flex min-h-11 items-center gap-2 rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default"
                   >
                     <input
                       type="radio"
@@ -210,7 +210,7 @@ export function GenerateWithAiPanel({
                   onChange={(e) => setTopic(e.target.value)}
                   rows={3}
                   disabled={generating}
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-800"
+                  className="w-full rounded-md border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-overlay"
                   placeholder={t('liveQuiz.ai.topicPlaceholder')}
                 />
               </label>
@@ -223,7 +223,7 @@ export function GenerateWithAiPanel({
                   onChange={(e) => setPassage(e.target.value)}
                   rows={6}
                   disabled={generating}
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-800"
+                  className="w-full rounded-md border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-overlay"
                   placeholder={t('liveQuiz.ai.passagePlaceholder')}
                 />
               </label>
@@ -235,7 +235,7 @@ export function GenerateWithAiPanel({
                   value={contentId}
                   onChange={(e) => setContentId(e.target.value)}
                   disabled={generating}
-                  className="w-full min-h-11 rounded-md border border-slate-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-800"
+                  className="w-full min-h-11 rounded-md border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-overlay"
                   placeholder={t('liveQuiz.ai.contentIdPlaceholder')}
                 />
               </label>
@@ -251,7 +251,7 @@ export function GenerateWithAiPanel({
                   value={count}
                   onChange={(e) => setCount(Number(e.target.value) || 5)}
                   disabled={generating}
-                  className="w-full min-h-11 rounded-md border border-slate-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-800"
+                  className="w-full min-h-11 rounded-md border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-overlay"
                 />
               </label>
               <label className="block text-sm">
@@ -260,7 +260,7 @@ export function GenerateWithAiPanel({
                   value={difficulty}
                   onChange={(e) => setDifficulty(e.target.value as 'easy' | 'medium' | 'hard')}
                   disabled={generating}
-                  className="w-full min-h-11 rounded-md border border-slate-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-800"
+                  className="w-full min-h-11 rounded-md border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-overlay"
                 >
                   <option value="easy">{t('liveQuiz.ai.difficulty.easy')}</option>
                   <option value="medium">{t('liveQuiz.ai.difficulty.medium')}</option>
@@ -275,7 +275,7 @@ export function GenerateWithAiPanel({
                 {TYPE_OPTIONS.map((qt) => (
                   <label
                     key={qt}
-                    className="inline-flex min-h-11 items-center gap-2 rounded-md border border-slate-300 px-2 py-1 text-xs dark:border-neutral-600"
+                    className="inline-flex min-h-11 items-center gap-2 rounded-md border border-border-strong px-2 py-1 text-xs dark:border-border-default"
                   >
                     <input
                       type="checkbox"
@@ -296,7 +296,7 @@ export function GenerateWithAiPanel({
                   value={gradeBand}
                   onChange={(e) => setGradeBand(e.target.value)}
                   disabled={generating}
-                  className="w-full min-h-11 rounded-md border border-slate-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-800"
+                  className="w-full min-h-11 rounded-md border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-overlay"
                   placeholder={t('liveQuiz.ai.gradePlaceholder')}
                 />
               </label>
@@ -306,7 +306,7 @@ export function GenerateWithAiPanel({
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
                   disabled={generating}
-                  className="w-full min-h-11 rounded-md border border-slate-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-800"
+                  className="w-full min-h-11 rounded-md border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-overlay"
                 />
               </label>
             </div>
@@ -322,13 +322,13 @@ export function GenerateWithAiPanel({
             </label>
 
             {job ? (
-              <div className="rounded-md border border-slate-200 p-3 text-sm dark:border-neutral-700" aria-live="polite">
+              <div className="rounded-md border border-border-default p-3 text-sm dark:border-border-default" aria-live="polite">
                 <p>
                   {t('liveQuiz.ai.jobStatus', { status: job.status, progress: job.progress })}
                 </p>
-                {job.error ? <p className="mt-1 text-red-600 dark:text-red-400">{job.error}</p> : null}
+                {job.error ? <p className="mt-1 text-danger-fg">{job.error}</p> : null}
                 {job.status === 'succeeded' && job.resultSummary ? (
-                  <p className="mt-1 text-slate-600 dark:text-neutral-400">
+                  <p className="mt-1 text-fg-muted">
                     {t('liveQuiz.ai.jobSummary', {
                       inserted: job.resultSummary.inserted ?? 0,
                       dropped: job.resultSummary.dropped ?? 0,
@@ -345,7 +345,7 @@ export function GenerateWithAiPanel({
                   onClick={() => {
                     void handleCancel()
                   }}
-                  className="min-h-11 rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600"
+                  className="min-h-11 rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default"
                 >
                   {t('liveQuiz.ai.cancel')}
                 </button>
@@ -356,7 +356,7 @@ export function GenerateWithAiPanel({
                   void handleGenerate()
                 }}
                 disabled={!!unavailableReason || submitting || generating}
-                className="inline-flex min-h-11 items-center gap-1.5 rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
+                className="inline-flex min-h-11 items-center gap-1.5 rounded-md bg-accent-solid px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
               >
                 {submitting || generating ? (
                   <Loader2 className="h-4 w-4 motion-safe:animate-spin" aria-hidden />

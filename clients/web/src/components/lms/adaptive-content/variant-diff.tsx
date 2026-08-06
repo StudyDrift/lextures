@@ -13,16 +13,16 @@ export function VariantDiff({ baseMarkdown, variantMarkdown, className = '' }: P
   const lines = diffLines(baseMarkdown, variantMarkdown)
   return (
     <div
-      className={`overflow-auto rounded-lg border border-slate-200 bg-white text-sm dark:border-neutral-700 dark:bg-neutral-950 ${className}`}
+      className={`overflow-auto rounded-lg border border-border-default bg-surface-raised text-sm dark:border-border-default dark:bg-surface-base ${className}`}
       role="region"
       aria-label="Base versus variant diff"
     >
-      <pre className="m-0 whitespace-pre-wrap break-words p-3 font-mono text-xs leading-relaxed text-slate-800 dark:text-neutral-100">
+      <pre className="m-0 whitespace-pre-wrap break-words p-3 font-mono text-xs leading-relaxed text-fg-default">
         {lines.map((line, idx) => {
           if (line.type === 'same') {
             return (
-              <div key={idx} className="text-slate-700 dark:text-neutral-300">
-                <span className="select-none text-slate-400 dark:text-neutral-600" aria-hidden>
+              <div key={idx} className="text-fg-muted">
+                <span className="select-none text-fg-subtle dark:text-neutral-600" aria-hidden>
                   {'  '}
                 </span>
                 {line.text || ' '}

@@ -10,7 +10,7 @@ export function QuizFocusTopBar({ model }: { model: QuizShellFocusMode }) {
       ? 'border-b-amber-700/40 bg-amber-950 text-amber-50 dark:border-b-amber-500/30 dark:bg-amber-950/90 dark:text-amber-50'
       : lockdownAccent === 'one_at_a_time'
         ? 'border-b-indigo-900/25 bg-indigo-950 text-indigo-50 dark:border-b-indigo-400/20 dark:bg-indigo-950/90 dark:text-indigo-50'
-        : 'border-b-slate-200 bg-slate-900 text-slate-50 dark:border-b-neutral-700 dark:bg-neutral-950 dark:text-neutral-100'
+        : 'border-b-slate-200 bg-slate-900 text-slate-50 dark:border-b-neutral-700 dark:bg-surface-base dark:text-fg-default'
 
   return (
     <header
@@ -32,9 +32,7 @@ export function QuizFocusTopBar({ model }: { model: QuizShellFocusMode }) {
 
         {timeRemainingLabel ? (
           <p
-            className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold tabular-nums sm:text-sm ${
-              timeUrgent ? 'bg-rose-600 text-white' : 'bg-white/10'
-            }`}
+            className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold tabular-nums sm:text-sm ${ timeUrgent ? 'bg-rose-600 text-white' : 'bg-white/10' }`}
             role="timer"
             aria-live={timeUrgent ? 'assertive' : 'polite'}
           >
@@ -52,11 +50,7 @@ export function QuizFocusTopBar({ model }: { model: QuizShellFocusMode }) {
             type="button"
             onClick={onToggleFlagForReview}
             aria-pressed={flaggedForCurrent}
-            className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold transition-[background-color,color,border-color] sm:text-sm ${
-              flaggedForCurrent
-                ? 'border-amber-300 bg-amber-400/20 text-amber-50'
-                : 'border-white/25 bg-white/5 text-inherit hover:bg-white/10'
-            }`}
+            className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold transition-[background-color,color,border-color] sm:text-sm ${ flaggedForCurrent ? 'border-amber-300 bg-amber-400/20 text-amber-50' : 'border-white/25 bg-white/5 text-inherit hover:bg-white/10' }`}
           >
             <Bookmark className={`h-3.5 w-3.5 shrink-0 ${flaggedForCurrent ? 'fill-current' : ''}`} aria-hidden />
             {flaggedForCurrent ? 'Flagged' : 'Flag for review'}

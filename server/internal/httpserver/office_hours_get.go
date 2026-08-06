@@ -18,11 +18,6 @@ import (
 // Returns upcoming availability windows and appointment slots for the next 4 weeks.
 func (d Deps) handleListAvailabilitySlots() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode := chi.URLParam(r, "course_code")
 		userID, ok := d.meUserID(w, r)
 		if !ok {
@@ -97,11 +92,6 @@ func (d Deps) handleListAvailabilitySlots() http.HandlerFunc {
 // handleGetMyAppointments is GET /api/v1/me/appointments.
 func (d Deps) handleGetMyAppointments() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -124,11 +114,6 @@ func (d Deps) handleGetMyAppointments() http.HandlerFunc {
 // handleGetSlotIcal is GET /api/v1/slots/{slot_id}/ical — RFC 5545 VCALENDAR download.
 func (d Deps) handleGetSlotIcal() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		slotIDStr := chi.URLParam(r, "slot_id")
 		slotID, err := uuid.Parse(slotIDStr)
 		if err != nil {

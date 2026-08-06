@@ -83,7 +83,7 @@ export default function CourseTranslationsSettings() {
 
   if (!enabled) {
     return (
-      <p className="text-sm text-stone-600 dark:text-neutral-400">
+      <p className="text-sm text-stone-600 dark:text-fg-muted">
         Ask a global administrator to enable translation memory in platform settings.
       </p>
     )
@@ -95,7 +95,7 @@ export default function CourseTranslationsSettings() {
 
   if (!canTranslate) {
     return (
-      <p className="text-sm text-stone-600 dark:text-neutral-400">
+      <p className="text-sm text-stone-600 dark:text-fg-muted">
         You do not have permission to manage course translations.{' '}
         <Link className="text-blue-600 underline" to={`/courses/${courseCode}`}>
           Back to course
@@ -167,7 +167,7 @@ export default function CourseTranslationsSettings() {
   return (
     <div>
       {coverage ? (
-        <p className="mb-4 text-sm text-stone-600 dark:text-neutral-400" role="status">
+        <p className="mb-4 text-sm text-stone-600 dark:text-fg-muted" role="status">
           {Math.round(coverage.percent)}% of items have a published {TARGET_LOCALE} translation (
           {coverage.translatedItems}/{coverage.totalItems}).
         </p>
@@ -177,21 +177,17 @@ export default function CourseTranslationsSettings() {
         <Loader2 className="h-6 w-6 animate-spin" aria-label="Loading" />
       ) : (
         <div className="grid gap-4 lg:grid-cols-[240px_1fr]">
-          <ul className="space-y-1 rounded-lg border border-stone-200 p-2 dark:border-neutral-700">
+          <ul className="space-y-1 rounded-lg border border-stone-200 p-2 dark:border-border-default">
             {items.map((it) => (
               <li key={it.itemId}>
                 <button
                   type="button"
-                  className={`w-full rounded px-2 py-1.5 text-start text-sm ${
-                    selectedId === it.itemId
-                      ? 'bg-stone-200 dark:bg-neutral-700'
-                      : 'hover:bg-stone-100 dark:hover:bg-neutral-800'
-                  }`}
+                  className={`w-full rounded px-2 py-1.5 text-start text-sm ${ selectedId === it.itemId ? 'bg-stone-200 dark:bg-neutral-700' : 'hover:bg-stone-100 dark:hover:bg-surface-overlay' }`}
                   onClick={() => setSelectedId(it.itemId)}
                 >
                   {it.title || 'Untitled'}
                   {it.hasPublished ? (
-                    <span className="ms-1 text-xs text-green-700 dark:text-green-400">✓</span>
+                    <span className="ms-1 text-xs text-success-fg">✓</span>
                   ) : null}
                 </button>
               </li>
@@ -201,9 +197,9 @@ export default function CourseTranslationsSettings() {
           {selected ? (
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <h2 className="text-sm font-semibold text-stone-800 dark:text-neutral-200">Source</h2>
+                <h2 className="text-sm font-semibold text-stone-800 dark:text-fg-default">Source</h2>
                 <p className="mt-1 text-sm font-medium">{selected.title}</p>
-                <div className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap rounded border border-stone-200 p-3 text-sm dark:border-neutral-700">
+                <div className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap rounded border border-stone-200 p-3 text-sm dark:border-border-default">
                   {selected.body}
                 </div>
                 {selected.glossaryMatches && selected.glossaryMatches.length > 0 ? (
@@ -214,21 +210,21 @@ export default function CourseTranslationsSettings() {
                 ) : null}
               </div>
               <div>
-                <h2 className="text-sm font-semibold text-stone-800 dark:text-neutral-200">
+                <h2 className="text-sm font-semibold text-stone-800 dark:text-fg-default">
                   Translation ({TARGET_LOCALE})
                 </h2>
                 {selected.machineTranslationDraft ? (
-                  <p className="text-xs text-amber-700 dark:text-amber-400">AI-generated draft — review required</p>
+                  <p className="text-xs text-warning-fg dark:text-amber-400">AI-generated draft — review required</p>
                 ) : null}
                 <input
-                  className="mt-2 w-full rounded border border-stone-300 px-2 py-1 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+                  className="mt-2 w-full rounded border border-stone-300 px-2 py-1 text-sm dark:border-border-default dark:bg-surface-raised"
                   value={draftTitle}
                   onChange={(e) => setDraftTitle(e.target.value)}
                   placeholder="Translated title"
                   aria-label="Translated title"
                 />
                 <textarea
-                  className="mt-2 min-h-[200px] w-full rounded border border-stone-300 p-2 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+                  className="mt-2 min-h-[200px] w-full rounded border border-stone-300 p-2 text-sm dark:border-border-default dark:bg-surface-raised"
                   value={draftBody}
                   onChange={(e) => setDraftBody(e.target.value)}
                   dir="ltr"
@@ -264,7 +260,7 @@ export default function CourseTranslationsSettings() {
                   </button>
                   <button
                     type="button"
-                    className="rounded border border-stone-300 px-3 py-1.5 text-sm dark:border-neutral-600"
+                    className="rounded border border-stone-300 px-3 py-1.5 text-sm dark:border-border-default"
                     disabled={saving}
                     onClick={() => void handleAIDraft()}
                   >
@@ -285,18 +281,18 @@ export default function CourseTranslationsSettings() {
         </div>
       )}
 
-      <section className="mt-8 border-t border-stone-200 pt-6 dark:border-neutral-700">
+      <section className="mt-8 border-t border-stone-200 pt-6 dark:border-border-default">
         <h2 className="text-sm font-semibold">Course glossary</h2>
         <div className="mt-2 flex flex-wrap gap-2">
           <input
-            className="rounded border border-stone-300 px-2 py-1 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+            className="rounded border border-stone-300 px-2 py-1 text-sm dark:border-border-default dark:bg-surface-raised"
             placeholder="Source term"
             value={glossarySource}
             onChange={(e) => setGlossarySource(e.target.value)}
             aria-label="Glossary source term"
           />
           <input
-            className="rounded border border-stone-300 px-2 py-1 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+            className="rounded border border-stone-300 px-2 py-1 text-sm dark:border-border-default dark:bg-surface-raised"
             placeholder="Target term"
             value={glossaryTarget}
             onChange={(e) => setGlossaryTarget(e.target.value)}

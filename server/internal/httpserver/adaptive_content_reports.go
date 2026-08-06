@@ -21,10 +21,6 @@ func (d Deps) registerAdaptiveContentReportRoutes(r chi.Router) {
 // handleAdaptiveContentCourseReportGet is GET .../adaptive-content/report (instructor, AC.9 FR-1).
 func (d Deps) handleAdaptiveContentCourseReportGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, _, ok := d.requireCourseItemCreate(w, r)
 		if !ok {
 			return
@@ -51,10 +47,6 @@ func (d Deps) handleAdaptiveContentCourseReportGet() http.HandlerFunc {
 // handleAdaptiveContentCourseReportExport is GET .../adaptive-content/report/export (CSV, AC.9 FR-3).
 func (d Deps) handleAdaptiveContentCourseReportExport() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, _, ok := d.requireCourseItemCreate(w, r)
 		if !ok {
 			return
@@ -85,10 +77,6 @@ func (d Deps) handleAdaptiveContentCourseReportExport() http.HandlerFunc {
 // handleAdminAdaptiveContentReportGet is GET /api/v1/admin/adaptive-content/report (AC.9 FR-2).
 func (d Deps) handleAdminAdaptiveContentReportGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -105,10 +93,6 @@ func (d Deps) handleAdminAdaptiveContentReportGet() http.HandlerFunc {
 // handleAdminAdaptiveContentReportExport is GET /api/v1/admin/adaptive-content/report/export (CSV).
 func (d Deps) handleAdminAdaptiveContentReportExport() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}

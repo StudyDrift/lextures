@@ -41,7 +41,7 @@ export default function MyAccommodationsPage() {
   if (featuresLoading || loading) {
     return (
       <LmsPage title="My accommodations">
-        <p className="text-sm text-slate-500">Loading…</p>
+        <p className="text-sm text-fg-muted">Loading…</p>
       </LmsPage>
     )
   }
@@ -49,7 +49,7 @@ export default function MyAccommodationsPage() {
   if (!ffAccessibilityIntake) {
     return (
       <LmsPage title="My accommodations">
-        <p className="text-sm text-slate-600 dark:text-neutral-400">
+        <p className="text-sm text-fg-muted">
           Accessibility services are not enabled on this platform.
         </p>
       </LmsPage>
@@ -58,31 +58,31 @@ export default function MyAccommodationsPage() {
 
   return (
     <LmsPage title="My accommodations">
-      <p className="text-sm text-slate-600 dark:text-neutral-400">
+      <p className="text-sm text-fg-muted">
         These accommodations are configured by your accessibility services office and applied
         automatically across your courses. Contact the office if anything looks incorrect.
       </p>
 
       {error && (
-        <p role="alert" className="mt-4 text-sm text-red-600 dark:text-red-400">
+        <p role="alert" className="mt-4 text-sm text-danger-fg">
           {error}
         </p>
       )}
 
       {profiles.length === 0 ? (
-        <p className="mt-6 text-sm text-slate-500">You have no active accommodations.</p>
+        <p className="mt-6 text-sm text-fg-muted">You have no active accommodations.</p>
       ) : (
         <ul className="mt-6 space-y-3" aria-label="Active accommodations">
           {profiles.map((p) => (
             <li
               key={p.id}
-              className="rounded-xl border border-slate-200 px-4 py-3 dark:border-neutral-800"
+              className="rounded-xl border border-border-default px-4 py-3 dark:border-border-subtle"
             >
-              <p className="flex items-center gap-2 text-sm font-medium text-slate-900 dark:text-neutral-100">
+              <p className="flex items-center gap-2 text-sm font-medium text-fg-default">
                 <ShieldCheck className="h-4 w-4 text-violet-500" aria-hidden="true" />
                 {p.labels.join(', ')}
               </p>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-fg-muted">
                 Effective {p.effectiveFrom}
                 {p.effectiveUntil ? ` – ${p.effectiveUntil}` : ''}
               </p>
@@ -92,16 +92,16 @@ export default function MyAccommodationsPage() {
       )}
 
       <section aria-label="Courses affected" className="mt-8">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-fg-muted">
           Courses affected
         </h2>
         {courses.length === 0 ? (
-          <p className="mt-2 text-sm text-slate-500">You are not currently enrolled in any courses.</p>
+          <p className="mt-2 text-sm text-fg-muted">You are not currently enrolled in any courses.</p>
         ) : (
           <ul className="mt-2 space-y-1">
             {courses.map((c) => (
-              <li key={c.courseId} className="text-sm text-slate-700 dark:text-neutral-300">
-                <span className="font-mono text-xs text-slate-500">{c.courseCode}</span> — {c.title}
+              <li key={c.courseId} className="text-sm text-fg-muted">
+                <span className="font-mono text-xs text-fg-muted">{c.courseCode}</span> — {c.title}
               </li>
             ))}
           </ul>

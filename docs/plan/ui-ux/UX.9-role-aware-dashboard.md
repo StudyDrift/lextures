@@ -312,7 +312,7 @@ The primary region for students consumes the existing recommendation engine
 ## 13. Dependencies & Sequencing
 
 - **Must ship after** — [UX.1](UX.1-semantic-design-token-system.md) (status
-  colour), [UX.2](UX.2-core-component-library-and-adoption-ratchet.md) (cards,
+  colour), [UX.2](../../completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md) (cards,
   disclosure), [UX.3](UX.3-typography-and-reading-system.md) (scale),
   [UX.7](UX.7-navigation-information-architecture.md) (audience model reused),
   [UX.12](UX.12-loading-empty-error-offline-states.md) (per-widget states).

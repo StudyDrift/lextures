@@ -296,11 +296,11 @@ export default function HighlightAnnotateRenderer({
       <div className="space-y-2">
         <div className="flex flex-wrap items-end justify-between gap-2">
           <div>
-            <h3 className="text-sm font-semibold text-slate-800 dark:text-neutral-100">
+            <h3 className="text-sm font-semibold text-fg-default">
               {t('contentTools.tools.highlight_annotate.passageTitle')}
             </h3>
             {!readOnly ? (
-              <p className="text-xs text-slate-500 dark:text-neutral-400">
+              <p className="text-xs text-fg-muted">
                 {unitMode
                   ? t('contentTools.tools.highlight_annotate.passageHintTap', { unit: unitWord })
                   : t('contentTools.tools.highlight_annotate.passageHintSelect')}
@@ -308,10 +308,10 @@ export default function HighlightAnnotateRenderer({
             ) : null}
           </div>
           {!readOnly ? (
-            <label className="inline-flex cursor-pointer items-center gap-1.5 text-xs text-slate-600 dark:text-neutral-300">
+            <label className="inline-flex cursor-pointer items-center gap-1.5 text-xs text-fg-muted">
               <input
                 type="checkbox"
-                className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                className="rounded border-border-strong text-accent-fg focus:ring-indigo-500"
                 checked={!unitMode}
                 onChange={(e) => setUnitMode(!e.target.checked)}
                 data-testid="ha-unit-mode"

@@ -54,37 +54,37 @@ export default function CourseModuleVibeActivityPage() {
       actions={
         <Link
           to={`/courses/${encodeURIComponent(courseCode)}/modules`}
-          className="text-sm text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-neutral-200"
+          className="text-sm text-fg-muted hover:text-fg-default dark:text-fg-muted dark:hover:text-fg-default"
         >
           ← Back to modules
         </Link>
       }
     >
-      {loading && <p className="text-sm text-slate-500">Loading activity…</p>}
+      {loading && <p className="text-sm text-fg-muted">Loading activity…</p>}
       {loadError && (
-        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+        <p role="alert" className="text-sm text-danger-fg">
           {loadError}
         </p>
       )}
 
       {payload && (
         <div className="space-y-4">
-          <div className="rounded-xl border border-slate-200 bg-white p-2 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
+          <div className="rounded-xl border border-border-default bg-surface-raised p-2 shadow-sm dark:border-border-default dark:bg-surface-raised">
             <iframe
               title={payload.title}
               sandbox="allow-scripts allow-forms allow-same-origin"
               srcDoc={payload.html || '<!doctype html><html><body style="font-family:sans-serif;padding:2rem;color:#666">Empty activity. The instructor has not added content yet.</body></html>'}
-              className="block h-[70vh] w-full rounded-lg border border-slate-200 bg-white dark:border-neutral-700 dark:bg-neutral-950"
+              className="block h-[70vh] w-full rounded-lg border border-border-default bg-surface-raised dark:border-border-default dark:bg-surface-base"
               style={{ minHeight: '480px' }}
             />
           </div>
 
-          <p className="text-xs text-slate-500 dark:text-neutral-500">
+          <p className="text-xs text-fg-subtle">
             This is a self-contained instructor-authored interactive activity. It runs in a sandboxed frame.
           </p>
 
           {canEdit && (
-            <div className="pt-2 text-sm text-slate-600 dark:text-neutral-400">
+            <div className="pt-2 text-sm text-fg-muted">
               Instructors: edit the HTML via the Vibe Activity creation flow from the modules page (re-vibe or tweak source).
             </div>
           )}

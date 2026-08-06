@@ -83,7 +83,7 @@ export function ToolPreviewModal({ open, courseCode, instance, onClose }: ToolPr
       aria-modal="true"
       aria-labelledby="content-tool-preview-title"
     >
-      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-900">
+      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-raised">
         <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-200">
           {t('contentTools.authoring.previewBanner')}
         </div>
@@ -91,43 +91,43 @@ export function ToolPreviewModal({ open, courseCode, instance, onClose }: ToolPr
           <div className="flex items-start justify-between gap-2">
             <h2
               id="content-tool-preview-title"
-              className="text-sm font-semibold text-slate-900 dark:text-neutral-100"
+              className="text-sm font-semibold text-fg-default"
             >
               {t('contentTools.authoring.previewTitle')}
             </h2>
             <button
               type="button"
               onClick={onClose}
-              className="rounded px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+              className="rounded px-2 py-1 text-xs font-medium text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay"
             >
               {t('contentTools.authoring.close')}
             </button>
           </div>
           {localOnly ? (
-            <p className="text-xs text-slate-500 dark:text-neutral-400">
+            <p className="text-xs text-fg-muted">
               {t('contentTools.authoring.previewLocalOnly')}
             </p>
           ) : null}
-          <p className="text-sm text-slate-800 dark:text-neutral-200">{prompt}</p>
+          <p className="text-sm text-fg-default">{prompt}</p>
           {instance.toolId === 'noop_probe' ? (
             <label className="block space-y-1">
-              <span className="text-xs font-medium text-slate-600 dark:text-neutral-300">
+              <span className="text-xs font-medium text-fg-muted">
                 {t('contentTools.authoring.previewAnswer')}
               </span>
               <input
                 type="text"
                 value={answer}
                 onChange={(e) => setAnswer(e.target.value)}
-                className="w-full rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+                className="w-full rounded-md border border-border-default bg-surface-raised px-2.5 py-1.5 text-sm dark:border-border-default dark:bg-surface-base dark:text-fg-default"
               />
             </label>
           ) : (
-            <p className="text-xs text-slate-500 dark:text-neutral-400">
+            <p className="text-xs text-fg-muted">
               {t('contentTools.authoring.previewGeneric')}
             </p>
           )}
           {status ? (
-            <p className="text-xs text-slate-600 dark:text-neutral-300" role="status">
+            <p className="text-xs text-fg-muted" role="status">
               {status}
             </p>
           ) : null}
@@ -142,7 +142,7 @@ export function ToolPreviewModal({ open, courseCode, instance, onClose }: ToolPr
             <button
               type="button"
               onClick={resetPreview}
-              className="rounded-md px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:text-neutral-200 dark:hover:bg-neutral-800"
+              className="rounded-md px-3 py-1.5 text-xs font-medium text-fg-muted hover:bg-surface-sunken dark:text-fg-default dark:hover:bg-surface-overlay"
             >
               {t('contentTools.authoring.resetPreview')}
             </button>

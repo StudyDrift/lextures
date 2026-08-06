@@ -89,10 +89,10 @@ export default function ActivateParentPage() {
         <div className="mb-5 flex justify-center px-2">
           <BrandLogo className="mx-auto h-14 w-auto max-w-[min(100%,240px)] object-contain" />
         </div>
-        <h1 className="lex-auth-display text-[1.7rem] leading-snug text-stone-900 dark:text-neutral-50">
+        <h1 className="lex-auth-display text-[1.7rem] leading-snug text-stone-900">
           Activate parent account
         </h1>
-        <p className="mt-2 text-sm leading-relaxed text-stone-600 dark:text-neutral-400">
+        <p className="mt-2 text-sm leading-relaxed text-stone-600 dark:text-fg-muted">
           Set a password to connect to your child&apos;s Family dashboard.
         </p>
       </header>
@@ -100,7 +100,7 @@ export default function ActivateParentPage() {
       <div className={authCardClass}>
         {status === 'done' ? (
           <div className="space-y-4 text-center">
-            <p className="text-sm text-stone-700 dark:text-neutral-300" role="status">
+            <p className="text-sm text-stone-700 dark:text-fg-muted" role="status">
               {message}
             </p>
             <Link to="/login" state={{ from: '/parent' }} className={`inline-block text-sm ${authMutedLinkClass}`}>
@@ -110,14 +110,14 @@ export default function ActivateParentPage() {
         ) : (
           <form className="space-y-5" onSubmit={onSubmit}>
             {!tokenFromUrl.trim() ? (
-              <p className="text-sm text-amber-700" role="status">
+              <p className="text-sm text-warning-fg" role="status">
                 Missing token. Open the link from your invite email, or ask school staff to resend it.
               </p>
             ) : null}
             <div>
               <label
                 htmlFor="activate-password"
-                className="mb-1.5 block text-sm font-medium text-stone-800 dark:text-neutral-200"
+                className="mb-1.5 block text-sm font-medium text-stone-800 dark:text-fg-default"
               >
                 New password
               </label>
@@ -137,7 +137,7 @@ export default function ActivateParentPage() {
             <div>
               <label
                 htmlFor="activate-confirm"
-                className="mb-1.5 block text-sm font-medium text-stone-800 dark:text-neutral-200"
+                className="mb-1.5 block text-sm font-medium text-stone-800 dark:text-fg-default"
               >
                 Confirm password
               </label>
@@ -152,7 +152,7 @@ export default function ActivateParentPage() {
               />
             </div>
             {status === 'error' && message ? (
-              <p className="text-sm text-red-700 dark:text-red-300" role="alert">
+              <p className="text-sm text-danger-fg" role="alert">
                 {message}
               </p>
             ) : null}

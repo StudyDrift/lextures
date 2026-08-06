@@ -95,11 +95,6 @@ func (d Deps) notifyEnrollmentsForCourse(ctx context.Context, courseCode string)
 // handleCommMessagesList is GET /api/v1/communication/messages?folder&...
 func (d Deps) handleCommMessagesList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -126,11 +121,6 @@ func (d Deps) handleCommMessagesList() http.HandlerFunc {
 // handleCommMessagesPost is POST /api/v1/communication/messages
 func (d Deps) handleCommMessagesPost() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -193,11 +183,6 @@ func (d Deps) handleCommMessagesPost() http.HandlerFunc {
 // handleCommMessageGet is GET /api/v1/communication/messages/{id}
 func (d Deps) handleCommMessageGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -224,11 +209,6 @@ func (d Deps) handleCommMessageGet() http.HandlerFunc {
 // handleCommMessagePatch is PATCH /api/v1/communication/messages/{id}
 func (d Deps) handleCommMessagePatch() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -265,11 +245,6 @@ func (d Deps) handleCommMessagePatch() http.HandlerFunc {
 // handleCommUnread is GET /api/v1/communication/unread-count
 func (d Deps) handleCommUnread() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -287,11 +262,6 @@ func (d Deps) handleCommUnread() http.HandlerFunc {
 // handleCommWS is GET /api/v1/communication/ws — first text message: {"authToken":"…"} (serde camelCase).
 func (d Deps) handleCommWS() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.JWTSigner == nil {
 			http.Error(w, "auth not configured", http.StatusServiceUnavailable)
 			return

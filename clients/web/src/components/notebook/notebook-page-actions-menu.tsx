@@ -52,7 +52,7 @@ export function NotebookPageActionsMenu({
       <button
         type="button"
         onClick={onToggle}
-        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800"
+        className="inline-flex items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-fg-muted shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-muted dark:hover:bg-surface-overlay"
         aria-expanded={open}
         aria-haspopup="menu"
       >
@@ -62,7 +62,7 @@ export function NotebookPageActionsMenu({
       {open ? (
         <div
           role="menu"
-          className="absolute right-0 top-full z-20 mt-1 w-56 rounded-xl border border-slate-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-900"
+          className="absolute right-0 top-full z-20 mt-1 w-56 rounded-xl border border-border-default bg-surface-raised py-1 shadow-lg dark:border-border-default dark:bg-surface-raised"
         >
           {flashcardsEnabled ? (
             <button
@@ -72,7 +72,7 @@ export function NotebookPageActionsMenu({
                 closeAll()
                 onFlashcards()
               }}
-              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 transition-[background-color,color,border-color] hover:bg-slate-50 dark:text-neutral-300 dark:hover:bg-neutral-800"
+              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-fg-muted transition-[background-color,color,border-color] hover:bg-surface-base dark:text-fg-muted dark:hover:bg-surface-overlay"
             >
               <Sparkles className="h-4 w-4 text-indigo-500" aria-hidden />
               Create Flash Cards
@@ -82,7 +82,7 @@ export function NotebookPageActionsMenu({
           {moveTargets.length > 0 || canMoveToRoot ? (
             <>
               {flashcardsEnabled ? (
-                <div className="my-1 border-t border-slate-100 dark:border-neutral-800" role="separator" />
+                <div className="my-1 border-t border-border-subtle" role="separator" />
               ) : null}
               <div className="relative">
                 <button
@@ -91,19 +91,19 @@ export function NotebookPageActionsMenu({
                   aria-expanded={moveOpen}
                   aria-haspopup="menu"
                   onClick={() => setMoveOpen((v) => !v)}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 transition-[background-color,color,border-color] hover:bg-slate-50 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-fg-muted transition-[background-color,color,border-color] hover:bg-surface-base dark:text-fg-muted dark:hover:bg-surface-overlay"
                 >
                   <Folder className="h-4 w-4 text-amber-500 dark:text-amber-400" aria-hidden />
                   <span className="flex-1 text-start">Move to group</span>
-                  <ChevronRight className="h-3.5 w-3.5 text-slate-400" aria-hidden />
+                  <ChevronRight className="h-3.5 w-3.5 text-fg-subtle" aria-hidden />
                 </button>
                 {moveOpen ? (
                   <div
                     role="menu"
-                    className="absolute right-full top-0 z-30 me-1 max-h-64 w-60 overflow-y-auto rounded-xl border border-slate-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-900"
+                    className="absolute right-full top-0 z-30 me-1 max-h-64 w-60 overflow-y-auto rounded-xl border border-border-default bg-surface-raised py-1 shadow-lg dark:border-border-default dark:bg-surface-raised"
                   >
                     {moveTargets.length === 0 ? (
-                      <p className="px-3 py-2 text-xs text-slate-500 dark:text-neutral-400">
+                      <p className="px-3 py-2 text-xs text-fg-muted">
                         No groups available.
                       </p>
                     ) : (
@@ -119,13 +119,13 @@ export function NotebookPageActionsMenu({
                               closeAll()
                               onMoveToGroup(activePage.id, group.id)
                             }}
-                            className="flex w-full flex-col items-start gap-0.5 px-3 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-default disabled:opacity-50 dark:hover:bg-neutral-800"
+                            className="flex w-full flex-col items-start gap-0.5 px-3 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-surface-base disabled:cursor-default disabled:opacity-50 dark:hover:bg-surface-overlay"
                           >
-                            <span className="font-medium text-slate-800 dark:text-neutral-100">
+                            <span className="font-medium text-fg-default">
                               {group.title || 'Untitled group'}
                               {selected ? ' (current)' : ''}
                             </span>
-                            <span className="text-xs text-slate-500 dark:text-neutral-400">
+                            <span className="text-xs text-fg-muted">
                               {notebookPagePathLabel(pages, group.id)}
                             </span>
                           </button>
@@ -143,7 +143,7 @@ export function NotebookPageActionsMenu({
                     closeAll()
                     onMoveToRoot(activePage.id)
                   }}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 transition-[background-color,color,border-color] hover:bg-slate-50 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-fg-muted transition-[background-color,color,border-color] hover:bg-surface-base dark:text-fg-muted dark:hover:bg-surface-overlay"
                 >
                   Move to top level
                 </button>
@@ -152,7 +152,7 @@ export function NotebookPageActionsMenu({
           ) : null}
 
           {isNotebookGroup(activePage) && moveTargets.length === 0 && !canMoveToRoot ? (
-            <p className="px-3 py-2 text-xs text-slate-500 dark:text-neutral-400">
+            <p className="px-3 py-2 text-xs text-fg-muted">
               Create a group in the sidebar to organize pages.
             </p>
           ) : null}

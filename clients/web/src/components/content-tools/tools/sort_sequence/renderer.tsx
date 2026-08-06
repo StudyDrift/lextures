@@ -292,7 +292,7 @@ export default function SortSequenceRenderer({
       aria-describedby={liveHelpId}
     >
       <div className="flex items-start justify-between gap-2">
-        <p className="text-sm font-semibold text-slate-800 dark:text-neutral-100">{prompt}</p>
+        <p className="text-sm font-semibold text-fg-default">{prompt}</p>
         <button
           type="button"
           className="shrink-0 text-xs text-sky-700 underline dark:text-sky-300"
@@ -305,7 +305,7 @@ export default function SortSequenceRenderer({
       {helpOpen ? (
         <p
           id={liveHelpId}
-          className="rounded bg-slate-50 px-3 py-2 text-xs text-slate-700 dark:bg-neutral-800 dark:text-neutral-200"
+          className="rounded bg-surface-base px-3 py-2 text-xs text-fg-muted dark:bg-surface-overlay dark:text-fg-default"
         >
           {t('contentTools.tools.sort_sequence.keyboardHelpBody')}
         </p>
@@ -333,11 +333,9 @@ export default function SortSequenceRenderer({
             applyEngine(tapItemOrTarget(engine, engineOpts(), { type: 'tray' }))
           }
         }}
-        className={`min-h-12 rounded border border-dashed border-slate-300 p-2 dark:border-neutral-600 ${
-          engine.target?.kind === 'tray' && engine.grabbedId ? 'ring-2 ring-sky-500' : ''
-        }`}
+        className={`min-h-12 rounded border border-dashed border-border-strong p-2 dark:border-border-default ${ engine.target?.kind === 'tray' && engine.grabbedId ? 'ring-2 ring-sky-500' : '' }`}
       >
-        <p className="mb-1 text-xs font-medium text-slate-500">
+        <p className="mb-1 text-xs font-medium text-fg-muted">
           {t('contentTools.tools.sort_sequence.tray')} ({trayIds.length})
         </p>
         <div className="flex flex-wrap gap-2">
@@ -409,7 +407,7 @@ export default function SortSequenceRenderer({
           <button
             type="button"
             data-testid="sort-try-again"
-            className="rounded border border-slate-300 px-3 py-1.5 text-sm dark:border-neutral-600"
+            className="rounded border border-border-strong px-3 py-1.5 text-sm dark:border-border-default"
             disabled={busy || readOnly}
             onClick={() => void onTryAgain()}
           >
@@ -417,14 +415,14 @@ export default function SortSequenceRenderer({
           </button>
         ) : null}
         {typeof checkResult?.scorePct === 'number' ? (
-          <span className="text-sm text-slate-700 dark:text-neutral-200" data-testid="sort-score">
+          <span className="text-sm text-fg-default" data-testid="sort-score">
             {t('contentTools.tools.sort_sequence.score', {
               score: Math.round(checkResult.scorePct),
             })}
           </span>
         ) : null}
         {attemptsLeft != null && attemptsLeft >= 0 ? (
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-fg-muted">
             {t('contentTools.tools.sort_sequence.attemptsLeft', { count: attemptsLeft })}
           </span>
         ) : null}

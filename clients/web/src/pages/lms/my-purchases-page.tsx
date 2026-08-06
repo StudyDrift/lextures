@@ -71,10 +71,10 @@ export default function MyPurchasesPage() {
     <LmsPage title={t('purchases.title')} description={t('purchases.subtitle')}>
       <div className="mx-auto max-w-3xl space-y-6">
         <header>
-          <h1 id={titleId} className="text-2xl font-semibold text-slate-900 dark:text-neutral-100">
+          <h1 id={titleId} className="text-2xl font-semibold text-fg-default">
             {t('purchases.title')}
           </h1>
-          <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">{t('purchases.subtitle')}</p>
+          <p className="mt-2 text-sm text-fg-muted">{t('purchases.subtitle')}</p>
         </header>
 
         {error ? (
@@ -87,7 +87,7 @@ export default function MyPurchasesPage() {
         ) : null}
 
         {loading || purchases === null ? (
-          <p className="inline-flex items-center gap-2 text-sm text-slate-600 dark:text-neutral-400">
+          <p className="inline-flex items-center gap-2 text-sm text-fg-muted">
             <Loader2 className="h-4 w-4 motion-safe:animate-spin" aria-hidden />
             {t('marketplace.loading')}
           </p>
@@ -99,7 +99,7 @@ export default function MyPurchasesPage() {
             primaryAction={{ label: t('marketplace.title'), to: '/marketplace' }}
           />
         ) : (
-          <ul className="divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white dark:divide-neutral-800 dark:border-neutral-700 dark:bg-neutral-900">
+          <ul className="divide-y divide-slate-200 rounded-xl border border-border-default bg-surface-raised dark:divide-neutral-800 dark:border-border-default dark:bg-surface-raised">
             {purchases.map((p) => {
               const acquired = new Date(p.acquiredAt)
               const dateLabel = Number.isNaN(acquired.getTime())
@@ -122,25 +122,25 @@ export default function MyPurchasesPage() {
                   <div className="min-w-0">
                     <Link
                       to={`/courses/${encodeURIComponent(p.courseCode)}`}
-                      className="font-semibold text-slate-900 hover:text-indigo-600 dark:text-neutral-100 dark:hover:text-indigo-300"
+                      className="font-semibold text-fg-default hover:text-accent-fg dark:text-fg-default dark:hover:text-indigo-300"
                     >
                       {p.title}
                     </Link>
-                    <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+                    <p className="mt-1 text-sm text-fg-muted">
                       {sourceLabel(p.source, t)} · {dateLabel} · {priceLabel}
                     </p>
                   </div>
                   <div className="flex shrink-0 flex-wrap items-center gap-2">
                     <Link
                       to={`/courses/${encodeURIComponent(p.courseCode)}`}
-                      className="inline-flex items-center rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                      className="inline-flex items-center rounded-lg border border-border-default px-3 py-1.5 text-sm font-medium text-fg-muted hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
                     >
                       {t('marketplace.goToCourse')}
                     </Link>
                     {p.receiptUrl ? (
                       <Link
                         to="/me/billing"
-                        className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                        className="inline-flex items-center gap-1 rounded-lg border border-border-default px-3 py-1.5 text-sm font-medium text-fg-muted hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
                       >
                         {t('purchases.receipt')}
                         <ExternalLink className="h-3.5 w-3.5" aria-hidden />

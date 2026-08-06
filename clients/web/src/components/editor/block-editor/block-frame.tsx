@@ -58,10 +58,10 @@ export function BlockFrame({
   return (
     <div
       className={[
-        '@container group relative rounded-xl border bg-white motion-safe:transition-[border-color,box-shadow] dark:bg-neutral-900',
+        '@container group relative rounded-xl border bg-surface-raised motion-safe:transition-[border-color,box-shadow] dark:bg-surface-raised',
         selected
           ? 'border-indigo-400 shadow-sm shadow-indigo-900/10 ring-1 ring-indigo-400/25 dark:border-indigo-500 dark:ring-indigo-500/25'
-          : 'border-slate-200 hover:border-slate-300 dark:border-neutral-700 dark:hover:border-neutral-600',
+          : 'border-border-default hover:border-border-strong dark:hover:border-border-default',
         disabled ? 'opacity-60' : '',
         className,
       ]
@@ -83,15 +83,15 @@ export function BlockFrame({
       <div
         className={[
           'sticky top-0 z-20 flex h-10 items-center gap-2 rounded-t-xl border-b px-3',
-          'bg-white/95 backdrop-blur-sm dark:bg-neutral-900/95',
+          'bg-white/95 backdrop-blur-sm/95',
           selected
-            ? 'border-slate-200 dark:border-neutral-700'
-            : 'border-transparent group-hover:border-slate-100 group-focus-within:border-slate-100 dark:group-hover:border-neutral-800 dark:group-focus-within:border-neutral-800',
+            ? 'border-border-default'
+            : 'border-transparent group-hover:border-border-subtle group-focus-within:border-border-subtle dark:group-hover:border-border-subtle dark:group-focus-within:border-border-subtle',
         ].join(' ')}
       >
         <span
           className={[
-            'min-w-0 truncate text-xs font-medium text-slate-500 dark:text-neutral-400',
+            'min-w-0 truncate text-xs font-medium text-fg-muted',
             // With the toolbar in the row, drop the label rather than ellipsing it.
             toolbar ? 'hidden @[34rem]:block' : 'block',
           ].join(' ')}
@@ -109,7 +109,7 @@ export function BlockFrame({
                 type="button"
                 disabled={disabled || moveUpDisabled}
                 onClick={onMoveUp}
-                className={`${ACTION_BUTTON} text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-neutral-50`}
+                className={`${ACTION_BUTTON} text-fg-muted hover:bg-surface-sunken hover:text-fg-default dark:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-neutral-50`}
                 title="Move this section up"
               >
                 <ChevronUp className="h-4 w-4" aria-hidden />
@@ -121,7 +121,7 @@ export function BlockFrame({
                 type="button"
                 disabled={disabled || moveDownDisabled}
                 onClick={onMoveDown}
-                className={`${ACTION_BUTTON} text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-neutral-50`}
+                className={`${ACTION_BUTTON} text-fg-muted hover:bg-surface-sunken hover:text-fg-default dark:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-neutral-50`}
                 title="Move this section down"
               >
                 <ChevronDown className="h-4 w-4" aria-hidden />
@@ -133,7 +133,7 @@ export function BlockFrame({
                 type="button"
                 disabled={disabled || Boolean(removeDisabledReason)}
                 onClick={onRemove}
-                className={`${ACTION_BUTTON} text-slate-600 hover:bg-rose-50 hover:text-rose-700 dark:text-neutral-300 dark:hover:bg-rose-950/50 dark:hover:text-rose-400`}
+                className={`${ACTION_BUTTON} text-fg-muted hover:bg-rose-50 hover:text-rose-700 dark:text-fg-muted dark:hover:bg-rose-950/50 dark:hover:text-rose-400`}
                 title={removeDisabledReason ?? 'Delete this section'}
               >
                 <Trash2 className="h-4 w-4" aria-hidden />

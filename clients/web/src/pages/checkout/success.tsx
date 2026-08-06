@@ -73,9 +73,9 @@ export default function CheckoutSuccessPage() {
     <main className="mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center px-4 text-center">
       {status === 'verifying' ? (
         <>
-          <Loader2 className="h-10 w-10 motion-safe:animate-spin text-indigo-600" aria-hidden />
+          <Loader2 className="h-10 w-10 motion-safe:animate-spin text-accent-fg" aria-hidden />
           <h1 className="mt-4 text-2xl font-semibold">{t('billing.checkout.success.verifying.title')}</h1>
-          <p className="mt-2 text-slate-600 dark:text-neutral-400" aria-live="polite">
+          <p className="mt-2 text-fg-muted" aria-live="polite">
             {t('billing.checkout.success.verifying.description')}
           </p>
         </>
@@ -85,12 +85,12 @@ export default function CheckoutSuccessPage() {
           <h1 className="text-2xl font-semibold text-emerald-700 dark:text-emerald-300">
             {t('billing.checkout.success.ready.title')}
           </h1>
-          <p className="mt-2 text-slate-600 dark:text-neutral-400">
+          <p className="mt-2 text-fg-muted">
             {t('billing.checkout.success.ready.description')}
           </p>
           <Link
             to={continueTo}
-            className="mt-6 inline-flex rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+            className="mt-6 inline-flex rounded-lg bg-accent-solid px-4 py-2 text-sm font-medium text-white hover:bg-accent"
           >
             {t('billing.checkout.success.ready.continue')}
           </Link>
@@ -99,10 +99,10 @@ export default function CheckoutSuccessPage() {
       {status === 'timeout' ? (
         <>
           <h1 className="text-2xl font-semibold">{t('billing.checkout.success.timeout.title')}</h1>
-          <p className="mt-2 text-slate-600 dark:text-neutral-400" role="status">
+          <p className="mt-2 text-fg-muted" role="status">
             {t('billing.checkout.success.timeout.description')}
           </p>
-          <Link to={fallbackTo} className="mt-6 text-sm font-medium text-indigo-600 hover:underline">
+          <Link to={fallbackTo} className="mt-6 text-sm font-medium text-accent-fg hover:underline">
             {t('billing.checkout.success.timeout.billingLink')}
           </Link>
         </>

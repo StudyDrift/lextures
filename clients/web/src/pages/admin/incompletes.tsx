@@ -33,7 +33,7 @@ export default function IncompletesAdminPage() {
     return (
       <div className="p-6 max-w-4xl mx-auto">
         <h1 className="text-xl font-semibold mb-2">Incomplete grades</h1>
-        <p className="text-sm text-slate-600">Incomplete grade workflow is not enabled for this platform.</p>
+        <p className="text-sm text-fg-muted">Incomplete grade workflow is not enabled for this platform.</p>
       </div>
     )
   }
@@ -41,7 +41,7 @@ export default function IncompletesAdminPage() {
   return (
     <div className="p-6 max-w-5xl mx-auto">
       <h1 className="text-xl font-semibold mb-1">Open Incomplete grades</h1>
-      <p className="text-sm text-slate-600 dark:text-neutral-400 mb-4">
+      <p className="text-sm text-fg-muted mb-4">
         Registrar report of outstanding Incomplete grades, sorted by nearest deadline.
       </p>
 
@@ -56,33 +56,33 @@ export default function IncompletesAdminPage() {
             value={termId}
             onChange={(e) => setTermId(e.target.value)}
             placeholder="Filter by term UUID"
-            className="border rounded-lg px-3 py-2 text-sm w-72 dark:border-neutral-600 dark:bg-neutral-800"
+            className="border rounded-lg px-3 py-2 text-sm w-72 dark:border-border-default dark:bg-surface-overlay"
           />
         </div>
         <button
           type="button"
           onClick={load}
           disabled={loading}
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
+          className="rounded-lg bg-accent-solid px-4 py-2 text-sm font-medium text-white hover:bg-accent disabled:opacity-60"
         >
           {loading ? 'Loading…' : 'Refresh'}
         </button>
       </div>
 
       {error ? (
-        <div role="alert" className="mb-3 text-red-600 text-sm">
+        <div role="alert" className="mb-3 text-danger-fg text-sm">
           {error}
         </div>
       ) : null}
 
       {rows && rows.length === 0 && !loading ? (
-        <p className="text-sm text-slate-500">No open Incomplete grades.</p>
+        <p className="text-sm text-fg-muted">No open Incomplete grades.</p>
       ) : null}
 
       {rows && rows.length > 0 ? (
-        <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-700">
+        <div className="overflow-x-auto rounded-xl border border-border-default">
           <table className="min-w-full text-sm">
-            <thead className="bg-slate-50 dark:bg-neutral-800">
+            <thead className="bg-surface-sunken">
               <tr>
                 <th className="px-4 py-3 text-start font-medium">Student</th>
                 <th className="px-4 py-3 text-start font-medium">Course</th>
@@ -92,18 +92,18 @@ export default function IncompletesAdminPage() {
             </thead>
             <tbody>
               {rows.map((r) => (
-                <tr key={r.id} className="border-t border-slate-100 dark:border-neutral-700">
+                <tr key={r.id} className="border-t border-border-subtle dark:border-border-default">
                   <td className="px-4 py-3 font-medium">{r.studentName}</td>
                   <td className="px-4 py-3">
                     <Link
                       to={`/courses/${encodeURIComponent(r.courseCode)}/gradebook`}
-                      className="text-indigo-700 hover:underline dark:text-indigo-300"
+                      className="text-accent-fg hover:underline dark:text-indigo-300"
                     >
                       {r.courseTitle}
                     </Link>
                   </td>
                   <td className="px-4 py-3 tabular-nums">{r.extensionDeadline}</td>
-                  <td className="px-4 py-3 text-slate-600 dark:text-neutral-400">
+                  <td className="px-4 py-3 text-fg-muted">
                     {r.outstandingTitles.length > 0 ? r.outstandingTitles.join(', ') : '—'}
                   </td>
                 </tr>

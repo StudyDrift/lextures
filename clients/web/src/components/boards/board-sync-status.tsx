@@ -10,7 +10,7 @@ export function BoardSyncStatus({ connState }: Props) {
   if (connState === 'offline') return null
 
   let label = t('boards.sync.connecting')
-  let className = 'text-slate-500 dark:text-neutral-400'
+  let className = 'text-fg-muted'
   if (connState === 'connected') {
     label = t('boards.sync.live')
     className = 'text-emerald-600 dark:text-emerald-400'

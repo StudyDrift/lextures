@@ -63,11 +63,6 @@ func (d Deps) requireQuizGameGrader(w http.ResponseWriter, r *http.Request, cour
 // handleGetQuizGameReport is GET .../games/{game_id}/report
 func (d Deps) handleGetQuizGameReport() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, _, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -131,11 +126,6 @@ func (d Deps) handleGetQuizGameReport() http.HandlerFunc {
 // handleGetQuizGameMyResults is GET .../games/{game_id}/my-results
 func (d Deps) handleGetQuizGameMyResults() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -171,11 +161,6 @@ func (d Deps) handleGetQuizGameMyResults() http.HandlerFunc {
 // handleRebuildQuizGameReport is POST .../games/{game_id}/report/rebuild
 func (d Deps) handleRebuildQuizGameReport() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, _, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -214,11 +199,6 @@ func (d Deps) handleRebuildQuizGameReport() http.HandlerFunc {
 // handleExportQuizGameReport is GET .../games/{game_id}/report/export?format=csv|pdf|html
 func (d Deps) handleExportQuizGameReport() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -443,11 +423,6 @@ func (d Deps) handlePostQuizGameGradebookLink() http.HandlerFunc {
 		PreviewOnly      bool     `json:"previewOnly"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, _, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -517,11 +492,6 @@ func (d Deps) handlePostQuizGameGradebookLink() http.HandlerFunc {
 // handleDeleteQuizGameGradebookLink is DELETE .../games/{game_id}/gradebook-link/{link_id}
 func (d Deps) handleDeleteQuizGameGradebookLink() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodDelete {
-			w.Header().Set("Allow", http.MethodDelete)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, _, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -560,11 +530,6 @@ func (d Deps) handlePostQuizAssignmentGradebookLink() http.HandlerFunc {
 		Title            string  `json:"title"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, _, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return

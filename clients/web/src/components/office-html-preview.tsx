@@ -140,19 +140,19 @@ export function OfficeHtmlPreview({ filePath, filename, annotation }: OfficeHtml
   if (error || !html) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-4 p-8">
-        <div className="rounded-2xl bg-slate-100 p-6 dark:bg-neutral-800">
-          <svg className="h-12 w-12 text-slate-400 dark:text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+        <div className="rounded-2xl bg-surface-sunken p-6 dark:bg-surface-overlay">
+          <svg className="h-12 w-12 text-fg-subtle" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
         </div>
         <div className="text-center">
-          <p className="text-sm font-medium text-slate-700 dark:text-neutral-300">{filename}</p>
-          <p className="mt-1 text-xs text-slate-500 dark:text-neutral-500">{error ?? 'Preview unavailable.'}</p>
+          <p className="text-sm font-medium text-fg-muted">{filename}</p>
+          <p className="mt-1 text-xs text-fg-subtle">{error ?? 'Preview unavailable.'}</p>
         </div>
         <button
           type="button"
           onClick={() => void handleDownload()}
-          className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+          className="flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
         >
           <Download className="h-4 w-4" aria-hidden="true" />
           Download to view
@@ -167,7 +167,7 @@ export function OfficeHtmlPreview({ filePath, filename, annotation }: OfficeHtml
     return (
       <div
         ref={scrollRef}
-        className={`${SCOPE_CLASS} relative h-full overflow-auto bg-white`}
+        className={`${SCOPE_CLASS} relative h-full overflow-auto bg-surface-raised`}
       >
         {/* eslint-disable-next-line react/no-danger -- server-sanitized office preview HTML */}
         <style dangerouslySetInnerHTML={{ __html: inline.css }} />
@@ -192,7 +192,7 @@ export function OfficeHtmlPreview({ filePath, filename, annotation }: OfficeHtml
       title={`Preview of ${filename}`}
       sandbox="allow-same-origin"
       src={iframeSrc ?? undefined}
-      className="h-full w-full border-0 bg-white"
+      className="h-full w-full border-0 bg-surface-raised"
     />
   )
 }

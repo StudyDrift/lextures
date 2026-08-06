@@ -53,7 +53,7 @@ export function SubmissionPreviewSidebar({
   if (mode !== 'staff') {
     return (
       <aside
-        className="flex h-full min-h-0 w-full flex-col overflow-y-auto bg-slate-100 dark:bg-neutral-800"
+        className="flex h-full min-h-0 w-full flex-col overflow-y-auto bg-surface-sunken"
         aria-label="Submission feedback"
       >
         {submissionId ? (
@@ -83,11 +83,11 @@ export function SubmissionPreviewSidebar({
 
   return (
     <aside
-      className="flex h-full min-h-0 w-full flex-col bg-slate-100 dark:bg-neutral-800"
+      className="flex h-full min-h-0 w-full flex-col bg-surface-sunken"
       aria-label="Submission grading and details"
     >
       <div
-        className="flex shrink-0 gap-1 border-b border-slate-200 bg-slate-100 p-2 dark:border-neutral-600 dark:bg-neutral-900/40"
+        className="flex shrink-0 gap-1 border-b border-border-default bg-surface-sunken p-2 dark:border-border-default/40"
         role="tablist"
         aria-label="Submission sidebar"
       >
@@ -96,15 +96,11 @@ export function SubmissionPreviewSidebar({
           role="tab"
           aria-selected={tab === 'grade'}
           onClick={() => setTab('grade')}
-          className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition-[background-color,color,border-color] ${
-            tab === 'grade'
-              ? 'bg-white text-indigo-700 shadow-sm dark:bg-neutral-800 dark:text-indigo-300'
-              : 'text-slate-600 hover:bg-white/70 dark:text-neutral-400 dark:hover:bg-neutral-800/60'
-          }`}
+          className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition-[background-color,color,border-color] ${ tab === 'grade' ? 'bg-surface-raised text-accent-fg shadow-sm dark:bg-surface-overlay dark:text-indigo-300' : 'text-fg-muted hover:bg-white/70 dark:text-fg-muted dark:hover:bg-neutral-800/60' }`}
         >
           Grade
           {hasRubric ? (
-            <span className="ms-1.5 rounded-full bg-indigo-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300">
+            <span className="ms-1.5 rounded-full bg-indigo-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-accent-fg dark:bg-indigo-950/70 dark:text-indigo-300">
               Rubric
             </span>
           ) : null}
@@ -114,11 +110,7 @@ export function SubmissionPreviewSidebar({
           role="tab"
           aria-selected={tab === 'files'}
           onClick={() => setTab('files')}
-          className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold transition-[background-color,color,border-color] ${
-            tab === 'files'
-              ? 'bg-white text-indigo-700 shadow-sm dark:bg-neutral-800 dark:text-indigo-300'
-              : 'text-slate-600 hover:bg-white/70 dark:text-neutral-400 dark:hover:bg-neutral-800/60'
-          }`}
+          className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold transition-[background-color,color,border-color] ${ tab === 'files' ? 'bg-surface-raised text-accent-fg shadow-sm dark:bg-surface-overlay dark:text-indigo-300' : 'text-fg-muted hover:bg-white/70 dark:text-fg-muted dark:hover:bg-neutral-800/60' }`}
         >
           <Files className="h-4 w-4" aria-hidden="true" />
           Files

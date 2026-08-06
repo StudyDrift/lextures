@@ -68,13 +68,13 @@ export default function AdminCourses() {
 
   return (
     <div>
-      <h1 id={titleId} className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+      <h1 id={titleId} className="text-xl font-semibold text-fg-default dark:text-slate-100">
         Courses
       </h1>
 
       <div className="mt-4 flex flex-wrap gap-3">
         <label className="flex flex-col text-sm">
-          <span className="mb-1 text-slate-600 dark:text-slate-400">Search</span>
+          <span className="mb-1 text-fg-muted dark:text-fg-subtle">Search</span>
           <input
             type="search"
             value={q}
@@ -83,18 +83,18 @@ export default function AdminCourses() {
               setPage(1)
             }}
             placeholder="Title, code, or instructor"
-            className="rounded-lg border border-slate-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+            className="rounded-lg border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-raised"
           />
         </label>
         <label className="flex flex-col text-sm">
-          <span className="mb-1 text-slate-600 dark:text-slate-400">Status</span>
+          <span className="mb-1 text-fg-muted dark:text-fg-subtle">Status</span>
           <select
             value={status}
             onChange={(e) => {
               setStatus(e.target.value)
               setPage(1)
             }}
-            className="rounded-lg border border-slate-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+            className="rounded-lg border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-raised"
           >
             {STATUSES.map((s) => (
               <option key={s || 'all'} value={s}>
@@ -106,17 +106,17 @@ export default function AdminCourses() {
       </div>
 
       {error ? (
-        <p role="alert" className="mt-4 text-sm text-red-600 dark:text-red-400">
+        <p role="alert" className="mt-4 text-sm text-danger-fg">
           {error}
         </p>
       ) : null}
 
-      <div className="mt-4 overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-800">
+      <div className="mt-4 overflow-x-auto rounded-xl border border-border-default dark:border-border-subtle">
         <table className="min-w-full text-left text-sm">
           <caption className="sr-only">Organization courses</caption>
-          <thead className="bg-slate-50 text-slate-600 dark:bg-neutral-950 dark:text-slate-400">
+          <thead className="bg-surface-base text-fg-muted dark:bg-surface-base dark:text-fg-subtle">
             <tr>
-              <th scope="col" className="sticky left-0 bg-slate-50 px-4 py-2 font-medium dark:bg-neutral-950">
+              <th scope="col" className="sticky left-0 bg-surface-base px-4 py-2 font-medium dark:bg-surface-base">
                 Title
               </th>
               <th scope="col" className="px-4 py-2 font-medium">
@@ -142,23 +142,23 @@ export default function AdminCourses() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
+                <td colSpan={7} className="px-4 py-8 text-center text-fg-muted">
                   Loading…
                 </td>
               </tr>
             ) : !data?.items.length ? (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
+                <td colSpan={7} className="px-4 py-8 text-center text-fg-muted">
                   No courses found.
                 </td>
               </tr>
             ) : (
               data.items.map((course) => (
-                <tr key={course.id} className="border-t border-slate-100 dark:border-neutral-800">
-                  <td className="sticky left-0 bg-white px-4 py-2 dark:bg-neutral-900">
+                <tr key={course.id} className="border-t border-border-subtle">
+                  <td className="sticky left-0 bg-surface-raised px-4 py-2 dark:bg-surface-raised">
                     <Link
                       to={`/courses/${encodeURIComponent(course.courseCode)}`}
-                      className="text-indigo-600 hover:underline dark:text-indigo-400"
+                      className="text-accent-fg hover:underline dark:text-indigo-400"
                     >
                       {course.title}
                     </Link>
@@ -173,7 +173,7 @@ export default function AdminCourses() {
                       <button
                         type="button"
                         onClick={() => void setCourseStatus(course, 'archived')}
-                        className="text-sm text-slate-600 hover:underline dark:text-slate-400"
+                        className="text-sm text-fg-muted hover:underline dark:text-fg-subtle"
                       >
                         Archive
                       </button>
@@ -181,7 +181,7 @@ export default function AdminCourses() {
                       <button
                         type="button"
                         onClick={() => void setCourseStatus(course, 'active')}
-                        className="text-sm text-slate-600 hover:underline dark:text-slate-400"
+                        className="text-sm text-fg-muted hover:underline dark:text-fg-subtle"
                       >
                         Restore
                       </button>
@@ -204,7 +204,7 @@ export default function AdminCourses() {
           >
             Previous
           </button>
-          <span className="text-sm text-slate-600 dark:text-slate-400">
+          <span className="text-sm text-fg-muted dark:text-fg-subtle">
             Page {data.page} of {data.totalPages}
           </span>
           <button

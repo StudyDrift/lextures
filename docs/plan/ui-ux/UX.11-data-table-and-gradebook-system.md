@@ -308,7 +308,7 @@ work continue to apply unchanged.
 ## 13. Dependencies & Sequencing
 
 - **Must ship after** — [UX.1](UX.1-semantic-design-token-system.md),
-  [UX.2](UX.2-core-component-library-and-adoption-ratchet.md) (Table primitives),
+  [UX.2](../../completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md) (Table primitives),
   [UX.3](UX.3-typography-and-reading-system.md) (tabular numerals, dense scale),
   [UX.5](UX.5-wcag-2.2-aa-conformance-uplift.md) (target size, drag alternatives).
 - **Should ship alongside** — [UX.13](UX.13-feedback-undo-and-destructive-actions.md)
@@ -421,7 +421,7 @@ work continue to apply unchanged.
 - Audit: [audit.md](audit.md) G-11, G-15, G-13, G-7
 - External: [WAI-ARIA APG — Grid pattern](https://www.w3.org/WAI/ARIA/apg/patterns/grid/),
   [NN/g — Confirmation Dialogs](https://www.nngroup.com/articles/confirmation-dialog/)
-- Related plans: [UX.2](UX.2-core-component-library-and-adoption-ratchet.md),
+- Related plans: [UX.2](../../completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md),
   [UX.5](UX.5-wcag-2.2-aa-conformance-uplift.md),
   [UX.13](UX.13-feedback-undo-and-destructive-actions.md),
   [UX.14](UX.14-responsive-and-small-viewport-experience.md),

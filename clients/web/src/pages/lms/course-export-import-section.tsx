@@ -174,7 +174,7 @@ export function CourseExportImportSection({ courseCode }: { courseCode: string }
 
   if (!canEdit) {
     return (
-      <p className="text-sm text-slate-600 dark:text-neutral-400">
+      <p className="text-sm text-fg-muted">
         You need permission to edit course modules to export or import course content.
       </p>
     )
@@ -183,11 +183,11 @@ export function CourseExportImportSection({ courseCode }: { courseCode: string }
   return (
     <div className="space-y-8">
       <section
-        className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-700 dark:bg-neutral-900/40"
+        className="rounded-2xl border border-border-default bg-surface-raised p-5 shadow-sm shadow-slate-900/5 dark:border-border-default/40"
         data-focus-anchor="course.import-export.export"
       >
-        <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Export</h2>
-        <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+        <h2 className="text-sm font-semibold text-fg-default">Export</h2>
+        <p className="mt-1 text-sm text-fg-muted">
           Download the full course bundle as one JSON file: syllabus, modules, pages,
           assignments, quizzes, grading groups, roster emails and roles, and course appearance
           settings.
@@ -197,7 +197,7 @@ export function CourseExportImportSection({ courseCode }: { courseCode: string }
             type="button"
             onClick={() => void onExport()}
             disabled={busy !== 'idle'}
-            className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <Download className="h-4 w-4" aria-hidden />
             {busy === 'exporting' ? 'Preparing…' : 'Download JSON export'}
@@ -205,19 +205,19 @@ export function CourseExportImportSection({ courseCode }: { courseCode: string }
         </div>
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-700 dark:bg-neutral-900/40">
-        <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Import</h2>
-        <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+      <section className="rounded-2xl border border-border-default bg-surface-raised p-5 shadow-sm shadow-slate-900/5 dark:border-border-default/40">
+        <h2 className="text-sm font-semibold text-fg-default">Import</h2>
+        <p className="mt-1 text-sm text-fg-muted">
           Bring content into this course from Canvas (API) or from a JSON export file. The import
           mode below applies to both paths. For JSON files, the{' '}
           <code className="text-xs">courseCode</code> in the file is informational only.
         </p>
 
         <fieldset className="mt-4 space-y-3">
-          <legend className="text-sm font-medium text-slate-800 dark:text-neutral-200">
+          <legend className="text-sm font-medium text-fg-default">
             Import mode
           </legend>
-          <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 p-3 dark:border-neutral-600">
+          <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border-default p-3 dark:border-border-default">
             <input
               type="radio"
               name="importMode"
@@ -226,10 +226,10 @@ export function CourseExportImportSection({ courseCode }: { courseCode: string }
               onChange={() => setImportMode('erase')}
             />
             <span>
-              <span className="block text-sm font-medium text-slate-900 dark:text-neutral-100">
+              <span className="block text-sm font-medium text-fg-default">
                 Erase and import
               </span>
-              <span className="mt-0.5 block text-sm text-slate-500 dark:text-neutral-400">
+              <span className="mt-0.5 block text-sm text-fg-muted">
                 Remove all modules and related content, then apply the file. Also replaces
                 syllabus, grading groups, and course settings from the file. If the bundle includes
                 an <code className="text-xs">enrollments</code> array, the roster is replaced except
@@ -237,7 +237,7 @@ export function CourseExportImportSection({ courseCode }: { courseCode: string }
               </span>
             </span>
           </label>
-          <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 p-3 dark:border-neutral-600">
+          <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border-default p-3 dark:border-border-default">
             <input
               type="radio"
               name="importMode"
@@ -246,10 +246,10 @@ export function CourseExportImportSection({ courseCode }: { courseCode: string }
               onChange={() => setImportMode('mergeAdd')}
             />
             <span>
-              <span className="block text-sm font-medium text-slate-900 dark:text-neutral-100">
+              <span className="block text-sm font-medium text-fg-default">
                 Add difference (merge)
               </span>
-              <span className="mt-0.5 block text-sm text-slate-500 dark:text-neutral-400">
+              <span className="mt-0.5 block text-sm text-fg-muted">
                 Keep existing content. Only add syllabus sections, assignment groups, and outline
                 items whose ids are not already present, with bodies for those new items only. Existing
                 syllabus text is never replaced in this mode (use erase or overwrite to refresh it).
@@ -258,7 +258,7 @@ export function CourseExportImportSection({ courseCode }: { courseCode: string }
               </span>
             </span>
           </label>
-          <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 p-3 dark:border-neutral-600">
+          <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border-default p-3 dark:border-border-default">
             <input
               type="radio"
               name="importMode"
@@ -267,10 +267,10 @@ export function CourseExportImportSection({ courseCode }: { courseCode: string }
               onChange={() => setImportMode('overwrite')}
             />
             <span>
-              <span className="block text-sm font-medium text-slate-900 dark:text-neutral-100">
+              <span className="block text-sm font-medium text-fg-default">
                 Overwrite / sync
               </span>
-              <span className="mt-0.5 block text-sm text-slate-500 dark:text-neutral-400">
+              <span className="mt-0.5 block text-sm text-fg-muted">
                 Update this course from the file: replace syllabus and grading, refresh settings,
                 upsert every item in the file, remove outline items not listed in the file, and
                 refresh all module bodies from the file. If the bundle includes enrollments, the
@@ -299,11 +299,11 @@ export function CourseExportImportSection({ courseCode }: { courseCode: string }
           onImport={() => void onCanvasImport()}
         />
 
-        <div className="mt-8 border-t border-slate-200 pt-8 dark:border-neutral-600">
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+        <div className="mt-8 border-t border-border-default pt-8 dark:border-border-default">
+          <h3 className="text-sm font-semibold text-fg-default">
             From JSON export file
           </h3>
-          <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+          <p className="mt-1 text-sm text-fg-muted">
             Choose a JSON file produced by this app or another environment running the same export
             format. You will review a summary of what will be imported before anything is applied.
           </p>
@@ -319,7 +319,7 @@ export function CourseExportImportSection({ courseCode }: { courseCode: string }
               type="button"
               onClick={() => fileRef.current?.click()}
               disabled={busy !== 'idle'}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700"
+              className="inline-flex items-center gap-2 rounded-xl border border-border-strong bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-60 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700"
             >
               <Upload className="h-4 w-4" aria-hidden />
               {busy === 'importing' ? 'Importing…' : 'Choose JSON file…'}

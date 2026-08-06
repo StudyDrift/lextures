@@ -143,7 +143,7 @@ test.describe('Content Tools authoring (CT.2)', () => {
       await promptField.fill('CT2 authoring prompt')
       await configPanel.getByRole('button', { name: /^save$/i }).click()
 
-      // Page-level Save in the content page header (indigo primary).
+      // Page-level Save in the content page header (semantic primary).
       // Do not match generic "Saved" from tool sync chips — wait for PATCH + "Page saved".
       const pageSave = page.waitForResponse(
         (res) =>
@@ -152,7 +152,7 @@ test.describe('Content Tools authoring (CT.2)', () => {
           res.ok(),
         { timeout: 20_000 },
       )
-      await page.locator('button.bg-indigo-600').filter({ hasText: /^Save$/ }).click()
+      await page.locator('button.bg-accent-solid').filter({ hasText: /^Save$/ }).click()
       await pageSave
       await expect(page.getByText(/^Page saved$/i).first()).toBeVisible({
         timeout: 12_000,

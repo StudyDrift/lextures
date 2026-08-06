@@ -139,20 +139,20 @@ export function GradeCurveModal(props: {
         role="dialog"
         aria-modal="true"
         aria-labelledby={`${baseId}-title`}
-        className="relative flex max-h-[min(90vh,720px)] w-full max-w-2xl flex-col overflow-hidden rounded-xl bg-white shadow-xl dark:bg-neutral-900"
+        className="relative flex max-h-[min(90vh,720px)] w-full max-w-2xl flex-col overflow-hidden rounded-xl bg-surface-raised shadow-xl dark:bg-surface-raised"
       >
-        <div className="flex items-start justify-between gap-3 border-b border-slate-200 px-4 py-3 dark:border-neutral-700">
+        <div className="flex items-start justify-between gap-3 border-b border-border-default px-4 py-3 dark:border-border-default">
           <div>
-            <h2 id={`${baseId}-title`} className="text-lg font-semibold text-slate-900 dark:text-neutral-100">
+            <h2 id={`${baseId}-title`} className="text-lg font-semibold text-fg-default">
               Curve grades — {column.title}
             </h2>
-            <p className="mt-0.5 text-sm text-slate-600 dark:text-neutral-400">
+            <p className="mt-0.5 text-sm text-fg-muted">
               Preview changes before applying. Raw scores are preserved and curves can be undone.
             </p>
           </div>
           <button
             type="button"
-            className="rounded-md px-2 py-1 text-slate-500 hover:bg-slate-100 dark:hover:bg-neutral-800"
+            className="rounded-md px-2 py-1 text-fg-muted hover:bg-surface-sunken dark:hover:bg-surface-overlay"
             onClick={onClose}
             aria-label="Close dialog"
           >
@@ -169,9 +169,9 @@ export function GradeCurveModal(props: {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block text-sm">
-              <span className="mb-1 block font-medium text-slate-700 dark:text-neutral-300">Method</span>
+              <span className="mb-1 block font-medium text-fg-muted">Method</span>
               <select
-                className="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                className="w-full rounded-md border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
                 value={method}
                 onChange={(e) => setMethod(e.target.value as GradeCurveMethod)}
               >
@@ -185,10 +185,10 @@ export function GradeCurveModal(props: {
 
             {method === 'flat_bonus' ? (
               <label className="block text-sm">
-                <span className="mb-1 block font-medium text-slate-700 dark:text-neutral-300">Bonus points</span>
+                <span className="mb-1 block font-medium text-fg-muted">Bonus points</span>
                 <input
                   type="number"
-                  className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                  className="w-full rounded-md border border-border-strong px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
                   value={bonus}
                   onChange={(e) => setBonus(e.target.value)}
                 />
@@ -198,9 +198,9 @@ export function GradeCurveModal(props: {
             {method === 'linear_scale' ? (
               <>
                 <label className="block text-sm">
-                  <span className="mb-1 block font-medium text-slate-700 dark:text-neutral-300">Scale to</span>
+                  <span className="mb-1 block font-medium text-fg-muted">Scale to</span>
                   <select
-                    className="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                    className="w-full rounded-md border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
                     value={scaleTarget}
                     onChange={(e) => setScaleTarget(e.target.value as 'mean' | 'max')}
                   >
@@ -209,12 +209,12 @@ export function GradeCurveModal(props: {
                   </select>
                 </label>
                 <label className="block text-sm">
-                  <span className="mb-1 block font-medium text-slate-700 dark:text-neutral-300">
+                  <span className="mb-1 block font-medium text-fg-muted">
                     {scaleTarget === 'mean' ? 'Target mean' : 'Target max score'}
                   </span>
                   <input
                     type="number"
-                    className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                    className="w-full rounded-md border border-border-strong px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
                     value={scaleTarget === 'mean' ? targetMean : targetMax}
                     onChange={(e) =>
                       scaleTarget === 'mean' ? setTargetMean(e.target.value) : setTargetMax(e.target.value)
@@ -226,10 +226,10 @@ export function GradeCurveModal(props: {
 
             {method === 'set_minimum' ? (
               <label className="block text-sm">
-                <span className="mb-1 block font-medium text-slate-700 dark:text-neutral-300">Minimum score</span>
+                <span className="mb-1 block font-medium text-fg-muted">Minimum score</span>
                 <input
                   type="number"
-                  className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                  className="w-full rounded-md border border-border-strong px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
                   value={minimum}
                   onChange={(e) => setMinimum(e.target.value)}
                 />
@@ -249,7 +249,7 @@ export function GradeCurveModal(props: {
           <div className="mt-4 flex flex-wrap gap-2">
             <button
               type="button"
-              className="rounded-md border border-slate-300 px-3 py-1.5 text-sm dark:border-neutral-600"
+              className="rounded-md border border-border-strong px-3 py-1.5 text-sm dark:border-border-default"
               onClick={() => void runPreview()}
               disabled={loadingPreview}
             >
@@ -257,7 +257,7 @@ export function GradeCurveModal(props: {
             </button>
           </div>
 
-          {formError ? <p className="mt-3 text-sm text-red-600 dark:text-red-400">{formError}</p> : null}
+          {formError ? <p className="mt-3 text-sm text-danger-fg">{formError}</p> : null}
 
           {preview ? (
             <div className="mt-4 space-y-4">
@@ -269,13 +269,13 @@ export function GradeCurveModal(props: {
               </div>
 
               <div>
-                <h3 className="mb-2 text-sm font-medium text-slate-800 dark:text-neutral-200">
+                <h3 className="mb-2 text-sm font-medium text-fg-default">
                   Distribution (text summary)
                 </h3>
-                <div className="overflow-x-auto rounded-lg border border-slate-200 dark:border-neutral-700">
+                <div className="overflow-x-auto rounded-lg border border-border-default">
                   <table className="min-w-full text-left text-xs">
                     <caption className="sr-only">Before and after score distribution buckets</caption>
-                    <thead className="bg-slate-50 dark:bg-neutral-800/80">
+                    <thead className="bg-surface-sunken/80">
                       <tr>
                         <th scope="col" className="px-2 py-1.5 font-medium">
                           Range
@@ -290,7 +290,7 @@ export function GradeCurveModal(props: {
                     </thead>
                     <tbody>
                       {preview.preview.histogramBefore.map((b, i) => (
-                        <tr key={b.label} className="border-t border-slate-100 dark:border-neutral-800">
+                        <tr key={b.label} className="border-t border-border-subtle">
                           <td className="px-2 py-1.5">{b.label}</td>
                           <td className="px-2 py-1.5 tabular-nums">{b.count}</td>
                           <td className="px-2 py-1.5 tabular-nums">
@@ -304,16 +304,16 @@ export function GradeCurveModal(props: {
               </div>
 
               <div>
-                <h3 className="mb-2 text-sm font-medium text-slate-800 dark:text-neutral-200">
+                <h3 className="mb-2 text-sm font-medium text-fg-default">
                   Students with changes ({changedRows.length})
                 </h3>
                 {changedRows.length === 0 ? (
-                  <p className="text-sm text-slate-600 dark:text-neutral-400">No scores would change.</p>
+                  <p className="text-sm text-fg-muted">No scores would change.</p>
                 ) : (
-                  <div className="max-h-48 overflow-y-auto rounded-lg border border-slate-200 dark:border-neutral-700">
+                  <div className="max-h-48 overflow-y-auto rounded-lg border border-border-default">
                     <table className="min-w-full text-left text-xs">
                       <caption className="sr-only">Per-student grade changes from curve preview</caption>
-                      <thead className="sticky top-0 bg-slate-50 dark:bg-neutral-800/95">
+                      <thead className="sticky top-0 bg-surface-sunken/95">
                         <tr>
                           <th scope="col" className="px-2 py-1.5 font-medium">
                             Student
@@ -331,7 +331,7 @@ export function GradeCurveModal(props: {
                       </thead>
                       <tbody>
                         {changedRows.map((row) => (
-                          <tr key={row.studentId} className="border-t border-slate-100 dark:border-neutral-800">
+                          <tr key={row.studentId} className="border-t border-border-subtle">
                             <td className="px-2 py-1.5">{studentsById[row.studentId]?.name ?? row.studentId}</td>
                             <td className="px-2 py-1.5 tabular-nums">{row.rawScore}</td>
                             <td className="px-2 py-1.5 tabular-nums">{row.adjustedScore}</td>
@@ -349,11 +349,11 @@ export function GradeCurveModal(props: {
           ) : null}
         </div>
 
-        <div className="flex flex-wrap justify-end gap-2 border-t border-slate-200 px-4 py-3 dark:border-neutral-700">
+        <div className="flex flex-wrap justify-end gap-2 border-t border-border-default px-4 py-3 dark:border-border-default">
           {activeCurveId ? (
             <button
               type="button"
-              className="rounded-md border border-red-300 px-3 py-1.5 text-sm text-red-700 dark:border-red-800 dark:text-red-300"
+              className="rounded-md border border-red-300 px-3 py-1.5 text-sm text-danger-fg dark:border-red-800 dark:text-red-300"
               onClick={() => void handleRevert()}
               disabled={reverting || applying}
             >
@@ -362,14 +362,14 @@ export function GradeCurveModal(props: {
           ) : null}
           <button
             type="button"
-            className="rounded-md border border-slate-300 px-3 py-1.5 text-sm dark:border-neutral-600"
+            className="rounded-md border border-border-strong px-3 py-1.5 text-sm dark:border-border-default"
             onClick={onClose}
           >
             Cancel
           </button>
           <button
             type="button"
-            className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
+            className="rounded-md bg-accent-solid px-3 py-1.5 text-sm font-medium text-white hover:bg-accent disabled:opacity-60"
             onClick={() => void handleApply()}
             disabled={applying || reverting || loadingPreview || !preview}
           >
@@ -384,9 +384,9 @@ export function GradeCurveModal(props: {
 function StatCard(props: { label: string; value?: number | null }) {
   const { label, value } = props
   return (
-    <div className="rounded-lg border border-slate-200 px-3 py-2 dark:border-neutral-700">
-      <div className="text-xs text-slate-500 dark:text-neutral-400">{label}</div>
-      <div className="text-lg font-semibold tabular-nums text-slate-900 dark:text-neutral-100">
+    <div className="rounded-lg border border-border-default px-3 py-2 dark:border-border-default">
+      <div className="text-xs text-fg-muted">{label}</div>
+      <div className="text-lg font-semibold tabular-nums text-fg-default">
         {value != null ? value.toFixed(2) : '—'}
       </div>
     </div>

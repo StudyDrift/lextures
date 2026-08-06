@@ -54,11 +54,11 @@ export function ResetScopePicker({
 
   return (
     <fieldset className="space-y-2" data-testid="reset-scope-picker">
-      <legend className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+      <legend className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
         {t('contentTools.reset.scopeLabel')}
       </legend>
       {options.map((scope) => (
-        <label key={scope} className="flex items-start gap-2 text-sm text-slate-800 dark:text-neutral-200">
+        <label key={scope} className="flex items-start gap-2 text-sm text-fg-default">
           <input
             type="radio"
             name="reset-scope"
@@ -68,7 +68,7 @@ export function ResetScopePicker({
           />
           <span>
             <span className="font-medium">{t(`contentTools.reset.scopes.${scope}.label`)}</span>
-            <span className="mt-0.5 block text-xs text-slate-500 dark:text-neutral-400">
+            <span className="mt-0.5 block text-xs text-fg-muted">
               {t(`contentTools.reset.scopes.${scope}.help`)}
             </span>
           </span>

@@ -26,11 +26,6 @@ type createWindowBody struct {
 // handleCreateAvailabilityWindow is POST /api/v1/courses/{course_code}/availability.
 func (d Deps) handleCreateAvailabilityWindow() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode := chi.URLParam(r, "course_code")
 		userID, ok := d.meUserID(w, r)
 		if !ok {
@@ -115,11 +110,6 @@ type bookSlotBody struct {
 // handleBookSlot is POST /api/v1/slots/{slot_id}/book.
 func (d Deps) handleBookSlot() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		slotIDStr := chi.URLParam(r, "slot_id")
 		slotID, err := uuid.Parse(slotIDStr)
 		if err != nil {

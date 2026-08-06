@@ -29,16 +29,16 @@ function executionStatusClass(status: NodeExecutionStatus | undefined, selected:
     case 'error':
       return 'border-rose-400 ring-2 ring-rose-400/30'
     case 'skipped':
-      return 'border-slate-300 opacity-50 ring-1 ring-slate-300/40 dark:border-neutral-600 dark:ring-neutral-600/40'
+      return 'border-border-strong opacity-50 ring-1 ring-slate-300/40 dark:border-border-default dark:ring-neutral-600/40'
     default:
-      return selected ? 'border-indigo-500 ring-2 ring-indigo-200' : 'border-slate-200 dark:border-neutral-700'
+      return selected ? 'border-indigo-500 ring-2 ring-indigo-200' : 'border-border-default'
   }
 }
 
 function ExecutionBadge({ status }: { status: NodeExecutionStatus | undefined }) {
   if (status !== 'running') return null
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-indigo-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-300">
+    <span className="inline-flex items-center gap-1 rounded-full bg-indigo-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent-fg dark:text-indigo-300">
       <Loader2 className="h-3 w-3 motion-safe:animate-spin" aria-hidden />
     </span>
   )
@@ -64,7 +64,7 @@ function InputSlotRow({
         className={`grader-slot-handle ${handleClass}`}
       />
       <span className={`size-1.5 shrink-0 rounded-full ${dotClass}`} aria-hidden />
-      <span className="text-start text-xs font-medium text-slate-600 dark:text-neutral-300">{label}</span>
+      <span className="text-start text-xs font-medium text-fg-muted">{label}</span>
     </div>
   )
 }
@@ -82,7 +82,7 @@ function OutputSlotRow({
 }) {
   return (
     <div className="relative flex items-center justify-end gap-2.5 px-3 py-2.5">
-      <span className="text-end text-xs font-medium text-slate-600 dark:text-neutral-300">{label}</span>
+      <span className="text-end text-xs font-medium text-fg-muted">{label}</span>
       <span className={`size-1.5 shrink-0 rounded-full ${dotClass}`} aria-hidden />
       <Handle
         type="source"
@@ -117,10 +117,10 @@ export const OutputNode = memo(function OutputNode({ id, data, selected }: NodeP
       ? executionStatusClass(executionStatus, selected)
       : selected
         ? 'border-emerald-400/80 ring-2 ring-emerald-500/20'
-        : 'border-slate-200 dark:border-neutral-700'
+        : 'border-border-default'
   return (
     <div
-      className={`${isQuizMode ? 'w-[240px]' : 'w-[216px]'} overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${statusClass}`}
+      className={`${isQuizMode ? 'w-[240px]' : 'w-[216px]'} overflow-hidden rounded-xl border bg-surface-raised shadow-sm dark:bg-surface-raised ${statusClass}`}
     >
       <RenamableNodeHeader
         nodeId={id}
@@ -175,10 +175,10 @@ export const QuizResponsesNode = memo(function QuizResponsesNode({ id, data, sel
       ? executionStatusClass(executionStatus, selected)
       : selected
         ? 'border-violet-400/80 ring-2 ring-violet-500/20'
-        : 'border-slate-200 dark:border-neutral-700'
+        : 'border-border-default'
   return (
     <div
-      className={`${quizSlots.length > 4 ? 'w-[260px]' : 'w-[240px]'} overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${statusClass}`}
+      className={`${quizSlots.length > 4 ? 'w-[260px]' : 'w-[240px]'} overflow-hidden rounded-xl border bg-surface-raised shadow-sm dark:bg-surface-raised ${statusClass}`}
     >
       <RenamableNodeHeader
         nodeId={id}
@@ -189,7 +189,7 @@ export const QuizResponsesNode = memo(function QuizResponsesNode({ id, data, sel
         trailing={<ExecutionBadge status={executionStatus} />}
       />
       {quizSlots.length === 0 ? (
-        <p className="px-3 py-2 text-xs text-slate-500 dark:text-neutral-400">
+        <p className="px-3 py-2 text-xs text-fg-muted">
           {t('gradingAgent.canvas.nodes.quizResponses.empty')}
         </p>
       ) : (
@@ -227,9 +227,9 @@ export const CriterionGraderNode = memo(function CriterionGraderNode({ id, data,
       ? executionStatusClass(executionStatus, selected)
       : selected
         ? 'border-indigo-400/80 ring-2 ring-indigo-500/20'
-        : 'border-slate-200 dark:border-neutral-700'
+        : 'border-border-default'
   return (
-    <div className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${statusClass}`}>
+    <div className={`w-[216px] overflow-hidden rounded-xl border bg-surface-raised shadow-sm dark:bg-surface-raised ${statusClass}`}>
       <RenamableNodeHeader
         nodeId={id}
         data={nodeData}
@@ -286,29 +286,29 @@ export const GraderNode = memo(function GraderNode({ id, data, selected }: NodeP
         ? 'border-indigo-500 ring-2 ring-indigo-200'
         : 'border-indigo-300 dark:border-indigo-800'
   return (
-    <div className={`min-w-[200px] rounded-xl border bg-white px-3 py-2 shadow-md dark:bg-neutral-900 ${statusClass}`}>
+    <div className={`min-w-[200px] rounded-xl border bg-surface-raised px-3 py-2 shadow-md dark:bg-surface-raised ${statusClass}`}>
       <div className="flex items-center justify-between gap-2">
         <RenamableNodeTitle
           nodeId={id}
           data={nodeData}
           defaultLabel={t('gradingAgent.canvas.nodes.grader.title')}
-          className="text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300"
+          className="text-xs font-semibold uppercase tracking-wide text-accent-fg"
         />
         <ExecutionBadge status={executionStatus} />
       </div>
-      <p className="mt-1 line-clamp-2 text-xs text-slate-600 dark:text-neutral-400">
+      <p className="mt-1 line-clamp-2 text-xs text-fg-muted">
         {prompt.trim() || t('gradingAgent.canvas.nodes.grader.emptyPrompt')}
       </p>
       <Handle type="target" position={Position.Left} id="submission" style={{ top: '22%' }} />
-      <span className="absolute start-[-5.5rem] top-[15%] text-[10px] font-medium text-slate-600 dark:text-neutral-300">
+      <span className="absolute start-[-5.5rem] top-[15%] text-[10px] font-medium text-fg-muted">
         {t('gradingAgent.canvas.slots.submission')}
       </span>
       <Handle type="target" position={Position.Left} id="content" className="!bg-amber-500" style={{ top: '50%' }} />
-      <span className="absolute start-[-4.5rem] top-[43%] text-[10px] font-medium text-slate-600 dark:text-neutral-300">
+      <span className="absolute start-[-4.5rem] top-[43%] text-[10px] font-medium text-fg-muted">
         {t('gradingAgent.canvas.slots.content')}
       </span>
       <Handle type="target" position={Position.Left} id="rubric" className="!bg-orange-500" style={{ top: '78%' }} />
-      <span className="absolute start-[-4rem] top-[71%] text-[10px] font-medium text-slate-600 dark:text-neutral-300">
+      <span className="absolute start-[-4rem] top-[71%] text-[10px] font-medium text-fg-muted">
         {t('gradingAgent.canvas.slots.rubric')}
       </span>
       <Handle type="source" position={Position.Right} id="grade" className="!bg-emerald-500" style={{ top: '35%' }} />
@@ -326,9 +326,9 @@ export const ActivityNode = memo(function ActivityNode({ id, data, selected }: N
       ? executionStatusClass(executionStatus, selected)
       : selected
         ? 'border-amber-400/80 ring-2 ring-amber-500/20'
-        : 'border-slate-200 dark:border-neutral-700'
+        : 'border-border-default'
   return (
-    <div className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${statusClass}`}>
+    <div className={`w-[216px] overflow-hidden rounded-xl border bg-surface-raised shadow-sm dark:bg-surface-raised ${statusClass}`}>
       <RenamableNodeHeader
         nodeId={id}
         data={nodeData}
@@ -387,9 +387,9 @@ export const RubricNode = memo(function RubricNode({ id, data, selected }: NodeP
       ? executionStatusClass(executionStatus, selected)
       : selected
         ? 'border-orange-400/80 ring-2 ring-orange-500/20'
-        : 'border-slate-200 dark:border-neutral-700'
+        : 'border-border-default'
   return (
-    <div className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${statusClass}`}>
+    <div className={`w-[216px] overflow-hidden rounded-xl border bg-surface-raised shadow-sm dark:bg-surface-raised ${statusClass}`}>
       <RenamableNodeHeader
         nodeId={id}
         data={nodeData}
@@ -427,9 +427,9 @@ export const ReferenceNode = memo(function ReferenceNode({ id, data, selected }:
       ? executionStatusClass(executionStatus, selected)
       : selected
         ? 'border-violet-400/80 ring-2 ring-violet-500/20'
-        : 'border-slate-200 dark:border-neutral-700'
+        : 'border-border-default'
   return (
-    <div className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${statusClass}`}>
+    <div className={`w-[216px] overflow-hidden rounded-xl border bg-surface-raised shadow-sm dark:bg-surface-raised ${statusClass}`}>
       <RenamableNodeHeader
         nodeId={id}
         data={nodeData}
@@ -466,9 +466,9 @@ export const StudentSubmissionNode = memo(function StudentSubmissionNode({ id, d
       ? executionStatusClass(executionStatus, selected)
       : selected
         ? 'border-slate-400/80 ring-2 ring-slate-400/20'
-        : 'border-slate-200 dark:border-neutral-700'
+        : 'border-border-default'
   return (
-    <div className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${statusClass}`}>
+    <div className={`w-[216px] overflow-hidden rounded-xl border bg-surface-raised shadow-sm dark:bg-surface-raised ${statusClass}`}>
       <RenamableNodeHeader
         nodeId={id}
         data={nodeData}
@@ -504,9 +504,9 @@ export const AiNode = memo(function AiNode({ id, data, selected }: NodeProps) {
       ? executionStatusClass(executionStatus, selected)
       : selected
         ? 'border-indigo-400/80 ring-2 ring-indigo-500/20'
-        : 'border-slate-200 dark:border-neutral-700'
+        : 'border-border-default'
   return (
-    <div className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${statusClass}`}>
+    <div className={`w-[216px] overflow-hidden rounded-xl border bg-surface-raised shadow-sm dark:bg-surface-raised ${statusClass}`}>
       <RenamableNodeHeader
         nodeId={id}
         data={nodeData}
@@ -543,9 +543,9 @@ export const CodeTestRunnerNode = memo(function CodeTestRunnerNode({ id, data, s
       ? executionStatusClass(executionStatus, selected)
       : selected
         ? 'border-cyan-400/80 ring-2 ring-cyan-500/20'
-        : 'border-slate-200 dark:border-neutral-700'
+        : 'border-border-default'
   return (
-    <div className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${statusClass}`}>
+    <div className={`w-[216px] overflow-hidden rounded-xl border bg-surface-raised shadow-sm dark:bg-surface-raised ${statusClass}`}>
       <RenamableNodeHeader
         nodeId={id}
         data={nodeData}
@@ -554,7 +554,7 @@ export const CodeTestRunnerNode = memo(function CodeTestRunnerNode({ id, data, s
         headerClassName="border-b border-cyan-500/15 bg-cyan-500/5 dark:border-cyan-500/10 dark:bg-cyan-500/10"
         trailing={<ExecutionBadge status={executionStatus} />}
       />
-      <p className="px-3 py-2 text-xs text-slate-600 dark:text-neutral-400">
+      <p className="px-3 py-2 text-xs text-fg-muted">
         {t('gradingAgent.canvas.nodes.codeTests.runtimeLabel', {
           runtime: codeTestRuntimeDisplayLabel(runtime, t),
         })}
@@ -593,9 +593,9 @@ export const OriginalityNode = memo(function OriginalityNode({ id, data, selecte
       ? executionStatusClass(executionStatus, selected)
       : selected
         ? 'border-amber-400/80 ring-2 ring-amber-500/20'
-        : 'border-slate-200 dark:border-neutral-700'
+        : 'border-border-default'
   return (
-    <div className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${statusClass}`}>
+    <div className={`w-[216px] overflow-hidden rounded-xl border bg-surface-raised shadow-sm dark:bg-surface-raised ${statusClass}`}>
       <RenamableNodeHeader
         nodeId={id}
         data={nodeData}
@@ -650,9 +650,9 @@ export const HumanReviewGateNode = memo(function HumanReviewGateNode({ id, data,
       ? executionStatusClass(executionStatus, selected)
       : selected
         ? 'border-slate-400/80 ring-2 ring-slate-500/20'
-        : 'border-slate-200 dark:border-neutral-700'
+        : 'border-border-default'
   return (
-    <div className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${statusClass}`}>
+    <div className={`w-[216px] overflow-hidden rounded-xl border bg-surface-raised shadow-sm dark:bg-surface-raised ${statusClass}`}>
       <RenamableNodeHeader
         nodeId={id}
         data={nodeData}
@@ -662,10 +662,10 @@ export const HumanReviewGateNode = memo(function HumanReviewGateNode({ id, data,
         trailing={<ExecutionBadge status={executionStatus} />}
       />
       <div className="flex flex-wrap gap-1.5 px-3 py-2">
-        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600 dark:bg-neutral-800 dark:text-neutral-300">
+        <span className="rounded-full bg-surface-sunken px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-fg-muted dark:bg-surface-overlay dark:text-fg-muted">
           {t(`gradingAgent.canvas.nodes.reviewGate.mode.${mode}`, { defaultValue: mode })}
         </span>
-        <span className="rounded-full bg-slate-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-300">
+        <span className="rounded-full bg-slate-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-fg-muted dark:text-slate-300">
           {t('gradingAgent.canvas.nodes.reviewGate.queueBadge', { queue })}
         </span>
       </div>
@@ -717,9 +717,9 @@ export const FlagForReviewNode = memo(function FlagForReviewNode({ id, data, sel
       ? executionStatusClass(executionStatus, selected)
       : selected
         ? 'border-rose-400/80 ring-2 ring-rose-500/20'
-        : 'border-slate-200 dark:border-neutral-700'
+        : 'border-border-default'
   return (
-    <div className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${statusClass}`}>
+    <div className={`w-[216px] overflow-hidden rounded-xl border bg-surface-raised shadow-sm dark:bg-surface-raised ${statusClass}`}>
       <RenamableNodeHeader
         nodeId={id}
         data={nodeData}
@@ -729,7 +729,7 @@ export const FlagForReviewNode = memo(function FlagForReviewNode({ id, data, sel
         trailing={<ExecutionBadge status={executionStatus} />}
       />
       <div className="flex flex-wrap gap-1.5 px-3 py-2">
-        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600 dark:bg-neutral-800 dark:text-neutral-300">
+        <span className="rounded-full bg-surface-sunken px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-fg-muted dark:bg-surface-overlay dark:text-fg-muted">
           {t('gradingAgent.canvas.nodes.flagForReview.queueBadge', { queue })}
         </span>
         <span className="rounded-full bg-rose-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-rose-700 dark:text-rose-300">
@@ -786,9 +786,9 @@ export const ConditionalRouterNode = memo(function ConditionalRouterNode({ id, d
       ? executionStatusClass(executionStatus, selected)
       : selected
         ? 'border-slate-400/80 ring-2 ring-slate-400/20'
-        : 'border-slate-200 dark:border-neutral-700'
+        : 'border-border-default'
   return (
-    <div className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${statusClass}`}>
+    <div className={`w-[216px] overflow-hidden rounded-xl border bg-surface-raised shadow-sm dark:bg-surface-raised ${statusClass}`}>
       <RenamableNodeHeader
         nodeId={id}
         data={nodeData}
@@ -797,7 +797,7 @@ export const ConditionalRouterNode = memo(function ConditionalRouterNode({ id, d
         headerClassName="border-b border-slate-500/15 bg-slate-500/5 dark:border-slate-500/10 dark:bg-slate-500/10"
         trailing={<ExecutionBadge status={executionStatus} />}
       />
-      <p className="px-3 py-2 text-xs text-slate-600 dark:text-neutral-400" aria-live="polite">
+      <p className="px-3 py-2 text-xs text-fg-muted" aria-live="polite">
         {t('gradingAgent.canvas.nodes.router.ifPrefix')} {conditionText}
       </p>
       <div className="divide-y divide-slate-100 dark:divide-neutral-800">
@@ -834,9 +834,9 @@ export const SetScoreNode = memo(function SetScoreNode({ id, data, selected }: N
       ? executionStatusClass(executionStatus, selected)
       : selected
         ? 'border-teal-400/80 ring-2 ring-teal-500/20'
-        : 'border-slate-200 dark:border-neutral-700'
+        : 'border-border-default'
   return (
-    <div className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${statusClass}`}>
+    <div className={`w-[216px] overflow-hidden rounded-xl border bg-surface-raised shadow-sm dark:bg-surface-raised ${statusClass}`}>
       <RenamableNodeHeader
         nodeId={id}
         data={nodeData}
@@ -880,9 +880,9 @@ export const ScoreAggregatorNode = memo(function ScoreAggregatorNode({ id, data,
       ? executionStatusClass(executionStatus, selected)
       : selected
         ? 'border-emerald-400/80 ring-2 ring-emerald-500/20'
-        : 'border-slate-200 dark:border-neutral-700'
+        : 'border-border-default'
   return (
-    <div className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${statusClass}`}>
+    <div className={`w-[216px] overflow-hidden rounded-xl border bg-surface-raised shadow-sm dark:bg-surface-raised ${statusClass}`}>
       <RenamableNodeHeader
         nodeId={id}
         data={nodeData}
@@ -935,9 +935,9 @@ export const GroupNode = memo(function GroupNode({ id, data, selected }: NodePro
       ? executionStatusClass(executionStatus, selected)
       : selected
         ? 'border-fuchsia-400/80 ring-2 ring-fuchsia-500/20'
-        : 'border-slate-200 dark:border-neutral-700'
+        : 'border-border-default'
   return (
-    <div className={`w-[244px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${statusClass}`}>
+    <div className={`w-[244px] overflow-hidden rounded-xl border bg-surface-raised shadow-sm dark:bg-surface-raised ${statusClass}`}>
       <RenamableNodeHeader
         nodeId={id}
         data={nodeData}
@@ -950,9 +950,9 @@ export const GroupNode = memo(function GroupNode({ id, data, selected }: NodePro
         {t('gradingAgent.canvas.nodes.group.subtitle', { count: memberCount })}
       </div>
       <div className="grid grid-cols-2">
-        <div className="divide-y divide-slate-100 border-e border-slate-100 dark:divide-neutral-800 dark:border-neutral-800">
+        <div className="divide-y divide-slate-100 border-e border-border-subtle dark:divide-neutral-800 dark:border-border-subtle">
           {inputs.length === 0 ? (
-            <div className="px-3 py-2.5 text-[11px] text-slate-400">{t('gradingAgent.canvas.nodes.group.noInputs')}</div>
+            <div className="px-3 py-2.5 text-[11px] text-fg-subtle">{t('gradingAgent.canvas.nodes.group.noInputs')}</div>
           ) : (
             inputs.map((port) => (
               <InputSlotRow
@@ -967,7 +967,7 @@ export const GroupNode = memo(function GroupNode({ id, data, selected }: NodePro
         </div>
         <div className="divide-y divide-slate-100 dark:divide-neutral-800">
           {outputs.length === 0 ? (
-            <div className="px-3 py-2.5 text-end text-[11px] text-slate-400">{t('gradingAgent.canvas.nodes.group.noOutputs')}</div>
+            <div className="px-3 py-2.5 text-end text-[11px] text-fg-subtle">{t('gradingAgent.canvas.nodes.group.noOutputs')}</div>
           ) : (
             outputs.map((port) => (
               <OutputSlotRow

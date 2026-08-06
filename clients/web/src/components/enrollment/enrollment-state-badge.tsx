@@ -23,7 +23,7 @@ const STATE_ABBREV: Record<EnrollmentState, string> = {
 const STATE_COLORS: Record<EnrollmentState, string> = {
   active: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-200',
   waitlist: 'bg-amber-100 text-amber-900 dark:bg-amber-950/50 dark:text-amber-200',
-  dropped: 'bg-slate-200 text-slate-700 dark:bg-neutral-700 dark:text-neutral-200',
+  dropped: 'bg-slate-200 text-fg-muted dark:bg-neutral-700 dark:text-fg-default',
   withdrawn: 'bg-rose-100 text-rose-900 dark:bg-rose-950/50 dark:text-rose-200',
   audit: 'bg-sky-100 text-sky-900 dark:bg-sky-950/50 dark:text-sky-200',
   no_credit: 'bg-orange-100 text-orange-900 dark:bg-orange-950/50 dark:text-orange-200',

@@ -9,7 +9,7 @@ function StatusBadge({ on, label }: { on: boolean; label: string }) {
       {on ? (
         <CheckCircle2 className="h-4 w-4 text-green-600" aria-hidden />
       ) : (
-        <XCircle className="h-4 w-4 text-slate-400" aria-hidden />
+        <XCircle className="h-4 w-4 text-fg-subtle" aria-hidden />
       )}
       <span>{label}</span>
       <span className="sr-only">{on ? 'enabled' : 'disabled'}</span>
@@ -43,25 +43,25 @@ export default function AdminIntegrations() {
 
   return (
     <div>
-      <h1 id={titleId} className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+      <h1 id={titleId} className="text-xl font-semibold text-fg-default dark:text-slate-100">
         Integrations
       </h1>
-      <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+      <p className="mt-1 text-sm text-fg-muted dark:text-fg-subtle">
         Read-only status for SSO, provisioning, SIS, and webhooks.
       </p>
 
       {error ? (
-        <p role="alert" className="mt-4 text-sm text-red-600 dark:text-red-400">
+        <p role="alert" className="mt-4 text-sm text-danger-fg">
           {error}
         </p>
       ) : null}
 
       {loading ? (
-        <p className="mt-6 text-sm text-slate-500">Loading…</p>
+        <p className="mt-6 text-sm text-fg-muted">Loading…</p>
       ) : data ? (
         <div className="mt-6 grid gap-4 md:grid-cols-2">
-          <section className="rounded-xl border border-slate-200 p-4 dark:border-neutral-800">
-            <h2 className="font-medium text-slate-900 dark:text-slate-100">Single sign-on</h2>
+          <section className="rounded-xl border border-border-default p-4 dark:border-border-subtle">
+            <h2 className="font-medium text-fg-default dark:text-slate-100">Single sign-on</h2>
             <ul className="mt-3 space-y-2">
               <li>
                 <StatusBadge on={data.sso.saml} label="SAML 2.0" />
@@ -77,8 +77,8 @@ export default function AdminIntegrations() {
               </li>
             </ul>
           </section>
-          <section className="rounded-xl border border-slate-200 p-4 dark:border-neutral-800">
-            <h2 className="font-medium text-slate-900 dark:text-slate-100">Provisioning</h2>
+          <section className="rounded-xl border border-border-default p-4 dark:border-border-subtle">
+            <h2 className="font-medium text-fg-default dark:text-slate-100">Provisioning</h2>
             <ul className="mt-3 space-y-2">
               <li>
                 <StatusBadge on={data.oneRoster.enabled} label="OneRoster" />
@@ -88,21 +88,21 @@ export default function AdminIntegrations() {
               </li>
             </ul>
           </section>
-          <section className="rounded-xl border border-slate-200 p-4 dark:border-neutral-800">
-            <h2 className="font-medium text-slate-900 dark:text-slate-100">SIS</h2>
-            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+          <section className="rounded-xl border border-border-default p-4 dark:border-border-subtle">
+            <h2 className="font-medium text-fg-default dark:text-slate-100">SIS</h2>
+            <p className="mt-2 text-sm text-fg-muted dark:text-fg-subtle">
               <StatusBadge on={data.sis.enabled} label="SIS integration" />
             </p>
-            <p className="mt-2 text-sm tabular-nums text-slate-600 dark:text-slate-400">
+            <p className="mt-2 text-sm tabular-nums text-fg-muted dark:text-fg-subtle">
               Active connections: {data.sis.activeConnections}
             </p>
           </section>
-          <section className="rounded-xl border border-slate-200 p-4 dark:border-neutral-800">
-            <h2 className="font-medium text-slate-900 dark:text-slate-100">Webhooks</h2>
-            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+          <section className="rounded-xl border border-border-default p-4 dark:border-border-subtle">
+            <h2 className="font-medium text-fg-default dark:text-slate-100">Webhooks</h2>
+            <p className="mt-2 text-sm text-fg-muted dark:text-fg-subtle">
               <StatusBadge on={data.webhooks.enabled} label="Outbound webhooks" />
             </p>
-            <p className="mt-2 text-sm tabular-nums text-slate-600 dark:text-slate-400">
+            <p className="mt-2 text-sm tabular-nums text-fg-muted dark:text-fg-subtle">
               Active subscriptions: {data.webhooks.subscriptions}
             </p>
           </section>

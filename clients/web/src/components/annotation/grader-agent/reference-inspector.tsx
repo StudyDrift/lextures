@@ -56,7 +56,7 @@ export function ReferenceInspector({
   }, [courseCode, t])
 
   return (
-    <div className="space-y-3 text-sm text-slate-700 dark:text-neutral-200">
+    <div className="space-y-3 text-sm text-fg-default">
       <p>{t('gradingAgent.canvas.inspector.referenceHelp')}</p>
       <div
         role="note"
@@ -65,7 +65,7 @@ export function ReferenceInspector({
         {t('gradingAgent.canvas.inspector.referenceTrustedWarning')}
       </div>
       <label className="block">
-        <span className="mb-1.5 block font-medium text-slate-800 dark:text-neutral-100">
+        <span className="mb-1.5 block font-medium text-fg-default">
           {t('gradingAgent.canvas.inspector.referenceMode')}
         </span>
         <select
@@ -81,7 +81,7 @@ export function ReferenceInspector({
         </select>
       </label>
       <label className="block">
-        <span className="mb-1.5 block font-medium text-slate-800 dark:text-neutral-100">
+        <span className="mb-1.5 block font-medium text-fg-default">
           {t('gradingAgent.canvas.inspector.referenceText')}
         </span>
         <InspectorExpandableTextarea
@@ -93,7 +93,7 @@ export function ReferenceInspector({
           expandTitle={t('gradingAgent.canvas.inspector.referenceText')}
         />
         <p
-          className={`mt-1 text-xs ${truncated ? 'text-amber-700 dark:text-amber-300' : 'text-slate-500 dark:text-neutral-400'}`}
+          className={`mt-1 text-xs ${truncated ? 'text-warning-fg' : 'text-fg-muted'}`}
         >
           {truncated
             ? t('gradingAgent.canvas.inspector.referenceCharTruncated', { count: charCount, max: MAX_REFERENCE_CHARS })
@@ -101,7 +101,7 @@ export function ReferenceInspector({
         </p>
       </label>
       <label className="block">
-        <span className="mb-1.5 block font-medium text-slate-800 dark:text-neutral-100">
+        <span className="mb-1.5 block font-medium text-fg-default">
           {t('gradingAgent.canvas.inspector.referenceFile')}
         </span>
         <select
@@ -117,7 +117,7 @@ export function ReferenceInspector({
             </option>
           ))}
         </select>
-        <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+        <p className="mt-1 text-xs text-fg-muted">
           {t('gradingAgent.canvas.inspector.referenceFileHelp')}
         </p>
         {filesError ? <p className="mt-1 text-xs text-rose-700 dark:text-rose-300">{filesError}</p> : null}

@@ -18,24 +18,20 @@ export function SideNavCommandPaletteTrigger() {
           data-command-palette-anchor="sidebar"
           data-onboarding="command-palette"
           onClick={() => open()}
-          className={`flex items-center rounded-full bg-[#E8E9EB] text-start text-sm text-slate-700 outline-none transition-[background-color,color,border-color] hover:bg-[#E0E2E5] focus-visible:ring-2 focus-visible:ring-slate-400/35 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:focus-visible:ring-neutral-500/40 ${
-            sideNavCollapsed ? 'h-10 w-10 justify-center p-0 mx-auto' : 'w-full gap-2.5 py-2 ps-3 pe-2'
-          }`}
+          className={`flex items-center rounded-full bg-[#E8E9EB] text-start text-sm text-fg-muted outline-none transition-[background-color,color,border-color] hover:bg-[#E0E2E5] focus-visible:ring-2 focus-visible:ring-slate-400/35 dark:bg-surface-overlay dark:text-fg-muted dark:hover:bg-neutral-700 dark:focus-visible:ring-neutral-500/40 ${ sideNavCollapsed ? 'h-10 w-10 justify-center p-0 mx-auto' : 'w-full gap-2.5 py-2 ps-3 pe-2' }`}
           title={undefined}
         >
         <Search
-          className={`h-4 w-4 shrink-0 text-slate-400 dark:text-neutral-500 ${
-            sideNavCollapsed ? 'h-5 w-5' : ''
-          }`}
+          className={`h-4 w-4 shrink-0 text-fg-subtle ${ sideNavCollapsed ? 'h-5 w-5' : '' }`}
           strokeWidth={1.75}
           aria-hidden
         />
         {!sideNavCollapsed && (
           <>
-            <span className="min-w-0 flex-1 truncate font-medium text-slate-700 dark:text-neutral-400">
+            <span className="min-w-0 flex-1 truncate font-medium text-fg-muted dark:text-fg-muted">
               Search
             </span>
-            <kbd className="pointer-events-none flex h-7 min-w-[1.75rem] shrink-0 items-center justify-center rounded-lg border border-black/[0.06] bg-white px-2 font-mono text-[11px] font-medium text-slate-500 shadow-sm dark:border-white/10 dark:bg-neutral-900 dark:text-neutral-400">
+            <kbd className="pointer-events-none flex h-7 min-w-[1.75rem] shrink-0 items-center justify-center rounded-lg border border-black/[0.06] bg-surface-raised px-2 font-mono text-[11px] font-medium text-fg-muted shadow-sm dark:border-white/10 dark:bg-surface-raised dark:text-fg-muted">
               {shortcutHint()}
             </kbd>
           </>
@@ -55,7 +51,7 @@ export function TopBarMobileCommandPaletteButton() {
       aria-label="Search courses, people, pages, and actions"
       data-command-palette-anchor="topbar"
       onClick={() => open()}
-      className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-slate-600 transition-[background-color,color,border-color] hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/35 md:hidden dark:text-neutral-300 dark:hover:bg-neutral-800 dark:focus-visible:ring-neutral-500/40"
+      className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-fg-muted transition-[background-color,color,border-color] hover:bg-surface-sunken focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/35 md:hidden dark:text-fg-muted dark:hover:bg-surface-overlay dark:focus-visible:ring-neutral-500/40"
     >
       <Search className="h-5 w-5" strokeWidth={1.75} aria-hidden />
     </button>

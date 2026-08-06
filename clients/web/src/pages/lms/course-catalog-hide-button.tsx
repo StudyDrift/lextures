@@ -39,16 +39,16 @@ export function CourseCatalogHideButton({
           : `Hide ${displayTitle} from your catalog`
       }
       className={[
-        'inline-flex h-8 w-full items-center gap-2 rounded-md px-2 text-start text-sm transition-colors hover:bg-slate-50 disabled:opacity-60 dark:hover:bg-neutral-700',
+        'inline-flex h-8 w-full items-center gap-2 rounded-md px-2 text-start text-sm transition-colors hover:bg-surface-base disabled:opacity-60 dark:hover:bg-neutral-700',
         className,
       ]
         .filter(Boolean)
         .join(' ')}
     >
       {hidden ? (
-        <Eye className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
+        <Eye className="h-4 w-4 shrink-0 text-fg-muted" aria-hidden />
       ) : (
-        <EyeOff className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
+        <EyeOff className="h-4 w-4 shrink-0 text-fg-muted" aria-hidden />
       )}
       <span>{hidden ? 'Show in catalog' : 'Hide from catalog'}</span>
     </button>

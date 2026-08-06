@@ -274,15 +274,6 @@ func blindRanksForRoster(entries []assignmentRosterEntry) map[uuid.UUID]int {
 // handleListAssignmentSubmissions is GET /api/v1/courses/{course_code}/assignments/{item_id}/submissions.
 func (d Deps) handleListAssignmentSubmissions() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -404,15 +395,6 @@ func (d Deps) handleListAssignmentSubmissions() http.HandlerFunc {
 // handleGetMyAssignmentSubmission is GET /api/v1/courses/{course_code}/assignments/{item_id}/submissions/mine.
 func (d Deps) handleGetMyAssignmentSubmission() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return

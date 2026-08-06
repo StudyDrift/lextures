@@ -22,10 +22,10 @@ export function ChecklistDashboardCard({
   const outstandingItems = topItems.filter((i) => isOutstandingStatus(i.status)).slice(0, 3)
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-900 sm:col-span-2 lg:col-span-1">
-      <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400">
+    <div className="rounded-2xl border border-border-default bg-surface-raised p-5 shadow-sm dark:border-border-default dark:bg-surface-raised sm:col-span-2 lg:col-span-1">
+      <div className="flex items-center gap-2 text-warning-fg dark:text-amber-400">
         <ClipboardCheck className="h-5 w-5 shrink-0" aria-hidden />
-        <span className="text-sm font-semibold text-slate-900 dark:text-neutral-50">
+        <span className="text-sm font-semibold text-fg-default">
           {courseChecklistI18n.dashboardTitle}
         </span>
       </div>
@@ -33,19 +33,19 @@ export function ChecklistDashboardCard({
       {loading && !summary ? (
         <div className="mt-3 space-y-2" aria-busy="true">
           <div className="h-4 w-2/3 motion-safe:animate-pulse rounded bg-slate-200 dark:bg-neutral-700" />
-          <div className="h-3 w-full motion-safe:animate-pulse rounded bg-slate-100 dark:bg-neutral-800" />
+          <div className="h-3 w-full motion-safe:animate-pulse rounded bg-surface-sunken" />
         </div>
       ) : outstanding <= 0 ? (
-        <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
+        <p className="mt-2 text-sm text-fg-muted">
           {courseChecklistI18n.dashboardComplete}
         </p>
       ) : (
         <>
-          <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
+          <p className="mt-2 text-sm text-fg-muted">
             {courseChecklistI18n.dashboardProgress(summary?.done ?? 0, summary?.total ?? 0)}
           </p>
           {outstandingItems.length > 0 ? (
-            <ul className="mt-3 space-y-1.5 text-sm text-slate-800 dark:text-neutral-200">
+            <ul className="mt-3 space-y-1.5 text-sm text-fg-default">
               {outstandingItems.map((item) => (
                 <li key={item.id} className="truncate">
                   · {item.title}
@@ -58,7 +58,7 @@ export function ChecklistDashboardCard({
 
       <Link
         to={href}
-        className="mt-4 inline-flex text-xs font-semibold text-amber-800 hover:text-amber-700 dark:text-amber-300 dark:hover:text-amber-200"
+        className="mt-4 inline-flex text-xs font-semibold text-amber-800 hover:text-warning-fg dark:hover:text-amber-200"
       >
         {courseChecklistI18n.dashboardViewAll} →
       </Link>

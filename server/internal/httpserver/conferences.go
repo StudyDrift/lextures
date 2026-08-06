@@ -43,11 +43,6 @@ func (d Deps) handleCreateConferenceAvailability() http.HandlerFunc {
 		if !d.conferenceSchedulingEnabled(w) {
 			return
 		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		teacherID, err := uuid.Parse(strings.TrimSpace(chi.URLParam(r, "teacherId")))
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid teacher id.")
@@ -107,11 +102,6 @@ func (d Deps) handleListConferenceSlots() http.HandlerFunc {
 		if !d.conferenceSchedulingEnabled(w) {
 			return
 		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		teacherID, err := uuid.Parse(strings.TrimSpace(chi.URLParam(r, "teacherId")))
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid teacher id.")
@@ -146,11 +136,6 @@ type bookConferenceSlotBody struct {
 func (d Deps) handleBookConferenceSlot() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !d.conferenceSchedulingEnabled(w) {
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
 		slotID, err := uuid.Parse(strings.TrimSpace(chi.URLParam(r, "slotId")))
@@ -206,11 +191,6 @@ func (d Deps) handleCancelConferenceBooking() http.HandlerFunc {
 		if !d.conferenceSchedulingEnabled(w) {
 			return
 		}
-		if r.Method != http.MethodDelete {
-			w.Header().Set("Allow", http.MethodDelete)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		slotID, err := uuid.Parse(strings.TrimSpace(chi.URLParam(r, "slotId")))
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid slot id.")
@@ -243,11 +223,6 @@ func (d Deps) handleCancelConferenceBooking() http.HandlerFunc {
 func (d Deps) handleParentConferenceTeachers() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !d.conferenceSchedulingEnabled(w) {
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
 		parentID, orgID, ok := d.requireParentViewer(w, r)
@@ -288,11 +263,6 @@ func (d Deps) handleParentConferenceTeachers() http.HandlerFunc {
 func (d Deps) handleSchoolConferenceSchedule() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !d.conferenceSchedulingEnabled(w) {
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
 		if _, ok := d.meUserID(w, r); !ok {
@@ -349,11 +319,6 @@ func (d Deps) handleSchoolConferenceSchedule() http.HandlerFunc {
 func (d Deps) handleConferenceSlotIcal() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !d.conferenceSchedulingEnabled(w) {
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
 		slotID, err := uuid.Parse(strings.TrimSpace(chi.URLParam(r, "slotId")))

@@ -73,7 +73,7 @@ export default function AttendanceDashboard() {
       </div>
 
       {error && (
-        <div role="alert" className="mb-3 text-red-600 text-sm">
+        <div role="alert" className="mb-3 text-danger-fg text-sm">
           {error}
         </div>
       )}
@@ -112,8 +112,8 @@ export default function AttendanceDashboard() {
                     <td className="px-3 py-2 font-mono">{e.sectionCode}</td>
                     <td className="px-3 py-2">{e.courseName}</td>
                     <td className="px-3 py-2 text-end">{e.totalStudents}</td>
-                    <td className="px-3 py-2 text-end text-green-700">{e.presentCount}</td>
-                    <td className="px-3 py-2 text-end text-red-600">{e.absentCount}</td>
+                    <td className="px-3 py-2 text-end text-success-fg">{e.presentCount}</td>
+                    <td className="px-3 py-2 text-end text-danger-fg">{e.absentCount}</td>
                     <td className="px-3 py-2 text-end text-yellow-600">{e.tardyCount}</td>
                     <td className="px-3 py-2 text-end">{absenceRate(e)}</td>
                     <td className="px-3 py-2">
@@ -122,7 +122,7 @@ export default function AttendanceDashboard() {
                           Not taken
                         </span>
                       ) : (
-                        <span className="inline-block px-2 py-0.5 rounded text-xs bg-green-100 text-green-700">
+                        <span className="inline-block px-2 py-0.5 rounded text-xs bg-green-100 text-success-fg">
                           Taken
                         </span>
                       )}

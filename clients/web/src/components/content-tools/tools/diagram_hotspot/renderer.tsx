@@ -323,12 +323,12 @@ export default function DiagramHotspotRenderer({
       aria-describedby={liveHelpId}
     >
       <div className="flex flex-wrap items-start justify-between gap-2">
-        <p className="text-sm font-semibold text-slate-800 dark:text-neutral-100">{prompt}</p>
+        <p className="text-sm font-semibold text-fg-default">{prompt}</p>
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
             data-testid="diagram-toggle-list"
-            className="rounded border border-slate-300 px-2 py-1 text-xs dark:border-neutral-600"
+            className="rounded border border-border-strong px-2 py-1 text-xs dark:border-border-default"
             aria-pressed={listMode}
             onClick={() => {
               const next = !listMode
@@ -357,7 +357,7 @@ export default function DiagramHotspotRenderer({
       {helpOpen ? (
         <p
           id={liveHelpId}
-          className="rounded bg-slate-50 px-3 py-2 text-xs text-slate-700 dark:bg-neutral-800 dark:text-neutral-200"
+          className="rounded bg-surface-base px-3 py-2 text-xs text-fg-muted dark:bg-surface-overlay dark:text-fg-default"
         >
           {t('contentTools.tools.diagram_hotspot.keyboardHelpBody')}
         </p>

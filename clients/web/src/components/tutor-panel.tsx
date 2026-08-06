@@ -45,11 +45,7 @@ function AiTutorTrigger({ open, onToggle }: { open: boolean; onToggle: () => voi
       aria-expanded={open}
       aria-haspopup="dialog"
       onClick={onToggle}
-      className={`relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-[background-color,color,border-color] focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30 ${
-        open
-          ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300'
-          : 'text-slate-600 hover:bg-slate-100 dark:text-neutral-300 dark:hover:bg-neutral-800'
-      }`}
+      className={`relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-[background-color,color,border-color] focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30 ${ open ? 'bg-indigo-100 text-accent-fg dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay' }`}
     >
       <Bot className="h-5 w-5" aria-hidden />
     </button>
@@ -66,7 +62,7 @@ function CitationChips({ citations }: { citations: TutorCitation[] }) {
           key={`${c.sourceId}-${c.chunkId}`}
           type="button"
           title={c.excerpt}
-          className="rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-xs text-indigo-700 hover:bg-indigo-100 dark:border-indigo-800 dark:bg-indigo-950 dark:text-indigo-300"
+          className="rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-xs text-accent-fg hover:bg-indigo-100 dark:border-indigo-800 dark:bg-indigo-950 dark:text-indigo-300"
           onClick={() => {
             if (c.sourceId) {
               toast(t('tutor.citation.title', { title: c.title ?? 'Course material' }), {
@@ -355,12 +351,12 @@ export function AiTutorMenu({ courseCode }: AiTutorMenuProps) {
           role="dialog"
           aria-label="AI Tutor"
           aria-modal="true"
-          className="fixed inset-y-0 end-0 z-50 flex w-full flex-col bg-white shadow-2xl dark:bg-neutral-900 sm:w-96"
+          className="fixed inset-y-0 end-0 z-50 flex w-full flex-col bg-surface-raised shadow-2xl dark:bg-surface-raised sm:w-96"
         >
-          <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-neutral-800">
+          <div className="flex items-center justify-between border-b border-border-default px-4 py-3 dark:border-border-subtle">
             <div className="flex items-center gap-2">
-              <Bot className="h-5 w-5 text-indigo-600" />
-              <span className="font-semibold text-slate-900 dark:text-neutral-100">AI Tutor</span>
+              <Bot className="h-5 w-5 text-accent-fg" />
+              <span className="font-semibold text-fg-default">AI Tutor</span>
             </div>
             <div className="flex items-center gap-2">
               {persistent && (
@@ -368,7 +364,7 @@ export function AiTutorMenu({ courseCode }: AiTutorMenuProps) {
                   type="button"
                   aria-label="New tutor session"
                   onClick={() => void startNewSession()}
-                  className="rounded p-1 text-slate-500 hover:bg-slate-100 dark:hover:bg-neutral-800"
+                  className="rounded p-1 text-fg-muted hover:bg-surface-sunken dark:hover:bg-surface-overlay"
                 >
                   <Plus className="h-4 w-4" />
                 </button>
@@ -377,7 +373,7 @@ export function AiTutorMenu({ courseCode }: AiTutorMenuProps) {
                 type="button"
                 aria-label="Reset conversation"
                 onClick={() => void handleReset()}
-                className="rounded p-1 text-slate-500 hover:bg-slate-100 dark:hover:bg-neutral-800"
+                className="rounded p-1 text-fg-muted hover:bg-surface-sunken dark:hover:bg-surface-overlay"
               >
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -385,7 +381,7 @@ export function AiTutorMenu({ courseCode }: AiTutorMenuProps) {
                 type="button"
                 aria-label="Close AI Tutor"
                 onClick={() => setOpen(false)}
-                className="rounded p-1 text-slate-500 hover:bg-slate-100 dark:hover:bg-neutral-800"
+                className="rounded p-1 text-fg-muted hover:bg-surface-sunken dark:hover:bg-surface-overlay"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -393,7 +389,7 @@ export function AiTutorMenu({ courseCode }: AiTutorMenuProps) {
           </div>
 
           {persistent && sessions.length > 0 && (
-            <div className="border-b border-slate-100 px-4 py-2 dark:border-neutral-800">
+            <div className="border-b border-border-subtle px-4 py-2 dark:border-border-subtle">
               <label htmlFor="tutor-session-select" className="sr-only">
                 Previous sessions
               </label>
@@ -401,7 +397,7 @@ export function AiTutorMenu({ courseCode }: AiTutorMenuProps) {
                 id="tutor-session-select"
                 value={activeSessionId ?? ''}
                 onChange={(e) => void switchSession(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-800"
+                className="w-full rounded-lg border border-border-default bg-surface-base px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-overlay"
               >
                 {sessions.map((s) => (
                   <option key={s.id} value={s.id}>
@@ -431,14 +427,14 @@ export function AiTutorMenu({ courseCode }: AiTutorMenuProps) {
           )}
 
           {!persistent && tokenBudget && (
-            <div className="border-b border-slate-100 px-4 py-2 dark:border-neutral-800">
-              <div className="mb-1 flex items-center justify-between text-xs text-slate-500">
+            <div className="border-b border-border-subtle px-4 py-2 dark:border-border-subtle">
+              <div className="mb-1 flex items-center justify-between text-xs text-fg-muted">
                 <span>
                   {formatNumber(tokenBudget.used)} / {formatNumber(tokenBudget.limit)} tokens used
                 </span>
                 <span>{tokenBudget.month}</span>
               </div>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-neutral-800">
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-sunken">
                 <div className="h-full rounded-full bg-indigo-500" style={{ width: `${budgetPct}%` }} />
               </div>
             </div>
@@ -451,10 +447,10 @@ export function AiTutorMenu({ courseCode }: AiTutorMenuProps) {
             className="flex-1 overflow-y-auto px-4 py-4"
           >
             {loading && (
-              <p className="text-sm text-slate-400 dark:text-neutral-500">Loading conversation…</p>
+              <p className="text-sm text-fg-subtle">Loading conversation…</p>
             )}
             {!loading && displayMessages.length === 0 && !streamedText && (
-              <p className="text-center text-sm text-slate-400 dark:text-neutral-500">
+              <p className="text-center text-sm text-fg-subtle">
                 Ask the AI tutor a question about this course.
               </p>
             )}
@@ -464,11 +460,7 @@ export function AiTutorMenu({ courseCode }: AiTutorMenuProps) {
                 className={`mb-3 flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
-                    msg.role === 'user'
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-slate-100 text-slate-900 dark:bg-neutral-800 dark:text-neutral-100'
-                  }`}
+                  className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${ msg.role === 'user' ? 'bg-accent-solid text-white' : 'bg-surface-sunken text-fg-default dark:bg-surface-overlay dark:text-fg-default' }`}
                 >
                   {msg.content}
                   {msg.role === 'assistant' && msg.citations ? (
@@ -479,7 +471,7 @@ export function AiTutorMenu({ courseCode }: AiTutorMenuProps) {
             ))}
             {streamedText && (
               <div className="mb-3 flex justify-start">
-                <div className="max-w-[85%] rounded-2xl bg-slate-100 px-4 py-2.5 text-sm dark:bg-neutral-800">
+                <div className="max-w-[85%] rounded-2xl bg-surface-sunken px-4 py-2.5 text-sm dark:bg-surface-overlay">
                   {streamedText}
                   <span className="ms-0.5 inline-block h-3 w-0.5 animate-pulse bg-current" />
                 </div>
@@ -493,7 +485,7 @@ export function AiTutorMenu({ courseCode }: AiTutorMenuProps) {
             <div ref={messagesEndRef} />
           </div>
 
-          <div className="border-t border-slate-200 px-4 py-3 dark:border-neutral-800">
+          <div className="border-t border-border-default px-4 py-3 dark:border-border-subtle">
             <div className="flex items-end gap-2">
               <textarea
                 ref={inputRef}
@@ -504,19 +496,19 @@ export function AiTutorMenu({ courseCode }: AiTutorMenuProps) {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 disabled={streaming}
-                className="flex-1 resize-none rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-800"
+                className="flex-1 resize-none rounded-xl border border-border-default bg-surface-base px-3 py-2 text-sm disabled:opacity-50 dark:border-border-default dark:bg-surface-overlay"
               />
               <button
                 type="button"
                 aria-label="Send message"
                 onClick={() => void sendMessage()}
                 disabled={!input.trim() || streaming}
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-white disabled:opacity-50"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-solid text-white disabled:opacity-50"
               >
                 <Send className="h-4 w-4" />
               </button>
             </div>
-            <p className="mt-1.5 text-center text-xs text-slate-400 dark:text-neutral-500">
+            <p className="mt-1.5 text-center text-xs text-fg-subtle">
               I am an AI tutor. I can make mistakes — please verify important information with your
               instructor.
             </p>

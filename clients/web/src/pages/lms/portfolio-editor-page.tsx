@@ -91,11 +91,11 @@ function artifactTypeLabel(a: Artifact): string {
 }
 
 const iconGhostPublished =
-  'rounded-md p-2 text-indigo-600 transition-[background-color,color,border-color] hover:bg-indigo-50/90 hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 dark:text-indigo-400 dark:hover:bg-indigo-950/45 dark:hover:text-indigo-300'
+  'rounded-md p-2 text-accent-fg transition-[background-color,color,border-color] hover:bg-indigo-50/90 hover:text-accent-fg disabled:cursor-not-allowed disabled:opacity-50 dark:text-indigo-400 dark:hover:bg-indigo-950/45 dark:hover:text-indigo-300'
 const iconGhostDraft =
-  'rounded-md p-2 text-slate-400 transition-[background-color,color,border-color] hover:bg-slate-200/45 hover:text-slate-600 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-500 dark:hover:bg-neutral-700/35 dark:hover:text-neutral-300'
+  'rounded-md p-2 text-fg-subtle transition-[background-color,color,border-color] hover:bg-slate-200/45 hover:text-fg-muted disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-700/35 dark:hover:text-fg-muted'
 const iconGhost =
-  'rounded-md p-2 text-slate-500 transition-[background-color,color,border-color] hover:bg-slate-200/45 hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-700/35 dark:hover:text-neutral-200'
+  'rounded-md p-2 text-fg-muted transition-[background-color,color,border-color] hover:bg-slate-200/45 hover:text-fg-default disabled:cursor-not-allowed disabled:opacity-50 dark:text-fg-muted dark:hover:bg-neutral-700/35 dark:hover:text-fg-default'
 
 function ArtifactTypeIcon({ type }: { type: ArtifactType }) {
   if (type === 'url') {
@@ -110,7 +110,7 @@ function ArtifactTypeIcon({ type }: { type: ArtifactType }) {
   }
   return (
     <span
-      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-indigo-200/80 bg-indigo-50 text-indigo-600 dark:border-indigo-500/35 dark:bg-indigo-950/60 dark:text-indigo-300"
+      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-indigo-200/80 bg-indigo-50 text-accent-fg dark:border-indigo-500/35 dark:bg-indigo-950/60 dark:text-indigo-300"
       aria-hidden
     >
       <FileText className="h-4 w-4" strokeWidth={2} />
@@ -180,14 +180,14 @@ function ArtifactItemActions({
             id={menuId}
             role="menu"
             aria-label="Artifact actions"
-            className="absolute end-0 z-50 mt-1 min-w-[10rem] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-800 dark:shadow-black/40"
+            className="absolute end-0 z-50 mt-1 min-w-[10rem] overflow-hidden rounded-xl border border-border-default bg-surface-raised py-1 shadow-lg shadow-slate-900/10 dark:border-border-default dark:bg-surface-overlay dark:shadow-black/40"
           >
             {onEditTitle ? (
               <button
                 type="button"
                 role="menuitem"
                 onClick={() => { onEditTitle(); setMenuOpen(false) }}
-                className="flex w-full px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+                className="flex w-full px-2.5 py-2 text-start text-sm font-medium text-fg-default transition-[background-color,color,border-color] hover:bg-surface-base dark:text-fg-default dark:hover:bg-neutral-700/80"
               >
                 Edit title
               </button>
@@ -196,7 +196,7 @@ function ArtifactItemActions({
               type="button"
               role="menuitem"
               onClick={() => { onDelete(); setMenuOpen(false) }}
-              className="flex w-full items-center gap-2 border-t border-slate-100 px-2.5 py-2 text-start text-sm font-medium text-rose-700 transition-[background-color,color,border-color] hover:bg-rose-50 dark:border-neutral-700 dark:text-rose-300 dark:hover:bg-rose-950/50"
+              className="flex w-full items-center gap-2 border-t border-border-subtle px-2.5 py-2 text-start text-sm font-medium text-rose-700 transition-[background-color,color,border-color] hover:bg-rose-50 dark:border-border-default dark:text-rose-300 dark:hover:bg-rose-950/50"
             >
               <Trash2 className="h-4 w-4" aria-hidden /> Delete
             </button>
@@ -250,7 +250,7 @@ function AddArtifactMenu({
           if (disabled) return
           setOpen((o) => !o)
         }}
-        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200/70 bg-white/90 px-2 py-1.5 text-xs font-medium text-slate-700 shadow-none transition-[background-color,color,border-color] hover:border-slate-300/80 hover:bg-slate-50/90 disabled:cursor-not-allowed disabled:opacity-60 sm:px-2.5 sm:text-sm dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:border-neutral-500 dark:hover:bg-neutral-800"
+        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200/70 bg-white/90 px-2 py-1.5 text-xs font-medium text-fg-muted shadow-none transition-[background-color,color,border-color] hover:border-slate-300/80 hover:bg-slate-50/90 disabled:cursor-not-allowed disabled:opacity-60 sm:px-2.5 sm:text-sm dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:border-neutral-500 dark:hover:bg-surface-overlay"
       >
         <Plus className="h-4 w-4 shrink-0" aria-hidden />
         <span className="truncate">Add artifact</span>
@@ -265,73 +265,69 @@ function AddArtifactMenu({
           id={menuId}
           role="menu"
           aria-label="Artifact types"
-          className="absolute end-0 z-50 mt-1 w-max min-w-[min(22rem,calc(100vw-1.5rem))] max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-800 dark:shadow-black/40"
+          className="absolute end-0 z-50 mt-1 w-max min-w-[min(22rem,calc(100vw-1.5rem))] max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl border border-border-default bg-surface-raised py-1 shadow-lg shadow-slate-900/10 dark:border-border-default dark:bg-surface-overlay dark:shadow-black/40"
         >
           <button
             type="button"
             role="menuitem"
             onClick={() => pick('heading')}
-            className="flex w-full items-start gap-3 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:hover:bg-neutral-700"
+            className="flex w-full items-start gap-3 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:hover:bg-neutral-700"
           >
-            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-400">
+            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border-default bg-surface-raised text-fg-muted dark:border-border-default dark:bg-surface-raised dark:text-fg-muted">
               <Heading className="h-4 w-4" aria-hidden />
             </span>
             <span className="flex min-w-0 flex-col gap-0.5">
-              <span className="font-semibold text-slate-950 dark:text-neutral-100">Heading</span>
-              <span className="text-xs text-slate-500 dark:text-neutral-400">Text label for organizing content</span>
+              <span className="font-semibold text-slate-950 dark:text-fg-default">Heading</span>
+              <span className="text-xs text-fg-muted">Text label for organizing content</span>
             </span>
           </button>
           <button
             type="button"
             role="menuitem"
             onClick={() => pick('content_page')}
-            className="flex w-full items-start gap-3 border-t border-slate-100 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
+            className="flex w-full items-start gap-3 border-t border-border-subtle px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:hover:bg-neutral-700"
           >
-            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-indigo-200/80 bg-indigo-50 text-indigo-600 dark:border-indigo-500/35 dark:bg-indigo-950 dark:text-indigo-300">
+            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-indigo-200/80 bg-indigo-50 text-accent-fg dark:border-indigo-500/35 dark:bg-indigo-950 dark:text-indigo-300">
               <FileText className="h-4 w-4" aria-hidden />
             </span>
             <span className="flex min-w-0 flex-col gap-0.5">
-              <span className="font-semibold text-slate-950 dark:text-neutral-100">Content page</span>
-              <span className="text-xs text-slate-500 dark:text-neutral-400">Markdown page with rich formatting</span>
+              <span className="font-semibold text-slate-950 dark:text-fg-default">Content page</span>
+              <span className="text-xs text-fg-muted">Markdown page with rich formatting</span>
             </span>
           </button>
           <button
             type="button"
             role="menuitem"
             onClick={() => pick('url')}
-            className="flex w-full items-start gap-3 border-t border-slate-100 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
+            className="flex w-full items-start gap-3 border-t border-border-subtle px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:hover:bg-neutral-700"
           >
             <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-sky-200/90 bg-sky-50 text-sky-700 dark:border-sky-500/40 dark:bg-sky-950 dark:text-sky-200">
               <ExternalLink className="h-4 w-4" aria-hidden />
             </span>
             <span className="flex min-w-0 flex-col gap-0.5">
-              <span className="font-semibold text-slate-950 dark:text-neutral-100">External link</span>
-              <span className="text-xs text-slate-500 dark:text-neutral-400">Opens a URL in a new tab</span>
+              <span className="font-semibold text-slate-950 dark:text-fg-default">External link</span>
+              <span className="text-xs text-fg-muted">Opens a URL in a new tab</span>
             </span>
           </button>
           {artifactListActionsEnabled ? (
             <>
-              <div className="my-1 border-t border-slate-100 dark:border-neutral-700" role="separator" />
+              <div className="my-1 border-t border-border-subtle dark:border-border-default" role="separator" />
               <button
                 type="button"
                 role="menuitemcheckbox"
                 aria-checked={dragHandlesVisible}
                 onClick={onToggleDragHandles}
-                className="flex w-full items-start gap-2 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:hover:bg-neutral-700"
+                className="flex w-full items-start gap-2 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:hover:bg-neutral-700"
               >
                 <span
-                  className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
-                    dragHandlesVisible
-                      ? 'border-indigo-600 bg-indigo-600 text-white dark:border-indigo-500 dark:bg-indigo-500'
-                      : 'border-slate-300 bg-white dark:border-neutral-500 dark:bg-neutral-800'
-                  }`}
+                  className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border ${ dragHandlesVisible ? 'border-indigo-600 bg-accent-solid text-white dark:border-indigo-500 dark:bg-indigo-500' : 'border-border-strong bg-surface-raised dark:border-neutral-500 dark:bg-surface-overlay' }`}
                   aria-hidden
                 >
                   {dragHandlesVisible ? <Check className="h-3 w-3" strokeWidth={3} /> : null}
                 </span>
                 <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                  <span className="font-semibold text-slate-950 dark:text-neutral-100">Drag and drop</span>
-                  <span className="text-xs text-slate-500 dark:text-neutral-400">Show reorder handles for artifacts</span>
+                  <span className="font-semibold text-slate-950 dark:text-fg-default">Drag and drop</span>
+                  <span className="text-xs text-fg-muted">Show reorder handles for artifacts</span>
                 </span>
               </button>
             </>
@@ -357,7 +353,7 @@ function ArtifactRowContent({
 
   if (heading) {
     return (
-      <p className="text-lg font-bold leading-snug tracking-tight text-slate-950 sm:text-xl dark:text-neutral-100">
+      <p className="text-lg font-bold leading-snug tracking-tight text-slate-950 sm:text-xl dark:text-fg-default">
         {artifact.title}
       </p>
     )
@@ -370,7 +366,7 @@ function ArtifactRowContent({
         <div className="min-w-0 flex-1">
           <Link
             to={portfolioContentPageHref(pid, artifact.id)}
-            className="min-w-0 flex-1 text-base font-semibold leading-snug tracking-tight text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+            className="min-w-0 flex-1 text-base font-semibold leading-snug tracking-tight text-accent-fg hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
           >
             {artifact.title}
           </Link>
@@ -384,16 +380,16 @@ function ArtifactRowContent({
       <ArtifactTypeIcon type={artifact.artifactType} />
       <div className="min-w-0 flex-1">
         <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-          <p className="text-base font-semibold leading-snug tracking-tight text-slate-900 dark:text-neutral-100">
+          <p className="text-base font-semibold leading-snug tracking-tight text-fg-default">
             {artifact.title}
           </p>
-          <p className="inline-flex shrink-0 items-center rounded bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:bg-neutral-750 dark:text-neutral-400">
+          <p className="inline-flex shrink-0 items-center rounded bg-surface-sunken px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-fg-muted dark:bg-neutral-750 dark:text-fg-muted">
             {artifactTypeLabel(artifact)}
             {artifact.fileName ? ` · ${artifact.fileName}` : ''}
           </p>
         </div>
         {artifact.description && (
-          <p className="mt-0.5 text-sm text-slate-500 dark:text-neutral-400">{artifact.description}</p>
+          <p className="mt-0.5 text-sm text-fg-muted">{artifact.description}</p>
         )}
         {artifact.externalUrl && (
           <div className="mt-1">
@@ -408,7 +404,7 @@ function ArtifactRowContent({
           </div>
         )}
         {artifact.outcomeIds.length > 0 && (
-          <p className="mt-1 text-xs font-medium text-slate-500 dark:text-neutral-400">
+          <p className="mt-1 text-xs font-medium text-fg-muted">
             {artifact.outcomeIds.length} outcome{artifact.outcomeIds.length === 1 ? '' : 's'} tagged
           </p>
         )}
@@ -466,11 +462,7 @@ function SortableArtifactRow({
           {(!disabled || dragHandlesVisible || isDragging) && (
             <button
               type="button"
-              className={`flex h-11 w-11 shrink-0 cursor-grab touch-none items-center justify-center rounded-lg border-0 bg-transparent p-0 text-slate-400 shadow-none transition-[opacity,background-color,color,border-color] hover:text-slate-600 active:cursor-grabbing focus-visible:pointer-events-auto focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 sm:h-9 sm:w-9 dark:text-neutral-500 dark:hover:text-neutral-300 ${
-                gripAlwaysOn
-                  ? 'opacity-100'
-                  : 'opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto'
-              }`}
+              className={`flex h-11 w-11 shrink-0 cursor-grab touch-none items-center justify-center rounded-lg border-0 bg-transparent p-0 text-fg-subtle shadow-none transition-[opacity,background-color,color,border-color] hover:text-fg-muted active:cursor-grabbing focus-visible:pointer-events-auto focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 sm:h-9 sm:w-9 dark:hover:text-fg-muted ${ gripAlwaysOn ? 'opacity-100' : 'opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto' }`}
               aria-label="Drag to reorder item"
               {...listeners}
               {...attributes}
@@ -542,12 +534,12 @@ function AddArtifactForm({
   return (
     <form
       onSubmit={(e) => void submit(e)}
-      className="mt-4 space-y-4 border-t border-slate-200/55 pt-4 dark:border-neutral-700/80"
+      className="mt-4 space-y-4 border-t border-slate-200/55 pt-4/80"
     >
-      <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">New {kindLabel}</h3>
+      <h3 className="text-sm font-semibold text-fg-default">New {kindLabel}</h3>
       {err && <p className="text-sm text-destructive">{err}</p>}
       <div>
-        <label htmlFor="art-title" className="mb-1 block text-sm font-medium text-slate-700 dark:text-neutral-300">
+        <label htmlFor="art-title" className="mb-1 block text-sm font-medium text-fg-muted">
           Title *
         </label>
         <input
@@ -556,13 +548,13 @@ function AddArtifactForm({
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           autoFocus
-          className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+          className="w-full rounded-xl border border-border-default bg-surface-raised px-3.5 py-2.5 text-sm text-fg-default focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none dark:border-border-default dark:bg-surface-base dark:text-fg-default"
           required
         />
       </div>
       {kind === 'content_page' && (
         <div>
-          <label htmlFor="art-text" className="mb-1 block text-sm font-medium text-slate-700 dark:text-neutral-300">
+          <label htmlFor="art-text" className="mb-1 block text-sm font-medium text-fg-muted">
             Content
           </label>
           <textarea
@@ -570,13 +562,13 @@ function AddArtifactForm({
             rows={4}
             value={textContent}
             onChange={(e) => setTextContent(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+            className="w-full rounded-xl border border-border-default bg-surface-raised px-3.5 py-2.5 text-sm text-fg-default focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none dark:border-border-default dark:bg-surface-base dark:text-fg-default"
           />
         </div>
       )}
       {kind === 'url' && (
         <div>
-          <label htmlFor="art-url" className="mb-1 block text-sm font-medium text-slate-700 dark:text-neutral-300">
+          <label htmlFor="art-url" className="mb-1 block text-sm font-medium text-fg-muted">
             URL *
           </label>
           <input
@@ -584,7 +576,7 @@ function AddArtifactForm({
             type="url"
             value={externalUrl}
             onChange={(e) => setExternalUrl(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+            className="w-full rounded-xl border border-border-default bg-surface-raised px-3.5 py-2.5 text-sm text-fg-default focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none dark:border-border-default dark:bg-surface-base dark:text-fg-default"
             placeholder="https://"
           />
         </div>
@@ -600,7 +592,7 @@ function AddArtifactForm({
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-[background-color,color,border-color] dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800"
+          className="rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm font-medium text-fg-muted hover:bg-surface-base transition-[background-color,color,border-color] dark:border-border-default dark:bg-surface-raised dark:text-fg-muted dark:hover:bg-surface-overlay"
         >
           Cancel
         </button>
@@ -627,11 +619,7 @@ function PortfolioPublishButton({
       }
       aria-label={portfolio.isPublic ? 'Published' : 'Draft'}
       aria-pressed={portfolio.isPublic}
-      className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold shadow-sm transition-[background-color,color,border-color] ${
-        portfolio.isPublic
-          ? 'border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:border-indigo-900/40 dark:bg-indigo-950/30 dark:text-indigo-300 dark:hover:bg-indigo-900/40'
-          : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800'
-      }`}
+      className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold shadow-sm transition-[background-color,color,border-color] ${ portfolio.isPublic ? 'border-indigo-200 bg-indigo-50 text-accent-fg hover:bg-indigo-100 dark:border-indigo-900/40 dark:bg-indigo-950/30 dark:text-indigo-300 dark:hover:bg-indigo-900/40' : 'border-border-default bg-surface-raised text-fg-muted hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-muted dark:hover:bg-surface-overlay' }`}
     >
       <IconSwap
         active={portfolio.isPublic}
@@ -968,7 +956,7 @@ export default function PortfolioEditorPage() {
               disabled={anyModalBusy}
               title="Rename portfolio"
               aria-label="Rename portfolio"
-              className="rounded-lg p-1.5 text-muted-foreground transition-[background-color,color,border-color] hover:bg-slate-100 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-800"
+              className="rounded-lg p-1.5 text-muted-foreground transition-[background-color,color,border-color] hover:bg-surface-sunken hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-surface-overlay"
             >
               <Pencil className="h-4 w-4" aria-hidden />
             </button>
@@ -997,17 +985,17 @@ export default function PortfolioEditorPage() {
             </div>
             {publicUrl && (
               <div className="flex flex-wrap items-center gap-2 border-t border-amber-200/50 pt-3 dark:border-amber-900/30">
-                <code className="truncate rounded-lg border border-slate-100 bg-white px-3 py-1.5 font-mono text-xs text-slate-750 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-300">
+                <code className="truncate rounded-lg border border-border-subtle bg-surface-raised px-3 py-1.5 font-mono text-xs text-slate-750 dark:border-border-subtle dark:bg-surface-raised dark:text-fg-muted">
                   {publicUrl}
                 </code>
                 <button
                   onClick={() => void copyLink()}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-xs font-medium text-fg-muted transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-muted dark:hover:bg-surface-overlay"
                 >
                   {copied ? (
                     <Check className="h-3.5 w-3.5 text-emerald-600" aria-hidden />
                   ) : (
-                    <Copy className="h-3.5 w-3.5 text-slate-500" aria-hidden />
+                    <Copy className="h-3.5 w-3.5 text-fg-muted" aria-hidden />
                   )}
                   {copied ? 'Copied' : 'Copy link'}
                 </button>
@@ -1017,11 +1005,11 @@ export default function PortfolioEditorPage() {
         )}
 
         {/* Artifacts — styled as a module card */}
-        <div className="rounded-2xl border border-slate-200/70 bg-slate-50/60 p-4 shadow-sm dark:border-neutral-700/80 dark:bg-neutral-800/85">
+        <div className="rounded-2xl border border-slate-200/70 bg-slate-50/60 p-4 shadow-sm/80/85">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold text-slate-950 dark:text-neutral-100">Artifacts</p>
-              <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
+              <p className="text-sm font-semibold text-slate-950 dark:text-fg-default">Artifacts</p>
+              <p className="mt-0.5 text-xs text-fg-muted">
                 {artifacts.length === 0
                   ? 'Add text pages, links, or headings to this portfolio.'
                   : `${artifacts.length} ${artifacts.length === 1 ? 'item' : 'items'}`}
@@ -1075,7 +1063,7 @@ export default function PortfolioEditorPage() {
                 items={artifactIds}
                 strategy={verticalListSortingStrategy}
               >
-                <ul className="mt-4 divide-y divide-slate-200/55 border-t border-slate-200/55 dark:divide-neutral-700/80 dark:border-neutral-700/80">
+                <ul className="mt-4 divide-y divide-slate-200/55 border-t border-slate-200/55 dark:divide-neutral-700/80/80">
                   {artifacts.map((a) => (
                     <SortableArtifactRow
                       key={a.id}
@@ -1097,11 +1085,11 @@ export default function PortfolioEditorPage() {
               </SortableContext>
               {activeDragId && activeDragArtifact ? (
                 <DragOverlay dropAnimation={null}>
-                  <div className="pointer-events-none max-w-lg rounded-xl border border-slate-300 bg-white px-3 py-2 shadow-lg dark:border-neutral-600 dark:bg-neutral-800">
-                    <p className="text-sm font-semibold text-slate-950 dark:text-neutral-100">
+                  <div className="pointer-events-none max-w-lg rounded-xl border border-border-strong bg-surface-raised px-3 py-2 shadow-lg dark:border-border-default dark:bg-surface-overlay">
+                    <p className="text-sm font-semibold text-slate-950 dark:text-fg-default">
                       {activeDragArtifact.title}
                     </p>
-                    <p className="text-xs text-slate-500 dark:text-neutral-400">
+                    <p className="text-xs text-fg-muted">
                       {isPortfolioHeading(activeDragArtifact)
                         ? 'Heading'
                         : isPortfolioContentPage(activeDragArtifact)
@@ -1117,7 +1105,7 @@ export default function PortfolioEditorPage() {
           )}
 
           {artifacts.length === 0 && !addKind && (
-            <div className="mt-4 border-t border-slate-200/55 pt-4 dark:border-neutral-700/80">
+            <div className="mt-4 border-t border-slate-200/55 pt-4/80">
               <EmptyState
                 icon={FileText}
                 title="No artifacts yet"
@@ -1176,11 +1164,11 @@ export default function PortfolioEditorPage() {
             }
           }}
         >
-          <div className="w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-neutral-600 dark:bg-neutral-800">
-            <div className="flex items-start justify-between gap-3 border-b border-slate-200 px-4 py-3 dark:border-neutral-600">
+          <div className="w-full max-w-md overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-overlay">
+            <div className="flex items-start justify-between gap-3 border-b border-border-default px-4 py-3 dark:border-border-default">
               <h3
                 id={deleteDialogTitleId}
-                className="text-sm font-semibold text-slate-900 dark:text-neutral-100"
+                className="text-sm font-semibold text-fg-default"
               >
                 Delete item
               </h3>
@@ -1190,18 +1178,18 @@ export default function PortfolioEditorPage() {
                   if (deletingArtifactId !== deleteConfirmArtifact.id) setDeleteConfirmArtifact(null)
                 }}
                 disabled={deletingArtifactId === deleteConfirmArtifact.id}
-                className="shrink-0 rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
+                className="shrink-0 rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken hover:text-fg-default disabled:cursor-not-allowed disabled:opacity-50 dark:text-fg-muted dark:hover:bg-neutral-700 dark:hover:text-fg-default"
                 aria-label="Close"
               >
                 <X className="h-5 w-5" aria-hidden />
               </button>
             </div>
             <div className="p-4">
-              <p className="text-sm leading-relaxed text-slate-600 dark:text-neutral-300">
+              <p className="text-sm leading-relaxed text-fg-muted">
                 Remove this artifact from your portfolio? This cannot be undone.
               </p>
               {deleteConfirmArtifact.title ? (
-                <p className="mt-2 text-sm font-medium text-slate-900 dark:text-neutral-100">
+                <p className="mt-2 text-sm font-medium text-fg-default">
                   {deleteConfirmArtifact.title}
                 </p>
               ) : null}
@@ -1210,7 +1198,7 @@ export default function PortfolioEditorPage() {
                   type="button"
                   onClick={() => setDeleteConfirmArtifact(null)}
                   disabled={deletingArtifactId === deleteConfirmArtifact.id}
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700/80"
+                  className="rounded-xl border border-border-default bg-surface-raised px-4 py-2 text-sm font-medium text-fg-muted shadow-sm hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-50 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700/80"
                 >
                   Cancel
                 </button>
@@ -1218,7 +1206,7 @@ export default function PortfolioEditorPage() {
                   type="button"
                   onClick={() => void confirmDeleteArtifact()}
                   disabled={deletingArtifactId === deleteConfirmArtifact.id}
-                  className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+                  className="rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-indigo-500 dark:hover:bg-indigo-400"
                 >
                   {deletingArtifactId === deleteConfirmArtifact.id ? 'Deleting…' : 'Delete'}
                 </button>

@@ -221,7 +221,7 @@ export default function CourseGroupsPage() {
   if (!courseCode) {
     return (
       <LmsPage title="Groups" description="">
-        <p className="mt-6 text-sm text-slate-500">Invalid link.</p>
+        <p className="mt-6 text-sm text-fg-muted">Invalid link.</p>
     </LmsPage>
     )
   }
@@ -243,18 +243,18 @@ export default function CourseGroupsPage() {
       )}
 
       {loading && (
-        <p className="text-sm text-slate-500 dark:text-neutral-400">Loading groups…</p>
+        <p className="text-sm text-fg-muted">Loading groups…</p>
       )}
 
       {!loading && (
         <div className="flex min-h-0 flex-1 flex-col gap-3 md:flex-row md:items-stretch">
           {/* Groups sidebar */}
-          <aside className="flex w-full shrink-0 flex-col rounded-xl border border-slate-200 bg-white p-2.5 dark:border-neutral-800 dark:bg-neutral-950 md:h-auto md:w-52">
-            <p className="px-1 pb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+          <aside className="flex w-full shrink-0 flex-col rounded-xl border border-border-default bg-surface-raised p-2.5 dark:border-border-subtle dark:bg-surface-base md:h-auto md:w-52">
+            <p className="px-1 pb-2 text-xs font-semibold uppercase tracking-wide text-fg-muted">
               Groups
             </p>
             {groups.length === 0 ? (
-              <p className="px-1 text-xs text-slate-400 dark:text-neutral-500">No groups yet.</p>
+              <p className="px-1 text-xs text-fg-subtle">No groups yet.</p>
             ) : (
               <div className="flex flex-col gap-0.5">
                 {groups.map((g) => (
@@ -262,16 +262,12 @@ export default function CourseGroupsPage() {
                     key={g.id}
                     type="button"
                     onClick={() => setActiveGroupId(g.id)}
-                    className={`flex w-full items-center gap-2 rounded-lg px-2 py-2 text-start text-sm font-medium ${
-                      g.id === activeGroupId
-                        ? 'bg-indigo-50 text-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-100'
-                        : 'text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-900'
-                    }`}
+                    className={`flex w-full items-center gap-2 rounded-lg px-2 py-2 text-start text-sm font-medium ${ g.id === activeGroupId ? 'bg-indigo-50 text-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-100' : 'text-fg-muted hover:bg-surface-base dark:text-fg-default dark:hover:bg-surface-raised' }`}
                   >
                     <Users className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
                     <span className="min-w-0 flex-1 truncate">{g.name}</span>
                     {isInstructor && g.memberCount > 0 && (
-                      <span className="shrink-0 rounded-full bg-slate-100 px-1.5 py-0.5 text-[0.65rem] font-medium text-slate-500 dark:bg-neutral-800 dark:text-neutral-400">
+                      <span className="shrink-0 rounded-full bg-surface-sunken px-1.5 py-0.5 text-[0.65rem] font-medium text-fg-muted dark:bg-surface-overlay dark:text-fg-muted">
                         {g.memberCount}
                       </span>
                     )}
@@ -283,16 +279,16 @@ export default function CourseGroupsPage() {
 
           {/* Channel sidebar */}
           {activeGroupId && (
-            <aside className="flex w-full shrink-0 flex-col rounded-xl border border-slate-200 bg-white p-2.5 dark:border-neutral-800 dark:bg-neutral-950 md:h-auto md:w-44">
+            <aside className="flex w-full shrink-0 flex-col rounded-xl border border-border-default bg-surface-raised p-2.5 dark:border-border-subtle dark:bg-surface-base md:h-auto md:w-44">
               <div className="flex items-center justify-between gap-2 px-1 pb-2">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                <p className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
                   Channels
                 </p>
                 {isInstructor && (
                   <button
                     type="button"
                     onClick={() => { setNewChannelName(''); setNewChannelModalOpen(true) }}
-                    className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+                    className="rounded-md p-1 text-fg-subtle hover:bg-surface-sunken hover:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-fg-default"
                     aria-label="New channel"
                   >
                     <Plus className="h-4 w-4" aria-hidden />
@@ -305,11 +301,7 @@ export default function CourseGroupsPage() {
                     key={ch.id}
                     type="button"
                     onClick={() => setActiveChannelId(ch.id)}
-                    className={`flex w-full items-center gap-2 rounded-lg px-2 py-2 text-start text-sm font-medium ${
-                      ch.id === activeChannelId
-                        ? 'bg-indigo-50 text-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-100'
-                        : 'text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-900'
-                    }`}
+                    className={`flex w-full items-center gap-2 rounded-lg px-2 py-2 text-start text-sm font-medium ${ ch.id === activeChannelId ? 'bg-indigo-50 text-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-100' : 'text-fg-muted hover:bg-surface-base dark:text-fg-default dark:hover:bg-surface-raised' }`}
                   >
                     <Hash className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
                     <span className="min-w-0 flex-1 truncate">{ch.name}</span>
@@ -322,29 +314,29 @@ export default function CourseGroupsPage() {
           {/* New channel modal */}
           {newChannelModalOpen && (
             <div
-              className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/40 p-4 sm:items-center dark:bg-neutral-950"
+              className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/40 p-4 sm:items-center dark:bg-surface-base"
               role="dialog"
               aria-modal="true"
               aria-labelledby="group-new-channel-title"
               onClick={(e) => { if (e.target === e.currentTarget && !creatingChannel) setNewChannelModalOpen(false) }}
             >
-              <div className="w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-950">
-                <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 dark:border-neutral-800">
-                  <h3 id="group-new-channel-title" className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+              <div className="w-full max-w-md overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-base">
+                <div className="flex items-center justify-between border-b border-border-subtle px-4 py-3 dark:border-border-subtle">
+                  <h3 id="group-new-channel-title" className="text-sm font-semibold text-fg-default">
                     New channel
                   </h3>
                   <button
                     type="button"
                     onClick={() => !creatingChannel && setNewChannelModalOpen(false)}
                     disabled={creatingChannel}
-                    className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-800"
+                    className="rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken disabled:opacity-50 dark:text-fg-muted dark:hover:bg-surface-overlay"
                     aria-label="Close"
                   >
                     <X className="h-5 w-5" aria-hidden />
                   </button>
                 </div>
                 <div className="p-4">
-                  <label className="mb-1.5 block text-xs font-medium text-slate-600 dark:text-neutral-400" htmlFor="group-new-channel-name">
+                  <label className="mb-1.5 block text-xs font-medium text-fg-muted" htmlFor="group-new-channel-name">
                     Channel name
                   </label>
                   <input
@@ -356,15 +348,15 @@ export default function CourseGroupsPage() {
                     autoFocus
                     disabled={creatingChannel}
                     maxLength={80}
-                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                    className="w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm text-fg-default focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60 dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
                   />
                 </div>
-                <div className="flex items-center justify-end gap-2 border-t border-slate-100 bg-slate-50/80 px-4 py-3 dark:border-neutral-800 dark:bg-neutral-900">
+                <div className="flex items-center justify-end gap-2 border-t border-border-subtle bg-slate-50/80 px-4 py-3 dark:border-border-subtle dark:bg-surface-raised">
                   <button
                     type="button"
                     onClick={() => !creatingChannel && setNewChannelModalOpen(false)}
                     disabled={creatingChannel}
-                    className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-50 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                    className="rounded-xl px-3 py-2 text-sm font-medium text-fg-muted hover:bg-surface-sunken disabled:opacity-50 dark:text-fg-muted dark:hover:bg-surface-overlay"
                   >
                     Cancel
                   </button>
@@ -372,7 +364,7 @@ export default function CourseGroupsPage() {
                     type="button"
                     onClick={() => void onCreateChannel()}
                     disabled={creatingChannel || !newChannelName.trim()}
-                    className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50"
+                    className="rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50"
                   >
                     {creatingChannel ? 'Creating…' : 'Create'}
                   </button>
@@ -382,15 +374,15 @@ export default function CourseGroupsPage() {
           )}
 
           {/* Message area */}
-          <section className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
+          <section className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-200/80 bg-surface-raised shadow-sm dark:border-border-subtle dark:bg-surface-base">
             {activeGroupId && activeChannelId ? (
               <>
-                <div className="shrink-0 border-b border-slate-100 px-3 py-2 sm:px-4 dark:border-neutral-800">
-                  <h2 className="flex min-w-0 items-baseline gap-1.5 truncate text-base font-semibold tracking-tight text-slate-900 dark:text-neutral-50">
-                    <span className="shrink-0 text-slate-400 dark:text-neutral-500" aria-hidden>#</span>
+                <div className="shrink-0 border-b border-border-subtle px-3 py-2 sm:px-4 dark:border-border-subtle">
+                  <h2 className="flex min-w-0 items-baseline gap-1.5 truncate text-base font-semibold tracking-tight text-fg-default">
+                    <span className="shrink-0 text-fg-subtle" aria-hidden>#</span>
                     <span className="min-w-0 truncate">{activeChannel?.name ?? 'Channel'}</span>
                     {activeGroup && (
-                      <span className="ms-1 text-sm font-normal text-slate-400 dark:text-neutral-500">
+                      <span className="ms-1 text-sm font-normal text-fg-subtle">
                         — {activeGroup.name}
                       </span>
                     )}
@@ -412,24 +404,24 @@ export default function CourseGroupsPage() {
                     messages.map((m) => (
                       <article
                         key={m.id}
-                        className="border-b border-slate-100 py-3.5 last:border-b-0 dark:border-neutral-800/80"
+                        className="border-b border-border-subtle py-3.5 last:border-b-0/80"
                       >
                         <div className="flex gap-3">
                           <GroupAvatar userId={m.authorUserId} name={authorLabel(m)} />
                           <div className="min-w-0 flex-1 pt-0.5">
                             <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                              <span className="truncate text-[0.9375rem] font-semibold text-slate-900 dark:text-neutral-50">
+                              <span className="truncate text-[0.9375rem] font-semibold text-fg-default">
                                 {authorLabel(m)}
                               </span>
                               <span className="text-slate-300 dark:text-neutral-600" aria-hidden>·</span>
                               <time
-                                className="shrink-0 text-xs font-medium text-slate-400 dark:text-neutral-500"
+                                className="shrink-0 text-xs font-medium text-fg-subtle"
                                 dateTime={m.createdAt}
                               >
                                 {formatRelativeCompact(m.createdAt)}
                               </time>
                             </div>
-                            <p className="mt-1.5 whitespace-pre-wrap text-[0.9375rem] leading-relaxed text-slate-800 dark:text-neutral-100">
+                            <p className="mt-1.5 whitespace-pre-wrap text-[0.9375rem] leading-relaxed text-fg-default">
                               {m.body}
                             </p>
                           </div>
@@ -439,7 +431,7 @@ export default function CourseGroupsPage() {
                   )}
                 </div>
 
-                <div className="shrink-0 border-t border-slate-200 px-3 py-2 sm:px-4 dark:border-neutral-800">
+                <div className="shrink-0 border-t border-border-default px-3 py-2 sm:px-4 dark:border-border-subtle">
                   <FeedComposer
                     courseCode={courseCode}
                     value={composer}

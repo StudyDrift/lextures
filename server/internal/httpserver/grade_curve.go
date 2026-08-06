@@ -139,15 +139,6 @@ func (d Deps) parseCurveRequest(w http.ResponseWriter, r *http.Request, maxPts f
 // handlePostAssignmentCurvePreview is POST .../assignments/{item_id}/curve/preview.
 func (d Deps) handlePostAssignmentCurvePreview() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		_, _, courseID, itemID, ok := d.requireGradeCurveAccess(w, r)
 		if !ok {
 			return
@@ -189,15 +180,6 @@ func (d Deps) handlePostAssignmentCurve() http.HandlerFunc {
 		CurveID string `json:"curveId"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		courseCode, viewer, courseID, itemID, ok := d.requireGradeCurveAccess(w, r)
 		if !ok {
 			return
@@ -300,15 +282,6 @@ WHERE course_id = $2 AND student_user_id = $3 AND module_item_id = $4
 // handleDeleteGradeCurve is DELETE /api/v1/curves/{curve_id}.
 func (d Deps) handleDeleteGradeCurve() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodDelete {
-			w.Header().Set("Allow", http.MethodDelete+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.requireGradeCurvingEnabled(w) {
 			return
 		}

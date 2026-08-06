@@ -19,15 +19,6 @@ type patchCoursePlagiarismBody struct {
 // handleGetCoursePlagiarismSettings is GET /api/v1/courses/{course_code}/plagiarism-settings
 func (d Deps) handleGetCoursePlagiarismSettings() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.requirePlagiarismWorkflow(w) {
 			return
 		}
@@ -61,15 +52,6 @@ func (d Deps) handleGetCoursePlagiarismSettings() http.HandlerFunc {
 // handlePatchCoursePlagiarismSettings is PATCH /api/v1/courses/{course_code}/plagiarism-settings
 func (d Deps) handlePatchCoursePlagiarismSettings() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.requirePlagiarismWorkflow(w) {
 			return
 		}

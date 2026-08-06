@@ -42,7 +42,7 @@ export function ChecklistCategorySection({
   if (visibleItems.length === 0) return null
 
   return (
-    <section aria-labelledby={`${panelId}-heading`} className="border-b border-slate-200 py-4 last:border-0 dark:border-neutral-800">
+    <section aria-labelledby={`${panelId}-heading`} className="border-b border-border-default py-4 last:border-0 dark:border-border-subtle">
       <h2
         id={`${panelId}-heading`}
         className="sticky top-0 z-10 -mx-1 bg-[var(--lx-page-bg,theme(colors.slate.50))] px-1 py-1 dark:bg-[var(--lx-page-bg,theme(colors.neutral.950))] md:static md:bg-transparent"
@@ -54,7 +54,7 @@ export function ChecklistCategorySection({
           aria-controls={panelId}
           onClick={onToggle}
         >
-          <span className="inline-flex items-center gap-2 text-base font-semibold text-slate-900 dark:text-neutral-50">
+          <span className="inline-flex items-center gap-2 text-base font-semibold text-fg-default">
             {expanded ? (
               <ChevronDown className="h-4 w-4 shrink-0" aria-hidden />
             ) : (
@@ -62,7 +62,7 @@ export function ChecklistCategorySection({
             )}
             {category.title}
           </span>
-          <span className="shrink-0 text-xs font-medium text-slate-500 dark:text-neutral-400">
+          <span className="shrink-0 text-xs font-medium text-fg-muted">
             {courseChecklistI18n.outstandingCount(outstanding)}
           </span>
         </button>

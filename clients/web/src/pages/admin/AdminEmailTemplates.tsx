@@ -21,13 +21,13 @@ import {
 import { toastMutationError } from '../../lib/lms-toast'
 
 const fieldInputClass =
-  'mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 transition-[border-color,box-shadow] placeholder:text-slate-400 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-500'
+  'mt-1.5 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm text-fg-default outline-none ring-indigo-500/20 transition-[border-color,box-shadow] placeholder:text-fg-subtle focus:border-indigo-400 focus:ring-2 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:placeholder:text-neutral-500'
 
 const secondaryBtnClass =
-  'inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800'
+  'inline-flex items-center gap-1.5 rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm font-medium text-fg-muted shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-50 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay'
 
 const primaryBtnClass =
-  'inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50'
+  'inline-flex items-center gap-1.5 rounded-xl bg-accent-solid px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50'
 
 export default function AdminEmailTemplatesPage() {
   const { t } = useTranslation('common')
@@ -220,18 +220,18 @@ export default function AdminEmailTemplatesPage() {
 
   const selectedSlot = slots.find((s) => s.id === selectedSlotId)
 
-  if (featuresLoading) return <p className="p-6 text-sm text-slate-600">Loading…</p>
+  if (featuresLoading) return <p className="p-6 text-sm text-fg-muted">Loading…</p>
   if (!emailTemplateEditorEnabled || !adminConsoleEnabled) {
     return (
       <div className="p-6" role="alert">
-        <p className="text-sm text-slate-600 dark:text-neutral-400">Email template editor is not enabled.</p>
+        <p className="text-sm text-fg-muted">Email template editor is not enabled.</p>
       </div>
     )
   }
   if (!orgId) {
     return (
       <div className="p-6" role="alert">
-        <p className="text-sm text-slate-600 dark:text-neutral-400">Add ?orgId= to the URL to manage templates for an organization.</p>
+        <p className="text-sm text-fg-muted">Add ?orgId= to the URL to manage templates for an organization.</p>
       </div>
     )
   }
@@ -239,17 +239,17 @@ export default function AdminEmailTemplatesPage() {
   return (
     <div className="mx-auto max-w-7xl p-4 sm:p-6">
       <header className="mb-5">
-        <h1 id={titleId} className="text-2xl font-semibold text-slate-900 dark:text-neutral-100">
+        <h1 id={titleId} className="text-2xl font-semibold text-fg-default">
           Email templates
         </h1>
-        <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+        <p className="mt-1 text-sm text-fg-muted">
           Customize transactional email copy with merge fields and live preview.
         </p>
       </header>
 
       <div className="space-y-3">
         {error ? (
-          <div className="rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300" role="alert">
+          <div className="rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm text-danger-fg dark:border-red-900 dark:bg-red-950/40 dark:text-red-300" role="alert">
             {error}
           </div>
         ) : null}
@@ -279,23 +279,21 @@ export default function AdminEmailTemplatesPage() {
 
       <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(240px,280px)_minmax(0,1fr)] lg:items-start lg:gap-5">
         <aside
-          className={`overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-neutral-700 dark:bg-neutral-900 ${
-            mobileTab !== 'edit' ? 'hidden lg:block' : ''
-          }`}
+          className={`overflow-hidden rounded-2xl border border-border-default bg-surface-raised dark:border-border-default dark:bg-surface-raised ${ mobileTab !== 'edit' ? 'hidden lg:block' : '' }`}
         >
-          <div className="flex items-center gap-2 border-b border-slate-200 px-3.5 py-3 dark:border-neutral-700">
-            <Mail className="h-4 w-4 text-slate-400 dark:text-neutral-500" aria-hidden />
-            <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+          <div className="flex items-center gap-2 border-b border-border-default px-3.5 py-3 dark:border-border-default">
+            <Mail className="h-4 w-4 text-fg-subtle" aria-hidden />
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
               Templates
             </h2>
             {slots.length > 0 ? (
-              <span className="ms-auto rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium tabular-nums text-slate-600 dark:bg-neutral-800 dark:text-neutral-300">
+              <span className="ms-auto rounded-full bg-surface-sunken px-2 py-0.5 text-[11px] font-medium tabular-nums text-fg-muted dark:bg-surface-overlay dark:text-fg-muted">
                 {slots.length}
               </span>
             ) : null}
           </div>
           <nav className="max-h-[min(70vh,640px)] space-y-0.5 overflow-y-auto p-1.5" aria-label="Email template slots">
-            {loading ? <p className="px-2.5 py-3 text-sm text-slate-500">Loading slots…</p> : null}
+            {loading ? <p className="px-2.5 py-3 text-sm text-fg-muted">Loading slots…</p> : null}
             {slots.map((slot) => {
               const selected = selectedSlotId === slot.id
               return (
@@ -304,21 +302,13 @@ export default function AdminEmailTemplatesPage() {
                   type="button"
                   onClick={() => void selectSlot(slot.id)}
                   aria-current={selected ? 'true' : undefined}
-                  className={`flex w-full flex-col gap-1 rounded-xl px-3 py-2.5 text-left transition-colors ${
-                    selected
-                      ? 'bg-indigo-50 text-indigo-900 ring-1 ring-inset ring-indigo-200/80 dark:bg-indigo-950/50 dark:text-indigo-100 dark:ring-indigo-800/60'
-                      : 'text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800/80'
-                  }`}
+                  className={`flex w-full flex-col gap-1 rounded-xl px-3 py-2.5 text-left transition-colors ${ selected ? 'bg-indigo-50 text-indigo-900 ring-1 ring-inset ring-indigo-200/80 dark:bg-indigo-950/50 dark:text-indigo-100 dark:ring-indigo-800/60' : 'text-fg-muted hover:bg-surface-base dark:text-fg-default dark:hover:bg-neutral-800/80' }`}
                 >
                   <span className={`text-sm leading-snug ${selected ? 'font-semibold' : 'font-medium'}`}>
                     {slot.description}
                   </span>
                   <span
-                    className={`inline-flex w-fit rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
-                      slot.hasCustom
-                        ? 'bg-violet-100 text-violet-700 dark:bg-violet-950/60 dark:text-violet-300'
-                        : 'bg-slate-100 text-slate-500 dark:bg-neutral-800 dark:text-neutral-400'
-                    }`}
+                    className={`inline-flex w-fit rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${ slot.hasCustom ? 'bg-violet-100 text-violet-700 dark:bg-violet-950/60 dark:text-violet-300' : 'bg-surface-sunken text-fg-muted dark:bg-surface-overlay dark:text-fg-muted' }`}
                   >
                     {slot.hasCustom ? 'Customized' : 'Default'}
                   </span>
@@ -332,14 +322,12 @@ export default function AdminEmailTemplatesPage() {
           {selectedSlot ? (
             <>
               <div
-                className={`rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 dark:border-neutral-700 dark:bg-neutral-900 ${
-                  mobileTab !== 'edit' ? 'hidden lg:block' : ''
-                }`}
+                className={`rounded-2xl border border-border-default bg-surface-raised p-4 sm:p-5 dark:border-border-default dark:bg-surface-raised ${ mobileTab !== 'edit' ? 'hidden lg:block' : '' }`}
               >
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="truncate text-base font-semibold text-slate-900 dark:text-neutral-100">
+                      <h2 className="truncate text-base font-semibold text-fg-default">
                         {selectedSlot.description}
                       </h2>
                       {dirty ? (
@@ -348,7 +336,7 @@ export default function AdminEmailTemplatesPage() {
                         </span>
                       ) : null}
                     </div>
-                    <p className="mt-1 font-mono text-xs text-slate-400 dark:text-neutral-500">{selectedSlot.id}</p>
+                    <p className="mt-1 font-mono text-xs text-fg-subtle">{selectedSlot.id}</p>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <button type="button" onClick={() => void onSave()} disabled={saving || !dirty} className={primaryBtnClass}>
@@ -371,15 +359,15 @@ export default function AdminEmailTemplatesPage() {
                 </div>
 
                 {showHistory ? (
-                  <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50/80 p-3 dark:border-neutral-700 dark:bg-neutral-800/40">
-                    <h3 className="mb-2 text-sm font-semibold text-slate-800 dark:text-neutral-200">Version history</h3>
+                  <div className="mt-4 rounded-xl border border-border-default bg-slate-50/80 p-3 dark:border-border-default/40">
+                    <h3 className="mb-2 text-sm font-semibold text-fg-default">Version history</h3>
                     {history.length === 0 ? (
-                      <p className="text-sm text-slate-500">No custom versions yet.</p>
+                      <p className="text-sm text-fg-muted">No custom versions yet.</p>
                     ) : (
                       <ul className="divide-y divide-slate-200 dark:divide-neutral-700">
                         {history.map((v) => (
                           <li key={v.id} className="flex items-center justify-between gap-2 py-2 text-sm first:pt-0 last:pb-0">
-                            <span className="text-slate-700 dark:text-neutral-300">
+                            <span className="text-fg-muted">
                               {new Date(v.createdAt).toLocaleString()}
                               {v.isActive ? (
                                 <span className="ms-2 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300">
@@ -388,7 +376,7 @@ export default function AdminEmailTemplatesPage() {
                               ) : null}
                             </span>
                             {!v.isActive ? (
-                              <button type="button" onClick={() => void onRestore(v.id)} className="font-medium text-indigo-600 hover:underline dark:text-indigo-300">
+                              <button type="button" onClick={() => void onRestore(v.id)} className="font-medium text-accent-fg hover:underline dark:text-indigo-300">
                                 Restore
                               </button>
                             ) : null}
@@ -402,14 +390,14 @@ export default function AdminEmailTemplatesPage() {
 
               <div className="grid gap-4 xl:grid-cols-2 xl:items-start">
                 <section className={`space-y-4 ${mobileTab !== 'edit' ? 'hidden lg:block' : ''}`}>
-                  <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 dark:border-neutral-700 dark:bg-neutral-900">
-                    <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Delivery</h3>
-                    <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
+                  <div className="rounded-2xl border border-border-default bg-surface-raised p-4 sm:p-5 dark:border-border-default dark:bg-surface-raised">
+                    <h3 className="text-sm font-semibold text-fg-default">Delivery</h3>
+                    <p className="mt-0.5 text-xs text-fg-muted">
                       Optional overrides for who this email appears to come from.
                     </p>
                     <div className="mt-4 grid gap-4 sm:grid-cols-2">
                       <label className="block min-w-0">
-                        <span className="text-sm font-medium text-slate-700 dark:text-neutral-300">Reply-To</span>
+                        <span className="text-sm font-medium text-fg-muted">Reply-To</span>
                         <input
                           type="email"
                           value={replyTo}
@@ -419,7 +407,7 @@ export default function AdminEmailTemplatesPage() {
                         />
                       </label>
                       <label className="block min-w-0">
-                        <span className="text-sm font-medium text-slate-700 dark:text-neutral-300">Sender display name</span>
+                        <span className="text-sm font-medium text-fg-muted">Sender display name</span>
                         <input
                           type="text"
                           value={senderName}
@@ -431,14 +419,14 @@ export default function AdminEmailTemplatesPage() {
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 dark:border-neutral-700 dark:bg-neutral-900">
-                    <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Message body</h3>
-                    <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
+                  <div className="rounded-2xl border border-border-default bg-surface-raised p-4 sm:p-5 dark:border-border-default dark:bg-surface-raised">
+                    <h3 className="text-sm font-semibold text-fg-default">Message body</h3>
+                    <p className="mt-0.5 text-xs text-fg-muted">
                       Edit the HTML body, then insert merge fields where needed.
                     </p>
 
                     <div className="mt-4">
-                      <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                      <p className="mb-2 text-xs font-medium uppercase tracking-wide text-fg-muted">
                         Merge fields
                       </p>
                       <div className="flex flex-wrap gap-1.5">
@@ -463,11 +451,11 @@ export default function AdminEmailTemplatesPage() {
                       />
                     </div>
 
-                    <div className="mt-4 border-t border-slate-100 pt-4 dark:border-neutral-800">
+                    <div className="mt-4 border-t border-border-subtle pt-4 dark:border-border-subtle">
                       <button
                         type="button"
                         onClick={() => setShowPlainText((v) => !v)}
-                        className="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+                        className="text-sm font-medium text-fg-muted hover:text-fg-default dark:text-fg-muted dark:hover:text-fg-default"
                         aria-expanded={showPlainText}
                       >
                         {showPlainText ? 'Hide plain-text body' : 'Plain-text body (optional)'}
@@ -489,26 +477,24 @@ export default function AdminEmailTemplatesPage() {
                 </section>
 
                 <section
-                  className={`overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-neutral-700 dark:bg-neutral-900 xl:sticky xl:top-4 ${
-                    mobileTab !== 'preview' ? 'hidden lg:block' : ''
-                  }`}
+                  className={`overflow-hidden rounded-2xl border border-border-default bg-surface-raised dark:border-border-default dark:bg-surface-raised xl:sticky xl:top-4 ${ mobileTab !== 'preview' ? 'hidden lg:block' : '' }`}
                 >
-                  <div className="border-b border-slate-200 bg-slate-50/80 px-4 py-3 dark:border-neutral-700 dark:bg-neutral-800/50">
-                    <h2 className="text-sm font-semibold text-slate-800 dark:text-neutral-100">Live preview</h2>
-                    <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
+                  <div className="border-b border-border-default bg-slate-50/80 px-4 py-3 dark:border-border-default/50">
+                    <h2 className="text-sm font-semibold text-fg-default">Live preview</h2>
+                    <p className="mt-0.5 text-xs text-fg-muted">
                       Approximate client preview; server compile is authoritative on save.
                     </p>
                   </div>
                   <div id={previewLiveId} className="sr-only" aria-live="polite">
                     Preview updated
                   </div>
-                  <div className="bg-slate-100/60 p-3 dark:bg-neutral-950/40 sm:p-4">
-                    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-700">
+                  <div className="bg-slate-100/60 p-3/40 sm:p-4">
+                    <div className="overflow-hidden rounded-xl border border-border-default bg-surface-raised shadow-sm dark:border-border-default">
                       <iframe
                         title="Email preview"
                         sandbox=""
                         srcDoc={previewHtml}
-                        className="h-[min(560px,65vh)] w-full bg-white"
+                        className="h-[min(560px,65vh)] w-full bg-surface-raised"
                       />
                     </div>
                   </div>
@@ -516,9 +502,9 @@ export default function AdminEmailTemplatesPage() {
               </div>
             </>
           ) : !loading ? (
-            <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 px-6 py-12 text-center dark:border-neutral-700 dark:bg-neutral-900/40">
+            <div className="rounded-2xl border border-dashed border-border-default bg-slate-50/50 px-6 py-12 text-center dark:border-border-default/40">
               <Mail className="mx-auto h-8 w-8 text-slate-300 dark:text-neutral-600" aria-hidden />
-              <p className="mt-3 text-sm text-slate-500 dark:text-neutral-400">Select a template to edit.</p>
+              <p className="mt-3 text-sm text-fg-muted">Select a template to edit.</p>
             </div>
           ) : null}
         </div>

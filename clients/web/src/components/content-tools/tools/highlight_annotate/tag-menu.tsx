@@ -36,16 +36,16 @@ export function TagMenu({
       aria-modal="false"
       id={menuId}
       aria-label={t('contentTools.tools.highlight_annotate.tagMenu')}
-      className="rounded-xl border-2 border-indigo-300 bg-white p-4 shadow-lg dark:border-indigo-700 dark:bg-neutral-950"
+      className="rounded-xl border-2 border-indigo-300 bg-surface-raised p-4 shadow-lg dark:border-indigo-700 dark:bg-surface-base"
       data-testid="ha-tag-menu"
     >
-      <p className="text-sm font-semibold text-slate-900 dark:text-neutral-50">
+      <p className="text-sm font-semibold text-fg-default">
         {t('contentTools.tools.highlight_annotate.tagMenuTitle')}
       </p>
-      <blockquote className="mt-2 rounded-lg border-l-4 border-indigo-400 bg-slate-50 px-3 py-2 text-sm text-slate-800 dark:bg-neutral-900 dark:text-neutral-100">
+      <blockquote className="mt-2 rounded-lg border-l-4 border-indigo-400 bg-surface-base px-3 py-2 text-sm text-fg-default dark:bg-surface-raised dark:text-fg-default">
         “{quote}”
       </blockquote>
-      <p className="mt-3 mb-2 text-xs font-medium text-slate-600 dark:text-neutral-400">
+      <p className="mt-3 mb-2 text-xs font-medium text-fg-muted">
         {t('contentTools.tools.highlight_annotate.pickLabel')}
       </p>
       <div className="flex flex-wrap gap-2" role="menu">
@@ -55,7 +55,7 @@ export function TagMenu({
             type="button"
             role="menuitem"
             disabled={applying}
-            className="inline-flex min-h-10 items-center gap-2 rounded-lg border-2 bg-white px-3 py-2 text-sm font-semibold shadow-sm transition hover:scale-[1.02] hover:shadow disabled:opacity-60 dark:bg-neutral-900"
+            className="inline-flex min-h-10 items-center gap-2 rounded-lg border-2 bg-surface-raised px-3 py-2 text-sm font-semibold shadow-sm transition-transform hover:scale-[1.02] hover:shadow disabled:opacity-60 dark:bg-surface-raised"
             style={{
               borderColor: tag.color,
               color: tag.color,
@@ -74,13 +74,13 @@ export function TagMenu({
         ))}
       </div>
       <label className="mt-3 block space-y-1 text-xs">
-        <span className="font-medium text-slate-700 dark:text-neutral-300">
+        <span className="font-medium text-fg-muted">
           {requireNote
             ? t('contentTools.tools.highlight_annotate.noteLabelRequired')
             : t('contentTools.tools.highlight_annotate.noteLabel')}
         </span>
         <textarea
-          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+          className="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
           rows={2}
           value={noteDraft}
           data-testid="ha-note-input"
@@ -95,17 +95,17 @@ export function TagMenu({
       <div className="mt-3 flex flex-wrap items-center gap-3">
         <button
           type="button"
-          className="text-sm font-medium text-slate-600 underline-offset-2 hover:underline dark:text-neutral-300"
+          className="text-sm font-medium text-fg-muted underline-offset-2 hover:underline dark:text-fg-muted"
           onClick={onClose}
         >
           {t('contentTools.tools.highlight_annotate.cancel')}
         </button>
         {requireNote ? (
-          <p className="text-xs text-slate-500 dark:text-neutral-400">
+          <p className="text-xs text-fg-muted">
             {t('contentTools.tools.highlight_annotate.noteThenTag')}
           </p>
         ) : (
-          <p className="text-xs text-slate-500 dark:text-neutral-400">
+          <p className="text-xs text-fg-muted">
             {t('contentTools.tools.highlight_annotate.clickTagToSave')}
           </p>
         )}

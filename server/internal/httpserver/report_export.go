@@ -30,15 +30,6 @@ func (d Deps) reportExportFeatureEnabled(w http.ResponseWriter) bool {
 // Synchronously generates a PDF and streams it back as an attachment.
 func (d Deps) handleExportCoursePDF() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		viewer, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -97,15 +88,6 @@ func (d Deps) handleExportCoursePDF() http.HandlerFunc {
 // handleExportLearningActivityPDF is GET /api/v1/reports/learning-activity/export.pdf
 func (d Deps) handleExportLearningActivityPDF() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.meUserID(w, r); !ok {
 			return
 		}
@@ -177,11 +159,6 @@ func toScheduleJSON(s reportschedules.Schedule) scheduleJSON {
 // handleListReportSchedules is GET /api/v1/reports/schedules
 func (d Deps) handleListReportSchedules() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		viewer, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -215,11 +192,6 @@ type createScheduleBody struct {
 // handleCreateReportSchedule is POST /api/v1/reports/schedules
 func (d Deps) handleCreateReportSchedule() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		viewer, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -277,11 +249,6 @@ type updateScheduleBody struct {
 // handleUpdateReportSchedule is PUT /api/v1/reports/schedules/{id}
 func (d Deps) handleUpdateReportSchedule() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPut {
-			w.Header().Set("Allow", http.MethodPut)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		viewer, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -350,11 +317,6 @@ func (d Deps) handleUpdateReportSchedule() http.HandlerFunc {
 // handleDeleteReportSchedule is DELETE /api/v1/reports/schedules/{id}
 func (d Deps) handleDeleteReportSchedule() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodDelete {
-			w.Header().Set("Allow", http.MethodDelete)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		viewer, ok := d.meUserID(w, r)
 		if !ok {
 			return

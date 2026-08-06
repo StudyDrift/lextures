@@ -67,19 +67,19 @@ export function IntroCompletionCelebration() {
         showBurst={!reducedMotion}
         className="relative w-full max-w-md"
       >
-        <div className="relative w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-xl dark:bg-neutral-900">
+        <div className="relative w-full max-w-md rounded-2xl bg-surface-raised p-8 text-center shadow-xl dark:bg-surface-raised">
           <PartyPopper className="mx-auto h-12 w-12 text-emerald-500" aria-hidden />
-          <h2 className="mt-4 text-xl font-bold text-slate-900 dark:text-white">
+          <h2 className="mt-4 text-xl font-bold text-fg-default dark:text-white">
             {t('introCourse.celebration.title')}
           </h2>
-          <p className="mt-2 text-sm text-slate-600 dark:text-neutral-300">
+          <p className="mt-2 text-sm text-fg-muted">
             {credential
               ? t('introCourse.celebration.bodyWithCredential')
               : t('introCourse.celebration.body')}
           </p>
           {credential ? (
             <div className="mt-6 text-left">
-              <div className="mb-3 flex items-center gap-2 text-sm font-medium text-slate-800 dark:text-neutral-100">
+              <div className="mb-3 flex items-center gap-2 text-sm font-medium text-fg-default">
                 <Award className="h-4 w-4 text-emerald-600" aria-hidden />
                 <span>{t('introCourse.celebration.badgeLabel')}</span>
               </div>
@@ -97,7 +97,7 @@ export function IntroCompletionCelebration() {
             ref={closeButtonRef}
             type="button"
             onClick={handleClose}
-            className="mt-6 w-full rounded-lg px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600 dark:text-neutral-300 dark:hover:bg-neutral-800"
+            className="mt-6 w-full rounded-lg px-4 py-2 text-sm font-medium text-fg-muted hover:bg-surface-sunken focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600 dark:text-fg-muted dark:hover:bg-surface-overlay"
           >
             {t('introCourse.celebration.close')}
           </button>

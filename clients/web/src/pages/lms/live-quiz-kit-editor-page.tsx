@@ -489,12 +489,12 @@ export default function LiveQuizKitEditorPage() {
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <Link
           to={listBase}
-          className="inline-flex min-h-11 items-center gap-1.5 text-sm text-indigo-600 hover:underline dark:text-indigo-400"
+          className="inline-flex min-h-11 items-center gap-1.5 text-sm text-accent-fg hover:underline dark:text-indigo-400"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden />
           {t('liveQuiz.kit.backToGallery')}
         </Link>
-        <div className="flex flex-wrap items-center gap-2 text-sm text-slate-500 dark:text-neutral-400">
+        <div className="flex flex-wrap items-center gap-2 text-sm text-fg-muted">
           {saveState === 'saving' ? t('liveQuiz.editor.saving') : null}
           {saveState === 'saved' ? t('liveQuiz.editor.saved') : null}
           {saveState === 'conflict' ? (
@@ -504,9 +504,9 @@ export default function LiveQuizKitEditorPage() {
       </div>
 
       {loading ? (
-        <p className="text-sm text-slate-500 dark:text-neutral-400">{t('common.loading')}</p>
+        <p className="text-sm text-fg-muted">{t('common.loading')}</p>
       ) : error ? (
-        <div className="rounded-md bg-red-50 p-4 text-sm text-red-700 dark:bg-red-950/30 dark:text-red-400">
+        <div className="rounded-md bg-red-50 p-4 text-sm text-danger-fg dark:bg-red-950/30 dark:text-red-400">
           {error}
         </div>
       ) : kit ? (
@@ -525,25 +525,25 @@ export default function LiveQuizKitEditorPage() {
                   maxLength={200}
                   required
                   autoFocus
-                  className="min-w-[16rem] min-h-11 rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                  className="min-w-[16rem] min-h-11 rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
                 />
                 <button
                   type="submit"
-                  className="min-h-11 rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white"
+                  className="min-h-11 rounded-md bg-accent-solid px-3 py-2 text-sm font-medium text-white"
                 >
                   {t('liveQuiz.kit.saveTitle')}
                 </button>
               </form>
             ) : (
               <>
-                <h2 className="text-xl font-semibold text-slate-900 dark:text-neutral-100">
+                <h2 className="text-xl font-semibold text-fg-default">
                   {kit.title}
                 </h2>
                 {canEdit ? (
                   <button
                     type="button"
                     onClick={() => setRenaming(true)}
-                    className="min-h-11 rounded-md px-3 py-2 text-sm text-indigo-600 hover:underline dark:text-indigo-400"
+                    className="min-h-11 rounded-md px-3 py-2 text-sm text-accent-fg hover:underline dark:text-indigo-400"
                   >
                     {t('liveQuiz.kit.rename')}
                   </button>
@@ -556,7 +556,7 @@ export default function LiveQuizKitEditorPage() {
                   <button
                     type="button"
                     onClick={() => setImportOpen(true)}
-                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600"
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default"
                   >
                     <Upload className="h-4 w-4" aria-hidden />
                     {t('liveQuiz.editor.importBank')}
@@ -573,7 +573,7 @@ export default function LiveQuizKitEditorPage() {
                       ? t('liveQuiz.ai.unavailable.short')
                       : undefined
                   }
-                  className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600"
+                  className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default"
                 >
                   <Sparkles className="h-4 w-4" aria-hidden />
                   {t('liveQuiz.ai.open')}
@@ -583,7 +583,7 @@ export default function LiveQuizKitEditorPage() {
                   onClick={() => {
                     void handleValidate()
                   }}
-                  className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600"
+                  className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default"
                 >
                   <CheckCircle2 className="h-4 w-4" aria-hidden />
                   {t('liveQuiz.editor.checkKit')}
@@ -595,7 +595,7 @@ export default function LiveQuizKitEditorPage() {
                     onClick={() => {
                       void openHostDialog()
                     }}
-                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md bg-accent-solid px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
                   >
                     {t('liveQuiz.host.startFromKit')}
                   </button>
@@ -632,9 +632,9 @@ export default function LiveQuizKitEditorPage() {
 
           <div className="grid gap-4 lg:grid-cols-[16rem_minmax(0,1fr)_14rem]">
             {/* Left rail */}
-            <aside className="space-y-2 rounded-lg border border-slate-200 p-3 dark:border-neutral-700">
+            <aside className="space-y-2 rounded-lg border border-border-default p-3 dark:border-border-default">
               <div className="flex items-center justify-between gap-2">
-                <h3 className="text-sm font-semibold text-slate-800 dark:text-neutral-100">
+                <h3 className="text-sm font-semibold text-fg-default">
                   {t('liveQuiz.editor.questionList')}
                 </h3>
                 {canEdit ? (
@@ -643,7 +643,7 @@ export default function LiveQuizKitEditorPage() {
                     onClick={() => {
                       void handleAdd()
                     }}
-                    className="inline-flex min-h-11 items-center gap-1 rounded-md px-2 text-sm text-indigo-600 dark:text-indigo-400"
+                    className="inline-flex min-h-11 items-center gap-1 rounded-md px-2 text-sm text-accent-fg"
                     aria-label={t('liveQuiz.editor.addQuestion')}
                   >
                     <Plus className="h-4 w-4" aria-hidden />
@@ -651,7 +651,7 @@ export default function LiveQuizKitEditorPage() {
                 ) : null}
               </div>
               {questions.length === 0 ? (
-                <div className="rounded-md border border-dashed border-slate-300 p-4 text-center text-sm text-slate-500 dark:border-neutral-600">
+                <div className="rounded-md border border-dashed border-border-strong p-4 text-center text-sm text-fg-muted dark:border-border-default">
                   <p>{t('liveQuiz.editor.empty')}</p>
                   {canEdit ? (
                     <button
@@ -659,7 +659,7 @@ export default function LiveQuizKitEditorPage() {
                       onClick={() => {
                         void handleAdd()
                       }}
-                      className="mt-3 min-h-11 rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white"
+                      className="mt-3 min-h-11 rounded-md bg-accent-solid px-3 py-2 text-sm font-medium text-white"
                     >
                       {t('liveQuiz.editor.addFirst')}
                     </button>
@@ -670,21 +670,17 @@ export default function LiveQuizKitEditorPage() {
                   {questions.map((q, index) => (
                     <li key={q.id}>
                       <div
-                        className={`flex items-start gap-1 rounded-md ${
-                          selectedId === q.id
-                            ? 'bg-indigo-50 dark:bg-indigo-950/40'
-                            : 'hover:bg-slate-50 dark:hover:bg-neutral-800'
-                        }`}
+                        className={`flex items-start gap-1 rounded-md ${ selectedId === q.id ? 'bg-accent-surface' : 'hover:bg-surface-base dark:hover:bg-surface-overlay' }`}
                       >
                         <button
                           type="button"
                           onClick={() => setSelectedId(q.id)}
                           className="min-h-11 min-w-0 flex-1 px-2 py-2 text-start text-sm"
                         >
-                          <span className="block font-medium text-slate-800 dark:text-neutral-100">
+                          <span className="block font-medium text-fg-default">
                             {index + 1}. {q.prompt.trim() || t('liveQuiz.editor.untitled')}
                           </span>
-                          <span className="text-xs text-slate-500">
+                          <span className="text-xs text-fg-muted">
                             {t(`liveQuiz.qtype.${q.questionType}`)} · {q.timeLimitSeconds}s
                             {q.source === 'ai_generated' ? ` · ${t('liveQuiz.ai.badge')}` : ''}
                             {q.needsReview ? ` · ${t('liveQuiz.ai.needsReview')}` : ''}
@@ -724,9 +720,9 @@ export default function LiveQuizKitEditorPage() {
             </aside>
 
             {/* Center editor */}
-            <section className="space-y-4 rounded-lg border border-slate-200 p-4 dark:border-neutral-700">
+            <section className="space-y-4 rounded-lg border border-border-default p-4 dark:border-border-default">
               {!selected ? (
-                <p className="text-sm text-slate-500">{t('liveQuiz.editor.selectPrompt')}</p>
+                <p className="text-sm text-fg-muted">{t('liveQuiz.editor.selectPrompt')}</p>
               ) : (
                 <>
                   <QuestionTypePicker
@@ -735,7 +731,7 @@ export default function LiveQuizKitEditorPage() {
                     disabled={!canEdit}
                   />
                   <label className="block text-sm">
-                    <span className="mb-1 block font-medium text-slate-700 dark:text-neutral-200">
+                    <span className="mb-1 block font-medium text-fg-default">
                       {t('liveQuiz.editor.prompt')}
                     </span>
                     <textarea
@@ -744,7 +740,7 @@ export default function LiveQuizKitEditorPage() {
                       onChange={(e) => setPrompt(e.target.value)}
                       rows={3}
                       maxLength={4000}
-                      className="w-full rounded-md border border-slate-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                      className="w-full rounded-md border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
                     />
                   </label>
                   <MediaAttach
@@ -758,13 +754,13 @@ export default function LiveQuizKitEditorPage() {
                   />
                   {renderTypeEditor()}
                   {canEdit && selected ? (
-                    <div className="flex flex-wrap gap-2 border-t border-slate-200 pt-3 dark:border-neutral-700">
+                    <div className="flex flex-wrap gap-2 border-t border-border-default pt-3 dark:border-border-default">
                       <button
                         type="button"
                         onClick={() => {
                           void handleDuplicate(selected.id)
                         }}
-                        className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600"
+                        className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default"
                       >
                         <Copy className="h-4 w-4" aria-hidden />
                         {t('liveQuiz.editor.duplicate')}
@@ -791,7 +787,7 @@ export default function LiveQuizKitEditorPage() {
                                 }
                               })()
                             }}
-                            className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600"
+                            className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default"
                           >
                             <Sparkles className="h-4 w-4" aria-hidden />
                             {t('liveQuiz.ai.regenerate')}
@@ -802,7 +798,7 @@ export default function LiveQuizKitEditorPage() {
                               setAiLikeQuestionId(selected.id)
                               setAiOpen(true)
                             }}
-                            className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600"
+                            className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-border-strong px-3 py-2 text-sm dark:border-border-default"
                           >
                             {t('liveQuiz.ai.moreLikeThis')}
                           </button>
@@ -813,7 +809,7 @@ export default function LiveQuizKitEditorPage() {
                         onClick={() => {
                           void handleDelete(selected.id)
                         }}
-                        className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-sm text-red-600"
+                        className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-sm text-danger-fg"
                       >
                         <Trash2 className="h-4 w-4" aria-hidden />
                         {t('liveQuiz.editor.delete')}
@@ -825,12 +821,12 @@ export default function LiveQuizKitEditorPage() {
             </section>
 
             {/* Settings rail */}
-            <aside className="space-y-3 rounded-lg border border-slate-200 p-3 dark:border-neutral-700 lg:sticky lg:top-4 lg:self-start">
-              <h3 className="text-sm font-semibold text-slate-800 dark:text-neutral-100">
+            <aside className="space-y-3 rounded-lg border border-border-default p-3 dark:border-border-default lg:sticky lg:top-4 lg:self-start">
+              <h3 className="text-sm font-semibold text-fg-default">
                 {t('liveQuiz.editor.settings')}
               </h3>
               <label className="block text-sm">
-                <span className="mb-1 block text-slate-600 dark:text-neutral-300">
+                <span className="mb-1 block text-fg-muted">
                   {t('liveQuiz.editor.timer')}
                 </span>
                 <input
@@ -840,25 +836,25 @@ export default function LiveQuizKitEditorPage() {
                   disabled={!canEdit || !selected}
                   value={timer}
                   onChange={(e) => setTimer(Number(e.target.value))}
-                  className="w-full min-h-11 rounded-md border border-slate-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                  className="w-full min-h-11 rounded-md border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
                 />
               </label>
               <label className="block text-sm">
-                <span className="mb-1 block text-slate-600 dark:text-neutral-300">
+                <span className="mb-1 block text-fg-muted">
                   {t('liveQuiz.editor.pointsStyle')}
                 </span>
                 <select
                   disabled={!canEdit || !selected}
                   value={pointsStyle}
                   onChange={(e) => setPointsStyle(e.target.value as LiveQuizPointsStyle)}
-                  className="w-full min-h-11 rounded-md border border-slate-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                  className="w-full min-h-11 rounded-md border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
                 >
                   <option value="standard">{t('liveQuiz.editor.points.standard')}</option>
                   <option value="double">{t('liveQuiz.editor.points.double')}</option>
                   <option value="no_points">{t('liveQuiz.editor.points.none')}</option>
                 </select>
               </label>
-              <label className="flex min-h-11 items-center gap-2 text-sm text-slate-700 dark:text-neutral-200">
+              <label className="flex min-h-11 items-center gap-2 text-sm text-fg-default">
                 <input
                   type="checkbox"
                   disabled={!canEdit || !selected}
@@ -868,7 +864,7 @@ export default function LiveQuizKitEditorPage() {
                 {t('liveQuiz.editor.answerShuffle')}
               </label>
               <label className="block text-sm">
-                <span className="mb-1 block text-slate-600 dark:text-neutral-300">
+                <span className="mb-1 block text-fg-muted">
                   {t('liveQuiz.editor.explanation')}
                 </span>
                 <textarea
@@ -876,7 +872,7 @@ export default function LiveQuizKitEditorPage() {
                   value={explanation}
                   onChange={(e) => setExplanation(e.target.value)}
                   rows={3}
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                  className="w-full rounded-md border border-border-strong px-3 py-2 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default"
                 />
               </label>
             </aside>
@@ -929,12 +925,12 @@ export default function LiveQuizKitEditorPage() {
             role="dialog"
             aria-modal="true"
             aria-labelledby={hostDialogTitleId}
-            className="relative z-10 flex max-h-[min(90vh,720px)] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-900"
+            className="relative z-10 flex max-h-[min(90vh,720px)] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-raised"
           >
-            <div className="shrink-0 border-b border-slate-100 px-5 py-4 dark:border-neutral-800">
+            <div className="shrink-0 border-b border-border-subtle px-5 py-4 dark:border-border-subtle">
               <h2
                 id={hostDialogTitleId}
-                className="text-lg font-semibold text-slate-950 dark:text-neutral-100"
+                className="text-lg font-semibold text-slate-950 dark:text-fg-default"
               >
                 {t('liveQuiz.host.startDialogTitle')}
               </h2>
@@ -948,11 +944,11 @@ export default function LiveQuizKitEditorPage() {
               />
               <ScoringProfilePicker value={scoringOpts} onChange={setScoringOpts} />
             </div>
-            <div className="flex shrink-0 flex-wrap justify-end gap-2 border-t border-slate-100 bg-slate-50/80 px-5 py-4 dark:border-neutral-800 dark:bg-neutral-900/80">
+            <div className="flex shrink-0 flex-wrap justify-end gap-2 border-t border-border-subtle bg-slate-50/80 px-5 py-4 dark:border-border-subtle/80">
               <button
                 ref={hostCancelRef}
                 type="button"
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out motion-safe:active:scale-[0.96] hover:bg-slate-50 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+                className="rounded-xl border border-border-default bg-surface-raised px-4 py-2 text-sm font-semibold text-fg-default shadow-sm motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out motion-safe:active:scale-[0.96] hover:bg-surface-base disabled:opacity-60 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
                 onClick={() => setHostDialogOpen(false)}
                 disabled={hosting}
               >
@@ -960,7 +956,7 @@ export default function LiveQuizKitEditorPage() {
               </button>
               <button
                 type="button"
-                className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out motion-safe:active:scale-[0.96] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out motion-safe:active:scale-[0.96] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={hosting}
                 onClick={() => {
                   void handleHost()

@@ -25,10 +25,6 @@ import (
 
 func (d Deps) handleContentToolsStateReset() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, viewer, courseID, ok := d.requireContentToolsGradeRead(w, r)
 		if !ok {
 			return
@@ -197,10 +193,6 @@ func writeResetJobAccepted(w http.ResponseWriter, job *ctrepo.ResetJobRow) {
 
 func (d Deps) handleContentToolsStateResetsList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		_, _, courseID, ok := d.requireContentToolsGradeRead(w, r)
 		if !ok {
 			return
@@ -252,10 +244,6 @@ func (d Deps) handleContentToolsStateResetsList() http.HandlerFunc {
 
 func (d Deps) handleContentToolsStateResetRestore() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, viewer, courseID, ok := d.requireContentToolsGradeRead(w, r)
 		if !ok {
 			return
@@ -314,10 +302,6 @@ func (d Deps) handleContentToolsStateResetRestore() http.HandlerFunc {
 
 func (d Deps) handleContentToolsResetJobGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		_, _, courseID, ok := d.requireContentToolsGradeRead(w, r)
 		if !ok {
 			return
@@ -350,10 +334,6 @@ func (d Deps) handleContentToolsResetJobGet() http.HandlerFunc {
 
 func (d Deps) handleContentToolsSelfReset() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, viewer, courseID, ok := d.requireContentToolsCourse(w, r)
 		if !ok {
 			return

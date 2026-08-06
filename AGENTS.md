@@ -12,6 +12,10 @@ Lextures is an LMS (Learning Management System) with two main services:
 
 **Conventions:** [docs/ARCHITECTURE_CONVENTIONS.md](docs/ARCHITECTURE_CONVENTIONS.md) — package layout, layering, file/package budgets, naming, and automated ratchets (`make lint-structure`).
 
+**Design tokens (UX.1):** Never write a raw Tailwind palette literal (`slate-*`, `neutral-*`, `indigo-*`, …) or arbitrary hex colour utility in `clients/web/src` feature code. Use semantic tokens (`bg-surface-raised`, `text-fg-muted`, `border-border-default`, `bg-accent-solid`, status `*-surface`/`*-fg`). See [docs/design-tokens.md](docs/design-tokens.md). CI: `npm run contrast:check` and `npm run tokens:purity` in `clients/web/`.
+
+**Component library (UX.2):** Use `clients/web/src/components/ui/*` (barrel: `components/ui`) for buttons, dialogs, menus, tabs, form controls, and other interaction primitives. Do **not** hand-roll `<button>`, raw `role="dialog"` / `role="menu"` / `role="tablist"`, or `title=` tooltips in feature code. Gallery: `/design/components`. Guide: [docs/guides/component-library.md](docs/guides/component-library.md). CI: `npm run ds:coverage` and `npm run ds:gallery` in `clients/web/`.
+
 ### Starting services
 
 1. **Database**: `docker compose -f docker-compose.yml up -d postgres` (from repo root)

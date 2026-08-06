@@ -61,11 +61,11 @@ function ThresholdField({
 }) {
   return (
     <div>
-      <label htmlFor={id} className="text-sm font-medium text-slate-800 dark:text-neutral-100">
+      <label htmlFor={id} className="text-sm font-medium text-fg-default">
         {label}
       </label>
       {help ? (
-        <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">{help}</p>
+        <p className="mt-0.5 text-xs text-fg-muted">{help}</p>
       ) : null}
       <div className="mt-2 flex items-center gap-2">
         <input
@@ -77,10 +77,10 @@ function ThresholdField({
           value={value}
           disabled={disabled}
           onChange={(e) => onChange(Number(e.target.value))}
-          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm tabular-nums dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+          className="w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm tabular-nums dark:border-border-default dark:bg-surface-base dark:text-fg-default"
         />
         {suffix ? (
-          <span className="shrink-0 text-sm text-slate-500 dark:text-neutral-400">{suffix}</span>
+          <span className="shrink-0 text-sm text-fg-muted">{suffix}</span>
         ) : null}
       </div>
     </div>
@@ -197,17 +197,17 @@ export function AtRiskRunConfigDialog({
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={descId}
-        className="relative z-10 flex max-h-[min(90vh,720px)] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-900"
+        className="relative z-10 flex max-h-[min(90vh,720px)] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-xl dark:border-border-default dark:bg-surface-raised"
       >
-        <div className="border-b border-slate-200 px-5 py-4 dark:border-neutral-700">
-          <h2 id={titleId} className="text-lg font-semibold text-slate-950 dark:text-neutral-100">
+        <div className="border-b border-border-default px-5 py-4 dark:border-border-default">
+          <h2 id={titleId} className="text-lg font-semibold text-slate-950 dark:text-fg-default">
             {atRiskI18n.configTitle}
           </h2>
-          <p id={descId} className="mt-1 text-sm text-slate-600 dark:text-neutral-300">
+          <p id={descId} className="mt-1 text-sm text-fg-muted">
             {atRiskI18n.configDescription}
           </p>
           {form && !loading ? (
-            <p className="mt-2 text-xs text-slate-500 dark:text-neutral-400">
+            <p className="mt-2 text-xs text-fg-muted">
               {courseOverride ? atRiskI18n.courseOverrideNote : atRiskI18n.institutionDefaultsNote}
             </p>
           ) : null}
@@ -215,7 +215,7 @@ export function AtRiskRunConfigDialog({
 
         <div className="flex-1 overflow-y-auto px-5 py-4">
           {loading && (
-            <p className="text-sm text-slate-500 dark:text-neutral-400">{atRiskI18n.configLoading}</p>
+            <p className="text-sm text-fg-muted">{atRiskI18n.configLoading}</p>
           )}
           {error && (
             <p className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800 dark:border-rose-900/40 dark:bg-rose-950/40 dark:text-rose-100">
@@ -273,11 +273,11 @@ export function AtRiskRunConfigDialog({
                 disabled={busy}
               />
 
-              <div className="border-t border-slate-200 pt-5 dark:border-neutral-700">
-                <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+              <div className="border-t border-border-default pt-5 dark:border-border-default">
+                <h3 className="text-sm font-semibold text-fg-default">
                   {atRiskI18n.weightsSection}
                 </h3>
-                <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
+                <p className="mt-0.5 text-xs text-fg-muted">
                   {atRiskI18n.weightsHelp}
                 </p>
                 <div className="mt-3 grid gap-4 sm:grid-cols-2">
@@ -331,7 +331,7 @@ export function AtRiskRunConfigDialog({
                   />
                 </div>
                 {!weightsOk ? (
-                  <p className="mt-2 text-xs text-amber-700 dark:text-amber-300">
+                  <p className="mt-2 text-xs text-warning-fg">
                     Weights currently sum to {weightSumPct(form!)}% — adjust to total 100%.
                   </p>
                 ) : null}
@@ -340,13 +340,13 @@ export function AtRiskRunConfigDialog({
           ) : null}
         </div>
 
-        <div className="flex flex-wrap justify-end gap-2 border-t border-slate-200 px-5 py-4 dark:border-neutral-700">
+        <div className="flex flex-wrap justify-end gap-2 border-t border-border-default px-5 py-4 dark:border-border-default">
           <button
             ref={cancelRef}
             type="button"
             disabled={busy}
             onClick={onClose}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+            className="rounded-xl border border-border-default bg-surface-raised px-4 py-2 text-sm font-semibold text-fg-default shadow-sm hover:bg-surface-base disabled:opacity-60 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
           >
             Cancel
           </button>
@@ -354,7 +354,7 @@ export function AtRiskRunConfigDialog({
             type="button"
             disabled={busy || !form || !weightsOk}
             onClick={() => void handleSave()}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+            className="rounded-xl border border-border-default bg-surface-raised px-4 py-2 text-sm font-semibold text-fg-default shadow-sm hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-50 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
           >
             {saving ? atRiskI18n.configSaving : atRiskI18n.configSave}
           </button>
@@ -362,7 +362,7 @@ export function AtRiskRunConfigDialog({
             type="button"
             disabled={busy || !form || !weightsOk}
             onClick={() => void handleRunReport()}
-            className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {running ? atRiskI18n.configRunningReport : atRiskI18n.configRunReport}
           </button>

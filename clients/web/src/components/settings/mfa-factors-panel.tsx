@@ -192,13 +192,13 @@ export function MfaFactorsPanel({ embedded = false }: Props) {
   }
 
   if (loading) {
-    return <p className="text-sm text-slate-500">Loading security settings…</p>
+    return <p className="text-sm text-fg-muted">Loading security settings…</p>
   }
 
   return (
-    <div className={embedded ? '' : 'mt-10 border-t border-slate-200 pt-8 dark:border-neutral-700'}>
-      <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Two-factor authentication</h3>
-      <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+    <div className={embedded ? '' : 'mt-10 border-t border-border-default pt-8 dark:border-border-default'}>
+      <h3 className="text-sm font-semibold text-fg-default">Two-factor authentication</h3>
+      <p className="mt-1 text-xs text-fg-muted">
         Add an authenticator app or a passkey. Backup codes are shown once when you first enrol.
       </p>
       {error && (
@@ -210,11 +210,11 @@ export function MfaFactorsPanel({ embedded = false }: Props) {
         {factors.map((f) => (
           <li
             key={f.id}
-            className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/80 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-800/40"
+            className="flex items-center justify-between rounded-xl border border-border-subtle bg-slate-50/80 px-3 py-2 text-sm dark:border-border-default/40"
           >
-            <span className="text-slate-800 dark:text-neutral-100">
+            <span className="text-fg-default">
               <span className="font-medium">{f.kind === 'totp' ? 'Authenticator app' : 'Passkey'}</span>
-              {f.label ? <span className="text-slate-500"> — {f.label}</span> : null}
+              {f.label ? <span className="text-fg-muted"> — {f.label}</span> : null}
             </span>
             <button
               type="button"
@@ -226,14 +226,14 @@ export function MfaFactorsPanel({ embedded = false }: Props) {
             </button>
           </li>
         ))}
-        {factors.length === 0 && <li className="text-sm text-slate-500">No second factors yet.</li>}
+        {factors.length === 0 && <li className="text-sm text-fg-muted">No second factors yet.</li>}
       </ul>
       <div className="mt-4 flex flex-wrap gap-2">
         <button
           type="button"
           disabled={busy || !!totpQrUrl}
           onClick={() => void startTotp()}
-          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 shadow-sm hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700"
+          className="rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm font-medium text-fg-default shadow-sm hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700"
         >
           Add authenticator (QR)
         </button>
@@ -241,14 +241,14 @@ export function MfaFactorsPanel({ embedded = false }: Props) {
           type="button"
           disabled={busy}
           onClick={() => void addPasskey()}
-          className="rounded-xl bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50"
+          className="rounded-xl bg-accent-solid px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50"
         >
           Add passkey
         </button>
       </div>
       {totpQrUrl && (
         <form className="mt-6 space-y-3" onSubmit={confirmTotp}>
-          <p className="text-sm text-slate-600">Scan the QR code, then enter the 6-digit code to confirm.</p>
+          <p className="text-sm text-fg-muted">Scan the QR code, then enter the 6-digit code to confirm.</p>
           <img src={totpQrUrl} alt="Authenticator QR" className="lex-content-img h-44 w-44 rounded-lg" />
           <input
             inputMode="numeric"
@@ -256,14 +256,14 @@ export function MfaFactorsPanel({ embedded = false }: Props) {
             aria-label="One-time code (6 digits)"
             value={totpCode}
             onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-            className="w-full max-w-xs rounded-xl border border-slate-200 px-3 py-2 font-mono text-lg tracking-widest dark:border-neutral-600 dark:bg-neutral-900"
+            className="w-full max-w-xs rounded-xl border border-border-default px-3 py-2 font-mono text-lg tracking-widest dark:border-border-default dark:bg-surface-raised"
             placeholder="000000"
           />
           <div className="flex gap-2">
             <button
               type="submit"
               disabled={busy || totpCode.length !== 6}
-              className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+              className="rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
             >
               Confirm
             </button>
@@ -275,7 +275,7 @@ export function MfaFactorsPanel({ embedded = false }: Props) {
                 setTotpQrUrl(null)
                 setTotpCode('')
               }}
-              className="rounded-xl border border-slate-200 px-4 py-2 text-sm dark:border-neutral-600"
+              className="rounded-xl border border-border-default px-4 py-2 text-sm dark:border-border-default"
             >
               Cancel
             </button>

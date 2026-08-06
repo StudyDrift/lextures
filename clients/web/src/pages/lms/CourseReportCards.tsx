@@ -17,13 +17,13 @@ import { LmsPage } from './lms-page'
 type RosterEntry = { userId: string; email: string; displayName?: string | null }
 
 const INPUT_CLASS =
-  'rounded-lg border border-slate-200 bg-white px-2 py-1 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100'
+  'rounded-lg border border-border-default bg-surface-raised px-2 py-1 text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-border-default dark:bg-surface-raised dark:text-fg-default'
 
 const BTN_PRIMARY =
-  'inline-flex items-center rounded-lg bg-indigo-600 px-2 py-1 text-xs font-semibold text-white transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50'
+  'inline-flex items-center rounded-lg bg-accent-solid px-2 py-1 text-xs font-semibold text-white transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50'
 
 const BTN_SECONDARY =
-  'inline-flex items-center rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-700 transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800'
+  'inline-flex items-center rounded-lg border border-border-default bg-surface-raised px-2 py-1 text-xs font-medium text-fg-muted transition-[background-color,color,border-color] hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-50 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay'
 
 const BTN_SUCCESS =
   'inline-flex items-center rounded-lg bg-emerald-600 px-2 py-1 text-xs font-semibold text-white transition-[background-color,color,border-color] hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50'
@@ -47,7 +47,7 @@ function reportCardStatusBadgeClass(status: string | undefined): string {
     case 'submitted':
       return 'bg-amber-100 text-amber-900 dark:bg-amber-950/40 dark:text-amber-300'
     default:
-      return 'bg-slate-100 text-slate-600 dark:bg-neutral-800/60 dark:text-neutral-400'
+      return 'bg-surface-sunken text-fg-muted/60 dark:text-fg-muted'
   }
 }
 
@@ -261,7 +261,7 @@ export default function CourseReportCards() {
   if (featuresLoading) {
     return (
       <LmsPage title="Report Cards">
-        <p className="text-sm text-slate-500 dark:text-neutral-400" aria-busy="true">
+        <p className="text-sm text-fg-muted" aria-busy="true">
           Loading…
         </p>
       </LmsPage>
@@ -285,7 +285,7 @@ export default function CourseReportCards() {
       <div className="space-y-4">
         {/* Period selector */}
         <div className="flex flex-wrap items-center gap-3">
-          <label htmlFor="grading-period" className="text-sm font-medium text-slate-900 dark:text-neutral-100">
+          <label htmlFor="grading-period" className="text-sm font-medium text-fg-default">
             Grading Period:
           </label>
           <input
@@ -297,10 +297,10 @@ export default function CourseReportCards() {
             placeholder="Q1-2026"
             aria-describedby="period-hint"
           />
-          <span id="period-hint" className="text-xs text-slate-500 dark:text-neutral-400">
+          <span id="period-hint" className="text-xs text-fg-muted">
             e.g. Q1-2026, S1-2026
           </span>
-          <span className="ms-auto text-sm text-slate-500 dark:text-neutral-400">
+          <span className="ms-auto text-sm text-fg-muted">
             {approvedCount} approved · {releasedCount} released of {roster.length} students
           </span>
         </div>
@@ -326,10 +326,10 @@ export default function CourseReportCards() {
         {commentBank.length > 0 && editingCardId && (
           <aside
             aria-label="Comment Bank"
-            className="rounded-xl border border-slate-200 bg-white p-3 text-sm shadow-sm dark:border-neutral-700 dark:bg-neutral-900"
+            className="rounded-xl border border-border-default bg-surface-raised p-3 text-sm shadow-sm dark:border-border-default dark:bg-surface-raised"
           >
             <div className="mb-2 flex items-center gap-2">
-              <strong className="text-slate-900 dark:text-neutral-100">Comment Bank</strong>
+              <strong className="text-fg-default">Comment Bank</strong>
               <select
                 value={bankCategory}
                 onChange={(e) => setBankCategory(e.target.value)}
@@ -349,7 +349,7 @@ export default function CourseReportCards() {
                   <button
                     type="button"
                     onClick={() => insertBankPhrase(editingCardId, entry.text)}
-                    className="w-full text-start text-xs text-indigo-700 hover:underline dark:text-indigo-300"
+                    className="w-full text-start text-xs text-accent-fg hover:underline dark:text-indigo-300"
                     aria-label={`Insert: ${entry.text}`}
                   >
                     {entry.text}
@@ -361,15 +361,15 @@ export default function CourseReportCards() {
         )}
 
         {loading && (
-          <p className="text-sm text-slate-500 dark:text-neutral-400">Loading report cards…</p>
+          <p className="text-sm text-fg-muted">Loading report cards…</p>
         )}
 
         {/* Student table */}
         {!loading && (
-          <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
+          <div className="overflow-x-auto rounded-xl border border-border-default bg-surface-raised shadow-sm dark:border-border-default dark:bg-surface-raised">
             <table className="w-full text-sm" role="grid" aria-label="Report cards">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50 text-start text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-neutral-700 dark:bg-neutral-800/60 dark:text-neutral-400">
+                <tr className="border-b border-border-default bg-surface-base text-start text-xs font-semibold uppercase tracking-wide text-fg-muted dark:border-border-default/60 dark:text-fg-muted">
                   <th scope="col" className="px-4 py-3">Student</th>
                   <th scope="col" className="px-4 py-3">Final %</th>
                   <th scope="col" className="px-4 py-3">Letter</th>
@@ -387,15 +387,15 @@ export default function CourseReportCards() {
                   return (
                     <tr
                       key={student.userId}
-                      className="border-b border-slate-100 last:border-0 hover:bg-slate-50/80 dark:border-neutral-800 dark:hover:bg-neutral-800/80"
+                      className="border-b border-border-subtle last:border-0 hover:bg-slate-50/80 dark:border-border-subtle dark:hover:bg-neutral-800/80"
                     >
-                      <td className="px-4 py-3 font-medium text-slate-900 dark:text-neutral-100">
+                      <td className="px-4 py-3 font-medium text-fg-default">
                         {studentLabel(student)}
                       </td>
-                      <td className="px-4 py-3 tabular-nums text-slate-600 dark:text-neutral-400">
+                      <td className="px-4 py-3 tabular-nums text-fg-muted">
                         {card?.finalGradePct != null ? `${card.finalGradePct.toFixed(1)}%` : '—'}
                       </td>
-                      <td className="px-4 py-3 text-slate-600 dark:text-neutral-400">
+                      <td className="px-4 py-3 text-fg-muted">
                         {card?.letterGrade ?? '—'}
                       </td>
                       <td className="px-4 py-3">
@@ -418,9 +418,9 @@ export default function CourseReportCards() {
                             autoFocus
                           />
                         ) : (
-                          <span className="line-clamp-2 text-xs text-slate-500 dark:text-neutral-400">
+                          <span className="line-clamp-2 text-xs text-fg-muted">
                             {card?.comment || (
-                              <em className="text-slate-400 dark:text-neutral-500">No comment</em>
+                              <em className="text-fg-subtle">No comment</em>
                             )}
                           </span>
                         )}
@@ -498,7 +498,7 @@ export default function CourseReportCards() {
                             )}
                           </div>
                         ) : (
-                          <span className="text-xs text-slate-500 dark:text-neutral-400">No card yet</span>
+                          <span className="text-xs text-fg-muted">No card yet</span>
                         )}
                       </td>
                     </tr>
@@ -506,7 +506,7 @@ export default function CourseReportCards() {
                 })}
                 {roster.length === 0 && !loading && (
                   <tr>
-                    <td colSpan={6} className="py-6 text-center text-sm text-slate-500 dark:text-neutral-400">
+                    <td colSpan={6} className="py-6 text-center text-sm text-fg-muted">
                       No students enrolled.
                     </td>
                   </tr>
@@ -527,7 +527,7 @@ export default function CourseReportCards() {
             >
               {releasing ? 'Releasing…' : `Release ${approvedCount} Approved Card(s) to Parents`}
             </button>
-            <span className="text-xs text-slate-500 dark:text-neutral-400">
+            <span className="text-xs text-fg-muted">
               Parents will see released report cards in the parent portal.
             </span>
           </div>

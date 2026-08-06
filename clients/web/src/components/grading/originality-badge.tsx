@@ -24,7 +24,7 @@ function chipClass(band: 'neutral' | 'amber' | 'red'): string {
   if (band === 'amber') {
     return 'border-amber-300 bg-amber-50 text-amber-950 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-50'
   }
-  return 'border-slate-200 bg-slate-50 text-slate-800 dark:border-neutral-600 dark:bg-neutral-900/60 dark:text-neutral-100'
+  return 'border-border-default bg-surface-base text-fg-default dark:border-border-default/60 dark:text-fg-default'
 }
 
 export function OriginalityBadge({
@@ -73,7 +73,7 @@ export function OriginalityBadge({
   return (
     <div className="flex flex-wrap items-center gap-2" role="status" aria-label={ariaParts || 'Originality status'}>
       {pending ? (
-        <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-200">
+        <span className="inline-flex items-center gap-1 rounded-full border border-border-default bg-surface-raised px-2.5 py-1 text-xs font-medium text-fg-muted dark:border-border-default dark:bg-surface-base dark:text-fg-default">
           <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
           Checking academic integrity…
         </span>

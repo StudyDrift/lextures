@@ -47,7 +47,7 @@ function TreeBranch({
         {hasKids ? (
           <button
             type="button"
-            className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200"
+            className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-border-default bg-surface-raised text-fg-muted dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
             onClick={() => setOpen((o) => !o)}
             aria-label={open ? 'Collapse' : 'Expand'}
           >
@@ -56,17 +56,17 @@ function TreeBranch({
         ) : (
           <span className="inline-block w-7 shrink-0" aria-hidden />
         )}
-        <span className="font-medium text-slate-900 dark:text-neutral-100">{node.name}</span>
-        <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs text-slate-600 dark:bg-neutral-800 dark:text-neutral-300">
+        <span className="font-medium text-fg-default">{node.name}</span>
+        <span className="rounded-md bg-surface-sunken px-2 py-0.5 text-xs text-fg-muted dark:bg-surface-overlay dark:text-fg-muted">
           {node.unitType}
         </span>
         {node.childCourseCount > 0 && (
-          <span className="text-xs text-slate-500 dark:text-neutral-400">{node.childCourseCount} courses</span>
+          <span className="text-xs text-fg-muted">{node.childCourseCount} courses</span>
         )}
         {canAddChild && (
           <button
             type="button"
-            className="text-xs font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+            className="text-xs font-medium text-accent-fg hover:underline dark:text-indigo-400"
             onClick={() => onAddChild(node.id)}
           >
             Add sub-unit
@@ -74,7 +74,7 @@ function TreeBranch({
         )}
       </div>
       {hasKids && open && (
-        <ul role="group" className="list-none border-s border-slate-200 ps-1 dark:border-neutral-700">
+        <ul role="group" className="list-none border-s border-border-default ps-1 dark:border-border-default">
           {node.children.map((c) => (
             <TreeBranch
               key={c.id}
@@ -241,7 +241,7 @@ export function OrgUnitsPanel() {
 
   if (!canUnits) {
     return (
-      <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
+      <p className="mt-2 text-sm text-fg-muted">
         You need the Org Unit Admin role or platform administration access to manage schools and departments.
       </p>
     )
@@ -249,9 +249,9 @@ export function OrgUnitsPanel() {
 
   return (
     <div className="mt-6 space-y-6">
-      <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4 dark:border-neutral-600 dark:bg-neutral-800/40">
-        <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Institution type</h3>
-        <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+      <div className="rounded-xl border border-border-default bg-slate-50/80 p-4 dark:border-border-default/40">
+        <h3 className="text-sm font-semibold text-fg-default">Institution type</h3>
+        <p className="mt-1 text-xs text-fg-muted">
           Determines which features are available. K-12 enables grade-level filtering on the course catalog.
         </p>
         <div className="mt-3 flex flex-wrap gap-3">
@@ -261,11 +261,7 @@ export function OrgUnitsPanel() {
               type="button"
               disabled={orgTypeSaving}
               onClick={() => void saveOrgType(t)}
-              className={`rounded-xl border px-4 py-2 text-sm font-medium transition-[background-color,color,border-color] disabled:opacity-50 ${
-                orgType === t
-                  ? 'border-indigo-600 bg-indigo-600 text-white'
-                  : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800'
-              }`}
+              className={`rounded-xl border px-4 py-2 text-sm font-medium transition-[background-color,color,border-color] disabled:opacity-50 ${ orgType === t ? 'border-indigo-600 bg-accent-solid text-white' : 'border-border-default bg-surface-raised text-fg-muted hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay' }`}
             >
               {t === 'higher-ed' ? 'Higher Education' : 'K-12'}
             </button>
@@ -274,7 +270,7 @@ export function OrgUnitsPanel() {
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-slate-600 dark:text-neutral-400">
+        <p className="text-sm text-fg-muted">
           Structure your tenant with nested schools and departments. Course catalog visibility can be limited to a unit
           subtree for Org Unit Admins.
         </p>
@@ -282,7 +278,7 @@ export function OrgUnitsPanel() {
           type="button"
           onClick={() => void loadTree()}
           disabled={loading || !orgId}
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+          className="inline-flex items-center gap-2 rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm font-medium text-fg-default shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:bg-surface-overlay"
         >
           <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} aria-hidden />
           Refresh
@@ -290,12 +286,12 @@ export function OrgUnitsPanel() {
       </div>
 
       {canRbac && orgs.length > 0 && (
-        <label className="flex max-w-md flex-col gap-1 text-xs font-medium text-slate-700 dark:text-neutral-300">
+        <label className="flex max-w-md flex-col gap-1 text-xs font-medium text-fg-muted">
           Organization
           <select
             value={orgId}
             onChange={(e) => setOrgId(e.target.value)}
-            className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+            className="rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised"
           >
             {orgs.map((o) => (
               <option key={o.id} value={o.id}>
@@ -307,7 +303,7 @@ export function OrgUnitsPanel() {
       )}
 
       {!canRbac && jwtOrgId && (
-        <p className="text-sm text-slate-600 dark:text-neutral-400">
+        <p className="text-sm text-fg-muted">
           Managing units for your organization (org id <span className="font-mono text-xs">{jwtOrgId}</span>).
         </p>
       )}
@@ -324,33 +320,33 @@ export function OrgUnitsPanel() {
       {canRbac && (
         <form
           onSubmit={createRoot}
-          className="rounded-xl border border-slate-200 bg-slate-50/80 p-4 dark:border-neutral-600 dark:bg-neutral-800/40"
+          className="rounded-xl border border-border-default bg-slate-50/80 p-4 dark:border-border-default/40"
           aria-labelledby="root-unit-heading"
         >
           <h3
             id="root-unit-heading"
-            className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-neutral-100"
+            className="flex items-center gap-2 text-sm font-semibold text-fg-default"
           >
             <Plus className="h-4 w-4" aria-hidden />
             Add root unit
           </h3>
-          <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">Platform admins can create top-level units.</p>
+          <p className="mt-1 text-xs text-fg-muted">Platform admins can create top-level units.</p>
           <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end">
-            <label className="flex min-w-0 flex-1 flex-col gap-1 text-xs font-medium text-slate-700 dark:text-neutral-300">
+            <label className="flex min-w-0 flex-1 flex-col gap-1 text-xs font-medium text-fg-muted">
               Name
               <input
                 value={rootName}
                 onChange={(e) => setRootName(e.target.value)}
-                className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+                className="rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised"
                 placeholder="Lincoln High"
               />
             </label>
-            <label className="flex w-40 flex-col gap-1 text-xs font-medium text-slate-700 dark:text-neutral-300">
+            <label className="flex w-40 flex-col gap-1 text-xs font-medium text-fg-muted">
               Type
               <select
                 value={rootType}
                 onChange={(e) => setRootType(e.target.value)}
-                className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+                className="rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised"
               >
                 {UNIT_TYPES.map((t) => (
                   <option key={t} value={t}>
@@ -362,7 +358,7 @@ export function OrgUnitsPanel() {
             <button
               type="submit"
               disabled={creatingRoot || !rootName.trim() || !orgId}
-              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
             >
               Create
             </button>
@@ -377,23 +373,23 @@ export function OrgUnitsPanel() {
           role="dialog"
           aria-label="Add sub-unit"
         >
-          <p className="text-sm font-medium text-slate-900 dark:text-neutral-100">New sub-unit under selected parent</p>
+          <p className="text-sm font-medium text-fg-default">New sub-unit under selected parent</p>
           <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end">
-            <label className="flex min-w-0 flex-1 flex-col gap-1 text-xs font-medium text-slate-700 dark:text-neutral-300">
+            <label className="flex min-w-0 flex-1 flex-col gap-1 text-xs font-medium text-fg-muted">
               Name
               <input
                 value={childName}
                 onChange={(e) => setChildName(e.target.value)}
-                className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+                className="rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised"
                 placeholder="Math department"
               />
             </label>
-            <label className="flex w-40 flex-col gap-1 text-xs font-medium text-slate-700 dark:text-neutral-300">
+            <label className="flex w-40 flex-col gap-1 text-xs font-medium text-fg-muted">
               Type
               <select
                 value={childType}
                 onChange={(e) => setChildType(e.target.value)}
-                className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+                className="rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-raised"
               >
                 {UNIT_TYPES.map((t) => (
                   <option key={t} value={t}>
@@ -405,13 +401,13 @@ export function OrgUnitsPanel() {
             <button
               type="submit"
               disabled={creatingChild || !childName.trim()}
-              className="inline-flex shrink-0 items-center justify-center rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+              className="inline-flex shrink-0 items-center justify-center rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
             >
               Save
             </button>
             <button
               type="button"
-              className="text-sm text-slate-600 underline dark:text-neutral-400"
+              className="text-sm text-fg-muted underline dark:text-fg-muted"
               onClick={() => {
                 setChildParentId(null)
                 setChildName('')
@@ -426,11 +422,11 @@ export function OrgUnitsPanel() {
       {loading && tree.length === 0 ? (
         <div className="space-y-2" aria-busy="true" aria-label="Loading unit tree">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="h-10 animate-pulse rounded-xl bg-slate-100 dark:bg-neutral-800" />
+            <div key={i} className="h-10 animate-pulse rounded-xl bg-surface-sunken" />
           ))}
         </div>
       ) : tree.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-slate-200 px-4 py-8 text-center text-sm text-slate-600 dark:border-neutral-600 dark:text-neutral-400">
+        <p className="rounded-xl border border-dashed border-border-default px-4 py-8 text-center text-sm text-fg-muted dark:border-border-default dark:text-fg-muted">
           <FolderTree className="mx-auto mb-2 h-8 w-8 opacity-50" aria-hidden />
           No sub-accounts yet. Add a school or department to structure your organization.
         </p>
@@ -439,7 +435,7 @@ export function OrgUnitsPanel() {
           role="tree"
           aria-label="Organization units"
           aria-multiselectable="false"
-          className="list-none rounded-xl border border-slate-200 p-3 dark:border-neutral-600"
+          className="list-none rounded-xl border border-border-default p-3 dark:border-border-default"
         >
           {tree.map((n) => (
             <TreeBranch

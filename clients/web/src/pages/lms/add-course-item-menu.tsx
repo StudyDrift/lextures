@@ -46,7 +46,7 @@ export function AddCourseItemMenu({
           if (disabled) return
           setOpen((o) => !o)
         }}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-2 py-1.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:justify-start sm:px-3 sm:py-2"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent-solid px-2 py-1.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:justify-start sm:px-3 sm:py-2"
       >
         <Plus className="h-4 w-4 shrink-0" aria-hidden />
         <span>Actions</span>
@@ -61,7 +61,7 @@ export function AddCourseItemMenu({
           id={menuId}
           role="menu"
           aria-label="Course actions"
-          className="absolute start-0 end-0 z-50 mt-1 min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10 sm:left-auto sm:end-0 sm:min-w-[14rem] dark:border-neutral-600 dark:bg-neutral-800 dark:shadow-black/40"
+          className="absolute start-0 end-0 z-50 mt-1 min-w-0 overflow-hidden rounded-xl border border-border-default bg-surface-raised py-1 shadow-lg shadow-slate-900/10 sm:left-auto sm:end-0 sm:min-w-[14rem] dark:border-border-default dark:bg-surface-overlay dark:shadow-black/40"
         >
           <button
             type="button"
@@ -70,12 +70,12 @@ export function AddCourseItemMenu({
               onAdd()
               setOpen(false)
             }}
-            className="flex w-full flex-col gap-0.5 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:hover:bg-neutral-700"
+            className="flex w-full flex-col gap-0.5 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:hover:bg-neutral-700"
           >
-            <span className="font-semibold text-slate-950 dark:text-neutral-100">Add Module</span>
-            <span className="text-xs text-slate-500 dark:text-neutral-400">Group course activities and items</span>
+            <span className="font-semibold text-slate-950 dark:text-fg-default">Add Module</span>
+            <span className="text-xs text-fg-muted">Group course activities and items</span>
           </button>
-          <div className="my-1 border-t border-slate-100 dark:border-neutral-700" role="separator" />
+          <div className="my-1 border-t border-border-subtle dark:border-border-default" role="separator" />
           {moduleListActionsEnabled ? (
             <>
               <button
@@ -86,18 +86,18 @@ export function AddCourseItemMenu({
                   onCollapseExpandAllModules()
                   setOpen(false)
                 }}
-                className="flex w-full flex-col gap-0.5 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-neutral-700"
+                className="flex w-full flex-col gap-0.5 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-neutral-700"
               >
-                <span className="font-semibold text-slate-950 dark:text-neutral-100">
+                <span className="font-semibold text-slate-950 dark:text-fg-default">
                   {allModulesCollapsed ? 'Expand all modules' : 'Collapse all modules'}
                 </span>
-                <span className="text-xs text-slate-500 dark:text-neutral-400">
+                <span className="text-xs text-fg-muted">
                   {allModulesCollapsed
                     ? 'Show items under every module'
                     : 'Hide module item lists'}
                 </span>
               </button>
-              <div className="my-1 border-t border-slate-100 dark:border-neutral-700" role="separator" />
+              <div className="my-1 border-t border-border-subtle dark:border-border-default" role="separator" />
             </>
           ) : null}
           <button
@@ -105,21 +105,17 @@ export function AddCourseItemMenu({
             role="menuitemcheckbox"
             aria-checked={dragHandlesVisible}
             onClick={onToggleDragHandles}
-            className="flex w-full items-start gap-2 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:hover:bg-neutral-700"
+            className="flex w-full items-start gap-2 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:hover:bg-neutral-700"
           >
             <span
-              className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
-                dragHandlesVisible
-                  ? 'border-indigo-600 bg-indigo-600 text-white dark:border-indigo-500 dark:bg-indigo-500'
-                  : 'border-slate-300 bg-white dark:border-neutral-500 dark:bg-neutral-800'
-              }`}
+              className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border ${ dragHandlesVisible ? 'border-indigo-600 bg-accent-solid text-white dark:border-indigo-500 dark:bg-indigo-500' : 'border-border-strong bg-surface-raised dark:border-neutral-500 dark:bg-surface-overlay' }`}
               aria-hidden
             >
               {dragHandlesVisible ? <Check className="h-3 w-3" strokeWidth={3} /> : null}
             </span>
             <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-              <span className="font-semibold text-slate-950 dark:text-neutral-100">Drag and drop</span>
-              <span className="text-xs text-slate-500 dark:text-neutral-400">Show reorder handles for modules and items</span>
+              <span className="font-semibold text-slate-950 dark:text-fg-default">Drag and drop</span>
+              <span className="text-xs text-fg-muted">Show reorder handles for modules and items</span>
             </span>
           </button>
         </div>

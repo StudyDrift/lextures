@@ -51,12 +51,12 @@ export function PredictRevealEditor({
   return (
     <div className="space-y-4" data-testid="predict-reveal-editor">
       <label className="block space-y-1 text-xs">
-        <span className="font-medium text-slate-700 dark:text-neutral-300">
+        <span className="font-medium text-fg-muted">
           {t('contentTools.tools.predict_reveal.editor.question')}
         </span>
         <textarea
           id={`${idPrefix}-${baseId}-q`}
-          className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+          className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
           rows={2}
           disabled={disabled}
           value={typeof value.question === 'string' ? value.question : ''}
@@ -65,11 +65,11 @@ export function PredictRevealEditor({
       </label>
 
       <label className="block space-y-1 text-xs">
-        <span className="font-medium text-slate-700 dark:text-neutral-300">
+        <span className="font-medium text-fg-muted">
           {t('contentTools.tools.predict_reveal.editor.mode')}
         </span>
         <select
-          className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+          className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
           disabled={disabled}
           value={mode}
           onChange={(e) => {
@@ -93,13 +93,13 @@ export function PredictRevealEditor({
 
       {mode === 'choice' ? (
         <div className="space-y-2">
-          <div className="text-xs font-medium text-slate-700 dark:text-neutral-300">
+          <div className="text-xs font-medium text-fg-muted">
             {t('contentTools.tools.predict_reveal.editor.outcomes')}
           </div>
           {outcomes.map((o, idx) => (
             <div key={o.id} className="flex flex-wrap items-center gap-2">
               <input
-                className="min-w-[12rem] flex-1 rounded border border-slate-300 bg-white px-2 py-1 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                className="min-w-[12rem] flex-1 rounded border border-border-strong bg-surface-raised px-2 py-1 text-sm dark:border-border-default dark:bg-surface-base"
                 disabled={disabled}
                 value={o.text}
                 placeholder={t('contentTools.tools.predict_reveal.editor.outcomeText')}
@@ -134,7 +134,7 @@ export function PredictRevealEditor({
           ))}
           <button
             type="button"
-            className="text-xs text-slate-700 underline dark:text-neutral-300"
+            className="text-xs text-fg-muted underline dark:text-fg-muted"
             disabled={disabled || outcomes.length >= 8}
             onClick={() =>
               setOutcomes([...outcomes, { id: newId('out'), text: '', correct: false }])
@@ -145,11 +145,11 @@ export function PredictRevealEditor({
         </div>
       ) : (
         <label className="block space-y-1 text-xs">
-          <span className="font-medium text-slate-700 dark:text-neutral-300">
+          <span className="font-medium text-fg-muted">
             {t('contentTools.tools.predict_reveal.editor.openPlaceholder')}
           </span>
           <input
-            className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+            className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
             disabled={disabled}
             value={typeof value.openPlaceholder === 'string' ? value.openPlaceholder : ''}
             onChange={(e) => patch({ openPlaceholder: e.target.value })}
@@ -159,11 +159,11 @@ export function PredictRevealEditor({
 
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="block space-y-1 text-xs">
-          <span className="font-medium text-slate-700 dark:text-neutral-300">
+          <span className="font-medium text-fg-muted">
             {t('contentTools.tools.predict_reveal.editor.confidenceScale')}
           </span>
           <select
-            className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+            className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
             disabled={disabled}
             value={typeof value.confidenceScale === 'string' ? value.confidenceScale : 'three'}
             onChange={(e) => patch({ confidenceScale: e.target.value })}
@@ -181,18 +181,18 @@ export function PredictRevealEditor({
             checked={value.confidenceRequired !== false}
             onChange={(e) => patch({ confidenceRequired: e.target.checked })}
           />
-          <span className="font-medium text-slate-700 dark:text-neutral-300">
+          <span className="font-medium text-fg-muted">
             {t('contentTools.tools.predict_reveal.editor.confidenceRequired')}
           </span>
         </label>
       </div>
 
       <label className="block space-y-1 text-xs">
-        <span className="font-medium text-slate-700 dark:text-neutral-300">
+        <span className="font-medium text-fg-muted">
           {t('contentTools.tools.predict_reveal.editor.revealMarkdown')}
         </span>
         <textarea
-          className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+          className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
           rows={3}
           disabled={disabled}
           value={reveal.markdown}
@@ -201,11 +201,11 @@ export function PredictRevealEditor({
       </label>
 
       <label className="block space-y-1 text-xs">
-        <span className="font-medium text-slate-700 dark:text-neutral-300">
+        <span className="font-medium text-fg-muted">
           {t('contentTools.tools.predict_reveal.editor.revealImage')}
         </span>
         <input
-          className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+          className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
           disabled={disabled}
           value={reveal.imageUrl ?? ''}
           onChange={(e) =>
@@ -215,11 +215,11 @@ export function PredictRevealEditor({
       </label>
 
       <label className="block space-y-1 text-xs">
-        <span className="font-medium text-slate-700 dark:text-neutral-300">
+        <span className="font-medium text-fg-muted">
           {t('contentTools.tools.predict_reveal.editor.reflectionPrompt')}
         </span>
         <input
-          className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+          className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
           disabled={disabled}
           value={typeof value.reflectionPrompt === 'string' ? value.reflectionPrompt : ''}
           onChange={(e) => patch({ reflectionPrompt: e.target.value })}
@@ -233,7 +233,7 @@ export function PredictRevealEditor({
           checked={value.showPeerResults === true}
           onChange={(e) => patch({ showPeerResults: e.target.checked })}
         />
-        <span className="font-medium text-slate-700 dark:text-neutral-300">
+        <span className="font-medium text-fg-muted">
           {t('contentTools.tools.predict_reveal.editor.showPeerResults')}
         </span>
       </label>

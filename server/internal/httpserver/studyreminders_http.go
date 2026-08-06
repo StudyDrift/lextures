@@ -59,11 +59,6 @@ func (d Deps) handlePatchReminderConfig() http.HandlerFunc {
 		Enabled          *bool     `json:"enabled"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.studyRemindersEnabled(w) {
 			return
 		}
@@ -123,11 +118,6 @@ func (d Deps) handlePauseReminderConfig() http.HandlerFunc {
 		Days int `json:"days"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.studyRemindersEnabled(w) {
 			return
 		}

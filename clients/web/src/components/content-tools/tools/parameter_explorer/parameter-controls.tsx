@@ -25,7 +25,7 @@ export function ParameterControls({ parameters, values, onChange, readOnly, t }:
               />
               <span className="font-medium">{p.label}</span>
               {p.description ? (
-                <span id={`${p.id}-desc`} className="text-xs text-slate-500">
+                <span id={`${p.id}-desc`} className="text-xs text-fg-muted">
                   {p.description}
                 </span>
               ) : null}
@@ -38,7 +38,7 @@ export function ParameterControls({ parameters, values, onChange, readOnly, t }:
             <label key={p.id} className="block space-y-1 text-sm">
               <span className="font-medium">{p.label}</span>
               <select
-                className="w-full rounded border border-slate-300 bg-white px-2 py-1.5 dark:border-neutral-600 dark:bg-neutral-950"
+                className="w-full rounded border border-border-strong bg-surface-raised px-2 py-1.5 dark:border-border-default dark:bg-surface-base"
                 value={val}
                 disabled={readOnly}
                 onChange={(e) => onChange(p.id, e.target.value)}
@@ -61,15 +61,15 @@ export function ParameterControls({ parameters, values, onChange, readOnly, t }:
               <label htmlFor={`pe-range-${p.id}`} className="font-medium">
                 {p.label}
                 {p.unit ? (
-                  <span className="ml-1 font-normal text-slate-500">({p.unit})</span>
+                  <span className="ml-1 font-normal text-fg-muted">({p.unit})</span>
                 ) : null}
               </label>
-              <span className="tabular-nums text-xs text-slate-600 dark:text-neutral-400">
+              <span className="tabular-nums text-xs text-fg-muted">
                 {valueText}
               </span>
             </div>
             {p.description ? (
-              <p className="text-xs text-slate-500" id={`pe-desc-${p.id}`}>
+              <p className="text-xs text-fg-muted" id={`pe-desc-${p.id}`}>
                 {p.description}
               </p>
             ) : null}
@@ -112,7 +112,7 @@ export function ParameterControls({ parameters, values, onChange, readOnly, t }:
                 aria-label={t('contentTools.tools.parameter_explorer.numericInput', {
                   label: p.label,
                 })}
-                className="w-20 rounded border border-slate-300 bg-white px-1.5 py-1 text-sm tabular-nums dark:border-neutral-600 dark:bg-neutral-950"
+                className="w-20 rounded border border-border-strong bg-surface-raised px-1.5 py-1 text-sm tabular-nums dark:border-border-default dark:bg-surface-base"
                 data-testid={`parameter-explorer-number-${p.id}`}
                 onChange={(e) => {
                   const v = Number(e.target.value)

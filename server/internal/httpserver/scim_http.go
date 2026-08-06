@@ -80,11 +80,6 @@ func writeSCIMError(w http.ResponseWriter, status int, scimType, detail string) 
 
 func (d Deps) handleSCIMServiceProviderConfig() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			writeSCIMError(w, http.StatusMethodNotAllowed, "invalidSyntax", "Method not allowed")
-			return
-		}
 		w.Header().Set("Content-Type", "application/scim+json")
 		_ = json.NewEncoder(w).Encode(map[string]any{
 			"schemas": []string{"urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig"},
@@ -102,11 +97,6 @@ func (d Deps) handleSCIMServiceProviderConfig() http.HandlerFunc {
 
 func (d Deps) handleSCIMSchemas() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			writeSCIMError(w, http.StatusMethodNotAllowed, "invalidSyntax", "Method not allowed")
-			return
-		}
 		w.Header().Set("Content-Type", "application/scim+json")
 		userSchema := map[string]any{
 			"id":          "urn:ietf:params:scim:schemas:core:2.0:User",

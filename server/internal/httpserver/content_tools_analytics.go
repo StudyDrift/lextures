@@ -31,10 +31,6 @@ func (d Deps) registerContentToolsAnalyticsRoutes(r chi.Router) {
 
 func (d Deps) handleContentToolsInstanceAnalytics() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		_, viewer, courseID, ok := d.requireContentToolsGradeRead(w, r)
 		if !ok {
 			return

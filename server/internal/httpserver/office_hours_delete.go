@@ -13,11 +13,6 @@ import (
 // handleCancelBooking is DELETE /api/v1/slots/{slot_id}/book.
 func (d Deps) handleCancelBooking() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodDelete {
-			w.Header().Set("Allow", http.MethodDelete)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		slotIDStr := chi.URLParam(r, "slot_id")
 		slotID, err := uuid.Parse(slotIDStr)
 		if err != nil {

@@ -64,10 +64,6 @@ func (d Deps) requireEnrollmentGroupsManage(w http.ResponseWriter, r *http.Reque
 
 func (d Deps) handleEnrollmentGroupsEnable() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		_, courseID, _, ok := d.requireEnrollmentGroupsManage(w, r)
 		if !ok {
 			return
@@ -86,10 +82,6 @@ func (d Deps) handleEnrollmentGroupsEnable() http.HandlerFunc {
 
 func (d Deps) handleEnrollmentGroupsTree() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, _, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return

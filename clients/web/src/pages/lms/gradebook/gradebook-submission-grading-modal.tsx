@@ -98,7 +98,7 @@ export function GradebookSubmissionGradingModal({
           role="status"
           aria-live="polite"
         >
-          <p className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-lg dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200">
+          <p className="rounded-xl border border-border-default bg-surface-raised px-4 py-3 text-sm text-fg-muted shadow-lg dark:border-border-default dark:bg-surface-raised dark:text-fg-default">
             Loading assignment…
           </p>
         </div>
@@ -110,20 +110,20 @@ export function GradebookSubmissionGradingModal({
           aria-modal="true"
           aria-labelledby="gradebook-submission-error-title"
         >
-          <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-5 shadow-xl dark:border-neutral-600 dark:bg-neutral-900">
+          <div className="w-full max-w-md rounded-xl border border-border-default bg-surface-raised p-5 shadow-xl dark:border-border-default dark:bg-surface-raised">
             <h2
               id="gradebook-submission-error-title"
-              className="text-lg font-semibold text-slate-950 dark:text-neutral-100"
+              className="text-lg font-semibold text-slate-950 dark:text-fg-default"
             >
               Could not open grading
             </h2>
-            <p className="mt-2 text-sm text-red-600 dark:text-red-400" role="alert">
+            <p className="mt-2 text-sm text-danger-fg" role="alert">
               {loadError}
             </p>
             <div className="mt-4 flex justify-end">
               <button
                 type="button"
-                className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-800 hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+                className="rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-sm font-medium text-fg-default hover:bg-surface-base dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700/80"
                 onClick={onClose}
               >
                 Close
@@ -168,20 +168,20 @@ export function GradebookSubmissionGradingModal({
           aria-modal="true"
           aria-labelledby="gradebook-submission-empty-title"
         >
-          <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-5 shadow-xl dark:border-neutral-600 dark:bg-neutral-900">
+          <div className="w-full max-w-md rounded-xl border border-border-default bg-surface-raised p-5 shadow-xl dark:border-border-default dark:bg-surface-raised">
             <h2
               id="gradebook-submission-empty-title"
-              className="text-lg font-semibold text-slate-950 dark:text-neutral-100"
+              className="text-lg font-semibold text-slate-950 dark:text-fg-default"
             >
               {assignment.title || open.columnTitle}
             </h2>
-            <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
+            <p className="mt-2 text-sm text-fg-muted">
               This assignment does not accept submissions, so there is nothing to grade here.
             </p>
             <div className="mt-4 flex justify-end">
               <button
                 type="button"
-                className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-800 hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+                className="rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-sm font-medium text-fg-default hover:bg-surface-base dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700/80"
                 onClick={onClose}
               >
                 Close

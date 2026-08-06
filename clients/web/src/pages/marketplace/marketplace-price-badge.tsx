@@ -29,12 +29,12 @@ export function MarketplacePriceBadge({
 
   return (
     <span
-      className={`inline-flex items-baseline gap-1.5 font-semibold text-slate-900 dark:text-neutral-100 ${className}`}
+      className={`inline-flex items-baseline gap-1.5 font-semibold text-fg-default ${className}`}
       data-testid={testId}
     >
       {listPrice ? (
         <span
-          className="text-sm font-normal text-slate-500 line-through dark:text-neutral-400"
+          className="text-sm font-normal text-fg-muted line-through dark:text-fg-muted"
           aria-hidden="true"
         >
           {listPrice}

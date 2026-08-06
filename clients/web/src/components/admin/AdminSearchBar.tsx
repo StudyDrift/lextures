@@ -136,14 +136,14 @@ export function AdminSearchBar() {
     const Icon = meta.icon
     return (
       <div key={key} role="group" aria-label={meta.label}>
-        <div className="flex items-center justify-between px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <div className="flex items-center justify-between px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-fg-muted">
           <span className="flex items-center gap-1.5">
             <Icon className="h-3.5 w-3.5" aria-hidden />
             {meta.label}
           </span>
           <button
             type="button"
-            className="font-medium normal-case text-indigo-600 hover:underline dark:text-indigo-400"
+            className="font-medium normal-case text-accent-fg hover:underline dark:text-indigo-400"
             onClick={() => {
               setOpen(false)
               navigate(adminSearchResultsPath(query.trim(), key, orgId))
@@ -163,17 +163,15 @@ export function AdminSearchBar() {
                   type="button"
                   role="option"
                   aria-selected={active}
-                  className={`flex w-full flex-col gap-0.5 px-3 py-2 text-left text-sm ${
-                    active ? 'bg-indigo-50 dark:bg-indigo-950/50' : 'hover:bg-slate-50 dark:hover:bg-neutral-900'
-                  }`}
+                  className={`flex w-full flex-col gap-0.5 px-3 py-2 text-left text-sm ${ active ? 'bg-accent-surface' : 'hover:bg-surface-base dark:hover:bg-surface-raised' }`}
                   onMouseEnter={() => setCursor(idx)}
                   onClick={() => navigateTo(item)}
                 >
-                  <span className="font-medium text-slate-900 dark:text-slate-100">{item.title}</span>
-                  <span className="text-xs text-slate-500 dark:text-slate-400">{item.subtitle}</span>
+                  <span className="font-medium text-fg-default dark:text-slate-100">{item.title}</span>
+                  <span className="text-xs text-fg-muted dark:text-fg-subtle">{item.subtitle}</span>
                   {item.snippet ? (
                     <span
-                      className="text-xs text-slate-600 dark:text-slate-300"
+                      className="text-xs text-fg-muted dark:text-slate-300"
                       dangerouslySetInnerHTML={{ __html: item.snippet }}
                     />
                   ) : null}
@@ -193,7 +191,7 @@ export function AdminSearchBar() {
         Search organization
       </label>
       <div className="relative">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden />
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-subtle" aria-hidden />
         <input
           ref={inputRef}
           id={`${listboxId}-input`}
@@ -208,23 +206,23 @@ export function AdminSearchBar() {
           onFocus={() => setOpen(true)}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={onInputKeyDown}
-          className="w-full rounded-lg border border-slate-300 bg-white py-2 pl-9 pr-3 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+          className="w-full rounded-lg border border-border-strong bg-surface-raised py-2 pl-9 pr-3 text-sm dark:border-border-default dark:bg-surface-raised"
         />
       </div>
       {open && (
         <div
           id={`${listboxId}-listbox`}
           role="listbox"
-          className="absolute z-50 mt-1 max-h-96 w-full overflow-auto rounded-lg border border-slate-200 bg-white shadow-lg dark:border-neutral-700 dark:bg-neutral-900"
+          className="absolute z-50 mt-1 max-h-96 w-full overflow-auto rounded-lg border border-border-default bg-surface-raised shadow-lg dark:border-border-default dark:bg-surface-raised"
         >
           {loading ? (
-            <p className="px-3 py-4 text-sm text-slate-500">Searching…</p>
+            <p className="px-3 py-4 text-sm text-fg-muted">Searching…</p>
           ) : error ? (
-            <p className="px-3 py-4 text-sm text-red-600">{error}</p>
+            <p className="px-3 py-4 text-sm text-danger-fg">{error}</p>
           ) : query.trim().length < MIN_QUERY ? (
-            <p className="px-3 py-4 text-sm text-slate-500">Type at least {MIN_QUERY} characters.</p>
+            <p className="px-3 py-4 text-sm text-fg-muted">Type at least {MIN_QUERY} characters.</p>
           ) : totalCount === 0 ? (
-            <p className="px-3 py-4 text-sm text-slate-500">No results for &ldquo;{query.trim()}&rdquo;</p>
+            <p className="px-3 py-4 text-sm text-fg-muted">No results for &ldquo;{query.trim()}&rdquo;</p>
           ) : (
             <>
               {renderGroup('users', users)}

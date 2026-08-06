@@ -97,12 +97,12 @@ function ResultIcon({ result, valid }: { result: string; valid: boolean }) {
     return <ShieldAlert className="h-8 w-8 text-amber-600" aria-hidden />
   }
   if (result === 'tampered' || !valid) {
-    return <XCircle className="h-8 w-8 text-red-600" aria-hidden />
+    return <XCircle className="h-8 w-8 text-danger-fg" aria-hidden />
   }
   if (result === 'genuine' || valid) {
     return <CheckCircle2 className="h-8 w-8 text-green-600" aria-hidden />
   }
-  return <AlertTriangle className="h-8 w-8 text-slate-500" aria-hidden />
+  return <AlertTriangle className="h-8 w-8 text-fg-muted" aria-hidden />
 }
 
 export default function CcrVerifyPage() {
@@ -175,15 +175,15 @@ export default function CcrVerifyPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-100 to-slate-200 px-4 py-10 dark:from-neutral-950 dark:to-neutral-900">
-      <main className="mx-auto max-w-xl rounded-2xl border border-slate-200 bg-white p-8 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-        <p className="text-sm font-semibold tracking-wide text-indigo-700 dark:text-indigo-300">Lextures</p>
-        <h1 className="mt-1 text-2xl font-semibold text-slate-900 dark:text-neutral-100">{t('verify.heading')}</h1>
-        <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">{t('verify.help')}</p>
+      <main className="mx-auto max-w-xl rounded-2xl border border-border-default bg-surface-raised p-8 shadow-sm dark:border-border-subtle dark:bg-surface-raised">
+        <p className="text-sm font-semibold tracking-wide text-accent-fg">Lextures</p>
+        <h1 className="mt-1 text-2xl font-semibold text-fg-default">{t('verify.heading')}</h1>
+        <p className="mt-2 text-sm text-fg-muted">{t('verify.help')}</p>
 
         {showLanding ? (
           <div className="mt-8 space-y-8">
             <form onSubmit={onManualSubmit} className="space-y-3" aria-labelledby="manual-code-heading">
-              <h2 id="manual-code-heading" className="text-base font-semibold text-slate-900 dark:text-neutral-100">
+              <h2 id="manual-code-heading" className="text-base font-semibold text-fg-default">
                 {t('verify.enterCode')}
               </h2>
               <label htmlFor={codeFieldId} className="sr-only">
@@ -195,21 +195,21 @@ export default function CcrVerifyPage() {
                 onChange={(e) => setManualCode(e.target.value)}
                 placeholder={t('verify.codePlaceholder')}
                 autoComplete="off"
-                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                className="w-full rounded-md border border-border-strong bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
               />
               <button
                 type="submit"
-                className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
+                className="rounded-md bg-accent-solid px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
               >
                 {t('verify.submitCode')}
               </button>
             </form>
 
             <div className="space-y-3" aria-labelledby="upload-heading">
-              <h2 id="upload-heading" className="text-base font-semibold text-slate-900 dark:text-neutral-100">
+              <h2 id="upload-heading" className="text-base font-semibold text-fg-default">
                 {t('verify.uploadHeading')}
               </h2>
-              <p className="text-sm text-slate-600 dark:text-neutral-400">{t('verify.uploadHelp')}</p>
+              <p className="text-sm text-fg-muted">{t('verify.uploadHelp')}</p>
               <label htmlFor={fileFieldId} className="sr-only">
                 {t('verify.uploadLabel')}
               </label>
@@ -219,17 +219,17 @@ export default function CcrVerifyPage() {
                 accept="application/pdf,.pdf"
                 disabled={uploading}
                 onChange={(e) => void onUpload(e.target.files?.[0] ?? null)}
-                className="block w-full text-sm text-slate-700 file:me-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-medium dark:text-neutral-200 dark:file:bg-neutral-800"
+                className="block w-full text-sm text-fg-muted file:me-3 file:rounded-md file:border-0 file:bg-surface-sunken file:px-3 file:py-2 file:text-sm file:font-medium dark:text-fg-default dark:file:bg-surface-overlay"
               />
-              {uploading ? <p className="text-sm text-slate-500">{t('verify.verifying')}</p> : null}
+              {uploading ? <p className="text-sm text-fg-muted">{t('verify.verifying')}</p> : null}
             </div>
           </div>
         ) : null}
 
-        {loading ? <p className="mt-6 text-sm text-slate-600">{t('verify.verifying')}</p> : null}
+        {loading ? <p className="mt-6 text-sm text-fg-muted">{t('verify.verifying')}</p> : null}
 
         {error ? (
-          <p role="alert" className="mt-6 text-sm text-red-700 dark:text-red-300">
+          <p role="alert" className="mt-6 text-sm text-danger-fg">
             {error}
           </p>
         ) : null}
@@ -245,17 +245,11 @@ export default function CcrVerifyPage() {
               <ResultIcon result={result.result} valid={result.valid} />
               <div>
                 <p
-                  className={`text-lg font-semibold ${
-                    result.result === 'genuine' || result.valid
-                      ? 'text-green-800 dark:text-green-300'
-                      : result.result === 'revoked'
-                        ? 'text-amber-800 dark:text-amber-300'
-                        : 'text-red-800 dark:text-red-300'
-                  }`}
+                  className={`text-lg font-semibold ${ result.result === 'genuine' || result.valid ? 'text-green-800 dark:text-green-300' : result.result === 'revoked' ? 'text-amber-800 dark:text-amber-300' : 'text-red-800 dark:text-red-300' }`}
                 >
                   {result.status}
                 </p>
-                <p className="text-sm text-slate-600 dark:text-neutral-400">
+                <p className="text-sm text-fg-muted">
                   {result.result === 'genuine' || result.valid
                     ? t('verify.signatureOk')
                     : result.result === 'revoked'
@@ -267,56 +261,56 @@ export default function CcrVerifyPage() {
             <dl className="grid gap-2 text-sm">
               {result.documentType ? (
                 <div>
-                  <dt className="font-medium text-slate-700 dark:text-neutral-300">{t('verify.type')}</dt>
+                  <dt className="font-medium text-fg-muted">{t('verify.type')}</dt>
                   <dd className="capitalize">{result.documentType}</dd>
                 </div>
               ) : null}
               {result.learnerName ? (
                 <div>
-                  <dt className="font-medium text-slate-700 dark:text-neutral-300">{t('verify.learner')}</dt>
+                  <dt className="font-medium text-fg-muted">{t('verify.learner')}</dt>
                   <dd>{result.learnerName}</dd>
                 </div>
               ) : null}
               <div>
-                <dt className="font-medium text-slate-700 dark:text-neutral-300">{t('verify.issuer')}</dt>
+                <dt className="font-medium text-fg-muted">{t('verify.issuer')}</dt>
                 <dd>{result.issuerName}</dd>
               </div>
               {result.issuerDid ? (
                 <div>
-                  <dt className="font-medium text-slate-700 dark:text-neutral-300">{t('verify.issuerDid')}</dt>
+                  <dt className="font-medium text-fg-muted">{t('verify.issuerDid')}</dt>
                   <dd className="break-all font-mono text-xs">{result.issuerDid}</dd>
                 </div>
               ) : null}
               {result.issuedAt ? (
                 <div>
-                  <dt className="font-medium text-slate-700 dark:text-neutral-300">{t('verify.issued')}</dt>
+                  <dt className="font-medium text-fg-muted">{t('verify.issued')}</dt>
                   <dd>{result.issuedAt}</dd>
                 </div>
               ) : null}
               {result.revokedAt ? (
                 <div>
-                  <dt className="font-medium text-slate-700 dark:text-neutral-300">{t('verify.revokedAt')}</dt>
+                  <dt className="font-medium text-fg-muted">{t('verify.revokedAt')}</dt>
                   <dd>{result.revokedAt}</dd>
                 </div>
               ) : null}
             </dl>
             {result.achievementTitles.length > 0 ? (
               <section aria-label={t('verify.credentialSection')}>
-                <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">{t('verify.credentialSection')}</h2>
-                <ul className="mt-2 list-disc ps-5 text-sm text-slate-700 dark:text-neutral-300">
+                <h2 className="text-base font-semibold text-fg-default">{t('verify.credentialSection')}</h2>
+                <ul className="mt-2 list-disc ps-5 text-sm text-fg-muted">
                   {result.achievementTitles.map((title) => (
                     <li key={title}>{title}</li>
                   ))}
                 </ul>
               </section>
             ) : null}
-            <p className="text-xs text-slate-500 dark:text-neutral-500">{t('verify.trustMark')}</p>
+            <p className="text-xs text-fg-subtle">{t('verify.trustMark')}</p>
           </div>
         ) : null}
 
         {token ? (
           <p className="mt-8 text-sm">
-            <Link to="/verify" className="font-medium text-indigo-600 hover:underline dark:text-indigo-400">
+            <Link to="/verify" className="font-medium text-accent-fg hover:underline dark:text-indigo-400">
               {t('verify.backToPortal')}
             </Link>
           </p>

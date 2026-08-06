@@ -8,8 +8,8 @@ import {
 export type { ScoringStartOptions }
 
 const fieldClass =
-  'w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100'
-const labelMuted = 'mb-1 block text-xs font-medium text-slate-600 dark:text-neutral-400'
+  'w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm text-fg-default outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 dark:border-border-default dark:bg-surface-base dark:text-fg-default'
+const labelMuted = 'mb-1 block text-xs font-medium text-fg-muted'
 
 export function ScoringProfilePicker({
   value,
@@ -23,7 +23,7 @@ export function ScoringProfilePicker({
 
   return (
     <fieldset className="space-y-4">
-      <legend className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+      <legend className="text-sm font-semibold text-fg-default">
         {t('liveQuiz.score.profileHeading')}
       </legend>
       <div className="grid gap-2 sm:grid-cols-3">
@@ -41,7 +41,7 @@ export function ScoringProfilePicker({
               className={
                 selected
                   ? 'cursor-pointer rounded-xl border border-indigo-400 bg-indigo-50/60 p-3 text-sm dark:border-indigo-500 dark:bg-indigo-950/40'
-                  : 'cursor-pointer rounded-xl border border-slate-200 bg-white p-3 text-sm hover:border-slate-300 dark:border-neutral-700 dark:bg-neutral-950 dark:hover:border-neutral-600'
+                  : 'cursor-pointer rounded-xl border border-border-default bg-surface-raised p-3 text-sm hover:border-border-strong dark:bg-surface-base dark:hover:border-border-default'
               }
             >
               <input
@@ -60,8 +60,8 @@ export function ScoringProfilePicker({
                   })
                 }
               />
-              <span className="font-medium text-slate-900 dark:text-neutral-100">{t(labelKey)}</span>
-              <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">
+              <span className="font-medium text-fg-default">{t(labelKey)}</span>
+              <p className="mt-1 text-xs text-fg-muted">
                 {t(`${labelKey}Hint`)}
               </p>
             </label>
@@ -148,12 +148,12 @@ export function ScoringProfilePicker({
         </div>
       ) : null}
 
-      <label className="flex items-center gap-2 text-sm text-slate-800 dark:text-neutral-200">
+      <label className="flex items-center gap-2 text-sm text-fg-default">
         <input
           type="checkbox"
           checked={value.powerUpsEnabled}
           onChange={(e) => onChange({ ...value, powerUpsEnabled: e.target.checked })}
-          className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+          className="h-4 w-4 rounded border-border-strong text-accent-fg focus:ring-indigo-500"
         />
         {t('liveQuiz.powerup.enable')}
       </label>

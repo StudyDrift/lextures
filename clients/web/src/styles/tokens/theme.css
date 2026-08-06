@@ -1,0 +1,104 @@
+/*
+ * UX.1 — Tailwind v4 @theme mapping for semantic tokens.
+ * Authors write: bg-surface-raised, text-fg-muted, border-border-subtle, etc.
+ * Motion values live in motion.css (:root); @theme re-exports for utilities.
+ */
+
+@theme {
+  --font-sans: 'Lextures', ui-sans-serif, system-ui, sans-serif;
+
+  /* Surfaces */
+  --color-surface-base: var(--lx-surface-base);
+  --color-surface-raised: var(--lx-surface-raised);
+  --color-surface-overlay: var(--lx-surface-overlay);
+  --color-surface-sunken: var(--lx-surface-sunken);
+  --color-surface-inverse: var(--lx-surface-inverse);
+
+  /* Foregrounds */
+  --color-fg-default: var(--lx-fg-default);
+  --color-fg-muted: var(--lx-fg-muted);
+  --color-fg-subtle: var(--lx-fg-subtle);
+  --color-fg-on-accent: var(--lx-fg-on-accent);
+  --color-fg-inverse: var(--lx-fg-inverse);
+  --color-fg: var(--lx-fg-default);
+
+  /* Borders */
+  --color-border-default: var(--lx-border-default);
+  --color-border-subtle: var(--lx-border-subtle);
+  --color-border-strong: var(--lx-border-strong);
+  --color-border-focus: var(--lx-border-focus);
+  --color-border: var(--lx-border-default);
+
+  /* Status */
+  --color-info-surface: var(--lx-info-surface);
+  --color-info-fg: var(--lx-info-fg);
+  --color-info-border: var(--lx-info-border);
+  --color-success-surface: var(--lx-success-surface);
+  --color-success-fg: var(--lx-success-fg);
+  --color-success-border: var(--lx-success-border);
+  --color-warning-surface: var(--lx-warning-surface);
+  --color-warning-fg: var(--lx-warning-fg);
+  --color-warning-border: var(--lx-warning-border);
+  --color-danger-surface: var(--lx-danger-surface);
+  --color-danger-fg: var(--lx-danger-fg);
+  --color-danger-border: var(--lx-danger-border);
+  --color-accent-surface: var(--lx-accent-surface);
+  --color-accent-fg: var(--lx-accent-fg);
+  --color-accent-border: var(--lx-accent-border);
+  --color-accent-solid: var(--lx-accent-solid);
+  --color-accent: var(--lx-accent-solid);
+
+  /* Interaction */
+  --color-focus-ring: var(--lx-focus-ring);
+  --color-selection: var(--lx-selection);
+  --color-overlay-scrim: var(--lx-overlay-scrim);
+
+  /* Radius */
+  --radius-sm: var(--lx-radius-sm);
+  --radius-md: var(--lx-radius-md);
+  --radius-lg: var(--lx-radius-lg);
+  --radius-pill: var(--lx-radius-pill);
+
+  /* Space */
+  --spacing-space-1: var(--lx-space-1);
+  --spacing-space-2: var(--lx-space-2);
+  --spacing-space-3: var(--lx-space-3);
+  --spacing-space-4: var(--lx-space-4);
+  --spacing-space-5: var(--lx-space-5);
+  --spacing-space-6: var(--lx-space-6);
+  --spacing-space-7: var(--lx-space-7);
+  --spacing-space-8: var(--lx-space-8);
+  --spacing-space-9: var(--lx-space-9);
+  --spacing-space-10: var(--lx-space-10);
+  --spacing-space-11: var(--lx-space-11);
+  --spacing-space-12: var(--lx-space-12);
+
+  /* Elevation */
+  --shadow-elevation-0: var(--lx-elevation-0);
+  --shadow-elevation-1: var(--lx-elevation-1);
+  --shadow-elevation-2: var(--lx-elevation-2);
+  --shadow-elevation-3: var(--lx-elevation-3);
+
+  /* Motion — concrete values (must not self-reference; aliases in motion.css) */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-exit: cubic-bezier(0.3, 0, 1, 1);
+  --ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --ease-bubble: cubic-bezier(0.2, 0, 0, 1);
+  --dur-instant: 100ms;
+  --dur-fast: 150ms;
+  --dur-base: 220ms;
+  --dur-slow: 320ms;
+  --dur-deliberate: 480ms;
+  --stagger-step: 40ms;
+  --motion-enter-translate: 12px;
+  --motion-enter-scale: 0.97;
+  --motion-press-scale: 0.97;
+  --ease-lx-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-lx-exit: cubic-bezier(0.3, 0, 1, 1);
+  --ease-lx-bubble: cubic-bezier(0.2, 0, 0, 1);
+  --duration-instant: 100ms;
+  --duration-fast: 150ms;
+  --duration-base: 220ms;
+  --duration-slow: 320ms;
+  --duration-deliberate: 480ms;
+}

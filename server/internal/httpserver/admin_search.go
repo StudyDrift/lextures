@@ -61,11 +61,6 @@ func (d Deps) registerAdminSearchRoutes(r interface {
 func (d Deps) handleAdminSearchOmnisearch() http.HandlerFunc {
 	svc := adminsearch.New(d.Pool)
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		actor, orgID, _, ok := d.adminSearchAccess(w, r)
 		if !ok {
 			return
@@ -94,11 +89,6 @@ func (d Deps) handleAdminSearchOmnisearch() http.HandlerFunc {
 func (d Deps) handleAdminSearchUsers() http.HandlerFunc {
 	svc := adminsearch.New(d.Pool)
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		actor, orgID, _, ok := d.adminSearchAccess(w, r)
 		if !ok {
 			return
@@ -126,11 +116,6 @@ func (d Deps) handleAdminSearchUsers() http.HandlerFunc {
 func (d Deps) handleAdminSearchCourses() http.HandlerFunc {
 	svc := adminsearch.New(d.Pool)
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		actor, orgID, _, ok := d.adminSearchAccess(w, r)
 		if !ok {
 			return
@@ -158,11 +143,6 @@ func (d Deps) handleAdminSearchCourses() http.HandlerFunc {
 func (d Deps) handleAdminSearchContent() http.HandlerFunc {
 	svc := adminsearch.New(d.Pool)
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		actor, orgID, _, ok := d.adminSearchAccess(w, r)
 		if !ok {
 			return

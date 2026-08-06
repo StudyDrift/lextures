@@ -91,7 +91,7 @@ export default function EvaluationReport() {
     children: React.ReactNode
   }) => (
     <th
-      className="cursor-pointer select-none px-4 py-2 text-left text-xs font-semibold text-slate-500 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+      className="cursor-pointer select-none px-4 py-2 text-left text-xs font-semibold text-fg-muted hover:text-fg-default dark:text-fg-muted dark:hover:text-fg-default"
       onClick={() => handleSort(field)}
     >
       {children}
@@ -104,11 +104,11 @@ export default function EvaluationReport() {
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-xl font-bold text-slate-900 dark:text-neutral-100">
+        <h1 className="text-xl font-bold text-fg-default">
           Evaluation Report
         </h1>
         <div className="flex items-center gap-4">
-          <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-neutral-300">
+          <label className="flex items-center gap-2 text-sm text-fg-muted">
             <input
               type="checkbox"
               checked={closedOnly}
@@ -121,7 +121,7 @@ export default function EvaluationReport() {
             type="button"
             onClick={load}
             disabled={loading}
-            className="rounded-lg bg-indigo-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-60 dark:bg-indigo-500"
+            className="rounded-lg bg-accent-solid px-4 py-1.5 text-sm font-semibold text-white hover:bg-accent disabled:opacity-60 dark:bg-indigo-500"
           >
             {loading ? 'Loading…' : 'Refresh'}
           </button>
@@ -129,17 +129,17 @@ export default function EvaluationReport() {
       </div>
 
       {error && (
-        <p className="mb-4 text-sm text-red-600 dark:text-red-400">{error}</p>
+        <p className="mb-4 text-sm text-danger-fg">{error}</p>
       )}
 
       {!loading && rows.length === 0 ? (
-        <p className="py-16 text-center text-slate-500 dark:text-neutral-400">
+        <p className="py-16 text-center text-fg-muted">
           No evaluation windows found.
         </p>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-700">
+        <div className="overflow-x-auto rounded-xl border border-border-default">
           <table className="min-w-full divide-y divide-slate-200 dark:divide-neutral-700">
-            <thead className="bg-slate-50 dark:bg-neutral-800/50">
+            <thead className="bg-surface-sunken/50">
               <tr>
                 <SortHeader field="courseTitle">Course</SortHeader>
                 <SortHeader field="closesAt">Window</SortHeader>
@@ -148,22 +148,22 @@ export default function EvaluationReport() {
                 <SortHeader field="completionPct">Completion</SortHeader>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 bg-white dark:divide-neutral-800 dark:bg-neutral-900">
+            <tbody className="divide-y divide-slate-100 bg-surface-raised dark:divide-neutral-800 dark:bg-surface-raised">
               {sorted.map((row) => (
-                <tr key={row.windowId} className="hover:bg-slate-50 dark:hover:bg-neutral-800/40">
+                <tr key={row.windowId} className="hover:bg-surface-base dark:hover:bg-neutral-800/40">
                   <td className="px-4 py-3">
-                    <p className="text-sm font-medium text-slate-900 dark:text-neutral-100">
+                    <p className="text-sm font-medium text-fg-default">
                       {row.courseTitle}
                     </p>
-                    <p className="text-xs text-slate-500 dark:text-neutral-400">{row.courseCode}</p>
+                    <p className="text-xs text-fg-muted">{row.courseCode}</p>
                   </td>
-                  <td className="px-4 py-3 text-xs text-slate-600 dark:text-neutral-400">
+                  <td className="px-4 py-3 text-xs text-fg-muted">
                     {formatDate(row.opensAt)} – {formatDate(row.closesAt)}
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-700 dark:text-neutral-300">
+                  <td className="px-4 py-3 text-sm text-fg-muted">
                     {row.responseCount}
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-700 dark:text-neutral-300">
+                  <td className="px-4 py-3 text-sm text-fg-muted">
                     {row.enrolledCount}
                   </td>
                   <td className="px-4 py-3">

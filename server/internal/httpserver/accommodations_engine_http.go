@@ -28,11 +28,6 @@ type accommodationAuditEntryJSON struct {
 
 func (d Deps) handleAccommodationAuditLog() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.requireAccommodationsEngine(w) {
 			return
 		}
@@ -96,11 +91,6 @@ type accommodationImportSummary struct {
 
 func (d Deps) handleAccommodationCSVImport() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			w.Header().Set("Allow", http.MethodPost)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if !d.requireAccommodationsEngine(w) {
 			return
 		}

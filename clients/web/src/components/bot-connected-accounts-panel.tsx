@@ -66,9 +66,9 @@ export function BotConnectedAccountsPanel({ embedded = false }: Props) {
   }
 
   return (
-    <div className={embedded ? '' : 'mt-10 border-t border-slate-200 pt-8 dark:border-neutral-600'}>
-      <h3 className="text-sm font-medium text-slate-700 dark:text-neutral-200">Messaging apps</h3>
-      <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+    <div className={embedded ? '' : 'mt-10 border-t border-border-default pt-8 dark:border-border-default'}>
+      <h3 className="text-sm font-medium text-fg-default">Messaging apps</h3>
+      <p className="mt-1 text-sm text-fg-muted">
         Link Slack or Discord to use <code className="text-xs">/lextures upcoming</code> and receive
         personal due-date reminders.
       </p>
@@ -83,9 +83,9 @@ export function BotConnectedAccountsPanel({ embedded = false }: Props) {
           return (
             <li
               key={platform}
-              className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800/50"
+              className="flex items-center justify-between rounded-lg border border-border-default bg-surface-base px-3 py-2 text-sm dark:border-border-default/50"
             >
-              <span className="font-medium text-slate-800 dark:text-neutral-100">{LABEL[platform]}</span>
+              <span className="font-medium text-fg-default">{LABEL[platform]}</span>
               {linked ? (
                 <button
                   type="button"
@@ -98,7 +98,7 @@ export function BotConnectedAccountsPanel({ embedded = false }: Props) {
               ) : (
                 <button
                   type="button"
-                  className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+                  className="text-sm font-medium text-accent-fg hover:text-indigo-500"
                   disabled={busy === platform}
                   onClick={() => void link(platform)}
                 >

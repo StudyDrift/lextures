@@ -17,7 +17,7 @@ export function WhiteboardPopoverGroup({ trigger, children }: { trigger: ReactNo
       <div onClick={() => setOpen((o) => !o)}>{trigger}</div>
       {open && (
         <div
-          className="absolute left-full top-0 z-50 ml-2 rounded-xl border border-slate-200 bg-white p-2 shadow-lg dark:border-neutral-800 dark:bg-neutral-950"
+          className="absolute left-full top-0 z-50 ml-2 rounded-xl border border-border-default bg-surface-raised p-2 shadow-lg dark:border-border-subtle dark:bg-surface-base"
           onMouseEnter={show}
           onMouseLeave={hide}
         >

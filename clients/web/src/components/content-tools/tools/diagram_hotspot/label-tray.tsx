@@ -34,9 +34,9 @@ export function LabelTray({
     <section
       aria-label={t('contentTools.tools.diagram_hotspot.tray')}
       data-testid="diagram-tray"
-      className="min-h-12 overflow-x-auto rounded border border-dashed border-slate-300 p-2 dark:border-neutral-600"
+      className="min-h-12 overflow-x-auto rounded border border-dashed border-border-strong p-2 dark:border-border-default"
     >
-      <p className="mb-1 text-xs font-medium text-slate-500">
+      <p className="mb-1 text-xs font-medium text-fg-muted">
         {t('contentTools.tools.diagram_hotspot.tray')} ({trayIds.length})
       </p>
       <div className="flex flex-nowrap gap-2 sm:flex-wrap">
@@ -53,17 +53,7 @@ export function LabelTray({
               type="button"
               data-testid={`diagram-label-${id}`}
               draggable={!readOnly && !lockedIds.includes(id)}
-              className={`shrink-0 rounded-full border px-3 py-1 text-sm ${
-                grabbed
-                  ? 'border-sky-600 bg-sky-100 dark:bg-sky-950'
-                  : 'border-slate-300 bg-white dark:border-neutral-600 dark:bg-neutral-900'
-              } ${
-                correctness === true
-                  ? 'ring-2 ring-teal-600'
-                  : correctness === false
-                    ? 'ring-2 ring-rose-500'
-                    : ''
-              }`}
+              className={`shrink-0 rounded-full border px-3 py-1 text-sm ${ grabbed ? 'border-sky-600 bg-sky-100 dark:bg-sky-950' : 'border-border-strong bg-surface-raised dark:border-border-default dark:bg-surface-raised' } ${ correctness === true ? 'ring-2 ring-teal-600' : correctness === false ? 'ring-2 ring-rose-500' : '' }`}
               aria-grabbed={grabbed}
               disabled={readOnly || lockedIds.includes(id)}
               onClick={() => {

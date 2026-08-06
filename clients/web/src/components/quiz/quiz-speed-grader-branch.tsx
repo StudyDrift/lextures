@@ -274,7 +274,7 @@ export function QuizSpeedGraderBranch({
 
   const mainContent =
     rosterLoading || gradingLoading ? (
-      <div className="flex h-full min-h-[40vh] items-center justify-center text-sm text-slate-600 dark:text-neutral-400">
+      <div className="flex h-full min-h-[40vh] items-center justify-center text-sm text-fg-muted">
         Loading…
       </div>
     ) : gradingError ? (
@@ -282,7 +282,7 @@ export function QuizSpeedGraderBranch({
         {gradingError}
       </div>
     ) : !grading || grading.questions.length === 0 ? (
-      <div className="flex h-full min-h-[40vh] items-center justify-center px-4 text-sm text-slate-600 dark:text-neutral-400">
+      <div className="flex h-full min-h-[40vh] items-center justify-center px-4 text-sm text-fg-muted">
         {current?.submittedAt
           ? 'This attempt has no recorded answers to display.'
           : 'No submission from this student yet.'}
@@ -290,7 +290,7 @@ export function QuizSpeedGraderBranch({
     ) : (
       <div className="h-full min-h-[40vh] overflow-y-auto px-4 py-4">
         {grading.score ? (
-          <p className="mb-4 text-sm text-slate-700 dark:text-neutral-200">
+          <p className="mb-4 text-sm text-fg-default">
             Current total: {grading.score.pointsEarned}/{grading.score.pointsPossible} (
             {Math.round(grading.score.scorePercent)}%)
           </p>
@@ -312,20 +312,20 @@ export function QuizSpeedGraderBranch({
 
   const gradingSidebar = (
     <aside
-      className="flex h-full min-h-0 w-full flex-col overflow-y-auto bg-slate-100 dark:bg-neutral-800"
+      className="flex h-full min-h-0 w-full flex-col overflow-y-auto bg-surface-sunken"
       aria-label="Quiz grading"
     >
-      <div className="border-b border-slate-200 px-4 py-3 dark:border-neutral-600">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+      <div className="border-b border-border-default px-4 py-3 dark:border-border-default">
+        <p className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
           Quiz attempt
         </p>
         {current ? (
-          <p className="mt-1 text-sm font-medium text-slate-900 dark:text-neutral-100">
+          <p className="mt-1 text-sm font-medium text-fg-default">
             {current.submittedByDisplayName ?? 'Student'}
           </p>
         ) : null}
         {current?.submittedAt ? (
-          <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
+          <p className="mt-0.5 text-xs text-fg-muted">
             Submitted {formatDateTime(current.submittedAt, { dateStyle: 'medium', timeStyle: 'short' })}
           </p>
         ) : null}
@@ -343,11 +343,11 @@ export function QuizSpeedGraderBranch({
           type="button"
           disabled={saving || canvasSyncPending || !grading || grading.questions.length === 0}
           onClick={() => void saveScores()}
-          className="w-full rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
+          className="w-full rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
         >
           {saving ? 'Saving…' : canvasSyncPending ? 'Syncing to Canvas…' : 'Save scores'}
         </button>
-        <p className="text-xs text-slate-500 dark:text-neutral-400">
+        <p className="text-xs text-fg-muted">
           Enter points per question, then save. Partial credit is supported.
         </p>
       </div>
@@ -380,11 +380,11 @@ export function QuizSpeedGraderBranch({
           role="dialog"
           aria-modal="true"
           aria-labelledby={modalTitleId}
-          className="relative z-10 flex w-full max-w-[min(96vw,1600px)] flex-col overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-[0_24px_80px_-12px_rgba(15,23,42,0.55)] ring-1 ring-slate-900/10 dark:border-neutral-500 dark:bg-neutral-900 dark:shadow-[0_24px_80px_-12px_rgba(0,0,0,0.85)] dark:ring-white/10"
+          className="relative z-10 flex w-full max-w-[min(96vw,1600px)] flex-col overflow-hidden rounded-2xl border border-border-strong bg-surface-raised shadow-[0_24px_80px_-12px_rgba(15,23,42,0.55)] ring-1 ring-slate-900/10 dark:border-neutral-500 dark:bg-surface-raised dark:shadow-[0_24px_80px_-12px_rgba(0,0,0,0.85)] dark:ring-white/10"
           style={{ height: 'min(92vh, 1080px)', maxHeight: 'calc(100dvh - 1.5rem)' }}
         >
-          <div className="flex shrink-0 flex-wrap items-center gap-3 border-b border-slate-200 bg-slate-50 px-4 py-3 dark:border-neutral-600 dark:bg-neutral-800">
-            <h2 id={modalTitleId} className="text-base font-semibold text-slate-900 dark:text-neutral-50">
+          <div className="flex shrink-0 flex-wrap items-center gap-3 border-b border-border-default bg-surface-base px-4 py-3 dark:border-border-default dark:bg-surface-overlay">
+            <h2 id={modalTitleId} className="text-base font-semibold text-fg-default">
               {sectionTitle} — {quizTitle}
             </h2>
             <div className="flex flex-1 flex-wrap items-center justify-end gap-2">{headerNav}</div>
@@ -392,7 +392,7 @@ export function QuizSpeedGraderBranch({
               ref={modalCloseRef}
               type="button"
               onClick={onModalClose}
-              className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+              className="rounded-lg p-1.5 text-fg-muted hover:bg-surface-sunken hover:text-fg-muted dark:text-fg-muted dark:hover:bg-surface-overlay dark:hover:text-fg-default"
               aria-label="Close SpeedGrader"
             >
               <X className="h-5 w-5" />
@@ -407,7 +407,7 @@ export function QuizSpeedGraderBranch({
 
           <ResizableSplitPane
             storageKey="lextures:quiz-grade-sidebar-width"
-            primary={<div className="h-full min-h-[40vh] bg-slate-50 dark:bg-neutral-800/60">{mainContent}</div>}
+            primary={<div className="h-full min-h-[40vh] bg-surface-sunken/60">{mainContent}</div>}
             secondary={gradingSidebar}
           />
         </div>
@@ -420,10 +420,10 @@ export function QuizSpeedGraderBranch({
       id="submission-preview"
       tabIndex={-1}
       aria-label="Quiz SpeedGrader"
-      className="scroll-mt-20 mt-8 space-y-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-neutral-700 dark:bg-neutral-950"
+      className="scroll-mt-20 mt-8 space-y-4 rounded-2xl border border-border-default bg-surface-raised p-4 shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-border-default dark:bg-surface-base"
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-neutral-50">
+        <h2 className="text-lg font-semibold text-fg-default">
           {sectionTitle} — {quizTitle}
         </h2>
         {headerNav}
@@ -436,7 +436,7 @@ export function QuizSpeedGraderBranch({
       <div className="min-h-[min(70vh,720px)]">
         <ResizableSplitPane
           storageKey="lextures:quiz-grade-sidebar-width-inline"
-          primary={<div className="h-full min-h-0 bg-slate-50 dark:bg-neutral-800/60">{mainContent}</div>}
+          primary={<div className="h-full min-h-0 bg-surface-sunken/60">{mainContent}</div>}
           secondary={gradingSidebar}
         />
       </div>
@@ -493,7 +493,7 @@ function QuestionStatusBadge({ status }: { status: QuestionStatus }) {
     unanswered: {
       label: 'Not answered',
       icon: null,
-      className: 'bg-slate-200 text-slate-700 dark:bg-neutral-800 dark:text-neutral-300',
+      className: 'bg-slate-200 text-fg-muted dark:bg-surface-overlay dark:text-fg-muted',
     },
   }
   const { label, className, icon: Icon } = config[status]
@@ -527,25 +527,25 @@ function QuizQuestionGradeCard({
         ? 'border-rose-200 bg-rose-50/40 dark:border-rose-900/50 dark:bg-rose-950/20'
         : status === 'correct'
           ? 'border-emerald-200 bg-emerald-50/40 dark:border-emerald-900/50 dark:bg-emerald-950/20'
-          : 'border-slate-200 bg-white dark:border-neutral-700 dark:bg-neutral-900'
+          : 'border-border-default bg-surface-raised dark:border-border-default dark:bg-surface-raised'
   return (
     <article className={`rounded-xl border p-4 ${cardBorder}`}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="mb-1 flex flex-wrap items-center gap-2">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+            <p className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
               Question {question.questionIndex + 1}
               {questionPointsLabel(question)}
             </p>
             <QuestionStatusBadge status={status} />
           </div>
           {question.promptSnapshot ? (
-            <div className="mt-1 text-sm font-medium text-slate-900 dark:text-neutral-100">
+            <div className="mt-1 text-sm font-medium text-fg-default">
               <MathPlainText text={question.promptSnapshot} />
             </div>
           ) : null}
         </div>
-        <label className="shrink-0 text-xs text-slate-600 dark:text-neutral-400">
+        <label className="shrink-0 text-xs text-fg-muted">
           Score
           <div className="mt-1 flex items-center gap-1">
             <input
@@ -556,14 +556,14 @@ function QuizQuestionGradeCard({
               value={scoreInput}
               onChange={(e) => onScoreChange(e.target.value)}
               data-speed-grader-score="true"
-              className="w-20 rounded-lg border border-slate-200 px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+              className="w-20 rounded-lg border border-border-default px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
             />
-            <span className="text-sm text-slate-500 dark:text-neutral-400">/ {question.maxPoints}</span>
+            <span className="text-sm text-fg-muted">/ {question.maxPoints}</span>
           </div>
         </label>
       </div>
-      <div className="mt-3 rounded-lg border border-slate-100 bg-slate-50/80 p-3 dark:border-neutral-800 dark:bg-neutral-950/60">
-        <p className="mb-1 text-xs font-medium text-slate-500 dark:text-neutral-400">Student answer</p>
+      <div className="mt-3 rounded-lg border border-border-subtle bg-slate-50/80 p-3 dark:border-border-subtle/60">
+        <p className="mb-1 text-xs font-medium text-fg-muted">Student answer</p>
         <QuizResponseDisplay
           responseJson={question.responseJson}
           questionType={question.questionType}

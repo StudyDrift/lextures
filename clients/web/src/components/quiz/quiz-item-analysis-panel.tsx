@@ -74,12 +74,12 @@ export function QuizItemAnalysisPanel({ courseCode, itemId }: Props) {
   return (
     <section
       aria-labelledby="item-analysis-heading"
-      className="mt-6 rounded-2xl border border-slate-200/90 bg-white p-5 dark:border-neutral-600 dark:bg-neutral-950/80"
+      className="mt-6 rounded-2xl border border-slate-200/90 bg-surface-raised p-5 dark:border-border-default/80"
     >
       <div className="flex items-center justify-between gap-4">
         <h2
           id="item-analysis-heading"
-          className="text-base font-semibold text-slate-900 dark:text-neutral-100"
+          className="text-base font-semibold text-fg-default"
         >
           Item Analysis
         </h2>
@@ -89,7 +89,7 @@ export function QuizItemAnalysisPanel({ courseCode, itemId }: Props) {
             onClick={() => void handleCompute()}
             disabled={computing || loading}
             aria-label="Recompute item statistics"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 transition-[background-color,color,border-color] hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-300"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-2.5 py-1.5 text-xs font-medium text-fg-muted transition-[background-color,color,border-color] hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:bg-surface-raised dark:text-fg-muted"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${computing ? 'animate-spin' : ''}`} aria-hidden />
             {computing ? 'Computing…' : 'Recompute'}
@@ -99,7 +99,7 @@ export function QuizItemAnalysisPanel({ courseCode, itemId }: Props) {
               type="button"
               onClick={handleExportCSV}
               aria-label="Export item analysis as CSV"
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-300"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-2.5 py-1.5 text-xs font-medium text-fg-muted transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:bg-surface-raised dark:text-fg-muted"
             >
               <Download className="h-3.5 w-3.5" aria-hidden />
               Export CSV
@@ -115,18 +115,18 @@ export function QuizItemAnalysisPanel({ courseCode, itemId }: Props) {
       )}
 
       {loading && (
-        <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">Loading…</p>
+        <p className="mt-4 text-sm text-fg-muted">Loading…</p>
       )}
 
       {!loading && result?.status === 'insufficient' && (
-        <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">
+        <p className="mt-4 text-sm text-fg-muted">
           Not enough responses yet — at least {result.minimumRequired} are required per question
           (current: {result.nResponses}).
         </p>
       )}
 
       {!loading && result?.status === 'pending' && (
-        <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">
+        <p className="mt-4 text-sm text-fg-muted">
           Statistics are pending — click Recompute to generate them.
         </p>
       )}
@@ -175,14 +175,12 @@ function SummaryCard({
   warn?: boolean
 }) {
   return (
-    <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2.5 dark:border-neutral-700 dark:bg-neutral-900">
-      <dt className="text-[11px] uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+    <div className="rounded-xl border border-border-subtle bg-surface-base px-3 py-2.5 dark:border-border-default dark:bg-surface-raised">
+      <dt className="text-[11px] uppercase tracking-wide text-fg-muted">
         {label}
       </dt>
       <dd
-        className={`mt-0.5 text-lg font-semibold tabular-nums ${
-          warn ? 'text-amber-600 dark:text-amber-400' : 'text-slate-900 dark:text-neutral-100'
-        }`}
+        className={`mt-0.5 text-lg font-semibold tabular-nums ${ warn ? 'text-amber-600 dark:text-amber-400' : 'text-fg-default' }`}
       >
         {value}
       </dd>
@@ -193,7 +191,7 @@ function SummaryCard({
 function ItemStatsTable({ items }: { items: ItemStat[] }) {
   if (items.length === 0) {
     return (
-      <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">No item data available.</p>
+      <p className="mt-4 text-sm text-fg-muted">No item data available.</p>
     )
   }
 
@@ -204,26 +202,26 @@ function ItemStatsTable({ items }: { items: ItemStat[] }) {
           Per-question difficulty, discrimination, distractor breakdown, and quality flags
         </caption>
         <thead>
-          <tr className="border-b border-slate-100 dark:border-neutral-700">
-            <th scope="col" className="pb-2 pe-4 text-start text-xs font-semibold text-slate-500 dark:text-neutral-400">
+          <tr className="border-b border-border-subtle dark:border-border-default">
+            <th scope="col" className="pb-2 pe-4 text-start text-xs font-semibold text-fg-muted">
               #
             </th>
-            <th scope="col" className="pb-2 pe-4 text-start text-xs font-semibold text-slate-500 dark:text-neutral-400">
+            <th scope="col" className="pb-2 pe-4 text-start text-xs font-semibold text-fg-muted">
               Question
             </th>
-            <th scope="col" className="pb-2 pe-4 text-end text-xs font-semibold text-slate-500 dark:text-neutral-400">
+            <th scope="col" className="pb-2 pe-4 text-end text-xs font-semibold text-fg-muted">
               N
             </th>
-            <th scope="col" className="pb-2 pe-4 text-end text-xs font-semibold text-slate-500 dark:text-neutral-400">
+            <th scope="col" className="pb-2 pe-4 text-end text-xs font-semibold text-fg-muted">
               Difficulty (p)
             </th>
-            <th scope="col" className="pb-2 pe-4 text-end text-xs font-semibold text-slate-500 dark:text-neutral-400">
+            <th scope="col" className="pb-2 pe-4 text-end text-xs font-semibold text-fg-muted">
               Discrimination (r<sub>pb</sub>)
             </th>
-            <th scope="col" className="pb-2 pe-4 text-start text-xs font-semibold text-slate-500 dark:text-neutral-400">
+            <th scope="col" className="pb-2 pe-4 text-start text-xs font-semibold text-fg-muted">
               Distractors
             </th>
-            <th scope="col" className="pb-2 text-start text-xs font-semibold text-slate-500 dark:text-neutral-400">
+            <th scope="col" className="pb-2 text-start text-xs font-semibold text-fg-muted">
               Flag
             </th>
           </tr>
@@ -246,19 +244,19 @@ function ItemRow({ item }: { item: ItemStat }) {
 
   return (
     <tr className="py-1.5 align-top">
-      <td className="py-1.5 pe-4 tabular-nums text-slate-500 dark:text-neutral-400">
+      <td className="py-1.5 pe-4 tabular-nums text-fg-muted">
         {item.questionIndex + 1}
       </td>
-      <td className="py-1.5 pe-4 text-slate-700 dark:text-neutral-300" title={item.questionText}>
-        {truncatedText || <span className="italic text-slate-400">No text</span>}
+      <td className="py-1.5 pe-4 text-fg-muted" title={item.questionText}>
+        {truncatedText || <span className="italic text-fg-subtle">No text</span>}
       </td>
-      <td className="py-1.5 pe-4 text-end tabular-nums text-slate-700 dark:text-neutral-300">
+      <td className="py-1.5 pe-4 text-end tabular-nums text-fg-muted">
         {item.nResponses}
       </td>
       <td className="py-1.5 pe-4 text-end">
         <DifficultyBar pValue={item.pValue} />
       </td>
-      <td className="py-1.5 pe-4 text-end tabular-nums text-slate-700 dark:text-neutral-300">
+      <td className="py-1.5 pe-4 text-end tabular-nums text-fg-muted">
         {item.rPb != null ? item.rPb.toFixed(3) : '—'}
       </td>
       <td className="py-1.5 pe-4">
@@ -272,7 +270,7 @@ function ItemRow({ item }: { item: ItemStat }) {
 }
 
 function DifficultyBar({ pValue }: { pValue: number | null }) {
-  if (pValue == null) return <span className="text-slate-400">—</span>
+  if (pValue == null) return <span className="text-fg-subtle">—</span>
 
   const pct = Math.round(pValue * 100)
   const color =
@@ -287,14 +285,14 @@ function DifficultyBar({ pValue }: { pValue: number | null }) {
       <span
         role="img"
         aria-label={`Difficulty ${pct}%`}
-        className="inline-block h-2 w-16 overflow-hidden rounded-full bg-slate-100 dark:bg-neutral-700"
+        className="inline-block h-2 w-16 overflow-hidden rounded-full bg-surface-sunken dark:bg-neutral-700"
       >
         <span
           className={`block h-full rounded-full ${color}`}
           style={{ width: `${pct}%` }}
         />
       </span>
-      <span className="tabular-nums text-slate-700 dark:text-neutral-300">{pct}%</span>
+      <span className="tabular-nums text-fg-muted">{pct}%</span>
     </span>
   )
 }
@@ -310,7 +308,7 @@ const DISTRACTOR_COLORS = [
 ]
 
 function DistractorBar({ freqs }: { freqs: Record<string, number> | null }) {
-  if (!freqs) return <span className="text-slate-400">—</span>
+  if (!freqs) return <span className="text-fg-subtle">—</span>
 
   const entries = DISTRACTOR_LABELS.filter((l) => l in freqs).map((l) => ({
     label: l,
@@ -318,7 +316,7 @@ function DistractorBar({ freqs }: { freqs: Record<string, number> | null }) {
     color: DISTRACTOR_COLORS[DISTRACTOR_LABELS.indexOf(l)] ?? 'bg-slate-400',
   }))
 
-  if (entries.length === 0) return <span className="text-slate-400">—</span>
+  if (entries.length === 0) return <span className="text-fg-subtle">—</span>
 
   return (
     <span className="inline-flex items-center gap-0.5" aria-label={entries.map((e) => `${e.label}: ${e.pct}%`).join(', ')}>
@@ -356,7 +354,7 @@ function FlagBadge({ flag }: { flag: ItemStat['flag'] }) {
         role="img"
         aria-label="Very easy — p > 0.90, consider revising"
         title="Very easy — p > 0.90"
-        className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-1.5 py-0.5 text-[11px] font-medium text-amber-700 dark:bg-amber-950/40 dark:text-amber-400"
+        className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-1.5 py-0.5 text-[11px] font-medium text-warning-fg dark:bg-amber-950/40 dark:text-amber-400"
       >
         <Sun className="h-3 w-3" aria-hidden />
         Very easy

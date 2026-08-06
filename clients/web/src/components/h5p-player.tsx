@@ -99,7 +99,7 @@ export function H5PPlayer({
   return (
     <div ref={containerRef} className="relative min-h-[320px] w-full">
       {!visible ? (
-        <p className="text-sm text-slate-500 dark:text-neutral-400" aria-live="polite">
+        <p className="text-sm text-fg-muted" aria-live="polite">
           {h5pI18n.loading}
         </p>
       ) : (
@@ -108,7 +108,7 @@ export function H5PPlayer({
           aria-labelledby={labelId}
           src={renderUrl}
           sandbox="allow-scripts allow-same-origin"
-          className="h-[min(70vh,640px)] w-full rounded-xl border border-slate-200/80 bg-white dark:border-neutral-600 dark:bg-neutral-900"
+          className="h-[min(70vh,640px)] w-full rounded-xl border border-slate-200/80 bg-surface-raised dark:border-border-default dark:bg-surface-raised"
           onError={() => setLoadError(true)}
         />
       )}

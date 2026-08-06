@@ -66,11 +66,6 @@ func getQuizGamePeer(id uuid.UUID) (quizGamePeerMeta, bool) {
 // First message: {"authToken":"...","role":"host"|"projector"|"player","playerToken":"..."}.
 func (d Deps) handleQuizGameWS() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.JWTSigner == nil || d.Pool == nil {
 			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "server misconfiguration")
 			return

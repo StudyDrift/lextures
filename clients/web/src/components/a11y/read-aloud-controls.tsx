@@ -108,7 +108,7 @@ export function ReadAloudControls({ lang = 'en-US' }: ReadAloudControlsProps) {
           setExpanded(true)
           tts.toggle()
         }}
-        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
+        className="inline-flex items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-xs font-medium text-fg-muted shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700"
         aria-label={playing ? 'Pause read aloud' : 'Read aloud'}
         aria-pressed={playing}
       >
@@ -121,11 +121,11 @@ export function ReadAloudControls({ lang = 'en-US' }: ReadAloudControlsProps) {
           data-read-aloud-controls
           role="toolbar"
           aria-label="Read aloud controls"
-          className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 px-4 py-3 shadow-lg backdrop-blur dark:border-neutral-700 dark:bg-neutral-950/95"
+          className="fixed inset-x-0 bottom-0 z-40 border-t border-border-default bg-white/95 px-4 py-3 shadow-lg backdrop-blur dark:border-border-default/95"
         >
           <div className="mx-auto flex max-w-3xl flex-wrap items-center gap-3">
             {accommodationTts && prefsLoaded ? (
-              <p className="w-full text-xs text-indigo-700 dark:text-indigo-300">
+              <p className="w-full text-xs text-accent-fg">
                 Reading enabled by your accommodation plan
               </p>
             ) : null}
@@ -140,7 +140,7 @@ export function ReadAloudControls({ lang = 'en-US' }: ReadAloudControlsProps) {
               aria-pressed={playing}
               aria-keyshortcuts="Alt+P"
               onClick={() => tts.toggle()}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-accent-solid px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
             >
               <IconSwap active={playing} activeIcon={Pause} inactiveIcon={Play} iconClassName="h-4 w-4" />
               {playing ? 'Pause' : 'Play'}
@@ -149,12 +149,12 @@ export function ReadAloudControls({ lang = 'en-US' }: ReadAloudControlsProps) {
               type="button"
               aria-label="Restart read aloud"
               onClick={() => tts.restart()}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-100 dark:hover:bg-neutral-800"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border-strong px-3 py-2 text-sm font-semibold text-fg-default hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
             >
               <RotateCcw className="h-4 w-4" aria-hidden />
               Restart
             </button>
-            <label className="inline-flex items-center gap-2 text-sm text-slate-700 dark:text-neutral-200">
+            <label className="inline-flex items-center gap-2 text-sm text-fg-default">
               <span className="sr-only">Reading speed</span>
               <span aria-hidden>Speed</span>
               <select
@@ -165,7 +165,7 @@ export function ReadAloudControls({ lang = 'en-US' }: ReadAloudControlsProps) {
                   void persistSpeed(next)
                   tts.setSpeed(next)
                 }}
-                className="rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+                className="rounded-lg border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-overlay"
               >
                 {TTS_SPEED_OPTIONS.map((s) => (
                   <option key={s} value={String(s)}>
@@ -175,13 +175,13 @@ export function ReadAloudControls({ lang = 'en-US' }: ReadAloudControlsProps) {
               </select>
             </label>
             {voiceOptions.length > 0 ? (
-              <label className="inline-flex min-w-0 flex-1 items-center gap-2 text-sm text-slate-700 dark:text-neutral-200">
+              <label className="inline-flex min-w-0 flex-1 items-center gap-2 text-sm text-fg-default">
                 <span className="shrink-0">Voice</span>
                 <select
                   aria-label="Voice"
                   value={voiceName ?? ''}
                   onChange={(e) => void onVoiceChange(e.target.value)}
-                  className="min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+                  className="min-w-0 flex-1 rounded-lg border border-border-strong bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-overlay"
                 >
                   <option value="">System default</option>
                   {voiceOptions.map((v) => (
@@ -193,7 +193,7 @@ export function ReadAloudControls({ lang = 'en-US' }: ReadAloudControlsProps) {
               </label>
             ) : null}
             {tts.sentenceCount > 0 ? (
-              <span className="text-xs text-slate-500 dark:text-neutral-400" aria-live="polite">
+              <span className="text-xs text-fg-muted" aria-live="polite">
                 Sentence {Math.min(tts.sentenceIndex + 1, tts.sentenceCount)} of {tts.sentenceCount}
               </span>
             ) : null}

@@ -191,10 +191,10 @@ export function ToolResetDialog({
       aria-labelledby="tool-reset-title"
       data-testid="tool-reset-dialog"
     >
-      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-t-2xl border border-slate-200 bg-white p-4 shadow-xl sm:rounded-lg dark:border-neutral-700 dark:bg-neutral-900">
+      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-t-2xl border border-border-default bg-surface-raised p-4 shadow-xl sm:rounded-lg dark:border-border-default dark:bg-surface-raised">
         <h2
           id="tool-reset-title"
-          className="text-sm font-semibold text-slate-900 dark:text-neutral-100"
+          className="text-sm font-semibold text-fg-default"
         >
           {t('contentTools.reset.dialogTitle')}
         </h2>
@@ -207,17 +207,17 @@ export function ToolResetDialog({
             allowCourse
           />
           <label className="block text-sm">
-            <span className="text-xs font-medium text-slate-600 dark:text-neutral-400">
+            <span className="text-xs font-medium text-fg-muted">
               {t('contentTools.reset.reasonLabel')}
             </span>
             <textarea
-              className="mt-1 w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+              className="mt-1 w-full rounded-md border border-border-default bg-surface-raised px-2 py-1.5 text-sm dark:border-border-default dark:bg-surface-base"
               rows={2}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
             />
           </label>
-          <label className="flex items-center gap-2 text-sm text-slate-800 dark:text-neutral-200">
+          <label className="flex items-center gap-2 text-sm text-fg-default">
             <input
               type="checkbox"
               checked={notify}
@@ -226,10 +226,10 @@ export function ToolResetDialog({
             {t('contentTools.reset.notifyLabel')}
           </label>
           <fieldset className="space-y-1 text-sm">
-            <legend className="text-xs font-medium text-slate-600 dark:text-neutral-400">
+            <legend className="text-xs font-medium text-fg-muted">
               {t('contentTools.reset.postHandlingLabel')}
             </legend>
-            <label className="flex items-start gap-2 text-slate-800 dark:text-neutral-200">
+            <label className="flex items-start gap-2 text-fg-default">
               <input
                 type="radio"
                 name="postHandling"
@@ -238,7 +238,7 @@ export function ToolResetDialog({
               />
               <span>{t('contentTools.reset.postHandlingKeep')}</span>
             </label>
-            <label className="flex items-start gap-2 text-slate-800 dark:text-neutral-200">
+            <label className="flex items-start gap-2 text-fg-default">
               <input
                 type="radio"
                 name="postHandling"
@@ -249,10 +249,10 @@ export function ToolResetDialog({
             </label>
           </fieldset>
           <fieldset className="space-y-2 text-xs">
-            <legend className="font-medium text-slate-700 dark:text-neutral-300">
+            <legend className="font-medium text-fg-muted">
               {t('contentTools.reset.schedulingHandlingLabel')}
             </legend>
-            <label className="flex items-start gap-2 text-slate-800 dark:text-neutral-200">
+            <label className="flex items-start gap-2 text-fg-default">
               <input
                 type="radio"
                 name="schedulingHandling"
@@ -261,7 +261,7 @@ export function ToolResetDialog({
               />
               <span>{t('contentTools.reset.schedulingHandlingKeep')}</span>
             </label>
-            <label className="flex items-start gap-2 text-slate-800 dark:text-neutral-200">
+            <label className="flex items-start gap-2 text-fg-default">
               <input
                 type="radio"
                 name="schedulingHandling"
@@ -284,7 +284,7 @@ export function ToolResetDialog({
                 {t('contentTools.reset.typeToConfirm')}
               </span>
               <input
-                className="mt-1 w-full rounded-md border border-rose-300 px-2 py-1.5 text-sm dark:border-rose-800 dark:bg-neutral-950"
+                className="mt-1 w-full rounded-md border border-rose-300 px-2 py-1.5 text-sm dark:border-rose-800 dark:bg-surface-base"
                 value={confirmText}
                 onChange={(e) => setConfirmText(e.target.value)}
                 autoComplete="off"
@@ -311,7 +311,7 @@ export function ToolResetDialog({
           <button
             type="button"
             autoFocus
-            className="rounded-md border border-slate-200 px-3 py-1.5 text-xs font-medium dark:border-neutral-600"
+            className="rounded-md border border-border-default px-3 py-1.5 text-xs font-medium dark:border-border-default"
             onClick={onClose}
             disabled={busy && !jobId}
           >

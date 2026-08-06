@@ -58,11 +58,6 @@ func broadcastFilesChanged(courseCode string) {
 // Sends {"type":"files_changed"} to all connected clients when a file or folder mutation occurs.
 func (d Deps) handleCourseFilesWS() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if d.JWTSigner == nil || d.Pool == nil {
 			http.Error(w, "server misconfiguration", http.StatusServiceUnavailable)
 			return

@@ -126,8 +126,8 @@ export default function PrivacyCentrePage() {
   if (!gdprModuleEnabled) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-neutral-50">Privacy Center</h1>
-        <p className="mt-2 text-sm text-slate-500 dark:text-neutral-400">
+        <h1 className="text-2xl font-bold text-fg-default">Privacy Center</h1>
+        <p className="mt-2 text-sm text-fg-muted">
           Privacy features are not enabled for this platform. Contact your system administrator.
         </p>
       </div>
@@ -137,15 +137,15 @@ export default function PrivacyCentrePage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-8 space-y-8">
       <header>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-neutral-50">Privacy Center</h1>
-        <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+        <h1 className="text-2xl font-bold text-fg-default">Privacy Center</h1>
+        <p className="mt-1 text-sm text-fg-muted">
           Manage your data rights under GDPR / UK GDPR. You can view and withdraw consents, and
           request a copy or deletion of your personal data.
         </p>
       </header>
 
       {error && (
-        <div role="alert" className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
+        <div role="alert" className="rounded-md bg-red-50 px-4 py-3 text-sm text-danger-fg dark:bg-red-950 dark:text-red-300">
           {error}
         </div>
       )}
@@ -158,18 +158,18 @@ export default function PrivacyCentrePage() {
 
       {/* Consent management */}
       <section aria-labelledby="consents-heading">
-        <h2 id="consents-heading" className="text-lg font-semibold text-slate-800 dark:text-neutral-100 mb-3">
+        <h2 id="consents-heading" className="text-lg font-semibold text-fg-default mb-3">
           Active Consents
         </h2>
         {consents.length === 0 ? (
-          <p className="text-sm text-slate-500 dark:text-neutral-400">No consent records found.</p>
+          <p className="text-sm text-fg-muted">No consent records found.</p>
         ) : (
-          <ul className="divide-y divide-slate-200 dark:divide-neutral-800 border border-slate-200 dark:border-neutral-800 rounded-lg overflow-hidden">
+          <ul className="divide-y divide-slate-200 dark:divide-neutral-800 border border-border-default dark:border-border-subtle rounded-lg overflow-hidden">
             {consents.map((c) => (
-              <li key={c.id} className="flex items-center justify-between px-4 py-3 bg-white dark:bg-neutral-900">
+              <li key={c.id} className="flex items-center justify-between px-4 py-3 bg-surface-raised">
                 <div>
-                  <p className="text-sm font-medium text-slate-900 dark:text-neutral-50">{purposeLabel(c.purpose)}</p>
-                  <p className="text-xs text-slate-500 dark:text-neutral-400">
+                  <p className="text-sm font-medium text-fg-default">{purposeLabel(c.purpose)}</p>
+                  <p className="text-xs text-fg-muted">
                     Basis: {c.lawfulBasis} · Version {c.consentVersion} ·{' '}
                     {c.withdrawnAt ? (
                       <span className="text-amber-600 dark:text-amber-400">Withdrawn {formatDate(c.withdrawnAt, { dateStyle: 'medium' })}</span>
@@ -183,7 +183,7 @@ export default function PrivacyCentrePage() {
                     type="button"
                     disabled={submitting}
                     onClick={() => withdrawConsent(c.id)}
-                    className="ms-4 shrink-0 rounded-md border border-slate-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-neutral-200 hover:bg-slate-50 dark:hover:bg-neutral-800 disabled:opacity-50"
+                    className="ms-4 shrink-0 rounded-md border border-border-strong bg-surface-raised px-3 py-1.5 text-xs font-medium text-fg-default hover:bg-surface-base dark:hover:bg-surface-overlay disabled:opacity-50"
                   >
                     Withdraw
                   </button>
@@ -196,19 +196,19 @@ export default function PrivacyCentrePage() {
 
       {/* DSAR form */}
       <section aria-labelledby="dsar-heading">
-        <h2 id="dsar-heading" className="text-lg font-semibold text-slate-800 dark:text-neutral-100 mb-3">
+        <h2 id="dsar-heading" className="text-lg font-semibold text-fg-default mb-3">
           Submit a Data Request
         </h2>
-        <form onSubmit={submitDSAR} className="rounded-lg border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4 space-y-4">
+        <form onSubmit={submitDSAR} className="rounded-lg border border-border-default dark:border-border-subtle bg-surface-raised p-4 space-y-4">
           <div>
-            <label htmlFor="dsar-type" className="block text-sm font-medium text-slate-700 dark:text-neutral-300 mb-1">
+            <label htmlFor="dsar-type" className="block text-sm font-medium text-fg-muted mb-1">
               Request type
             </label>
             <select
               id="dsar-type"
               value={dsarType}
               onChange={(e) => setDsarType(e.target.value)}
-              className="block w-full rounded-md border border-slate-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-2 py-1.5 text-sm text-slate-900 dark:text-neutral-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="block w-full rounded-md border border-border-strong bg-surface-raised px-2 py-1.5 text-sm text-fg-default focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               <option value="access">Access (download my data)</option>
               <option value="portability">Portability (machine-readable export)</option>
@@ -218,13 +218,13 @@ export default function PrivacyCentrePage() {
               <option value="objection">Objection (object to processing)</option>
             </select>
           </div>
-          <p className="text-xs text-slate-500 dark:text-neutral-400">
+          <p className="text-xs text-fg-muted">
             We will respond within 30 calendar days in accordance with GDPR Article 12(3).
           </p>
           <button
             type="submit"
             disabled={submitting}
-            className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
+            className="rounded-md bg-accent-solid px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
           >
             {submitting ? 'Submitting…' : 'Submit Request'}
           </button>
@@ -234,25 +234,19 @@ export default function PrivacyCentrePage() {
       {/* Existing DSARs */}
       {dsars.length > 0 && (
         <section aria-labelledby="dsar-history-heading">
-          <h2 id="dsar-history-heading" className="text-lg font-semibold text-slate-800 dark:text-neutral-100 mb-3">
+          <h2 id="dsar-history-heading" className="text-lg font-semibold text-fg-default mb-3">
             Your Requests
           </h2>
-          <ul className="divide-y divide-slate-200 dark:divide-neutral-800 border border-slate-200 dark:border-neutral-800 rounded-lg overflow-hidden">
+          <ul className="divide-y divide-slate-200 dark:divide-neutral-800 border border-border-default dark:border-border-subtle rounded-lg overflow-hidden">
             {dsars.map((r) => (
-              <li key={r.id} className="flex items-center justify-between px-4 py-3 bg-white dark:bg-neutral-900">
+              <li key={r.id} className="flex items-center justify-between px-4 py-3 bg-surface-raised">
                 <div>
-                  <p className="text-sm font-medium capitalize text-slate-900 dark:text-neutral-50">{r.requestType}</p>
-                  <p className="text-xs text-slate-500 dark:text-neutral-400">
+                  <p className="text-sm font-medium capitalize text-fg-default">{r.requestType}</p>
+                  <p className="text-xs text-fg-muted">
                     Submitted {formatDate(r.requestedAt, { dateStyle: 'medium' })} · Due {formatDate(r.dueAt, { dateStyle: 'medium' })}
                   </p>
                 </div>
-                <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                  r.status === 'completed'
-                    ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
-                    : r.status === 'rejected'
-                    ? 'bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300'
-                    : 'bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300'
-                }`}>
+                <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${ r.status === 'completed' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' : r.status === 'rejected' ? 'bg-red-50 text-danger-fg dark:bg-red-950 dark:text-red-300' : 'bg-amber-50 text-warning-fg dark:bg-amber-950 dark:text-amber-300' }`}>
                   {r.status}
                 </span>
               </li>

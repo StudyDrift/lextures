@@ -21,10 +21,6 @@ import (
 // handleAdaptiveContentUnitProfileGet is GET .../units/{unit_id}/profile (student own).
 func (d Deps) handleAdaptiveContentUnitProfileGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return
@@ -104,10 +100,6 @@ func (d Deps) handleAdaptiveContentUnitProfileGet() http.HandlerFunc {
 // handleAdaptiveContentUnitProfilesGet is GET .../units/{unit_id}/profiles (instructor cohort).
 func (d Deps) handleAdaptiveContentUnitProfilesGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		courseCode, _, ok := d.requireCourseItemCreate(w, r)
 		if !ok {
 			return
@@ -167,10 +159,6 @@ func (d Deps) handleAdaptiveContentUnitProfilesGet() http.HandlerFunc {
 // Creates an adaptive quiz under the unit's module, seeded from base content, and binds it as pre-assessment.
 func (d Deps) handleAdaptiveContentPreCheckGenerate() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
 		if acsvc.KillSwitchEngaged() {
 			writeACEKillSwitch(w)
 			return

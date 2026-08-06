@@ -72,24 +72,24 @@ export function LearningGoalsPanel() {
   }
 
   return (
-    <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-      <h3 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Learning goals</h3>
-      <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+    <section className="mt-8 rounded-2xl border border-border-default bg-surface-raised p-6 shadow-sm dark:border-border-default dark:bg-surface-raised">
+      <h3 className="text-base font-semibold text-fg-default">Learning goals</h3>
+      <p className="mt-1 text-sm text-fg-muted">
         Update what you want to learn and your daily study target.
       </p>
       {loading ? (
-        <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">Loading…</p>
+        <p className="mt-4 text-sm text-fg-muted">Loading…</p>
       ) : (
         <form onSubmit={(e) => void onSubmit(e)} className="mt-4 space-y-4">
           <div>
-            <label htmlFor="goals-topic" className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+            <label htmlFor="goals-topic" className="block text-sm font-medium text-fg-muted">
               Topic
             </label>
             <select
               id="goals-topic"
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+              className="mt-1 w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
             >
               <option value="">Select a topic</option>
               {ONBOARDING_TOPICS.map((t) => (
@@ -100,7 +100,7 @@ export function LearningGoalsPanel() {
             </select>
           </div>
           <div>
-            <label htmlFor="goals-text" className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+            <label htmlFor="goals-text" className="block text-sm font-medium text-fg-muted">
               Goal
             </label>
             <input
@@ -109,12 +109,12 @@ export function LearningGoalsPanel() {
               value={goalText}
               onChange={(e) => setGoalText(e.target.value)}
               placeholder="e.g. I want to learn Python by July"
-              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+              className="mt-1 w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
             />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="goals-date" className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+              <label htmlFor="goals-date" className="block text-sm font-medium text-fg-muted">
                 Target date
               </label>
               <input
@@ -122,11 +122,11 @@ export function LearningGoalsPanel() {
                 type="date"
                 value={targetDate}
                 onChange={(e) => setTargetDate(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                className="mt-1 w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
               />
             </div>
             <div>
-              <label htmlFor="goals-minutes" className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+              <label htmlFor="goals-minutes" className="block text-sm font-medium text-fg-muted">
                 Daily minutes
               </label>
               <input
@@ -136,12 +136,12 @@ export function LearningGoalsPanel() {
                 max={480}
                 value={dailyMinutes}
                 onChange={(e) => setDailyMinutes(Number(e.target.value))}
-                className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                className="mt-1 w-full rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
               />
             </div>
           </div>
           <fieldset>
-            <legend className="text-sm font-medium text-slate-700 dark:text-neutral-300">Experience level</legend>
+            <legend className="text-sm font-medium text-fg-muted">Experience level</legend>
             <div className="mt-2 flex flex-wrap gap-2">
               {(
                 [
@@ -152,11 +152,7 @@ export function LearningGoalsPanel() {
               ).map(([value, label]) => (
                 <label
                   key={value}
-                  className={`cursor-pointer rounded-full border px-3 py-1.5 text-sm ${
-                    priorLevel === value
-                      ? 'border-indigo-600 bg-indigo-50 text-indigo-800 dark:border-indigo-400 dark:bg-indigo-950 dark:text-indigo-100'
-                      : 'border-slate-200 text-slate-700 dark:border-neutral-600 dark:text-neutral-300'
-                  }`}
+                  className={`cursor-pointer rounded-full border px-3 py-1.5 text-sm ${ priorLevel === value ? 'border-indigo-600 bg-indigo-50 text-indigo-800 dark:border-indigo-400 dark:bg-indigo-950 dark:text-indigo-100' : 'border-border-default text-fg-muted dark:border-border-default dark:text-fg-muted' }`}
                 >
                   <input
                     type="radio"
@@ -172,14 +168,14 @@ export function LearningGoalsPanel() {
             </div>
           </fieldset>
           {goals?.recommendedCourseTitle ? (
-            <p className="text-xs text-slate-500 dark:text-neutral-400">
+            <p className="text-xs text-fg-muted">
               Recommended course: {goals.recommendedCourseTitle}
             </p>
           ) : null}
           <button
             type="submit"
             disabled={saving}
-            className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+            className="rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
           >
             {saving ? 'Saving…' : 'Save goals'}
           </button>

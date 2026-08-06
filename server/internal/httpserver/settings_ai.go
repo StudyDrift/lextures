@@ -17,15 +17,6 @@ import (
 // handleListAIModels is GET /api/v1/settings/ai/models?provider=&kind=text|image|vision
 func (d Deps) handleListAIModels() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
@@ -134,15 +125,6 @@ func (d Deps) platformAPIKeyForCatalog(ctx context.Context, provider aiprovider.
 // handleGetSettingsAI is GET /api/v1/settings/ai
 func (d Deps) handleGetSettingsAI() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		uid, ok := d.adminRbacUser(w, r)
 		if !ok {
 			return
@@ -202,15 +184,6 @@ type putSettingsAIBody struct {
 // handlePutSettingsAI is PUT /api/v1/settings/ai
 func (d Deps) handlePutSettingsAI() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if r.Method != http.MethodPut {
-			w.Header().Set("Allow", http.MethodPut+","+http.MethodOptions)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		uid, ok := d.adminRbacUser(w, r)
 		if !ok {
 			return

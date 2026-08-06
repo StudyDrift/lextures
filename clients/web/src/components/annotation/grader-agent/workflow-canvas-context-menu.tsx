@@ -21,7 +21,7 @@ function menuItemClass(destructive?: boolean) {
   if (destructive) {
     return 'block w-full px-3 py-2 text-start text-sm text-rose-700 hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-950/30'
   }
-  return 'block w-full px-3 py-2 text-start text-sm text-slate-800 hover:bg-slate-100 dark:text-neutral-100 dark:hover:bg-neutral-800'
+  return 'block w-full px-3 py-2 text-start text-sm text-fg-default hover:bg-surface-sunken dark:text-fg-default dark:hover:bg-surface-overlay'
 }
 
 function defaultLabelForNodeType(type: string, t: TFunction): string {
@@ -196,7 +196,7 @@ export function WorkflowCanvasContextMenu({
       ref={panelRef}
       role="menu"
       aria-label={ariaLabel}
-      className="fixed z-[560] min-w-[12rem] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-900"
+      className="fixed z-[560] min-w-[12rem] overflow-hidden rounded-xl border border-border-default bg-surface-raised py-1 shadow-lg shadow-slate-900/10 dark:border-border-default dark:bg-surface-raised"
       style={{ top: menu.top, left: menu.left }}
     >
       {regularItems.map((item) => (
@@ -211,7 +211,7 @@ export function WorkflowCanvasContextMenu({
         </button>
       ))}
       {regularItems.length > 0 && destructiveItems.length > 0 ? (
-        <div className="my-1 border-t border-slate-100 dark:border-neutral-800" role="separator" aria-hidden />
+        <div className="my-1 border-t border-border-subtle" role="separator" aria-hidden />
       ) : null}
       {destructiveItems.map((item) => (
         <button

@@ -106,15 +106,15 @@ export default function MyCCR() {
       <main aria-labelledby={titleId}>
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 id={titleId} className="text-2xl font-semibold text-slate-900 dark:text-neutral-100">
+            <h1 id={titleId} className="text-2xl font-semibold text-fg-default">
               Comprehensive Learner Record
             </h1>
-            <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+            <p className="mt-1 text-sm text-fg-muted">
               Generate a verifiable record of your courses, badges, and co-curricular achievements.
             </p>
           </div>
           <div className="flex flex-col items-end gap-2">
-            <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-neutral-300">
+            <label className="flex items-center gap-2 text-sm text-fg-muted">
               <input
                 type="checkbox"
                 checked={sharePublicly}
@@ -140,28 +140,28 @@ export default function MyCCR() {
           </p>
         ) : null}
 
-        {loading ? <p className="mt-6 text-sm text-slate-600">Loading achievements…</p> : null}
+        {loading ? <p className="mt-6 text-sm text-fg-muted">Loading achievements…</p> : null}
 
         {!loading && achievements.length === 0 ? (
-          <p className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-700 dark:border-neutral-700 dark:bg-neutral-900/50 dark:text-neutral-200">
+          <p className="mt-6 rounded-2xl border border-border-default bg-surface-base px-4 py-6 text-sm text-fg-muted dark:border-border-default/50 dark:text-fg-default">
             Complete courses and earn badges to build your CCR.
           </p>
         ) : null}
 
         {Object.entries(grouped).map(([type, items]) => (
           <section key={type} className="mt-8" aria-label={type}>
-            <h2 className="text-lg font-semibold capitalize text-slate-900 dark:text-neutral-100">{type}</h2>
+            <h2 className="text-lg font-semibold capitalize text-fg-default">{type}</h2>
             <ul className="mt-3 space-y-2">
               {items.map((item) => (
                 <li
                   key={item.id}
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-neutral-700 dark:bg-neutral-900"
+                  className="rounded-xl border border-border-default bg-surface-raised px-4 py-3 dark:border-border-default dark:bg-surface-raised"
                 >
-                  <p className="font-medium text-slate-900 dark:text-neutral-100">{item.title}</p>
+                  <p className="font-medium text-fg-default">{item.title}</p>
                   {item.description ? (
-                    <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">{item.description}</p>
+                    <p className="mt-1 text-sm text-fg-muted">{item.description}</p>
                   ) : null}
-                  <p className="mt-1 text-xs text-slate-500 dark:text-neutral-500">{item.issuedAt}</p>
+                  <p className="mt-1 text-xs text-fg-subtle">{item.issuedAt}</p>
                 </li>
               ))}
             </ul>
@@ -170,19 +170,19 @@ export default function MyCCR() {
 
         {documents.length > 0 ? (
           <section className="mt-10" aria-label="Generated records">
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-neutral-100">Generated records</h2>
+            <h2 className="text-lg font-semibold text-fg-default">Generated records</h2>
             <ul className="mt-3 space-y-3">
               {documents.map((doc) => (
                 <li
                   key={doc.id}
-                  className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-neutral-700 dark:bg-neutral-900"
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border-default bg-surface-raised px-4 py-3 dark:border-border-default dark:bg-surface-raised"
                 >
                   <div>
-                    <p className="font-medium text-slate-900 dark:text-neutral-100">{doc.generatedAt}</p>
+                    <p className="font-medium text-fg-default">{doc.generatedAt}</p>
                     {doc.shareable && doc.verificationUrl ? (
-                      <p className="mt-1 text-xs text-slate-500 break-all">{doc.verificationUrl}</p>
+                      <p className="mt-1 text-xs text-fg-muted break-all">{doc.verificationUrl}</p>
                     ) : (
-                      <p className="mt-1 text-xs text-slate-500">Private — no public verification link</p>
+                      <p className="mt-1 text-xs text-fg-muted">Private — no public verification link</p>
                     )}
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -190,7 +190,7 @@ export default function MyCCR() {
                       type="button"
                       aria-label="Download CCR JSON"
                       onClick={() => void handleDownload(doc.id, 'json')}
-                      className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-sm hover:bg-slate-50 dark:border-neutral-600 dark:hover:bg-neutral-800"
+                      className="inline-flex items-center gap-1 rounded-lg border border-border-default px-3 py-1.5 text-sm hover:bg-surface-base dark:border-border-default dark:hover:bg-surface-overlay"
                     >
                       <Download className="h-4 w-4" aria-hidden />
                       JSON
@@ -199,7 +199,7 @@ export default function MyCCR() {
                       type="button"
                       aria-label="Download CCR PDF"
                       onClick={() => void handleDownload(doc.id, 'pdf')}
-                      className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-sm hover:bg-slate-50 dark:border-neutral-600 dark:hover:bg-neutral-800"
+                      className="inline-flex items-center gap-1 rounded-lg border border-border-default px-3 py-1.5 text-sm hover:bg-surface-base dark:border-border-default dark:hover:bg-surface-overlay"
                     >
                       <Download className="h-4 w-4" aria-hidden />
                       PDF
@@ -223,7 +223,7 @@ export default function MyCCR() {
         ) : null}
 
         {copiedUrl ? (
-          <p role="status" className="mt-4 text-sm text-green-700 dark:text-green-300">
+          <p role="status" className="mt-4 text-sm text-success-fg dark:text-green-300">
             Verification link ready:{' '}
             <Link to={copiedUrl.replace(/^https?:\/\/[^/]+/, '')} className="underline">
               open verify page
