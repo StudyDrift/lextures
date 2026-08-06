@@ -3,6 +3,7 @@ package coursestructure
 import (
 	"context"
 	"fmt"
+	"strings"
 	"os"
 	"testing"
 	"time"
@@ -34,7 +35,7 @@ func TestApplyModuleAndChildOrder_TopLevelNonModuleNoCollision(t *testing.T) {
 	}
 	defer pool.Close()
 
-	em := "cstruct-reorder-top-" + time.Now().Format("20060102150405") + "@e.com"
+	em := "cstruct-reorder-top-" + uuid.New().String() + "@e.com"
 	ph, err := auth.HashPassword("longpassword0")
 	if err != nil {
 		t.Fatalf("hash: %v", err)
@@ -45,7 +46,7 @@ func TestApplyModuleAndChildOrder_TopLevelNonModuleNoCollision(t *testing.T) {
 	}
 	uid, _ := uuid.Parse(row.ID)
 	var courseID uuid.UUID
-	cc := fmt.Sprintf("C-R%05d", time.Now().UnixNano()%100000)
+	cc := fmt.Sprintf("C-%s", strings.ToUpper(strings.ReplaceAll(uuid.New().String(), "-", "")[:6]))
 	if err := pool.QueryRow(ctx, `
 INSERT INTO course.courses (course_code, title, created_by_user_id) VALUES ($1, 'Reorder top-level', $2) RETURNING id
 `, cc, uid).Scan(&courseID); err != nil {
