@@ -3,17 +3,23 @@
  * UX.2 AC-9 — every core barrel export must appear in the component gallery
  * (imported or rendered). Gallery imports satisfy "≥1 importer outside ui/".
  */
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import { join, dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const webRoot = resolve(__dirname, '..')
 const barrelPath = join(webRoot, 'src/components/ui/index.ts')
-const galleryPath = join(webRoot, 'src/pages/design/components-gallery.tsx')
+const galleryDir = join(webRoot, 'src/pages/design')
+const galleryEntryPath = join(galleryDir, 'components-gallery.tsx')
 
 const barrel = readFileSync(barrelPath, 'utf8')
-const gallery = readFileSync(galleryPath, 'utf8')
+// Page shell + demos (and helpers) under /design — split for file-size budgets.
+const galleryFiles = readdirSync(galleryDir)
+  .filter((n) => n.endsWith('.tsx') && (n.startsWith('components-gallery') || n === 'gallery-block.tsx'))
+  .map((n) => join(galleryDir, n))
+const gallery = galleryFiles.map((p) => readFileSync(p, 'utf8')).join('\n')
+const galleryEntry = readFileSync(galleryEntryPath, 'utf8')
 
 const exportNames = new Set()
 for (const line of barrel.split('\n')) {
@@ -66,8 +72,14 @@ const components = [...exportNames].filter((n) => !SKIP.has(n) && !isTypeName(n)
 
 const failures = []
 
-if (!gallery.includes("from '../../components/ui'") && !gallery.includes('from "../../components/ui"')) {
-  failures.push('Gallery must import from components/ui barrel')
+const hasUiImport =
+  /from ['"]\.\.\/\.\.\/components\/ui['"]/.test(gallery) ||
+  /from ['"]\.\.\/\.\.\/components\/ui\/index['"]/.test(gallery)
+if (!hasUiImport) {
+  failures.push('Gallery must import from components/ui barrel (entry or demos)')
+}
+if (!galleryEntry.includes('ComponentsGalleryDemos') && !galleryEntry.includes("from '../../components/ui'")) {
+  failures.push('components-gallery.tsx must wire demos or import ui barrel directly')
 }
 
 for (const name of components) {

@@ -2,10 +2,20 @@
   "description": "UX.2 raw interactive allowlist (FR-11). Per-file counts may only decrease. Empty when migration complete (AC-2).",
   "generatedAt": "2026-08-06T04:30:30.830Z",
   "files": {
-    "src/components/a11y/read-aloud-controls.tsx": {
-      "rawButton": 3,
+    "src/components/ImpersonationBanner.tsx": {
+      "rawButton": 1,
       "rawInput": 0,
-      "rawSelect": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/StatusBanner.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
       "rawTextarea": 0,
       "roleDialog": 0,
       "roleMenu": 0,
@@ -18,6 +28,16 @@
       "rawSelect": 0,
       "rawTextarea": 0,
       "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/components/a11y/read-aloud-controls.tsx": {
+      "rawButton": 3,
+      "rawInput": 0,
+      "rawSelect": 2,
+      "rawTextarea": 0,
+      "roleDialog": 0,
       "roleMenu": 0,
       "roleTablist": 0,
       "titleTooltip": 0
@@ -1952,16 +1972,6 @@
       "roleTablist": 0,
       "titleTooltip": 0
     },
-    "src/components/ImpersonationBanner.tsx": {
-      "rawButton": 1,
-      "rawInput": 0,
-      "rawSelect": 0,
-      "rawTextarea": 0,
-      "roleDialog": 0,
-      "roleMenu": 0,
-      "roleTablist": 0,
-      "titleTooltip": 0
-    },
     "src/components/incident-status-banner.tsx": {
       "rawButton": 1,
       "rawInput": 0,
@@ -3252,16 +3262,6 @@
       "roleTablist": 0,
       "titleTooltip": 0
     },
-    "src/components/StatusBanner.tsx": {
-      "rawButton": 1,
-      "rawInput": 0,
-      "rawSelect": 0,
-      "rawTextarea": 0,
-      "roleDialog": 0,
-      "roleMenu": 0,
-      "roleTablist": 0,
-      "titleTooltip": 0
-    },
     "src/components/study-stats/reflection-journal-prompt.tsx": {
       "rawButton": 3,
       "rawInput": 0,
@@ -3395,26 +3395,6 @@
     "src/pages/activate-parent.tsx": {
       "rawButton": 1,
       "rawInput": 2,
-      "rawSelect": 0,
-      "rawTextarea": 0,
-      "roleDialog": 0,
-      "roleMenu": 0,
-      "roleTablist": 0,
-      "titleTooltip": 0
-    },
-    "src/pages/admin/academic-calendar.tsx": {
-      "rawButton": 6,
-      "rawInput": 4,
-      "rawSelect": 2,
-      "rawTextarea": 1,
-      "roleDialog": 1,
-      "roleMenu": 0,
-      "roleTablist": 0,
-      "titleTooltip": 0
-    },
-    "src/pages/admin/accessibility-services.tsx": {
-      "rawButton": 6,
-      "rawInput": 5,
       "rawSelect": 0,
       "rawTextarea": 0,
       "roleDialog": 0,
@@ -3572,16 +3552,6 @@
       "roleTablist": 0,
       "titleTooltip": 0
     },
-    "src/pages/admin/boards-governance.tsx": {
-      "rawButton": 1,
-      "rawInput": 3,
-      "rawSelect": 1,
-      "rawTextarea": 0,
-      "roleDialog": 0,
-      "roleMenu": 0,
-      "roleTablist": 0,
-      "titleTooltip": 0
-    },
     "src/pages/admin/BookstoreIntegration.tsx": {
       "rawButton": 1,
       "rawInput": 2,
@@ -3601,6 +3571,66 @@
       "roleMenu": 0,
       "roleTablist": 0,
       "titleTooltip": 2
+    },
+    "src/pages/admin/EvaluationReport.tsx": {
+      "rawButton": 1,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/EvaluationTemplates.tsx": {
+      "rawButton": 7,
+      "rawInput": 3,
+      "rawSelect": 1,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/SuperAdminLicenses.tsx": {
+      "rawButton": 1,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/academic-calendar.tsx": {
+      "rawButton": 6,
+      "rawInput": 4,
+      "rawSelect": 2,
+      "rawTextarea": 1,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/accessibility-services.tsx": {
+      "rawButton": 6,
+      "rawInput": 5,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/admin/boards-governance.tsx": {
+      "rawButton": 1,
+      "rawInput": 3,
+      "rawSelect": 1,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
     },
     "src/pages/admin/conference-schedule-grid.tsx": {
       "rawButton": 1,
@@ -3657,26 +3687,6 @@
       "rawInput": 0,
       "rawSelect": 0,
       "rawTextarea": 0,
-      "roleDialog": 0,
-      "roleMenu": 0,
-      "roleTablist": 0,
-      "titleTooltip": 0
-    },
-    "src/pages/admin/EvaluationReport.tsx": {
-      "rawButton": 1,
-      "rawInput": 1,
-      "rawSelect": 0,
-      "rawTextarea": 0,
-      "roleDialog": 0,
-      "roleMenu": 0,
-      "roleTablist": 0,
-      "titleTooltip": 0
-    },
-    "src/pages/admin/EvaluationTemplates.tsx": {
-      "rawButton": 7,
-      "rawInput": 3,
-      "rawSelect": 1,
-      "rawTextarea": 1,
       "roleDialog": 0,
       "roleMenu": 0,
       "roleTablist": 0,
@@ -3745,16 +3755,6 @@
     "src/pages/admin/student-demographics.tsx": {
       "rawButton": 2,
       "rawInput": 0,
-      "rawSelect": 0,
-      "rawTextarea": 0,
-      "roleDialog": 0,
-      "roleMenu": 0,
-      "roleTablist": 0,
-      "titleTooltip": 0
-    },
-    "src/pages/admin/SuperAdminLicenses.tsx": {
-      "rawButton": 1,
-      "rawInput": 1,
       "rawSelect": 0,
       "rawTextarea": 0,
       "roleDialog": 0,
@@ -3882,6 +3882,106 @@
       "roleTablist": 0,
       "titleTooltip": 0
     },
+    "src/pages/lms/CeTranscript.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/CourseAttendance.tsx": {
+      "rawButton": 9,
+      "rawInput": 2,
+      "rawSelect": 2,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/CourseBehavior.tsx": {
+      "rawButton": 6,
+      "rawInput": 4,
+      "rawSelect": 3,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 1,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/CourseEvaluation.tsx": {
+      "rawButton": 1,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 4
+    },
+    "src/pages/lms/CourseEvaluationResults.tsx": {
+      "rawButton": 0,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 4
+    },
+    "src/pages/lms/CourseReportCards.tsx": {
+      "rawButton": 8,
+      "rawInput": 1,
+      "rawSelect": 1,
+      "rawTextarea": 1,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/MyBadges.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/MyCCR.tsx": {
+      "rawButton": 4,
+      "rawInput": 1,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/MyCredentials.tsx": {
+      "rawButton": 0,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 2
+    },
+    "src/pages/lms/MyProfile.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 1
+    },
     "src/pages/lms/accommodation-audit-page.tsx": {
       "rawButton": 1,
       "rawInput": 1,
@@ -3942,9 +4042,29 @@
       "roleTablist": 0,
       "titleTooltip": 1
     },
+    "src/pages/lms/admin/org-branding-accent-field.tsx": {
+      "rawButton": 1,
+      "rawInput": 2,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
+    "src/pages/lms/admin/org-branding-preview.tsx": {
+      "rawButton": 1,
+      "rawInput": 0,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
     "src/pages/lms/admin/org-branding.tsx": {
-      "rawButton": 3,
-      "rawInput": 10,
+      "rawButton": 1,
+      "rawInput": 8,
       "rawSelect": 0,
       "rawTextarea": 0,
       "roleDialog": 0,
@@ -4031,16 +4151,6 @@
       "roleMenu": 0,
       "roleTablist": 0,
       "titleTooltip": 0
-    },
-    "src/pages/lms/CeTranscript.tsx": {
-      "rawButton": 1,
-      "rawInput": 0,
-      "rawSelect": 0,
-      "rawTextarea": 0,
-      "roleDialog": 0,
-      "roleMenu": 0,
-      "roleTablist": 0,
-      "titleTooltip": 2
     },
     "src/pages/lms/conference-availability-setup.tsx": {
       "rawButton": 1,
@@ -4802,56 +4912,6 @@
       "roleTablist": 0,
       "titleTooltip": 1
     },
-    "src/pages/lms/CourseAttendance.tsx": {
-      "rawButton": 9,
-      "rawInput": 2,
-      "rawSelect": 2,
-      "rawTextarea": 0,
-      "roleDialog": 0,
-      "roleMenu": 0,
-      "roleTablist": 0,
-      "titleTooltip": 2
-    },
-    "src/pages/lms/CourseBehavior.tsx": {
-      "rawButton": 6,
-      "rawInput": 4,
-      "rawSelect": 3,
-      "rawTextarea": 1,
-      "roleDialog": 0,
-      "roleMenu": 0,
-      "roleTablist": 1,
-      "titleTooltip": 0
-    },
-    "src/pages/lms/CourseEvaluation.tsx": {
-      "rawButton": 1,
-      "rawInput": 2,
-      "rawSelect": 0,
-      "rawTextarea": 1,
-      "roleDialog": 0,
-      "roleMenu": 0,
-      "roleTablist": 0,
-      "titleTooltip": 4
-    },
-    "src/pages/lms/CourseEvaluationResults.tsx": {
-      "rawButton": 0,
-      "rawInput": 0,
-      "rawSelect": 0,
-      "rawTextarea": 0,
-      "roleDialog": 0,
-      "roleMenu": 0,
-      "roleTablist": 0,
-      "titleTooltip": 4
-    },
-    "src/pages/lms/CourseReportCards.tsx": {
-      "rawButton": 8,
-      "rawInput": 1,
-      "rawSelect": 1,
-      "rawTextarea": 1,
-      "roleDialog": 0,
-      "roleMenu": 0,
-      "roleTablist": 0,
-      "titleTooltip": 2
-    },
     "src/pages/lms/courses.tsx": {
       "rawButton": 2,
       "rawInput": 0,
@@ -4942,6 +5002,16 @@
       "roleTablist": 0,
       "titleTooltip": 3
     },
+    "src/pages/lms/gradebook/IncompleteGradeModal.tsx": {
+      "rawButton": 4,
+      "rawInput": 3,
+      "rawSelect": 0,
+      "rawTextarea": 1,
+      "roleDialog": 1,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 0
+    },
     "src/pages/lms/gradebook/gradebook-cell-menu.tsx": {
       "rawButton": 2,
       "rawInput": 0,
@@ -4978,16 +5048,6 @@
       "rawSelect": 0,
       "rawTextarea": 0,
       "roleDialog": 2,
-      "roleMenu": 0,
-      "roleTablist": 0,
-      "titleTooltip": 0
-    },
-    "src/pages/lms/gradebook/IncompleteGradeModal.tsx": {
-      "rawButton": 4,
-      "rawInput": 3,
-      "rawSelect": 0,
-      "rawTextarea": 1,
-      "roleDialog": 1,
       "roleMenu": 0,
       "roleTablist": 0,
       "titleTooltip": 0
@@ -5201,46 +5261,6 @@
       "roleMenu": 0,
       "roleTablist": 0,
       "titleTooltip": 3
-    },
-    "src/pages/lms/MyBadges.tsx": {
-      "rawButton": 1,
-      "rawInput": 0,
-      "rawSelect": 0,
-      "rawTextarea": 0,
-      "roleDialog": 0,
-      "roleMenu": 0,
-      "roleTablist": 0,
-      "titleTooltip": 2
-    },
-    "src/pages/lms/MyCCR.tsx": {
-      "rawButton": 4,
-      "rawInput": 1,
-      "rawSelect": 0,
-      "rawTextarea": 0,
-      "roleDialog": 0,
-      "roleMenu": 0,
-      "roleTablist": 0,
-      "titleTooltip": 2
-    },
-    "src/pages/lms/MyCredentials.tsx": {
-      "rawButton": 0,
-      "rawInput": 0,
-      "rawSelect": 0,
-      "rawTextarea": 0,
-      "roleDialog": 0,
-      "roleMenu": 0,
-      "roleTablist": 0,
-      "titleTooltip": 2
-    },
-    "src/pages/lms/MyProfile.tsx": {
-      "rawButton": 1,
-      "rawInput": 0,
-      "rawSelect": 0,
-      "rawTextarea": 0,
-      "roleDialog": 0,
-      "roleMenu": 0,
-      "roleTablist": 0,
-      "titleTooltip": 1
     },
     "src/pages/lms/org-tax-settings-page.tsx": {
       "rawButton": 2,
