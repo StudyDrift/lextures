@@ -43,13 +43,13 @@ export function SideNavFooter() {
 
   return (
     <footer
-      className={`shrink-0 border-t border-slate-200/80 px-3 py-2.5 text-[11px] leading-snug text-fg-muted dark:border-border-subtle dark:text-fg-muted ${ sideNavCollapsed ? 'flex justify-center' : '' }`}
+      className={`shrink-0 border-t border-border-default px-3 py-2.5 text-[11px] leading-snug text-fg-muted ${ sideNavCollapsed ? 'flex justify-center' : '' }`}
     >
       <SideNavTooltip content={sideNavCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
         <button
           type="button"
           onClick={toggleSideNav}
-          className={`mb-2 flex w-full items-center gap-3 rounded-lg px-2 py-1.5 text-sm font-medium text-fg-muted transition-colors hover:bg-white/80 hover:text-fg-default dark:text-fg-muted dark:hover:bg-neutral-800/90 dark:hover:text-neutral-50 ${ sideNavCollapsed ? 'justify-center' : '' }`}
+          className={`mb-2 flex w-full items-center gap-3 rounded-lg px-2 py-1.5 text-sm font-medium text-fg-muted transition-colors hover:bg-surface-raised hover:text-fg-default ${ sideNavCollapsed ? 'justify-center' : '' }`}
           title={!sideNavCollapsed ? 'Collapse sidebar' : undefined}
         >
           {sideNavCollapsed ? (
@@ -73,14 +73,14 @@ export function SideNavFooter() {
               aria-expanded={open}
               aria-controls={menuId}
               onClick={() => setOpen((prev) => !prev)}
-              className="flex w-full items-center justify-between rounded-lg border border-slate-200/60 bg-white/50 px-2 py-1.5 font-medium shadow-[0_1px_2px_rgba(0,0,0,0.02)] backdrop-blur-sm motion-safe:transition-[border-color,background-color,color,box-shadow] duration-200 hover:border-border-strong hover:bg-surface-raised hover:text-fg-default/60/40 dark:hover:border-border-default dark:hover:bg-surface-raised dark:hover:text-fg-default"
+              className="flex w-full items-center justify-between rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 font-medium text-fg-default shadow-sm motion-safe:transition-[border-color,background-color,color,box-shadow] duration-200 hover:border-border-strong hover:bg-surface-overlay"
             >
               <span className="flex items-center gap-1.5">
-                <Scale className="h-3.5 w-3.5 text-fg-subtle" aria-hidden="true" />
+                <Scale className="h-3.5 w-3.5 text-fg-muted" aria-hidden="true" />
                 <span>Legal Agreements</span>
               </span>
               <ChevronUp
-                className={`h-3.5 w-3.5 text-fg-subtle transition-transform duration-200 ${ open ? 'rotate-180' : '' }`}
+                className={`h-3.5 w-3.5 text-fg-muted transition-transform duration-200 ${ open ? 'rotate-180' : '' }`}
                 aria-hidden="true"
               />
             </button>
@@ -90,18 +90,18 @@ export function SideNavFooter() {
                 id={menuId}
                 role="menu"
                 aria-labelledby={buttonId}
-                className="absolute bottom-full start-0 z-50 mb-2 w-full min-w-[220px] origin-bottom motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-1 duration-150 overflow-hidden rounded-xl border border-slate-200/80 bg-white/95 p-1 shadow-lg shadow-slate-950/5 backdrop-blur-md/90/95 dark:shadow-black/30"
+                className="absolute bottom-full start-0 z-50 mb-2 w-full min-w-[220px] origin-bottom motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-1 duration-150 overflow-hidden rounded-xl border border-border-default bg-surface-raised p-1 shadow-lg"
               >
                 <div className="px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-fg-subtle">
                   Legal Documents
                 </div>
-                <div className="h-[1px] bg-surface-sunken/80 mx-1 mb-1" />
+                <div className="h-[1px] bg-border-default mx-1 mb-1" />
                 <a
                   href={MARKETING_SITE_URLS.terms}
                   target="_blank"
                   rel="noopener noreferrer"
                   role="menuitem"
-                  className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-fg-muted transition-[background-color,color,border-color] hover:bg-surface-base hover:text-slate-950 dark:text-fg-muted dark:hover:bg-neutral-800/50 dark:hover:text-neutral-50"
+                  className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-fg-muted transition-[background-color,color,border-color] hover:bg-surface-sunken hover:text-fg-default"
                   onClick={() => setOpen(false)}
                 >
                   <FileText className="h-4 w-4 shrink-0 text-fg-subtle" aria-hidden="true" />
@@ -112,7 +112,7 @@ export function SideNavFooter() {
                   target="_blank"
                   rel="noopener noreferrer"
                   role="menuitem"
-                  className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-fg-muted transition-[background-color,color,border-color] hover:bg-surface-base hover:text-slate-950 dark:text-fg-muted dark:hover:bg-neutral-800/50 dark:hover:text-neutral-50"
+                  className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-fg-muted transition-[background-color,color,border-color] hover:bg-surface-sunken hover:text-fg-default"
                   onClick={() => setOpen(false)}
                 >
                   <Shield className="h-4 w-4 shrink-0 text-fg-subtle" aria-hidden="true" />
@@ -123,19 +123,19 @@ export function SideNavFooter() {
                   target="_blank"
                   rel="noopener noreferrer"
                   role="menuitem"
-                  className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-fg-muted transition-[background-color,color,border-color] hover:bg-surface-base hover:text-slate-950 dark:text-fg-muted dark:hover:bg-neutral-800/50 dark:hover:text-neutral-50"
+                  className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-fg-muted transition-[background-color,color,border-color] hover:bg-surface-sunken hover:text-fg-default"
                   onClick={() => setOpen(false)}
                 >
                   <Globe className="h-4 w-4 shrink-0 text-fg-subtle" aria-hidden="true" />
                   <span className="truncate">Accessibility</span>
                 </a>
-                <div className="h-[1px] bg-surface-sunken/80 mx-1 my-1" />
+                <div className="h-[1px] bg-border-default mx-1 my-1" />
                 <a
                   href={MARKETING_SITE_URLS.californiaPrivacyRights}
                   target="_blank"
                   rel="noopener noreferrer"
                   role="menuitem"
-                  className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-fg-muted transition-[background-color,color,border-color] hover:bg-surface-base hover:text-slate-950 dark:text-fg-muted dark:hover:bg-neutral-800/50 dark:hover:text-neutral-50"
+                  className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-fg-muted transition-[background-color,color,border-color] hover:bg-surface-sunken hover:text-fg-default"
                   onClick={() => setOpen(false)}
                 >
                   <Scale className="h-4 w-4 shrink-0 text-fg-subtle" aria-hidden="true" />
@@ -143,7 +143,7 @@ export function SideNavFooter() {
                     Do Not Sell or Share My Info
                   </span>
                 </a>
-                <div className="h-[1px] bg-surface-sunken/80 mx-1 my-1" />
+                <div className="h-[1px] bg-border-default mx-1 my-1" />
                 <div className="px-2.5 py-1.5 text-[10px] text-fg-subtle">
                   © {year} Lextures
                 </div>
