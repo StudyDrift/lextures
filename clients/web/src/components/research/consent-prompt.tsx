@@ -68,10 +68,6 @@ export function ConsentPrompt() {
 
   const remaining = useMemo(() => studies.length - index, [studies.length, index])
 
-  if (!current) {
-    return null
-  }
-
   function advance() {
     setSubmitting(false)
     if (index + 1 >= studies.length) {
@@ -99,6 +95,27 @@ export function ConsentPrompt() {
     if (!current) return
     markDismissed(current.id)
     advance()
+  }
+
+  // Escape dismisses for this session (same as "Remind me later") — UX.4 modal contract.
+  useEffect(() => {
+    if (!current || submitting) return
+    const studyId = current.id
+    function onKey(e: KeyboardEvent) {
+      if (e.key !== 'Escape') return
+      e.preventDefault()
+      e.stopPropagation()
+      markDismissed(studyId)
+      advance()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+    // advance closes over index/studies; rebind when the active study changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional
+  }, [current, submitting, index, studies.length])
+
+  if (!current) {
+    return null
   }
 
   return (

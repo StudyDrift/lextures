@@ -22,8 +22,8 @@ async function dismissBlockingDialogs(page: Page) {
   const consent = page.getByRole('dialog', { name: /research participation/i })
   if (await consent.isVisible().catch(() => false)) {
     const dismiss = consent.getByRole('button', { name: /remind me later|no, i decline/i })
-    if (await dismiss.isVisible().catch(() => false)) {
-      await dismiss.click()
+    if ((await dismiss.count()) > 0) {
+      await dismiss.first().click({ force: true })
     } else {
       await page.keyboard.press('Escape')
     }
