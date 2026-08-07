@@ -47,6 +47,22 @@ describe('useOverlayPresence', () => {
     expect(result.current.mounted).toBe(false)
   })
 
+  it('mounts on the same render when open flips true (UX.4 focus-trap race)', () => {
+    const { result, rerender } = renderHook(
+      ({ open }: { open: boolean }) =>
+        useOverlayPresence({ open, kind: 'dialog', enabled: true }),
+      { initialProps: { open: false } },
+    )
+    expect(result.current.mounted).toBe(false)
+    expect(result.current.phase).toBe('closed')
+
+    rerender({ open: true })
+    // Must be mounted before passive effects — Dialog's focus trap effect keys on
+    // `open` and needs panelRef on that same commit.
+    expect(result.current.mounted).toBe(true)
+    expect(result.current.phase).toBe('opening')
+  })
+
   it('re-opens mid-exit (AC-6)', () => {
     const { result, rerender } = renderHook(
       ({ open }: { open: boolean }) =>
