@@ -89,7 +89,7 @@ final class BiometricGate {
 }
 
 @MainActor
-private struct BiometricGateKey: @MainActor EnvironmentKey {
+private struct BiometricGateKey: EnvironmentKey {
     static let defaultValue = BiometricGate.shared
 }
 
