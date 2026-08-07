@@ -2278,5 +2278,16 @@
   "screenShare.state.waitingPresenter": "No one is presenting",
   "screenShare.error.flagOff": "Screen sharing is not enabled for this course.",
   "screenShare.error.loadFailed": "Could not load course.",
-  "screenShare.error.unsupportedCapture": "Entire-screen capture needs a desktop browser. You can still watch as a viewer."
+  "screenShare.error.unsupportedCapture": "Entire-screen capture needs a desktop browser. You can still watch as a viewer.",
+  "reading": {
+    "title": "Reading Preferences",
+    "appliesEverywhere": "These settings apply across modules, assignments, discussions, and the notebook.",
+    "textSize": "Text size",
+    "font": "Font",
+    "letterSpacing": "Letter spacing",
+    "wordSpacing": "Word spacing",
+    "lineHeight": "Line height",
+    "ruler": "Reading ruler",
+    "display": "Display"
+  }
 }

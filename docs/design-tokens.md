@@ -112,7 +112,37 @@ Client applies ramp to `--lx-accent-*` via `OrgBrandingProvider`.
 
 ## UI modes (k2 / elementary)
 
-Token overrides on `html.ui-mode-k2` / `html.ui-mode-elementary` (radius, space, motion). Size/touch rules remain in `styles/ui-modes/*.css`.
+Token overrides on `html.ui-mode-k2` / `html.ui-mode-elementary` (radius, space, motion, **type ramp** via `--lx-type-mode-mult`). Touch targets remain in `styles/ui-modes/*.css`.
+
+## Typography (UX.3)
+
+Semantic type roles live in `clients/web/src/styles/tokens/typography.css` and ship as Tailwind utilities:
+
+| Role utility | Size / leading (base) | Use |
+|---|---|---|
+| `text-display` | 36 / 40 | Marketing-adjacent hero only |
+| `text-title-lg` | 28 / 34 (clamped) | Page title |
+| `text-title` | 22 / 28 | Section title |
+| `text-subtitle` | 18 / 26 | Card / panel heading |
+| `text-body-lg` | 18 / 28 | Long-form course content |
+| `text-body` | **16 / 24** when `ffTypeScale` | Default UI and prose |
+| `text-body-sm` | 14 / 20 | Dense UI, table cells |
+| `text-caption` | 13 / 18 | Metadata, timestamps — **floor** for sentences |
+| `text-overline` | 12 / 16 | Uppercase labels only, never sentences |
+| `text-code` | 14 / 22 | Monospace |
+
+### Rules
+
+- **Default body** inherits on `.lms-scope`. `ffTypeScale` (`data-type-scale="on"`) raises body from 14px → 16px; roles and lint ship unflagged.
+- **No sentences below 13px.** `text-overline` is for short uppercase labels only.
+- **Caption contrast:** pair `text-caption` / `text-overline` with `text-fg-default` (or other ≥7:1 tokens), not `text-fg-muted`.
+- **Measure:** long-form surfaces use `lex-measure` (target 65ch, min 45ch, max 75ch).
+- **Tabular numbers:** dense numeric columns use `lex-tabular` / `lex-num` (`font-variant-numeric: tabular-nums`).
+- **Reading preferences** (`Aa` panel) set `--lx-type-scale` (textScale 1–1.5), font family, letter/word spacing, and line height on the root so preferences apply across learning surfaces.
+- **Locale:** `html[lang=ar]` multiplies sizes via `--lx-type-locale-mult` (1.08).
+- **Lint:** `npm run type:purity` forbids raw `text-xs` / `text-sm` / `text-[Npx]` in `src/**/*.tsx` (ratcheting allowlist `type-role-allowlist.json`). Codemod: `npm run type:codemod`.
+
+Gallery: `/design/tokens` type specimen section.
 
 ## Runbook: contrast CI failure
 
@@ -124,5 +154,6 @@ Token overrides on `html.ui-mode-k2` / `html.ui-mode-elementary` (radius, space,
 ## Related
 
 - [design.md](design.md) — product design principles (references tokens, not raw hex)
-- Plan: `docs/completed/ui-ux/UX.1-semantic-design-token-system.md` (after move)
+- Plan: `docs/completed/ui-ux/UX.1-semantic-design-token-system.md`
+- Plan: `docs/completed/ui-ux/UX.3-typography-and-reading-system.md`
 - AN.1 motion: `docs/completed/animations/`

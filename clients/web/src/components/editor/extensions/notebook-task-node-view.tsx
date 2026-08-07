@@ -5,6 +5,7 @@ import { formatDate } from '../../../lib/format'
 import { getNotebookTaskContext } from '../../../lib/notebook-task-context'
 import { emitNotebookTasksChanged } from '../../../lib/notebook-task-sync'
 import { patchNotebookTask, upsertNotebookTask } from '../../../lib/notebook-tasks-api'
+import { handleMenuKeyDown, focusFirstMenuitem } from '../../../lib/a11y/menu-keyboard'
 
 function dueAtToDateInputValue(dueAt: string | null | undefined): string {
   if (!dueAt) return ''
@@ -27,6 +28,13 @@ export function NotebookTaskNodeView(props: NodeViewProps) {
   const menuId = useId()
   const menuRef = useRef<HTMLDivElement>(null)
   const [menuOpen, setMenuOpen] = useState(false)
+  const menuTypeaheadRef = useRef({ buffer: '', at: 0 })
+  const menuListRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!menuOpen) return
+    focusFirstMenuitem(menuListRef.current)
+  }, [menuOpen])
   const [dateDraft, setDateDraft] = useState('')
   const syncTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const createdRef = useRef(false)
@@ -172,9 +180,9 @@ export function NotebookTaskNodeView(props: NodeViewProps) {
           {menuOpen ? (
             <div
               id={menuId}
-              role="menu"
+              ref={menuListRef} role="menu"
               className="absolute right-0 top-full z-30 mt-1 w-52 rounded-xl border border-border-default bg-surface-raised p-3 shadow-lg dark:border-border-default dark:bg-surface-raised"
-            >
+             onKeyDown={(e) => handleMenuKeyDown(e, { onClose: () => setMenuOpen(false) }, menuTypeaheadRef.current)} tabIndex={-1}>
               <label className="block text-xs font-medium text-fg-muted">
                 Due date
                 <input

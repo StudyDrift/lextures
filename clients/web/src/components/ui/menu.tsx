@@ -10,7 +10,7 @@ import {
   type RefObject,
 } from 'react'
 import { createPortal } from 'react-dom'
-import { cx } from './utils'
+import { cx, focusRingClass } from './utils'
 
 export type MenuItem = {
   id: string
@@ -31,10 +31,16 @@ export type MenuProps = {
   className?: string
   /** Called after an item is chosen (menu already closing). */
   onAction?: (id: string) => void
+  /** Placement relative to anchor. Default bottom-start. */
+  placement?: 'bottom-start' | 'bottom-end' | 'top-start' | 'top-end'
+  /** Accessible name when no visible label. */
+  'aria-label'?: string
+  'aria-labelledby'?: string
 }
 
 /**
- * Menu per WAI-ARIA APG: focus first item on open, arrows, Home/End, typeahead, Escape.
+ * Menu per WAI-ARIA APG: focus first item on open, arrows, Home/End, typeahead,
+ * Escape closes + restores focus, Tab closes (FR-2).
  */
 export function Menu({
   open,
@@ -44,6 +50,9 @@ export function Menu({
   id: idProp,
   className = '',
   onAction,
+  placement = 'bottom-start',
+  'aria-label': ariaLabel,
+  'aria-labelledby': ariaLabelledby,
 }: MenuProps) {
   const autoId = useId()
   const menuId = idProp ?? autoId
@@ -60,15 +69,20 @@ export function Menu({
   useLayoutEffect(() => {
     if (!open || !anchorRef.current) return
     const r = anchorRef.current.getBoundingClientRect()
-    setPos({
+    const style: CSSProperties = {
       position: 'fixed',
       zIndex: 460,
-      top: r.bottom + 4,
-      left: r.left,
       minWidth: Math.max(r.width, 160),
-    })
+    }
+    if (placement.startsWith('bottom')) style.top = r.bottom + 4
+    else style.bottom = window.innerHeight - r.top + 4
+    if (placement.endsWith('start')) style.left = r.left
+    else style.right = window.innerWidth - r.right
+    setPos(style)
     setActiveIndex(enabledIndexes[0] ?? 0)
-  }, [open, anchorRef, items])
+    // enabledIndexes identity changes each render; open + items drive re-position.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional
+  }, [open, anchorRef, items, placement])
 
   useEffect(() => {
     if (!open || !listRef.current) return
@@ -129,6 +143,9 @@ export function Menu({
     } else if (e.key === 'Escape') {
       e.preventDefault()
       close()
+    } else if (e.key === 'Tab') {
+      // APG: Tab closes the menu and moves focus per normal tab order (after restore).
+      close()
     } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
       const now = Date.now()
       const state = typeaheadRef.current
@@ -137,8 +154,7 @@ export function Menu({
       state.buffer += e.key.toLowerCase()
       const match = items.findIndex((item) => {
         if (item.disabled) return false
-        const text =
-          item.textValue ?? (typeof item.label === 'string' ? item.label : '')
+        const text = item.textValue ?? (typeof item.label === 'string' ? item.label : '')
         return text.toLowerCase().startsWith(state.buffer)
       })
       if (match >= 0) setActiveIndex(match)
@@ -153,6 +169,8 @@ export function Menu({
       id={menuId}
       role="menu"
       tabIndex={-1}
+      aria-label={ariaLabel}
+      aria-labelledby={ariaLabelledby}
       style={pos}
       className={cx(
         'rounded-xl border border-border-default bg-surface-raised py-1 shadow-lg outline-none',
@@ -170,6 +188,7 @@ export function Menu({
           disabled={item.disabled}
           className={cx(
             'flex w-full min-h-9 items-center px-3 py-2 text-start text-sm font-medium outline-none',
+            focusRingClass,
             i === activeIndex && 'bg-accent-surface text-accent-fg',
             item.danger ? 'text-danger-fg' : 'text-fg-default',
             item.disabled && 'opacity-50',

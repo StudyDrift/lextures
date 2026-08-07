@@ -52,6 +52,35 @@ describe('UX.2 Tabs', () => {
     await user.keyboard('{Home}')
     expect(screen.getByRole('tab', { name: 'A' })).toHaveAttribute('aria-selected', 'true')
   })
+
+  it('inverts horizontal arrows under dir=rtl (UX.4 AC-2)', async () => {
+    const user = userEvent.setup()
+    document.documentElement.dir = 'rtl'
+    try {
+      wrap(
+        <Tabs defaultValue="a">
+          <TabList aria-label="RTL">
+            <Tab value="a">A</Tab>
+            <Tab value="b">B</Tab>
+            <Tab value="c">C</Tab>
+          </TabList>
+          <TabPanel value="a">Panel A</TabPanel>
+          <TabPanel value="b">Panel B</TabPanel>
+          <TabPanel value="c">Panel C</TabPanel>
+        </Tabs>,
+      )
+      screen.getByRole('tab', { name: 'A' }).focus()
+      // In RTL, ArrowRight moves to previous (none) / wrap — APG: ArrowRight → previous
+      await user.keyboard('{ArrowRight}')
+      // previous of A wraps to C
+      expect(screen.getByRole('tab', { name: 'C' })).toHaveAttribute('aria-selected', 'true')
+      await user.keyboard('{ArrowLeft}')
+      // ArrowLeft in RTL moves next → A
+      expect(screen.getByRole('tab', { name: 'A' })).toHaveAttribute('aria-selected', 'true')
+    } finally {
+      document.documentElement.dir = 'ltr'
+    }
+  })
 })
 
 describe('UX.2 EmptyState', () => {

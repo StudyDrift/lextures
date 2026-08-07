@@ -54,6 +54,7 @@ type platformFeaturesJSON struct {
 	VideoCaptionsEnabled               bool `json:"videoCaptionsEnabled"`
 	AutoCaptioningEnabled              bool `json:"autoCaptioningEnabled"`
 	FFReadingPreferences               bool `json:"ffReadingPreferences"`
+	FFTypeScale                        bool `json:"ffTypeScale"`
 	FFPinnedSettings                   bool `json:"ffPinnedSettings"`
 	FFHighContrastReducedMotion        bool `json:"ffHighContrastReducedMotion"`
 	FFMotionNavigation                 bool `json:"ffMotionNavigation"`
@@ -229,6 +230,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		VideoCaptionsEnabled:               cfg.VideoCaptionsEnabled,
 		AutoCaptioningEnabled:              cfg.AutoCaptioningEnabled,
 		FFReadingPreferences:               cfg.FFReadingPreferences,
+		FFTypeScale:                        cfg.FFTypeScale,
 		FFPinnedSettings:                   cfg.FFPinnedSettings,
 		FFHighContrastReducedMotion:        cfg.FFHighContrastReducedMotion,
 		FFMotionNavigation:                 cfg.FFMotionNavigation,

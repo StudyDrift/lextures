@@ -106,6 +106,7 @@ export type PlatformSettingsPayload = {
   ffLibrary: boolean
   ffLibraryIntegration: boolean
   ffReadingPreferences: boolean
+  ffTypeScale: boolean
   ffPinnedSettings: boolean
   ffMotionNavigation: boolean
   ffMotionReveal: boolean

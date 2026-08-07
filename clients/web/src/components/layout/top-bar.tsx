@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import { ChevronDown, LogOut, Menu, User } from 'lucide-react'
-import { Link, matchPath, useLocation, useNavigate } from 'react-router-dom'
+import { matchPath, useLocation, useNavigate } from 'react-router-dom'
 const AiTutorMenu = lazy(() => import('../tutor-panel').then((m) => ({ default: m.AiTutorMenu })))
 const FeedbackWidgetMenu = lazy(() =>
   import('../feedback/feedback-widget').then((m) => ({ default: m.FeedbackWidgetMenu })),
@@ -28,12 +28,13 @@ import { NotificationsDrawer, NotificationsDrawerTrigger } from './notifications
 import { TopBarMobileCommandPaletteButton } from './side-nav-command-palette'
 import { ReadingPreferencesPanel } from '../a11y/ReadingPreferencesPanel'
 import { usePlatformFeatures } from '../../context/platform-features-context'
+import { Menu as UiMenu } from '../ui/menu'
 
 function UserMenu() {
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const [profile, setProfile] = useState<TopBarAccountProfile | null>(null)
-  const rootRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
   const menuId = useId()
 
   useEffect(() => {
@@ -59,24 +60,7 @@ function UserMenu() {
     }
   }, [])
 
-  useEffect(() => {
-    if (!open) return
-    function onDoc(e: MouseEvent) {
-      if (!rootRef.current?.contains(e.target as Node)) setOpen(false)
-    }
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') setOpen(false)
-    }
-    document.addEventListener('mousedown', onDoc)
-    document.addEventListener('keydown', onKey)
-    return () => {
-      document.removeEventListener('mousedown', onDoc)
-      document.removeEventListener('keydown', onKey)
-    }
-  }, [open])
-
   async function signOut() {
-    setOpen(false)
     const rt = getRefreshToken()
     if (rt) {
       try {
@@ -98,8 +82,9 @@ function UserMenu() {
   const viewerId = getJwtSubject() ?? profile?.email ?? 'viewer'
 
   return (
-    <div ref={rootRef} className="relative">
+    <div className="relative">
       <button
+        ref={triggerRef}
         type="button"
         aria-haspopup="menu"
         aria-expanded={open}
@@ -121,39 +106,40 @@ function UserMenu() {
         />
       </button>
 
-      {open && (
-        <div
-          id={menuId}
-          role="menu"
-          aria-label="Account"
-          className="absolute end-0 z-50 mt-1 min-w-[11rem] overflow-hidden rounded-xl border border-border-default bg-surface-raised py-1 shadow-lg shadow-slate-900/10 dark:border-border-default dark:bg-surface-overlay dark:shadow-black/40"
-        >
-          <div className="border-b border-border-subtle px-3 py-2 dark:border-border-default">
-            <p className="truncate text-sm font-medium text-fg-default">{name}</p>
-            {profile?.email && (
-              <p className="truncate text-xs text-fg-muted">{profile.email}</p>
-            )}
-          </div>
-          <Link
-            to="/settings/account"
-            role="menuitem"
-            onClick={() => setOpen(false)}
-            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm text-fg-muted transition-[background-color,color,border-color] hover:bg-surface-base dark:text-fg-default dark:hover:bg-neutral-700"
-          >
-            <User className="h-4 w-4 shrink-0 text-fg-muted" aria-hidden />
-            Profile
-          </Link>
-          <button
-            type="button"
-            role="menuitem"
-            onClick={signOut}
-            className="flex w-full items-center gap-2 border-t border-border-subtle px-2.5 py-2 text-start text-sm text-fg-muted transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-neutral-700"
-          >
-            <LogOut className="h-4 w-4 shrink-0 text-fg-muted" aria-hidden />
-            Sign out
-          </button>
-        </div>
-      )}
+      <UiMenu
+        open={open}
+        onOpenChange={setOpen}
+        id={menuId}
+        anchorRef={triggerRef}
+        placement="bottom-end"
+        aria-label="Account"
+        items={[
+          {
+            id: 'profile',
+            textValue: 'Profile',
+            label: (
+              <span className="flex items-center gap-2">
+                <User className="h-4 w-4 shrink-0 text-fg-muted" aria-hidden />
+                Profile
+              </span>
+            ),
+            onSelect: () => navigate('/settings/account'),
+          },
+          {
+            id: 'sign-out',
+            textValue: 'Sign out',
+            label: (
+              <span className="flex items-center gap-2">
+                <LogOut className="h-4 w-4 shrink-0 text-fg-muted" aria-hidden />
+                Sign out
+              </span>
+            ),
+            onSelect: () => {
+              void signOut()
+            },
+          },
+        ]}
+      />
     </div>
   )
 }
@@ -170,24 +156,8 @@ function CourseEnrollmentViewDropdown() {
 
   const viewerRoles = useViewerEnrollmentRoles(courseCode)
   const [open, setOpen] = useState(false)
-  const rootRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
   const menuId = useId()
-
-  useEffect(() => {
-    if (!open) return
-    function onDoc(e: MouseEvent) {
-      if (!rootRef.current?.contains(e.target as Node)) setOpen(false)
-    }
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') setOpen(false)
-    }
-    document.addEventListener('mousedown', onDoc)
-    document.addEventListener('keydown', onKey)
-    return () => {
-      document.removeEventListener('mousedown', onDoc)
-      document.removeEventListener('keydown', onKey)
-    }
-  }, [open])
 
   const hasTeacher = viewerRoles?.includes('teacher') ?? false
   const hasStudent = viewerRoles?.includes('student') ?? false
@@ -198,8 +168,9 @@ function CourseEnrollmentViewDropdown() {
   const label = courseViewMode === 'student' ? 'Student' : 'Teacher'
 
   return (
-    <div ref={rootRef} className="relative shrink-0 text-start">
+    <div className="relative shrink-0 text-start">
       <button
+        ref={triggerRef}
         type="button"
         aria-haspopup="menu"
         aria-expanded={open}
@@ -216,43 +187,42 @@ function CourseEnrollmentViewDropdown() {
         />
       </button>
 
-      {open && (
-        <div
-          id={menuId}
-          role="menu"
-          aria-label="View course as"
-          className="absolute end-0 z-50 mt-1 min-w-[14rem] overflow-hidden rounded-xl border border-border-default bg-surface-raised py-1 shadow-lg shadow-slate-900/10 dark:border-border-default dark:bg-surface-overlay dark:shadow-black/40"
-        >
-          <button
-            type="button"
-            role="menuitem"
-            onClick={() => {
-              setCourseViewAs(courseCode, 'teacher')
-              setOpen(false)
-            }}
-            className={`flex w-full flex-col gap-0.5 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:hover:bg-neutral-700 ${ courseViewMode === 'teacher' ? 'bg-indigo-50 dark:bg-surface-overlay' : '' }`}
-          >
-            <span className="font-semibold text-slate-950 dark:text-fg-default">Teacher</span>
-            <span className="text-xs text-fg-muted">
-              Manage course content, gradebook, and settings
-            </span>
-          </button>
-          <button
-            type="button"
-            role="menuitem"
-            onClick={() => {
-              setCourseViewAs(courseCode, 'student')
-              setOpen(false)
-            }}
-            className={`flex w-full flex-col gap-0.5 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:hover:bg-neutral-700 ${ courseViewMode === 'student' ? 'bg-indigo-50 dark:bg-surface-overlay' : '' }`}
-          >
-            <span className="font-semibold text-slate-950 dark:text-fg-default">Student</span>
-            <span className="text-xs text-fg-muted">
-              Preview the course as a learner would see it
-            </span>
-          </button>
-        </div>
-      )}
+      <UiMenu
+        open={open}
+        onOpenChange={setOpen}
+        id={menuId}
+        anchorRef={triggerRef}
+        placement="bottom-end"
+        aria-label="View course as"
+        items={[
+          {
+            id: 'teacher',
+            textValue: 'Teacher',
+            label: (
+              <span className="flex flex-col gap-0.5">
+                <span className="font-semibold text-fg-default">Teacher</span>
+                <span className="text-xs font-normal text-fg-muted">
+                  Manage course content, gradebook, and settings
+                </span>
+              </span>
+            ),
+            onSelect: () => setCourseViewAs(courseCode, 'teacher'),
+          },
+          {
+            id: 'student',
+            textValue: 'Student',
+            label: (
+              <span className="flex flex-col gap-0.5">
+                <span className="font-semibold text-fg-default">Student</span>
+                <span className="text-xs font-normal text-fg-muted">
+                  Preview the course as a learner would see it
+                </span>
+              </span>
+            ),
+            onSelect: () => setCourseViewAs(courseCode, 'student'),
+          },
+        ]}
+      />
     </div>
   )
 }

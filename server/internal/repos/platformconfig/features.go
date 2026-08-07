@@ -238,11 +238,13 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	// Temporary rollout gates — owner + removal target (docs/completed/flags.md):
 	// RTLEnabled: i18n — remove after RTL audit; target 2026-Q4.
 	// FFReadingPreferences: a11y — flip default on after QA sign-off; target 2026-Q3.
+	// FFTypeScale: UX.3 base-size raise — dogfood then GA; target 2026-Q3.
 	// FFPinnedSettings: editor UX — GA default on after PS.4 (plan PS.4 FR-16).
 	out.RTLEnabled = mergeBool(db.RTLEnabled, false)
 	out.SecurityDisclosureModuleEnabled = mergeBool(db.SecurityDisclosureModuleEnabled, false)
 	out.BackupModuleEnabled = mergeBool(db.BackupModuleEnabled, false)
 	out.FFReadingPreferences = mergeBool(db.FFReadingPreferences, false)
+	out.FFTypeScale = mergeBool(db.FFTypeScale, false)
 	out.FFPinnedSettings = mergeBool(db.FFPinnedSettings, true)
 	out.FFClassroomSignals = mergeBool(db.FFClassroomSignals, false)
 	out.FFLibraryIntegration = mergeBool(db.FFLibraryIntegration, false)

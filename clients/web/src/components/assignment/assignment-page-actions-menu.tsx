@@ -1,6 +1,7 @@
 import { ChevronDown, Pencil, Sparkles } from 'lucide-react'
 import { useEffect, useId, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { handleMenuKeyDown, focusFirstMenuitem } from '../../lib/a11y/menu-keyboard'
 
 type AssignmentPageActionsMenuProps = {
   disabled: boolean
@@ -19,6 +20,13 @@ export function AssignmentPageActionsMenu({
 }: AssignmentPageActionsMenuProps) {
   const { t } = useTranslation('common')
   const [open, setOpen] = useState(false)
+  const menuTypeaheadRef = useRef({ buffer: '', at: 0 })
+  const menuListRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    focusFirstMenuitem(menuListRef.current)
+  }, [open])
   const rootRef = useRef<HTMLDivElement>(null)
   const menuId = useId()
 
@@ -55,10 +63,10 @@ export function AssignmentPageActionsMenu({
       {open && (
         <div
           id={menuId}
-          role="menu"
+          ref={menuListRef} role="menu"
           aria-label="Assignment actions"
           className="absolute end-0 z-50 mt-1 min-w-[12rem] overflow-hidden rounded-xl border border-border-default bg-surface-raised py-1 shadow-lg shadow-slate-900/10 dark:border-border-default dark:bg-surface-raised"
-        >
+         onKeyDown={(e) => handleMenuKeyDown(e, { onClose: () => setOpen(false) }, menuTypeaheadRef.current)} tabIndex={-1}>
           <button
             type="button"
             role="menuitem"

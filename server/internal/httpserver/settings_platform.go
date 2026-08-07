@@ -211,6 +211,7 @@ type platformSettingsJSON struct {
 	DPAPortalEnabled             bool    `json:"dpaPortalEnabled"`
 	SOC2ModuleEnabled            bool    `json:"soc2ModuleEnabled"`
 	FFReadingPreferences         bool    `json:"ffReadingPreferences"`
+	FFTypeScale                  bool    `json:"ffTypeScale"`
 	FFPinnedSettings             bool    `json:"ffPinnedSettings"`
 	FFMotionNavigation           bool    `json:"ffMotionNavigation"`
 	FFMotionReveal               bool    `json:"ffMotionReveal"`
@@ -485,6 +486,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			DPAPortalEnabled:                   merged.DPAPortalEnabled,
 			SOC2ModuleEnabled:                  merged.SOC2ModuleEnabled,
 			FFReadingPreferences:               merged.FFReadingPreferences,
+			FFTypeScale:                        merged.FFTypeScale,
 			FFPinnedSettings:                   merged.FFPinnedSettings,
 			FFMotionNavigation:                 merged.FFMotionNavigation,
 			FFMotionReveal:                     merged.FFMotionReveal,
@@ -742,6 +744,7 @@ type putPlatformBody struct {
 	DPAPortalEnabled             *bool    `json:"dpaPortalEnabled"`
 	SOC2ModuleEnabled            *bool    `json:"soc2ModuleEnabled"`
 	FFReadingPreferences         *bool    `json:"ffReadingPreferences"`
+	FFTypeScale                  *bool    `json:"ffTypeScale"`
 	FFPinnedSettings             *bool    `json:"ffPinnedSettings"`
 	FFMotionNavigation           *bool    `json:"ffMotionNavigation"`
 	FFMotionReveal               *bool    `json:"ffMotionReveal"`
@@ -1190,6 +1193,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("dpaportalenabled", body.DPAPortalEnabled, func(v bool) { wr.DPAPortalEnabled = &v })
 		setBool("soc2moduleenabled", body.SOC2ModuleEnabled, func(v bool) { wr.SOC2ModuleEnabled = &v })
 		setBool("ffreadingpreferences", body.FFReadingPreferences, func(v bool) { wr.FFReadingPreferences = &v })
+		setBool("fftypescale", body.FFTypeScale, func(v bool) { wr.FFTypeScale = &v })
 		setBool("ffpinnedsettings", body.FFPinnedSettings, func(v bool) { wr.FFPinnedSettings = &v })
 		setMotion := func(v bool) {
 			wr.FFMotionNavigation = &v
@@ -1458,6 +1462,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			DPAPortalEnabled:                   merged.DPAPortalEnabled,
 			SOC2ModuleEnabled:                  merged.SOC2ModuleEnabled,
 			FFReadingPreferences:               merged.FFReadingPreferences,
+			FFTypeScale:                        merged.FFTypeScale,
 			FFPinnedSettings:                   merged.FFPinnedSettings,
 			FFMotionNavigation:                 merged.FFMotionNavigation,
 			FFMotionReveal:                     merged.FFMotionReveal,

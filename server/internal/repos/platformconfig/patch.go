@@ -241,6 +241,7 @@ func patch(ctx context.Context, pool *pgxpool.Pool, w *Write) error {
 	addBool("dpa_portal_enabled", w.DPAPortalEnabled)
 	addBool("soc2_module_enabled", w.SOC2ModuleEnabled)
 	addBool("ff_reading_preferences", w.FFReadingPreferences)
+	addBool("ff_type_scale", w.FFTypeScale)
 	addBool("ff_pinned_settings", w.FFPinnedSettings)
 	addBool("ff_classroom_signals", w.FFClassroomSignals)
 	addBool("ff_library_integration", w.FFLibraryIntegration)

@@ -117,7 +117,7 @@ unverified across the product.
   mid-tier Chromebook over 4G; INP ≤200 ms. Images MUST be responsive
   (`srcset`/`sizes`); off-screen media MUST be lazy.
 - **Security** — None specific. Bottom sheets MUST not expose content behind them
-  to screen readers (`inert`, per [UX.4](UX.4-aria-widget-and-focus-management-remediation.md)).
+  to screen readers (`inert`, per [UX.4](../../completed/ui-ux/UX.4-aria-widget-and-focus-management-remediation.md)).
 - **Privacy & Compliance** — Delivers WCAG 2.1 SC 1.4.4 (Resize Text), 1.4.10
   (Reflow), 1.3.4 (Orientation), and 2.2 SC 2.5.8 (Target Size).
 - **Accessibility** — Orientation MUST NOT be locked (SC 1.3.4). Reflow at 400%

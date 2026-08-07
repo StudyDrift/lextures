@@ -24,7 +24,7 @@
     },
     "src/components/a11y/ReadingPreferencesPanel.tsx": {
       "rawButton": 3,
-      "rawInput": 3,
+      "rawInput": 4,
       "rawSelect": 0,
       "rawTextarea": 0,
       "roleDialog": 1,

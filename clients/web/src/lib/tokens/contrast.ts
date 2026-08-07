@@ -27,6 +27,8 @@ export function contrastRatio(hex1: string, hex2: string): number {
 export const AA_NORMAL = 4.5
 export const AA_LARGE = 3.0
 export const AA_UI = 3.0
+/** UX.3 FR-7 — caption/overline must use foregrounds meeting ≥7:1. */
+export const AAA_CAPTION = 7.0
 
 export type ContrastPair = {
   fg: string
@@ -51,4 +53,8 @@ export const SEMANTIC_PAIRS: ContrastPair[] = [
   { fg: 'accent-fg', bg: 'accent-surface', minRatio: AA_NORMAL, usage: 'accent status' },
   { fg: 'border-strong', bg: 'surface-raised', minRatio: AA_UI, usage: 'strong UI border' },
   { fg: 'focus-ring', bg: 'surface-raised', minRatio: AA_UI, usage: 'focus ring vs surface' },
+  // UX.3 FR-7 / AC-6 — caption role must pair with ≥7:1 foregrounds (use text-fg-default).
+  { fg: 'fg-default', bg: 'surface-base', minRatio: AAA_CAPTION, usage: 'caption on page (AAA)' },
+  { fg: 'fg-default', bg: 'surface-raised', minRatio: AAA_CAPTION, usage: 'caption on cards (AAA)' },
+  { fg: 'fg-default', bg: 'surface-sunken', minRatio: AAA_CAPTION, usage: 'caption on sunken (AAA)' },
 ]

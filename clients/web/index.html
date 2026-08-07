@@ -91,6 +91,23 @@
       } catch {
         /* ignore */
       }
+      /* UX.3 — restore text scale + type-scale flag before first paint (no CLS). */
+      try {
+        const scale = (localStorage.getItem('lextures.textScale') || '1').trim()
+        const n = Number(scale)
+        const allowed = n === 1.125 || n === 1.25 || n === 1.5 ? n : 1
+        document.documentElement.style.setProperty('--reading-text-scale', String(allowed))
+        document.documentElement.style.setProperty('--lx-type-scale', String(allowed))
+      } catch {
+        /* ignore */
+      }
+      try {
+        if (localStorage.getItem('lextures.typeScale') === '1') {
+          document.documentElement.setAttribute('data-type-scale', 'on')
+        }
+      } catch {
+        /* ignore */
+      }
     })()
   </script>
   <title>Lextures</title>

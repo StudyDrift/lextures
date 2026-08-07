@@ -44,13 +44,13 @@ exists so it does not happen again.**
 |---|---|---|---|---|
 | **UX.1** | [Semantic design token system](../../completed/ui-ux/UX.1-semantic-design-token-system.md) (shipped) | BLOCKER | L | — |
 | **UX.2** | [Core component library and adoption ratchet](../../completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md) (shipped — library + ratchet; migration ongoing) | BLOCKER | XL | UX.1 |
-| **UX.3** | [Typography and reading system](UX.3-typography-and-reading-system.md) | MAJOR | M | UX.1 |
+| **UX.3** | [Typography and reading system](../../completed/ui-ux/UX.3-typography-and-reading-system.md) ✅ | MAJOR | M | UX.1 |
 
 ### Accessibility — legal floor, not polish
 
 | ID | Plan | Severity | Effort | Depends on |
 |---|---|---|---|---|
-| **UX.4** | [ARIA widget and focus management remediation](UX.4-aria-widget-and-focus-management-remediation.md) | BLOCKER | L | UX.2 |
+| **UX.4** | [ARIA widget and focus management remediation](../../completed/ui-ux/UX.4-aria-widget-and-focus-management-remediation.md) (shipped — contracts + ratchet; modal tail ongoing) | BLOCKER | L | UX.2 |
 | **UX.5** | [WCAG 2.2 AA conformance uplift](UX.5-wcag-2.2-aa-conformance-uplift.md) | MAJOR¹ | M | UX.2, UX.4 |
 | **UX.6** | [Form and validation system](UX.6-form-and-validation-system.md) | MAJOR | L | UX.2 |
 
@@ -154,7 +154,7 @@ regression regardless of whether the target is met yet.
 | `token-purity` (raw palette literals) | **33,331** | 0 | UX.1 |
 | `design-system-coverage` | **~0.25%** | ≥90% | UX.2 |
 | Body text below 13px | **2,775** | 0 | UX.3 |
-| `aria-contract-coverage` | **~11%**³ | 100% | UX.4 |
+| `aria-contract-coverage` | **~21%**³ (ratchet live) | 100% | UX.4 |
 | Modals with `aria-modal` but no focus trap | **~123** | 0 | UX.4 |
 | `aria-invalid` per invalid field | **10 / 929 inputs** | 100% | UX.6 |
 | Max in-course nav links | **40** | ≤7 + sections | UX.7 |

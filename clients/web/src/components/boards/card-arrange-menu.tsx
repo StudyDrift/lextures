@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MoreVertical } from 'lucide-react'
 import type { BoardPost, BoardSection } from '../../lib/boards-api'
 import { midpointSortIndex } from '../../lib/boards-api'
+import { handleMenuKeyDown, focusFirstMenuitem } from '../../lib/a11y/menu-keyboard'
 
 type CardArrangeMenuProps = {
   post: BoardPost
@@ -32,6 +33,13 @@ export function CardArrangeMenu({
 }: CardArrangeMenuProps) {
   const { t } = useTranslation('common')
   const [open, setOpen] = useState(false)
+  const menuTypeaheadRef = useRef({ buffer: '', at: 0 })
+  const menuListRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    focusFirstMenuitem(menuListRef.current)
+  }, [open])
   const [latDraft, setLatDraft] = useState(String(post.lat ?? ''))
   const [lngDraft, setLngDraft] = useState(String(post.lng ?? ''))
   const [coordsOpen, setCoordsOpen] = useState(false)
@@ -83,9 +91,9 @@ export function CardArrangeMenu({
       </button>
       {open ? (
         <div
-          role="menu"
+          ref={menuListRef} role="menu"
           className="absolute end-0 z-20 mt-1 w-56 rounded-md border border-border-default bg-surface-raised py-1 shadow-lg dark:border-border-default dark:bg-surface-raised"
-        >
+         onKeyDown={(e) => handleMenuKeyDown(e, { onClose: () => setOpen(false) }, menuTypeaheadRef.current)} tabIndex={-1}>
           <button
             type="button"
             role="menuitem"

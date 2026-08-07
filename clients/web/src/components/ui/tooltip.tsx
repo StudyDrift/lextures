@@ -1,6 +1,7 @@
 import {
   cloneElement,
   isValidElement,
+  useEffect,
   useId,
   useLayoutEffect,
   useRef,
@@ -34,30 +35,63 @@ type TriggerProps = {
 
 /**
  * Accessible tooltip using aria-describedby (not the native `title` attribute).
+ * Keyboard-reachable via focus; dismissible with Escape; hoverable for SC 1.4.13
+ * (UX.4 FR-7).
  */
 export function Tooltip({ content, children, delayMs = 400, placement = 'top' }: TooltipProps) {
   const id = useId()
   const [open, setOpen] = useState(false)
   const [pos, setPos] = useState<CSSProperties>({})
   const triggerRef = useRef<HTMLElement | null>(null)
+  const tipRef = useRef<HTMLDivElement | null>(null)
   const timer = useRef<number | null>(null)
+  const hideTimer = useRef<number | null>(null)
 
-  function clearTimer() {
+  function clearShowTimer() {
     if (timer.current != null) {
       window.clearTimeout(timer.current)
       timer.current = null
     }
   }
 
+  function clearHideTimer() {
+    if (hideTimer.current != null) {
+      window.clearTimeout(hideTimer.current)
+      hideTimer.current = null
+    }
+  }
+
   function show() {
-    clearTimer()
+    clearHideTimer()
+    clearShowTimer()
     timer.current = window.setTimeout(() => setOpen(true), delayMs)
   }
 
-  function hide() {
-    clearTimer()
+  function hideSoon() {
+    clearShowTimer()
+    clearHideTimer()
+    // Brief grace so pointer can move onto the tooltip (SC 1.4.13).
+    hideTimer.current = window.setTimeout(() => setOpen(false), 100)
+  }
+
+  function hideNow() {
+    clearShowTimer()
+    clearHideTimer()
     setOpen(false)
   }
+
+  useEffect(() => {
+    if (!open) return
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        e.stopPropagation()
+        hideNow()
+      }
+    }
+    window.addEventListener('keydown', onKey, true)
+    return () => window.removeEventListener('keydown', onKey, true)
+  }, [open])
 
   useLayoutEffect(() => {
     if (!open || !triggerRef.current) return
@@ -91,7 +125,7 @@ export function Tooltip({ content, children, delayMs = 400, placement = 'top' }:
     },
     onMouseLeave: (e: MouseEvent) => {
       child.props.onMouseLeave?.(e)
-      hide()
+      hideSoon()
     },
     onFocus: (e: FocusEvent) => {
       child.props.onFocus?.(e)
@@ -99,7 +133,10 @@ export function Tooltip({ content, children, delayMs = 400, placement = 'top' }:
     },
     onBlur: (e: FocusEvent) => {
       child.props.onBlur?.(e)
-      hide()
+      // Don't hide if focus moved into the tooltip (rare; tip is not focusable by default).
+      const next = e.relatedTarget as Node | null
+      if (tipRef.current?.contains(next)) return
+      hideNow()
     },
   } as Partial<TriggerProps>)
 
@@ -109,12 +146,18 @@ export function Tooltip({ content, children, delayMs = 400, placement = 'top' }:
       {open && typeof document !== 'undefined'
         ? createPortal(
             <div
+              ref={tipRef}
               id={id}
               role="tooltip"
               style={pos}
               className={cx(
-                'pointer-events-none max-w-xs rounded-md bg-surface-inverse px-2 py-1 text-xs font-medium text-fg-inverse shadow-md',
+                // pointer-events-auto so users can hover the tip (SC 1.4.13).
+                'pointer-events-auto max-w-xs rounded-md bg-surface-inverse px-2 py-1 text-xs font-medium text-fg-inverse shadow-md',
               )}
+              onMouseEnter={() => {
+                clearHideTimer()
+              }}
+              onMouseLeave={() => hideSoon()}
             >
               {content}
             </div>,

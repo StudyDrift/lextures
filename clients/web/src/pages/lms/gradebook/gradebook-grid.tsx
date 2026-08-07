@@ -1559,7 +1559,7 @@ export function GradebookGrid({
                   className={`sticky ${stickyFinalLeft} z-[27] min-w-[5.5rem] ${pad} border-b border-e border-border-default bg-surface-sunken text-end align-top font-normal shadow-[inset_0_-1px_0_rgba(15,23,42,0.06)] dark:border-border-default dark:bg-surface-overlay`}
                   style={{ top: `${headerStickyPx > 0 ? headerStickyPx : 72}px` }}
                 >
-                  <div className="flex flex-col items-end gap-0.5 text-[11px] tabular-nums leading-snug">
+                  <div className="flex flex-col items-end gap-0.5 text-overline lex-tabular leading-snug">
                     <span>
                       <span className="text-fg-muted">Avg </span>
                       {classSummaryStats.finalAvg != null ? `${formatStat(classSummaryStats.finalAvg)}%` : '—'}
@@ -1579,7 +1579,7 @@ export function GradebookGrid({
                       className={`sticky z-[26] ${pad} ${assignmentColMin} border-b border-border-default bg-surface-sunken text-end align-top font-normal shadow-[inset_0_-1px_0_rgba(15,23,42,0.06)] dark:border-border-default dark:bg-surface-overlay`}
                       style={{ top: `${headerStickyPx > 0 ? headerStickyPx : 72}px` }}
                     >
-                      <div className="flex flex-col items-end gap-0.5 text-[11px] tabular-nums leading-snug">
+                      <div className="flex flex-col items-end gap-0.5 text-overline lex-tabular leading-snug">
                         <span title={col.maxPoints != null ? `Average of entered scores (out of ${col.maxPoints})` : 'Average of entered scores'}>
                           <span className="text-fg-muted">Avg </span>
                           {st.avg != null ? formatStat(st.avg) : '—'}
@@ -1834,7 +1834,7 @@ export function GradebookGrid({
                               inputMode="decimal"
                               autoComplete="off"
                               aria-label={`Grade for ${student.name}, ${col.title}`}
-                              className="m-0 w-full min-w-0 border-0 bg-transparent p-0 text-end text-sm tabular-nums text-slate-950 shadow-none outline-none ring-0 focus:ring-0 dark:text-fg-default"
+                              className="m-0 w-full min-w-0 border-0 bg-transparent p-0 text-end text-body-sm lex-tabular text-fg-default shadow-none outline-none ring-0 focus:ring-0 dark:text-fg-default"
                               value={draft}
                               onChange={(e) => setDraft(e.target.value)}
                               onPaste={(e) => {

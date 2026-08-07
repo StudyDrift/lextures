@@ -1,6 +1,7 @@
 import { ChevronDown } from 'lucide-react'
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import type { CourseAssignmentOption } from './activity-node-data'
+import { handleMenuKeyDown, focusFirstMenuitem } from '../../../lib/a11y/menu-keyboard'
 
 type AssignmentPickerProps = {
   assignments: CourseAssignmentOption[]
@@ -24,6 +25,13 @@ export function AssignmentPicker({
   onChange,
 }: AssignmentPickerProps) {
   const [open, setOpen] = useState(false)
+  const menuTypeaheadRef = useRef({ buffer: '', at: 0 })
+  const menuListRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    focusFirstMenuitem(menuListRef.current)
+  }, [open])
   const [query, setQuery] = useState('')
   const [highlightedIndex, setHighlightedIndex] = useState(0)
   const rootRef = useRef<HTMLDivElement>(null)
@@ -116,10 +124,10 @@ export function AssignmentPicker({
       {open ? (
         <div
           id={menuId}
-          role="menu"
+          ref={menuListRef} role="menu"
           aria-labelledby={buttonId}
           className="absolute start-0 top-full z-50 mt-1 flex max-h-72 w-full min-w-[14rem] flex-col overflow-hidden rounded-xl border border-border-default bg-surface-raised shadow-lg dark:border-border-default dark:bg-surface-raised"
-        >
+         onKeyDown={(e) => handleMenuKeyDown(e, { onClose: () => setOpen(false) }, menuTypeaheadRef.current)} tabIndex={-1}>
           <div className="shrink-0 border-b border-border-default p-2 dark:border-border-default">
             <label htmlFor={filterId} className="sr-only">
               {filterPlaceholder}

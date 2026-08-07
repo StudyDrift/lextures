@@ -28,6 +28,8 @@ export type DialogProps = {
   closeOnEscape?: boolean
   className?: string
   panelClassName?: string
+  /** Extra classes on the scrollable body region that wraps `children`. */
+  bodyClassName?: string
   size?: 'sm' | 'md' | 'lg' | 'xl'
   /** Called when exit animation finishes. */
   onExited?: () => void
@@ -58,6 +60,7 @@ export function Dialog({
   closeOnEscape = true,
   className = '',
   panelClassName = '',
+  bodyClassName = '',
   size = 'md',
   onExited,
   initialFocusRef,
@@ -110,37 +113,54 @@ export function Dialog({
         aria-labelledby={titleId}
         aria-describedby={description ? descId : undefined}
         className={cx(
-          'relative z-10 w-full rounded-2xl border border-border-default bg-surface-raised p-5 shadow-xl',
+          // Cap height to the viewport and scroll the body so long content
+          // (tables, forms) never overflows off-screen without a scrollbar.
+          'relative z-10 flex w-full max-h-[min(90vh,48rem)] flex-col overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-xl',
           sizeClass[size],
           panelClassName,
         )}
         data-testid="ui-dialog-panel"
       >
-        <div className="flex items-start justify-between gap-3">
-          <h2 id={titleId} className="text-lg font-semibold text-fg-default">
-            {title}
-          </h2>
-          {!hideClose ? (
-            <IconButton
-              variant="ghost"
-              size="sm"
-              aria-label={closeLabel}
-              onClick={onClose}
-              className="shrink-0"
-            >
-              <span aria-hidden className="text-base leading-none">
-                ×
-              </span>
-            </IconButton>
+        <div className="shrink-0 px-5 pt-5">
+          <div className="flex items-start justify-between gap-3">
+            <h2 id={titleId} className="text-lg font-semibold text-fg-default">
+              {title}
+            </h2>
+            {!hideClose ? (
+              <IconButton
+                variant="ghost"
+                size="sm"
+                aria-label={closeLabel}
+                onClick={onClose}
+                className="shrink-0"
+              >
+                <span aria-hidden className="text-base leading-none">
+                  ×
+                </span>
+              </IconButton>
+            ) : null}
+          </div>
+          {description ? (
+            <div id={descId} className="mt-2 text-sm text-fg-muted">
+              {description}
+            </div>
           ) : null}
         </div>
-        {description ? (
-          <div id={descId} className="mt-2 text-sm text-fg-muted">
-            {description}
+        {children ? (
+          <div
+            className={cx(
+              'min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-4',
+              bodyClassName,
+            )}
+          >
+            {children}
           </div>
         ) : null}
-        {children ? <div className="mt-4">{children}</div> : null}
-        {footer ? <div className="mt-6 flex flex-wrap justify-end gap-2">{footer}</div> : null}
+        {footer ? (
+          <div className="shrink-0 border-t border-border-subtle px-5 py-4">
+            <div className="flex flex-wrap justify-end gap-2">{footer}</div>
+          </div>
+        ) : null}
       </div>
     </OverlaySurface>
   )

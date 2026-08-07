@@ -668,7 +668,7 @@ to this standard when the mechanism exists.
 | G-1 Tokens | [UX.1](UX.1-semantic-design-token-system.md) |
 | G-2 Component adoption | [UX.2](../../completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md) |
 | G-7 Typography | [UX.3](UX.3-typography-and-reading-system.md) |
-| G-3, G-4, G-5a, G-5c ARIA | [UX.4](UX.4-aria-widget-and-focus-management-remediation.md) |
+| G-3, G-4, G-5a, G-5c ARIA | [UX.4](../../completed/ui-ux/UX.4-aria-widget-and-focus-management-remediation.md) |
 | G-5b WCAG 2.2 | [UX.5](UX.5-wcag-2.2-aa-conformance-uplift.md) |
 | G-8 Forms | [UX.6](UX.6-form-and-validation-system.md) |
 | G-5, G-5d Navigation | [UX.7](UX.7-navigation-information-architecture.md) |

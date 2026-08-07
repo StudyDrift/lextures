@@ -395,7 +395,7 @@ export function GradebookTransposedTable({
                     {col.maxPoints != null ? `Out of ${col.maxPoints}` : 'Max points not set'}
                   </span>
                   {stats ? (
-                    <span className="mt-1 block text-[11px] tabular-nums leading-snug text-fg-muted">
+                    <span className="mt-1 block text-overline lex-tabular leading-snug text-fg-muted">
                       Avg {stats.avg != null ? formatStat(stats.avg) : '—'} · Med{' '}
                       {stats.med != null ? formatStat(stats.med) : '—'}
                     </span>
@@ -480,7 +480,7 @@ export function GradebookTransposedTable({
                             inputMode="decimal"
                             autoComplete="off"
                             aria-label={`Grade for ${student.name}, ${col.title}`}
-                            className="m-0 w-full min-w-0 border-0 bg-transparent p-0 text-end text-sm tabular-nums text-slate-950 shadow-none outline-none ring-0 focus:ring-0 dark:text-fg-default"
+                            className="m-0 w-full min-w-0 border-0 bg-transparent p-0 text-end text-body-sm lex-tabular text-fg-default shadow-none outline-none ring-0 focus:ring-0 dark:text-fg-default"
                             value={draft}
                             onChange={(e) => setDraft(e.target.value)}
                             onBlur={commitEdit}

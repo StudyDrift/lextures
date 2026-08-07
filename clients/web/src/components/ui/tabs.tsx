@@ -55,6 +55,12 @@ function useTabs() {
   return ctx
 }
 
+/** True when the tablist (or document) is RTL — APG inverts horizontal arrows. */
+function isRtl(el: HTMLElement): boolean {
+  const dir = el.closest('[dir]')?.getAttribute('dir') ?? document.documentElement.dir
+  return dir === 'rtl'
+}
+
 export type TabListProps = {
   children: ReactNode
   className?: string
@@ -73,11 +79,20 @@ export function TabList({ children, className = '', 'aria-label': ariaLabel }: T
     const idx = tabs.indexOf(current)
     if (idx < 0) return
     const horizontal = orientation === 'horizontal'
+    const rtl = horizontal && isRtl(e.currentTarget)
     let next = idx
-    if ((horizontal && e.key === 'ArrowRight') || (!horizontal && e.key === 'ArrowDown')) {
+
+    const goNext =
+      (horizontal && (rtl ? e.key === 'ArrowLeft' : e.key === 'ArrowRight')) ||
+      (!horizontal && e.key === 'ArrowDown')
+    const goPrev =
+      (horizontal && (rtl ? e.key === 'ArrowRight' : e.key === 'ArrowLeft')) ||
+      (!horizontal && e.key === 'ArrowUp')
+
+    if (goNext) {
       e.preventDefault()
       next = (idx + 1) % tabs.length
-    } else if ((horizontal && e.key === 'ArrowLeft') || (!horizontal && e.key === 'ArrowUp')) {
+    } else if (goPrev) {
       e.preventDefault()
       next = (idx - 1 + tabs.length) % tabs.length
     } else if (e.key === 'Home') {

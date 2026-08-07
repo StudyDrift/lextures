@@ -46,7 +46,7 @@ quality improvement.
 - WCAG 2.2 **AAA** criteria (2.4.12 Focus Not Obscured Enhanced, 2.4.13 Focus
   Appearance, 3.3.9 Accessible Authentication Enhanced). Documented as
   aspirational only.
-- Re-litigating WCAG 2.1 criteria — that is [UX.4](UX.4-aria-widget-and-focus-management-remediation.md)
+- Re-litigating WCAG 2.1 criteria — that is [UX.4](../../completed/ui-ux/UX.4-aria-widget-and-focus-management-remediation.md)
   and [UX.1](UX.1-semantic-design-token-system.md).
 - Native iOS/Android clients (tracked separately in
   `docs/accessibility/mobile-audit-checklist.md`).
@@ -261,7 +261,7 @@ Not AI-touching.
 ## 13. Dependencies & Sequencing
 
 - **Must ship after** — [UX.2](../../completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md)
-  (target size by construction), [UX.4](UX.4-aria-widget-and-focus-management-remediation.md)
+  (target size by construction), [UX.4](../../completed/ui-ux/UX.4-aria-widget-and-focus-management-remediation.md)
   (focus management is a precondition for 2.4.11).
 - **Must ship before** — VPAT re-attestation and any EU RFP response claiming
   2.2 AA.
@@ -370,6 +370,6 @@ Not AI-touching.
   [EAA June 2025 deadline](https://www.insideglobaltech.com/2025/06/10/european-accessibility-act-june-2025-deadline-has-arrived/),
   [EN 301 549](https://www.deque.com/en-301-549-compliance/)
 - Related plans: [UX.2](../../completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md),
-  [UX.4](UX.4-aria-widget-and-focus-management-remediation.md),
+  [UX.4](../../completed/ui-ux/UX.4-aria-widget-and-focus-management-remediation.md),
   [`../standards/S20-accessibility-legal-mandates.md`](../standards/S20-accessibility-legal-mandates.md),
   `../../completed/12-accessibility/`

@@ -744,6 +744,13 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     pack: 'accessibility',
   },
   {
+    key: 'ffTypeScale',
+    label: 'Type scale (16px body)',
+    description:
+      'Raises default body text to 16px via the semantic type scale (UX.3). Roles and lint ship regardless; turn off to roll back to 14px base.',
+    pack: 'accessibility',
+  },
+  {
     key: 'ffPinnedSettings',
     label: 'Pinned editor settings',
     description:

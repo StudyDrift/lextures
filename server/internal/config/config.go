@@ -438,6 +438,8 @@ type Config struct {
 	RTLEnabled bool
 	// FFReadingPreferences gates the reading preferences panel UI (plan 12.6). Default false; flip after QA sign-off.
 	FFReadingPreferences bool
+	// FFTypeScale gates the 16px body base-size raise (UX.3). Roles/lint ship unflagged. Default false until dogfood.
+	FFTypeScale bool
 	// FFPinnedSettings gates per-user pinned settings in assignment/quiz editors (plan PS.2/PS.4).
 	// Platform default is true at GA (merge in platformconfig/features.go); env/DB can still force off.
 	FFPinnedSettings bool

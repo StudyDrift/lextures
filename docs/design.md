@@ -30,9 +30,12 @@ Do not encode meaning with colour alone (SC 1.4.1): pair with icon or text.
 
 ## Typography
 
-- **Font stack**: A contemporary **sans-serif** optimized for UI—e.g. **Plus Jakarta Sans** or **Inter** (variable weights, clear at small sizes).
-- **Headings**: Semibold, tight tracking (`tracking-tight`) for page titles.
-- **Body**: Regular/medium for UI labels; **muted gray** for helper and timestamp text.
+- **Font stack**: **Lextures** (self-hosted humanist sans) with system-ui fallbacks. Dyslexia-friendly options (OpenDyslexic, Atkinson Hyperlegible) via Reading Preferences.
+- **Type scale (UX.3)**: Authors pick **roles**, not raw sizes — `text-title-lg`, `text-title`, `text-subtitle`, `text-body-lg`, `text-body` (16px default when `ffTypeScale` is on), `text-body-sm`, `text-caption` (13px floor), `text-overline` (uppercase labels only), `text-code`. See [design-tokens.md](design-tokens.md).
+- **Headings**: Role utilities include weight and `text-wrap: balance`.
+- **Body**: `text-body` / `text-body-lg` with `text-wrap: pretty`; long-form columns use `lex-measure` (~65ch).
+- **Dense UI**: Tables and gradebook use `text-body-sm` + `lex-tabular` for aligned numerals.
+- **Do not** use `text-xs` / `text-sm` / `text-[Npx]` in feature code (`npm run type:purity`).
 
 ## Layout
 

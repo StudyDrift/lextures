@@ -13,6 +13,7 @@ import {
   setPlatformFeaturesSnapshot,
   type PlatformFeaturesSnapshot,
 } from '../lib/platform-features'
+import { applyTypeScaleFlag } from '../lib/apply-type-scale-flag'
 
 export type PlatformFeatures = {
   studentProgressEnabled: boolean
@@ -55,6 +56,7 @@ export type PlatformFeatures = {
   videoCaptionsEnabled: boolean
   autoCaptioningEnabled: boolean
   ffReadingPreferences: boolean
+  ffTypeScale: boolean
   ffPinnedSettings: boolean
   ffHighContrastReducedMotion: boolean
   ffMotionNavigation: boolean
@@ -202,6 +204,7 @@ const defaultFeatures: PlatformFeatures = {
   videoCaptionsEnabled: false,
   autoCaptioningEnabled: false,
   ffReadingPreferences: false,
+  ffTypeScale: false,
   ffPinnedSettings: true,
   ffHighContrastReducedMotion: false,
   ffMotionNavigation: true,
@@ -347,6 +350,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     videoCaptionsEnabled: false,
     autoCaptioningEnabled: false,
     ffReadingPreferences: false,
+  ffTypeScale: false,
     ffPinnedSettings: true,
     ffHighContrastReducedMotion: false,
     ffMotionNavigation: true,
@@ -499,6 +503,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           videoCaptionsEnabled: data.videoCaptionsEnabled === true,
           autoCaptioningEnabled: data.autoCaptioningEnabled === true,
           ffReadingPreferences: data.ffReadingPreferences === true,
+          ffTypeScale: data.ffTypeScale === true,
           ffPinnedSettings: data.ffPinnedSettings === true,
           ffHighContrastReducedMotion: data.ffHighContrastReducedMotion === true,
           ffMotionNavigation: data.ffMotionNavigation !== false,
@@ -608,6 +613,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           videoCaptionsEnabled: next.videoCaptionsEnabled === true,
           autoCaptioningEnabled: next.autoCaptioningEnabled === true,
           ffReadingPreferences: next.ffReadingPreferences === true,
+          ffTypeScale: next.ffTypeScale === true,
           ffPinnedSettings: next.ffPinnedSettings === true,
           ffHighContrastReducedMotion: next.ffHighContrastReducedMotion === true,
           ffMotionNavigation: next.ffMotionNavigation !== false,
@@ -722,6 +728,12 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
   useEffect(() => {
     void refresh()
   }, [refresh])
+
+  /* UX.3 — raise body base to 16px when ffTypeScale is on (data-type-scale). */
+  useEffect(() => {
+    if (loading) return
+    applyTypeScaleFlag(features.ffTypeScale === true)
+  }, [loading, features.ffTypeScale])
 
   // AN.6 — expose control-motion kill-switch to CSS (press/shake/toggle styles).
   useEffect(() => {

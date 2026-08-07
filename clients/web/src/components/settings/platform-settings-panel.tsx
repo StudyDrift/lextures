@@ -167,6 +167,7 @@ function emptyForm(): PlatformSettingsPayload {
     ffLibrary: false,
     ffLibraryIntegration: false,
     ffReadingPreferences: false,
+    ffTypeScale: false,
     ffPinnedSettings: true,
     ffMotionNavigation: true,
     ffMotionReveal: true,
