@@ -9993,6 +9993,37 @@
       "rationale": "Core component library adoption ratchet. No dedicated e2e journey; covered by web unit/component tests and lint ratchets rather than Playwright.",
       "owner": "Web Platform",
       "reviewed": true
+    },
+    {
+      "id": "UX.3",
+      "path": "docs/completed/ui-ux/UX.3-typography-and-reading-system.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "minor",
+      "client": "web",
+      "coverage": "not-applicable",
+      "rationale": "Semantic type scale tokens, reading text-scale prefs, and type-role purity ratchet (npm run type:purity). No Playwright journey; structural tooling and unit tests own regression detection.",
+      "owner": "Web Platform",
+      "reviewed": true
+    },
+    {
+      "id": "UX.4",
+      "path": "docs/completed/ui-ux/UX.4-aria-widget-and-focus-management-remediation.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "smoke",
+      "rationale": "ARIA widget/focus contracts with CI ratchet (npm run a11y:contracts) plus gallery-driven Playwright overlay smoke for Dialog/Tabs/Menu/Tooltip. Long-tail modal migration remains under the static ratchet.",
+      "owner": "Web Platform",
+      "specs": [
+        {
+          "path": "e2e/tests/aria-overlay-contracts.spec.ts"
+        }
+      ],
+      "reviewed": true
     }
   ]
 }
