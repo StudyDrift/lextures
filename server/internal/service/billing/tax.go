@@ -10,8 +10,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/stripe/stripe-go/v81"
-	taxcalc "github.com/stripe/stripe-go/v81/tax/calculation"
+	"github.com/stripe/stripe-go/v82"
+	taxcalc "github.com/stripe/stripe-go/v82/tax/calculation"
 
 	"github.com/lextures/lextures/server/internal/crypto"
 	repoBilling "github.com/lextures/lextures/server/internal/repos/billing"

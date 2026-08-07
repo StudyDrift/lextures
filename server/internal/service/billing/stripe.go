@@ -11,10 +11,10 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/stripe/stripe-go/v81"
-	billingportal "github.com/stripe/stripe-go/v81/billingportal/session"
-	"github.com/stripe/stripe-go/v81/customer"
-	"github.com/stripe/stripe-go/v81/webhook"
+	"github.com/stripe/stripe-go/v82"
+	billingportal "github.com/stripe/stripe-go/v82/billingportal/session"
+	"github.com/stripe/stripe-go/v82/customer"
+	"github.com/stripe/stripe-go/v82/webhook"
 
 	"github.com/lextures/lextures/server/internal/config"
 	"github.com/lextures/lextures/server/internal/courseroles"
@@ -456,11 +456,17 @@ func subscriptionMetaFromInvoice(ctx context.Context, pool *pgxpool.Pool, inv *s
 	if err != nil || userID == uuid.Nil {
 		return uuid.Nil, "", err
 	}
+	// Basil (API ≥ 2025-03-31): InvoiceLineItem.Price was removed in favor of
+	// Pricing.price_details.price (ID only). Infer monthly vs annual from the
+	// line's billing period when present; default to monthly.
 	entType := repoBilling.TypeSubscriptionMonthly
-	if inv.Lines != nil && len(inv.Lines.Data) > 0 && inv.Lines.Data[0].Price != nil {
-		switch inv.Lines.Data[0].Price.Recurring.Interval {
-		case stripe.PriceRecurringIntervalYear:
-			entType = repoBilling.TypeSubscriptionAnnual
+	if inv.Lines != nil && len(inv.Lines.Data) > 0 {
+		if period := inv.Lines.Data[0].Period; period != nil && period.End > period.Start {
+			// Annual periods are ~365 days; treat anything ≥ ~6 months as annual.
+			const sixMonths = int64(180 * 24 * 3600)
+			if period.End-period.Start >= sixMonths {
+				entType = repoBilling.TypeSubscriptionAnnual
+			}
 		}
 	}
 	return userID, entType, nil

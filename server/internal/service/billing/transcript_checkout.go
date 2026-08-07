@@ -8,7 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/stripe/stripe-go/v81"
+	"github.com/stripe/stripe-go/v82"
 
 	"github.com/lextures/lextures/server/internal/currency"
 	transcriptsrepo "github.com/lextures/lextures/server/internal/repos/transcripts"
