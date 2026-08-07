@@ -594,7 +594,7 @@ struct MainTabView: View {
         let kind = EnvironmentStore.shared.kind
         let apiBase = EnvironmentStore.shared.apiBaseURLString
         let billingOn = BillingLogic.billingEnabled(shell.platformFeatures)
-        let host = HomeschoolSubscribeGateLogic.isSelfLearnerHost(
+        let host = HomeschoolSubscribeGateLogic.isHomeschoolHost(
             kind: kind,
             apiBaseURLString: apiBase
         )

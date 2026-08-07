@@ -108,8 +108,16 @@ struct CoursesAdminView: View {
                         }.buttonStyle(.borderedProminent).tint(LexturesTheme.brandTeal)
                     }
                     if let errorMessage { LMSErrorBanner(message: errorMessage) }
-                    if loading && results == nil { LMSSkeletonList(count: 3) } else if let results { courseList(results, isFilter: false) } else if !PlatformCoursesAdminLogic.shouldSearch(submittedQuery) {
-                        LMSEmptyState(systemImage: "books.vertical", title: L.text("mobile.admin.courses.emptyTitle"), message: L.text("mobile.admin.courses.emptyMessage"))
+                    if loading && results == nil {
+                        LMSSkeletonList(count: 3)
+                    } else if let results {
+                        courseList(results, isFilter: false)
+                    } else if !PlatformCoursesAdminLogic.shouldSearch(submittedQuery) {
+                        LMSEmptyState(
+                            systemImage: "books.vertical",
+                            title: L.text("mobile.admin.courses.emptyTitle"),
+                            message: L.text("mobile.admin.courses.emptyMessage")
+                        )
                     }
                 }
                 .padding(16)

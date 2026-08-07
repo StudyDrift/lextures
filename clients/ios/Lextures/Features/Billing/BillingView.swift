@@ -40,7 +40,7 @@ struct BillingView: View {
                             LMSErrorBanner(message: errorMessage)
                         }
                         if let statusMessage {
-                            statusBanner(statusMessage)
+                            BillingStatusBanner(message: statusMessage)
                         }
 
                         subscriptionStatusCard
@@ -109,7 +109,7 @@ struct BillingView: View {
                             .font(.title3.weight(.semibold))
                             .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
 
-                        statusChip(
+                        BillingStatusChip(
                             title: L.text("mobile.billing.status.active"),
                             tone: .success
                         )
@@ -159,7 +159,7 @@ struct BillingView: View {
             LMSSectionHeader(title: L.text("mobile.billing.manage"), systemImage: "gearshape")
 
             LMSCard {
-                actionRow(
+                BillingActionRow(
                     systemImage: "apple.logo",
                     title: L.text("mobile.billing.manageSubscription"),
                     subtitle: L.text("mobile.billing.manageSubscriptionHint"),
@@ -170,7 +170,7 @@ struct BillingView: View {
 
                 Divider().opacity(0.5)
 
-                actionRow(
+                BillingActionRow(
                     systemImage: "arrow.clockwise",
                     title: restoreLoading
                         ? L.text("mobile.billing.iap.restoring")
@@ -184,7 +184,7 @@ struct BillingView: View {
 
                 Divider().opacity(0.5)
 
-                actionRow(
+                BillingActionRow(
                     systemImage: "globe",
                     title: portalLoading
                         ? L.text("mobile.billing.openingPortal")
@@ -216,9 +216,9 @@ struct BillingView: View {
                     ForEach(Array(historyItems.enumerated()), id: \.element.id) { index, item in
                         switch item {
                         case .transaction(let tx):
-                            transactionRow(tx)
+                            BillingTransactionRow(tx: tx)
                         case .entitlement(let ent):
-                            entitlementRow(ent)
+                            BillingEntitlementRow(item: ent)
                         }
                         if index < historyItems.count - 1 {
                             Divider().opacity(0.5)
@@ -226,190 +226,6 @@ struct BillingView: View {
                     }
                 }
             }
-        }
-    }
-
-    // MARK: - Rows
-
-    private func actionRow(
-        systemImage: String,
-        title: String,
-        subtitle: String,
-        trailingSystemImage: String?,
-        disabled: Bool = false,
-        action: @escaping () -> Void
-    ) -> some View {
-        Button(action: action) {
-            HStack(spacing: 12) {
-                Image(systemName: systemImage)
-                    .font(.body.weight(.semibold))
-                    .foregroundStyle(LexturesTheme.primary)
-                    .frame(width: 36, height: 36)
-                    .background(LexturesTheme.primary.opacity(colorScheme == .dark ? 0.18 : 0.12))
-                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(title)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-                    Text(subtitle)
-                        .font(.caption)
-                        .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-                if let trailingSystemImage {
-                    Image(systemName: trailingSystemImage)
-                        .font(.footnote.weight(.semibold))
-                        .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-                } else if disabled {
-                    ProgressView()
-                        .controlSize(.small)
-                }
-            }
-            .padding(.vertical, 4)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .disabled(disabled)
-        .opacity(disabled && trailingSystemImage != nil ? 0.55 : 1)
-    }
-
-    private func transactionRow(_ tx: BillingTransaction) -> some View {
-        HStack(alignment: .center, spacing: 12) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(providerLabel(tx.provider))
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-                Text(String(tx.createdAt.prefix(10)))
-                    .font(.caption)
-                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-            }
-            Spacer(minLength: 8)
-            VStack(alignment: .trailing, spacing: 6) {
-                Text(BillingLogic.formatMoney(cents: tx.amountCents, currency: tx.currency))
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-                statusChip(title: statusLabel(tx.status), tone: statusTone(tx.status))
-            }
-        }
-        .padding(.vertical, 4)
-        .accessibilityElement(children: .combine)
-    }
-
-    private func entitlementRow(_ item: BillingEntitlement) -> some View {
-        HStack(alignment: .center, spacing: 12) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(BillingLogic.entitlementLabel(item.entitlementType))
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-                Text(String(item.validFrom.prefix(10)))
-                    .font(.caption)
-                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-            }
-            Spacer(minLength: 8)
-            VStack(alignment: .trailing, spacing: 6) {
-                Text(BillingLogic.formatMoney(cents: item.amountPaidCents, currency: item.currency))
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-                statusChip(title: statusLabel(item.status), tone: statusTone(item.status))
-                if let tax = item.taxAmountCents, tax > 0 {
-                    Text(L.format(
-                        "mobile.billing.taxLine",
-                        BillingLogic.formatMoney(cents: tax, currency: item.currency)
-                    ))
-                    .font(.caption2)
-                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-                }
-            }
-        }
-        .padding(.vertical, 4)
-        .accessibilityElement(children: .combine)
-    }
-
-    private func statusBanner(_ message: String) -> some View {
-        Label(message, systemImage: "checkmark.circle.fill")
-            .font(.subheadline)
-            .foregroundStyle(LexturesTheme.brandTeal)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(14)
-            .background(LexturesTheme.brandTeal.opacity(0.1))
-            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-    }
-
-    private func statusChip(title: String, tone: StatusTone) -> some View {
-        Text(title)
-            .font(.caption2.weight(.semibold))
-            .foregroundStyle(tone.foreground)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 3)
-            .background(tone.foreground.opacity(colorScheme == .dark ? 0.2 : 0.12))
-            .clipShape(Capsule())
-    }
-
-    // MARK: - Formatting
-
-    private enum StatusTone {
-        case success, warning, neutral, danger
-
-        var foreground: Color {
-            switch self {
-            case .success: return LexturesTheme.brandTeal
-            case .warning: return LexturesTheme.amber
-            case .danger: return LexturesTheme.error
-            case .neutral: return .secondary
-            }
-        }
-    }
-
-    private enum BillingHistoryItem: Identifiable {
-        case transaction(BillingTransaction)
-        case entitlement(BillingEntitlement)
-
-        var id: String {
-            switch self {
-            case .transaction(let tx): return "tx-\(tx.id)"
-            case .entitlement(let ent): return "ent-\(ent.id)"
-            }
-        }
-    }
-
-    private func providerLabel(_ provider: String) -> String {
-        let trimmed = provider.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return L.text("mobile.billing.provider.unknown") }
-        switch trimmed.lowercased() {
-        case "stripe": return L.text("mobile.billing.provider.stripe")
-        case "apple", "app_store", "appstore": return L.text("mobile.billing.provider.apple")
-        default: return trimmed.capitalized
-        }
-    }
-
-    private func statusLabel(_ status: String) -> String {
-        switch status.lowercased() {
-        case "active", "succeeded", "paid", "complete", "completed":
-            return L.text("mobile.billing.status.paid")
-        case "pending", "processing", "open":
-            return L.text("mobile.billing.status.pending")
-        case "failed", "canceled", "cancelled":
-            return L.text("mobile.billing.status.failed")
-        case "refunded":
-            return L.text("mobile.billing.status.refunded")
-        default:
-            return status.capitalized
-        }
-    }
-
-    private func statusTone(_ status: String) -> StatusTone {
-        switch status.lowercased() {
-        case "active", "succeeded", "paid", "complete", "completed":
-            return .success
-        case "pending", "processing", "open":
-            return .warning
-        case "failed", "canceled", "cancelled":
-            return .danger
-        default:
-            return .neutral
         }
     }
 
@@ -467,4 +283,217 @@ struct BillingView: View {
 
 struct BillingRoute: Hashable, Identifiable {
     var id: String { "billing" }
+}
+
+// MARK: - File-level helpers (kept outside BillingView to satisfy type_body_length)
+
+private enum BillingStatusTone {
+    case success, warning, neutral, danger
+
+    var foreground: Color {
+        switch self {
+        case .success: return LexturesTheme.brandTeal
+        case .warning: return LexturesTheme.amber
+        case .danger: return LexturesTheme.error
+        case .neutral: return .secondary
+        }
+    }
+}
+
+private enum BillingHistoryItem: Identifiable {
+    case transaction(BillingTransaction)
+    case entitlement(BillingEntitlement)
+
+    var id: String {
+        switch self {
+        case .transaction(let tx): return "tx-\(tx.id)"
+        case .entitlement(let ent): return "ent-\(ent.id)"
+        }
+    }
+}
+
+private enum BillingViewFormatting {
+    static func providerLabel(_ provider: String) -> String {
+        let trimmed = provider.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return L.text("mobile.billing.provider.unknown") }
+        switch trimmed.lowercased() {
+        case "stripe": return L.text("mobile.billing.provider.stripe")
+        case "apple", "app_store", "appstore": return L.text("mobile.billing.provider.apple")
+        default: return trimmed.capitalized
+        }
+    }
+
+    static func statusLabel(_ status: String) -> String {
+        switch status.lowercased() {
+        case "active", "succeeded", "paid", "complete", "completed":
+            return L.text("mobile.billing.status.paid")
+        case "pending", "processing", "open":
+            return L.text("mobile.billing.status.pending")
+        case "failed", "canceled", "cancelled":
+            return L.text("mobile.billing.status.failed")
+        case "refunded":
+            return L.text("mobile.billing.status.refunded")
+        default:
+            return status.capitalized
+        }
+    }
+
+    static func statusTone(_ status: String) -> BillingStatusTone {
+        switch status.lowercased() {
+        case "active", "succeeded", "paid", "complete", "completed":
+            return .success
+        case "pending", "processing", "open":
+            return .warning
+        case "failed", "canceled", "cancelled":
+            return .danger
+        default:
+            return .neutral
+        }
+    }
+}
+
+private struct BillingStatusBanner: View {
+    let message: String
+
+    var body: some View {
+        Label(message, systemImage: "checkmark.circle.fill")
+            .font(.subheadline)
+            .foregroundStyle(LexturesTheme.brandTeal)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(14)
+            .background(LexturesTheme.brandTeal.opacity(0.1))
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+    }
+}
+
+private struct BillingStatusChip: View {
+    @Environment(\.colorScheme) private var colorScheme
+    let title: String
+    let tone: BillingStatusTone
+
+    var body: some View {
+        Text(title)
+            .font(.caption2.weight(.semibold))
+            .foregroundStyle(tone.foreground)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 3)
+            .background(tone.foreground.opacity(colorScheme == .dark ? 0.2 : 0.12))
+            .clipShape(Capsule())
+    }
+}
+
+private struct BillingActionRow: View {
+    @Environment(\.colorScheme) private var colorScheme
+    let systemImage: String
+    let title: String
+    let subtitle: String
+    let trailingSystemImage: String?
+    var disabled: Bool = false
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                Image(systemName: systemImage)
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(LexturesTheme.primary)
+                    .frame(width: 36, height: 36)
+                    .background(LexturesTheme.primary.opacity(colorScheme == .dark ? 0.18 : 0.12))
+                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+                    Text(subtitle)
+                        .font(.caption)
+                        .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                if let trailingSystemImage {
+                    Image(systemName: trailingSystemImage)
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                } else if disabled {
+                    ProgressView()
+                        .controlSize(.small)
+                }
+            }
+            .padding(.vertical, 4)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(disabled)
+        .opacity(disabled && trailingSystemImage != nil ? 0.55 : 1)
+    }
+}
+
+private struct BillingTransactionRow: View {
+    @Environment(\.colorScheme) private var colorScheme
+    let tx: BillingTransaction
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(BillingViewFormatting.providerLabel(tx.provider))
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+                Text(String(tx.createdAt.prefix(10)))
+                    .font(.caption)
+                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+            }
+            Spacer(minLength: 8)
+            VStack(alignment: .trailing, spacing: 6) {
+                Text(BillingLogic.formatMoney(cents: tx.amountCents, currency: tx.currency))
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+                BillingStatusChip(
+                    title: BillingViewFormatting.statusLabel(tx.status),
+                    tone: BillingViewFormatting.statusTone(tx.status)
+                )
+            }
+        }
+        .padding(.vertical, 4)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+private struct BillingEntitlementRow: View {
+    @Environment(\.colorScheme) private var colorScheme
+    let item: BillingEntitlement
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(BillingLogic.entitlementLabel(item.entitlementType))
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+                Text(String(item.validFrom.prefix(10)))
+                    .font(.caption)
+                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+            }
+            Spacer(minLength: 8)
+            VStack(alignment: .trailing, spacing: 6) {
+                Text(BillingLogic.formatMoney(cents: item.amountPaidCents, currency: item.currency))
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+                BillingStatusChip(
+                    title: BillingViewFormatting.statusLabel(item.status),
+                    tone: BillingViewFormatting.statusTone(item.status)
+                )
+                if let tax = item.taxAmountCents, tax > 0 {
+                    Text(L.format(
+                        "mobile.billing.taxLine",
+                        BillingLogic.formatMoney(cents: tax, currency: item.currency)
+                    ))
+                    .font(.caption2)
+                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                }
+            }
+        }
+        .padding(.vertical, 4)
+        .accessibilityElement(children: .combine)
+    }
 }

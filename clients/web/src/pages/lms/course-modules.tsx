@@ -61,6 +61,7 @@ import { AddCourseItemMenu } from './add-course-item-menu'
 import { AdjustDatesModal } from './adjust-dates-modal'
 import { AddModuleItemMenu, type ModuleItemKind } from './add-module-item-menu'
 import { CourseModulesLoadingSkeleton } from '../../components/ui/lms-content-skeletons'
+import { Button } from '../../components/ui/button'
 import { IconSwap } from '../../components/ui/icon-swap'
 import { FeatureHelpTrigger } from '../../components/feature-help/feature-help-trigger'
 import { toast, toastWithUndo } from '../../lib/lms-toast'
@@ -2586,6 +2587,15 @@ export default function CourseModules() {
                 <span className="hidden sm:inline">AI</span>
               </button>
             ) : null}
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              disabled={anyModalBusy}
+              onClick={() => setAdjustDatesOpen(true)}
+            >
+              Adjust Dates
+            </Button>
             <AddCourseItemMenu
               onAdd={openAddModule}
               disabled={anyModalBusy}
@@ -2596,7 +2606,6 @@ export default function CourseModules() {
                 moduleIds.length > 0 && moduleIds.every((id) => collapsedModuleIds.has(id))
               }
               onCollapseExpandAllModules={handleCollapseExpandAllModules}
-              onAdjustDates={() => setAdjustDatesOpen(true)}
             />
           </div>
         ) : null

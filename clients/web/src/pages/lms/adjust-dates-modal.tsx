@@ -191,14 +191,14 @@ export function AdjustDatesModal({
     <Dialog
       open={open}
       onClose={onClose}
-      title="Adjust Dates"
+      title={'Adjust Dates'}
       description={
         isRelative
           ? 'Bulk-adjust due dates for this course. Dates are stored as absolute instants and shift relative to each learner’s enrollment when the course uses relative scheduling.'
           : 'Bulk-adjust due dates for assignments, quizzes, and content pages. Preview changes, then accept.'
       }
       size="xl"
-      closeLabel="Close"
+      closeLabel={'Close'}
       footer={
         <>
           <Button type="button" variant="secondary" onClick={onClose} disabled={applying}>

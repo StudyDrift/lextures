@@ -2,20 +2,20 @@ import XCTest
 @testable import Lextures
 
 final class HomeschoolSubscribeGateLogicTests: XCTestCase {
-    func testSelfLearnerHostByKind() {
-        XCTAssertTrue(HomeschoolSubscribeGateLogic.isSelfLearnerHost(kind: .homeschool, apiBaseURLString: nil))
-        XCTAssertFalse(HomeschoolSubscribeGateLogic.isSelfLearnerHost(kind: .school, apiBaseURLString: "https://acme.lextures.com"))
+    func testHomeschoolHostByKind() {
+        XCTAssertTrue(HomeschoolSubscribeGateLogic.isHomeschoolHost(kind: .homeschool, apiBaseURLString: nil))
+        XCTAssertFalse(HomeschoolSubscribeGateLogic.isHomeschoolHost(kind: .school, apiBaseURLString: "https://acme.lextures.com"))
     }
 
-    func testSelfLearnerHostByURL() {
+    func testHomeschoolHostByURL() {
         XCTAssertTrue(
-            HomeschoolSubscribeGateLogic.isSelfLearnerHost(
+            HomeschoolSubscribeGateLogic.isHomeschoolHost(
                 kind: .school,
                 apiBaseURLString: "https://self.lextures.com"
             )
         )
         XCTAssertTrue(
-            HomeschoolSubscribeGateLogic.isSelfLearnerHost(
+            HomeschoolSubscribeGateLogic.isHomeschoolHost(
                 kind: nil,
                 apiBaseURLString: "https://self.lextures.com/api"
             )
@@ -25,28 +25,28 @@ final class HomeschoolSubscribeGateLogicTests: XCTestCase {
     func testEligibleRequiresAllGates() {
         XCTAssertTrue(
             HomeschoolSubscribeGateLogic.isEligible(
-                isSelfLearnerHost: true,
+                isHomeschoolHost: true,
                 billingEnabled: true,
                 hasActiveSubscription: false
             )
         )
         XCTAssertFalse(
             HomeschoolSubscribeGateLogic.isEligible(
-                isSelfLearnerHost: true,
+                isHomeschoolHost: true,
                 billingEnabled: true,
                 hasActiveSubscription: true
             )
         )
         XCTAssertFalse(
             HomeschoolSubscribeGateLogic.isEligible(
-                isSelfLearnerHost: false,
+                isHomeschoolHost: false,
                 billingEnabled: true,
                 hasActiveSubscription: false
             )
         )
         XCTAssertFalse(
             HomeschoolSubscribeGateLogic.isEligible(
-                isSelfLearnerHost: true,
+                isHomeschoolHost: true,
                 billingEnabled: false,
                 hasActiveSubscription: false
             )

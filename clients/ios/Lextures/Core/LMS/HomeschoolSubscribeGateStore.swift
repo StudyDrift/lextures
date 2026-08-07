@@ -44,12 +44,12 @@ final class HomeschoolSubscribeGateStore {
         apiBaseURLString: String?,
         billingEnabled: Bool
     ) {
-        let host = HomeschoolSubscribeGateLogic.isSelfLearnerHost(
+        let host = HomeschoolSubscribeGateLogic.isHomeschoolHost(
             kind: environmentKind,
             apiBaseURLString: apiBaseURLString
         )
         let eligible = HomeschoolSubscribeGateLogic.isEligible(
-            isSelfLearnerHost: host,
+            isHomeschoolHost: host,
             billingEnabled: billingEnabled,
             hasActiveSubscription: hasActiveSubscription
         )

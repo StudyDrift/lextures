@@ -1,14 +1,14 @@
 import Foundation
 
-/// Freemium gate for the hosted self-learner environment (`self.lextures.com`).
+/// Freemium gate for the hosted Homeschool environment (`self.lextures.com`).
 /// When a signed-in learner has no active subscription, the app presents a full-screen
 /// subscribe prompt after a short delay (StoreKit).
 enum HomeschoolSubscribeGateLogic {
     /// Delay after eligibility is confirmed before presenting the paywall.
     static let presentationDelaySeconds: TimeInterval = 5
 
-    /// True when the selected environment is the public self-learner host.
-    static func isSelfLearnerHost(
+    /// True when the selected environment is the public Homeschool host.
+    static func isHomeschoolHost(
         kind: EnvironmentStore.Kind?,
         apiBaseURLString: String?
     ) -> Bool {
@@ -19,11 +19,11 @@ enum HomeschoolSubscribeGateLogic {
 
     /// Gate only applies on self.lextures.com when billing is enabled and no sub is active.
     static func isEligible(
-        isSelfLearnerHost: Bool,
+        isHomeschoolHost: Bool,
         billingEnabled: Bool,
         hasActiveSubscription: Bool
     ) -> Bool {
-        isSelfLearnerHost && billingEnabled && !hasActiveSubscription
+        isHomeschoolHost && billingEnabled && !hasActiveSubscription
     }
 
     /// Whether the full-screen subscribe UI should appear.
