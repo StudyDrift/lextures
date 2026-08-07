@@ -56,10 +56,7 @@ func (p *StripeProvider) CreateCheckoutSession(ctx context.Context, req Checkout
 	if currency == "" {
 		currency = "usd"
 	}
-	taxCode := req.TaxCode
-	if taxCode == "" {
-		taxCode = "txcd_99999999"
-	}
+	taxCode := NormalizeTaxCode(req.TaxCode)
 	params.PaymentIntentData = &stripe.CheckoutSessionPaymentIntentDataParams{
 		Metadata: params.Metadata,
 	}

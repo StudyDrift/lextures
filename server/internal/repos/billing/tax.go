@@ -12,53 +12,53 @@ import (
 )
 
 const (
-	TaxTypeNone      = "none"
-	TaxTypeVAT       = "vat"
-	TaxTypeGST       = "gst"
-	TaxTypeSalesTax  = "sales_tax"
-	PriceDisplayInc  = "inclusive"
-	PriceDisplayExc  = "exclusive"
+	TaxTypeNone     = "none"
+	TaxTypeVAT      = "vat"
+	TaxTypeGST      = "gst"
+	TaxTypeSalesTax = "sales_tax"
+	PriceDisplayInc = "inclusive"
+	PriceDisplayExc = "exclusive"
 )
 
 // OrgTaxSettings is per-org tax configuration (plan 15.13).
 type OrgTaxSettings struct {
-	OrgID                     uuid.UUID
-	Enabled                   bool
-	RegisteredJurisdictions   []string
-	DefaultTaxCategory        string
-	PriceDisplay              string
-	FilingMode                string
-	RecordRetentionYears      int
-	SellerName                string
-	SellerAddress             string
-	SellerTaxID               string
-	UpdatedAt                 time.Time
+	OrgID                   uuid.UUID
+	Enabled                 bool
+	RegisteredJurisdictions []string
+	DefaultTaxCategory      string
+	PriceDisplay            string
+	FilingMode              string
+	RecordRetentionYears    int
+	SellerName              string
+	SellerAddress           string
+	SellerTaxID             string
+	UpdatedAt               time.Time
 }
 
 // TaxFields captures tax metadata stored on an entitlement.
 type TaxFields struct {
-	SubtotalCents            int
-	TaxAmountCents           int
-	TaxRate                  *float64
-	TaxJurisdiction          string
-	TaxType                  string
-	TaxInclusive             bool
-	CustomerCountry          string
-	CustomerRegion           string
-	CustomerTaxIDEnc         string
-	ReverseCharge            bool
-	StripeTaxCalculationID   string
-	InvoiceID                *uuid.UUID
+	SubtotalCents          int
+	TaxAmountCents         int
+	TaxRate                *float64
+	TaxJurisdiction        string
+	TaxType                string
+	TaxInclusive           bool
+	CustomerCountry        string
+	CustomerRegion         string
+	CustomerTaxIDEnc       string
+	ReverseCharge          bool
+	StripeTaxCalculationID string
+	InvoiceID              *uuid.UUID
 }
 
 // TaxInvoice is a tax-compliant invoice record.
 type TaxInvoice struct {
-	ID             uuid.UUID
-	EntitlementID  uuid.UUID
-	InvoiceNumber  string
-	PDFStorageKey  string
-	IssuedAt       time.Time
-	CreditedBy     *uuid.UUID
+	ID            uuid.UUID
+	EntitlementID uuid.UUID
+	InvoiceNumber string
+	PDFStorageKey string
+	IssuedAt      time.Time
+	CreditedBy    *uuid.UUID
 }
 
 // TaxReportRow aggregates tax collected for a jurisdiction and period.
@@ -89,7 +89,7 @@ WHERE org_id = $1
 	if errors.Is(err, pgx.ErrNoRows) {
 		return &OrgTaxSettings{
 			OrgID:                orgID,
-			DefaultTaxCategory:   "txcd_99999999",
+			DefaultTaxCategory:   "txcd_10103000",
 			PriceDisplay:         PriceDisplayExc,
 			FilingMode:           "manual",
 			RecordRetentionYears: 7,
@@ -110,8 +110,8 @@ func UpsertOrgTaxSettings(ctx context.Context, pool *pgxpool.Pool, s OrgTaxSetti
 	if err != nil {
 		return err
 	}
-	if s.DefaultTaxCategory == "" {
-		s.DefaultTaxCategory = "txcd_99999999"
+	if s.DefaultTaxCategory == "" || s.DefaultTaxCategory == "txcd_99999999" {
+		s.DefaultTaxCategory = "txcd_10103000"
 	}
 	if s.PriceDisplay == "" {
 		s.PriceDisplay = PriceDisplayExc

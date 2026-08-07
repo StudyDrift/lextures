@@ -6,6 +6,18 @@ import (
 	"github.com/google/uuid"
 )
 
+// DefaultDigitalTaxCode is Stripe's "Software as a service (SaaS) - personal use".
+// Eligible for Managed Payments; replaces the legacy catch-all txcd_99999999.
+const DefaultDigitalTaxCode = "txcd_10103000"
+
+// NormalizeTaxCode returns a Managed Payments–eligible product tax code.
+func NormalizeTaxCode(code string) string {
+	if code == "" || code == "txcd_99999999" {
+		return DefaultDigitalTaxCode
+	}
+	return code
+}
+
 // CheckoutRequest starts a hosted checkout flow.
 type CheckoutRequest struct {
 	UserID             uuid.UUID
@@ -22,8 +34,11 @@ type CheckoutRequest struct {
 	CancelURL          string
 	Country            string
 	PlatformTaxEnabled bool
-	TaxCode            string
-	Metadata           map[string]string
+	// TaxCode is a Stripe product tax code (e.g. txcd_10103000 for SaaS personal).
+	// Empty or the legacy catch-all txcd_99999999 is replaced with DefaultDigitalTaxCode
+	// so Checkout works with Managed Payments accounts.
+	TaxCode  string
+	Metadata map[string]string
 }
 
 // SubscriptionRequest starts a recurring checkout.

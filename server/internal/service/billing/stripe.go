@@ -28,30 +28,30 @@ import (
 
 // CheckoutRequest is the learner checkout payload.
 type CheckoutRequest struct {
-	UserID              uuid.UUID
-	Email               string
-	CourseID            *uuid.UUID
-	Plan                string // monthly | annual
-	PromoCode           string
-	AffiliateCode       string
-	SuccessURL          string
-	CancelURL           string
-	PlatformTaxEnabled  bool
+	UserID             uuid.UUID
+	Email              string
+	CourseID           *uuid.UUID
+	Plan               string // monthly | annual
+	PromoCode          string
+	AffiliateCode      string
+	SuccessURL         string
+	CancelURL          string
+	PlatformTaxEnabled bool
 }
 
 // CheckoutResult is a Stripe Checkout redirect.
 type CheckoutResult struct {
-	SessionID  string
+	SessionID   string
 	CheckoutURL string
 }
 
 // Config bundles Stripe credentials and price ids.
 type StripeConfig struct {
-	SecretKey         string
-	WebhookSecret     string
-	MonthlyPriceID    string
-	AnnualPriceID     string
-	PublicWebOrigin   string
+	SecretKey       string
+	WebhookSecret   string
+	MonthlyPriceID  string
+	AnnualPriceID   string
+	PublicWebOrigin string
 }
 
 // ConfigFrom merges process config for Stripe calls.
@@ -74,7 +74,7 @@ func CreateCheckoutSession(ctx context.Context, pool *pgxpool.Pool, cfg StripeCo
 	if !cfg.IsConfigured() {
 		return nil, errors.New("stripe not configured")
 	}
-	taxCode := "txcd_99999999"
+	taxCode := paymentprovider.DefaultDigitalTaxCode
 	if req.CourseID != nil {
 		price, err := repoBilling.CoursePriceByID(ctx, pool, *req.CourseID)
 		if err != nil {
@@ -82,7 +82,7 @@ func CreateCheckoutSession(ctx context.Context, pool *pgxpool.Pool, cfg StripeCo
 		}
 		if price != nil {
 			if taxEnabled, settings, _ := TaxEnabledForOrg(ctx, pool, price.OrgID, req.PlatformTaxEnabled); taxEnabled && settings != nil {
-				taxCode = settings.DefaultTaxCategory
+				taxCode = paymentprovider.NormalizeTaxCode(settings.DefaultTaxCategory)
 			}
 		}
 	}
@@ -139,7 +139,7 @@ type WebhookResult struct {
 
 // WebhookOptions configures optional post-payment side effects.
 type WebhookOptions struct {
-	RevenueShareEnabled bool
+	RevenueShareEnabled  bool
 	TaxCollectionEnabled bool
 }
 

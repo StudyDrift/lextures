@@ -63,10 +63,7 @@ func StartCheckout(ctx context.Context, pool *pgxpool.Pool, cfg Config, req Star
 		if code := strings.TrimSpace(req.AffiliateCode); code != "" {
 			meta["affiliate_code"] = code
 		}
-		taxCode := req.TaxCode
-		if taxCode == "" {
-			taxCode = "txcd_99999999"
-		}
+		taxCode := NormalizeTaxCode(req.TaxCode)
 		if providerName == ProviderStripe {
 			customerID, err := ensureStripeCustomer(ctx, pool, cfg, req.UserID, req.Email)
 			if err != nil {
