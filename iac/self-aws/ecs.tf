@@ -36,6 +36,7 @@ locals {
   )
 
   # Secret keys injected from the JSON blob in Secrets Manager.
+  # Must match keys written in secrets.tf (including empty billing/IAP placeholders).
   app_secret_keys = [
     "DATABASE_URL",
     "REDIS_URL",
@@ -50,6 +51,13 @@ locals {
     "STORAGE_BUCKET",
     "STORAGE_REGION",
     "AWS_REGION",
+    "STRIPE_SECRET_KEY",
+    "STRIPE_WEBHOOK_SECRET",
+    "STRIPE_MONTHLY_PRICE_ID",
+    "STRIPE_ANNUAL_PRICE_ID",
+    "APPLE_IAP_BUNDLE_ID",
+    "APPLE_IAP_MONTHLY_PRODUCT_ID",
+    "APPLE_IAP_ANNUAL_PRODUCT_ID",
   ]
 
   # Optional private-registry pull credentials (GHCR, etc.).

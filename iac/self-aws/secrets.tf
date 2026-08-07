@@ -58,6 +58,14 @@ resource "aws_secretsmanager_secret_version" "app" {
     STORAGE_BUCKET                 = aws_s3_bucket.course_files.id
     STORAGE_REGION                 = data.aws_region.current.name
     AWS_REGION                     = data.aws_region.current.name
+    # Billing / IAP — empty strings leave those features unconfigured until set in TFC.
+    STRIPE_SECRET_KEY              = var.stripe_secret_key
+    STRIPE_WEBHOOK_SECRET          = var.stripe_webhook_secret
+    STRIPE_MONTHLY_PRICE_ID        = var.stripe_monthly_price_id
+    STRIPE_ANNUAL_PRICE_ID         = var.stripe_annual_price_id
+    APPLE_IAP_BUNDLE_ID            = var.apple_iap_bundle_id
+    APPLE_IAP_MONTHLY_PRODUCT_ID   = var.apple_iap_monthly_product_id
+    APPLE_IAP_ANNUAL_PRODUCT_ID    = var.apple_iap_annual_product_id
   })
 }
 

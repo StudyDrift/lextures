@@ -129,6 +129,50 @@ variable "course_files_cors_allowed_origins" {
   default     = []
 }
 
+variable "stripe_secret_key" {
+  description = "Stripe API secret key (sk_live_… or sk_test_…). Injected as STRIPE_SECRET_KEY on the API task. Empty leaves Stripe checkout unconfigured."
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "stripe_webhook_secret" {
+  description = "Stripe webhook signing secret (whsec_…). Injected as STRIPE_WEBHOOK_SECRET. Required for reliable entitlement grants after checkout."
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "stripe_monthly_price_id" {
+  description = "Stripe Price id for monthly platform subscription (price_…). Injected as STRIPE_MONTHLY_PRICE_ID."
+  type        = string
+  default     = ""
+}
+
+variable "stripe_annual_price_id" {
+  description = "Stripe Price id for annual platform subscription (price_…). Injected as STRIPE_ANNUAL_PRICE_ID."
+  type        = string
+  default     = ""
+}
+
+variable "apple_iap_bundle_id" {
+  description = "iOS app bundle id for StoreKit verification (e.g. com.lextures.ios). Injected as APPLE_IAP_BUNDLE_ID."
+  type        = string
+  default     = ""
+}
+
+variable "apple_iap_monthly_product_id" {
+  description = "App Store product id for monthly access (e.g. com.lextures.ios.sub.monthly). Injected as APPLE_IAP_MONTHLY_PRODUCT_ID."
+  type        = string
+  default     = ""
+}
+
+variable "apple_iap_annual_product_id" {
+  description = "App Store product id for annual access (e.g. com.lextures.ios.sub.annual). Injected as APPLE_IAP_ANNUAL_PRODUCT_ID."
+  type        = string
+  default     = ""
+}
+
 variable "bootstrap_admin_email" {
   description = "If set, the first password signup whose email matches (case-insensitive) receives Global Admin when no human users exist yet. Empty disables bootstrap-on-signup (use server/cmd/bootstrap-admin instead)."
   type        = string
