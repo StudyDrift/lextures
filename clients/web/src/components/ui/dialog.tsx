@@ -1,4 +1,4 @@
-import { useEffect, useId, useLayoutEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useId, useRef, type ReactNode } from 'react'
 import { createFocusTrap } from '../../lib/a11y/focus-trap'
 import { useInertBackground } from './use-inert-background'
 import { OverlaySurface } from './overlay-surface'
@@ -72,9 +72,11 @@ export function Dialog({
 
   useInertBackground(open)
 
-  // Layout phase: capture restore target + move focus before paint, and before
-  // useInertBackground's deferred inert application can blur the trigger.
-  useLayoutEffect(() => {
+  // useEffect (not layout): on close, inert release (also useEffect, declared
+  // above) runs first so restoreFocus can land on the trigger inside #root.
+  // Open-path capture still works because useInertBackground defers applying
+  // inert to a microtask after this activate() runs.
+  useEffect(() => {
     if (!open || !panelRef.current) return
     const trap = createFocusTrap(panelRef.current)
     trap.activate()
