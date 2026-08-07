@@ -153,7 +153,7 @@ Copy/adapt this reply into App Store Connect.
 
 ### 4. What paid content, subscriptions, or features are unlocked within the app that do not use In-App Purchase?
 
-- **Consumer digital courses and self-learner subscriptions** are unlocked via **In-App Purchase** on iOS (or already-owned multiplatform entitlements that are also offered as IAP).
+- **Consumer digital courses and homeschool subscriptions** are unlocked via **In-App Purchase** on iOS (or already-owned multiplatform entitlements that are also offered as IAP).
 - Institutional seats and org-level features are unlocked by **organization provisioning**, not by an in-app consumer store.
 - Web Stripe purchases unlock the same multiplatform entitlements; those SKUs are also available as IAP (guideline 3.1.3(b)).
 

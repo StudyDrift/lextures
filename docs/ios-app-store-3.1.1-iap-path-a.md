@@ -77,7 +77,7 @@ Billing feature flags (`ffStripeBilling` / `ffPaymentsEnabled`) still gate the b
 
 ## App Review reply template (3.1.1)
 
-> Digital courses and self-learner subscriptions are available for purchase **in the app using In-App Purchase** (StoreKit).  
+> Digital courses and homeschool subscriptions are available for purchase **in the app using In-App Purchase** (StoreKit).  
 >  
 > **How to purchase in the app**  
 > 1. Sign in with the demo account.  

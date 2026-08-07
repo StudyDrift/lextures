@@ -363,6 +363,8 @@ GET	/api/v1/badges/{awardedId}/badge-export/download	anonymous
 GET	/api/v1/badges/{awardedId}/linkedin-params	anonymous
 POST	/api/v1/badges/{awardedId}/revoke	anonymous
 POST	/api/v1/behavior/referrals	session
+GET	/api/v1/billing/apple/products	session
+POST	/api/v1/billing/apple/verify	session
 POST	/api/v1/billing/checkout	session
 GET	/api/v1/billing/portal	session
 GET	/api/v1/board-links/{token}	anonymous

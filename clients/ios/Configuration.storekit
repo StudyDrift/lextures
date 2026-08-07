@@ -53,7 +53,7 @@
           "introductoryOffer" : null,
           "localizations" : [
             {
-              "description" : "Monthly Lextures self-learner access.",
+              "description" : "Monthly Lextures Homeschool access.",
               "displayName" : "Monthly",
               "locale" : "en_US"
             }
@@ -81,7 +81,7 @@
           "introductoryOffer" : null,
           "localizations" : [
             {
-              "description" : "Annual Lextures self-learner access.",
+              "description" : "Annual Lextures Homeschool access.",
               "displayName" : "Annual",
               "locale" : "en_US"
             }
