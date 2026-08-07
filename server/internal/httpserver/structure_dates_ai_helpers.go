@@ -337,7 +337,6 @@ func resolvePlanWindow(plan *adjustDatesAIPlan) (start, end time.Time, ok bool) 
 	start, ok = parsePlanDate(plan.StartDate)
 	if !ok {
 		start = endOfDayUTC(time.Now().UTC())
-		ok = true
 	}
 	if ed, eok := parsePlanDate(plan.EndDate); eok {
 		end = ed
