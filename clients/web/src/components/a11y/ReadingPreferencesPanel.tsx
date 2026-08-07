@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import { useReadingPreferences } from '../../context/reading-preferences-context'
 import { LiveRegion } from './live-region'
@@ -77,9 +78,10 @@ export function ReadingPreferencesPanel({ open, onClose }: Props) {
     }
   }, [open, onClose])
 
-  if (!open) return null
+  if (!open || typeof document === 'undefined') return null
 
-  return (
+  // Portal outside #root so useInertBackground does not make this panel inert.
+  return createPortal(
     <>
       {/* Backdrop (click-outside closes) */}
       <div
@@ -310,7 +312,8 @@ export function ReadingPreferencesPanel({ open, onClose }: Props) {
           </div>
         )}
       </div>
-    </>
+    </>,
+    document.body,
   )
 }
 
