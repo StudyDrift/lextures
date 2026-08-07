@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, type ReactNode } from 'react'
+import { useEffect, useId, useLayoutEffect, useRef, type ReactNode } from 'react'
 import { createFocusTrap } from '../../lib/a11y/focus-trap'
 import { useInertBackground } from './use-inert-background'
 import { OverlaySurface } from './overlay-surface'
@@ -72,7 +72,9 @@ export function Dialog({
 
   useInertBackground(open)
 
-  useEffect(() => {
+  // Layout phase: capture restore target + move focus before paint, and before
+  // useInertBackground's deferred inert application can blur the trigger.
+  useLayoutEffect(() => {
     if (!open || !panelRef.current) return
     const trap = createFocusTrap(panelRef.current)
     trap.activate()

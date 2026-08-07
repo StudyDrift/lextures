@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { PlatformFeaturesProvider } from '../../../context/platform-features-context'
 import { Dialog } from '../dialog'
@@ -25,6 +25,41 @@ describe('UX.2 Dialog', () => {
     expect(dialog).toBeTruthy()
     await user.keyboard('{Escape}')
     expect(onClose).toHaveBeenCalled()
+  })
+
+  it('restores focus to the trigger after Escape (UX.4 FR-4 / inert race)', async () => {
+    const user = userEvent.setup()
+    function Harness() {
+      const [open, setOpen] = useState(false)
+      return (
+        <PlatformFeaturesProvider>
+          <div id="root">
+            <button type="button" onClick={() => setOpen(true)}>
+              Open dialog
+            </button>
+          </div>
+          <Dialog
+            open={open}
+            onClose={() => setOpen(false)}
+            title="Title"
+            closeLabel="Close dialog"
+          >
+            <Button>Inside</Button>
+          </Dialog>
+        </PlatformFeaturesProvider>
+      )
+    }
+    render(<Harness />)
+    const trigger = screen.getByRole('button', { name: 'Open dialog' })
+    await user.click(trigger)
+    await screen.findByRole('dialog')
+    await user.keyboard('{Escape}')
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).toBeNull()
+    })
+    await waitFor(() => {
+      expect(trigger).toHaveFocus()
+    })
   })
 })
 
