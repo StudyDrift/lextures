@@ -97,7 +97,7 @@ func TestKeepAliveWS_PingsIdlePeer(t *testing.T) {
 
 		runCtx, stop := context.WithCancel(r.Context())
 		defer stop()
-		go keepAliveWS(runCtx, conn, stop, 10*time.Millisecond)
+		go keepAliveWS(runCtx, conn, stop, 100*time.Millisecond)
 
 		// Read dispatches incoming pongs and blocks until the peer goes away.
 		for {
@@ -123,16 +123,16 @@ func TestKeepAliveWS_PingsIdlePeer(t *testing.T) {
 		}
 	}()
 
-	// Baseline after the handshake response has been written.
-	time.Sleep(50 * time.Millisecond)
+	// Handshake writes some bytes; wait until more bytes go out (keepalive pings).
+	time.Sleep(20 * time.Millisecond)
 	baseline := written.Load()
 
 	deadline := time.Now().Add(5 * time.Second)
 	for written.Load() <= baseline {
 		if time.Now().After(deadline) {
-			t.Fatal("server sent no keepalive traffic on an idle socket")
+			t.Fatalf("server sent no keepalive traffic on an idle socket (baseline=%d written=%d)", baseline, written.Load())
 		}
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(20 * time.Millisecond)
 	}
 }
 
@@ -151,7 +151,7 @@ func TestKeepAliveWS_CancelsWhenPeerStopsAnswering(t *testing.T) {
 
 		runCtx, stop := context.WithCancel(r.Context())
 		defer stop()
-		go keepAliveWS(runCtx, conn, stop, 10*time.Millisecond)
+		go keepAliveWS(runCtx, conn, stop, 100*time.Millisecond)
 
 		<-runCtx.Done()
 		close(done)

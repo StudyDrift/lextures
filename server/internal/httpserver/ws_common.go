@@ -31,11 +31,35 @@ const (
 // responsible for dispatching; coder/websocket allows Ping concurrently with a
 // single reader.
 func keepAliveWS(ctx context.Context, conn *websocket.Conn, stop context.CancelFunc, period time.Duration) {
-	// Never wait for a pong longer than the gap between pings, so a dead peer is
-	// noticed instead of leaving pings queued behind one another.
+	if period <= 0 {
+		period = wsPingPeriod
+	}
+	// Cap pong wait at the gap between pings so a dead peer is noticed instead of
+	// leaving pings queued, but keep a floor so short test periods are not so
+	// tight that a single scheduler hiccup aborts keepalive.
 	pongTimeout := wsPongTimeout
 	if period < pongTimeout {
 		pongTimeout = period
+	}
+	const minPongTimeout = 100 * time.Millisecond
+	if pongTimeout < minPongTimeout {
+		pongTimeout = minPongTimeout
+	}
+
+	pingOnce := func() bool {
+		pingCtx, cancel := context.WithTimeout(ctx, pongTimeout)
+		err := conn.Ping(pingCtx)
+		cancel()
+		if err != nil {
+			stop()
+			return false
+		}
+		return true
+	}
+
+	// Ping immediately so idle sockets get traffic before the first ticker fire.
+	if !pingOnce() {
+		return
 	}
 
 	t := time.NewTicker(period)
@@ -45,11 +69,7 @@ func keepAliveWS(ctx context.Context, conn *websocket.Conn, stop context.CancelF
 		case <-ctx.Done():
 			return
 		case <-t.C:
-			pingCtx, cancel := context.WithTimeout(ctx, pongTimeout)
-			err := conn.Ping(pingCtx)
-			cancel()
-			if err != nil {
-				stop()
+			if !pingOnce() {
 				return
 			}
 		}
