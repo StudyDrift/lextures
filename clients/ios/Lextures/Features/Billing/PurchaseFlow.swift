@@ -1,11 +1,11 @@
+import StoreKit
 import SwiftUI
 
-/// Paid course checkout sheet: tax quote + Stripe web checkout handoff (M9.2 / MOB.7).
+/// Paid course checkout sheet: StoreKit 2 In-App Purchase (Path A / App Store 3.1.1).
 struct PurchaseFlowSheet: View {
     @Environment(AuthSession.self) private var session
     @Environment(AppShellModel.self) private var shell
     @Environment(\.colorScheme) private var colorScheme
-    @Environment(\.openURL) private var openURL
     @Environment(\.dismiss) private var dismiss
 
     let courseId: String
@@ -13,18 +13,18 @@ struct PurchaseFlowSheet: View {
     let title: String
     let priceCents: Int
     let currency: String
-    /// When set, uses marketplace checkout endpoint instead of catalog billing checkout (MOB.7).
+    /// When set, used for analytics / already-owned handling (marketplace).
     var marketplaceSlug: String? = nil
     var onAlreadyOwned: (() -> Void)? = nil
+    /// Called after a successful IAP + server verify (entitlement granted).
+    var onPurchased: (() -> Void)? = nil
 
-    @State private var quote: CheckoutTaxQuote?
-    @State private var loadingQuote = false
+    @State private var appleProducts: [AppleIAPProductInfo] = []
+    @State private var storeProduct: Product?
+    @State private var loadingProducts = true
     @State private var purchasing = false
     @State private var errorMessage: String?
-
-    private var displayTotalCents: Int {
-        quote?.totalCents ?? priceCents
-    }
+    @State private var iapConfigured = false
 
     var body: some View {
         NavigationStack {
@@ -53,16 +53,16 @@ struct PurchaseFlowSheet: View {
                         Button {
                             Task { await purchase() }
                         } label: {
-                            Text(purchasing ? L.text("mobile.billing.startingCheckout") : L.text("mobile.billing.purchase"))
+                            Text(purchaseButtonTitle)
                                 .font(.headline)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 14)
                         }
                         .buttonStyle(.borderedProminent)
                         .tint(LexturesTheme.primary)
-                        .disabled(purchasing || session.accessToken == nil)
+                        .disabled(purchasing || session.accessToken == nil || storeProduct == nil || loadingProducts)
                         .accessibilityLabel(L.text("mobile.billing.purchase"))
-                        .accessibilityValue(BillingLogic.formatMoney(cents: displayTotalCents, currency: currency))
+                        .accessibilityValue(displayPriceLabel)
 
                         Text(L.text("mobile.billing.storePolicyNote"))
                             .font(.caption2)
@@ -78,47 +78,50 @@ struct PurchaseFlowSheet: View {
                     Button(L.text("mobile.common.close")) { dismiss() }
                 }
             }
-            .task { await loadQuote() }
+            .task { await loadProducts() }
         }
+    }
+
+    private var purchaseButtonTitle: String {
+        if loadingProducts {
+            return L.text("mobile.billing.iap.loading")
+        }
+        if purchasing {
+            return L.text("mobile.billing.startingCheckout")
+        }
+        return L.text("mobile.billing.purchase")
+    }
+
+    private var displayPriceLabel: String {
+        if let storeProduct {
+            return storeProduct.displayPrice
+        }
+        return BillingLogic.formatMoney(cents: priceCents, currency: currency)
     }
 
     @ViewBuilder
     private var priceCard: some View {
         LMSCard {
             VStack(alignment: .leading, spacing: 10) {
-                if loadingQuote {
+                if loadingProducts {
                     ProgressView()
                         .frame(maxWidth: .infinity, alignment: .center)
-                } else if let quote {
-                    ForEach(Array(BillingLogic.quoteLineItems(quote).enumerated()), id: \.offset) { _, row in
-                        HStack {
-                            Text(row.label)
-                                .font(.subheadline)
-                            Spacer()
-                            Text(BillingLogic.formatMoney(cents: row.cents, currency: quote.currency))
-                                .font(.subheadline.weight(.semibold))
-                        }
-                    }
-                    Divider()
-                    HStack {
-                        Text(L.text("mobile.billing.total"))
-                            .font(.headline)
-                        Spacer()
-                        Text(BillingLogic.formatMoney(cents: quote.totalCents, currency: quote.currency))
-                            .font(.headline)
-                    }
-                    if let jurisdiction = quote.taxJurisdiction, !jurisdiction.isEmpty {
-                        Text(L.format("mobile.billing.taxJurisdiction", jurisdiction))
-                            .font(.caption2)
-                            .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-                    }
                 } else {
                     HStack {
                         Text(L.text("mobile.billing.total"))
                             .font(.headline)
                         Spacer()
-                        Text(BillingLogic.formatMoney(cents: priceCents, currency: currency))
+                        Text(displayPriceLabel)
                             .font(.headline)
+                    }
+                    if storeProduct == nil {
+                        Text(
+                            iapConfigured
+                                ? L.text("mobile.billing.iap.productNotFound")
+                                : L.text("mobile.billing.iap.notConfigured")
+                        )
+                        .font(.caption)
+                        .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
                     }
                 }
             }
@@ -126,66 +129,89 @@ struct PurchaseFlowSheet: View {
         }
     }
 
-    private func loadQuote() async {
-        guard shell.platformFeatures.ffTaxCollection,
-              let token = session.accessToken else { return }
-        loadingQuote = true
-        defer { loadingQuote = false }
+    private func loadProducts() async {
+        guard let token = session.accessToken else {
+            loadingProducts = false
+            errorMessage = L.text("mobile.billing.checkoutError")
+            return
+        }
+        loadingProducts = true
+        errorMessage = nil
+        defer { loadingProducts = false }
         do {
-            quote = try await LMSAPI.fetchCheckoutQuote(courseId: courseId, accessToken: token)
+            let response = try await LMSAPI.fetchAppleIAPProducts(courseId: courseId, accessToken: token)
+            iapConfigured = response.configured == true
+            appleProducts = response.products ?? []
+            guard let preferred = BillingLogic.preferredAppleProduct(from: appleProducts, courseId: courseId)
+            else {
+                storeProduct = nil
+                return
+            }
+            let loaded = try await StoreKitPurchaseService.loadProducts(ids: [preferred.productId])
+            storeProduct = loaded.first
+            if storeProduct == nil {
+                errorMessage = L.text("mobile.billing.iap.productNotFound")
+            }
         } catch {
-            quote = nil
+            errorMessage = L.text("mobile.billing.checkoutError")
+            storeProduct = nil
         }
     }
 
     private func purchase() async {
-        guard let token = session.accessToken else { return }
+        guard let token = session.accessToken, let product = storeProduct else { return }
         purchasing = true
         errorMessage = nil
         defer { purchasing = false }
-        do {
-            shell.pendingCheckout = PendingCheckoutContext(
-                courseId: courseId,
-                courseCode: courseCode,
-                title: title
-            )
-            if let marketplaceSlug, !marketplaceSlug.isEmpty {
-                let result = try await LMSAPI.checkoutMarketplaceCourse(slug: marketplaceSlug, accessToken: token)
-                if result.alreadyOwned == true {
-                    shell.pendingCheckout = nil
-                    dismiss()
-                    onAlreadyOwned?()
-                    return
-                }
-                guard let urlString = result.checkoutUrl, let url = URL(string: urlString) else {
-                    shell.pendingCheckout = nil
-                    errorMessage = L.text("mobile.billing.checkoutError")
-                    MarketplaceObservability.record("marketplace_purchase_failed", attributes: ["reason": "url"])
-                    return
-                }
-                dismiss()
-                openURL(url)
-                return
-            }
 
-            let result = try await LMSAPI.startCheckout(
+        shell.pendingCheckout = PendingCheckoutContext(
+            courseId: courseId,
+            courseCode: courseCode,
+            title: title
+        )
+
+        let accountToken = UUID(uuidString: shell.profile?.id ?? "")
+        do {
+            let result = try await StoreKitPurchaseService.purchase(
+                product: product,
+                appAccountToken: accountToken,
                 courseId: courseId,
-                successUrl: BillingLogic.checkoutSuccessURL(courseId: courseId).absoluteString,
-                cancelUrl: BillingLogic.checkoutCancelURL().absoluteString,
-                usePaymentsAbstraction: shell.platformFeatures.ffPaymentsEnabled,
                 accessToken: token
             )
-            guard let url = URL(string: result.checkoutUrl) else {
-                errorMessage = L.text("mobile.billing.checkoutError")
+            if marketplaceSlug != nil {
+                MarketplaceObservability.record(
+                    "marketplace_purchase_succeeded",
+                    attributes: ["source": "apple_iap", "productId": result.productId]
+                )
+            }
+            if result.alreadyOwned {
+                shell.pendingCheckout = nil
+                dismiss()
+                onAlreadyOwned?()
                 return
             }
+            shell.pendingCheckout = nil
+            onPurchased?()
             dismiss()
-            openURL(url)
+            // Route into course via checkout success handler surface.
+            shell.checkoutReturnPhase = .success(courseId: courseId)
+        } catch let err as StoreKitPurchaseService.PurchaseError {
+            shell.pendingCheckout = nil
+            if case .userCancelled = err {
+                if marketplaceSlug != nil {
+                    MarketplaceObservability.record("marketplace_cancelled", attributes: [:])
+                }
+                return
+            }
+            errorMessage = err.errorDescription ?? L.text("mobile.billing.checkoutError")
+            if marketplaceSlug != nil {
+                MarketplaceObservability.record("marketplace_purchase_failed", attributes: ["reason": "iap"])
+            }
         } catch {
             shell.pendingCheckout = nil
             errorMessage = L.text("mobile.billing.checkoutError")
             if marketplaceSlug != nil {
-                MarketplaceObservability.record("marketplace_purchase_failed", attributes: ["reason": "start"])
+                MarketplaceObservability.record("marketplace_purchase_failed", attributes: ["reason": "iap"])
             }
         }
     }

@@ -1,4 +1,89 @@
 {
+  "mobile.billing.iap.cancelled": "Purchase cancelled.",
+  "mobile.billing.iap.loading": "Loading products…",
+  "mobile.billing.iap.notConfigured": "In-App Purchase is not configured for this environment.",
+  "mobile.billing.iap.pending": "Purchase is pending approval.",
+  "mobile.billing.iap.productNotFound": "This course is not available for In-App Purchase yet.",
+  "mobile.billing.iap.restore": "Restore purchases",
+  "mobile.billing.iap.restoreDone": "Restored %d purchase(s).",
+  "mobile.billing.iap.restoreFailed": "Could not restore purchases.",
+  "mobile.billing.iap.restoring": "Restoring…",
+  "mobile.billing.iap.serverVerifyFailed": "Purchase succeeded but we could not unlock access. Tap Restore purchases or contact support.",
+  "mobile.billing.iap.verificationFailed": "Could not verify the App Store purchase.",
+  "mobile.billing.manageWebSubscription": "Manage web subscription",
+  "mobile.billing.purchaseHint": "You'll complete this purchase securely with Apple In-App Purchase.",
+  "mobile.billing.storePolicyNote": "Digital courses and subscriptions are sold through Apple In-App Purchase. Content you buy on the web is also available here when purchased via IAP or restored.",
+  "mobile.marketplace.purchases.source.apple": "App Store",
+  "plurals": {
+    "mobile.dashboard.dueThisWeek.count": {
+      "one": "[%d äššîġñɱëñţ đûë ţĥîš ŵëëĸ]",
+      "other": "[%d äššîġñɱëñţš đûë ţĥîš ŵëëĸ]"
+    },
+    "mobile.grading.submissionCount": {
+      "one": "[%d šûɓɱîššîöñ ŵäîţîñġ]",
+      "other": "[%d šûɓɱîššîöñš ŵäîţîñġ]"
+    },
+    "mobile.ia.teach.ungraded": {
+      "one": "%d ungraded",
+      "other": "%d ungraded"
+    },
+    "mobile.insights.streak": {
+      "one": "%d-day study streak",
+      "other": "%d-day study streak"
+    },
+    "mobile.insights.streakAccessibility": {
+      "one": "%d-day study streak",
+      "other": "%d-day study streak"
+    },
+    "mobile.instructorInsights.progress.missingCount": {
+      "one": "%d missing item",
+      "other": "%d missing items"
+    },
+    "mobile.instructorInsights.snapshot.atRiskCount": {
+      "one": "%d student",
+      "other": "%d students"
+    },
+    "mobile.instructorInsights.snapshot.engagementCount": {
+      "one": "%d insight",
+      "other": "%d insights"
+    },
+    "mobile.instructorInsights.snapshot.ungradedCount": {
+      "one": "%d item",
+      "other": "%d items"
+    },
+    "mobile.learnerProfile.evidence.courseCount": {
+      "one": "%d course",
+      "other": "%d courses"
+    },
+    "mobile.learnerProfile.evidence.observationCount": {
+      "one": "%d observation",
+      "other": "%d observations"
+    },
+    "mobile.pendingSync.waiting": {
+      "one": "[%d çĥäñġë ŵäîţîñġ ţö ûþľöäđ]",
+      "other": "[%d çĥäñġëš ŵäîţîñġ ţö ûþľöäđ]"
+    },
+    "mobile.planner.calendar.eventCount": {
+      "one": "[%d ëṽëñţ]",
+      "other": "[%d ëṽëñţš]"
+    },
+    "mobile.reading.streakDays": {
+      "one": "%d day",
+      "other": "%d days"
+    },
+    "mobile.review.dueCount": {
+      "one": "[%d ŕëṽîëŵ đûë ţöđäÿ]",
+      "other": "[%d ŕëṽîëŵš đûë ţöđäÿ]"
+    },
+    "mobile.review.streak": {
+      "one": "[%d-đäÿ šţŕëäķ]",
+      "other": "[%d-đäÿ šţŕëäķ]"
+    },
+    "mobile.review.summaryReviewed": {
+      "one": "[Ýöû ŕëṽîëŵëđ %d îţëɱ]",
+      "other": "[Ýöû ŕëṽîëŵëđ %d îţëɱš]"
+    }
+  },
   "strings": {
     "app.name": "[Łëxţûŕëš]",
     "app.tagline": "[ƀÿ ŠţûđÿÐŕîƒţ]",
@@ -4073,75 +4158,5 @@
     "mobile.checklist.offlineBody": "⟦Connect to see your checklist⟧",
     "mobile.checklist.offlineMutations": "⟦Connect to dismiss or restore items.⟧",
     "mobile.checklist.badgeAria": "⟦%d checklist items need attention⟧"
-  },
-  "plurals": {
-    "mobile.dashboard.dueThisWeek.count": {
-      "one": "[%d äššîġñɱëñţ đûë ţĥîš ŵëëĸ]",
-      "other": "[%d äššîġñɱëñţš đûë ţĥîš ŵëëĸ]"
-    },
-    "mobile.grading.submissionCount": {
-      "one": "[%d šûɓɱîššîöñ ŵäîţîñġ]",
-      "other": "[%d šûɓɱîššîöñš ŵäîţîñġ]"
-    },
-    "mobile.ia.teach.ungraded": {
-      "one": "%d ungraded",
-      "other": "%d ungraded"
-    },
-    "mobile.insights.streak": {
-      "one": "%d-day study streak",
-      "other": "%d-day study streak"
-    },
-    "mobile.insights.streakAccessibility": {
-      "one": "%d-day study streak",
-      "other": "%d-day study streak"
-    },
-    "mobile.instructorInsights.progress.missingCount": {
-      "one": "%d missing item",
-      "other": "%d missing items"
-    },
-    "mobile.instructorInsights.snapshot.atRiskCount": {
-      "one": "%d student",
-      "other": "%d students"
-    },
-    "mobile.instructorInsights.snapshot.engagementCount": {
-      "one": "%d insight",
-      "other": "%d insights"
-    },
-    "mobile.instructorInsights.snapshot.ungradedCount": {
-      "one": "%d item",
-      "other": "%d items"
-    },
-    "mobile.learnerProfile.evidence.courseCount": {
-      "one": "%d course",
-      "other": "%d courses"
-    },
-    "mobile.learnerProfile.evidence.observationCount": {
-      "one": "%d observation",
-      "other": "%d observations"
-    },
-    "mobile.pendingSync.waiting": {
-      "one": "[%d çĥäñġë ŵäîţîñġ ţö ûþľöäđ]",
-      "other": "[%d çĥäñġëš ŵäîţîñġ ţö ûþľöäđ]"
-    },
-    "mobile.planner.calendar.eventCount": {
-      "one": "[%d ëṽëñţ]",
-      "other": "[%d ëṽëñţš]"
-    },
-    "mobile.reading.streakDays": {
-      "one": "%d day",
-      "other": "%d days"
-    },
-    "mobile.review.dueCount": {
-      "one": "[%d ŕëṽîëŵ đûë ţöđäÿ]",
-      "other": "[%d ŕëṽîëŵš đûë ţöđäÿ]"
-    },
-    "mobile.review.streak": {
-      "one": "[%d-đäÿ šţŕëäķ]",
-      "other": "[%d-đäÿ šţŕëäķ]"
-    },
-    "mobile.review.summaryReviewed": {
-      "one": "[Ýöû ŕëṽîëŵëđ %d îţëɱ]",
-      "other": "[Ýöû ŕëṽîëŵëđ %d îţëɱš]"
-    }
   }
 }

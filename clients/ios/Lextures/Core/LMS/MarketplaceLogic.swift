@@ -187,6 +187,7 @@ enum MarketplaceLogic {
         switch source {
         case "free": return "mobile.marketplace.purchases.source.free"
         case "stripe": return "mobile.marketplace.purchases.source.stripe"
+        case "apple": return "mobile.marketplace.purchases.source.apple"
         case "comp": return "mobile.marketplace.purchases.source.comp"
         default: return "mobile.marketplace.purchases.source.other"
         }
@@ -196,6 +197,7 @@ enum MarketplaceLogic {
         switch source {
         case "free": return L.text("mobile.marketplace.purchases.source.free")
         case "stripe": return L.text("mobile.marketplace.purchases.source.stripe")
+        case "apple": return L.text("mobile.marketplace.purchases.source.apple")
         case "comp": return L.text("mobile.marketplace.purchases.source.comp")
         default: return L.text("mobile.marketplace.purchases.source.other")
         }

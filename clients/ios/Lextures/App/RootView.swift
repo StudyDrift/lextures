@@ -52,6 +52,7 @@ struct RootView: View {
                     Task {
                         await session.refreshIfNeeded()
                         await OfflineService.shared.syncNow(accessToken: session.accessToken)
+                        await StoreKitPurchaseService.syncUnfinished(accessToken: session.accessToken)
                     }
                 }
             case .inactive:

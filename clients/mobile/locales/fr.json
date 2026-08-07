@@ -1,4 +1,89 @@
 {
+  "mobile.billing.iap.cancelled": "Purchase cancelled.",
+  "mobile.billing.iap.loading": "Loading products…",
+  "mobile.billing.iap.notConfigured": "In-App Purchase is not configured for this environment.",
+  "mobile.billing.iap.pending": "Purchase is pending approval.",
+  "mobile.billing.iap.productNotFound": "This course is not available for In-App Purchase yet.",
+  "mobile.billing.iap.restore": "Restore purchases",
+  "mobile.billing.iap.restoreDone": "Restored %d purchase(s).",
+  "mobile.billing.iap.restoreFailed": "Could not restore purchases.",
+  "mobile.billing.iap.restoring": "Restoring…",
+  "mobile.billing.iap.serverVerifyFailed": "Purchase succeeded but we could not unlock access. Tap Restore purchases or contact support.",
+  "mobile.billing.iap.verificationFailed": "Could not verify the App Store purchase.",
+  "mobile.billing.manageWebSubscription": "Manage web subscription",
+  "mobile.billing.purchaseHint": "You'll complete this purchase securely with Apple In-App Purchase.",
+  "mobile.billing.storePolicyNote": "Digital courses and subscriptions are sold through Apple In-App Purchase. Content you buy on the web is also available here when purchased via IAP or restored.",
+  "mobile.marketplace.purchases.source.apple": "App Store",
+  "plurals": {
+    "mobile.dashboard.dueThisWeek.count": {
+      "one": "%d devoir à rendre cette semaine",
+      "other": "%d devoirs à rendre cette semaine"
+    },
+    "mobile.grading.submissionCount": {
+      "one": "%d rendu en attente",
+      "other": "%d rendus en attente"
+    },
+    "mobile.ia.teach.ungraded": {
+      "one": "%d ungraded",
+      "other": "%d ungraded"
+    },
+    "mobile.insights.streak": {
+      "one": "%d-day study streak",
+      "other": "%d-day study streak"
+    },
+    "mobile.insights.streakAccessibility": {
+      "one": "%d-day study streak",
+      "other": "%d-day study streak"
+    },
+    "mobile.instructorInsights.progress.missingCount": {
+      "one": "%d missing item",
+      "other": "%d missing items"
+    },
+    "mobile.instructorInsights.snapshot.atRiskCount": {
+      "one": "%d student",
+      "other": "%d students"
+    },
+    "mobile.instructorInsights.snapshot.engagementCount": {
+      "one": "%d insight",
+      "other": "%d insights"
+    },
+    "mobile.instructorInsights.snapshot.ungradedCount": {
+      "one": "%d item",
+      "other": "%d items"
+    },
+    "mobile.learnerProfile.evidence.courseCount": {
+      "one": "%d course",
+      "other": "%d courses"
+    },
+    "mobile.learnerProfile.evidence.observationCount": {
+      "one": "%d observation",
+      "other": "%d observations"
+    },
+    "mobile.pendingSync.waiting": {
+      "one": "%d modification en attente de téléversement",
+      "other": "%d modifications en attente de téléversement"
+    },
+    "mobile.planner.calendar.eventCount": {
+      "one": "%d événement",
+      "other": "%d événements"
+    },
+    "mobile.reading.streakDays": {
+      "one": "%d day",
+      "other": "%d days"
+    },
+    "mobile.review.dueCount": {
+      "one": "%d révision à faire aujourd'hui",
+      "other": "%d révisions à faire aujourd'hui"
+    },
+    "mobile.review.streak": {
+      "one": "Série de %d jours",
+      "other": "Série de %d jours"
+    },
+    "mobile.review.summaryReviewed": {
+      "one": "Vous avez révisé %d élément",
+      "other": "Vous avez révisé %d éléments"
+    }
+  },
   "strings": {
     "app.name": "Lextures",
     "app.tagline": "par StudyDrift",
@@ -4073,75 +4158,5 @@
     "mobile.checklist.offlineBody": "Connect to see your checklist",
     "mobile.checklist.offlineMutations": "Connect to dismiss or restore items.",
     "mobile.checklist.badgeAria": "%d checklist items need attention"
-  },
-  "plurals": {
-    "mobile.dashboard.dueThisWeek.count": {
-      "one": "%d devoir à rendre cette semaine",
-      "other": "%d devoirs à rendre cette semaine"
-    },
-    "mobile.grading.submissionCount": {
-      "one": "%d rendu en attente",
-      "other": "%d rendus en attente"
-    },
-    "mobile.ia.teach.ungraded": {
-      "one": "%d ungraded",
-      "other": "%d ungraded"
-    },
-    "mobile.insights.streak": {
-      "one": "%d-day study streak",
-      "other": "%d-day study streak"
-    },
-    "mobile.insights.streakAccessibility": {
-      "one": "%d-day study streak",
-      "other": "%d-day study streak"
-    },
-    "mobile.instructorInsights.progress.missingCount": {
-      "one": "%d missing item",
-      "other": "%d missing items"
-    },
-    "mobile.instructorInsights.snapshot.atRiskCount": {
-      "one": "%d student",
-      "other": "%d students"
-    },
-    "mobile.instructorInsights.snapshot.engagementCount": {
-      "one": "%d insight",
-      "other": "%d insights"
-    },
-    "mobile.instructorInsights.snapshot.ungradedCount": {
-      "one": "%d item",
-      "other": "%d items"
-    },
-    "mobile.learnerProfile.evidence.courseCount": {
-      "one": "%d course",
-      "other": "%d courses"
-    },
-    "mobile.learnerProfile.evidence.observationCount": {
-      "one": "%d observation",
-      "other": "%d observations"
-    },
-    "mobile.pendingSync.waiting": {
-      "one": "%d modification en attente de téléversement",
-      "other": "%d modifications en attente de téléversement"
-    },
-    "mobile.planner.calendar.eventCount": {
-      "one": "%d événement",
-      "other": "%d événements"
-    },
-    "mobile.reading.streakDays": {
-      "one": "%d day",
-      "other": "%d days"
-    },
-    "mobile.review.dueCount": {
-      "one": "%d révision à faire aujourd'hui",
-      "other": "%d révisions à faire aujourd'hui"
-    },
-    "mobile.review.streak": {
-      "one": "Série de %d jours",
-      "other": "Série de %d jours"
-    },
-    "mobile.review.summaryReviewed": {
-      "one": "Vous avez révisé %d élément",
-      "other": "Vous avez révisé %d éléments"
-    }
   }
 }

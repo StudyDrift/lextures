@@ -51,22 +51,23 @@ type Entitlement struct {
 
 // CreateInput is the payload for idempotent entitlement creation.
 type CreateInput struct {
-	UserID          uuid.UUID
-	EntitlementType string
-	CourseID        *uuid.UUID
-	StripeEventID   string
-	StripeInvoiceID *string
-	AmountPaidCents int
-	Currency        string
-	ValidUntil      *time.Time
+	UserID            uuid.UUID
+	EntitlementType   string
+	CourseID          *uuid.UUID
+	StripeEventID     string
+	StripeInvoiceID   *string
+	AmountPaidCents   int
+	Currency          string
+	ValidUntil        *time.Time
+	AcquisitionSource string // stripe (default) | apple
 }
 
-// CourseGrantInput is the payload for free/comp/stripe course_purchase grants (plan MKT1).
+// CourseGrantInput is the payload for free/comp/stripe/apple course_purchase grants (plan MKT1).
 // Free claims may omit StripeEventID; grants are idempotent per (user_id, course_id).
 type CourseGrantInput struct {
 	UserID            uuid.UUID
 	CourseID          uuid.UUID
-	AcquisitionSource string // stripe | free | comp
+	AcquisitionSource string // stripe | free | comp | apple
 	AmountPaidCents   int
 	Currency          string
 	StripeEventID     *string
@@ -83,17 +84,26 @@ func CreateIdempotent(ctx context.Context, pool *pgxpool.Pool, in CreateInput) (
 	if currency == "" {
 		currency = "usd"
 	}
+	src := in.AcquisitionSource
+	if src == "" {
+		src = AcquisitionStripe
+	}
+	switch src {
+	case AcquisitionStripe, AcquisitionApple:
+	default:
+		return nil, false, errors.New("invalid acquisition_source")
+	}
 	e, err := scanEntitlement(ctx, pool, `
 INSERT INTO billing.user_entitlements (
     user_id, entitlement_type, course_id, stripe_event_id, stripe_invoice_id,
     amount_paid_cents, currency, valid_until, status, acquisition_source
-) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'active', 'stripe')
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'active', $9)
 ON CONFLICT (stripe_event_id) DO NOTHING
 RETURNING id, user_id, entitlement_type, course_id, COALESCE(stripe_event_id, ''), stripe_invoice_id,
           amount_paid_cents, currency, valid_from, valid_until, status,
           COALESCE(acquisition_source, 'stripe'), created_at
 `, in.UserID, in.EntitlementType, in.CourseID, in.StripeEventID, in.StripeInvoiceID,
-		in.AmountPaidCents, currency, in.ValidUntil)
+		in.AmountPaidCents, currency, in.ValidUntil, src)
 	if err == nil {
 		return e, true, nil
 	}
@@ -125,7 +135,7 @@ func CreateCourseGrantIdempotent(ctx context.Context, pool *pgxpool.Pool, in Cou
 		}
 	}
 	switch src {
-	case AcquisitionStripe, AcquisitionFree, AcquisitionComp:
+	case AcquisitionStripe, AcquisitionFree, AcquisitionComp, AcquisitionApple:
 	default:
 		return nil, false, errors.New("invalid acquisition_source")
 	}

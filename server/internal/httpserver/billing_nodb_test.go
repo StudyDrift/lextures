@@ -23,6 +23,8 @@ func TestBilling_Unauthenticated(t *testing.T) {
 		{http.MethodGet, "/api/v1/me/purchases"},
 		{http.MethodPost, "/api/v1/billing/checkout"},
 		{http.MethodGet, "/api/v1/billing/portal"},
+		{http.MethodGet, "/api/v1/billing/apple/products"},
+		{http.MethodPost, "/api/v1/billing/apple/verify"},
 	}
 	for _, tc := range paths {
 		req := httptest.NewRequest(tc.method, tc.path, nil)

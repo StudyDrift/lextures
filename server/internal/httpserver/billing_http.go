@@ -60,6 +60,7 @@ func (d Deps) registerBillingRoutes(r chi.Router) {
 	r.Get("/api/v1/me/purchases", d.handleMyPurchases())
 	r.Get("/api/v1/internal/entitlements/check", d.handleInternalEntitlementCheck())
 	r.Post("/api/v1/webhooks/stripe", d.handleStripeWebhook())
+	d.registerAppleIAPRoutes(r)
 }
 
 type entitlementJSON struct {

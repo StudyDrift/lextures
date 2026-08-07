@@ -142,8 +142,7 @@ Copy/adapt this reply into App Store Connect.
 ### 2. Where can users purchase the content, subscriptions, features, and services that can be accessed in the app?
 
 - **Institutional access:** Purchased/contracted **outside the app** (school/district/university agreement, invoice, or self-hosted deployment). Users then sign in with school credentials or accounts provisioned by the institution.
-- **Individual hosted access / course purchases:** On the **website** (e.g. self.lextures.com) via browser checkout (Stripe). The iOS app may open an external browser for digital course checkout; it does **not** use Apple In-App Purchase for those digital goods.
-- **No IAP:** The app does not unlock digital content via StoreKit IAP.
+- **Individual hosted access / course purchases (iOS):** **In-App Purchase (StoreKit)** — see [ios-app-store-3.1.1-iap-path-a.md](./ios-app-store-3.1.1-iap-path-a.md). The same digital courses and plans are also sold on the website (Stripe) for multiplatform parity (3.1.3(b)).
 
 ### 3. What specific types of previously purchased content, subscriptions, features, and services can a user access in the app?
 
@@ -154,9 +153,9 @@ Copy/adapt this reply into App Store Connect.
 
 ### 4. What paid content, subscriptions, or features are unlocked within the app that do not use In-App Purchase?
 
-- **None unlocked only inside the app via a non-IAP payment UI that grants digital goods without leaving the app.** Paid digital course checkout is completed **in the browser** (Stripe), after which content is available on all clients including iOS.
-- Institutional seats and org-level features are unlocked by **organization provisioning**, not by an in-app store.
-- Optional individual hosting plans (e.g. monthly access marketed on the website) are purchased on the **web**, not via IAP.
+- **Consumer digital courses and homeschool subscriptions** are unlocked via **In-App Purchase** on iOS (or already-owned multiplatform entitlements that are also offered as IAP).
+- Institutional seats and org-level features are unlocked by **organization provisioning**, not by an in-app consumer store.
+- Web Stripe purchases unlock the same multiplatform entitlements; those SKUs are also available as IAP (guideline 3.1.3(b)).
 
 ### 5. What is the maximum number of users that can participate in your app's live, real-time services?
 

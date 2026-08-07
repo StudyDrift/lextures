@@ -1,12 +1,36 @@
 import Foundation
 
-/// Checkout and billing helpers (M9.2). v1 uses compliant web-checkout handoff (Stripe in browser).
+/// Checkout and billing helpers (M9.2). iOS Path A uses StoreKit IAP for digital goods;
+/// web/Android continue to use Stripe browser checkout.
 enum BillingLogic {
     static let entitlementPollAttempts = 10
     static let entitlementPollIntervalSeconds: UInt64 = 1
 
     static func billingEnabled(_ features: MobilePlatformFeatures) -> Bool {
         features.ffStripeBilling || features.ffPaymentsEnabled
+    }
+
+    /// iOS always purchases digital goods via StoreKit when the server maps a product.
+    static var prefersInAppPurchase: Bool { true }
+
+    /// Prefer a course non-consumable product; fall back to first product id.
+    static func preferredAppleProduct(
+        from products: [AppleIAPProductInfo],
+        courseId: String?
+    ) -> AppleIAPProductInfo? {
+        if let courseId, !courseId.isEmpty {
+            if let match = products.first(where: { $0.isCoursePurchase && $0.courseId == courseId }) {
+                return match
+            }
+            if let anyCourse = products.first(where: \.isCoursePurchase) {
+                return anyCourse
+            }
+        }
+        return products.first
+    }
+
+    static func appStoreSubscriptionsURL() -> URL {
+        URL(string: "https://apps.apple.com/account/subscriptions")!
     }
 
     static func checkoutSuccessPath(courseId: String) -> String {
