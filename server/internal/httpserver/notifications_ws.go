@@ -37,19 +37,24 @@ func (d Deps) handleNotificationsWS() http.HandlerFunc {
 			AuthToken string `json:"authToken"`
 		}
 		if err := json.Unmarshal(b, &m); err != nil || m.AuthToken == "" {
+			_ = conn.Close(wsStatusAuthFailed, "invalid auth message")
 			return
 		}
 		u, err := d.JWTSigner.Verify(r.Context(), m.AuthToken)
 		if err != nil {
+			_ = conn.Close(wsStatusAuthFailed, "invalid auth token")
 			return
 		}
 		uid, err := uuid.Parse(u.UserID)
 		if err != nil {
+			_ = conn.Close(wsStatusAuthFailed, "invalid auth token")
 			return
 		}
 
 		runCtx, stop := context.WithCancel(r.Context())
 		defer stop()
+
+		go keepAliveWS(runCtx, conn, stop, wsPingPeriod)
 
 		if d.NotifHub != nil {
 			recv, unsub := d.NotifHub.Subscribe(uid)

@@ -24,7 +24,7 @@ actor DownloadStore {
         indexURL = base.appendingPathComponent("index.json")
         self.maxBytes = maxBytes
         try? FileManager.default.createDirectory(at: rootURL, withIntermediateDirectories: true)
-        loadIndex()
+        index = Self.loadIndex(from: indexURL)
     }
 
     func isDownloaded(key: String) -> Bool {
@@ -82,12 +82,12 @@ actor DownloadStore {
         return rootURL.appendingPathComponent(safe)
     }
 
-    private func loadIndex() {
+    private static func loadIndex(from indexURL: URL) -> [String: DownloadRecord] {
         guard
             let data = try? Data(contentsOf: indexURL),
             let decoded = try? JSONDecoder().decode([String: DownloadRecord].self, from: data)
-        else { return }
-        index = decoded
+        else { return [:] }
+        return decoded
     }
 
     private func persistIndex() {

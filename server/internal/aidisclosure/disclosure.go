@@ -65,6 +65,7 @@ type modelBinding struct {
 var disclosureFeatures = []FeatureCard{
 	{Key: "ai_tutor", Label: "AI Tutor", Description: "Conversational tutoring within enrolled courses."},
 	{Key: "modules_ai_assistant", Label: "Modules AI assistant", Description: "Instructor chat to propose course outline changes on the Modules page."},
+	{Key: "dates_ai_adjust", Label: "Adjust dates with AI", Description: "Instructor tool to propose bulk due-date shifts for course items (fixed or relative schedules)."},
 	{Key: "rag_notebook", Label: "Notebook AI", Description: "Answers questions using your course notebook content."},
 	{Key: "syllabus_generation", Label: "Syllabus generation", Description: "Instructor tool to draft syllabus sections."},
 	{Key: "content_page_generation", Label: "Content page generation", Description: "Instructor tool to draft module content-page sections from a topic description."},
@@ -94,7 +95,7 @@ var platformModelBindings = []modelBinding{
 		modelID: user.DefaultCourseSetupModelID,
 		alias:   aiprovider.AliasCourseSetup,
 		purposes: []string{
-			"ai_tutor", "modules_ai_assistant", "rag_notebook", "syllabus_generation", "content_page_generation", "outcomes_extraction", "quiz_outcome_mapping", "assessment_outcome_mapping", "welcome_draft", "badges_extraction", "quiz_generation", "inline_questions_generation", "live_quiz_kit_generation", "lesson_generation", "ai_study_buddy", "adaptive_content",
+			"ai_tutor", "modules_ai_assistant", "dates_ai_adjust", "rag_notebook", "syllabus_generation", "content_page_generation", "outcomes_extraction", "quiz_outcome_mapping", "assessment_outcome_mapping", "welcome_draft", "badges_extraction", "quiz_generation", "inline_questions_generation", "live_quiz_kit_generation", "lesson_generation", "ai_study_buddy", "adaptive_content",
 		},
 		dataSent: "Course context, prompts, and user questions necessary for the feature; PII is redacted where configured.",
 	},

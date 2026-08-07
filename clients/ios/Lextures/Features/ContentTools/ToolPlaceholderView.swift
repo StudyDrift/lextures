@@ -14,9 +14,9 @@ enum ToolPlaceholderReason {
 struct ToolPlaceholderView: View {
     @Environment(\.colorScheme) private var colorScheme
     let reason: ToolPlaceholderReason
-    var toolName: String? = nil
-    var message: String? = nil
-    var onOpenInBrowser: (() -> Void)? = nil
+    var toolName: String?
+    var message: String?
+    var onOpenInBrowser: (() -> Void)?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {

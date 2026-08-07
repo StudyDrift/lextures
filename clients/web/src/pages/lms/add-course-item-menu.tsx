@@ -10,6 +10,8 @@ type AddCourseItemMenuProps = {
   moduleListActionsEnabled: boolean
   allModulesCollapsed: boolean
   onCollapseExpandAllModules: () => void
+  /** Opens bulk due-date adjust modal. */
+  onAdjustDates?: () => void
 }
 
 export function AddCourseItemMenu({
@@ -20,6 +22,7 @@ export function AddCourseItemMenu({
   moduleListActionsEnabled,
   allModulesCollapsed,
   onCollapseExpandAllModules,
+  onAdjustDates,
 }: AddCourseItemMenuProps) {
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
@@ -76,6 +79,24 @@ export function AddCourseItemMenu({
             <span className="text-xs text-fg-muted">Group course activities and items</span>
           </button>
           <div className="my-1 border-t border-border-subtle dark:border-border-default" role="separator" />
+          {onAdjustDates ? (
+            <>
+              <button
+                type="button"
+                role="menuitem"
+                disabled={disabled}
+                onClick={() => {
+                  onAdjustDates()
+                  setOpen(false)
+                }}
+                className="flex w-full flex-col gap-0.5 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-neutral-700"
+              >
+                <span className="font-semibold text-slate-950 dark:text-fg-default">Adjust Dates</span>
+                <span className="text-xs text-fg-muted">Bulk shift or AI-adjust course due dates</span>
+              </button>
+              <div className="my-1 border-t border-border-subtle dark:border-border-default" role="separator" />
+            </>
+          ) : null}
           {moduleListActionsEnabled ? (
             <>
               <button

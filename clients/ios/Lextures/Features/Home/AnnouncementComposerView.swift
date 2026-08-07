@@ -172,7 +172,7 @@ struct AnnouncementComposerView: View {
                 : []
             let channels = try await channelsTask
             announcementsChannelId = AnnouncementLogic.announcementsChannelId(channels: channels)
-            sections = await sectionsTask
+            sections = try await sectionsTask
             selectedSectionId = sections.first?.id ?? ""
             if announcementsChannelId == nil {
                 errorMessage = L.text("mobile.announcement.compose.noChannel")

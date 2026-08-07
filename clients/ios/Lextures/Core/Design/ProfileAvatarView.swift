@@ -8,7 +8,7 @@ struct ProfileAvatarView: View {
     let initials: String
     var size: CGFloat = 84
     var initialsBackground: Color = LexturesTheme.brandTeal.opacity(0.16)
-    var initialsForeground: Color? = nil
+    var initialsForeground: Color?
 
     var body: some View {
         Group {

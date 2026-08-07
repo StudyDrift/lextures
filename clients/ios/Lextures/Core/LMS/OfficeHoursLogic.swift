@@ -57,7 +57,6 @@ enum OfficeHoursLogic {
         slots: [AppointmentSlot],
         windows: [AvailabilityWindow]
     ) -> [PlannerCalendarEvent] {
-        let lookup = windowMap(windows)
         return myBookedSlots(slots).compactMap { slot in
             guard let start = LMSDates.parse(slot.slotStart) else { return nil }
             let end = LMSDates.parse(slot.slotEnd)

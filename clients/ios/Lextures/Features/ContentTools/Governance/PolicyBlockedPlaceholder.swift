@@ -3,8 +3,8 @@ import SwiftUI
 /// Neutral placeholder naming why a tool did not mount (CT.M9 policy-blocked states).
 struct PolicyBlockedPlaceholder: View {
     let decision: ContentToolGovernanceLogic.MountDecision
-    var toolName: String? = nil
-    var onRefresh: (() -> Void)? = nil
+    var toolName: String?
+    var onRefresh: (() -> Void)?
 
     var body: some View {
         ToolPlaceholderView(

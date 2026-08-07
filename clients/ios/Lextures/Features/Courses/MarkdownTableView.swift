@@ -131,7 +131,7 @@ struct MarkdownTableFullScreenView: View {
             ScrollView([.horizontal, .vertical], showsIndicators: true) {
                 Grid(alignment: .leading, horizontalSpacing: 0, verticalSpacing: 0) {
                     GridRow {
-                        ForEach(Array(header.enumerated()), id: \.offset) { index, cell in
+                        ForEach(Array(header.enumerated()), id: \.offset) { _, cell in
                             Text(cell)
                                 .font(.subheadline.weight(.semibold))
                                 .padding(12)

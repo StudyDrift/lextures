@@ -1,3 +1,4 @@
+import Combine
 import SwiftUI
 
 /// Teacher hall-pass queue: approve, deny, return, and countdown active passes.

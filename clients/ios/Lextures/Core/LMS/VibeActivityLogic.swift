@@ -92,7 +92,7 @@ enum VibeActivityLogic {
             blocks.append(VibeActivityBlock(id: cursor, kind: .reveal(trigger: label, body: hiddenBody)))
             cursor += 1
 
-            var next = NSMutableString(string: working as String)
+            let next = NSMutableString(string: working as String)
             next.deleteCharacters(in: buttonMatch.range)
             if let targetMatch {
                 next.deleteCharacters(in: targetMatch.range)

@@ -117,8 +117,7 @@ struct BoardPresentModeView: View {
         }
         .gesture(
             DragGesture(minimumDistance: 40).onEnded { value in
-                if value.translation.width < -40 { move(1) }
-                else if value.translation.width > 40 { move(-1) }
+                if value.translation.width < -40 { move(1) } else if value.translation.width > 40 { move(-1) }
             }
         )
     }

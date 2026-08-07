@@ -82,9 +82,7 @@ struct PeopleAdminView: View {
                     }
                     searchForm
                     if let errorMessage { LMSErrorBanner(message: errorMessage) }
-                    if loading && results == nil { LMSSkeletonList(count: 3) }
-                    else if let results { peopleList(results, isFilter: false) }
-                    else if !PeopleAdminLogic.shouldSearch(submittedQuery) {
+                    if loading && results == nil { LMSSkeletonList(count: 3) } else if let results { peopleList(results, isFilter: false) } else if !PeopleAdminLogic.shouldSearch(submittedQuery) {
                         LMSEmptyState(systemImage: "person.2", title: L.text("mobile.admin.people.emptyTitle"), message: L.text("mobile.admin.people.emptyMessage"))
                     }
                 }
@@ -108,8 +106,7 @@ struct PeopleAdminView: View {
                     .font(.subheadline.weight(.semibold))
             }
             if let filterError { LMSErrorBanner(message: filterError) }
-            if filterLoading && filterResults == nil { LMSSkeletonList(count: 3) }
-            else if let filterResults { peopleList(filterResults, isFilter: true) }
+            if filterLoading && filterResults == nil { LMSSkeletonList(count: 3) } else if let filterResults { peopleList(filterResults, isFilter: true) }
         }
         .padding(14)
         .background(LexturesTheme.cardBackground(for: colorScheme))
@@ -175,15 +172,13 @@ struct PeopleAdminView: View {
                 if data.totalPages > 1 {
                     HStack {
                         Button(L.text("mobile.admin.people.previous")) {
-                            if isFilter { filterPage = max(1, filterPage - 1); Task { await loadFilter() } }
-                            else { page = max(1, page - 1); Task { await search() } }
+                            if isFilter { filterPage = max(1, filterPage - 1); Task { await loadFilter() } } else { page = max(1, page - 1); Task { await search() } }
                         }.disabled((isFilter ? filterPage : page) <= 1)
                         Spacer()
                         Text(L.format("mobile.admin.people.pageOf", isFilter ? filterPage : page, data.totalPages)).font(.caption)
                         Spacer()
                         Button(L.text("mobile.admin.people.next")) {
-                            if isFilter { filterPage = min(data.totalPages, filterPage + 1); Task { await loadFilter() } }
-                            else { page = min(data.totalPages, page + 1); Task { await search() } }
+                            if isFilter { filterPage = min(data.totalPages, filterPage + 1); Task { await loadFilter() } } else { page = min(data.totalPages, page + 1); Task { await search() } }
                         }.disabled((isFilter ? filterPage : page) >= data.totalPages)
                     }
                 }
@@ -194,8 +189,7 @@ struct PeopleAdminView: View {
     private func loadStats() async {
         guard let token = session.accessToken else { return }
         statsLoading = true; statsError = nil; defer { statsLoading = false }
-        do { stats = try await LMSAPI.fetchPeopleStats(accessToken: token) }
-        catch { statsError = PeopleAdminLogic.userFacingError(error) }
+        do { stats = try await LMSAPI.fetchPeopleStats(accessToken: token) } catch { statsError = PeopleAdminLogic.userFacingError(error) }
     }
 
     private func loadFilter() async {
@@ -250,7 +244,6 @@ private struct PeopleInviteSheet: View {
         guard let token = session.accessToken else { return }
         busy = true; errorMessage = nil; defer { busy = false }
         let request = PeopleAdminLogic.invitePersonRequest(email: email, firstName: firstName, lastName: lastName)
-        do { _ = try await LMSAPI.invitePerson(request, accessToken: token); onInvited(request.email); dismiss() }
-        catch { errorMessage = PeopleAdminLogic.userFacingError(error) }
+        do { _ = try await LMSAPI.invitePerson(request, accessToken: token); onInvited(request.email); dismiss() } catch { errorMessage = PeopleAdminLogic.userFacingError(error) }
     }
 }

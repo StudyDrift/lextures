@@ -7,7 +7,7 @@ import SwiftUI
 @Observable
 final class LocalePreferences {
     static let shared = LocalePreferences()
-    static let storageKey = "lextures.locale"
+    nonisolated static let storageKey = "lextures.locale"
 
     /// BCP 47 tags offered in the language picker (endonyms for fixed languages).
     static let localeOptions: [(tag: String, label: String)] = [
@@ -18,7 +18,7 @@ final class LocalePreferences {
         ("ar", "العربية"),
     ]
 
-    private static let rtlLocales: Set<String> = ["ar", "he", "fa", "ur", "ps"]
+    nonisolated private static let rtlLocales: Set<String> = ["ar", "he", "fa", "ur", "ps"]
 
     /// Stored override tag, or `system` to follow the device locale.
     var localeTag: String {

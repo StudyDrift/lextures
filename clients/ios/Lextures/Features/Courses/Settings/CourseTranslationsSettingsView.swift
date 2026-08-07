@@ -733,4 +733,3 @@ private struct GlossaryEditorSheet: View {
         }
     }
 }
-

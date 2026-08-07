@@ -117,8 +117,7 @@ enum ProfileDepthLogic {
             case .string(let stringValue): draft[def.key] = stringValue
             case .bool(let boolValue): draft[def.key] = boolValue ? "true" : "false"
             case .number(let numberValue):
-                if numberValue.rounded(.towardZero) == numberValue { draft[def.key] = String(Int(numberValue)) }
-                else { draft[def.key] = String(numberValue) }
+                if numberValue.rounded(.towardZero) == numberValue { draft[def.key] = String(Int(numberValue)) } else { draft[def.key] = String(numberValue) }
             case .null, .array, .object: break
             }
         }

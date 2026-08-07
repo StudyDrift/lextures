@@ -235,4 +235,3 @@ struct LibraryBrowseView: View {
         }
     }
 }
-

@@ -23,7 +23,7 @@ actor CacheStore {
         indexURL = base.appendingPathComponent("index.json")
         self.maxBytes = maxBytes
         try? FileManager.default.createDirectory(at: rootURL, withIntermediateDirectories: true)
-        loadIndex()
+        index = Self.loadIndex(from: indexURL)
     }
 
     func get<T: Decodable>(_ type: T.Type, key: String) -> Cached<T>? {
@@ -67,12 +67,12 @@ actor CacheStore {
 
     // MARK: - Private
 
-    private func loadIndex() {
+    private static func loadIndex(from indexURL: URL) -> [String: CacheEntry] {
         guard
             let data = try? Data(contentsOf: indexURL),
             let decoded = try? JSONDecoder().decode([String: CacheEntry].self, from: data)
-        else { return }
-        index = decoded
+        else { return [:] }
+        return decoded
     }
 
     private func persistIndex() {

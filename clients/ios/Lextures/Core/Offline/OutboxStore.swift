@@ -15,7 +15,10 @@ actor OutboxStore {
         try? FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
         fileURL = base.appendingPathComponent("outbox.json")
         appliedKeysURL = base.appendingPathComponent("applied-idempotency-keys.json")
-        load()
+        let loaded = Self.load(fileURL: fileURL, appliedKeysURL: appliedKeysURL)
+        items = loaded.items
+        nextSequence = loaded.nextSequence
+        appliedKeys = loaded.appliedKeys
     }
 
     func enqueue(method: String, path: String, bodyJSON: String?, label: String, id: String? = nil) -> OutboxItem {
@@ -86,7 +89,19 @@ actor OutboxStore {
         var nextSequence: Int
     }
 
-    private func load() {
+    private struct LoadedState {
+        var items: [OutboxItem]
+        var nextSequence: Int
+        var appliedKeys: Set<String>
+    }
+
+    private static func load(
+        fileURL: URL,
+        appliedKeysURL: URL
+    ) -> LoadedState {
+        var items: [OutboxItem] = []
+        var nextSequence = 0
+        var appliedKeys: Set<String> = []
         if
             let data = try? Data(contentsOf: fileURL),
             let decoded = try? JSONDecoder().decode(PersistedOutbox.self, from: data) {
@@ -98,6 +113,7 @@ actor OutboxStore {
             let keys = try? JSONDecoder().decode(Set<String>.self, from: data) {
             appliedKeys = keys
         }
+        return LoadedState(items: items, nextSequence: nextSequence, appliedKeys: appliedKeys)
     }
 
     private func persist() {

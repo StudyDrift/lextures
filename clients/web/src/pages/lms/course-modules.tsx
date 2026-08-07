@@ -58,6 +58,7 @@ import {
   X,
 } from 'lucide-react'
 import { AddCourseItemMenu } from './add-course-item-menu'
+import { AdjustDatesModal } from './adjust-dates-modal'
 import { AddModuleItemMenu, type ModuleItemKind } from './add-module-item-menu'
 import { CourseModulesLoadingSkeleton } from '../../components/ui/lms-content-skeletons'
 import { IconSwap } from '../../components/ui/icon-swap'
@@ -1547,6 +1548,7 @@ export default function CourseModules() {
   const { modulesAiAssistantEnabled, loading: courseFeaturesLoading } = useCourseNavFeatures()
   const { aiConfigured, ffConditionalRelease } = usePlatformFeatures()
   const [modulesAiOpen, setModulesAiOpen] = useState(false)
+  const [adjustDatesOpen, setAdjustDatesOpen] = useState(false)
   const [items, setItems] = useState<CourseStructureItem[]>([])
   const [studentGradeContext, setStudentGradeContext] = useState<{
     columns: CourseGradebookGridColumn[]
@@ -1707,6 +1709,7 @@ export default function CourseModules() {
     moduleSettingsOpen ||
     editItemSaving ||
     editItemModalOpen ||
+    adjustDatesOpen ||
     archiveConfirmItem !== null ||
     moduleDeleteTarget !== null ||
     moduleDeleting
@@ -2593,6 +2596,7 @@ export default function CourseModules() {
                 moduleIds.length > 0 && moduleIds.every((id) => collapsedModuleIds.has(id))
               }
               onCollapseExpandAllModules={handleCollapseExpandAllModules}
+              onAdjustDates={() => setAdjustDatesOpen(true)}
             />
           </div>
         ) : null
@@ -2605,6 +2609,18 @@ export default function CourseModules() {
           open={modulesAiOpen}
           onOpenChange={setModulesAiOpen}
           onStructureChanged={() => load({ silent: true })}
+        />
+      ) : null}
+      {courseCode && canEditModules ? (
+        <AdjustDatesModal
+          open={adjustDatesOpen}
+          onClose={() => setAdjustDatesOpen(false)}
+          courseCode={courseCode}
+          structureItems={items}
+          scheduleMode={courseMeta?.scheduleMode}
+          relativeScheduleAnchorAt={courseMeta?.relativeScheduleAnchorAt}
+          aiConfigured={aiConfigured}
+          onApplied={() => load({ silent: true })}
         />
       ) : null}
       {courseMeta ? <CourseHeroBanner course={courseMeta} /> : null}

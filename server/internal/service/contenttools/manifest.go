@@ -191,6 +191,7 @@ func KnownAIFeatureIDs() map[string]struct{} {
 	return map[string]struct{}{
 		"ai_tutor":                       {},
 		"modules_ai_assistant":           {},
+		"dates_ai_adjust":                {},
 		"rag_notebook":                   {},
 		"syllabus_generation":            {},
 		"content_page_generation":        {},

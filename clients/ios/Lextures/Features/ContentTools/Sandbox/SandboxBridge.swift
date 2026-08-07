@@ -131,14 +131,11 @@ final class SandboxBridge: NSObject, WKScriptMessageHandler {
         post(msg)
     }
 
-    nonisolated func userContentController(
+    func userContentController(
         _ userContentController: WKUserContentController,
         didReceive message: WKScriptMessage
     ) {
-        let body = message.body
-        Task { @MainActor in
-            self.handleIngress(body)
-        }
+        handleIngress(message.body)
     }
 
     private func handleIngress(_ body: Any) {

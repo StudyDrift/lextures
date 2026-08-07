@@ -27,7 +27,7 @@ enum ContentToolGovernanceLogic {
     struct MountInput: Equatable {
         var toolId: String
         var capabilities: [String] = []
-        var sandboxMode: String? = nil
+        var sandboxMode: String?
         var tombstone = false
         var breakerOpen = false
         var deprecated = false

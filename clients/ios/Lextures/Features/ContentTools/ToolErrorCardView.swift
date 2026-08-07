@@ -3,7 +3,7 @@ import SwiftUI
 struct ToolErrorCardView: View {
     @Environment(\.colorScheme) private var colorScheme
     let toolName: String
-    var message: String? = nil
+    var message: String?
     var onRetry: () -> Void
 
     private var resolvedMessage: String {

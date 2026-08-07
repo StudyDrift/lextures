@@ -93,4 +93,3 @@ struct AddGlossaryEntryBody: Codable, Hashable {
     var targetLocale: String
     var sourceLocale: String?
 }
-

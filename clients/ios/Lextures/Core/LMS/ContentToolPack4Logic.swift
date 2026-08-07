@@ -135,7 +135,6 @@ enum ContentToolPack4Logic {
         let answersObj = objectMap(objectMap(state)["answers"])
         var out: [String: CheckpointAnswer] = [:]
         for (id, raw) in answersObj {
-            let obj = objectMap(raw)
             let done = boolField(raw, key: "done") ?? false
             let attempts = arrayField(raw, key: "attempts")
             let lastCorrect: Bool
@@ -223,7 +222,7 @@ enum ContentToolPack4Logic {
             let f = floorG(v)
             return v > f ? f + granularity : f
         }
-        var s = floorG(start)
+        let s = floorG(start)
         var e = ceilG(end)
         if e <= s { e = s + granularity }
         var all = existing + [[s, e]]

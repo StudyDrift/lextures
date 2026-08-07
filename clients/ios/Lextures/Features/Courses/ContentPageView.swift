@@ -163,7 +163,7 @@ struct ContentPageView: View {
         markingComplete = true
         defer { markingComplete = false }
         do {
-            try await offline.enqueueMutation(
+            _ = try await offline.enqueueMutation(
                 method: "POST",
                 path: "/api/v1/courses/\(LMSAPI.encodePath(course.courseCode))/items/\(LMSAPI.encodePath(item.id))/complete",
         body: nil,

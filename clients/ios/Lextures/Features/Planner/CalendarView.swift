@@ -88,8 +88,6 @@ struct CalendarView: View {
     private func dayCell(_ day: Date, count: Int) -> some View {
         let inMonth = Calendar.current.isDate(day, equalTo: monthAnchor, toGranularity: .month)
         let selected = Calendar.current.isDate(day, inSameDayAs: selectedDay)
-        let label = PlannerLogic.dateKeyLocal(day)
-
         return Button {
             selectedDay = Calendar.current.startOfDay(for: day)
         } label: {

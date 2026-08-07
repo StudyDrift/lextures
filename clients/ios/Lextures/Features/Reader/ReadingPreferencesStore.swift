@@ -97,6 +97,7 @@ final class ReadingPreferencesStore {
     }
 }
 
+@MainActor
 private struct ReadingPreferencesStoreKey: EnvironmentKey {
     static let defaultValue = ReadingPreferencesStore.shared
 }

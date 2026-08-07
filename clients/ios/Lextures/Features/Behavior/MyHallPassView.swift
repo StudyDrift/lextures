@@ -1,3 +1,4 @@
+import Combine
 import SwiftUI
 
 /// Student hall-pass request and active pass display with countdown.

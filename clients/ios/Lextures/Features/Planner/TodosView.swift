@@ -163,7 +163,7 @@ struct TodosView: View {
     }
 
     private func bucketTint(_ item: StudentTodoItem) -> Color {
-        guard let due = item.dueAt else { return LexturesTheme.amber }
+        guard item.dueAt != nil else { return LexturesTheme.amber }
         let buckets = PlannerLogic.bucketTodos([item])
         if buckets[.overdue]?.isEmpty == false { return LexturesTheme.error }
         if buckets[.today]?.isEmpty == false { return LexturesTheme.coral }
