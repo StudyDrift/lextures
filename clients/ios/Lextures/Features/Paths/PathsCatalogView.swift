@@ -32,8 +32,7 @@ struct PathsCatalogView: View {
 
     private var content: some View {
         ZStack {
-            if embedded { Color.clear }
-            else { LexturesTheme.sceneBackground(for: colorScheme).ignoresSafeArea() }
+            if embedded { Color.clear } else { LexturesTheme.sceneBackground(for: colorScheme).ignoresSafeArea() }
 
             if loading && paths.isEmpty {
                 LMSSkeletonList(count: 4)

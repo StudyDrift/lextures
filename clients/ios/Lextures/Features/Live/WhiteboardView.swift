@@ -7,7 +7,7 @@ struct WhiteboardView: View {
     let course: CourseSummary
     let board: CourseWhiteboard
     var canEdit: Bool = false
-    var onDeleted: (() -> Void)? = nil
+    var onDeleted: (() -> Void)?
 
     @State private var loadedBoard: CourseWhiteboard?
     @State private var elements: [WhiteboardElement] = []

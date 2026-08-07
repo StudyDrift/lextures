@@ -988,6 +988,3 @@ struct FilePreviewTarget: Hashable, Identifiable {
         )
     }
 }
-
-
-

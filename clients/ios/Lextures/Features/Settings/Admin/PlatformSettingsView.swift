@@ -152,8 +152,7 @@ struct PlatformSettingsView: View {
         guard let token = session.accessToken else { return }
         loading = true
         errorMessage = nil
-        do { settings = try await LMSAPI.fetchPlatformSettings(accessToken: token) }
-        catch { errorMessage = L.text("mobile.admin.platform.error") }
+        do { settings = try await LMSAPI.fetchPlatformSettings(accessToken: token) } catch { errorMessage = L.text("mobile.admin.platform.error") }
         loading = false
     }
 
@@ -178,4 +177,3 @@ struct PlatformSettingsView: View {
         busyKey = nil
     }
 }
-

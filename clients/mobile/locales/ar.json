@@ -4173,6 +4173,15 @@
     "mobile.checklist.offlineTitle": "You're offline",
     "mobile.checklist.offlineBody": "Connect to see your checklist",
     "mobile.checklist.offlineMutations": "Connect to dismiss or restore items.",
-    "mobile.checklist.badgeAria": "%d checklist items need attention"
+    "mobile.checklist.badgeAria": "%d checklist items need attention",
+    "mobile.billing.paywall.annualBadge": "Best value",
+    "mobile.billing.paywall.everyDays": "Every %d day(s)",
+    "mobile.billing.paywall.everyMonths": "Every %d month(s)",
+    "mobile.billing.paywall.everyWeeks": "Every %d week(s)",
+    "mobile.billing.paywall.everyYears": "Every %d year(s)",
+    "mobile.billing.paywall.legal": "Payment is charged to your Apple ID. Manage or cancel anytime in Settings → Subscriptions.",
+    "mobile.billing.paywall.message": "You've started free lessons in the Homeschool app. Subscribe to keep learning with full access.",
+    "mobile.billing.paywall.monthlyBadge": "Monthly",
+    "mobile.billing.paywall.title": "Continue with Lextures"
   }
 }

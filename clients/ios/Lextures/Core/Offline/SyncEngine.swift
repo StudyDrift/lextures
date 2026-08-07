@@ -15,7 +15,7 @@ actor SyncEngine {
             .appendingPathComponent("Offline", isDirectory: true)
             .appendingPathComponent(ownerKey, isDirectory: true)
         metricsURL = base.appendingPathComponent("sync-metrics.json")
-        loadMetrics()
+        metrics = Self.loadMetrics(from: metricsURL)
     }
 
     func currentMetrics() -> OfflineSyncMetrics {
@@ -90,12 +90,12 @@ actor SyncEngine {
 
     // MARK: - Private
 
-    private func loadMetrics() {
+    private static func loadMetrics(from metricsURL: URL) -> OfflineSyncMetrics {
         guard
             let data = try? Data(contentsOf: metricsURL),
             let decoded = try? JSONDecoder().decode(OfflineSyncMetrics.self, from: data)
-        else { return }
-        metrics = decoded
+        else { return OfflineSyncMetrics() }
+        return decoded
     }
 
     private func persistMetrics() {

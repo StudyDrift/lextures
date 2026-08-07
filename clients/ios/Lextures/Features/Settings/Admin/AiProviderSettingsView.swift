@@ -222,7 +222,7 @@ struct AiProviderSettingsView: View {
         }
     }
 
-    private func testConnection() async {
+    func testConnection() async {
         guard let token = session.accessToken else { return }
         testing = true
         defer { testing = false }

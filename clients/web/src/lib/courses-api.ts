@@ -4340,6 +4340,74 @@ export async function patchCourseStructureItemDueAt(
   }
 }
 
+export type BulkDueAtUpdate = { itemId: string; dueAt: string }
+
+export type BulkDueAtResult = { updated: number; failed: number }
+
+/** Bulk apply due dates; server requires `course:<code>:item:create`. */
+export async function bulkPatchCourseStructureItemDueAt(
+  courseCode: string,
+  body: { updates: BulkDueAtUpdate[] },
+): Promise<BulkDueAtResult> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/structure/dates/bulk`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const o = (raw ?? {}) as Record<string, unknown>
+  return {
+    updated: typeof o.updated === 'number' ? o.updated : 0,
+    failed: typeof o.failed === 'number' ? o.failed : 0,
+  }
+}
+
+export type AdjustDatesAiProposal = {
+  itemId: string
+  dueAt: string
+}
+
+export type AdjustDatesAiResponse = {
+  reply: string
+  proposals: AdjustDatesAiProposal[]
+}
+
+/** AI-proposed bulk due date adjustments (preview only; apply via bulk endpoint). */
+export async function postAdjustDatesWithAi(
+  courseCode: string,
+  body: { instruction?: string } = {},
+): Promise<AdjustDatesAiResponse> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/structure/dates/ai-adjust`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ instruction: body.instruction ?? '' }),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const o = (raw ?? {}) as Record<string, unknown>
+  const list = Array.isArray(o.proposals) ? o.proposals : []
+  const proposals: AdjustDatesAiProposal[] = []
+  for (const row of list) {
+    if (!row || typeof row !== 'object') continue
+    const r = row as Record<string, unknown>
+    const itemId = typeof r.itemId === 'string' ? r.itemId : ''
+    const dueAt = typeof r.dueAt === 'string' ? r.dueAt : ''
+    if (!itemId || !dueAt) continue
+    proposals.push({ itemId, dueAt })
+  }
+  return {
+    reply: typeof o.reply === 'string' ? o.reply : '',
+    proposals,
+  }
+}
+
 export async function unarchiveCourseStructureItem(
   courseCode: string,
   itemId: string,

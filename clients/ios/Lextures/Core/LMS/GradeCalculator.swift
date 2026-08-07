@@ -47,8 +47,7 @@ enum GradeCalculator {
         for id in heldItemIds { merged.removeValue(forKey: id) }
         for (id, val) in overrides {
             let trimmed = val.trimmingCharacters(in: .whitespacesAndNewlines)
-            if trimmed.isEmpty { merged.removeValue(forKey: id) }
-            else { merged[id] = trimmed }
+            if trimmed.isEmpty { merged.removeValue(forKey: id) } else { merged[id] = trimmed }
         }
         return merged
     }

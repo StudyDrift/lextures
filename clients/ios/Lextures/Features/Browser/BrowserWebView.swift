@@ -150,7 +150,7 @@ struct BrowserWebView: UIViewRepresentable {
                 if navigationAction.request.value(forHTTPHeaderField: "Authorization") != nil,
                    !MobileLinkPolicy.shouldAttachBearer(requestURL: url, apiBaseURL: AppConfiguration.apiBaseURL) {
                     decisionHandler(.cancel)
-                    var clean = URLRequest(url: url)
+                    let clean = URLRequest(url: url)
                     webView.load(clean)
                     return
                 }
@@ -182,6 +182,7 @@ struct BrowserWebView: UIViewRepresentable {
 }
 
 /// Session-scoped website data store; purged on sign-out and Settings clear (FR-22/23).
+@MainActor
 final class InAppBrowserDataStore {
     static let shared = InAppBrowserDataStore()
 

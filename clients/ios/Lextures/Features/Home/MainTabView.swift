@@ -54,7 +54,7 @@ final class AppShellModel {
     var checkoutReturnPhase: CheckoutReturnPhase?
     /// Public board share-link token pending presentation (VC.M6).
     var pendingBoardLinkToken: String?
-    var pendingLiveQuizCode: String? = nil
+    var pendingLiveQuizCode: String?
     var showLiveQuizPlay = false
 
     // MARK: MB.1 in-app browser
@@ -445,6 +445,7 @@ struct MainTabView: View {
     @Environment(\.lxReduceMotion) private var reduceMotion
     var initialDeepLink: DeepLinkDestination?
     @State private var shell = AppShellModel()
+    @State private var subscribeGate = HomeschoolSubscribeGateStore()
     @Bindable private var realtime = RealtimeManager.shared
     /// 0 = drawer fully open, 1 = fully closed — reported by `DrawerScaffold`.
     @State private var drawerOpenProgress: CGFloat = 0
@@ -466,10 +467,23 @@ struct MainTabView: View {
             coursePanel: { CourseDrawer() }
         )
         .environment(shell)
+        .environment(subscribeGate)
         .overlay {
             if let phase = shell.checkoutReturnPhase {
                 CheckoutReturnOverlay(phase: phase)
             }
+        }
+        .fullScreenCover(isPresented: Bindable(subscribeGate).showPaywall) {
+            HomeschoolSubscribePaywallView(
+                onSubscribed: {
+                    subscribeGate.markSubscribed()
+                },
+                onDismiss: {
+                    subscribeGate.dismissPaywallForNow()
+                }
+            )
+            .environment(session)
+            .environment(shell)
         }
         .fullScreenCover(item: Binding(
             get: { shell.pendingBoardLinkToken.map { BoardLinkToken(token: $0) } },
@@ -509,6 +523,10 @@ struct MainTabView: View {
         }
         .task {
             await shell.refresh(accessToken: session.accessToken)
+            await refreshSubscribeGate()
+        }
+        .onChange(of: shell.profile?.id) { _, _ in
+            Task { await refreshSubscribeGate() }
         }
         .onOpenURL { url in
             shell.openDeepLink(DeepLinkRouter.resolve(url.absoluteString))
@@ -568,6 +586,45 @@ struct MainTabView: View {
                 shell.completeRootNavigationTransition()
             }
         }
+    }
+
+    /// Loads subscription entitlements and schedules the self.lextures.com subscribe paywall.
+    private func refreshSubscribeGate() async {
+        subscribeGate.configure(userId: shell.profile?.id)
+        let kind = EnvironmentStore.shared.kind
+        let apiBase = EnvironmentStore.shared.apiBaseURLString
+        let billingOn = BillingLogic.billingEnabled(shell.platformFeatures)
+        let host = HomeschoolSubscribeGateLogic.isHomeschoolHost(
+            kind: kind,
+            apiBaseURLString: apiBase
+        )
+        guard host, billingOn else {
+            // Disable gate off-host / when billing is off.
+            subscribeGate.setHasActiveSubscription(true)
+            subscribeGate.considerSchedulingPaywall(
+                environmentKind: kind,
+                apiBaseURLString: apiBase,
+                billingEnabled: billingOn
+            )
+            return
+        }
+        guard let token = session.accessToken else {
+            subscribeGate.setHasActiveSubscription(false)
+            return
+        }
+        do {
+            let entitlements = try await LMSAPI.fetchMyEntitlements(accessToken: token)
+            let active = BillingLogic.activeSubscription(entitlements) != nil
+            subscribeGate.setHasActiveSubscription(active)
+        } catch {
+            // Fail closed for the gate: treat as no subscription so the prompt can appear.
+            subscribeGate.setHasActiveSubscription(false)
+        }
+        subscribeGate.considerSchedulingPaywall(
+            environmentKind: kind,
+            apiBaseURLString: apiBase,
+            billingEnabled: billingOn
+        )
     }
 
     /// 0 = transition just started, 1 = navigation complete.
@@ -861,7 +918,7 @@ struct LexturesTabBar: View {
 /// Floating card: generous radius, soft warm shadow, hairline border in dark mode only.
 struct LMSCard<Content: View>: View {
     @Environment(\.colorScheme) private var colorScheme
-    var accent: Color? = nil
+    var accent: Color?
     @ViewBuilder var content: () -> Content
 
     var body: some View {

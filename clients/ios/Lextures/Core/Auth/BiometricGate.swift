@@ -10,7 +10,7 @@ final class BiometricGate {
     static let shared = BiometricGate()
 
     /// Background duration before the app locks (seconds).
-    static let lockTimeoutSeconds: TimeInterval = 60
+    nonisolated static let lockTimeoutSeconds: TimeInterval = 60
 
     private enum Keys {
         static let enabled = "lextures.biometric.enabled"
@@ -88,6 +88,7 @@ final class BiometricGate {
     }
 }
 
+@MainActor
 private struct BiometricGateKey: EnvironmentKey {
     static let defaultValue = BiometricGate.shared
 }

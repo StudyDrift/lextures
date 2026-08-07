@@ -48,7 +48,7 @@ struct DiscussionsListView: View {
                 LMSErrorBanner(message: errorMessage)
             }
 
-            if forums.count > 1, let selectedForumId {
+            if forums.count > 1, selectedForumId != nil {
                 LMSSegmentedChips(
                     options: forums,
                     selection: forumChipSelection,

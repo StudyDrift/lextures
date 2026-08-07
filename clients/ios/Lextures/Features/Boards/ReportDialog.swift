@@ -106,7 +106,7 @@ struct ReportDialog: View {
             onSubmitted?()
             dismiss()
         } catch let err as APIError {
-            if case let .httpStatus(code, message) = err, code == 429 {
+            if case let .httpStatus(code, _) = err, code == 429 {
                 errorMessage = L.text("mobile.boards.report.rateLimited")
             } else if case let .httpStatus(_, message) = err {
                 errorMessage = message ?? L.text("mobile.boards.report.error")

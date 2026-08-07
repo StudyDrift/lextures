@@ -224,7 +224,7 @@ struct PeerReviewDetailView: View {
     }
 
     private func submit() async {
-        guard let token = session.accessToken, let detail else { return }
+        guard let token = session.accessToken, detail != nil else { return }
         saving = true
         errorMessage = nil
         successMessage = nil

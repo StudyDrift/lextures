@@ -195,6 +195,8 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Patch("/api/v1/courses/{course_code}/structure/items/{item_id}", d.handlePatchCourseStructureItem())
 	r.Patch("/api/v1/courses/{course_code}/structure/items/{item_id}/assignment-group", d.handlePatchCourseStructureItemAssignmentGroup())
 	r.Patch("/api/v1/courses/{course_code}/structure/items/{item_id}/due-at", d.handlePatchCourseStructureItemDueAt())
+	r.Post("/api/v1/courses/{course_code}/structure/dates/bulk", d.handlePostBulkStructureDueAt())
+	r.Post("/api/v1/courses/{course_code}/structure/dates/ai-adjust", d.handlePostAdjustDatesAI())
 	r.Delete("/api/v1/courses/{course_code}/structure/items/{item_id}", d.handleDeleteCourseStructureItem())
 	r.Get("/api/v1/courses/{course_code}/my-grades", d.handleCourseMyGrades())
 	r.Get("/api/v1/courses/{course_code}/feed/channels", d.handleFeedChannels())

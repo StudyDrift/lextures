@@ -35,8 +35,11 @@ export type ScheduleDatetimeFieldProps = {
   hideLabel?: boolean
 }
 
-const defaultInputClass =
-  'w-full rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm text-fg-default focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 disabled:opacity-60 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:focus:border-indigo-500 dark:focus:ring-indigo-500'
+/** Shared chrome (border, padding, focus). Width is applied per control so relative flex rows stay balanced. */
+const inputChromeClass =
+  'rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-sm text-fg-default focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 disabled:opacity-60 dark:border-border-default dark:bg-surface-base dark:text-fg-default dark:focus:border-indigo-500 dark:focus:ring-indigo-500'
+
+const defaultInputClass = `w-full ${inputChromeClass}`
 
 /**
  * Date control that switches between calendar `datetime-local` (fixed courses)
@@ -56,7 +59,7 @@ export function ScheduleDatetimeField({
   scheduleMode,
   relativeAnchorAt,
   defaultTime = '00:00',
-  className = defaultInputClass,
+  className,
   hideLabel = false,
 }: ScheduleDatetimeFieldProps) {
   const relative = isRelativeScheduleMode(scheduleMode) && Boolean(relativeAnchorAt?.trim())
@@ -66,6 +69,9 @@ export function ScheduleDatetimeField({
     ? partsFromDatetimeLocal(value, relativeAnchorAt)
     : { amount: '', unit: 'D' as RelativeDurationUnit }
   const timeLocal = extractLocalTime(value, defaultTime)
+  // Relative amount/unit rows must not inherit a caller `w-full` (it collapses the amount field).
+  const fixedControlClass = className ?? defaultInputClass
+  const relativeChromeClass = className ? className.replace(/\bw-full\b/g, '').trim() : inputChromeClass
 
   return (
     <div>
@@ -100,7 +106,7 @@ export function ScheduleDatetimeField({
 
       {relative ? (
         <div className="space-y-2">
-          <div className="flex gap-2">
+          <div className="flex items-stretch gap-2">
             <input
               id={id}
               type="number"
@@ -120,7 +126,7 @@ export function ScheduleDatetimeField({
                   }),
                 )
               }}
-              className={`min-w-0 flex-1 ${className}`}
+              className={`min-w-[5.5rem] flex-1 ${relativeChromeClass}`}
             />
             <select
               aria-label={`${displayLabel} unit`}
@@ -137,7 +143,7 @@ export function ScheduleDatetimeField({
                   }),
                 )
               }}
-              className={`w-28 shrink-0 ${className}`}
+              className={`w-[7.25rem] shrink-0 ${relativeChromeClass}`}
             >
               <option value="D">Days</option>
               <option value="W">Weeks</option>
@@ -172,7 +178,7 @@ export function ScheduleDatetimeField({
                   ),
                 )
               }}
-              className={`min-w-0 flex-1 ${className}`}
+              className={`min-w-0 flex-1 ${relativeChromeClass}`}
             />
           </div>
         </div>
@@ -183,7 +189,7 @@ export function ScheduleDatetimeField({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
-          className={className}
+          className={fixedControlClass}
         />
       )}
 

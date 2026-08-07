@@ -131,7 +131,7 @@ struct ColumnsLayoutView: View {
                                 onEdit: onEdit,
                                 onDelete: onDelete,
                                 onArrange: { p, input in
-                                    var next = input
+                                    let next = input
                                     if next.sectionId == nil, sectionId != nil {
                                         // Keep section when only reordering inside the lane.
                                     }

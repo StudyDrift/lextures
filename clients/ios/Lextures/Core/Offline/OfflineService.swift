@@ -46,7 +46,7 @@ final class OfflineService {
     }
 
     /// Cache-first fetch: returns cached data immediately; refreshes when online.
-    func cachedFetch<T: Codable>(
+    func cachedFetch<T: Codable & Sendable>(
         key: String,
         accessToken: String,
         fetch: () async throws -> T

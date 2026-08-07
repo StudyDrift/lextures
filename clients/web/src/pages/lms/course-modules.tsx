@@ -58,8 +58,10 @@ import {
   X,
 } from 'lucide-react'
 import { AddCourseItemMenu } from './add-course-item-menu'
+import { AdjustDatesModal } from './adjust-dates-modal'
 import { AddModuleItemMenu, type ModuleItemKind } from './add-module-item-menu'
 import { CourseModulesLoadingSkeleton } from '../../components/ui/lms-content-skeletons'
+import { Button } from '../../components/ui/button'
 import { IconSwap } from '../../components/ui/icon-swap'
 import { FeatureHelpTrigger } from '../../components/feature-help/feature-help-trigger'
 import { toast, toastWithUndo } from '../../lib/lms-toast'
@@ -1547,6 +1549,7 @@ export default function CourseModules() {
   const { modulesAiAssistantEnabled, loading: courseFeaturesLoading } = useCourseNavFeatures()
   const { aiConfigured, ffConditionalRelease } = usePlatformFeatures()
   const [modulesAiOpen, setModulesAiOpen] = useState(false)
+  const [adjustDatesOpen, setAdjustDatesOpen] = useState(false)
   const [items, setItems] = useState<CourseStructureItem[]>([])
   const [studentGradeContext, setStudentGradeContext] = useState<{
     columns: CourseGradebookGridColumn[]
@@ -1707,6 +1710,7 @@ export default function CourseModules() {
     moduleSettingsOpen ||
     editItemSaving ||
     editItemModalOpen ||
+    adjustDatesOpen ||
     archiveConfirmItem !== null ||
     moduleDeleteTarget !== null ||
     moduleDeleting
@@ -2583,6 +2587,15 @@ export default function CourseModules() {
                 <span className="hidden sm:inline">AI</span>
               </button>
             ) : null}
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              disabled={anyModalBusy}
+              onClick={() => setAdjustDatesOpen(true)}
+            >
+              Adjust Dates
+            </Button>
             <AddCourseItemMenu
               onAdd={openAddModule}
               disabled={anyModalBusy}
@@ -2605,6 +2618,18 @@ export default function CourseModules() {
           open={modulesAiOpen}
           onOpenChange={setModulesAiOpen}
           onStructureChanged={() => load({ silent: true })}
+        />
+      ) : null}
+      {courseCode && canEditModules ? (
+        <AdjustDatesModal
+          open={adjustDatesOpen}
+          onClose={() => setAdjustDatesOpen(false)}
+          courseCode={courseCode}
+          structureItems={items}
+          scheduleMode={courseMeta?.scheduleMode}
+          relativeScheduleAnchorAt={courseMeta?.relativeScheduleAnchorAt}
+          aiConfigured={aiConfigured}
+          onApplied={() => load({ silent: true })}
         />
       ) : null}
       {courseMeta ? <CourseHeroBanner course={courseMeta} /> : null}

@@ -288,19 +288,24 @@ func (d Deps) handleCommWS() http.HandlerFunc {
 			AuthToken string `json:"authToken"`
 		}
 		if err := json.Unmarshal(b, &m); err != nil || m.AuthToken == "" {
+			_ = c.Close(wsStatusAuthFailed, "invalid auth message")
 			return
 		}
 		u, err := d.JWTSigner.Verify(r.Context(), m.AuthToken)
 		if err != nil {
+			_ = c.Close(wsStatusAuthFailed, "invalid auth token")
 			return
 		}
 		uid, err := uuid.Parse(u.UserID)
 		if err != nil {
+			_ = c.Close(wsStatusAuthFailed, "invalid auth token")
 			return
 		}
 
 		runCtx, stop := context.WithCancel(r.Context())
 		defer stop()
+
+		go keepAliveWS(runCtx, c, stop, wsPingPeriod)
 
 		if d.Comm != nil {
 			recv, unsub := d.Comm.Subscribe()

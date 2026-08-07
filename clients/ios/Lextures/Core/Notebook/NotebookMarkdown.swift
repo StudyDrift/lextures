@@ -373,9 +373,7 @@ enum NotebookMarkdown {
     private static func listDepth(_ line: String) -> Int {
         var spaces = 0
         for ch in line {
-            if ch == " " { spaces += 1 }
-            else if ch == "\t" { spaces += 2 }
-            else { break }
+            if ch == " " { spaces += 1 } else if ch == "\t" { spaces += 2 } else { break }
         }
         return min(spaces / 2, 3)
     }
@@ -456,8 +454,7 @@ enum NotebookMarkdown {
                 ))
             case .table(let align, let header, let rows):
                 for line in MarkdownTableLogic.serialize(align: align, header: header, rows: rows)
-                    .components(separatedBy: "\n")
-                {
+                    .components(separatedBy: "\n") {
                     out.append(NotebookEditBlock(kind: .paragraph, text: line))
                 }
             case .toolFence(let instanceId, let toolId, let version):

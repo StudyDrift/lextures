@@ -111,7 +111,7 @@ extension LMSAPI {
             )
             return try decode(ToolStateEnvelope.self, from: data)
         } catch let APIError.httpStatus(status, message) {
-            throw try await remapStateWriteError(
+            try await remapStateWriteError(
                 status: status,
                 message: message,
                 courseCode: courseCode,
@@ -140,7 +140,7 @@ extension LMSAPI {
             )
             return try decode(ToolStateEnvelope.self, from: data)
         } catch let APIError.httpStatus(status, message) {
-            throw try await remapStateWriteError(
+            try await remapStateWriteError(
                 status: status,
                 message: message,
                 courseCode: courseCode,

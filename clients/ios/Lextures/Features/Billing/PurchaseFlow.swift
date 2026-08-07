@@ -14,10 +14,10 @@ struct PurchaseFlowSheet: View {
     let priceCents: Int
     let currency: String
     /// When set, used for analytics / already-owned handling (marketplace).
-    var marketplaceSlug: String? = nil
-    var onAlreadyOwned: (() -> Void)? = nil
+    var marketplaceSlug: String?
+    var onAlreadyOwned: (() -> Void)?
     /// Called after a successful IAP + server verify (entitlement granted).
-    var onPurchased: (() -> Void)? = nil
+    var onPurchased: (() -> Void)?
 
     @State private var appleProducts: [AppleIAPProductInfo] = []
     @State private var storeProduct: Product?

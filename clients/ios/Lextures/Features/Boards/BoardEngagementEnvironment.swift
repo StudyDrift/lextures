@@ -5,8 +5,8 @@ struct BoardEngagementHandlers {
     var courseCode: String
     var onPostUpdate: (BoardPost) -> Void
     var onAnnounce: (String) -> Void
-    var onHidePost: ((BoardPost) -> Void)? = nil
-    var onRemovePost: ((BoardPost) -> Void)? = nil
+    var onHidePost: ((BoardPost) -> Void)?
+    var onRemovePost: ((BoardPost) -> Void)?
 }
 
 private struct BoardEngagementHandlersKey: EnvironmentKey {

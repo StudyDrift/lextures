@@ -107,10 +107,15 @@ enum GradesDisplayLogic {
         dropped: [String: Bool]
     ) -> [String] {
         var badges: [String] = []
-        if response.gradeStatuses[column.id] == "excused" { badges.append("Excused") }
-        else if response.heldGradeItemIds.contains(column.id) { badges.append("Pending") }
-        else if dropped[column.id] == true { badges.append("Dropped") }
-        else if response.gradeStatuses[column.id] == "late" { badges.append("Late") }
+        if response.gradeStatuses[column.id] == "excused" {
+            badges.append("Excused")
+        } else if response.heldGradeItemIds.contains(column.id) {
+            badges.append("Pending")
+        } else if dropped[column.id] == true {
+            badges.append("Dropped")
+        } else if response.gradeStatuses[column.id] == "late" {
+            badges.append("Late")
+        }
         return badges
     }
 }

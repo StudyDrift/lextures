@@ -289,7 +289,7 @@ extension LoginView {
 
     private func ssoLabel(for provider: SSOProvider) -> String {
         switch provider {
-        case let .saml(_):
+        case .saml:
             let label = samlStatus?.idp?.label ?? "SSO"
             return L.format("auth.login.ssoButton", label)
         case let .oidc(_, label):

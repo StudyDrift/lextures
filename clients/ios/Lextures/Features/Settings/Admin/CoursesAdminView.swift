@@ -92,8 +92,7 @@ struct CoursesAdminView: View {
                                     .font(.subheadline.weight(.semibold))
                             }
                             if let filterError { LMSErrorBanner(message: filterError) }
-                            if filterLoading && filterResults == nil { LMSSkeletonList(count: 3) }
-                            else if let filterResults { courseList(filterResults, isFilter: true) }
+                            if filterLoading && filterResults == nil { LMSSkeletonList(count: 3) } else if let filterResults { courseList(filterResults, isFilter: true) }
                         }
                         .padding(14)
                         .background(LexturesTheme.cardBackground(for: colorScheme))
@@ -109,10 +108,16 @@ struct CoursesAdminView: View {
                         }.buttonStyle(.borderedProminent).tint(LexturesTheme.brandTeal)
                     }
                     if let errorMessage { LMSErrorBanner(message: errorMessage) }
-                    if loading && results == nil { LMSSkeletonList(count: 3) }
-                    else if let results { courseList(results, isFilter: false) }
-                    else if !PlatformCoursesAdminLogic.shouldSearch(submittedQuery) {
-                        LMSEmptyState(systemImage: "books.vertical", title: L.text("mobile.admin.courses.emptyTitle"), message: L.text("mobile.admin.courses.emptyMessage"))
+                    if loading && results == nil {
+                        LMSSkeletonList(count: 3)
+                    } else if let results {
+                        courseList(results, isFilter: false)
+                    } else if !PlatformCoursesAdminLogic.shouldSearch(submittedQuery) {
+                        LMSEmptyState(
+                            systemImage: "books.vertical",
+                            title: L.text("mobile.admin.courses.emptyTitle"),
+                            message: L.text("mobile.admin.courses.emptyMessage")
+                        )
                     }
                 }
                 .padding(16)
@@ -145,15 +150,13 @@ struct CoursesAdminView: View {
                 if data.totalPages > 1 {
                     HStack {
                         Button(L.text("mobile.admin.people.previous")) {
-                            if isFilter { filterPage = max(1, filterPage - 1); Task { await loadFilter() } }
-                            else { page = max(1, page - 1); Task { await search() } }
+                            if isFilter { filterPage = max(1, filterPage - 1); Task { await loadFilter() } } else { page = max(1, page - 1); Task { await search() } }
                         }.disabled((isFilter ? filterPage : page) <= 1)
                         Spacer()
                         Text(L.format("mobile.admin.people.pageOf", isFilter ? filterPage : page, data.totalPages)).font(.caption)
                         Spacer()
                         Button(L.text("mobile.admin.people.next")) {
-                            if isFilter { filterPage = min(data.totalPages, filterPage + 1); Task { await loadFilter() } }
-                            else { page = min(data.totalPages, page + 1); Task { await search() } }
+                            if isFilter { filterPage = min(data.totalPages, filterPage + 1); Task { await loadFilter() } } else { page = min(data.totalPages, page + 1); Task { await search() } }
                         }.disabled((isFilter ? filterPage : page) >= data.totalPages)
                     }
                 }
@@ -164,8 +167,7 @@ struct CoursesAdminView: View {
     private func loadStats() async {
         guard let token = session.accessToken else { return }
         statsLoading = true; statsError = nil; defer { statsLoading = false }
-        do { stats = try await LMSAPI.fetchCoursesStats(accessToken: token) }
-        catch { statsError = PlatformCoursesAdminLogic.userFacingError(error) }
+        do { stats = try await LMSAPI.fetchCoursesStats(accessToken: token) } catch { statsError = PlatformCoursesAdminLogic.userFacingError(error) }
     }
 
     private func loadFilter() async {

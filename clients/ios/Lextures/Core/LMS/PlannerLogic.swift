@@ -430,7 +430,7 @@ enum PlannerLogic {
         items
             .filter { !$0.isCompleted }
             .filter { item in
-                guard let due = item.dueAt else { return false }
+                guard item.dueAt != nil else { return false }
                 let buckets = bucketTodos([item], now: now)
                 return buckets[.overdue]?.isEmpty == false
                     || buckets[.today]?.isEmpty == false

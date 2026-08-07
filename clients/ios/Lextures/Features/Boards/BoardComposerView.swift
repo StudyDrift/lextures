@@ -250,7 +250,7 @@ struct BoardComposerView: View {
             try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker])
             try session.setActive(true)
             let granted = await withCheckedContinuation { (cont: CheckedContinuation<Bool, Never>) in
-                AVAudioSession.sharedInstance().requestRecordPermission { cont.resume(returning: $0) }
+                AVAudioApplication.requestRecordPermission { cont.resume(returning: $0) }
             }
             guard granted else {
                 errorMessage = L.text("mobile.boards.compose.micDenied")

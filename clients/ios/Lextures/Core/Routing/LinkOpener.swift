@@ -12,7 +12,7 @@ enum LinkOpener {
         /// When set, overrides shell policy (tests / forced system).
         var forceSystemBrowser: Bool = false
         /// Optional access token for first-party WebItem loads.
-        var accessToken: String? = nil
+        var accessToken: String?
         /// When true, Report appears in overflow (user-generated surfaces).
         var allowReport: Bool = false
     }

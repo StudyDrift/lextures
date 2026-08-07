@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useLocation } from 'react-router-dom'
 import { authorizedFetch } from '../lib/api'
-import { closeWebSocket } from '../lib/close-websocket'
-import { getAccessToken } from '../lib/auth'
-import { wsReconnectDelayMs } from '../lib/ws-reconnect'
+import { openAppWebSocket } from '../lib/app-websocket'
 import {
   notificationsWebSocketUrl,
   parseNotificationsWsMessage,
@@ -22,10 +20,6 @@ export function InboxNotificationsProvider({ children }: { children: ReactNode }
   const [notifications, setNotifications] = useState<InboxNotification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [loading, setLoading] = useState(false)
-  const wsRef = useRef<WebSocket | null>(null)
-  const wsTokenRef = useRef<string | null>(null)
-  const wsReconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const wsAttemptRef = useRef(0)
   const inboxHydratedRef = useRef(false)
   const toastedIdsRef = useRef<Set<string>>(loadNotificationToastedIds())
   const mountedRef = useRef(true)
@@ -109,126 +103,17 @@ export function InboxNotificationsProvider({ children }: { children: ReactNode }
   // Long-lived socket: stay connected across navigations. Reconnect only on
   // unexpected close or auth token change (not on every pathname change).
   useEffect(() => {
-    let cancelled = false
-    let visibilityWait: (() => void) | null = null
-
-    const clearReconnectTimer = () => {
-      if (wsReconnectTimerRef.current) {
-        clearTimeout(wsReconnectTimerRef.current)
-        wsReconnectTimerRef.current = null
-      }
-      if (visibilityWait) {
-        document.removeEventListener('visibilitychange', visibilityWait)
-        visibilityWait = null
-      }
-    }
-
-    const disconnect = () => {
-      clearReconnectTimer()
-      closeWebSocket(wsRef.current)
-      wsRef.current = null
-      wsTokenRef.current = null
-    }
-
-    const scheduleReconnect = () => {
-      if (cancelled || wsReconnectTimerRef.current || visibilityWait) return
-      // Pause aggressive reconnect while the tab is backgrounded (origin 504 storms).
-      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') {
-        const onVis = () => {
-          if (document.visibilityState !== 'visible') return
-          document.removeEventListener('visibilitychange', onVis)
-          visibilityWait = null
-          if (!cancelled) scheduleReconnect()
-        }
-        visibilityWait = onVis
-        document.addEventListener('visibilitychange', onVis)
-        return
-      }
-      const delay = wsReconnectDelayMs(wsAttemptRef.current)
-      wsAttemptRef.current += 1
-      wsReconnectTimerRef.current = setTimeout(() => {
-        wsReconnectTimerRef.current = null
-        if (!cancelled) connect()
-      }, delay)
-    }
-
-    const connect = () => {
-      if (cancelled) return
-      const authToken = getAccessToken()
-      if (!authToken) {
-        disconnect()
-        return
-      }
-
-      const url = notificationsWebSocketUrl()
-      if (!url) return
-
-      if (wsRef.current && wsTokenRef.current === authToken) {
-        return
-      }
-
-      closeWebSocket(wsRef.current)
-      wsTokenRef.current = authToken
-
-      let ws: WebSocket
-      try {
-        ws = new WebSocket(url)
-      } catch {
-        scheduleReconnect()
-        return
-      }
-      wsRef.current = ws
-
-      ws.onopen = () => {
-        wsAttemptRef.current = 0
-        const currentToken = getAccessToken()
-        if (!currentToken) {
-          closeWebSocket(ws)
-          return
-        }
-        try {
-          ws.send(JSON.stringify({ authToken: currentToken }))
-        } catch {
-          /* socket may already be closing */
-        }
-      }
-
-      ws.onmessage = (ev) => {
-        const msg = parseNotificationsWsMessage(String(ev.data))
+    const handle = openAppWebSocket({
+      url: notificationsWebSocketUrl,
+      onMessage: (data) => {
+        const msg = parseNotificationsWsMessage(data)
         if (msg?.type === 'notification_updated') {
           void refresh()
         }
-      }
-
-      ws.onclose = () => {
-        if (wsRef.current === ws) {
-          wsRef.current = null
-          wsTokenRef.current = null
-        }
-        // Browser already closed the socket; do not call close() again.
-        scheduleReconnect()
-      }
-
-      // Errors are followed by onclose — avoid close() here (double-close noise).
-      ws.onerror = null
-    }
-
-    const onAuthToken = () => {
-      if (cancelled) return
-      if (!getAccessToken()) {
-        disconnect()
-        return
-      }
-      connect()
-    }
-
-    connect()
-    window.addEventListener('studydrift-auth-token', onAuthToken)
-
+      },
+    })
     return () => {
-      cancelled = true
-      window.removeEventListener('studydrift-auth-token', onAuthToken)
-      disconnect()
+      handle.close()
     }
   }, [refresh])
 

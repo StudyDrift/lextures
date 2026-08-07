@@ -39,38 +39,40 @@ struct ModuleItemRouteView: View {
     var onProgressChanged: (() async -> Void)?
 
     var body: some View {
-        switch ModuleContentLogic.destination(for: item.kind) {
-        case .contentPage:
-            ContentPageView(course: course, item: item, onProgressChanged: onProgressChanged)
-        case .quiz:
-            QuizIntroView(course: course, item: item, onProgressChanged: onProgressChanged)
-        case .assignment:
-            if course.viewerIsStudent {
-                AssignmentDetailView(course: course, item: item)
-            } else {
-                ItemDetailView(course: course, item: item)
+        Group {
+            switch ModuleContentLogic.destination(for: item.kind) {
+            case .contentPage:
+                ContentPageView(course: course, item: item, onProgressChanged: onProgressChanged)
+            case .quiz:
+                QuizIntroView(course: course, item: item, onProgressChanged: onProgressChanged)
+            case .assignment:
+                if course.viewerIsStudent {
+                    AssignmentDetailView(course: course, item: item)
+                } else {
+                    ItemDetailView(course: course, item: item)
+                }
+            case .externalLink, .webContent:
+                WebItemLoader(course: course, item: item)
+            case .interactive:
+                LaunchContainerView(course: course, item: item, onProgressChanged: onProgressChanged)
+            case .vibeActivity:
+                VibeActivityView(
+                    course: course,
+                    item: item,
+                    nativeEnabled: shell.platformFeatures.ffMobileVibeActivities,
+                    onProgressChanged: onProgressChanged
+                )
+            case .libraryResource:
+                LibraryResourceView(
+                    course: course,
+                    item: item,
+                    nativeEnabled: shell.platformFeatures.ffMobileLibraryEreserves
+                )
+            case .file:
+                FilePreviewView(target: FilePreviewTarget.from(moduleItem: item, courseCode: course.courseCode))
+            case .unsupported:
+                ModuleItemPlaceholderView(item: item, messageKey: "mobile.modules.placeholder.unsupported")
             }
-        case .externalLink, .webContent:
-            WebItemLoader(course: course, item: item)
-        case .interactive:
-            LaunchContainerView(course: course, item: item, onProgressChanged: onProgressChanged)
-        case .vibeActivity:
-            VibeActivityView(
-                course: course,
-                item: item,
-                nativeEnabled: shell.platformFeatures.ffMobileVibeActivities,
-                onProgressChanged: onProgressChanged
-            )
-        case .libraryResource:
-            LibraryResourceView(
-                course: course,
-                item: item,
-                nativeEnabled: shell.platformFeatures.ffMobileLibraryEreserves
-            )
-        case .file:
-            FilePreviewView(target: FilePreviewTarget.from(moduleItem: item, courseCode: course.courseCode))
-        case .unsupported:
-            ModuleItemPlaceholderView(item: item, messageKey: "mobile.modules.placeholder.unsupported")
         }
     }
 }

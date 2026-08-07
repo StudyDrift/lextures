@@ -14,8 +14,8 @@ struct ToolComposerView: View {
     var busy: Bool
     var showCancel: Bool = false
     var onSend: () -> Void
-    var onCancel: (() -> Void)? = nil
-    var onDraftChange: ((String) -> Void)? = nil
+    var onCancel: (() -> Void)?
+    var onDraftChange: ((String) -> Void)?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {

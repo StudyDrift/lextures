@@ -766,6 +766,15 @@ Bring a photo ID</string>
     <string name="mobile_billing_paymentConfirmed">Payment confirmed</string>
     <string name="mobile_billing_paymentProcessing">Payment processing</string>
     <string name="mobile_billing_paymentProcessingHint">Your purchase may take a moment to appear.</string>
+    <string name="mobile_billing_paywall_annualBadge">Best value</string>
+    <string name="mobile_billing_paywall_everyDays">Every %1$d day(s)</string>
+    <string name="mobile_billing_paywall_everyMonths">Every %1$d month(s)</string>
+    <string name="mobile_billing_paywall_everyWeeks">Every %1$d week(s)</string>
+    <string name="mobile_billing_paywall_everyYears">Every %1$d year(s)</string>
+    <string name="mobile_billing_paywall_legal">Payment is charged to your Apple ID. Manage or cancel anytime in Settings → Subscriptions.</string>
+    <string name="mobile_billing_paywall_message">You\'ve started free lessons in the Homeschool app. Subscribe to keep learning with full access.</string>
+    <string name="mobile_billing_paywall_monthlyBadge">Monthly</string>
+    <string name="mobile_billing_paywall_title">Continue with Lextures</string>
     <string name="mobile_billing_portalError">Could not open subscription management.</string>
     <string name="mobile_billing_purchase">Purchase</string>
     <string name="mobile_billing_purchaseHint">You\'ll complete checkout securely in your browser.</string>

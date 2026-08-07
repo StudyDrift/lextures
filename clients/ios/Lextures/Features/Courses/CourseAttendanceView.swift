@@ -140,7 +140,7 @@ struct CourseAttendanceSection: View {
         defer { loading = false }
         do {
             sessions = try await LMSAPI.fetchAttendanceSessions(courseCode: course.courseCode, accessToken: token)
-        } catch let APIError.httpStatus(404, _) {
+        } catch APIError.httpStatus(404, _) {
             sessions = []
         } catch {
             errorMessage = (error as? LocalizedError)?.errorDescription ?? L.text("mobile.attendance.take.loadError")

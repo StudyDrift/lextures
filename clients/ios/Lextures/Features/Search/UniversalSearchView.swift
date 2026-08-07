@@ -7,7 +7,7 @@ struct UniversalSearchView: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
 
-    var courseScope: String? = nil
+    var courseScope: String?
 
     @State private var query = ""
     @State private var scopedToCourse = false

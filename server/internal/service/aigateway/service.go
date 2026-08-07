@@ -29,6 +29,8 @@ const (
 
 	FeatureAITutor                    = "ai_tutor"
 	FeatureModulesAIAssistant         = "modules_ai_assistant"
+	// FeatureDatesAIAdjust is bulk due-date AI proposals from the Modules Adjust Dates modal.
+	FeatureDatesAIAdjust = "dates_ai_adjust"
 	FeatureRAGNotebook                = "rag_notebook"
 	FeatureSyllabusGeneration         = "syllabus_generation"
 	FeatureContentPageGeneration      = "content_page_generation"

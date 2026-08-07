@@ -3,6 +3,10 @@ disabled_rules:
   # cleaner diffs when items are added or reordered.
   - trailing_comma
 
+# Keep existing structural debt quiet while still reporting regressions.
+# Remove entries from this file as the corresponding code is refactored.
+baseline: .swiftlint-baseline.json
+
 line_length:
   warning: 150
   error: 200

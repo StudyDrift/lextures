@@ -242,6 +242,7 @@ final class UIModeStore {
 }
 // swiftlint:enable identifier_name
 
+@MainActor
 private struct UIModeStoreKey: EnvironmentKey {
     static let defaultValue = UIModeStore.shared
 }

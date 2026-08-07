@@ -49,4 +49,3 @@ struct PostReadingLogBody: Encodable {
 struct PostReadingLogResponse: Decodable {
     var entry: ReadingLogEntry
 }
-

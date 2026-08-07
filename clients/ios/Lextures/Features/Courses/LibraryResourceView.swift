@@ -174,7 +174,7 @@ struct LibraryResourceView: View {
 
     private func recordAccess(token: String) async {
         do {
-            try await offline.enqueueMutation(
+            _ = try await offline.enqueueMutation(
                 method: "POST",
                 path: LibraryResourceLogic.accessEventPath(courseCode: course.courseCode, itemId: item.id),
                 body: nil as String?,

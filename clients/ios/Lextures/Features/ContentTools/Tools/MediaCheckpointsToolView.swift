@@ -192,8 +192,7 @@ struct MediaCheckpointsToolView: View {
             case "multi":
                 ForEach(question.options, id: \.id) { opt in
                     Button {
-                        if selectedOptions.contains(opt.id) { selectedOptions.remove(opt.id) }
-                        else { selectedOptions.insert(opt.id) }
+                        if selectedOptions.contains(opt.id) { selectedOptions.remove(opt.id) } else { selectedOptions.insert(opt.id) }
                     } label: {
                         HStack {
                             Image(systemName: selectedOptions.contains(opt.id) ? "checkmark.square.fill" : "square")
