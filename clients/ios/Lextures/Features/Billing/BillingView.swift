@@ -11,7 +11,9 @@ struct BillingView: View {
     @State private var transactions: [BillingTransaction] = []
     @State private var loading = true
     @State private var portalLoading = false
+    @State private var restoreLoading = false
     @State private var errorMessage: String?
+    @State private var statusMessage: String?
 
     private var activeSubscription: BillingEntitlement? {
         BillingLogic.activeSubscription(entitlements)
@@ -28,6 +30,11 @@ struct BillingView: View {
                     VStack(alignment: .leading, spacing: 16) {
                         if let errorMessage {
                             LMSErrorBanner(message: errorMessage)
+                        }
+                        if let statusMessage {
+                            Text(statusMessage)
+                                .font(.caption)
+                                .foregroundStyle(LexturesTheme.primary)
                         }
 
                         subscriptionSection
@@ -68,15 +75,43 @@ struct BillingView: View {
                 }
 
                 Button {
+                    openURL(BillingLogic.appStoreSubscriptionsURL())
+                } label: {
+                    Label(
+                        L.text("mobile.billing.manageSubscription"),
+                        systemImage: "arrow.up.right.square"
+                    )
+                    .font(.subheadline.weight(.semibold))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .buttonStyle(.plain)
+
+                Button {
+                    Task { await restorePurchases() }
+                } label: {
+                    Label(
+                        restoreLoading
+                            ? L.text("mobile.billing.iap.restoring")
+                            : L.text("mobile.billing.iap.restore"),
+                        systemImage: "arrow.clockwise"
+                    )
+                    .font(.subheadline.weight(.semibold))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .buttonStyle(.plain)
+                .disabled(restoreLoading || session.accessToken == nil)
+
+                // Web/Stripe portal for multiplatform subscribers who bought outside iOS.
+                Button {
                     Task { await openPortal() }
                 } label: {
                     Label(
                         portalLoading
                             ? L.text("mobile.billing.openingPortal")
-                            : L.text("mobile.billing.manageSubscription"),
-                        systemImage: "arrow.up.right.square"
+                            : L.text("mobile.billing.manageWebSubscription"),
+                        systemImage: "globe"
                     )
-                    .font(.subheadline.weight(.semibold))
+                    .font(.subheadline)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .buttonStyle(.plain)
@@ -194,6 +229,21 @@ struct BillingView: View {
             openURL(url)
         } catch {
             errorMessage = L.text("mobile.billing.portalError")
+        }
+    }
+
+    private func restorePurchases() async {
+        guard let token = session.accessToken else { return }
+        restoreLoading = true
+        errorMessage = nil
+        statusMessage = nil
+        defer { restoreLoading = false }
+        do {
+            let count = try await StoreKitPurchaseService.restorePurchases(accessToken: token)
+            statusMessage = L.format("mobile.billing.iap.restoreDone", count)
+            await load()
+        } catch {
+            errorMessage = L.text("mobile.billing.iap.restoreFailed")
         }
     }
 }

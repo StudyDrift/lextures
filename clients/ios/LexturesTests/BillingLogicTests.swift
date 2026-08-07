@@ -50,4 +50,31 @@ final class BillingLogicTests: XCTestCase {
         ]
         XCTAssertEqual(BillingLogic.activeSubscription(entitlements)?.id, "2")
     }
+
+    func testPrefersInAppPurchaseOnIOS() {
+        XCTAssertTrue(BillingLogic.prefersInAppPurchase)
+    }
+
+    func testPreferredAppleProductPrefersCourseMatch() {
+        let products = [
+            AppleIAPProductInfo(productId: "sub.m", kind: "subscription_monthly"),
+            AppleIAPProductInfo(productId: "course.a", kind: "course_purchase", courseId: "aaa"),
+            AppleIAPProductInfo(productId: "course.b", kind: "course_purchase", courseId: "bbb"),
+        ]
+        XCTAssertEqual(
+            BillingLogic.preferredAppleProduct(from: products, courseId: "bbb")?.productId,
+            "course.b"
+        )
+        XCTAssertEqual(
+            BillingLogic.preferredAppleProduct(from: products, courseId: nil)?.productId,
+            "sub.m"
+        )
+    }
+
+    func testAppStoreSubscriptionsURL() {
+        XCTAssertEqual(
+            BillingLogic.appStoreSubscriptionsURL().absoluteString,
+            "https://apps.apple.com/account/subscriptions"
+        )
+    }
 }

@@ -680,6 +680,17 @@ type Config struct {
 	// StripeAnnualPriceID is the Stripe Price id for annual platform subscription.
 	StripeAnnualPriceID string
 
+	// AppleIAPBundleID is the iOS app bundle id used to validate StoreKit transactions (e.g. com.lextures.ios).
+	AppleIAPBundleID string
+	// AppleIAPMonthlyProductID is the App Store auto-renewable product id for monthly access.
+	AppleIAPMonthlyProductID string
+	// AppleIAPAnnualProductID is the App Store auto-renewable product id for annual access.
+	AppleIAPAnnualProductID string
+	// AppleIAPSkipSignatureVerify decodes StoreKit JWS without signature checks (local only).
+	AppleIAPSkipSignatureVerify bool
+	// AppleIAPRootCAPEM is optional PEM of Apple Root CAs for full x5c chain verification.
+	AppleIAPRootCAPEM string
+
 	// PayPalClientID is the PayPal REST app client id (plan 16.8).
 	PayPalClientID string
 	// PayPalClientSecret is the PayPal REST app secret (plan 16.8).
@@ -1006,6 +1017,12 @@ func Load() Config {
 		StripeWebhookSecret:  strings.TrimSpace(os.Getenv("STRIPE_WEBHOOK_SECRET")),
 		StripeMonthlyPriceID: strings.TrimSpace(os.Getenv("STRIPE_MONTHLY_PRICE_ID")),
 		StripeAnnualPriceID:  strings.TrimSpace(os.Getenv("STRIPE_ANNUAL_PRICE_ID")),
+
+		AppleIAPBundleID:            firstNonEmptyTrimmed("APPLE_IAP_BUNDLE_ID", "OIDC_APPLE_NATIVE_AUDIENCE"),
+		AppleIAPMonthlyProductID:    firstNonEmptyTrimmed("APPLE_IAP_MONTHLY_PRODUCT_ID"),
+		AppleIAPAnnualProductID:     firstNonEmptyTrimmed("APPLE_IAP_ANNUAL_PRODUCT_ID"),
+		AppleIAPSkipSignatureVerify: boolEnv("APPLE_IAP_SKIP_SIGNATURE_VERIFY"),
+		AppleIAPRootCAPEM:           firstNonEmptyTrimmedOrFile("APPLE_IAP_ROOT_CA_PEM", "APPLE_IAP_ROOT_CA_PATH"),
 
 		PayPalClientID:     strings.TrimSpace(os.Getenv("PAYPAL_CLIENT_ID")),
 		PayPalClientSecret: strings.TrimSpace(os.Getenv("PAYPAL_CLIENT_SECRET")),
