@@ -37,6 +37,18 @@ aws_region   = "us-east-1"
 # First password signup with this email gets Global Admin (only when no human users yet):
 # bootstrap_admin_email = "you@example.com"
 
+# Stripe (web checkout). Prefer HCP/TFC workspace variables (sensitive for keys).
+# Names must match these Terraform variable names — not the container env names alone.
+# stripe_secret_key       = "sk_live_..."   # sensitive
+# stripe_webhook_secret   = "whsec_..."     # sensitive
+# stripe_monthly_price_id = "price_..."
+# stripe_annual_price_id  = "price_..."
+
+# Apple IAP product mapping (iOS StoreKit). Non-sensitive product ids.
+# apple_iap_bundle_id          = "com.lextures.ios"
+# apple_iap_monthly_product_id = "com.lextures.ios.sub.monthly"
+# apple_iap_annual_product_id  = "com.lextures.ios.sub.annual"
+
 # Amazon SES (transactional email). Resources are created when ses_domain is set.
 # enable_ses   = true
 # ses_domain   = "example.com"

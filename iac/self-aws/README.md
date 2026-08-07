@@ -177,6 +177,26 @@ Secrets Manager secret `${project}-${environment}/app` is a JSON object. ECS inj
 | `SQS_*_URL` | Per-queue SQS URLs |
 | `STORAGE_BACKEND` | `s3` |
 | `STORAGE_BUCKET` / `STORAGE_REGION` | Course files |
+| `STRIPE_SECRET_KEY` | Stripe secret key (`stripe_secret_key` TFC var) — required for “Stripe is configured” |
+| `STRIPE_WEBHOOK_SECRET` | Webhook signing secret (`stripe_webhook_secret`) |
+| `STRIPE_MONTHLY_PRICE_ID` / `STRIPE_ANNUAL_PRICE_ID` | Stripe Price ids |
+| `APPLE_IAP_*` | StoreKit product mapping (`apple_iap_*` TFC vars) |
+
+### Stripe / Apple IAP (HCP Terraform Cloud)
+
+Workspace **Terraform variables** (not only shell `export`, and not unused env vars on the runner):
+
+| Terraform variable | Container env | Sensitive |
+|--------------------|---------------|-----------|
+| `stripe_secret_key` | `STRIPE_SECRET_KEY` | Yes |
+| `stripe_webhook_secret` | `STRIPE_WEBHOOK_SECRET` | Yes |
+| `stripe_monthly_price_id` | `STRIPE_MONTHLY_PRICE_ID` | No |
+| `stripe_annual_price_id` | `STRIPE_ANNUAL_PRICE_ID` | No |
+| `apple_iap_bundle_id` | `APPLE_IAP_BUNDLE_ID` | No |
+| `apple_iap_monthly_product_id` | `APPLE_IAP_MONTHLY_PRODUCT_ID` | No |
+| `apple_iap_annual_product_id` | `APPLE_IAP_ANNUAL_PRODUCT_ID` | No |
+
+After apply, ECS must roll a **new task definition** (this stack updates the secret + task). Confirm the API task has `STRIPE_SECRET_KEY` set. Also enable **Stripe billing** under Settings → Global platform (`ffStripeBilling`).
 
 `PLATFORM_SECRETS_KEY` is auto-generated (`random_id`, 32 bytes → base64) unless you set Terraform variable `platform_secrets_key` (e.g. `openssl rand -base64 32`). Keep it stable: rotating the key makes previously encrypted DB secrets undecryptable until they are re-entered.
 
