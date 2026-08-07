@@ -89,11 +89,11 @@ func StartTranscriptCheckout(
 		orgID = *o.OrgID
 	}
 	meta := map[string]string{
-		"checkout_key":         checkoutKey,
-		"entitlement_type":     EntitlementTranscriptOrder,
-		"transcript_order_id":  o.ID.String(),
-		"stripe_customer_id":   customerID,
-		"user_id":              req.UserID.String(),
+		"checkout_key":        checkoutKey,
+		"entitlement_type":    EntitlementTranscriptOrder,
+		"transcript_order_id": o.ID.String(),
+		"stripe_customer_id":  customerID,
+		"user_id":             req.UserID.String(),
 	}
 	if orgID != uuid.Nil {
 		meta["org_id"] = orgID.String()
@@ -116,7 +116,7 @@ func StartTranscriptCheckout(
 		OrgID:       orgID,
 		SuccessURL:  success,
 		CancelURL:   cancel,
-		TaxCode:     "txcd_99999999",
+		TaxCode:     paymentprovider.DefaultDigitalTaxCode,
 		Metadata:    meta,
 	})
 	if err != nil {
