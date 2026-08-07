@@ -119,6 +119,7 @@ keys:
   ffTaxCollection
   ffTranscriptInbound
   ffTranscripts
+  ffTypeScale
   ffUiMode
   ffVisualBoards
   ffWebhooks

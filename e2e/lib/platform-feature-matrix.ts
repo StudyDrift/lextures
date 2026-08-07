@@ -998,6 +998,18 @@ export const PLATFORM_FEATURE_MATRIX: readonly PlatformFeatureMatrixEntry[] = [
     gatedSurface: null,
   },
   {
+    key: 'ffTypeScale',
+    label: 'Type scale (16px body)',
+    category: 'accessibility',
+    ownershipSource: 'database',
+    sourceKey: null,
+    runtimeKey: 'ffTypeScale',
+    settingsOnlyRationale: null,
+    secretSensitive: false,
+    uiSample: false,
+    gatedSurface: null,
+  },
+  {
     key: 'ffUiMode',
     label: 'UI mode switcher',
     category: 'platform',
