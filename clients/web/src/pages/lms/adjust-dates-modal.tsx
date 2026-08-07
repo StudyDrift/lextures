@@ -224,7 +224,7 @@ export function AdjustDatesModal({
     <Dialog
       open={open}
       onClose={onClose}
-      title="Adjust Dates"
+      title={'Adjust Dates'}
       description={
         isRelative
           ? 'Bulk-edit due dates. Relative courses store absolute instants and re-anchor per enrollment.'
@@ -260,11 +260,11 @@ export function AdjustDatesModal({
       */}
       <div className="flex min-h-0 flex-1 flex-col gap-3">
         <div className="flex shrink-0 flex-wrap items-center gap-2">
-          <span className="rounded-full border border-border-subtle bg-surface-sunken px-2.5 py-0.5 text-xs text-fg-muted">
+          <span className="rounded-full border border-border-subtle bg-surface-sunken px-2.5 py-0.5 text-caption text-fg-muted">
             {statusLine}
           </span>
           {isRelative && relativeScheduleAnchorAt ? (
-            <span className="rounded-full border border-border-subtle bg-surface-sunken px-2.5 py-0.5 text-xs text-fg-muted">
+            <span className="rounded-full border border-border-subtle bg-surface-sunken px-2.5 py-0.5 text-caption text-fg-muted">
               Anchor {formatAbsolute(relativeScheduleAnchorAt)}
             </span>
           ) : null}
@@ -296,7 +296,7 @@ export function AdjustDatesModal({
                 <div className="min-w-[7.5rem] flex-1 sm:flex-none">
                   <label
                     htmlFor={`${baseId}-days`}
-                    className="mb-1 block text-xs font-medium text-fg-muted"
+                    className="mb-1 block text-caption font-medium text-fg-muted"
                   >
                     Days (negative = earlier)
                   </label>
@@ -313,7 +313,7 @@ export function AdjustDatesModal({
                 <div className="min-w-[10rem] flex-1 sm:flex-none">
                   <label
                     htmlFor={`${baseId}-earliest`}
-                    className="mb-1 block text-xs font-medium text-fg-muted"
+                    className="mb-1 block text-caption font-medium text-fg-muted"
                   >
                     New earliest due date
                   </label>
@@ -335,7 +335,7 @@ export function AdjustDatesModal({
               </Button>
             </div>
             {datedItems.length === 0 ? (
-              <p className="text-xs text-fg-muted">
+              <p className="text-caption text-fg-muted">
                 Manual shift needs existing due dates. Switch to AI to set an initial schedule.
               </p>
             ) : null}
@@ -343,7 +343,7 @@ export function AdjustDatesModal({
 
           <TabPanel value="ai" className="space-y-3 !py-2">
             <div>
-              <label htmlFor={`${baseId}-ai`} className="mb-1 block text-xs font-medium text-fg-muted">
+              <label htmlFor={`${baseId}-ai`} className="mb-1 block text-caption font-medium text-fg-muted">
                 Guidance (optional)
               </label>
               <Textarea
@@ -373,15 +373,15 @@ export function AdjustDatesModal({
                   : 'Adjust with AI'}
               </Button>
               {!aiConfigured ? (
-                <span className="text-xs text-fg-muted">AI is not configured.</span>
+                <span className="text-caption text-fg-muted">AI is not configured.</span>
               ) : dateableItems.length === 0 ? (
-                <span className="text-xs text-fg-muted">Add course content first.</span>
+                <span className="text-caption text-fg-muted">Add course content first.</span>
               ) : (
-                <span className="text-xs text-fg-muted">Proposals appear below for review.</span>
+                <span className="text-caption text-fg-muted">Proposals appear below for review.</span>
               )}
             </div>
             {aiReply ? (
-              <p className="rounded-lg border border-border-subtle bg-surface-sunken px-3 py-2 text-sm text-fg-muted">
+              <p className="rounded-lg border border-border-subtle bg-surface-sunken px-3 py-2 text-body-sm text-fg-muted">
                 {aiReply}
               </p>
             ) : null}
@@ -390,7 +390,7 @@ export function AdjustDatesModal({
 
         {error ? (
           <p
-            className="rounded-lg border border-border-default bg-danger-surface px-3 py-2 text-sm text-danger-fg"
+            className="rounded-lg border border-border-default bg-danger-surface px-3 py-2 text-body-sm text-danger-fg"
             role="alert"
           >
             {error}
@@ -399,7 +399,7 @@ export function AdjustDatesModal({
 
         <section className="flex min-h-[10rem] flex-1 flex-col overflow-hidden rounded-xl border border-border-default">
           <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-border-subtle bg-surface-sunken px-3 py-2">
-            <h3 className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
+            <h3 className="text-overline font-semibold uppercase tracking-wide text-fg-muted">
               {preview.length > 0
                 ? `Preview · ${selectedCount} of ${preview.length} selected`
                 : 'Preview'}
@@ -430,15 +430,15 @@ export function AdjustDatesModal({
                         className="mt-0.5"
                       />
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm font-medium text-fg-default">
+                        <span className="block truncate text-body-sm font-medium text-fg-default">
                           {row.title}
                         </span>
-                        <span className="block truncate text-xs text-fg-muted">
+                        <span className="block truncate text-caption text-fg-muted">
                           {kindLabel(row.kind)}
                           {row.moduleTitle ? ` · ${row.moduleTitle}` : ''}
                         </span>
                       </span>
-                      <span className="shrink-0 text-end text-xs leading-snug">
+                      <span className="shrink-0 text-end text-caption leading-snug">
                         <span className="block text-fg-muted">
                           {row.fromDueAt ? formatAbsolute(row.fromDueAt) : '—'}
                         </span>
@@ -452,7 +452,7 @@ export function AdjustDatesModal({
               })}
             </ul>
           ) : (
-            <div className="flex flex-1 items-center justify-center px-4 py-8 text-center text-sm text-fg-muted">
+            <div className="flex flex-1 items-center justify-center px-4 py-8 text-center text-body-sm text-fg-muted">
               {datedItems.length === 0 && dateableItems.length > 0
                 ? 'Use the AI tab to propose an initial schedule, then review it here.'
                 : 'Preview manual changes or run AI to review proposed due dates here.'}
