@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { createFocusTrap } from '../focus-trap'
+import { createFocusTrap, resolveFocusRestoreTarget } from '../focus-trap'
 
 function buildContainer(html: string): HTMLElement {
   const div = document.createElement('div')
@@ -58,7 +58,11 @@ describe('createFocusTrap()', () => {
     const b1 = document.getElementById('b1')!
     b1.focus()
 
-    const shiftTabEvent = new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true })
+    const shiftTabEvent = new KeyboardEvent('keydown', {
+      key: 'Tab',
+      shiftKey: true,
+      bubbles: true,
+    })
     document.dispatchEvent(shiftTabEvent)
 
     expect(document.activeElement?.id).toBe('b2')
@@ -70,5 +74,46 @@ describe('createFocusTrap()', () => {
     const trap = createFocusTrap(container)
     expect(() => trap.activate()).not.toThrow()
     trap.deactivate()
+  })
+
+  it('falls back to main when trigger unmounts (UX.4 restore chain)', () => {
+    const main = document.createElement('main')
+    main.id = 'main-content'
+    document.body.appendChild(main)
+
+    const trigger = document.createElement('button')
+    trigger.id = 'trigger'
+    document.body.appendChild(trigger)
+    trigger.focus()
+
+    const container = buildContainer('<button id="inner">Inner</button>')
+    const trap = createFocusTrap(container)
+    trap.activate()
+    expect(document.activeElement?.id).toBe('inner')
+
+    // Simulate trigger unmount (e.g. deleted row).
+    trigger.remove()
+    trap.deactivate()
+    expect(document.activeElement?.id).toBe('main-content')
+  })
+})
+
+describe('resolveFocusRestoreTarget()', () => {
+  beforeEach(() => {
+    document.body.innerHTML = ''
+  })
+
+  it('returns preferred when still connected', () => {
+    const btn = document.createElement('button')
+    document.body.appendChild(btn)
+    expect(resolveFocusRestoreTarget(btn)).toBe(btn)
+  })
+
+  it('returns main when preferred is detached', () => {
+    const main = document.createElement('main')
+    main.id = 'main-content'
+    document.body.appendChild(main)
+    const orphan = document.createElement('button')
+    expect(resolveFocusRestoreTarget(orphan)).toBe(main)
   })
 })

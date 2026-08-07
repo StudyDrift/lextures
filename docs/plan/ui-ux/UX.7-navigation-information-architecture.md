@@ -157,7 +157,7 @@ prioritisation, no personalisation, and no persistent search field in the top ba
 - **Accessibility** — Sidebar is a `nav` landmark with an accessible name;
   sections use a disclosure pattern with correct `aria-expanded`; the current page
   is `aria-current="page"`; collapsed sidebar tooltips are accessible components,
-  not `title` (see [UX.4](UX.4-aria-widget-and-focus-management-remediation.md)).
+  not `title` (see [UX.4](../../completed/ui-ux/UX.4-aria-widget-and-focus-management-remediation.md)).
 - **Scalability** — Adding a destination is a registry entry. The structure must
   hold at 150 destinations.
 - **Reliability** — If personalisation fails to load, the default navigation

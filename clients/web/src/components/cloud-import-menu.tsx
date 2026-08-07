@@ -7,6 +7,7 @@ import {
   type ConfiguredCloudProvider,
 } from '../lib/cloud-providers-api'
 import { createCloudPicker, downloadPickedFile } from '../services/cloud-picker'
+import { handleMenuKeyDown, focusFirstMenuitem } from '../lib/a11y/menu-keyboard'
 
 type CloudImportMenuProps = {
   disabled?: boolean
@@ -24,6 +25,13 @@ export function CloudImportMenu({
   const [providers, setProviders] = useState<ConfiguredCloudProvider[]>([])
   const [loading, setLoading] = useState(true)
   const [open, setOpen] = useState(false)
+  const menuTypeaheadRef = useRef({ buffer: '', at: 0 })
+  const menuListRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    focusFirstMenuitem(menuListRef.current)
+  }, [open])
   const [picking, setPicking] = useState<CloudProviderId | null>(null)
   const rootRef = useRef<HTMLDivElement>(null)
   const menuId = useId()
@@ -103,10 +111,10 @@ export function CloudImportMenu({
       {open && (
         <div
           id={menuId}
-          role="menu"
+          ref={menuListRef} role="menu"
           aria-label="Import from cloud storage"
           className="absolute end-0 z-50 mt-1 min-w-[12rem] overflow-hidden rounded-lg border border-border-default bg-surface-raised py-1 shadow-lg dark:border-border-default dark:bg-surface-raised"
-        >
+         onKeyDown={(e) => handleMenuKeyDown(e, { onClose: () => setOpen(false) }, menuTypeaheadRef.current)} tabIndex={-1}>
           {providers.map((provider) => (
             <button
               key={provider.provider}

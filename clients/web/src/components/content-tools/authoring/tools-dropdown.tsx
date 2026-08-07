@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { ToolPaletteList } from './tool-palette-list'
 import type { ToolPaletteItem } from './tool-palette-utils'
+import { handleMenuKeyDown, focusFirstMenuitem } from '../../../lib/a11y/menu-keyboard'
 
 export type ToolsDropdownProps = {
   tools: ToolPaletteItem[]
@@ -33,6 +34,13 @@ export function ToolsDropdown({
 }: ToolsDropdownProps) {
   const { t } = useTranslation('contentTools')
   const [open, setOpen] = useState(false)
+  const menuTypeaheadRef = useRef({ buffer: '', at: 0 })
+  const menuListRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    focusFirstMenuitem(menuListRef.current)
+  }, [open])
   const [menuPos, setMenuPos] = useState<MenuPos | null>(null)
   const rootRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
@@ -108,7 +116,7 @@ export function ToolsDropdown({
               zIndex: 80,
             }}
             className="overflow-hidden rounded-lg border border-border-default bg-surface-raised shadow-lg shadow-slate-900/10 dark:border-border-default dark:bg-surface-raised"
-          >
+           onKeyDown={(e) => handleMenuKeyDown(e, { onClose: () => setOpen(false) }, menuTypeaheadRef.current)} tabIndex={-1}>
             {emptyCatalog && !loading ? (
               <div className="space-y-2 p-3 text-xs text-fg-muted">
                 <p>{t('contentTools.authoring.noToolsEnabled')}</p>

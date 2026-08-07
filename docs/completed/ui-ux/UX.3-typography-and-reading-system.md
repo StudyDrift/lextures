@@ -1,6 +1,6 @@
 # UX.3 — Typography and Reading System
 
-> Implementation plan. Source: [audit.md](audit.md) §2 G-7.
+> Implementation plan. Source: [audit.md](../../plan/ui-ux/audit.md) §2 G-7.
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | UI/UX — Foundations |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | PARTIAL — a custom typeface ships; no scale, no roles, body text is 14px/12px |
+| **Status (today)** | DONE — type roles, lint ratchet, measure, textScale prefs, ffTypeScale (2026-03) |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Design Systems |
 | **Depends on** | UX.1 |
@@ -228,7 +228,7 @@ handling required.)*
 
 ## 13. Dependencies & Sequencing
 
-- **Must ship after** — [UX.1](UX.1-semantic-design-token-system.md) (roles are
+- **Must ship after** — [UX.1](./UX.1-semantic-design-token-system.md) (roles are
   tokens).
 - **Must ship before** — UX.9, UX.10, UX.11, UX.14 (all lay out against the scale).
 - **Runs in parallel with** — UX.2.
@@ -320,10 +320,10 @@ handling required.)*
   `clients/web/src/styles/ui-modes/elementary.css`,
   `clients/web/public/fonts/lextures-*.woff2`,
   `clients/web/src/pages/typeface-page.tsx`
-- Research: [research.md](research.md) R-1, R-2, R-3, §9
-- Audit: [audit.md](audit.md) G-7, G-1
+- Research: [research.md](../../plan/ui-ux/research.md) R-1, R-2, R-3, §9
+- Audit: [audit.md](../../plan/ui-ux/audit.md) G-7, G-1
 - External: [WCAG 2.2 SC 1.4.4 / 1.4.12 / 1.4.10](https://www.w3.org/TR/WCAG22/)
-- Related plans: [UX.1](UX.1-semantic-design-token-system.md),
-  [UX.10](UX.10-course-home-and-learning-flow.md),
-  [UX.11](UX.11-data-table-and-gradebook-system.md),
+- Related plans: [UX.1](./UX.1-semantic-design-token-system.md),
+  [UX.10](../../plan/ui-ux/UX.10-course-home-and-learning-flow.md),
+  [UX.11](../../plan/ui-ux/UX.11-data-table-and-gradebook-system.md),
   `../../completed/12-accessibility/`

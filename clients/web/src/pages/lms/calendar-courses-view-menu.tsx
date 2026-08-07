@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { Check, ChevronDown, Layers } from 'lucide-react'
 import type { CoursePublic } from '../../lib/courses-api'
+import { handleMenuKeyDown, focusFirstMenuitem } from '../../lib/a11y/menu-keyboard'
 
 type Props = {
   courses: CoursePublic[]
@@ -20,6 +21,13 @@ export function CalendarCoursesViewMenu({
   onHideAll,
 }: Props) {
   const [open, setOpen] = useState(false)
+  const menuTypeaheadRef = useRef({ buffer: '', at: 0 })
+  const menuListRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    focusFirstMenuitem(menuListRef.current)
+  }, [open])
   const rootRef = useRef<HTMLDivElement>(null)
   const menuId = useId()
 
@@ -74,10 +82,10 @@ export function CalendarCoursesViewMenu({
       {open && (
         <div
           id={menuId}
-          role="menu"
+          ref={menuListRef} role="menu"
           aria-label="Calendar courses"
           className="absolute start-0 end-0 z-50 mt-1 min-w-0 overflow-hidden rounded-xl border border-border-default bg-surface-raised py-1 shadow-lg shadow-slate-900/10 sm:left-auto sm:end-0 sm:min-w-[18rem] dark:border-border-default dark:bg-surface-overlay dark:shadow-black/40"
-        >
+         onKeyDown={(e) => handleMenuKeyDown(e, { onClose: () => setOpen(false) }, menuTypeaheadRef.current)} tabIndex={-1}>
           <div className="border-b border-border-subtle px-2.5 py-2 dark:border-border-default">
             <p className="text-xs font-medium text-fg-muted">
               Show due dates from selected courses

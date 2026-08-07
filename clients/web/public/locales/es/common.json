@@ -2278,5 +2278,16 @@
   "course.features.contentTools.linkIngestionOff": "Off",
   "course.features.contentTools.linkHostAllowlist": "Allowed hosts (comma-separated)",
   "course.features.contentTools.dailyAiCallsPerUser": "Daily AI calls per user",
-  "course.features.contentTools.monthlyAiTokenBudget": "Monthly AI token budget (0 = unlimited)"
+  "course.features.contentTools.monthlyAiTokenBudget": "Monthly AI token budget (0 = unlimited)",
+  "reading": {
+    "title": "Preferencias de lectura",
+    "appliesEverywhere": "Estos ajustes se aplican en módulos, tareas, debates y el cuaderno.",
+    "textSize": "Tamaño del texto",
+    "font": "Fuente",
+    "letterSpacing": "Espaciado de letras",
+    "wordSpacing": "Espaciado de palabras",
+    "lineHeight": "Interlineado",
+    "ruler": "Regla de lectura",
+    "display": "Pantalla"
+  }
 }

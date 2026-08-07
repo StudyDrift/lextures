@@ -22,6 +22,8 @@ type Row struct {
 	LetterSpacing          string  `json:"letterSpacing"`
 	WordSpacing            string  `json:"wordSpacing"`
 	LineHeight             string  `json:"lineHeight"`
+	// TextScale multiplies the semantic type scale (UX.3). Values: 1 | 1.125 | 1.25 | 1.5.
+	TextScale              float64 `json:"textScale"`
 	RulerEnabled           bool    `json:"rulerEnabled"`
 	RulerColor             string  `json:"rulerColor"`
 	TTSEnabled             bool    `json:"ttsEnabled"`
@@ -52,6 +54,7 @@ func defaults() Row {
 		LetterSpacing: "normal",
 		WordSpacing:   "normal",
 		LineHeight:    "normal",
+		TextScale:     1.0,
 		RulerEnabled:  false,
 		RulerColor:    "yellow",
 		TTSEnabled:    false,
@@ -67,7 +70,8 @@ func Get(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) (*Row, error
 	r := defaults()
 	var voice *string
 	err := pool.QueryRow(ctx, `
-SELECT font_face, letter_spacing, word_spacing, line_height, ruler_enabled, ruler_color,
+SELECT font_face, letter_spacing, word_spacing, line_height, (text_scale)::double precision,
+       ruler_enabled, ruler_color,
        tts_enabled, (tts_speed)::double precision, tts_voice_name,
        stt_enabled, stt_language,
        dyslexia_display_enabled, high_contrast_enabled, reduced_motion_enabled,
@@ -76,7 +80,7 @@ SELECT font_face, letter_spacing, word_spacing, line_height, ruler_enabled, rule
 FROM settings.user_reading_preferences
 WHERE user_id = $1
 `, userID).Scan(
-		&r.FontFace, &r.LetterSpacing, &r.WordSpacing, &r.LineHeight,
+		&r.FontFace, &r.LetterSpacing, &r.WordSpacing, &r.LineHeight, &r.TextScale,
 		&r.RulerEnabled, &r.RulerColor,
 		&r.TTSEnabled, &r.TTSSpeed, &voice,
 		&r.STTEnabled, &r.STTLanguage,
@@ -100,6 +104,7 @@ type Patch struct {
 	LetterSpacing          *string
 	WordSpacing            *string
 	LineHeight             *string
+	TextScale              *float64
 	RulerEnabled           *bool
 	RulerColor             *string
 	TTSEnabled             *bool
@@ -139,6 +144,12 @@ func (p Patch) Validate() error {
 	if p.LineHeight != nil && !validLineHeight[*p.LineHeight] {
 		return errors.New("lineHeight must be one of: normal, tall, taller")
 	}
+	if p.TextScale != nil {
+		s := *p.TextScale
+		if s != 1.0 && s != 1.125 && s != 1.25 && s != 1.5 {
+			return errors.New("textScale must be one of: 1.0, 1.125, 1.25, 1.5")
+		}
+	}
 	if p.RulerColor != nil && !validRulerColor[*p.RulerColor] {
 		return errors.New("rulerColor must be one of: yellow, grey")
 	}
@@ -168,6 +179,9 @@ func Upsert(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, p Patch) 
 	}
 	if p.LineHeight != nil {
 		current.LineHeight = *p.LineHeight
+	}
+	if p.TextScale != nil {
+		current.TextScale = *p.TextScale
 	}
 	if p.RulerEnabled != nil {
 		current.RulerEnabled = *p.RulerEnabled
@@ -208,17 +222,18 @@ func Upsert(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, p Patch) 
 	var voice *string
 	err = pool.QueryRow(ctx, `
 INSERT INTO settings.user_reading_preferences (
-    user_id, font_face, letter_spacing, word_spacing, line_height,
+    user_id, font_face, letter_spacing, word_spacing, line_height, text_scale,
     ruler_enabled, ruler_color, tts_enabled, tts_speed, tts_voice_name,
     stt_enabled, stt_language,
     dyslexia_display_enabled, high_contrast_enabled, reduced_motion_enabled,
     updated_at
-) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::numeric, $10, $11, $12, $13, $14, $15, now())
+) VALUES ($1, $2, $3, $4, $5, $6::numeric, $7, $8, $9, $10::numeric, $11, $12, $13, $14, $15, $16, now())
 ON CONFLICT (user_id) DO UPDATE
     SET font_face                = excluded.font_face,
         letter_spacing           = excluded.letter_spacing,
         word_spacing             = excluded.word_spacing,
         line_height              = excluded.line_height,
+        text_scale               = excluded.text_scale,
         ruler_enabled            = excluded.ruler_enabled,
         ruler_color              = excluded.ruler_color,
         tts_enabled              = excluded.tts_enabled,
@@ -230,20 +245,21 @@ ON CONFLICT (user_id) DO UPDATE
         high_contrast_enabled    = excluded.high_contrast_enabled,
         reduced_motion_enabled   = excluded.reduced_motion_enabled,
         updated_at               = now()
-RETURNING font_face, letter_spacing, word_spacing, line_height, ruler_enabled, ruler_color,
+RETURNING font_face, letter_spacing, word_spacing, line_height, (text_scale)::double precision,
+          ruler_enabled, ruler_color,
           tts_enabled, (tts_speed)::double precision, tts_voice_name,
           stt_enabled, stt_language,
           dyslexia_display_enabled, high_contrast_enabled, reduced_motion_enabled,
           ui_mode_override,
           updated_at
 `, userID,
-		current.FontFace, current.LetterSpacing, current.WordSpacing, current.LineHeight,
+		current.FontFace, current.LetterSpacing, current.WordSpacing, current.LineHeight, current.TextScale,
 		current.RulerEnabled, current.RulerColor,
 		current.TTSEnabled, current.TTSSpeed, current.TTSVoiceName,
 		current.STTEnabled, current.STTLanguage,
 		current.DyslexiaDisplayEnabled, current.HighContrastEnabled, current.ReducedMotionEnabled,
 	).Scan(
-		&out.FontFace, &out.LetterSpacing, &out.WordSpacing, &out.LineHeight,
+		&out.FontFace, &out.LetterSpacing, &out.WordSpacing, &out.LineHeight, &out.TextScale,
 		&out.RulerEnabled, &out.RulerColor,
 		&out.TTSEnabled, &out.TTSSpeed, &voice,
 		&out.STTEnabled, &out.STTLanguage,

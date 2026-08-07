@@ -7,6 +7,7 @@ import {
   type GradedFilter,
 } from './submission-navigator-utils'
 import { SpeedGraderShortcutsPopover } from './speed-grader-shortcuts'
+import { handleMenuKeyDown, focusFirstMenuitem } from '../../lib/a11y/menu-keyboard'
 
 type SubmissionStudentPickerProps = {
   submissions: ModuleAssignmentSubmissionApi[]
@@ -59,6 +60,13 @@ export function SubmissionStudentPicker({
   onIndexChange,
 }: SubmissionStudentPickerProps) {
   const [open, setOpen] = useState(false)
+  const menuTypeaheadRef = useRef({ buffer: '', at: 0 })
+  const menuListRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    focusFirstMenuitem(menuListRef.current)
+  }, [open])
   const [query, setQuery] = useState('')
   const [highlightedIndex, setHighlightedIndex] = useState(0)
   const rootRef = useRef<HTMLDivElement>(null)
@@ -160,10 +168,10 @@ export function SubmissionStudentPicker({
       {open ? (
         <div
           id={menuId}
-          role="menu"
+          ref={menuListRef} role="menu"
           aria-labelledby={buttonId}
           className="absolute start-0 top-full z-50 mt-1 flex max-h-72 w-full min-w-[14rem] flex-col overflow-hidden rounded-xl border border-border-default bg-surface-raised shadow-lg dark:border-border-default dark:bg-surface-raised"
-        >
+         onKeyDown={(e) => handleMenuKeyDown(e, { onClose: () => setOpen(false) }, menuTypeaheadRef.current)} tabIndex={-1}>
           <div className="shrink-0 border-b border-border-default p-2 dark:border-border-default">
             <label htmlFor={filterId} className="sr-only">
               Filter students

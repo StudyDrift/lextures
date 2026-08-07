@@ -1,0 +1,13 @@
+{
+  "description": "UX.4 ARIA contract baseline. Coverage may only increase; defect counts may only decrease.",
+  "generatedAt": "2026-08-07T17:34:49.086Z",
+  "metrics": {
+    "aria_contract_coverage": 0.211055,
+    "aria_contract_widgets": 199,
+    "aria_contract_satisfied": 42,
+    "aria_modal_without_trap": 125,
+    "role_menu_without_keyboard": 12,
+    "role_tablist_without_keyboard": 20,
+    "title_attribute_tooltips": 177
+  }
+}

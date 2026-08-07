@@ -58,7 +58,11 @@ npm run ds:coverage
 npm run ds:coverage          # fail if coverage ↓ or raw counts ↑
 npm run ds:baseline          # rewrite baseline + allowlist after a migration batch
 npm run ds:gallery           # every barrel component appears in the gallery
+npm run a11y:contracts       # UX.4 ARIA widget contract ratchet
+npm run a11y:baseline        # rewrite after intentional a11y migration batches
 ```
+
+Keyboard / focus / ARIA patterns: [accessibility-patterns.md](./accessibility-patterns.md).
 
 - **Baseline:** `clients/web/design-system-coverage-baseline.json`
 - **Allowlist:** `clients/web/raw-interactive-allowlist.json` (per-file raw `<button>` / `<input>` / `role="dialog"` / … counts; may only decrease)

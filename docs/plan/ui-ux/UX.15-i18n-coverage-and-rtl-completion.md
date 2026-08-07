@@ -104,7 +104,7 @@ concern; it is a present defect for every non-English user.
 - **FR-12.** Directional **icons** (arrows, chevrons, back/next, undo/redo, indent)
   MUST flip in RTL; non-directional icons MUST NOT.
 - **FR-13.** Keyboard arrow semantics MUST invert in RTL for tabs, menus and grids
-  ([UX.4](UX.4-aria-widget-and-focus-management-remediation.md) FR-1,
+  ([UX.4](../../completed/ui-ux/UX.4-aria-widget-and-focus-management-remediation.md) FR-1,
   [UX.11](UX.11-data-table-and-gradebook-system.md) FR-10).
 - **FR-14.** Mixed-direction content (an English course code inside Arabic prose, a
   URL, a formula) MUST render correctly using `dir="auto"` and Unicode isolation

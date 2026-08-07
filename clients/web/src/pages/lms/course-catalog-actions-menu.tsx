@@ -4,6 +4,7 @@ import type { CoursePublic } from '../../lib/courses-api'
 import { toPinnedSummary, useCoursePins } from '../../context/course-pinned-context'
 
 import { CourseCatalogHideButton } from './course-catalog-hide-button'
+import { handleMenuKeyDown, focusFirstMenuitem } from '../../lib/a11y/menu-keyboard'
 
 type ActionsMenuCourse = Pick<
   CoursePublic,
@@ -28,6 +29,13 @@ export function CourseCatalogActionsMenu({
   className = '',
 }: Props) {
   const [open, setOpen] = useState(false)
+  const menuTypeaheadRef = useRef({ buffer: '', at: 0 })
+  const menuListRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    focusFirstMenuitem(menuListRef.current)
+  }, [open])
   const rootRef = useRef<HTMLDivElement>(null)
   const menuId = useId()
   const { togglePin, togglingCourseId } = useCoursePins()
@@ -74,10 +82,15 @@ export function CourseCatalogActionsMenu({
       {open ? (
         <div
           id={menuId}
+          ref={menuListRef}
           role="menu"
+          tabIndex={-1}
           aria-label={`Actions for ${displayTitle}`}
           className="absolute end-0 z-50 mt-1 min-w-[12rem] overflow-hidden rounded-xl border border-border-default bg-surface-raised py-1 shadow-lg shadow-slate-900/10 dark:border-border-default dark:bg-surface-overlay dark:shadow-black/40"
           onPointerDown={(e) => e.stopPropagation()}
+          onKeyDown={(e) =>
+            handleMenuKeyDown(e, { onClose: () => setOpen(false) }, menuTypeaheadRef.current)
+          }
         >
           <button
             type="button"

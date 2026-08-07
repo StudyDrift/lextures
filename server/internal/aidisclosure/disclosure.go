@@ -65,7 +65,7 @@ type modelBinding struct {
 var disclosureFeatures = []FeatureCard{
 	{Key: "ai_tutor", Label: "AI Tutor", Description: "Conversational tutoring within enrolled courses."},
 	{Key: "modules_ai_assistant", Label: "Modules AI assistant", Description: "Instructor chat to propose course outline changes on the Modules page."},
-	{Key: "dates_ai_adjust", Label: "Adjust dates with AI", Description: "Instructor tool to propose bulk due-date shifts for course items (fixed or relative schedules)."},
+	{Key: "dates_ai_adjust", Label: "Adjust dates with AI", Description: "Instructor tool to propose initial due dates or bulk due-date shifts for course items (fixed or relative schedules)."},
 	{Key: "rag_notebook", Label: "Notebook AI", Description: "Answers questions using your course notebook content."},
 	{Key: "syllabus_generation", Label: "Syllabus generation", Description: "Instructor tool to draft syllabus sections."},
 	{Key: "content_page_generation", Label: "Content page generation", Description: "Instructor tool to draft module content-page sections from a topic description."},

@@ -49,6 +49,8 @@ export function contrastRatio(hex1, hex2) {
 
 const AA_TEXT = 4.5
 const AA_UI = 3.0
+/** UX.3 FR-7 — caption/overline roles require ≥7:1 (AAA small text). */
+const AAA_CAPTION = 7.0
 
 const SEMANTIC_PAIRS = [
   { fg: 'fg.default', bg: 'surface.base', minRatio: AA_TEXT, usage: 'body on page' },
@@ -66,6 +68,10 @@ const SEMANTIC_PAIRS = [
   // Decorative hairline borders are not SC 1.4.11 controls; use border.strong / focus for UI.
   { fg: 'border.strong', bg: 'surface.raised', minRatio: AA_UI, usage: 'strong UI border' },
   { fg: 'focus.ring', bg: 'surface.raised', minRatio: AA_UI, usage: 'focus ring' },
+  // UX.3 FR-7 / AC-6 — caption-role pairings must meet AAA (≥7:1). Use text-fg-default with text-caption.
+  { fg: 'fg.default', bg: 'surface.base', minRatio: AAA_CAPTION, usage: 'caption on page (AAA)' },
+  { fg: 'fg.default', bg: 'surface.raised', minRatio: AAA_CAPTION, usage: 'caption on cards (AAA)' },
+  { fg: 'fg.default', bg: 'surface.sunken', minRatio: AAA_CAPTION, usage: 'caption on sunken (AAA)' },
 ]
 
 const THEMES = ['light', 'dark', 'high-contrast-light', 'high-contrast-dark']

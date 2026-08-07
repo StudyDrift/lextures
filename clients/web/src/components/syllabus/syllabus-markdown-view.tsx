@@ -245,16 +245,16 @@ export const MarkdownArticleView = forwardRef<HTMLDivElement, MarkdownArticleVie
 
     if (!src) {
       return (
-        <div ref={ref} className={`syllabus-md ${theme.classes.article}`}>
-          <p className="text-sm leading-relaxed text-fg-muted">{emptyMessage}</p>
+        <div ref={ref} className={`syllabus-md lex-measure text-body-lg ${theme.classes.article}`}>
+          <p className="text-body-sm leading-relaxed text-fg-muted">{emptyMessage}</p>
         </div>
       )
     }
 
     const article = (
-      <div ref={ref} className={`syllabus-md ${theme.classes.article}`}>
+      <div ref={ref} className={`syllabus-md lex-measure text-body-lg ${theme.classes.article}`}>
         {deferMath ? (
-          <div className="mb-3 rounded-lg border border-border-default bg-surface-base px-3 py-2 text-sm text-fg-muted dark:border-border-default dark:bg-surface-overlay dark:text-fg-default">
+          <div className="mb-3 rounded-lg border border-border-default bg-surface-base px-3 py-2 text-body-sm text-fg-muted dark:border-border-default dark:bg-surface-overlay dark:text-fg-default">
             <span className="font-medium">Math formatting is paused</span> to save data.{' '}
             <button
               type="button"
@@ -302,14 +302,14 @@ export function SyllabusMarkdownView({ sections, theme = defaultResolved, course
   const mathPlugins = useMemo(() => mathPluginsFor(!deferMath), [deferMath])
 
   if (!src.trim()) {
-    return <p className="text-sm leading-relaxed text-fg-muted">No syllabus content yet.</p>
+    return <p className="text-body-sm leading-relaxed text-fg-muted">No syllabus content yet.</p>
   }
   const components = createMarkdownComponents(theme, { useCourseFileImages: Boolean(courseCode) })
   const normalized = normalizeMarkdownLists(src)
   return (
-    <div className={`syllabus-md ${theme.classes.article}`}>
+    <div className={`syllabus-md lex-measure text-body-lg ${theme.classes.article}`}>
       {deferMath ? (
-        <div className="mb-3 rounded-lg border border-border-default bg-surface-base px-3 py-2 text-sm text-fg-muted dark:border-border-default dark:bg-surface-overlay dark:text-fg-default">
+        <div className="mb-3 rounded-lg border border-border-default bg-surface-base px-3 py-2 text-body-sm text-fg-muted dark:border-border-default dark:bg-surface-overlay dark:text-fg-default">
           <span className="font-medium">Math formatting is paused</span> to save data.{' '}
           <button
             type="button"

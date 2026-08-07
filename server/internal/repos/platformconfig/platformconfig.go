@@ -209,6 +209,7 @@ type Row struct {
 	DPAPortalEnabled             *bool
 	SOC2ModuleEnabled            *bool
 	FFReadingPreferences         *bool
+	FFTypeScale                  *bool
 	FFPinnedSettings             *bool
 	FFClassroomSignals           *bool
 	FFLibraryIntegration         *bool
@@ -433,6 +434,7 @@ type Write struct {
 	DPAPortalEnabled             *bool
 	SOC2ModuleEnabled            *bool
 	FFReadingPreferences         *bool
+	FFTypeScale                  *bool
 	FFPinnedSettings             *bool
 	FFClassroomSignals           *bool
 	FFLibraryIntegration         *bool
@@ -651,6 +653,7 @@ SELECT
 	dpa_portal_enabled,
 	soc2_module_enabled,
 	ff_reading_preferences,
+	ff_type_scale,
 	ff_pinned_settings,
 	ff_classroom_signals,
 	ff_library_integration,
@@ -864,6 +867,7 @@ WHERE id = 1
 		&r.DPAPortalEnabled,
 		&r.SOC2ModuleEnabled,
 		&r.FFReadingPreferences,
+		&r.FFTypeScale,
 		&r.FFPinnedSettings,
 		&r.FFClassroomSignals,
 		&r.FFLibraryIntegration,
@@ -1116,6 +1120,7 @@ INSERT INTO settings.platform_app_settings (
 	dpa_portal_enabled,
 	soc2_module_enabled,
 	ff_reading_preferences,
+	ff_type_scale,
 	ff_pinned_settings,
 	ff_classroom_signals,
 	ff_library_integration,
@@ -1141,7 +1146,8 @@ INSERT INTO settings.platform_app_settings (
 	$121, $122, $123, $124, $125, $126, $127, $128, $129, $130, $131, $132, $133, $134, $135, $136, $137, $138, $139, $140,
 	$141, $142, $143, $144, $145, $146, $147, $148, $149, $150, $151, $152, $153, $154, $155, $156, $157, $158, $159, $160,
 	$161, $162, $163, $164, $165, $166, $167, $168, $169, $170, $171, $172, $173, $174, $175,
-	$176, $177, $178, $179, $180, $181, $182, $183, $184, $185, $186, $187, $188, $189,
+	$176, $177, $178, $179, $180, $181, $182, $183, $184, $185, $186, $187, $188, $189, $190,
+	$191, $192,
 	NOW()
 )
 ON CONFLICT (id) DO UPDATE SET
@@ -1314,6 +1320,7 @@ ON CONFLICT (id) DO UPDATE SET
 	dpa_portal_enabled = COALESCE(EXCLUDED.dpa_portal_enabled, settings.platform_app_settings.dpa_portal_enabled),
 	soc2_module_enabled = COALESCE(EXCLUDED.soc2_module_enabled, settings.platform_app_settings.soc2_module_enabled),
 	ff_reading_preferences = COALESCE(EXCLUDED.ff_reading_preferences, settings.platform_app_settings.ff_reading_preferences),
+	ff_type_scale = COALESCE(EXCLUDED.ff_type_scale, settings.platform_app_settings.ff_type_scale),
 	ff_pinned_settings = COALESCE(EXCLUDED.ff_pinned_settings, settings.platform_app_settings.ff_pinned_settings),
 	ff_classroom_signals = COALESCE(EXCLUDED.ff_classroom_signals, settings.platform_app_settings.ff_classroom_signals),
 	ff_library_integration = COALESCE(EXCLUDED.ff_library_integration, settings.platform_app_settings.ff_library_integration),
@@ -1515,6 +1522,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.DPAPortalEnabled,
 		w.SOC2ModuleEnabled,
 		w.FFReadingPreferences,
+		w.FFTypeScale,
 		w.FFPinnedSettings,
 		w.FFClassroomSignals,
 		w.FFLibraryIntegration,

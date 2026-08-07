@@ -1,5 +1,5 @@
 /**
- * Pure helpers for bulk course due-date adjustment (manual shift / rebase + preview).
+ * Pure helpers for bulk course due-date adjustment (manual shift / rebase + AI set/adjust).
  */
 
 export type DatedStructureItem = {
@@ -10,16 +10,38 @@ export type DatedStructureItem = {
   moduleTitle?: string | null
 }
 
+/** Assignments, quizzes, and content pages that can receive a due date (may be undated). */
+export type DateableStructureItem = {
+  id: string
+  title: string
+  kind: string
+  dueAt: string | null
+  moduleTitle?: string | null
+}
+
 export type DateChangePreview = {
   itemId: string
   title: string
   kind: string
   moduleTitle?: string | null
-  fromDueAt: string
+  /** Previous due date, or null when the item had none (initial schedule). */
+  fromDueAt: string | null
   toDueAt: string
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000
+
+const DATEABLE_KINDS = new Set(['assignment', 'quiz', 'content_page'])
+
+function moduleTitleMap(
+  items: Array<{ id: string; title: string; kind: string }>,
+): Map<string, string> {
+  const moduleTitleById = new Map<string, string>()
+  for (const it of items) {
+    if (it.kind === 'module') moduleTitleById.set(it.id, it.title)
+  }
+  return moduleTitleById
+}
 
 /** Items with a due date that can be bulk-adjusted (assignments, quizzes, content pages). */
 export function collectDatedItems(
@@ -31,16 +53,10 @@ export function collectDatedItems(
     parentId: string | null
   }>,
 ): DatedStructureItem[] {
-  const moduleTitleById = new Map<string, string>()
-  for (const it of items) {
-    if (it.kind === 'module') moduleTitleById.set(it.id, it.title)
-  }
+  const moduleTitleById = moduleTitleMap(items)
   const dated: DatedStructureItem[] = []
   for (const it of items) {
-    if (
-      (it.kind === 'assignment' || it.kind === 'quiz' || it.kind === 'content_page') &&
-      it.dueAt
-    ) {
+    if (DATEABLE_KINDS.has(it.kind) && it.dueAt) {
       dated.push({
         id: it.id,
         title: it.title,
@@ -51,6 +67,34 @@ export function collectDatedItems(
     }
   }
   return dated.sort((a, b) => new Date(a.dueAt).getTime() - new Date(b.dueAt).getTime())
+}
+
+/**
+ * Assignments, quizzes, and content pages that can receive due dates — including undated ones.
+ * Preserves structure order (module outline order) so AI can schedule progressively.
+ */
+export function collectDateableItems(
+  items: Array<{
+    id: string
+    title: string
+    kind: string
+    dueAt: string | null
+    parentId: string | null
+  }>,
+): DateableStructureItem[] {
+  const moduleTitleById = moduleTitleMap(items)
+  const out: DateableStructureItem[] = []
+  for (const it of items) {
+    if (!DATEABLE_KINDS.has(it.kind)) continue
+    out.push({
+      id: it.id,
+      title: it.title,
+      kind: it.kind,
+      dueAt: it.dueAt,
+      moduleTitle: it.parentId ? (moduleTitleById.get(it.parentId) ?? null) : null,
+    })
+  }
+  return out
 }
 
 /** Shift every due date by a whole-day delta (negative = earlier). */
@@ -104,9 +148,13 @@ export function rebaseDueDates(
   })
 }
 
-/** Merge AI proposals onto dated items; ignore unknown item ids. */
+/**
+ * Merge AI proposals onto dateable items (including undated).
+ * Unknown item ids and invalid timestamps are ignored.
+ * Unchanged existing dates are skipped; setting a date on an undated item is always a change.
+ */
 export function mergeAiProposals(
-  items: DatedStructureItem[],
+  items: DateableStructureItem[],
   proposals: Array<{ itemId: string; dueAt: string }>,
 ): DateChangePreview[] {
   const byId = new Map(items.map((it) => [it.id, it]))
@@ -117,7 +165,7 @@ export function mergeAiProposals(
     const next = new Date(p.dueAt)
     if (Number.isNaN(next.getTime())) continue
     const toIso = next.toISOString()
-    if (toIso === new Date(it.dueAt).toISOString()) continue
+    if (it.dueAt && toIso === new Date(it.dueAt).toISOString()) continue
     out.push({
       itemId: it.id,
       title: it.title,

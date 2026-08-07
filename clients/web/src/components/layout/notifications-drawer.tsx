@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { createPortal } from 'react-dom'
 import {
   Bell,
@@ -30,6 +30,10 @@ import { useInboxUnreadCount, useMailboxRevision, useRefreshInboxUnread } from '
 import { useInboxNotifications } from '../../context/use-push-notifications'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { AnimatedList } from '../ui/animated-list'
+import { createFocusTrap } from '../../lib/a11y/focus-trap'
+import { useInertBackground } from '../ui/use-inert-background'
+import { handleTablistKeyDown } from '../../lib/a11y/tablist-keyboard'
+import { Tooltip } from '../ui/tooltip'
 
 /** Drawer open/close uses AN.5 overlay tokens (bubble enter / exit dismiss). */
 const NOTIF_DRAWER_ENTER_EASE = easings.bubble
@@ -94,6 +98,7 @@ export function NotificationsDrawerTrigger({
 export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const enterRafRef = useRef<{ outer: number | null; inner: number | null }>({ outer: null, inner: null })
   const closeBtnRef = useRef<HTMLButtonElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
   const titleId = useId()
   const descId = useId()
   const reducedMotion = usePrefersReducedMotion()
@@ -114,6 +119,9 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
   const [portalVisible, setPortalVisible] = useState(open)
   const [entered, setEntered] = useState(false)
   const [filter, setFilter] = useState<NotificationFilter>('all')
+
+  // UX.4: inert background + focus trap while the drawer is shown.
+  useInertBackground(portalVisible && open)
   const [items, setItems] = useState<UnifiedNotification[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -231,9 +239,12 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
   }, [portalVisible])
 
   useEffect(() => {
-    if (!entered) return
-    const t = window.setTimeout(() => closeBtnRef.current?.focus(), 0)
-    return () => window.clearTimeout(t)
+    if (!entered || !panelRef.current) return
+    const trap = createFocusTrap(panelRef.current, {
+      initialFocus: closeBtnRef.current,
+    })
+    trap.activate()
+    return () => trap.deactivate()
   }, [entered])
 
   const mergedAll = useMemo(() => {
@@ -338,6 +349,7 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
         }}
       />
       <div
+        ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
@@ -387,37 +399,41 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
           role="tablist"
           aria-label="Filter notifications by type"
           className="grid shrink-0 grid-cols-6 border-b border-border-subtle"
+          onKeyDown={(e: ReactKeyboardEvent<HTMLDivElement>) =>
+            handleTablistKeyDown(e, { orientation: 'horizontal' })
+          }
         >
           {FILTER_OPTIONS.map(({ id, label, icon: Icon }) => {
             const active = filter === id
             const hasUnread = filterHasUnread(id)
             return (
-              <button
-                key={id}
-                type="button"
-                role="tab"
-                aria-selected={active}
-                aria-label={label}
-                title={label}
-                onClick={() => setFilter(id)}
-                className={`relative flex flex-col items-center justify-center gap-1 py-2.5 transition-[background-color,color,border-color] ${ active ? 'text-accent-fg' : 'text-fg-subtle hover:bg-surface-base hover:text-fg-muted dark:hover:bg-neutral-800/60 dark:hover:text-fg-default' }`}
-              >
-                <span className="relative">
-                  <Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2.25 : 1.75} aria-hidden />
-                  {hasUnread && !active ? (
+              <Tooltip key={id} content={label} delayMs={300}>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  aria-label={label}
+                  tabIndex={active ? 0 : -1}
+                  onClick={() => setFilter(id)}
+                  className={`relative flex flex-col items-center justify-center gap-1 py-2.5 transition-[background-color,color,border-color] ${ active ? 'text-accent-fg' : 'text-fg-subtle hover:bg-surface-base hover:text-fg-muted dark:hover:bg-neutral-800/60 dark:hover:text-fg-default' }`}
+                >
+                  <span className="relative">
+                    <Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2.25 : 1.75} aria-hidden />
+                    {hasUnread && !active ? (
+                      <span
+                        className="absolute -end-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-indigo-500 ring-2 ring-white dark:ring-neutral-900"
+                        aria-hidden
+                      />
+                    ) : null}
+                  </span>
+                  {active ? (
                     <span
-                      className="absolute -end-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-indigo-500 ring-2 ring-white dark:ring-neutral-900"
+                      className="absolute inset-x-2 bottom-0 h-0.5 rounded-full bg-accent-solid dark:bg-indigo-400"
                       aria-hidden
                     />
                   ) : null}
-                </span>
-                {active ? (
-                  <span
-                    className="absolute inset-x-2 bottom-0 h-0.5 rounded-full bg-accent-solid dark:bg-indigo-400"
-                    aria-hidden
-                  />
-                ) : null}
-              </button>
+                </button>
+              </Tooltip>
             )
           })}
         </div>

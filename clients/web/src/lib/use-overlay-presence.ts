@@ -42,6 +42,10 @@ export type OverlayPresence = {
 /**
  * Drives closed→opening→open→closing→closed with timeout-based completion.
  * Re-opening while closing restarts enter (AC-6).
+ *
+ * When `open` flips, phase is adjusted during render so the first paint with
+ * `open===true` already has `mounted===true`. Otherwise focus-trap effects that
+ * depend on `open` run against a null panel ref and never re-subscribe (UX.4).
  */
 export function useOverlayPresence({
   open,
@@ -51,11 +55,22 @@ export function useOverlayPresence({
 }: UseOverlayPresenceOptions): OverlayPresence {
   const reducedMotion = usePrefersReducedMotion()
   const [phase, setPhase] = useState<OverlayPhase>(() => (open ? 'open' : 'closed'))
+  const [openSnap, setOpenSnap] = useState(open)
   const phaseRef = useRef(phase)
   phaseRef.current = phase
   const onExitStartRef = useRef(onExitStart)
   onExitStartRef.current = onExitStart
   const timerRef = useRef<number | null>(null)
+  const exitStartForPhaseRef = useRef<OverlayPhase | null>(null)
+
+  if (open !== openSnap) {
+    setOpenSnap(open)
+    const next = transitionOverlay(phase, open ? 'requestOpen' : 'requestClose')
+    if (next !== phase) {
+      setPhase(next)
+      phaseRef.current = next
+    }
+  }
 
   useEffect(() => {
     const clearTimer = () => {
@@ -66,10 +81,19 @@ export function useOverlayPresence({
     }
 
     const current = phaseRef.current
+
+    if (current === 'closing' && exitStartForPhaseRef.current !== 'closing') {
+      exitStartForPhaseRef.current = 'closing'
+      onExitStartRef.current?.()
+    }
+    if (current !== 'closing') {
+      exitStartForPhaseRef.current = null
+    }
+
     if (open) {
       const next = transitionOverlay(current, 'requestOpen')
       if (next !== current) setPhase(next)
-      if (next === 'opening') {
+      if (next === 'opening' || current === 'opening') {
         clearTimer()
         const ms = overlayDurationMs({
           kind,
@@ -93,7 +117,6 @@ export function useOverlayPresence({
     if (current === 'closed') return clearTimer
     const next = transitionOverlay(current, 'requestClose')
     if (next !== current) {
-      if (next === 'closing') onExitStartRef.current?.()
       setPhase(next)
     }
     if (next === 'closing' || current === 'closing') {

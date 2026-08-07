@@ -1,4 +1,4 @@
-import { useId, useMemo, useState } from 'react'
+import { useId, useMemo, useState, useRef, useEffect } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { CircleHelp, MoreHorizontal, RefreshCw } from 'lucide-react'
 import { ChecklistStatusAffordance } from '../../../components/checklist/checklist-status-affordance'
@@ -15,6 +15,7 @@ import { hrefForTarget } from '../../../lib/use-focus-anchor'
 import { ChecklistEvidenceTable } from './checklist-evidence-table'
 import { ChecklistHelpPopover } from './checklist-help-popover'
 import { ChecklistResearchDialog } from './checklist-research-dialog'
+import { handleMenuKeyDown, focusFirstMenuitem } from '../../../lib/a11y/menu-keyboard'
 
 type ChecklistItemRowProps = {
   item: ChecklistItem
@@ -54,9 +55,16 @@ export function ChecklistItemRow({
   const evidenceId = useId()
   const whyId = useId()
   const [expanded, setExpanded] = useState(false)
+  const menuTypeaheadRef = useRef({ buffer: '', at: 0 })
+  const menuListRef = useRef<HTMLDivElement>(null)
   const [whyOpen, setWhyOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
+
+  useEffect(() => {
+    if (!menuOpen) return
+    focusFirstMenuitem(menuListRef.current)
+  }, [menuOpen])
   const [researchOpen, setResearchOpen] = useState(false)
   const [researchSource, setResearchSource] = useState<string | null>(null)
   const interactive = isOutstandingStatus(item.status) || unknown
@@ -195,9 +203,9 @@ export function ChecklistItemRow({
                 </button>
                 {menuOpen ? (
                   <div
-                    role="menu"
+                    ref={menuListRef} role="menu"
                     className="absolute end-0 z-20 mt-1 min-w-[10rem] rounded-lg border border-border-default bg-surface-raised py-1 shadow-lg dark:border-border-default dark:bg-surface-raised"
-                  >
+                   onKeyDown={(e) => handleMenuKeyDown(e, { onClose: () => setMenuOpen(false) }, menuTypeaheadRef.current)} tabIndex={-1}>
                     <button
                       type="button"
                       role="menuitem"

@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import { useReadingPreferences } from '../../context/reading-preferences-context'
 import { LiveRegion } from './live-region'
@@ -9,6 +10,9 @@ import type {
   RulerColor,
   WordSpacing,
 } from '../../lib/reading-preferences'
+import { TEXT_SCALE_OPTIONS, normalizeTextScale } from '../../lib/reading-preferences'
+import { createFocusTrap } from '../../lib/a11y/focus-trap'
+import { useInertBackground } from '../ui/use-inert-background'
 
 interface Props {
   open: boolean
@@ -52,42 +56,32 @@ export function ReadingPreferencesPanel({ open, onClose }: Props) {
   const titleId = useId()
   const [liveAnnouncement, setLiveAnnouncement] = useState('')
 
-  /* Trap focus + close on Escape */
+  useInertBackground(open)
+
+  /* Trap focus + close on Escape (UX.4 FR-4 via shared focus-trap). */
   useEffect(() => {
-    if (!open) return
-    closeBtnRef.current?.focus()
+    if (!open || !panelRef.current) return
+    const trap = createFocusTrap(panelRef.current, {
+      initialFocus: closeBtnRef.current,
+    })
+    trap.activate()
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') {
+        e.preventDefault()
         onClose()
-        return
-      }
-      if (e.key !== 'Tab') return
-      const panel = panelRef.current
-      if (!panel) return
-      const focusable = panel.querySelectorAll<HTMLElement>(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-      )
-      const first = focusable[0]
-      const last = focusable[focusable.length - 1]
-      if (e.shiftKey) {
-        if (document.activeElement === first) {
-          e.preventDefault()
-          last?.focus()
-        }
-      } else {
-        if (document.activeElement === last) {
-          e.preventDefault()
-          first?.focus()
-        }
       }
     }
     document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      trap.deactivate()
+    }
   }, [open, onClose])
 
-  if (!open) return null
+  if (!open || typeof document === 'undefined') return null
 
-  return (
+  // Portal outside #root so useInertBackground does not make this panel inert.
+  return createPortal(
     <>
       {/* Backdrop (click-outside closes) */}
       <div
@@ -105,7 +99,7 @@ export function ReadingPreferencesPanel({ open, onClose }: Props) {
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border-subtle px-4 py-3 dark:border-border-subtle">
-          <h2 id={titleId} className="text-sm font-semibold text-fg-default">
+          <h2 id={titleId} className="text-body-sm font-semibold text-fg-default">
             Reading Preferences
           </h2>
           <button
@@ -127,9 +121,52 @@ export function ReadingPreferencesPanel({ open, onClose }: Props) {
           </div>
         ) : (
           <div className="space-y-5 p-4">
+            <p className="text-caption text-fg-default">
+              These settings apply across modules, assignments, discussions, and the notebook.
+            </p>
+
+            {/* Text scale — UX.3 */}
+            <fieldset>
+              <legend className="mb-2 text-overline text-fg-default">
+                Text size
+              </legend>
+              <div className="flex gap-1.5">
+                {TEXT_SCALE_OPTIONS.map((opt) => {
+                  const current = normalizeTextScale(prefs.textScale)
+                  return (
+                    <label
+                      key={opt.value}
+                      className={`flex flex-1 cursor-pointer items-center justify-center rounded-lg border px-2 py-1.5 text-caption font-medium ${
+                        current === opt.value
+                          ? 'border-accent-border bg-accent-surface text-accent-fg'
+                          : 'border-border-default bg-surface-raised text-fg-muted hover:border-border-strong hover:bg-surface-base'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="reading-text-scale"
+                        value={opt.value}
+                        checked={current === opt.value}
+                        onChange={() => {
+                          update({ textScale: opt.value })
+                          setLiveAnnouncement(`Text size ${opt.label}`)
+                        }}
+                        className="sr-only"
+                        aria-label={`Text size: ${opt.label}`}
+                      />
+                      {opt.label}
+                    </label>
+                  )
+                })}
+              </div>
+              <p className="mt-1.5 text-caption text-fg-default">
+                Preview: <span className="text-body">The quick brown fox jumps.</span>
+              </p>
+            </fieldset>
+
             {/* Font face */}
             <fieldset>
-              <legend className="mb-2 text-xs font-medium uppercase tracking-wide text-fg-muted">
+              <legend className="mb-2 text-overline text-fg-default">
                 Font
               </legend>
               <div className="space-y-1.5">
@@ -148,10 +185,10 @@ export function ReadingPreferencesPanel({ open, onClose }: Props) {
                       aria-label={`Font: ${opt.label} — ${opt.description}`}
                     />
                     <span className="min-w-0">
-                      <span className="block text-sm font-medium text-fg-default">
+                      <span className="block text-body-sm font-medium text-fg-default">
                         {opt.label}
                       </span>
-                      <span className="block text-xs text-fg-muted">
+                      <span className="block text-caption text-fg-default">
                         {opt.description}
                       </span>
                     </span>
@@ -166,7 +203,10 @@ export function ReadingPreferencesPanel({ open, onClose }: Props) {
               name="reading-letter-spacing"
               options={spacingSteps}
               value={prefs.letterSpacing}
-              onChange={(v) => update({ letterSpacing: v as LetterSpacing })}
+              onChange={(v) => {
+                update({ letterSpacing: v as LetterSpacing })
+                setLiveAnnouncement(`Letter spacing ${v}`)
+              }}
             />
 
             {/* Word spacing */}
@@ -175,7 +215,10 @@ export function ReadingPreferencesPanel({ open, onClose }: Props) {
               name="reading-word-spacing"
               options={wordSpacingSteps}
               value={prefs.wordSpacing}
-              onChange={(v) => update({ wordSpacing: v as WordSpacing })}
+              onChange={(v) => {
+                update({ wordSpacing: v as WordSpacing })
+                setLiveAnnouncement(`Word spacing ${v}`)
+              }}
             />
 
             {/* Line height */}
@@ -184,13 +227,16 @@ export function ReadingPreferencesPanel({ open, onClose }: Props) {
               name="reading-line-height"
               options={lineHeightSteps}
               value={prefs.lineHeight}
-              onChange={(v) => update({ lineHeight: v as LineHeight })}
+              onChange={(v) => {
+                update({ lineHeight: v as LineHeight })
+                setLiveAnnouncement(`Line height ${v}`)
+              }}
             />
 
             {/* Reading ruler */}
             <div>
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium uppercase tracking-wide text-fg-muted">
+                <span className="text-overline text-fg-default">
                   Reading Ruler
                 </span>
                 <button
@@ -208,7 +254,7 @@ export function ReadingPreferencesPanel({ open, onClose }: Props) {
               </div>
               {prefs.rulerEnabled && (
                 <div className="mt-2.5">
-                  <p className="mb-1.5 text-xs text-fg-muted">Ruler colour</p>
+                  <p className="mb-1.5 text-caption text-fg-default">Ruler colour</p>
                   <div className="flex gap-2">
                     {rulerColorOptions.map((opt) => (
                       <label key={opt.value} className="flex cursor-pointer items-center gap-1.5">
@@ -226,7 +272,7 @@ export function ReadingPreferencesPanel({ open, onClose }: Props) {
                           style={{ background: opt.bg }}
                           className={`h-5 w-8 rounded border-2 ${ prefs.rulerColor === opt.value ? 'border-indigo-500' : 'border-border-default' }`}
                         />
-                        <span className="text-xs text-fg-muted">{opt.label}</span>
+                        <span className="text-caption text-fg-default">{opt.label}</span>
                       </label>
                     ))}
                   </div>
@@ -236,7 +282,7 @@ export function ReadingPreferencesPanel({ open, onClose }: Props) {
 
             {/* Accessibility display — plan 12.7 */}
             <div className="border-t border-border-subtle pt-4 dark:border-border-subtle">
-              <p className="mb-3 text-xs font-medium uppercase tracking-wide text-fg-muted">
+              <p className="mb-3 text-overline text-fg-default">
                 Display
               </p>
               <LiveRegion politeness="polite">{liveAnnouncement}</LiveRegion>
@@ -266,7 +312,8 @@ export function ReadingPreferencesPanel({ open, onClose }: Props) {
           </div>
         )}
       </div>
-    </>
+    </>,
+    document.body,
   )
 }
 
@@ -297,10 +344,10 @@ function AccessibilityToggle({ id, label, description, checked, onChange }: Acce
         />
       </button>
       <div className="min-w-0 flex-1">
-        <label htmlFor={id} className="cursor-pointer select-none text-sm font-medium text-fg-default">
+        <label htmlFor={id} className="cursor-pointer select-none text-body-sm font-medium text-fg-default">
           {label}
         </label>
-        <p id={`${id}-desc`} className="mt-0.5 text-xs text-fg-muted">
+        <p id={`${id}-desc`} className="mt-0.5 text-caption text-fg-default">
           {description}
         </p>
       </div>
@@ -319,14 +366,14 @@ interface SpacingControlProps {
 function SpacingControl({ legend, name, options, value, onChange }: SpacingControlProps) {
   return (
     <fieldset>
-      <legend className="mb-2 text-xs font-medium uppercase tracking-wide text-fg-muted">
+      <legend className="mb-2 text-overline text-fg-default">
         {legend}
       </legend>
       <div className="flex gap-1.5">
         {options.map((opt) => (
           <label
             key={opt.value}
-            className={`flex flex-1 cursor-pointer items-center justify-center rounded-lg border px-2 py-1.5 text-xs font-medium ${ value === opt.value ? 'border-indigo-300 bg-indigo-50 text-accent-fg dark:border-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300' : 'border-border-default bg-surface-raised text-fg-muted hover:border-border-strong hover:bg-surface-base dark:border-border-default dark:bg-surface-overlay dark:text-fg-muted dark:hover:border-border-default dark:hover:bg-neutral-700' }`}
+            className={`flex flex-1 cursor-pointer items-center justify-center rounded-lg border px-2 py-1.5 text-caption font-medium ${ value === opt.value ? 'border-accent-border bg-accent-surface text-accent-fg' : 'border-border-default bg-surface-raised text-fg-muted hover:border-border-strong hover:bg-surface-base dark:bg-surface-overlay' }`}
           >
             <input
               type="radio"

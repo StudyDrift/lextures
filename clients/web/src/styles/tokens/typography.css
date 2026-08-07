@@ -1,0 +1,170 @@
+/*
+ * UX.3 — Semantic type scale (roles, not raw Tailwind sizes).
+ *
+ * Roles: display, title-lg, title, subtitle, body-lg, body, body-sm, caption,
+ * overline, code. Authors use text-body / text-caption utilities.
+ *
+ * --lx-type-scale: user reading preference (textScale: 1 | 1.125 | 1.25 | 1.5)
+ * --lx-type-locale-mult: per-locale multiplier (e.g. ar → 1.08)
+ * --lx-type-mode-mult: k2 / elementary mode ramp (token override)
+ *
+ * ffTypeScale (data-type-scale="on"): body base 16px. Off: 14px rollback.
+ */
+
+:root {
+  --lx-type-scale: 1;
+  --lx-type-locale-mult: 1;
+  --lx-type-mode-mult: 1;
+  /* Combined multiplier applied to every role size/leading. */
+  --lx-type-mult: calc(var(--lx-type-scale) * var(--lx-type-locale-mult) * var(--lx-type-mode-mult));
+
+  /* Absolute role sizes (px) at scale=1 before flag; flag toggles body family only via aliases. */
+  --lx-type-display-size: calc(2.25rem * var(--lx-type-mult)); /* 36 */
+  --lx-type-display-leading: calc(2.5rem * var(--lx-type-mult)); /* 40 */
+
+  --lx-type-title-lg-size: calc(clamp(1.5rem, 1.25rem + 1vw, 1.75rem) * var(--lx-type-mult)); /* 24–28 */
+  --lx-type-title-lg-leading: calc(clamp(1.875rem, 1.6rem + 0.8vw, 2.125rem) * var(--lx-type-mult)); /* 30–34 */
+
+  --lx-type-title-size: calc(1.375rem * var(--lx-type-mult)); /* 22 */
+  --lx-type-title-leading: calc(1.75rem * var(--lx-type-mult)); /* 28 */
+
+  --lx-type-subtitle-size: calc(1.125rem * var(--lx-type-mult)); /* 18 */
+  --lx-type-subtitle-leading: calc(1.625rem * var(--lx-type-mult)); /* 26 */
+
+  --lx-type-body-lg-size: calc(1.125rem * var(--lx-type-mult)); /* 18 */
+  --lx-type-body-lg-leading: calc(1.75rem * var(--lx-type-mult)); /* 28 */
+
+  /* Body default — raised when data-type-scale="on" */
+  --lx-type-body-size: calc(0.875rem * var(--lx-type-mult)); /* 14 rollback */
+  --lx-type-body-leading: calc(1.25rem * var(--lx-type-mult)); /* 20 */
+
+  --lx-type-body-sm-size: calc(0.875rem * var(--lx-type-mult)); /* 14 */
+  --lx-type-body-sm-leading: calc(1.25rem * var(--lx-type-mult)); /* 20 */
+
+  --lx-type-caption-size: calc(0.8125rem * var(--lx-type-mult)); /* 13 floor */
+  --lx-type-caption-leading: calc(1.125rem * var(--lx-type-mult)); /* 18 */
+
+  --lx-type-overline-size: calc(0.75rem * var(--lx-type-mult)); /* 12 labels only */
+  --lx-type-overline-leading: calc(1rem * var(--lx-type-mult)); /* 16 */
+
+  --lx-type-code-size: calc(0.875rem * var(--lx-type-mult)); /* 14 */
+  --lx-type-code-leading: calc(1.375rem * var(--lx-type-mult)); /* 22 */
+
+  /* Long-form measure (FR-4) */
+  --lx-type-measure: 65ch;
+  --lx-type-measure-min: 45ch;
+  --lx-type-measure-max: 75ch;
+}
+
+/* UX.3 FR-2 / rollout: 16px body when type scale flag is on. */
+html[data-type-scale='on'] {
+  --lx-type-body-size: calc(1rem * var(--lx-type-mult)); /* 16 */
+  --lx-type-body-leading: calc(1.5rem * var(--lx-type-mult)); /* 24 */
+}
+
+/* Arabic (and other locales needing larger effective size) — FR i18n. */
+html[lang='ar'],
+html[data-locale^='ar'] {
+  --lx-type-locale-mult: 1.08;
+}
+
+/* UI modes scale the ramp via tokens, not bespoke font-size rules (FR-11). */
+html.ui-mode-k2 {
+  --lx-type-mode-mult: 1.5; /* ~24px body when scale on */
+}
+
+html.ui-mode-elementary {
+  --lx-type-mode-mult: 1.125; /* ~18px body when scale on */
+}
+
+/* Inherited default for LMS surfaces (FR-2). */
+.lms-scope {
+  font-size: var(--lx-type-body-size);
+  line-height: var(--lx-type-body-leading);
+}
+
+/* Reading preferences also drive spacing on .lms-scope (see index.css). */
+
+/* Long-form reading measure (FR-4). */
+@utility lex-measure {
+  max-width: min(var(--lx-type-measure-max), max(var(--lx-type-measure-min), var(--lx-type-measure)));
+  width: 100%;
+}
+
+/* Dense tables / gradebook: force tabular figures (FR-6). */
+@utility lex-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Type role utilities — semantic sizes (FR-1, FR-5). */
+@utility text-display {
+  font-size: var(--lx-type-display-size);
+  line-height: var(--lx-type-display-leading);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+@utility text-title-lg {
+  font-size: var(--lx-type-title-lg-size);
+  line-height: var(--lx-type-title-lg-leading);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+@utility text-title {
+  font-size: var(--lx-type-title-size);
+  line-height: var(--lx-type-title-leading);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+@utility text-subtitle {
+  font-size: var(--lx-type-subtitle-size);
+  line-height: var(--lx-type-subtitle-leading);
+  font-weight: 600;
+  text-wrap: balance;
+}
+
+@utility text-body-lg {
+  font-size: var(--lx-type-body-lg-size);
+  line-height: var(--lx-type-body-lg-leading);
+  font-weight: 400;
+  text-wrap: pretty;
+}
+
+@utility text-body {
+  font-size: var(--lx-type-body-size);
+  line-height: var(--lx-type-body-leading);
+  font-weight: 400;
+  text-wrap: pretty;
+}
+
+@utility text-body-sm {
+  font-size: var(--lx-type-body-sm-size);
+  line-height: var(--lx-type-body-sm-leading);
+  font-weight: 400;
+}
+
+@utility text-caption {
+  font-size: var(--lx-type-caption-size);
+  line-height: var(--lx-type-caption-leading);
+  font-weight: 400;
+}
+
+@utility text-overline {
+  font-size: var(--lx-type-overline-size);
+  line-height: var(--lx-type-overline-leading);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+@utility text-code {
+  font-size: var(--lx-type-code-size);
+  line-height: var(--lx-type-code-leading);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  font-weight: 400;
+}

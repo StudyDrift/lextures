@@ -47,6 +47,8 @@ import { LiveRegion } from '../a11y/live-region'
 import { overlayClassNames } from '../../lib/overlay-motion'
 import type { OverlayPresence } from '../../lib/use-overlay-presence'
 import { useCommandPalette } from './use-command-palette'
+import { createFocusTrap } from '../../lib/a11y/focus-trap'
+import { useInertBackground } from '../ui/use-inert-background'
 
 const GROUP_ICONS: Record<SearchGroup, typeof BookOpen> = {
   recent: Clock,
@@ -150,10 +152,15 @@ export function CommandPaletteDialog({
       })
   }, [open])
 
+  useInertBackground(presence.mounted && presence.phase !== 'closing' && presence.phase !== 'closed')
+
   useEffect(() => {
-    if (!presence.entered) return
-    const t = window.setTimeout(() => inputRef.current?.focus(), 0)
-    return () => window.clearTimeout(t)
+    if (!presence.entered || !dialogRef.current) return
+    const trap = createFocusTrap(dialogRef.current, {
+      initialFocus: inputRef.current,
+    })
+    trap.activate()
+    return () => trap.deactivate()
   }, [presence.entered])
 
   useEffect(() => {
@@ -162,29 +169,6 @@ export function CommandPaletteDialog({
       if (e.key === 'Escape') {
         e.preventDefault()
         close()
-        return
-      }
-      if (e.key !== 'Tab') return
-      const dialog = dialogRef.current
-      if (!dialog) return
-      const focusable = Array.from(
-        dialog.querySelectorAll<HTMLElement>(
-          'button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])',
-        ),
-      ).filter((el) => !el.closest('[aria-hidden="true"]'))
-      if (focusable.length === 0) return
-      const first = focusable[0]!
-      const last = focusable[focusable.length - 1]!
-      if (e.shiftKey) {
-        if (document.activeElement === first) {
-          e.preventDefault()
-          last.focus()
-        }
-      } else {
-        if (document.activeElement === last) {
-          e.preventDefault()
-          first.focus()
-        }
       }
     }
     window.addEventListener('keydown', onKey, true)

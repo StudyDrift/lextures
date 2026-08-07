@@ -2278,5 +2278,16 @@
   "course.features.contentTools.linkIngestionOff": "Off",
   "course.features.contentTools.linkHostAllowlist": "Allowed hosts (comma-separated)",
   "course.features.contentTools.dailyAiCallsPerUser": "Daily AI calls per user",
-  "course.features.contentTools.monthlyAiTokenBudget": "Monthly AI token budget (0 = unlimited)"
+  "course.features.contentTools.monthlyAiTokenBudget": "Monthly AI token budget (0 = unlimited)",
+  "reading": {
+    "title": "تفضيلات القراءة",
+    "appliesEverywhere": "تُطبَّق هذه الإعدادات على الوحدات والمهام والمناقشات والمفكرة.",
+    "textSize": "حجم النص",
+    "font": "الخط",
+    "letterSpacing": "تباعد الحروف",
+    "wordSpacing": "تباعد الكلمات",
+    "lineHeight": "ارتفاع السطر",
+    "ruler": "مسطرة القراءة",
+    "display": "العرض"
+  }
 }

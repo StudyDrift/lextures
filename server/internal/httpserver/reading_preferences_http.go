@@ -144,6 +144,7 @@ func (d Deps) handlePatchMyReadingPreferences() http.HandlerFunc {
 		LetterSpacing          *string  `json:"letterSpacing"`
 		WordSpacing            *string  `json:"wordSpacing"`
 		LineHeight             *string  `json:"lineHeight"`
+		TextScale              *float64 `json:"textScale"`
 		RulerEnabled           *bool    `json:"rulerEnabled"`
 		RulerColor             *string  `json:"rulerColor"`
 		TTSEnabled             *bool    `json:"ttsEnabled"`
@@ -198,11 +199,16 @@ func (d Deps) handlePatchMyReadingPreferences() http.HandlerFunc {
 			v := b.TTSVoiceName
 			voicePtr = &v
 		}
+		if b.TextScale != nil {
+			rounded := math.Round(*b.TextScale*1000) / 1000
+			b.TextScale = &rounded
+		}
 		p := readingprefs.Patch{
 			FontFace:               b.FontFace,
 			LetterSpacing:          b.LetterSpacing,
 			WordSpacing:            b.WordSpacing,
 			LineHeight:             b.LineHeight,
+			TextScale:              b.TextScale,
 			RulerEnabled:           b.RulerEnabled,
 			RulerColor:             b.RulerColor,
 			TTSEnabled:             b.TTSEnabled,

@@ -235,7 +235,7 @@ agent) consume this library like any other feature area.
 - **Must ship after** — [UX.1](UX.1-semantic-design-token-system.md).
 - **Must ship before** — UX.4 (ARIA remediation is *delivered by* migrating to
   these components), UX.6, UX.9, UX.10, UX.11, UX.12, UX.13, UX.14.
-- **Runs in parallel with** — [UX.3](../../plan/ui-ux/UX.3-typography-and-reading-system.md).
+- **Runs in parallel with** — [UX.3](UX.3-typography-and-reading-system.md).
 - **Shared infra** — none beyond CI.
 - **Internal sequencing**: overlays and forms first (they carry the accessibility
   debt), then actions, then display/layout. Migrate **by directory**, highest-
@@ -349,7 +349,7 @@ agent) consume this library like any other feature area.
   [React Aria Components](https://react-spectrum.adobe.com/react-aria/),
   [Instructure UI](https://github.com/instructure/instructure-ui) (LMS peer)
 - Related plans: [UX.1](UX.1-semantic-design-token-system.md),
-  [UX.4](../../plan/ui-ux/UX.4-aria-widget-and-focus-management-remediation.md),
+  [UX.4](./UX.4-aria-widget-and-focus-management-remediation.md),
   [UX.6](../../plan/ui-ux/UX.6-form-and-validation-system.md),
   [UX.18](../../plan/ui-ux/UX.18-design-system-governance-and-measurement.md),
   [`../tech_debt/TD.14-decompose-god-components.md`](../../plan/tech_debt/TD.14-decompose-god-components.md)

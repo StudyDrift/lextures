@@ -1,28 +1,19 @@
 /*
- * Plan 13.11 — K-2 UI mode (grades K, 1, 2; ages 5-8).
+ * Plan 13.11 / UX.3 — K-2 UI mode (grades K, 1, 2; ages 5-8).
  *
  * Activated by html.ui-mode-k2 (set server-side from grade_level or admin override;
  * persisted to localStorage for before-first-paint application).
  *
- * Requirements (FR-3):
- *   - Minimum font size 24px (1.5rem at 16px base)
- *   - Minimum interactive element height 48px
- *   - Card-based module/assignment list (not table)
+ * Type ramp scales via --lx-type-mode-mult in typography.css (UX.3 FR-11).
+ * Touch targets remain here.
  *
  * Scoped to .lms-scope to avoid affecting third-party embeds.
- * @layer keeps specificity low so component-level Tailwind utilities win.
  */
 
 @layer ui-mode-k2 {
   html.ui-mode-k2 .lms-scope {
-    font-size: 1.5rem;
     --ui-min-font-size: 1.5rem;
     --ui-min-touch-target: 3rem; /* 48px */
-  }
-
-  /* Enforce minimum font size — reading preferences cannot decrease below mode minimum (FR-6). */
-  html.ui-mode-k2 .lms-scope * {
-    font-size: max(1.5rem, var(--reading-font-size, 1.5rem));
   }
 
   /* 48px minimum touch targets for all interactive elements (WCAG 2.5.5, FR-3). */
@@ -62,12 +53,6 @@
     border-radius: 1rem;
     box-shadow: 0 4px 12px rgb(0 0 0 / 0.12);
     padding: 1.5rem;
-  }
-
-  /* Spacing and readability. */
-  html.ui-mode-k2 .lms-scope p,
-  html.ui-mode-k2 .lms-scope li {
-    line-height: 1.75;
   }
 
   /* Increase icon size in nav when displayed alongside text. */

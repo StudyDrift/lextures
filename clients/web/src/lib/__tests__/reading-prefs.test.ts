@@ -13,6 +13,20 @@ describe('defaultReadingPreferences', () => {
   it('has reducedMotionEnabled false by default', () => {
     expect(defaultReadingPreferences.reducedMotionEnabled).toBe(false)
   })
+
+  it('has textScale 1 by default (UX.3)', () => {
+    expect(defaultReadingPreferences.textScale).toBe(1)
+  })
+})
+
+describe('applyReadingPreferences — textScale (UX.3)', () => {
+  const root = document.documentElement
+
+  it('sets --lx-type-scale from textScale', () => {
+    applyReadingPreferences({ ...defaultReadingPreferences, textScale: 1.25 })
+    expect(root.style.getPropertyValue('--lx-type-scale')).toBe('1.25')
+    expect(root.style.getPropertyValue('--reading-text-scale')).toBe('1.25')
+  })
 })
 
 describe('applyReadingPreferences — HC/RM classes', () => {

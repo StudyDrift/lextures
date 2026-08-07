@@ -222,12 +222,57 @@ export default function TokensGalleryPage() {
           </div>
         </section>
 
+        <section aria-labelledby="type-heading">
+          <h2 id="type-heading" className="mb-2 text-title font-semibold">
+            Type scale (UX.3)
+          </h2>
+          <p className="mb-4 text-body-sm text-fg-muted">
+            Semantic roles — prefer <code className="text-code">text-body</code>,{' '}
+            <code className="text-code">text-caption</code>, never raw{' '}
+            <code className="text-code">text-xs</code> / <code className="text-code">text-sm</code>.
+            Caption and overline must use <code className="text-code">text-fg-default</code> (≥7:1).
+            Long-form surfaces use <code className="text-code">lex-measure</code> (65ch).
+          </p>
+          <div className="space-y-4 rounded-lg border border-border-default bg-surface-raised p-5">
+            {(
+              [
+                { role: 'display', cls: 'text-display', sample: 'Display — marketing-adjacent hero' },
+                { role: 'title-lg', cls: 'text-title-lg', sample: 'Title large — page title' },
+                { role: 'title', cls: 'text-title', sample: 'Title — section heading' },
+                { role: 'subtitle', cls: 'text-subtitle', sample: 'Subtitle — card / panel heading' },
+                { role: 'body-lg', cls: 'text-body-lg', sample: 'Body large — long-form course content' },
+                { role: 'body', cls: 'text-body', sample: 'Body — default UI and prose (16px when ffTypeScale)' },
+                { role: 'body-sm', cls: 'text-body-sm', sample: 'Body small — dense UI, table cells' },
+                { role: 'caption', cls: 'text-caption', sample: 'Caption — metadata, timestamps (13px floor)' },
+                { role: 'overline', cls: 'text-overline', sample: 'Overline — uppercase labels only' },
+                { role: 'code', cls: 'text-code', sample: 'const code = "monospace"' },
+              ] as const
+            ).map((row) => (
+              <div
+                key={row.role}
+                className="flex flex-col gap-1 border-b border-border-subtle pb-3 last:border-0 last:pb-0 sm:flex-row sm:items-baseline sm:gap-4"
+              >
+                <code className="w-28 shrink-0 font-mono text-caption text-fg-muted">text-{row.role}</code>
+                <p className={`${row.cls} text-fg-default`}>{row.sample}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 lex-measure rounded-lg border border-border-default bg-surface-raised p-5">
+            <p className="text-overline text-fg-default mb-2">Measure preview (lex-measure)</p>
+            <p className="text-body-lg text-fg-default">
+              Long-form course content is constrained to about sixty-five characters per line so learners
+              can track from the end of one line to the start of the next without fatigue. This column
+              uses the <code className="text-code">lex-measure</code> utility (min 45ch, target 65ch, max 75ch).
+            </p>
+          </div>
+        </section>
+
         <section aria-labelledby="contrast-heading">
           <h2 id="contrast-heading" className="mb-4 text-lg font-semibold">
             Contrast pairs ({themeId})
           </h2>
           <div className="overflow-x-auto rounded-lg border border-border-default bg-surface-raised">
-            <table className="w-full min-w-[32rem] text-start text-sm">
+            <table className="w-full min-w-[32rem] text-start text-body-sm">
               <thead className="border-b border-border-subtle bg-surface-sunken text-fg-muted">
                 <tr>
                   <th className="px-3 py-2 font-medium">Foreground</th>
@@ -239,10 +284,10 @@ export default function TokensGalleryPage() {
               </thead>
               <tbody>
                 {pairs.map((p) => (
-                  <tr key={`${p.fg}-${p.bg}`} className="border-b border-border-subtle last:border-0">
-                    <td className="px-3 py-2 font-mono text-xs">{p.fg}</td>
-                    <td className="px-3 py-2 font-mono text-xs">{p.bg}</td>
-                    <td className="px-3 py-2 font-mono tabular-nums">
+                  <tr key={`${p.fg}-${p.bg}-${p.usage}`} className="border-b border-border-subtle last:border-0">
+                    <td className="px-3 py-2 font-mono text-caption">{p.fg}</td>
+                    <td className="px-3 py-2 font-mono text-caption">{p.bg}</td>
+                    <td className="px-3 py-2 font-mono lex-tabular">
                       {p.ratio != null ? `${p.ratio.toFixed(2)}:1` : '—'}
                     </td>
                     <td className="px-3 py-2">
@@ -270,11 +315,13 @@ export default function TokensGalleryPage() {
           <h2 id="usage-heading" className="mb-4 text-lg font-semibold">
             Authoring
           </h2>
-          <pre className="overflow-x-auto rounded-lg border border-border-default bg-surface-sunken p-4 text-xs text-fg-default">
-{`// Semantic only — never slate-*/neutral-* in feature code
+          <pre className="overflow-x-auto rounded-lg border border-border-default bg-surface-sunken p-4 text-caption text-fg-default">
+{`// Semantic only — never slate-*/neutral-* or text-xs in feature code
 <div className="bg-surface-raised text-fg-default border border-border-default">
-  <p className="text-fg-muted">Secondary copy</p>
-  <button className="bg-accent-solid text-fg-on-accent">Save</button>
+  <h1 className="text-title-lg">Page title</h1>
+  <p className="text-body text-fg-muted">Secondary copy</p>
+  <p className="text-caption text-fg-default">Metadata · use ≥7:1</p>
+  <article className="lex-measure text-body-lg">Long-form prose…</article>
 </div>`}
           </pre>
         </section>

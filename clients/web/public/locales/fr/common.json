@@ -2278,5 +2278,16 @@
   "course.features.contentTools.linkIngestionOff": "Off",
   "course.features.contentTools.linkHostAllowlist": "Allowed hosts (comma-separated)",
   "course.features.contentTools.dailyAiCallsPerUser": "Daily AI calls per user",
-  "course.features.contentTools.monthlyAiTokenBudget": "Monthly AI token budget (0 = unlimited)"
+  "course.features.contentTools.monthlyAiTokenBudget": "Monthly AI token budget (0 = unlimited)",
+  "reading": {
+    "title": "Préférences de lecture",
+    "appliesEverywhere": "Ces réglages s’appliquent aux modules, devoirs, discussions et au carnet.",
+    "textSize": "Taille du texte",
+    "font": "Police",
+    "letterSpacing": "Espacement des lettres",
+    "wordSpacing": "Espacement des mots",
+    "lineHeight": "Interligne",
+    "ruler": "Règle de lecture",
+    "display": "Affichage"
+  }
 }

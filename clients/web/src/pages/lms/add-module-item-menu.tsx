@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from 'react'
+import { useId, useMemo, useRef, useState, type ReactNode } from 'react'
 import {
   BookOpen,
   BookMarked,
@@ -14,6 +14,7 @@ import {
   Puzzle,
   Sparkles,
 } from 'lucide-react'
+import { Menu, type MenuItem } from '../../components/ui/menu'
 
 export type ModuleItemKind =
   | 'heading'
@@ -43,6 +44,20 @@ type AddModuleItemMenuProps = {
   bookstoreEnabled?: boolean
 }
 
+function itemLabel(icon: ReactNode, title: string, description: string) {
+  return (
+    <span className="flex w-full items-start gap-3">
+      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border-default bg-surface-raised text-fg-muted">
+        {icon}
+      </span>
+      <span className="min-w-0 flex flex-col gap-0.5">
+        <span className="font-semibold text-fg-default">{title}</span>
+        <span className="text-xs font-normal text-fg-muted">{description}</span>
+      </span>
+    </span>
+  )
+}
+
 export function AddModuleItemMenu({
   onAdd,
   onFindOpenResources,
@@ -55,26 +70,166 @@ export function AddModuleItemMenu({
   bookstoreEnabled = false,
 }: AddModuleItemMenuProps) {
   const [open, setOpen] = useState(false)
-  const rootRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
   const menuId = useId()
 
-  useEffect(() => {
-    if (!open) return
-    function onDoc(e: MouseEvent) {
-      if (!rootRef.current?.contains(e.target as Node)) setOpen(false)
-    }
-    document.addEventListener('mousedown', onDoc)
-    return () => document.removeEventListener('mousedown', onDoc)
-  }, [open])
+  const items: MenuItem[] = useMemo(() => {
+    const list: MenuItem[] = [
+      {
+        id: 'heading',
+        textValue: 'Heading',
+        label: itemLabel(<Heading className="h-4 w-4" aria-hidden />, 'Heading', 'Text label for organizing content'),
+        onSelect: () => onAdd('heading'),
+      },
+      {
+        id: 'content_page',
+        textValue: 'Content page',
+        label: itemLabel(
+          <FileText className="h-4 w-4" aria-hidden />,
+          'Content page',
+          'Markdown page with rich formatting',
+        ),
+        onSelect: () => onAdd('content_page'),
+      },
+      {
+        id: 'assignment',
+        textValue: 'Assignment',
+        label: itemLabel(
+          <ClipboardList className="h-4 w-4" aria-hidden />,
+          'Assignment',
+          'Graded or submitted work',
+        ),
+        onSelect: () => onAdd('assignment'),
+      },
+      {
+        id: 'quiz',
+        textValue: 'Quiz',
+        label: itemLabel(
+          <CircleHelp className="h-4 w-4" aria-hidden />,
+          'Quiz',
+          'Questions and auto-graded checks',
+        ),
+        onSelect: () => onAdd('quiz'),
+      },
+    ]
 
-  function pick(kind: ModuleItemKind) {
-    onAdd(kind)
-    setOpen(false)
-  }
+    if (oerLibraryEnabled && onFindOpenResources) {
+      list.push({
+        id: 'find-oer',
+        textValue: 'Find open resources',
+        label: itemLabel(
+          <BookOpen className="h-4 w-4" aria-hidden />,
+          'Find open resources',
+          'Search OER Commons, MERLOT, and OpenStax',
+        ),
+        onSelect: () => onFindOpenResources(),
+      })
+    }
+
+    list.push({
+      id: 'external_link',
+      textValue: 'External link',
+      label: itemLabel(
+        <ExternalLink className="h-4 w-4" aria-hidden />,
+        'External link',
+        'Opens a URL in a new tab',
+      ),
+      onSelect: () => onAdd('external_link'),
+    })
+
+    if (h5pEnabled) {
+      list.push({
+        id: 'h5p',
+        textValue: 'Interactive H5P',
+        label: itemLabel(
+          <Puzzle className="h-4 w-4" aria-hidden />,
+          'Interactive H5P',
+          'Upload an interactive .h5p activity',
+        ),
+        onSelect: () => onAdd('h5p'),
+      })
+    }
+
+    if (scormIngestionEnabled) {
+      list.push({
+        id: 'scorm',
+        textValue: 'SCORM package',
+        label: itemLabel(
+          <BookCopy className="h-4 w-4" aria-hidden />,
+          'SCORM package',
+          'Upload a SCORM 1.2 .zip package',
+        ),
+        onSelect: () => onAdd('scorm'),
+      })
+    }
+
+    list.push({
+      id: 'vibe_activity',
+      textValue: 'Vibe Activity',
+      label: itemLabel(
+        <Sparkles className="h-4 w-4" aria-hidden />,
+        'Vibe Activity',
+        'AI-assisted interactive HTML web activity',
+      ),
+      onSelect: () => onAdd('vibe_activity'),
+    })
+
+    if (heLibraryEnabled) {
+      list.push({
+        id: 'library_resource',
+        textValue: 'Library Resource',
+        label: itemLabel(
+          <BookMarked className="h-4 w-4" aria-hidden />,
+          'Library Resource',
+          'Alma catalog item or Leganto reading list',
+        ),
+        onSelect: () => onAdd('library_resource'),
+      })
+    }
+
+    if (bookstoreEnabled) {
+      list.push({
+        id: 'textbook_resource',
+        textValue: 'Textbook Resource',
+        label: itemLabel(
+          <BookCopy className="h-4 w-4" aria-hidden />,
+          'Textbook Resource',
+          'VitalSource or RedShelf Inclusive Access deep link',
+        ),
+        onSelect: () => onAdd('textbook_resource'),
+      })
+    }
+
+    list.push({
+      id: 'lti_link',
+      textValue: 'LTI tool',
+      disabled: !ltiToolsAvailable,
+      label: itemLabel(
+        <Plug className="h-4 w-4" aria-hidden />,
+        'LTI tool',
+        ltiToolsAvailable
+          ? 'Embedded publisher or external LTI 1.3 tool'
+          : 'No LTI tools registered — add under Settings → LTI tools',
+      ),
+      onSelect: () => onAdd('lti_link'),
+    })
+
+    return list
+  }, [
+    onAdd,
+    onFindOpenResources,
+    oerLibraryEnabled,
+    h5pEnabled,
+    scormIngestionEnabled,
+    heLibraryEnabled,
+    bookstoreEnabled,
+    ltiToolsAvailable,
+  ])
 
   return (
-    <div ref={rootRef} className="relative inline-block max-w-full text-start">
+    <div className="relative inline-block max-w-full text-start">
       <button
+        ref={triggerRef}
         type="button"
         disabled={disabled}
         aria-haspopup="menu"
@@ -84,7 +239,7 @@ export function AddModuleItemMenu({
           if (disabled) return
           setOpen((o) => !o)
         }}
-        className="inline-flex max-w-full items-center gap-1.5 rounded-lg border border-slate-200/70 bg-white/90 px-2 py-1.5 text-xs font-medium text-fg-muted shadow-none transition-[background-color,color,border-color] hover:border-slate-300/80 hover:bg-slate-50/90 disabled:cursor-not-allowed disabled:opacity-60 sm:px-2.5 sm:text-sm dark:border-border-default dark:bg-surface-raised dark:text-fg-default dark:hover:border-neutral-500 dark:hover:bg-surface-overlay"
+        className="inline-flex max-w-full items-center gap-1.5 rounded-lg border border-border-default bg-surface-raised px-2 py-1.5 text-xs font-medium text-fg-muted shadow-none transition-[background-color,color,border-color] hover:border-border-strong hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-60 sm:px-2.5 sm:text-sm"
       >
         <Plus className="h-4 w-4 shrink-0" aria-hidden />
         <span className="truncate sm:hidden">Add item</span>
@@ -95,220 +250,16 @@ export function AddModuleItemMenu({
         />
       </button>
 
-      {open && (
-        <div
-          id={menuId}
-          role="menu"
-          aria-label="Module item types"
-          className="absolute end-0 z-50 mt-1 w-max min-w-[min(22rem,calc(100vw-1.5rem))] max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl border border-border-default bg-surface-raised py-1 shadow-lg shadow-slate-900/10 dark:border-border-default dark:bg-surface-overlay dark:shadow-black/40"
-        >
-          <button
-            type="button"
-            role="menuitem"
-            onClick={() => pick('heading')}
-            className="flex w-full items-start gap-3 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:hover:bg-neutral-700"
-          >
-            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border-default bg-surface-raised text-fg-muted dark:border-border-default dark:bg-surface-raised dark:text-fg-muted">
-              <Heading className="h-4 w-4" aria-hidden />
-            </span>
-            <span className="min-w-0 flex flex-col gap-0.5">
-              <span className="font-semibold text-slate-950 dark:text-fg-default">Heading</span>
-              <span className="text-xs text-fg-muted">Text label for organizing content</span>
-            </span>
-          </button>
-          <button
-            type="button"
-            role="menuitem"
-            onClick={() => pick('content_page')}
-            className="flex w-full items-start gap-3 border-t border-border-subtle px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:hover:bg-neutral-700"
-          >
-            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-indigo-200/80 bg-indigo-50 text-accent-fg dark:border-indigo-500/35 dark:bg-indigo-950 dark:text-indigo-300">
-              <FileText className="h-4 w-4" aria-hidden />
-            </span>
-            <span className="min-w-0 flex flex-col gap-0.5">
-              <span className="font-semibold text-slate-950 dark:text-fg-default">Content page</span>
-              <span className="text-xs text-fg-muted">Markdown page with rich formatting</span>
-            </span>
-          </button>
-          <button
-            type="button"
-            role="menuitem"
-            onClick={() => pick('assignment')}
-            className="flex w-full items-start gap-3 border-t border-border-subtle px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:hover:bg-neutral-700"
-          >
-            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-amber-200/90 bg-amber-50 text-amber-800 dark:border-amber-500/40 dark:bg-amber-950 dark:text-amber-200">
-              <ClipboardList className="h-4 w-4" aria-hidden />
-            </span>
-            <span className="min-w-0 flex flex-col gap-0.5">
-              <span className="font-semibold text-slate-950 dark:text-fg-default">Assignment</span>
-              <span className="text-xs text-fg-muted">Graded or submitted work</span>
-            </span>
-          </button>
-          <button
-            type="button"
-            role="menuitem"
-            onClick={() => pick('quiz')}
-            className="flex w-full items-start gap-3 border-t border-border-subtle px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:hover:bg-neutral-700"
-          >
-            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-emerald-200/90 bg-emerald-50 text-emerald-700 dark:border-emerald-500/35 dark:bg-emerald-950 dark:text-emerald-200">
-              <CircleHelp className="h-4 w-4" aria-hidden />
-            </span>
-            <span className="min-w-0 flex flex-col gap-0.5">
-              <span className="font-semibold text-slate-950 dark:text-fg-default">Quiz</span>
-              <span className="text-xs text-fg-muted">
-                Questions and auto-graded checks
-              </span>
-            </span>
-          </button>
-          {oerLibraryEnabled && onFindOpenResources && (
-            <button
-              type="button"
-              role="menuitem"
-              onClick={() => {
-                onFindOpenResources()
-                setOpen(false)
-              }}
-              className="flex w-full items-start gap-3 border-t border-border-subtle px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:hover:bg-neutral-700"
-            >
-              <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-teal-200/90 bg-teal-50 text-teal-700 dark:border-teal-500/40 dark:bg-teal-950 dark:text-teal-200">
-                <BookOpen className="h-4 w-4" aria-hidden />
-              </span>
-              <span className="min-w-0 flex flex-col gap-0.5">
-                <span className="font-semibold text-slate-950 dark:text-fg-default">Find open resources</span>
-                <span className="text-xs text-fg-muted">
-                  Search OER Commons, MERLOT, and OpenStax
-                </span>
-              </span>
-            </button>
-          )}
-          <button
-            type="button"
-            role="menuitem"
-            onClick={() => pick('external_link')}
-            className="flex w-full items-start gap-3 border-t border-border-subtle px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:hover:bg-neutral-700"
-          >
-            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-violet-200/90 bg-violet-50 text-violet-700 dark:border-violet-500/40 dark:bg-violet-950 dark:text-violet-200">
-              <ExternalLink className="h-4 w-4" aria-hidden />
-            </span>
-            <span className="min-w-0 flex flex-col gap-0.5">
-              <span className="font-semibold text-slate-950 dark:text-fg-default">External link</span>
-              <span className="text-xs text-fg-muted">
-                Opens a URL in a new tab
-              </span>
-            </span>
-          </button>
-          {h5pEnabled ? (
-            <button
-              type="button"
-              role="menuitem"
-              onClick={() => pick('h5p')}
-              className="flex w-full items-start gap-3 border-t border-border-subtle px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:hover:bg-neutral-700"
-            >
-              <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-teal-200/90 bg-teal-50 text-teal-800 dark:border-teal-500/40 dark:bg-teal-950 dark:text-teal-200">
-                <Puzzle className="h-4 w-4" aria-hidden />
-              </span>
-              <span className="min-w-0 flex flex-col gap-0.5">
-                <span className="font-semibold text-slate-950 dark:text-fg-default">Interactive H5P</span>
-                <span className="text-xs text-fg-muted">
-                  Upload an interactive .h5p activity
-                </span>
-              </span>
-            </button>
-          ) : null}
-          {scormIngestionEnabled ? (
-            <button
-              type="button"
-              role="menuitem"
-              onClick={() => pick('scorm')}
-              className="flex w-full items-start gap-3 border-t border-border-subtle px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:hover:bg-neutral-700"
-            >
-              <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-violet-200/90 bg-violet-50 text-violet-800 dark:border-violet-500/40 dark:bg-violet-950 dark:text-violet-200">
-                <BookCopy className="h-4 w-4" aria-hidden />
-              </span>
-              <span className="min-w-0 flex flex-col gap-0.5">
-                <span className="font-semibold text-slate-950 dark:text-fg-default">SCORM package</span>
-                <span className="text-xs text-fg-muted">
-                  Upload a SCORM 1.2 .zip package
-                </span>
-              </span>
-            </button>
-          ) : null}
-          <button
-            type="button"
-            role="menuitem"
-            onClick={() => pick('vibe_activity')}
-            className="flex w-full items-start gap-3 border-t border-border-subtle px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:hover:bg-neutral-700"
-          >
-            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-rose-200/90 bg-rose-50 text-rose-700 dark:border-rose-500/40 dark:bg-rose-950 dark:text-rose-200">
-              <Sparkles className="h-4 w-4" aria-hidden />
-            </span>
-            <span className="min-w-0 flex flex-col gap-0.5">
-              <span className="font-semibold text-slate-950 dark:text-fg-default">Vibe Activity</span>
-              <span className="text-xs text-fg-muted">
-                AI-assisted interactive HTML web activity
-              </span>
-            </span>
-          </button>
-          {heLibraryEnabled && (
-            <button
-              type="button"
-              role="menuitem"
-              onClick={() => pick('library_resource')}
-              className="flex w-full items-start gap-3 border-t border-border-subtle px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:hover:bg-neutral-700"
-            >
-              <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-cyan-200/90 bg-cyan-50 text-cyan-700 dark:border-cyan-500/40 dark:bg-cyan-950 dark:text-cyan-200">
-                <BookMarked className="h-4 w-4" aria-hidden />
-              </span>
-              <span className="min-w-0 flex flex-col gap-0.5">
-                <span className="font-semibold text-slate-950 dark:text-fg-default">Library Resource</span>
-                <span className="text-xs text-fg-muted">
-                  Alma catalog item or Leganto reading list
-                </span>
-              </span>
-            </button>
-          )}
-          {bookstoreEnabled && (
-            <button
-              type="button"
-              role="menuitem"
-              onClick={() => pick('textbook_resource')}
-              className="flex w-full items-start gap-3 border-t border-border-subtle px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-surface-base dark:border-border-default dark:hover:bg-neutral-700"
-            >
-              <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-orange-200/90 bg-orange-50 text-orange-700 dark:border-orange-500/40 dark:bg-orange-950 dark:text-orange-200">
-                <BookCopy className="h-4 w-4" aria-hidden />
-              </span>
-              <span className="min-w-0 flex flex-col gap-0.5">
-                <span className="font-semibold text-slate-950 dark:text-fg-default">Textbook Resource</span>
-                <span className="text-xs text-fg-muted">
-                  VitalSource or RedShelf Inclusive Access deep link
-                </span>
-              </span>
-            </button>
-          )}
-          <button
-            type="button"
-            role="menuitem"
-            disabled={!ltiToolsAvailable}
-            onClick={() => {
-              if (!ltiToolsAvailable) return
-              pick('lti_link')
-            }}
-            className="flex w-full items-start gap-3 border-t border-border-subtle px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-60 dark:border-border-default dark:hover:bg-neutral-700"
-          >
-            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-purple-200/90 bg-purple-50 text-purple-800 dark:border-purple-500/40 dark:bg-purple-950 dark:text-purple-200">
-              <Plug className="h-4 w-4" aria-hidden />
-            </span>
-            <span className="min-w-0 flex flex-col gap-0.5">
-              <span className="font-semibold text-slate-950 dark:text-fg-default">LTI tool</span>
-              <span className="text-xs text-fg-muted">
-                {ltiToolsAvailable
-                  ? 'Embedded publisher or external LTI 1.3 tool'
-                  : 'No LTI tools registered — add under Settings → LTI tools'}
-              </span>
-            </span>
-          </button>
-        </div>
-      )}
+      <Menu
+        open={open}
+        onOpenChange={setOpen}
+        id={menuId}
+        anchorRef={triggerRef}
+        placement="bottom-end"
+        aria-label="Module item types"
+        className="w-max min-w-[min(22rem,calc(100vw-1.5rem))] max-w-[calc(100vw-1.5rem)]"
+        items={items}
+      />
     </div>
   )
 }

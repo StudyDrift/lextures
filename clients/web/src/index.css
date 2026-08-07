@@ -6,6 +6,7 @@
 @import "./styles/tokens/component.css";
 @import "./styles/tokens/motion.css";
 @import "./styles/tokens/theme.css";
+@import "./styles/tokens/typography.css";
 @import "./styles/scrollbars.css";
 /* high-contrast.css retained for legacy class overrides during migration; themes cover HC. */
 @import "./styles/high-contrast.css";
@@ -188,6 +189,8 @@ html {
   --reading-letter-spacing: normal;
   --reading-word-spacing: normal;
   --reading-line-height: 1.5;
+  --reading-text-scale: 1;
+  --lx-type-scale: var(--reading-text-scale, 1);
   background-color: var(--lx-surface-base);
   color: var(--lx-fg-default);
 }

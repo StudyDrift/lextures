@@ -1,6 +1,14 @@
 # UX.4 — ARIA Widget and Focus Management Remediation
 
-> Implementation plan. Source: [audit.md](audit.md) §3 G-3, G-4, G-5a, G-5c.
+> Implementation plan. Source: [audit.md](../../plan/ui-ux/audit.md) §3 G-3, G-4, G-5a, G-5c.
+>
+> **Shipped** as the overlay stack + focus-trap restore chain, hardened UX.2
+> `Dialog`/`Tabs`/`Menu`/`Tooltip` contracts (RTL, Tab-to-close, Escape), ARIA
+> contract CI ratchet (`npm run a11y:contracts`), high-traffic migrations
+> (top bar, notifications drawer, add-module-item, action menus), and
+> [accessibility-patterns](../../guides/accessibility-patterns.md) guide.
+> Long-tail modal migration continues under the ratchet (defect counts may only
+> decrease; coverage may only increase).
 
 ## Metadata
 
@@ -10,7 +18,7 @@
 | **Section** | UI/UX — Accessibility |
 | **Severity** | BLOCKER |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | BROKEN — roles declared without their keyboard contracts |
+| **Status (today)** | SHIPPED (contracts + ratchet + high-traffic; modal tail ongoing) |
 | **Estimated effort** | L (1–2mo) |
 | **Owner (proposed)** | Accessibility + Design Systems |
 | **Depends on** | UX.2 |
@@ -48,9 +56,9 @@ under EN 301 549 (**R-36**).
 
 - A full manual screen-reader audit of every one of 200 routes (scoped, sampled —
   see §16).
-- WCAG 2.2's *new* criteria — those are [UX.5](UX.5-wcag-2.2-aa-conformance-uplift.md).
-- Colour contrast — delivered by [UX.1](UX.1-semantic-design-token-system.md).
-- Form error association — delivered by [UX.6](UX.6-form-and-validation-system.md).
+- WCAG 2.2's *new* criteria — those are [UX.5](../../plan/ui-ux/UX.5-wcag-2.2-aa-conformance-uplift.md).
+- Colour contrast — delivered by [UX.1](./UX.1-semantic-design-token-system.md).
+- Form error association — delivered by [UX.6](../../plan/ui-ux/UX.6-form-and-validation-system.md).
 - Native clients.
 
 ## 4. Personas & User Stories
@@ -194,7 +202,7 @@ changes.
 - **Accessibility annotations** — the deliverable is a written focus-order
   specification per overlay class, committed alongside the components.
 - **Copy & i18n** — new/normalised `aria-label` strings MUST be i18n keys, not
-  literals. This intersects [UX.15](UX.15-i18n-coverage-and-rtl-completion.md):
+  literals. This intersects [UX.15](../../plan/ui-ux/UX.15-i18n-coverage-and-rtl-completion.md):
   today's labels (e.g. `aria-label="User menu"`) are hardcoded English.
 
 ## 11. AI / ML Considerations
@@ -227,11 +235,11 @@ focus.
 
 ## 13. Dependencies & Sequencing
 
-- **Must ship after** — [UX.2](../../completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md).
+- **Must ship after** — [UX.2](./UX.2-core-component-library-and-adoption-ratchet.md).
   UX.4 is largely *delivered by* the UX.2 migration; this plan owns the
   verification, the removal of wrong roles, the tooltip replacement, and the CI
   gates.
-- **Must ship before** — [UX.5](UX.5-wcag-2.2-aa-conformance-uplift.md) and any
+- **Must ship before** — [UX.5](../../plan/ui-ux/UX.5-wcag-2.2-aa-conformance-uplift.md) and any
   VPAT re-attestation.
 - **Shared infra** — CI runners capable of running axe and Playwright.
 
@@ -334,13 +342,15 @@ focus.
   `clients/web/src/components/layout/side-nav-tooltip.tsx`,
   `clients/web/src/components/command-palette/command-palette-dialog.tsx`,
   `clients/web/src/components/use-confirm.tsx`
-- Research: [research.md](research.md) R-35, R-36, R-37
-- Audit: [audit.md](audit.md) G-3, G-4, G-5a, G-5c
+- Research: [research.md](../../plan/ui-ux/research.md) R-35, R-36, R-37
+- Audit: [audit.md](../../plan/ui-ux/audit.md) G-3, G-4, G-5a, G-5c
 - External: [WAI-ARIA Authoring Practices Guide](https://www.w3.org/WAI/ARIA/apg/),
   [WCAG 2.2](https://www.w3.org/TR/WCAG22/),
   [EN 301 549](https://www.deque.com/en-301-549-compliance/)
-- Related plans: [UX.2](../../completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md),
-  [UX.5](UX.5-wcag-2.2-aa-conformance-uplift.md),
-  [UX.6](UX.6-form-and-validation-system.md),
-  [UX.15](UX.15-i18n-coverage-and-rtl-completion.md),
-  `../../completed/12-accessibility/`, `../standards/S20-accessibility-legal-mandates.md`
+- Related plans: [UX.2](./UX.2-core-component-library-and-adoption-ratchet.md),
+  [UX.5](../../plan/ui-ux/UX.5-wcag-2.2-aa-conformance-uplift.md),
+  [UX.6](../../plan/ui-ux/UX.6-form-and-validation-system.md),
+  [UX.15](../../plan/ui-ux/UX.15-i18n-coverage-and-rtl-completion.md),
+  `../12-accessibility/`, `../../plan/standards/S20-accessibility-legal-mandates.md`
+- Guide: [accessibility-patterns.md](../../guides/accessibility-patterns.md)
+- CI: `clients/web` → `npm run a11y:contracts` / `npm run a11y:baseline`

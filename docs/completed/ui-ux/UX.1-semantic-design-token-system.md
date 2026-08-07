@@ -385,7 +385,7 @@ model required.)*
   [WCAG 2.2](https://www.w3.org/TR/WCAG22/),
   [Tailwind CSS v4 `@theme`](https://tailwindcss.com/docs/theme)
 - Related plans: [UX.2](UX.2-core-component-library-and-adoption-ratchet.md),
-  [UX.3](UX.3-typography-and-reading-system.md),
+  [UX.3](./UX.3-typography-and-reading-system.md),
   [UX.18](UX.18-design-system-governance-and-measurement.md),
   `../../completed/animations/` (AN.1 motion tokens),
   `../../completed/12-accessibility/`

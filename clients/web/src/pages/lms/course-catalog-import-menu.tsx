@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { ChevronDown, Download } from 'lucide-react'
+import { handleMenuKeyDown, focusFirstMenuitem } from '../../lib/a11y/menu-keyboard'
 
 type Props = {
   onImportCanvas: () => void
@@ -13,6 +14,13 @@ export function CourseCatalogImportMenu({
   onImportFromJson,
 }: Props) {
   const [open, setOpen] = useState(false)
+  const menuTypeaheadRef = useRef({ buffer: '', at: 0 })
+  const menuListRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    focusFirstMenuitem(menuListRef.current)
+  }, [open])
   const rootRef = useRef<HTMLDivElement>(null)
   const menuId = useId()
 
@@ -46,10 +54,10 @@ export function CourseCatalogImportMenu({
       {open && (
         <div
           id={menuId}
-          role="menu"
+          ref={menuListRef} role="menu"
           aria-label="Import course from"
           className="absolute start-0 end-0 z-50 mt-1 min-w-0 overflow-hidden rounded-xl border border-border-default bg-surface-raised py-1 shadow-lg shadow-slate-900/10 sm:left-auto sm:end-0 sm:min-w-[14rem] dark:border-border-default dark:bg-surface-overlay dark:shadow-black/40"
-        >
+         onKeyDown={(e) => handleMenuKeyDown(e, { onClose: () => setOpen(false) }, menuTypeaheadRef.current)} tabIndex={-1}>
           <button
             type="button"
             role="menuitem"

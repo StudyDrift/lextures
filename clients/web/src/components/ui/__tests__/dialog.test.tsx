@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { PlatformFeaturesProvider } from '../../../context/platform-features-context'
 import { Dialog } from '../dialog'
@@ -25,6 +25,41 @@ describe('UX.2 Dialog', () => {
     expect(dialog).toBeTruthy()
     await user.keyboard('{Escape}')
     expect(onClose).toHaveBeenCalled()
+  })
+
+  it('restores focus to the trigger after Escape (UX.4 FR-4 / inert race)', async () => {
+    const user = userEvent.setup()
+    function Harness() {
+      const [open, setOpen] = useState(false)
+      return (
+        <PlatformFeaturesProvider>
+          <div id="root">
+            <button type="button" onClick={() => setOpen(true)}>
+              Open dialog
+            </button>
+          </div>
+          <Dialog
+            open={open}
+            onClose={() => setOpen(false)}
+            title="Title"
+            closeLabel="Close dialog"
+          >
+            <Button>Inside</Button>
+          </Dialog>
+        </PlatformFeaturesProvider>
+      )
+    }
+    render(<Harness />)
+    const trigger = screen.getByRole('button', { name: 'Open dialog' })
+    await user.click(trigger)
+    await screen.findByRole('dialog')
+    await user.keyboard('{Escape}')
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).toBeNull()
+    })
+    await waitFor(() => {
+      expect(trigger).toHaveFocus()
+    })
   })
 })
 
@@ -51,6 +86,35 @@ describe('UX.2 Tabs', () => {
     expect(screen.getByRole('tab', { name: 'C' })).toHaveAttribute('aria-selected', 'true')
     await user.keyboard('{Home}')
     expect(screen.getByRole('tab', { name: 'A' })).toHaveAttribute('aria-selected', 'true')
+  })
+
+  it('inverts horizontal arrows under dir=rtl (UX.4 AC-2)', async () => {
+    const user = userEvent.setup()
+    document.documentElement.dir = 'rtl'
+    try {
+      wrap(
+        <Tabs defaultValue="a">
+          <TabList aria-label="RTL">
+            <Tab value="a">A</Tab>
+            <Tab value="b">B</Tab>
+            <Tab value="c">C</Tab>
+          </TabList>
+          <TabPanel value="a">Panel A</TabPanel>
+          <TabPanel value="b">Panel B</TabPanel>
+          <TabPanel value="c">Panel C</TabPanel>
+        </Tabs>,
+      )
+      screen.getByRole('tab', { name: 'A' }).focus()
+      // In RTL, ArrowRight moves to previous (none) / wrap — APG: ArrowRight → previous
+      await user.keyboard('{ArrowRight}')
+      // previous of A wraps to C
+      expect(screen.getByRole('tab', { name: 'C' })).toHaveAttribute('aria-selected', 'true')
+      await user.keyboard('{ArrowLeft}')
+      // ArrowLeft in RTL moves next → A
+      expect(screen.getByRole('tab', { name: 'A' })).toHaveAttribute('aria-selected', 'true')
+    } finally {
+      document.documentElement.dir = 'ltr'
+    }
   })
 })
 
