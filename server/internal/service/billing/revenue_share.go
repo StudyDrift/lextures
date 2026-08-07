@@ -9,10 +9,10 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/stripe/stripe-go/v81"
-	"github.com/stripe/stripe-go/v81/account"
-	"github.com/stripe/stripe-go/v81/accountlink"
-	"github.com/stripe/stripe-go/v81/transfer"
+	"github.com/stripe/stripe-go/v82"
+	"github.com/stripe/stripe-go/v82/account"
+	"github.com/stripe/stripe-go/v82/accountlink"
+	"github.com/stripe/stripe-go/v82/transfer"
 
 	repoBilling "github.com/lextures/lextures/server/internal/repos/billing"
 )
