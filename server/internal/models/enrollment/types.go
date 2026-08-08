@@ -26,6 +26,13 @@ type EnrollSelfAsStudentResponse struct {
 	Created bool `json:"created"`
 }
 
+// EnsureTestStudentResponse is returned by POST …/enrollments/test-student.
+type EnsureTestStudentResponse struct {
+	Created      bool   `json:"created"`
+	EnrollmentID string `json:"enrollmentId"`
+	Role         string `json:"role"`
+}
+
 type PatchEnrollmentRequest struct {
 	AppRoleID  *uuid.UUID `json:"appRoleId"`
 	Role       *string    `json:"role"`

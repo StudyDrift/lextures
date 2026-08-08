@@ -40,7 +40,7 @@ func QuizVisibleToStudent(
 			ON m.id = page.parent_id AND m.course_id = page.course_id AND m.kind = 'module'
 		INNER JOIN course.courses crs ON crs.id = page.course_id
 		LEFT JOIN course.course_enrollments stu
-			ON stu.course_id = crs.id AND stu.user_id = $3 AND stu.role = 'student' AND stu.active
+			ON stu.course_id = crs.id AND stu.user_id = $3 AND stu.active AND stu.role IN ('student', 'test_student')
 		WHERE page.id = $1 AND page.course_id = $2 AND page.kind = 'quiz'
 	`, quizItemID, courseID, userID).Scan(
 		&cPub, &cArch, &mPub, &mArch, &mVF, &scheduleMode, &crsAnchor, &enrollID, &enrollCreatedAt,

@@ -42,7 +42,7 @@ func (d Deps) handleCourseMyGrades() http.HandlerFunc {
 			return
 		}
 
-		isStudent, err := enrollment.UserHasEnrollmentRole(r.Context(), d.Pool, courseCode, viewer, "student")
+		isStudent, err := enrollment.UserHasStudentEquivalentEnrollment(r.Context(), d.Pool, courseCode, viewer)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify enrollment.")
 			return

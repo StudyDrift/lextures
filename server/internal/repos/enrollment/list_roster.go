@@ -68,9 +68,12 @@ ORDER BY
 		WHEN 'auditor' THEN 5
 		WHEN 'librarian' THEN 6
 		WHEN 'student' THEN 7
-		ELSE 8
+		WHEN 'test_student' THEN 8
+		ELSE 9
 	END,
-	COALESCE(NULLIF(TRIM(u.display_name), ''), u.email) ASC
+	CASE WHEN ce.role = 'test_student' THEN 'Test Student'
+	     ELSE COALESCE(NULLIF(TRIM(u.display_name), ''), u.email)
+	END ASC
 `, courseCode)
 	if err != nil {
 		return nil, err
@@ -92,7 +95,10 @@ ORDER BY
 		if err := rows.Scan(&r.ID, &r.UserID, &display, &avatar, &r.Role, &roleDisplay, &secID, &secCode, &secName, &stateStr, &stateChanged, &stateReason, &homeOrgID, &homeOrgName, &r.InvitationPending); err != nil {
 			return nil, err
 		}
-		if display.Valid {
+		if r.Role == RoleTestStudent {
+			s := DisplayNameTestStudent
+			r.DisplayName = &s
+		} else if display.Valid {
 			s := display.String
 			if s != "" {
 				r.DisplayName = &s

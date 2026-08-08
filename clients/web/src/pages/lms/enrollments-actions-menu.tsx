@@ -86,7 +86,7 @@ export function EnrollmentsActionsMenu({
               className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-fg-default transition-[background-color,color,border-color] hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-60 dark:text-fg-default dark:hover:bg-neutral-700/80"
             >
               <GraduationCap className="h-4 w-4 shrink-0" aria-hidden />
-              {enrollAsStudentBusy ? 'Enrolling…' : 'Enroll as Student'}
+              {enrollAsStudentBusy ? 'Adding…' : 'Add Test Student seat'}
             </button>
           ) : null}
           <button

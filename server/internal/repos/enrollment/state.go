@@ -230,23 +230,29 @@ func ListGradebookStudents(ctx context.Context, pool *pgxpool.Pool, courseCode s
 	if len(sectionIDs) == 0 {
 		rows, err = pool.Query(ctx, fmt.Sprintf(`
 SELECT ce.user_id, ce.id,
-       COALESCE(NULLIF(TRIM(u.display_name), ''), u.email) AS display_label,
+       CASE WHEN ce.role = 'test_student' THEN 'Test Student'
+            ELSE COALESCE(NULLIF(TRIM(u.display_name), ''), u.email)
+       END AS display_label,
        ce.state::text
 FROM course.course_enrollments ce
 INNER JOIN course.courses c ON c.id = ce.course_id
 INNER JOIN "user".users u ON u.id = ce.user_id
-WHERE c.course_code = $1 AND ce.role = 'student' AND (%s)
+INNER JOIN course.enrollment_roles er ON er.role_key = ce.role AND er.is_student_equivalent = true
+WHERE c.course_code = $1 AND (%s)
 ORDER BY display_label ASC, ce.user_id ASC
 `, stateFilter), courseCode)
 	} else {
 		rows, err = pool.Query(ctx, fmt.Sprintf(`
 SELECT ce.user_id, ce.id,
-       COALESCE(NULLIF(TRIM(u.display_name), ''), u.email) AS display_label,
+       CASE WHEN ce.role = 'test_student' THEN 'Test Student'
+            ELSE COALESCE(NULLIF(TRIM(u.display_name), ''), u.email)
+       END AS display_label,
        ce.state::text
 FROM course.course_enrollments ce
 INNER JOIN course.courses c ON c.id = ce.course_id
 INNER JOIN "user".users u ON u.id = ce.user_id
-WHERE c.course_code = $1 AND ce.role = 'student' AND (%s)
+INNER JOIN course.enrollment_roles er ON er.role_key = ce.role AND er.is_student_equivalent = true
+WHERE c.course_code = $1 AND (%s)
   AND ce.section_id = ANY($2::uuid[])
 ORDER BY display_label ASC, ce.user_id ASC
 `, stateFilter), courseCode, sectionIDs)
@@ -279,7 +285,11 @@ func ViewerStudentState(ctx context.Context, pool *pgxpool.Pool, courseCode stri
 SELECT ce.state::text, ce.state_changed_at
 FROM course.course_enrollments ce
 INNER JOIN course.courses c ON c.id = ce.course_id
-WHERE c.course_code = $1 AND ce.user_id = $2 AND ce.role = 'student'
+WHERE c.course_code = $1 AND ce.user_id = $2
+  AND EXISTS (
+    SELECT 1 FROM course.enrollment_roles er
+    WHERE er.role_key = ce.role AND er.is_student_equivalent = true
+  )
 ORDER BY ce.created_at ASC
 LIMIT 1
 `, courseCode, userID).Scan(&stateStr, &changedAt)

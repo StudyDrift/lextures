@@ -762,6 +762,7 @@ POST	/api/v1/courses/{course_code}/enrollment-groups/sets/{set_id}/groups	sessio
 GET	/api/v1/courses/{course_code}/enrollments	session
 POST	/api/v1/courses/{course_code}/enrollments	session
 POST	/api/v1/courses/{course_code}/enrollments/self-as-student	session
+POST	/api/v1/courses/{course_code}/enrollments/test-student	session
 DELETE	/api/v1/courses/{course_code}/enrollments/{enrollment_id}	session
 PATCH	/api/v1/courses/{course_code}/enrollments/{enrollment_id}	session
 GET	/api/v1/courses/{course_code}/enrollments/{enrollment_id}/at-risk-history	session

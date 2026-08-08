@@ -22,6 +22,8 @@ function enrollmentRoleBadgeClasses(courseRoleKey: string): string {
       return `${base} bg-emerald-50 text-emerald-900 ring-emerald-600/15 dark:bg-emerald-950/40 dark:text-emerald-100 dark:ring-emerald-400/25`
     case 'student':
       return `${base} bg-neutral-100 text-neutral-800 ring-neutral-400/20 dark:bg-surface-overlay dark:text-fg-default dark:ring-neutral-500/25`
+    case 'test_student':
+      return `${base} bg-warning-surface text-warning-fg ring-warning-border/40`
     default:
       return `${base} bg-neutral-100 text-neutral-800 ring-neutral-400/20 dark:bg-surface-overlay dark:text-fg-default dark:ring-neutral-500/25`
   }

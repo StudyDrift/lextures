@@ -232,6 +232,7 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Get("/api/v1/courses/{course_code}/gradebook/grid", d.handleGradebookGrid())
 	r.Put("/api/v1/courses/{course_code}/gradebook/grades", d.handlePutCourseGradebookGrades())
 	r.Post("/api/v1/courses/{course_code}/enrollments", d.handleCourseEnrollmentsPost())
+	r.Post("/api/v1/courses/{course_code}/enrollments/test-student", d.handleCourseEnrollmentsTestStudent())
 	r.Post("/api/v1/courses/{course_code}/enrollments/self-as-student", d.handleCourseEnrollmentsSelfStudent())
 	// Self-paced enrollment with no instructor (plan 15.2)
 	r.Post("/api/v1/courses/{course_code}/self-enroll", d.handleCourseSelfEnroll())
