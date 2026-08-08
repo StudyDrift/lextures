@@ -5,6 +5,7 @@ import {
   courseItemCreatePermission,
   courseItemsCreatePermission,
   defaultContentToolConfig,
+  isStudentEquivalentEnrollmentRole,
   viewerIsCourseStaffEnrollment,
   viewerIsLearnerOnlyCourseEnrollment,
   viewerShouldHideCourseEnrollmentsNav,
@@ -151,8 +152,21 @@ describe('viewerShouldShowMyGradesNav', () => {
     expect(viewerShouldShowMyGradesNav(['student', 'instructor'], 'teacher')).toBe(true)
   })
 
+  it('shows in teacher preview for Test Student dual enrollment', () => {
+    expect(viewerShouldShowMyGradesNav(['test_student', 'teacher'], 'teacher')).toBe(true)
+    expect(viewerShouldShowMyGradesNav(['test_student'], 'teacher')).toBe(true)
+  })
+
   it('returns false while enrollment roles are still loading or missing in teacher view', () => {
     expect(viewerShouldShowMyGradesNav(null, 'teacher')).toBe(false)
     expect(viewerShouldShowMyGradesNav([], 'teacher')).toBe(false)
+  })
+})
+
+describe('isStudentEquivalentEnrollmentRole', () => {
+  it('treats student and test_student as learner seats', () => {
+    expect(isStudentEquivalentEnrollmentRole('student')).toBe(true)
+    expect(isStudentEquivalentEnrollmentRole('test_student')).toBe(true)
+    expect(isStudentEquivalentEnrollmentRole('teacher')).toBe(false)
   })
 })

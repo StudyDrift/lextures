@@ -169,6 +169,11 @@ func (d Deps) handleCourseEnrollmentsPost() http.HandlerFunc {
 
 		if body.CourseRole != nil && strings.TrimSpace(*body.CourseRole) != "" {
 			role := normalizeCourseEnrollmentRole(*body.CourseRole)
+			if enrollment.IsTestStudentRole(role) {
+				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput,
+					"Test Student enrollments cannot be assigned by email. Use the preview-as-student action instead.")
+				return
+			}
 			roleCaps, err := lookupEnrollmentRoleCapabilities(ctx, d.Pool, role)
 			if err != nil {
 				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify role.")
@@ -349,59 +354,82 @@ LIMIT 1
 	}
 }
 
-func (d Deps) handleCourseEnrollmentsSelfStudent() http.HandlerFunc {
+// ensureTestStudentEnrollmentForStaff creates or reactivates the caller's test_student seat.
+// Shared by POST …/enrollments/test-student and the legacy self-as-student alias.
+func (d Deps) ensureTestStudentEnrollmentForStaff(w http.ResponseWriter, r *http.Request) (created bool, enrollmentID uuid.UUID, ok bool) {
+	viewer, okUID := d.meUserID(w, r)
+	if !okUID {
+		return false, uuid.Nil, false
+	}
+	courseCode, okCode := chiCourseCode(w, r)
+	if !okCode {
+		return false, uuid.Nil, false
+	}
+	isStaff, err := enrollment.UserIsCourseStaff(r.Context(), d.Pool, courseCode, viewer)
+	if err != nil {
+		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify enrollment.")
+		return false, uuid.Nil, false
+	}
+	if !isStaff {
+		apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "Only course staff may create a Test Student enrollment.")
+		return false, uuid.Nil, false
+	}
+	cid, err := course.GetIDByCourseCode(r.Context(), d.Pool, courseCode)
+	if err != nil || cid == nil {
+		apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
+		return false, uuid.Nil, false
+	}
+	ctx := r.Context()
+	tx, err := d.Pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to start transaction.")
+		return false, uuid.Nil, false
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+	eid, created, err := enrollment.EnsureTestStudentEnrollment(ctx, tx, *cid, viewer)
+	if err != nil {
+		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to create Test Student enrollment.")
+		return false, uuid.Nil, false
+	}
+	if err := courseroles.RefreshManagedGrantsForCourseUser(ctx, tx, viewer, *cid, courseCode); err != nil {
+		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to sync course permissions.")
+		return false, uuid.Nil, false
+	}
+	if err := tx.Commit(ctx); err != nil {
+		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save enrollment.")
+		return false, uuid.Nil, false
+	}
+	if created {
+		d.notifyCourses(viewer)
+	}
+	return created, eid, true
+}
+
+// handleCourseEnrollmentsTestStudent ensures a Test Student seat for staff preview-as-learner.
+func (d Deps) handleCourseEnrollmentsTestStudent() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		viewer, ok := d.meUserID(w, r)
+		created, eid, ok := d.ensureTestStudentEnrollmentForStaff(w, r)
 		if !ok {
 			return
-		}
-		courseCode, ok := chiCourseCode(w, r)
-		if !ok {
-			return
-		}
-		hasTeacher, err := enrollment.UserHasEnrollmentRole(r.Context(), d.Pool, courseCode, viewer, "teacher")
-		if err != nil {
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify enrollment.")
-			return
-		}
-		if !hasTeacher {
-			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "Only the course creator may use this action.")
-			return
-		}
-		cid, err := course.GetIDByCourseCode(r.Context(), d.Pool, courseCode)
-		if err != nil || cid == nil {
-			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
-			return
-		}
-		ctx := r.Context()
-		tx, err := d.Pool.BeginTx(ctx, pgx.TxOptions{})
-		if err != nil {
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to start transaction.")
-			return
-		}
-		defer func() { _ = tx.Rollback(ctx) }()
-		tag, err := tx.Exec(ctx, `
-INSERT INTO course.course_enrollments (course_id, user_id, role)
-VALUES ($1, $2, 'student')
-ON CONFLICT (course_id, user_id, role) DO NOTHING
-`, *cid, viewer)
-		if err != nil {
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to enroll.")
-			return
-		}
-		if err := courseroles.RefreshManagedGrantsForCourseUser(ctx, tx, viewer, *cid, courseCode); err != nil {
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to sync course permissions.")
-			return
-		}
-		if err := tx.Commit(ctx); err != nil {
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save enrollment.")
-			return
-		}
-		if tag.RowsAffected() > 0 {
-			d.notifyCourses(viewer)
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		_ = json.NewEncoder(w).Encode(modelenrollment.EnrollSelfAsStudentResponse{Created: tag.RowsAffected() > 0})
+		_ = json.NewEncoder(w).Encode(modelenrollment.EnsureTestStudentResponse{
+			Created:      created,
+			EnrollmentID: eid.String(),
+			Role:         enrollment.RoleTestStudent,
+		})
+	}
+}
+
+// handleCourseEnrollmentsSelfStudent is a back-compat alias for ensure Test Student.
+func (d Deps) handleCourseEnrollmentsSelfStudent() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		created, _, ok := d.ensureTestStudentEnrollmentForStaff(w, r)
+		if !ok {
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(modelenrollment.EnrollSelfAsStudentResponse{Created: created})
 	}
 }
 
@@ -442,6 +470,11 @@ func (d Deps) handleCourseEnrollmentsPatch() http.HandlerFunc {
 			newRole = "student"
 		default:
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Provide courseRole or role=student.")
+			return
+		}
+		if enrollment.IsTestStudentRole(newRole) {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput,
+				"Test Student enrollments cannot be assigned via role change. Use the preview-as-student action instead.")
 			return
 		}
 		roleCaps, err := lookupEnrollmentRoleCapabilities(r.Context(), d.Pool, newRole)

@@ -8,11 +8,11 @@ import (
 )
 
 type CourseEnrollmentPublic struct {
-	ID                 uuid.UUID                                        `json:"id"`
-	UserID             uuid.UUID                                        `json:"userId"`
-	DisplayName        *string                                          `json:"displayName"`
-	Role               string                                           `json:"role"`
-	LastCourseAccessAt *time.Time                                       `json:"lastCourseAccessAt"`
+	ID                 uuid.UUID                                         `json:"id"`
+	UserID             uuid.UUID                                         `json:"userId"`
+	DisplayName        *string                                           `json:"displayName"`
+	Role               string                                            `json:"role"`
+	LastCourseAccessAt *time.Time                                        `json:"lastCourseAccessAt"`
 	GroupMemberships   []enrollmentgroup.EnrollmentGroupMembershipPublic `json:"groupMemberships,omitempty"`
 }
 
@@ -24,6 +24,13 @@ type CourseEnrollmentsResponse struct {
 
 type EnrollSelfAsStudentResponse struct {
 	Created bool `json:"created"`
+}
+
+// EnsureTestStudentResponse is returned by POST …/enrollments/test-student.
+type EnsureTestStudentResponse struct {
+	Created      bool   `json:"created"`
+	EnrollmentID string `json:"enrollmentId"`
+	Role         string `json:"role"`
 }
 
 type PatchEnrollmentRequest struct {

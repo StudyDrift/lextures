@@ -3683,24 +3683,38 @@ export async function putEnrollmentGroupMembership(
  * **not** learner-only. Role strings are compared case-insensitively. Empty/missing roles are
  * treated as learner-only so roster UI stays hidden until we know otherwise.
  */
+/** True when the role is a learner seat (real student or Test Student preview seat). */
+export function isStudentEquivalentEnrollmentRole(role: string): boolean {
+  const x = role.trim().toLowerCase()
+  return x === 'student' || x === 'test_student'
+}
+
+const COURSE_STAFF_ENROLLMENT_ROLES = new Set([
+  'owner',
+  'teacher',
+  'instructor',
+  'ta',
+  'designer',
+  'observer',
+  'auditor',
+  'librarian',
+])
+
+function hasCourseStaffEnrollmentRole(roles: readonly string[]): boolean {
+  return roles.some((r) => COURSE_STAFF_ENROLLMENT_ROLES.has(r.trim().toLowerCase()))
+}
+
+function hasStudentEquivalentEnrollmentRole(roles: readonly string[]): boolean {
+  return roles.some((r) => isStudentEquivalentEnrollmentRole(r))
+}
+
 export function viewerIsLearnerOnlyCourseEnrollment(
   viewerEnrollmentRoles: readonly string[] | null | undefined,
 ): boolean {
   if (!viewerEnrollmentRoles?.length) return true
   const roles = viewerEnrollmentRoles.map((r) => r.trim().toLowerCase())
-  const hasStudent = roles.includes('student')
-  const hasStaff = roles.some((r) => {
-    const x = r.trim().toLowerCase()
-    return (
-      x === 'teacher' ||
-      x === 'instructor' ||
-      x === 'ta' ||
-      x === 'designer' ||
-      x === 'observer' ||
-      x === 'auditor' ||
-      x === 'librarian'
-    )
-  })
+  const hasStudent = hasStudentEquivalentEnrollmentRole(roles)
+  const hasStaff = hasCourseStaffEnrollmentRole(roles)
   return hasStudent && !hasStaff
 }
 
@@ -3713,19 +3727,7 @@ export function viewerIsCourseStaffEnrollment(
   viewerEnrollmentRoles: readonly string[] | null | undefined,
 ): boolean {
   if (!viewerEnrollmentRoles?.length) return false
-  const roles = viewerEnrollmentRoles.map((r) => r.trim().toLowerCase())
-  return roles.some((r) => {
-    const x = r.trim().toLowerCase()
-    return (
-      x === 'teacher' ||
-      x === 'instructor' ||
-      x === 'ta' ||
-      x === 'designer' ||
-      x === 'observer' ||
-      x === 'auditor' ||
-      x === 'librarian'
-    )
-  })
+  return hasCourseStaffEnrollmentRole(viewerEnrollmentRoles)
 }
 
 /** Hide course roster / Enrollments navigation for learners and when staff preview as a student. */
@@ -3739,7 +3741,7 @@ export function viewerShouldHideCourseEnrollmentsNav(
 
 /**
  * Show “My grades” whenever “View as: Student” is active (staff preview), or when the viewer
- * has a real student enrollment in this course (including dual student+staff enrollment).
+ * has a student-equivalent enrollment (including Test Student dual seat).
  * While enrollment roles are still loading (`null`), returns false so the nav does not flash on.
  */
 export function viewerShouldShowMyGradesNav(
@@ -3749,9 +3751,31 @@ export function viewerShouldShowMyGradesNav(
   if (courseViewPreview === 'student') return true
   if (viewerEnrollmentRoles == null) return false
   if (!viewerEnrollmentRoles.length) return false
-  const roles = viewerEnrollmentRoles.map((r) => r.trim().toLowerCase())
-  // Teacher preview: show when the viewer has a learner enrollment, including dual student+staff.
-  return roles.includes('student')
+  return hasStudentEquivalentEnrollmentRole(viewerEnrollmentRoles)
+}
+
+export type EnsureTestStudentEnrollmentResult = {
+  created: boolean
+  enrollmentId: string
+  role: string
+}
+
+/**
+ * Ensures the signed-in staff member has a Test Student enrollment for preview-as-learner.
+ * Idempotent. POST /api/v1/courses/{code}/enrollments/test-student
+ */
+export async function ensureCourseTestStudentEnrollment(
+  courseCode: string,
+): Promise<EnsureTestStudentEnrollmentResult> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/enrollments/test-student`,
+    { method: 'POST' },
+  )
+  if (!res.ok) {
+    const raw: unknown = await res.json().catch(() => ({}))
+    throw new Error(readApiErrorMessage(raw) || `Failed to create Test Student enrollment (${res.status})`)
+  }
+  return (await res.json()) as EnsureTestStudentEnrollmentResult
 }
 
 export type CourseStructureItem = {

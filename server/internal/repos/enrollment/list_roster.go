@@ -13,21 +13,21 @@ import (
 
 // RosterRow is one row for GET /api/v1/courses/{course}/enrollments.
 type RosterRow struct {
-	ID               uuid.UUID
-	UserID           uuid.UUID
-	DisplayName      *string
-	AvatarURL        *string
-	Role             string
-	RoleDisplay      *string
-	SectionID        *uuid.UUID
-	SectionCode      *string
-	SectionName      *string
-	State            string
-	StateChangedAt   *time.Time
-	StateReason      *string
-	HomeOrgID          *uuid.UUID
-	HomeOrgName        *string
-	InvitationPending  bool
+	ID                uuid.UUID
+	UserID            uuid.UUID
+	DisplayName       *string
+	AvatarURL         *string
+	Role              string
+	RoleDisplay       *string
+	SectionID         *uuid.UUID
+	SectionCode       *string
+	SectionName       *string
+	State             string
+	StateChangedAt    *time.Time
+	StateReason       *string
+	HomeOrgID         *uuid.UUID
+	HomeOrgName       *string
+	InvitationPending bool
 }
 
 // ListRosterForCourse returns enrollments for a course code, ordered for UI.
@@ -68,9 +68,12 @@ ORDER BY
 		WHEN 'auditor' THEN 5
 		WHEN 'librarian' THEN 6
 		WHEN 'student' THEN 7
-		ELSE 8
+		WHEN 'test_student' THEN 8
+		ELSE 9
 	END,
-	COALESCE(NULLIF(TRIM(u.display_name), ''), u.email) ASC
+	CASE WHEN ce.role = 'test_student' THEN 'Test Student'
+	     ELSE COALESCE(NULLIF(TRIM(u.display_name), ''), u.email)
+	END ASC
 `, courseCode)
 	if err != nil {
 		return nil, err
@@ -92,11 +95,12 @@ ORDER BY
 		if err := rows.Scan(&r.ID, &r.UserID, &display, &avatar, &r.Role, &roleDisplay, &secID, &secCode, &secName, &stateStr, &stateChanged, &stateReason, &homeOrgID, &homeOrgName, &r.InvitationPending); err != nil {
 			return nil, err
 		}
+		fallback := ""
 		if display.Valid {
-			s := display.String
-			if s != "" {
-				r.DisplayName = &s
-			}
+			fallback = display.String
+		}
+		if s := TestStudentDisplayName(r.Role, fallback); s != "" {
+			r.DisplayName = &s
 		}
 		if avatar.Valid {
 			s := avatar.String

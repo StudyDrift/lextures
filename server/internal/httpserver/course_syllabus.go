@@ -28,7 +28,7 @@ func (d Deps) syllabusView(r *http.Request, courseCode string, viewer uuid.UUID,
 	if p == nil {
 		return resp, nil
 	}
-	isStudent, err := enrollment.UserHasEnrollmentRole(r.Context(), d.Pool, courseCode, viewer, "student")
+	isStudent, err := enrollment.UserHasStudentEquivalentEnrollment(r.Context(), d.Pool, courseCode, viewer)
 	if err != nil {
 		return resp, err
 	}

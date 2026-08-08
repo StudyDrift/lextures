@@ -20,21 +20,27 @@ func ListStudentUsersForCourseCode(ctx context.Context, pool *pgxpool.Pool, cour
 	if len(sectionIDs) == 0 {
 		rows, err = pool.Query(ctx, `
 		SELECT ce.user_id,
-		       COALESCE(NULLIF(TRIM(u.display_name), ''), u.email) AS display_label
+		       CASE WHEN ce.role = 'test_student' THEN 'Test Student'
+		            ELSE COALESCE(NULLIF(TRIM(u.display_name), ''), u.email)
+		       END AS display_label
 		FROM course.course_enrollments ce
 		INNER JOIN course.courses c ON c.id = ce.course_id
 		INNER JOIN "user".users u ON u.id = ce.user_id
-		WHERE c.course_code = $1 AND ce.role = 'student' AND ce.active
+		INNER JOIN course.enrollment_roles er ON er.role_key = ce.role AND er.is_student_equivalent = true
+		WHERE c.course_code = $1 AND ce.active
 		ORDER BY display_label ASC, ce.user_id ASC
 	`, courseCode)
 	} else {
 		rows, err = pool.Query(ctx, `
 		SELECT ce.user_id,
-		       COALESCE(NULLIF(TRIM(u.display_name), ''), u.email) AS display_label
+		       CASE WHEN ce.role = 'test_student' THEN 'Test Student'
+		            ELSE COALESCE(NULLIF(TRIM(u.display_name), ''), u.email)
+		       END AS display_label
 		FROM course.course_enrollments ce
 		INNER JOIN course.courses c ON c.id = ce.course_id
 		INNER JOIN "user".users u ON u.id = ce.user_id
-		WHERE c.course_code = $1 AND ce.role = 'student' AND ce.active
+		INNER JOIN course.enrollment_roles er ON er.role_key = ce.role AND er.is_student_equivalent = true
+		WHERE c.course_code = $1 AND ce.active
 		  AND ce.section_id = ANY($2::uuid[])
 		ORDER BY display_label ASC, ce.user_id ASC
 	`, courseCode, sectionIDs)

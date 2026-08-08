@@ -8,6 +8,7 @@ import { fetchEvaluationStatus } from '../../lib/course-evaluations-api'
 import { coursePageTitleFromPath } from '../../lib/course-page-title'
 import { fetchCourse, type CoursePublic } from '../../lib/courses-api'
 import { ConsortiumHomeBrandingBanner } from '../../components/consortium/consortium-home-branding-banner'
+import { StudentPreviewBanner } from '../../components/student-preview-banner'
 import { useFocusAnchorRuntime } from '../../lib/use-focus-anchor'
 import { CourseSyllabusAcceptanceOverlay } from './course-syllabus-acceptance-overlay'
 
@@ -86,6 +87,7 @@ export default function CourseLayout() {
 
   return (
     <CourseLiveContext.Provider value={liveValue}>
+      <StudentPreviewBanner />
       {courseCode ? <CourseSyllabusAcceptanceOverlay courseCode={courseCode} /> : null}
       {courseCode && ffCourseEvaluations ? (
         <EvaluationReminderBanner courseCode={courseCode} />

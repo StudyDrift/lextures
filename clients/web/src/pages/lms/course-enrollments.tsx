@@ -25,15 +25,18 @@ import {
   courseEnrollmentsReadPermission,
   courseEnrollmentsUpdatePermission,
   courseGradebookViewPermission,
+  ensureCourseTestStudentEnrollment,
   fetchCourse,
   fetchCourseScopedRoles,
   fetchCourseSections,
   fetchEnrollmentAccommodationSummary,
   fetchEnrollmentGroupsTree,
+  isStudentEquivalentEnrollmentRole,
   patchEnrollmentSection,
   postEnrollmentGroupsEnable,
   putEnrollmentGroupMembership,
   sendEnrollmentMessage,
+  viewerIsCourseStaffEnrollment,
   viewerShouldHideCourseEnrollmentsNav,
   type CourseScopedAppRole,
   type CourseSection,
@@ -121,8 +124,10 @@ function enrollmentRoleRank(role: string): number {
       return 6
     case 'student':
       return 7
-    default:
+    case 'test_student':
       return 8
+    default:
+      return 9
   }
 }
 
@@ -207,8 +212,12 @@ export default function CourseEnrollments() {
     () => viewerRoles.some((r) => normEnrollmentRole(r) === 'teacher'),
     [viewerRoles],
   )
+  const viewerIsStaff = useMemo(
+    () => viewerIsCourseStaffEnrollment(viewerRoles),
+    [viewerRoles],
+  )
   const viewerHasStudent = useMemo(
-    () => viewerRoles.some((r) => normEnrollmentRole(r) === 'student'),
+    () => viewerRoles.some((r) => isStudentEquivalentEnrollmentRole(r)),
     [viewerRoles],
   )
 
@@ -789,31 +798,21 @@ export default function CourseEnrollments() {
   }
 
   const isCourseCreator = viewerIsTeacher
-
-  const canEnrollSelfAsStudent = isCourseCreator && !viewerHasStudent
+  const canEnrollSelfAsStudent = viewerIsStaff && !viewerHasStudent
 
   async function onEnrollAsStudent() {
     if (!courseCode) return
     setSelfStudentStatus('loading')
     setSelfStudentMessage(null)
     try {
-      const res = await authorizedFetch(
-        `/api/v1/courses/${encodeURIComponent(courseCode)}/enrollments/self-as-student`,
-        { method: 'POST' },
-      )
-      const raw: unknown = await res.json().catch(() => ({}))
-      if (!res.ok) {
-        setSelfStudentStatus('error')
-        setSelfStudentMessage(readApiErrorMessage(raw))
-        return
-      }
+      await ensureCourseTestStudentEnrollment(courseCode)
       setSelfStudentStatus('idle')
       notifyCourseViewerEnrollmentChanged(courseCode)
       await loadEnrollments()
       await refreshPermissions()
-    } catch {
+    } catch (e) {
       setSelfStudentStatus('error')
-      setSelfStudentMessage('Request failed.')
+      setSelfStudentMessage(e instanceof Error ? e.message : 'Request failed.')
     }
   }
 
@@ -1050,25 +1049,27 @@ export default function CourseEnrollments() {
             <tbody>
               {enrollments.map((e) => {
                 const er = normEnrollmentRole(e.role)
+                const isLearnerSeat = isStudentEquivalentEnrollmentRole(er)
                 const showRemove =
                   canUpdateEnrollments && !enrollmentMeta.isPrimaryRoleRow(e)
                 const showEdit =
                   canUpdateEnrollments &&
                   er !== 'teacher' &&
                   er !== 'student' &&
+                  er !== 'test_student' &&
                   (isCourseCreator || er === 'instructor')
                 const showGroupAssign =
-                  enrollmentGroupsEnabled && canUpdateEnrollments && er === 'student'
+                  enrollmentGroupsEnabled && canUpdateEnrollments && isLearnerSeat
                 const showSectionTransfer =
-                  sectionsEnabled && canUpdateEnrollments && er === 'student' && sections.length > 1
-                const showGradebook = courseCode != null && er === 'student' && canViewGradebook
-                const showReport = courseCode != null && er === 'student' && canViewGradebook
+                  sectionsEnabled && canUpdateEnrollments && isLearnerSeat && sections.length > 1
+                const showGradebook = courseCode != null && isLearnerSeat && canViewGradebook
+                const showReport = courseCode != null && isLearnerSeat && canViewGradebook
                 const showMessage =
                   canMessageEnrollments &&
                   viewerUserId != null &&
                   e.userId !== viewerUserId
                 const showStateChange =
-                  ffEnrollmentStateMachine && canUpdateEnrollments && er === 'student'
+                  ffEnrollmentStateMachine && canUpdateEnrollments && isLearnerSeat
                 return (
                   <tr
                     key={e.id}
@@ -1083,7 +1084,7 @@ export default function CourseEnrollments() {
                         />
                         {studentProgressFeatureEnabled() &&
                         courseCode &&
-                        (er === 'student' || er === 'learner') ? (
+                        (isLearnerSeat || er === 'learner') ? (
                           <Link
                             to={`/courses/${encodeURIComponent(courseCode)}/students/${encodeURIComponent(e.id)}/progress`}
                             className="text-accent-fg hover:underline dark:text-indigo-300"

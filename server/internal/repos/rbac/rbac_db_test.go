@@ -248,4 +248,15 @@ ORDER BY role_key
 	if !studentBits.isStudentEq {
 		t.Error("role 'student': expected is_student_equivalent=true")
 	}
+
+	testStudentBits, ok := bits["test_student"]
+	if !ok {
+		t.Fatal("role 'test_student' missing from catalog")
+	}
+	if testStudentBits.isStaff {
+		t.Error("role 'test_student': expected is_staff=false")
+	}
+	if !testStudentBits.isStudentEq {
+		t.Error("role 'test_student': expected is_student_equivalent=true")
+	}
 }
