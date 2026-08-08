@@ -8,11 +8,11 @@ import (
 )
 
 type CourseEnrollmentPublic struct {
-	ID                 uuid.UUID                                        `json:"id"`
-	UserID             uuid.UUID                                        `json:"userId"`
-	DisplayName        *string                                          `json:"displayName"`
-	Role               string                                           `json:"role"`
-	LastCourseAccessAt *time.Time                                       `json:"lastCourseAccessAt"`
+	ID                 uuid.UUID                                         `json:"id"`
+	UserID             uuid.UUID                                         `json:"userId"`
+	DisplayName        *string                                           `json:"displayName"`
+	Role               string                                            `json:"role"`
+	LastCourseAccessAt *time.Time                                        `json:"lastCourseAccessAt"`
 	GroupMemberships   []enrollmentgroup.EnrollmentGroupMembershipPublic `json:"groupMemberships,omitempty"`
 }
 

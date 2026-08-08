@@ -13,21 +13,21 @@ import (
 
 // RosterRow is one row for GET /api/v1/courses/{course}/enrollments.
 type RosterRow struct {
-	ID               uuid.UUID
-	UserID           uuid.UUID
-	DisplayName      *string
-	AvatarURL        *string
-	Role             string
-	RoleDisplay      *string
-	SectionID        *uuid.UUID
-	SectionCode      *string
-	SectionName      *string
-	State            string
-	StateChangedAt   *time.Time
-	StateReason      *string
-	HomeOrgID          *uuid.UUID
-	HomeOrgName        *string
-	InvitationPending  bool
+	ID                uuid.UUID
+	UserID            uuid.UUID
+	DisplayName       *string
+	AvatarURL         *string
+	Role              string
+	RoleDisplay       *string
+	SectionID         *uuid.UUID
+	SectionCode       *string
+	SectionName       *string
+	State             string
+	StateChangedAt    *time.Time
+	StateReason       *string
+	HomeOrgID         *uuid.UUID
+	HomeOrgName       *string
+	InvitationPending bool
 }
 
 // ListRosterForCourse returns enrollments for a course code, ordered for UI.
@@ -95,14 +95,12 @@ ORDER BY
 		if err := rows.Scan(&r.ID, &r.UserID, &display, &avatar, &r.Role, &roleDisplay, &secID, &secCode, &secName, &stateStr, &stateChanged, &stateReason, &homeOrgID, &homeOrgName, &r.InvitationPending); err != nil {
 			return nil, err
 		}
-		if r.Role == RoleTestStudent {
-			s := DisplayNameTestStudent
+		fallback := ""
+		if display.Valid {
+			fallback = display.String
+		}
+		if s := TestStudentDisplayName(r.Role, fallback); s != "" {
 			r.DisplayName = &s
-		} else if display.Valid {
-			s := display.String
-			if s != "" {
-				r.DisplayName = &s
-			}
 		}
 		if avatar.Valid {
 			s := avatar.String

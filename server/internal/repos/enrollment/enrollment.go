@@ -157,25 +157,6 @@ SELECT EXISTS (
 	return ok, nil
 }
 
-// UserHasEnrollmentRole checks a single role string (e.g. "teacher").
-// For student-equivalent checks prefer UserHasStudentEquivalentEnrollment.
-func UserHasEnrollmentRole(ctx context.Context, pool *pgxpool.Pool, courseCode string, userID uuid.UUID, role string) (bool, error) {
-	var ok bool
-	err := pool.QueryRow(ctx, `
-SELECT EXISTS (
-	SELECT 1
-	FROM course.course_enrollments ce
-	INNER JOIN course.courses c ON c.id = ce.course_id
-	INNER JOIN "user".users u ON u.id = ce.user_id
-	WHERE c.course_code = $1 AND ce.user_id = $2 AND ce.role = $3 AND ce.active AND `+userCourseOrgMatch+`
-)
-`, courseCode, userID, role).Scan(&ok)
-	if err != nil {
-		return false, err
-	}
-	return ok, nil
-}
-
 // UserHasStudentEquivalentEnrollment returns true when the user holds any active enrollment
 // whose role has is_student_equivalent = true in the catalog.
 func UserHasStudentEquivalentEnrollment(ctx context.Context, pool *pgxpool.Pool, courseCode string, userID uuid.UUID) (bool, error) {

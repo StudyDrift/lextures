@@ -6,7 +6,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 // RoleTestStudent is the catalog role_key for staff preview-as-learner seats.
@@ -68,22 +67,4 @@ RETURNING id
 		return uuid.Nil, false, err
 	}
 	return enrollmentID, true, nil
-}
-
-// EnsureTestStudentEnrollmentPool is EnsureTestStudentEnrollment for a pool (begins its own tx).
-// Prefer the tx form when refreshing grants in the same transaction.
-func EnsureTestStudentEnrollmentPool(ctx context.Context, pool *pgxpool.Pool, courseID, userID uuid.UUID) (enrollmentID uuid.UUID, created bool, err error) {
-	tx, err := pool.Begin(ctx)
-	if err != nil {
-		return uuid.Nil, false, err
-	}
-	defer func() { _ = tx.Rollback(ctx) }()
-	id, created, err := EnsureTestStudentEnrollment(ctx, tx, courseID, userID)
-	if err != nil {
-		return uuid.Nil, false, err
-	}
-	if err := tx.Commit(ctx); err != nil {
-		return uuid.Nil, false, err
-	}
-	return id, created, nil
 }
