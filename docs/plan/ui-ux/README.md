@@ -60,7 +60,7 @@ exists so it does not happen again.**
 
 | ID | Plan | Severity | Effort | Depends on |
 |---|---|---|---|---|
-| **UX.7** | [Navigation information architecture](../../completed/ui-ux/UX.7-navigation-information-architecture.md) (shipped — registry + prefs; V2 flag residual research) | MAJOR | L | UX.2, UX.15 |
+| **UX.7** | [Navigation information architecture](UX.7-navigation-information-architecture.md) | MAJOR | L | UX.2, UX.15 |
 | **UX.8** | [Settings and admin IA unification](UX.8-settings-and-admin-ia-unification.md) | MAJOR | M | UX.6, UX.7 |
 
 ### Core surfaces

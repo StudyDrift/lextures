@@ -245,7 +245,6 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.BackupModuleEnabled = mergeBool(db.BackupModuleEnabled, false)
 	out.FFReadingPreferences = mergeBool(db.FFReadingPreferences, false)
 	out.FFTypeScale = mergeBool(db.FFTypeScale, false)
-	out.FFNavigationV2 = mergeBool(db.FFNavigationV2, false)
 	out.FFPinnedSettings = mergeBool(db.FFPinnedSettings, true)
 	out.FFClassroomSignals = mergeBool(db.FFClassroomSignals, false)
 	out.FFLibraryIntegration = mergeBool(db.FFLibraryIntegration, false)

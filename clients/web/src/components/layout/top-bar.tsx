@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useId, useMemo, useRef, useState } from 'react'
 
-import { ChevronDown, LogOut, Menu, Search, User } from 'lucide-react'
+import { ChevronDown, LogOut, Menu, User } from 'lucide-react'
 import { matchPath, useLocation, useNavigate } from 'react-router-dom'
 const AiTutorMenu = lazy(() => import('../tutor-panel').then((m) => ({ default: m.AiTutorMenu })))
 const FeedbackWidgetMenu = lazy(() =>
@@ -36,10 +36,7 @@ import { NotificationsDrawer, NotificationsDrawerTrigger } from './notifications
 import { TopBarMobileCommandPaletteButton } from './side-nav-command-palette'
 import { ReadingPreferencesPanel } from '../a11y/ReadingPreferencesPanel'
 import { usePlatformFeatures } from '../../context/platform-features-context'
-import { useCommandPalette } from '../command-palette/use-command-palette'
-import { emitNavTelemetry } from '../../lib/nav'
 import { Menu as UiMenu } from '../ui/menu'
-import { shortcutHint } from './top-bar-utils'
 
 function UserMenu() {
   const navigate = useNavigate()
@@ -260,30 +257,6 @@ function CourseEnrollmentViewDropdown() {
   )
 }
 
-/** UX.7 FR-16 — persistent search affordance on every authenticated top bar. */
-function TopBarSearchField() {
-  const { open } = useCommandPalette()
-  return (
-    <button
-      type="button"
-      aria-label="Search courses, people, pages, and actions"
-      data-command-palette-anchor="topbar"
-      data-testid="topbar-search"
-      onClick={() => {
-        emitNavTelemetry('nav_search_open', { source: 'topbar' })
-        open()
-      }}
-      className="hidden h-9 min-w-0 max-w-[14rem] flex-1 items-center gap-2 rounded-full border border-border-default bg-surface-sunken/80 px-3 text-start text-sm text-fg-muted outline-none transition-[background-color,border-color] hover:border-border-strong hover:bg-surface-sunken focus-visible:ring-2 focus-visible:ring-indigo-500/30 sm:flex md:max-w-[18rem] dark:bg-surface-overlay dark:hover:bg-neutral-700"
-    >
-      <Search className="h-4 w-4 shrink-0 text-fg-subtle" strokeWidth={1.75} aria-hidden />
-      <span className="min-w-0 flex-1 truncate">Search</span>
-      <kbd className="pointer-events-none hidden h-6 min-w-[1.5rem] shrink-0 items-center justify-center rounded-md border border-black/[0.06] bg-surface-raised px-1.5 font-mono text-[10px] font-medium text-fg-muted shadow-sm lg:inline-flex dark:border-white/10">
-        {shortcutHint()}
-      </kbd>
-    </button>
-  )
-}
-
 export function TopBar() {
   const location = useLocation()
   const { mobileNavOpen, setMobileNavOpen } = useShellNav()
@@ -316,8 +289,6 @@ export function TopBar() {
       <div className="flex min-w-0 flex-1 items-center gap-2 md:gap-3">
         <TopBarBreadcrumbs />
       </div>
-      <TopBarSearchField />
-      {/* Narrow viewports: icon-only search (FR-16 still present in top bar). */}
       <TopBarMobileCommandPaletteButton />
       <div className="ms-auto flex shrink-0 items-center gap-1.5 sm:gap-3">
         {ffReadingPreferences && (

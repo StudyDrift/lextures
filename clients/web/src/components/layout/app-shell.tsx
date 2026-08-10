@@ -12,7 +12,6 @@ import { CourseChecklistSummaryProvider } from '../../context/course-checklist-s
 import { CourseNavFeaturesProvider } from '../../context/course-nav-features-context'
 import { ContentFilterProvider } from '../../context/content-filter-context'
 import { PlatformFeaturesProvider } from '../../context/platform-features-context'
-import { NavPreferencesProvider } from '../../context/nav-preferences-context'
 import { ReadingPreferencesProvider } from '../../context/reading-preferences-context'
 import { QuizFocusTopBar } from './quiz-focus-top-bar'
 import { ReadingFocusTopBar } from './reading-focus-top-bar'
@@ -107,7 +106,6 @@ function AppShellLayout() {
 export function AppShell() {
   return (
     <PlatformFeaturesProvider>
-    <NavPreferencesProvider>
     <ContentFilterProvider>
     <ReadingPreferencesProvider>
     <InboxUnreadProvider>
@@ -135,7 +133,6 @@ export function AppShell() {
     </InboxUnreadProvider>
     </ReadingPreferencesProvider>
     </ContentFilterProvider>
-    </NavPreferencesProvider>
     </PlatformFeaturesProvider>
   )
 }

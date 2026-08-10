@@ -440,8 +440,6 @@ type Config struct {
 	FFReadingPreferences bool
 	// FFTypeScale gates the 16px body base-size raise (UX.3). Roles/lint ship unflagged. Default false until dogfood.
 	FFTypeScale bool
-	// FFNavigationV2 gates the UX.7 task-based nav taxonomy (default false until dogfood).
-	FFNavigationV2 bool
 	// FFPinnedSettings gates per-user pinned settings in assignment/quiz editors (plan PS.2/PS.4).
 	// Platform default is true at GA (merge in platformconfig/features.go); env/DB can still force off.
 	FFPinnedSettings bool

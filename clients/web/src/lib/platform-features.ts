@@ -42,8 +42,6 @@ export type PlatformFeaturesSnapshot = {
   autoCaptioningEnabled?: boolean
   ffReadingPreferences?: boolean
   ffTypeScale?: boolean
-  /** UX.7 — task-based nav taxonomy, primary budget, More disclosure. Default false. */
-  ffNavigationV2?: boolean
   ffPinnedSettings?: boolean
   ffHighContrastReducedMotion?: boolean
   ffMotionNavigation?: boolean
@@ -184,7 +182,6 @@ const defaults: PlatformFeaturesSnapshot = {
   autoCaptioningEnabled: false,
   ffReadingPreferences: false,
   ffTypeScale: false,
-  ffNavigationV2: false,
   ffPinnedSettings: true,
   ffHighContrastReducedMotion: false,
   ffMotionNavigation: true,
