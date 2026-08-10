@@ -71,10 +71,20 @@ func (d Deps) handleGetNavPreferences() http.HandlerFunc {
 		}
 		scope := strings.TrimSpace(r.URL.Query().Get("scope"))
 		if scope == "" {
-			scope = "global"
+			row, err := navprefs.GetGlobal(r.Context(), d.Pool, userID)
+			if err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not load navigation preferences.")
+				return
+			}
+			encodeNavPreferences(w, row)
+			return
 		}
 		if !navprefs.ValidScope(scope) {
-			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeValidation, "Invalid navigation preference scope.")
+			apierr.WriteValidationFailed(w, "Invalid navigation preference scope.", []apierr.FieldViolation{{
+				Path:    "scope",
+				Code:    "invalid",
+				Message: "Invalid navigation preference scope.",
+			}})
 			return
 		}
 		row, err := navprefs.Get(r.Context(), d.Pool, userID, scope)
@@ -103,7 +113,7 @@ func (d Deps) handlePutNavPreferences() http.HandlerFunc {
 		}
 		var body navPreferencesBody
 		if err := json.Unmarshal(payload, &body); err != nil {
-			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeValidation, "Invalid JSON body.")
+			apierr.WriteValidationFailed(w, "Invalid JSON body.", []apierr.FieldViolation{})
 			return
 		}
 		scope := strings.TrimSpace(body.Scope)
@@ -111,7 +121,11 @@ func (d Deps) handlePutNavPreferences() http.HandlerFunc {
 			scope = "global"
 		}
 		if !navprefs.ValidScope(scope) {
-			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeValidation, "Invalid navigation preference scope.")
+			apierr.WriteValidationFailed(w, "Invalid navigation preference scope.", []apierr.FieldViolation{{
+				Path:    "scope",
+				Code:    "invalid",
+				Message: "Invalid navigation preference scope.",
+			}})
 			return
 		}
 		if body.Pinned == nil {
