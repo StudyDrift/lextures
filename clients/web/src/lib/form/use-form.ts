@@ -32,6 +32,42 @@ export function useForm<T extends Record<string, unknown>>(
   return store
 }
 
+type FieldSnap = {
+  state: FormFieldState
+  value: unknown
+  token: string
+}
+
+type FormSnap = {
+  isDirty: boolean
+  isSubmitting: boolean
+  submitAttempted: boolean
+  formError: string | null
+  summary: ReturnType<FormApi<Record<string, unknown>>['summaryErrors']>
+  token: string
+}
+
+/**
+ * Cache the last snapshot so useSyncExternalStore sees a stable reference when
+ * the token is unchanged (required by React — new object every call infinite-loops).
+ */
+function useCachedSnapshot<T extends { token: string }>(
+  subscribe: (onStoreChange: () => void) => () => void,
+  compute: () => T,
+): T {
+  const cacheRef = useRef<T | null>(null)
+  const getSnapshot = useCallback(() => {
+    const next = compute()
+    const prev = cacheRef.current
+    if (prev && prev.token === next.token) {
+      return prev
+    }
+    cacheRef.current = next
+    return next
+  }, [compute])
+  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot)
+}
+
 /** Subscribe to one field (+ form-level flags that affect it). */
 export function useFormField<T extends Record<string, unknown>>(
   form: FormApi<T>,
@@ -46,14 +82,13 @@ export function useFormField<T extends Record<string, unknown>>(
     (onStoreChange: () => void) => form.subscribe(name, onStoreChange),
     [form, name],
   )
-  const getSnapshot = useCallback(() => {
+  const compute = useCallback((): FieldSnap => {
     const state = form.getFieldState(name)
     const value = form.getValues()
     const at = name.split('.').reduce<unknown>((acc, key) => {
       if (acc == null || typeof acc !== 'object') return undefined
       return (acc as Record<string, unknown>)[key]
     }, value)
-    // Snapshot token so useSyncExternalStore sees changes.
     return {
       state,
       value: at,
@@ -61,7 +96,7 @@ export function useFormField<T extends Record<string, unknown>>(
     }
   }, [form, name])
 
-  const snap = useSyncExternalStore(subscribe, getSnapshot, getSnapshot)
+  const snap = useCachedSnapshot(subscribe, compute)
   const controlProps = form.register(name)
 
   return {
@@ -79,7 +114,7 @@ export function useFormState<T extends Record<string, unknown>>(form: FormApi<T>
     (onStoreChange: () => void) => form.subscribe(null, onStoreChange),
     [form],
   )
-  const getSnapshot = useCallback(() => {
+  const compute = useCallback((): FormSnap => {
     const summary = form.summaryErrors()
     return {
       isDirty: form.isDirty(),
@@ -91,5 +126,5 @@ export function useFormState<T extends Record<string, unknown>>(form: FormApi<T>
     }
   }, [form])
 
-  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot)
+  return useCachedSnapshot(subscribe, compute)
 }
