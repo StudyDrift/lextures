@@ -24,6 +24,7 @@ import { SideNavSectionLabel } from '../side-nav-section-label'
 import { sideNavActiveClass } from '../side-nav-styles'
 import { useShellNav } from '../use-shell-nav'
 import { Button } from '../../ui/button'
+import { IconButton } from '../../ui/icon-button'
 
 export type RegistryNavLinksProps = {
   scope: NavScopeKind
@@ -123,31 +124,33 @@ function SectionBlock({
   }
   return (
     <div className="flex flex-col gap-1">
-      <button
+      <Button
         type="button"
-        className={`flex w-full items-center justify-between rounded-lg px-3 text-start text-sm font-bold tracking-tight text-fg-default outline-none hover:bg-white/40 focus-visible:ring-2 focus-visible:ring-slate-400/35 dark:hover:bg-white/5 ${ first ? 'pt-3' : 'pt-4' } pb-1`}
+        variant="ghost"
+        className={`flex h-auto w-full items-center justify-between rounded-lg px-3 text-start text-sm font-bold tracking-tight text-fg-default hover:bg-white/40 dark:hover:bg-white/5 ${first ? 'pt-3' : 'pt-4'} pb-1`}
         aria-expanded={!collapsed}
         onClick={onToggle}
       >
         <span>{label}</span>
         <ChevronDown
-          className={`h-4 w-4 shrink-0 text-fg-muted transition-transform ${collapsed ? '-rotate-90' : ''}`}
+          className={`h-4 w-4 shrink-0 text-fg-muted motion-safe:transition-transform ${collapsed ? '-rotate-90' : ''}`}
           aria-hidden
         />
-      </button>
+      </Button>
       {!collapsed ? (
         <>
           {children}
           {more ? (
             <div className="flex flex-col gap-1">
-              <button
+              <Button
                 type="button"
-                className="px-3 py-1.5 text-start text-xs font-semibold text-fg-muted outline-none hover:text-fg-default focus-visible:ring-2 focus-visible:ring-slate-400/35"
+                variant="ghost"
+                className="h-auto px-3 py-1.5 text-start text-xs font-semibold text-fg-muted hover:text-fg-default"
                 aria-expanded={moreOpen}
                 onClick={onMoreToggle}
               >
                 {moreOpen ? 'Show less' : 'More'}
-              </button>
+              </Button>
               {moreOpen ? more : null}
             </div>
           ) : null}
@@ -315,10 +318,11 @@ export function NavCustomiseActions({
 
   return (
     <div className="flex items-center gap-1">
-      <Button
+      <IconButton
         type="button"
         variant="ghost"
         size="sm"
+        className="min-h-6 min-w-6"
         aria-label={isPinned ? 'Unpin' : 'Pin'}
         onClick={() => {
           if (isPinned) {
@@ -330,13 +334,14 @@ export function NavCustomiseActions({
           }
         }}
       >
-        {isPinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
-      </Button>
+        {isPinned ? <PinOff aria-hidden /> : <Pin aria-hidden />}
+      </IconButton>
       {!essential ? (
-        <Button
+        <IconButton
           type="button"
           variant="ghost"
           size="sm"
+          className="min-h-6 min-w-6"
           aria-label={isHidden ? 'Show in sidebar' : 'Hide from sidebar'}
           onClick={() => {
             if (isHidden) {
@@ -348,8 +353,8 @@ export function NavCustomiseActions({
             }
           }}
         >
-          <EyeOff className="h-4 w-4" />
-        </Button>
+          <EyeOff aria-hidden />
+        </IconButton>
       ) : null}
     </div>
   )

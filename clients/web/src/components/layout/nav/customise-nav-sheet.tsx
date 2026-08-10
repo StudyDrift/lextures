@@ -44,23 +44,26 @@ export function NavCustomiseSheetTrigger({
     <>
       <div className={`mt-2 ${sideNavCollapsed ? 'flex justify-center' : ''}`}>
         <SideNavTooltip content="Customise navigation">
-          <button
+          <Button
             type="button"
+            variant="ghost"
             aria-label="Customise navigation"
             onClick={() => setOpen(true)}
-            className={`flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-fg-muted outline-none transition-[background-color,color] hover:bg-white/50 hover:text-fg-default focus-visible:ring-2 focus-visible:ring-slate-400/35 dark:hover:bg-white/5 ${ sideNavCollapsed ? 'h-10 w-10 justify-center px-0' : 'w-full' }`}
+            className={`flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-fg-muted hover:bg-white/50 hover:text-fg-default dark:hover:bg-white/5 ${sideNavCollapsed ? 'h-10 w-10 justify-center px-0' : 'w-full'}`}
           >
             <SlidersHorizontal className="h-4 w-4 shrink-0" aria-hidden />
             {!sideNavCollapsed ? <span>Customise</span> : null}
-          </button>
+          </Button>
         </SideNavTooltip>
       </div>
 
       <Dialog
         open={open}
         onClose={() => setOpen(false)}
-        title="Customise navigation"
-        description="Pin destinations you use often, hide the rest. Hidden items stay available in search."
+        title={'Customise navigation'}
+        description={
+          'Pin destinations you use often, hide the rest. Hidden items stay available in search.'
+        }
         size="md"
         footer={
           <div className="flex justify-end gap-2">

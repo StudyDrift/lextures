@@ -69,6 +69,7 @@ import {
   type MenuItem,
 } from '../../components/ui'
 import { GalleryBlock } from './gallery-block'
+import { ReorderableGalleryDemo } from './components-gallery-reorderable'
 
 /** Interactive demos for each UX.2 primitive (keeps the page shell under file-size budget). */
 export function ComponentsGalleryDemos() {
@@ -239,6 +240,8 @@ export function ComponentsGalleryDemos() {
           onSave={() => setUnsavedDemo(false)}
         />
       </GalleryBlock>
+
+      <ReorderableGalleryDemo />
 
       <GalleryBlock
         id="dialog"

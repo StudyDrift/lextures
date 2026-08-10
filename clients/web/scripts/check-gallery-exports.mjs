@@ -52,6 +52,8 @@ const SKIP = new Set([
   'FieldContext',
   'useFieldContext',
   'mergeDescribedBy',
+  // UX.5 hook (gallery demos use MoveToPositionMenu / ClickToMoveDropZone)
+  'useClickToMove',
 ])
 
 function isTypeName(n) {
@@ -60,6 +62,7 @@ function isTypeName(n) {
     n.endsWith('Tone') ||
     n.endsWith('Variant') ||
     n.endsWith('Option') ||
+    n.endsWith('Options') ||
     n.endsWith('Item') ||
     n.endsWith('Action') ||
     n.endsWith('Handle') ||
@@ -70,7 +73,8 @@ function isTypeName(n) {
     n === 'ComboboxOption' ||
     n === 'SegmentedOption' ||
     n === 'DescriptionItem' ||
-    n === 'EmptyStateAction'
+    n === 'EmptyStateAction' ||
+    n === 'ReorderableItemMeta'
   )
 }
 
