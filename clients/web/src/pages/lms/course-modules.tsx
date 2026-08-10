@@ -31,9 +31,13 @@ import {
   buildModuleChildrenMap,
   buildReorderPayloadFromItems,
   moveChildInStructure,
+  moveChildToIndex,
+  moveModuleToIndex,
   reorderModulesInStructure,
   structureReorderDropAction,
 } from './course-modules-reorder'
+import { MoveToPositionMenu } from '../../components/ui/reorderable'
+import { announce } from '../../lib/a11y'
 import {
   AlertCircle,
   BookMarked,
@@ -140,13 +144,13 @@ import { useCourseNavFeatures } from '../../context/course-nav-features-context'
 
 const MODULE_SORT_ID = 'sortable-modules'
 
-/** Quiet icon-only controls (no box borders) for module + item toolbars. */
+/** Quiet icon-only controls — min 24×24 CSS px (WCAG 2.2 SC 2.5.8 / UX.5 FR-1). */
 const iconGhost =
-  'rounded-md p-2.5 text-fg-muted transition-[background-color,color,border-color] hover:bg-slate-200/45 hover:text-fg-default disabled:cursor-not-allowed disabled:opacity-50 sm:p-1.5 dark:text-fg-muted dark:hover:bg-neutral-700/35 dark:hover:text-fg-default'
+  'inline-flex min-h-6 min-w-6 items-center justify-center rounded-md p-1.5 text-fg-muted transition-[background-color,color,border-color] hover:bg-slate-200/45 hover:text-fg-default disabled:cursor-not-allowed disabled:opacity-50 dark:text-fg-muted dark:hover:bg-neutral-700/35 dark:hover:text-fg-default'
 const iconGhostPublished =
-  'rounded-md p-2.5 text-accent-fg transition-[background-color,color,border-color] hover:bg-indigo-50/90 hover:text-accent-fg disabled:cursor-not-allowed disabled:opacity-50 sm:p-1.5 dark:text-indigo-400 dark:hover:bg-indigo-950/45 dark:hover:text-indigo-300'
+  'inline-flex min-h-6 min-w-6 items-center justify-center rounded-md p-1.5 text-accent-fg transition-[background-color,color,border-color] hover:bg-indigo-50/90 hover:text-accent-fg disabled:cursor-not-allowed disabled:opacity-50 dark:text-indigo-400 dark:hover:bg-indigo-950/45 dark:hover:text-indigo-300'
 const iconGhostDraft =
-  'rounded-md p-2.5 text-fg-subtle transition-[background-color,color,border-color] hover:bg-slate-200/45 hover:text-fg-muted disabled:cursor-not-allowed disabled:opacity-50 sm:p-1.5 dark:hover:bg-neutral-700/35 dark:hover:text-fg-muted'
+  'inline-flex min-h-6 min-w-6 items-center justify-center rounded-md p-1.5 text-fg-subtle transition-[background-color,color,border-color] hover:bg-slate-200/45 hover:text-fg-muted disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-700/35 dark:hover:text-fg-muted'
 
 function sortableDragStyle(
   transform: Transform | null,
@@ -763,6 +767,8 @@ function ModuleItemRowActions({
   onTogglePublished,
   onEditTitle,
   onArchive,
+  siblings,
+  onMoveToIndex,
 }: {
   child: CourseStructureItem
   disabled: boolean
@@ -770,6 +776,8 @@ function ModuleItemRowActions({
   onTogglePublished: () => void
   onEditTitle: () => void
   onArchive: () => void
+  siblings: CourseStructureItem[]
+  onMoveToIndex?: (childId: string, toIndex: number) => void
 }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
@@ -786,16 +794,25 @@ function ModuleItemRowActions({
 
   return (
     <div className="flex shrink-0 items-center gap-1 sm:gap-0.5">
+      {onMoveToIndex && siblings.length > 1 ? (
+        <MoveToPositionMenu
+          itemId={child.id}
+          itemTitle={child.title}
+          siblings={siblings.map((s) => ({ id: s.id, title: s.title }))}
+          onMoveToIndex={onMoveToIndex}
+          disabled={disabled || busy}
+          label="Move to…"
+        />
+      ) : null}
       <button
         type="button"
         onClick={() => onTogglePublished()}
         disabled={disabled || busy}
-        title={
+        aria-label={
           child.published
             ? 'Published — visible to students when the module is available'
             : 'Draft — hidden from students; staff can still see it'
         }
-        aria-label={child.published ? 'Published to students' : 'Hidden from students'}
         aria-pressed={child.published}
         className={`flex shrink-0 items-center justify-center ${child.published ? iconGhostPublished : iconGhostDraft}`}
       >
@@ -817,7 +834,7 @@ function ModuleItemRowActions({
             if (disabled || busy) return
             setMenuOpen((o) => !o)
           }}
-          title="Item actions"
+          aria-label="Item actions"
           className={`flex shrink-0 items-center justify-center ${iconGhost}`}
         >
           <MoreVertical className="h-4 w-4" strokeWidth={2} aria-hidden />
@@ -870,6 +887,8 @@ type SortableChildRowProps = {
   onOpenEditChildTitle: (child: CourseStructureItem) => void
   onArchiveChild: (child: CourseStructureItem) => void
   studentGradeContext: { columns: CourseGradebookGridColumn[]; grades: Record<string, string> } | null
+  siblings: CourseStructureItem[]
+  onMoveChildToIndex?: (childId: string, toIndex: number) => void
 }
 
 function SortableChildRow({
@@ -884,6 +903,8 @@ function SortableChildRow({
   onOpenEditChildTitle,
   onArchiveChild,
   studentGradeContext,
+  siblings,
+  onMoveChildToIndex,
 }: SortableChildRowProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: child.id,
@@ -940,6 +961,8 @@ function SortableChildRow({
               onTogglePublished={() => onChildTogglePublished(child)}
               onEditTitle={() => onOpenEditChildTitle(child)}
               onArchive={() => onArchiveChild(child)}
+              siblings={siblings}
+              onMoveToIndex={onMoveChildToIndex}
             />
           </div>
         ) : null}
@@ -1000,6 +1023,9 @@ type ModuleCardBodyProps = {
   moduleDragHandle: ReactNode
   childrenList: ReactNode | null
   footerExtra?: ReactNode | null
+  /** UX.5 — siblings for single-pointer "Move to…" (modules list). */
+  moduleSiblings?: CourseStructureItem[]
+  onMoveModuleToIndex?: (moduleId: string, toIndex: number) => void
 }
 
 function ModuleCardBody({
@@ -1027,6 +1053,8 @@ function ModuleCardBody({
   moduleDragHandle,
   childrenList,
   footerExtra,
+  moduleSiblings,
+  onMoveModuleToIndex,
 }: ModuleCardBodyProps) {
   const children = moduleChildrenById.get(item.id) ?? []
   const moduleItemsRegionId = `module-items-${item.id}`
@@ -1097,6 +1125,16 @@ function ModuleCardBody({
         </div>
         {canEditModules && !minified && (
           <div className="flex w-full flex-wrap items-center justify-end gap-1 border-t border-border-subtle pt-3 sm:w-auto sm:shrink-0 sm:flex-nowrap sm:border-0 sm:pt-0">
+            {onMoveModuleToIndex && moduleSiblings && moduleSiblings.length > 1 ? (
+              <MoveToPositionMenu
+                itemId={item.id}
+                itemTitle={item.title}
+                siblings={moduleSiblings.map((m) => ({ id: m.id, title: m.title }))}
+                onMoveToIndex={onMoveModuleToIndex}
+                disabled={anyModalBusy || busyModuleId === item.id}
+                label="Move to…"
+              />
+            ) : null}
             <ModulePublishMenu
               item={item}
               disabled={anyModalBusy}
@@ -1110,7 +1148,6 @@ function ModuleCardBody({
               type="button"
               onClick={() => onOpenModuleSettings(item)}
               disabled={anyModalBusy}
-              title="Module settings"
               aria-label="Module settings"
               className={`flex shrink-0 items-center justify-center ${iconGhost}`}
             >
@@ -1340,6 +1377,9 @@ type SortableModuleCardProps = {
   onArchiveChild: (child: CourseStructureItem) => void
   courseAdaptivePathsEnabled: boolean
   studentGradeContext: { columns: CourseGradebookGridColumn[]; grades: Record<string, string> } | null
+  moduleSiblings: CourseStructureItem[]
+  onMoveModuleToIndex: (moduleId: string, toIndex: number) => void
+  onMoveChildToIndex: (moduleId: string, childId: string, toIndex: number) => void
 }
 
 function SortableModuleCard({
@@ -1372,6 +1412,9 @@ function SortableModuleCard({
   onArchiveChild,
   courseAdaptivePathsEnabled,
   studentGradeContext,
+  moduleSiblings,
+  onMoveModuleToIndex,
+  onMoveChildToIndex,
 }: SortableModuleCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: item.id,
@@ -1415,6 +1458,10 @@ function SortableModuleCard({
               onOpenEditChildTitle={onOpenEditChildTitle}
               onArchiveChild={onArchiveChild}
               studentGradeContext={studentGradeContext}
+              siblings={children}
+              onMoveChildToIndex={(childId, toIndex) =>
+                onMoveChildToIndex(item.id, childId, toIndex)
+              }
             />
           ))}
         </ul>
@@ -1451,12 +1498,14 @@ function SortableModuleCard({
         onUnpublishModuleOnly={onUnpublishModuleOnly}
         onUnpublishAllItems={onUnpublishAllItems}
         onOpenModuleSettings={onOpenModuleSettings}
+        moduleSiblings={moduleSiblings}
+        onMoveModuleToIndex={onMoveModuleToIndex}
         moduleDragHandle={
           canEditModules ? (
             <button
               type="button"
               className={`mt-0.5 flex h-11 w-11 shrink-0 cursor-grab touch-none items-center justify-center rounded-lg border-0 bg-transparent p-0 text-fg-subtle shadow-none transition-[opacity,background-color,color,border-color] hover:text-fg-muted active:cursor-grabbing focus-visible:pointer-events-auto focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 sm:h-9 sm:w-9 dark:hover:text-fg-muted ${ gripsPinned || isDragging ? 'opacity-100' : 'opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto' }`}
-              aria-label="Drag to reorder module"
+              aria-label="Drag to reorder module. Keyboard: Space to pick up, arrows to move, Space to drop, Escape to cancel. Or use Move to menu."
               {...listeners}
               {...attributes}
             >
@@ -2410,6 +2459,46 @@ export default function CourseModules() {
     [courseCode, load],
   )
 
+  /** UX.5 — single-pointer absolute module move ("Move to…"). */
+  const handleMoveModuleToIndex = useCallback(
+    (moduleId: string, toIndex: number) => {
+      setItems((prev) => {
+        const next = moveModuleToIndex(prev, moduleId, toIndex)
+        if (!next) return prev
+        const moved = prev.find((i) => i.id === moduleId)
+        const modules = next.filter((i) => i.kind === 'module' && !i.parentId)
+        if (moved) {
+          announce(
+            `"${moved.title}" moved to position ${toIndex + 1} of ${modules.length}.`,
+          )
+        }
+        void persistReorder(buildReorderPayloadFromItems(next))
+        return next
+      })
+    },
+    [persistReorder],
+  )
+
+  /** UX.5 — single-pointer absolute child move within a module. */
+  const handleMoveChildToIndex = useCallback(
+    (moduleId: string, childId: string, toIndex: number) => {
+      setItems((prev) => {
+        const next = moveChildToIndex(prev, moduleId, childId, toIndex)
+        if (!next) return prev
+        const moved = prev.find((i) => i.id === childId)
+        const siblings = buildModuleChildrenMap(next).get(moduleId) ?? []
+        if (moved) {
+          announce(
+            `"${moved.title}" moved to position ${toIndex + 1} of ${siblings.length}.`,
+          )
+        }
+        void persistReorder(buildReorderPayloadFromItems(next))
+        return next
+      })
+    },
+    [persistReorder],
+  )
+
   const handleDragStart = useCallback((event: DragStartEvent) => {
     dragReorderCommittedRef.current = false
     setActiveDragId(String(event.active.id))
@@ -2796,6 +2885,9 @@ export default function CourseModules() {
                     onArchiveChild={requestArchiveChild}
                     courseAdaptivePathsEnabled={courseMeta?.adaptivePathsEnabled === true}
                     studentGradeContext={studentGradeContext}
+                    moduleSiblings={sortedTopLevel.filter((i) => i.kind === 'module')}
+                    onMoveModuleToIndex={handleMoveModuleToIndex}
+                    onMoveChildToIndex={handleMoveChildToIndex}
                   />
                 ))}
             </ul>

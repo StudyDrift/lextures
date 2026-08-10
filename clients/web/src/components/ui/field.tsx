@@ -1,26 +1,34 @@
 import { useId, type HTMLAttributes, type ReactNode } from 'react'
+import { FieldContext } from './field-context'
 import { cx } from './utils'
 
 export type FieldProps = HTMLAttributes<HTMLDivElement> & {
   label: ReactNode
+  /** Override auto-generated control id (must match the control if set manually). */
   htmlFor?: string
   description?: ReactNode
   error?: ReactNode
   required?: boolean
+  /** Async validation in flight — sets aria-busy on the control via context. */
+  busy?: boolean
+  /** Optional warning (non-blocking) shown below the control. */
+  warning?: ReactNode
   children: ReactNode
 }
 
 /**
  * Form field wrapper: label + description + control slot + error.
- * Prefer composing with `Input` / `Select` / etc. Pass `htmlFor` matching the control id,
- * or let the child provide its own id via FieldContext (see Input).
+ * Owns id / aria-describedby / aria-invalid / aria-required wiring via FieldContext
+ * so child controls (Input, Select, …) pick them up automatically (UX.6 FR-1).
  */
 export function Field({
   label,
   htmlFor,
   description,
   error,
-  required,
+  warning,
+  required = false,
+  busy = false,
   children,
   className = '',
   ...props
@@ -29,6 +37,9 @@ export function Field({
   const controlId = htmlFor ?? autoId
   const descId = description ? `${controlId}-desc` : undefined
   const errId = error ? `${controlId}-err` : undefined
+  const warnId = warning && !error ? `${controlId}-warn` : undefined
+  const describedBy = [descId, errId, warnId].filter(Boolean).join(' ') || undefined
+  const invalid = Boolean(error)
 
   return (
     <div className={cx('flex flex-col gap-1.5', className)} {...props}>
@@ -45,12 +56,27 @@ export function Field({
           {description}
         </p>
       ) : null}
-      <div data-field-control data-field-id={controlId} data-describedby={[descId, errId].filter(Boolean).join(' ') || undefined}>
-        {children}
-      </div>
+      <FieldContext.Provider
+        value={{
+          id: controlId,
+          describedBy,
+          invalid,
+          required,
+          busy: busy || undefined,
+        }}
+      >
+        <div data-field-control data-field-id={controlId}>
+          {children}
+        </div>
+      </FieldContext.Provider>
       {error ? (
-        <p id={errId} role="alert" className="text-xs font-medium text-danger-fg">
+        <p id={errId} className="text-xs font-medium text-danger-fg">
           {error}
+        </p>
+      ) : null}
+      {warning && !error ? (
+        <p id={warnId} className="text-xs font-medium text-warning-fg">
+          {warning}
         </p>
       ) : null}
     </div>

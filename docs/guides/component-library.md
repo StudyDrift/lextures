@@ -14,7 +14,7 @@ Gallery (staff): **`/design/components`** (tokens at `/design/tokens`).
 | Group | Components |
 |---|---|
 | Actions | `Button`, `IconButton`, `LinkButton`, `ButtonGroup`, `SplitButton` |
-| Forms | `Field`, `Input`, `Textarea`, `Select`, `Combobox`, `Checkbox`, `Radio`/`RadioGroup`, `Switch`, `SegmentedControl`, `DatePicker`, `FileInput`, `Fieldset` |
+| Forms | `Field`, `Input`, `Textarea`, `Select`, `Combobox`, `Checkbox`, `Radio`/`RadioGroup`, `Switch`, `SegmentedControl`, `DatePicker`, `FileInput`, `Fieldset`, `ErrorSummary`, `UnsavedChangesBanner` |
 | Overlays | `Dialog`, `AlertDialog`, `Sheet`/`Drawer`, `Popover`, `Tooltip`, `Menu`, `ContextMenu`, `OverlaySurface` |
 | Navigation | `Tabs`/`TabList`/`Tab`/`TabPanel`, `Breadcrumbs`, `Pagination`, `NavLink`/`UiNavLink`, `Disclosure` |
 | Display | `Card`, `Badge`, `Avatar`, `Tag`, `Callout`, `Separator`, `ProgressBar`, `Meter`, `Table` primitives, `DescriptionList` |
@@ -64,8 +64,11 @@ npm run a11y:baseline        # rewrite after intentional a11y migration batches
 
 Keyboard / focus / ARIA patterns: [accessibility-patterns.md](./accessibility-patterns.md).
 
+Forms / validation (zod, error summary, dirty guard): [forms.md](./forms.md) (UX.6).
+
 - **Baseline:** `clients/web/design-system-coverage-baseline.json`
 - **Allowlist:** `clients/web/raw-interactive-allowlist.json` (per-file raw `<button>` / `<input>` / `role="dialog"` / … counts; may only decrease)
+- **Form ratchet:** `npm run forms:check` (`form-fields-baseline.json`)
 
 `design-system-coverage = ds_jsx_tags / (ds_jsx_tags + raw_interactive_tags)`.
 

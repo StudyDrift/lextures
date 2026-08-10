@@ -51,8 +51,8 @@ exists so it does not happen again.**
 | ID | Plan | Severity | Effort | Depends on |
 |---|---|---|---|---|
 | **UX.4** | [ARIA widget and focus management remediation](../../completed/ui-ux/UX.4-aria-widget-and-focus-management-remediation.md) (shipped — contracts + ratchet; modal tail ongoing) | BLOCKER | L | UX.2 |
-| **UX.5** | [WCAG 2.2 AA conformance uplift](UX.5-wcag-2.2-aa-conformance-uplift.md) | MAJOR¹ | M | UX.2, UX.4 |
-| **UX.6** | [Form and validation system](UX.6-form-and-validation-system.md) | MAJOR | L | UX.2 |
+| **UX.5** | [WCAG 2.2 AA conformance uplift](../../completed/ui-ux/UX.5-wcag-2.2-aa-conformance-uplift.md) (shipped — engineering uplift; external audit pending) | MAJOR¹ | M | UX.2, UX.4 |
+| **UX.6** | [Form and validation system](../../completed/ui-ux/UX.6-form-and-validation-system.md) (shipped — system + pilot; migration ratchet ongoing) | MAJOR | L | UX.2 |
 
 ¹ BLOCKER for EU sales — the EAA deadline passed 28 June 2025 and enforcement is live (**R-36**).
 
@@ -60,7 +60,7 @@ exists so it does not happen again.**
 
 | ID | Plan | Severity | Effort | Depends on |
 |---|---|---|---|---|
-| **UX.7** | [Navigation information architecture](UX.7-navigation-information-architecture.md) | MAJOR | L | UX.2, UX.15 |
+| **UX.7** | [Navigation information architecture](../../completed/ui-ux/UX.7-navigation-information-architecture.md) (shipped — registry + prefs; V2 flag residual research) | MAJOR | L | UX.2, UX.15 |
 | **UX.8** | [Settings and admin IA unification](UX.8-settings-and-admin-ia-unification.md) | MAJOR | M | UX.6, UX.7 |
 
 ### Core surfaces

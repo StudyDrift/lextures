@@ -1346,6 +1346,9 @@ PATCH	/api/v1/meetings/{meeting_id}	anonymous
 GET	/api/v1/meetings/{meeting_id}/attendance	anonymous
 GET	/api/v1/meetings/{meeting_id}/ical	anonymous
 GET	/api/v1/meetings/{meeting_id}/join	anonymous
+DELETE	/api/v1/nav/preferences	session
+GET	/api/v1/nav/preferences	session
+PUT	/api/v1/nav/preferences	session
 GET	/api/v1/oer/providers	session
 GET	/api/v1/oer/search	session
 GET	/api/v1/org-units/{unitId}/attendance/dashboard	session

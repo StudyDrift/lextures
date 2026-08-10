@@ -751,6 +751,13 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     pack: 'accessibility',
   },
   {
+    key: 'ffNavigationV2',
+    label: 'Navigation IA v2',
+    description:
+      'Task-based sidebar taxonomy, primary destinations budget, More disclosure, and disambiguated credential labels (UX.7). Registry refactor ships unflagged; this gates the visible re-arrangement only. Default off until dogfood.',
+    pack: 'core',
+  },
+  {
     key: 'ffPinnedSettings',
     label: 'Pinned editor settings',
     description:

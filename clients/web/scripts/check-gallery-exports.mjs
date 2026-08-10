@@ -48,6 +48,12 @@ const SKIP = new Set([
   'toastSaveOk',
   'toastMutationError',
   'toastWithUndo',
+  // UX.6 utilities / context (not visual gallery demos)
+  'FieldContext',
+  'useFieldContext',
+  'mergeDescribedBy',
+  // UX.5 hook (gallery demos use MoveToPositionMenu / ClickToMoveDropZone)
+  'useClickToMove',
 ])
 
 function isTypeName(n) {
@@ -56,15 +62,19 @@ function isTypeName(n) {
     n.endsWith('Tone') ||
     n.endsWith('Variant') ||
     n.endsWith('Option') ||
+    n.endsWith('Options') ||
     n.endsWith('Item') ||
     n.endsWith('Action') ||
+    n.endsWith('Handle') ||
+    n.endsWith('Value') ||
     n === 'ControlSize' ||
     n === 'MenuItem' ||
     n === 'BreadcrumbItem' ||
     n === 'ComboboxOption' ||
     n === 'SegmentedOption' ||
     n === 'DescriptionItem' ||
-    n === 'EmptyStateAction'
+    n === 'EmptyStateAction' ||
+    n === 'ReorderableItemMeta'
   )
 }
 

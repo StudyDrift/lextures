@@ -13,6 +13,7 @@ export { SplitButton, type SplitButtonProps } from './split-button'
 
 // Forms
 export { Field, type FieldProps } from './field'
+export { FieldContext, useFieldContext, mergeDescribedBy, type FieldContextValue } from './field-context'
 export { Input, type InputProps } from './input'
 export { Textarea, type TextareaProps } from './textarea'
 export { Select, type SelectProps } from './select'
@@ -24,6 +25,13 @@ export { SegmentedControl, type SegmentedControlProps, type SegmentedOption } fr
 export { DatePicker, type DatePickerProps } from './date-picker'
 export { FileInput, type FileInputProps } from './file-input'
 export { Fieldset, type FieldsetProps } from './fieldset'
+export {
+  ErrorSummary,
+  type ErrorSummaryProps,
+  type ErrorSummaryItem,
+  type ErrorSummaryHandle,
+} from './error-summary'
+export { UnsavedChangesBanner, type UnsavedChangesBannerProps } from './unsaved-changes-banner'
 
 // Overlays
 export { Dialog, type DialogProps } from './dialog'
@@ -76,6 +84,16 @@ export { Grid, type GridProps } from './grid'
 export { PageHeader, type PageHeaderProps } from './page-header'
 export { Section, type SectionProps } from './section'
 export { Toolbar, type ToolbarProps } from './toolbar'
+
+// Reorder (UX.5 — WCAG 2.2 SC 2.5.7 single-pointer alternative)
+export { useClickToMove, type UseClickToMoveOptions } from './use-click-to-move'
+export {
+  MoveToPositionMenu,
+  ClickToMoveDropZone,
+  type ReorderableItemMeta,
+  type MoveToPositionMenuProps,
+  type ClickToMoveDropZoneProps,
+} from './reorderable'
 
 // Shared
 export { cx, sizeClasses, focusRingClass, type ControlSize } from './utils'

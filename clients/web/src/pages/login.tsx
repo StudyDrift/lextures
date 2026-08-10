@@ -257,11 +257,12 @@ export default function Login() {
                   </label>
                   <input
                     id="email"
-                    name="email"
+                    name="username"
                     type="email"
-                    autoComplete="email"
+                    autoComplete="username"
                     autoFocus
                     required
+                    spellCheck={false}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className={authFieldClass}
@@ -281,6 +282,7 @@ export default function Login() {
                     type="password"
                     autoComplete="current-password"
                     required
+                    // UX.5 FR-16/FR-18: never block paste — password managers depend on it.
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className={authFieldClass}

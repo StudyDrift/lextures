@@ -1,6 +1,12 @@
 # UX.6 — Form and Validation System
 
-> Implementation plan. Source: [audit.md](audit.md) §3 G-8.
+> Implementation plan. Source: [audit.md](../../plan/ui-ux/audit.md) §3 G-8.
+> **Shipped** (2026-08): `Field` context wiring, `ErrorSummary`, in-house zod form
+> store (`lib/form`), server `apierr.WriteValidationFailed` 422 envelope + OpenAPI
+> schemas, `common.validation.*` i18n, forms CI ratchet, engineer guide, account
+> settings profile pilot. Residual: migrate remaining settings/course/admin/auth
+> forms (baseline ratchet prevents regression); SPA `useBlocker` when data router
+> lands; endpoint-by-endpoint envelope adoption.
 
 ## Metadata
 
@@ -10,7 +16,7 @@
 | **Section** | UI/UX — Accessibility & Interaction |
 | **Severity** | MAJOR (legal) |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | MISSING — no form abstraction; 929 inputs, 10 `aria-invalid` |
+| **Status (today)** | SHIPPED (system + pilot; residual form migration via ratchet) |
 | **Estimated effort** | L (1–2mo) |
 | **Owner (proposed)** | Design Systems + Accessibility |
 | **Depends on** | UX.2 |
@@ -46,7 +52,7 @@ every form in the product a fresh opportunity to get validation wrong.
 ## 3. Non-Goals
 
 - Redesigning the settings or course-settings information architecture — that is
-  [UX.8](UX.8-settings-and-admin-ia-unification.md).
+  [UX.8](../../plan/ui-ux/UX.8-settings-and-admin-ia-unification.md).
 - Server-side validation logic — unchanged; this plan standardises how server
   errors are *presented* and mapped to fields.
 - The rich content editors (TipTap, CodeMirror) as *fields* — they are wrapped,
@@ -259,11 +265,11 @@ surfaces.)*
 
 ## 13. Dependencies & Sequencing
 
-- **Must ship after** — [UX.2](../../completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md)
+- **Must ship after** — [UX.2](UX.2-core-component-library-and-adoption-ratchet.md)
   (form controls are library components).
-- **Should ship alongside** — [UX.4](../../completed/ui-ux/UX.4-aria-widget-and-focus-management-remediation.md)
+- **Should ship alongside** — [UX.4](UX.4-aria-widget-and-focus-management-remediation.md)
   (comboboxes and selects share ARIA contracts).
-- **Must ship before** — [UX.8](UX.8-settings-and-admin-ia-unification.md)
+- **Must ship before** — [UX.8](../../plan/ui-ux/UX.8-settings-and-admin-ia-unification.md)
   (settings restructure should land on the new form system, not the old one).
 - **Shared infra** — none.
 - **Internal sequencing**: `Field` + summary + zod integration → pilot on
@@ -359,12 +365,12 @@ surfaces.)*
   `clients/web/src/components/ui/unsaved-changes-banner.tsx`,
   `clients/web/src/lib/errors.ts`,
   `clients/web/src/lib/generated/openapi-types.ts`
-- Research: [research.md](research.md) R-18, R-19, R-35
-- Audit: [audit.md](audit.md) G-8, G-13
+- Research: [research.md](../../plan/ui-ux/research.md) R-18, R-19, R-35
+- Audit: [audit.md](../../plan/ui-ux/audit.md) G-8, G-13
 - External: [WCAG 2.2 SC 3.3.1–3.3.4, 1.3.5](https://www.w3.org/TR/WCAG22/),
   [WAI Forms Tutorial](https://www.w3.org/WAI/tutorials/forms/)
-- Related plans: [UX.2](../../completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md),
-  [UX.4](../../completed/ui-ux/UX.4-aria-widget-and-focus-management-remediation.md),
+- Related plans: [UX.2](UX.2-core-component-library-and-adoption-ratchet.md),
+  [UX.4](UX.4-aria-widget-and-focus-management-remediation.md),
   [UX.5](UX.5-wcag-2.2-aa-conformance-uplift.md),
-  [UX.8](UX.8-settings-and-admin-ia-unification.md),
-  [UX.13](UX.13-feedback-undo-and-destructive-actions.md)
+  [UX.8](../../plan/ui-ux/UX.8-settings-and-admin-ia-unification.md),
+  [UX.13](../../plan/ui-ux/UX.13-feedback-undo-and-destructive-actions.md)

@@ -43,7 +43,7 @@ offer undo) is implemented and unused.
 
 ## 3. Non-Goals
 
-- Form field validation — that is [UX.6](UX.6-form-and-validation-system.md).
+- Form field validation — that is [UX.6](../../completed/ui-ux/UX.6-form-and-validation-system.md).
 - Loading/empty/error *states* — that is [UX.12](UX.12-loading-empty-error-offline-states.md).
 - Notifications (the bell drawer) — a distinct system, out of scope.
 - Replacing `sonner` unless UX.2 §18 Q4 decides otherwise.

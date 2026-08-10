@@ -19,6 +19,7 @@ import {
   Drawer,
   EmptyState,
   ErrorState,
+  ErrorSummary,
   Field,
   Fieldset,
   FileInput,
@@ -64,9 +65,11 @@ import {
   Tooltip,
   DatePicker,
   UiNavLink,
+  UnsavedChangesBanner,
   type MenuItem,
 } from '../../components/ui'
 import { GalleryBlock } from './gallery-block'
+import { ReorderableGalleryDemo } from './components-gallery-reorderable'
 
 /** Interactive demos for each UX.2 primitive (keeps the page shell under file-size budget). */
 export function ComponentsGalleryDemos() {
@@ -82,6 +85,8 @@ export function ComponentsGalleryDemos() {
   const [sheetOpen, setSheetOpen] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [overlayDemo, setOverlayDemo] = useState(false)
+  const [formDemoEmail, setFormDemoEmail] = useState('')
+  const [unsavedDemo, setUnsavedDemo] = useState(false)
   const menuBtn = useRef<HTMLButtonElement>(null)
   const popBtn = useRef<HTMLButtonElement>(null)
 
@@ -140,15 +145,33 @@ export function ComponentsGalleryDemos() {
       <GalleryBlock
         id="forms"
         title="Forms"
-        pattern="form controls + Field label association"
-        keyboard="Native control keys; Combobox arrows / typeahead / Escape"
+        pattern="Field + ErrorSummary + validation states (UX.6)"
+        keyboard="Native control keys; Combobox arrows / typeahead / Escape; summary links move focus"
       >
+        <p className="text-xs text-fg-muted">Required fields are marked with an asterisk (*).</p>
+        <ErrorSummary
+          title="Please fix the following errors"
+          errors={[
+            {
+              id: 'gallery-role',
+              label: 'Role',
+              message: 'Choose a role to continue.',
+            },
+          ]}
+          autoFocus={false}
+        />
         <Grid cols={2} gap="md">
           <Field label="Email" description="Work address" required>
-            <Input type="email" placeholder="you@school.edu" />
+            <Input
+              type="email"
+              autoComplete="email"
+              placeholder="you@school.edu"
+              value={formDemoEmail}
+              onChange={(e) => setFormDemoEmail(e.target.value)}
+            />
           </Field>
-          <Field label="Role" error="Required">
-            <Select invalid defaultValue="">
+          <Field label="Role" error="Choose a role to continue." required htmlFor="gallery-role">
+            <Select id="gallery-role" invalid defaultValue="">
               <option value="" disabled>
                 Choose…
               </option>
@@ -158,6 +181,9 @@ export function ComponentsGalleryDemos() {
           </Field>
           <Field label="Notes">
             <Textarea placeholder="Optional notes" />
+          </Field>
+          <Field label="Course code" busy description="Checking availability…">
+            <Input defaultValue="BIO-101" aria-busy />
           </Field>
           <Field label="Course">
             <Combobox
@@ -171,6 +197,9 @@ export function ComponentsGalleryDemos() {
               placeholder="Search courses"
               emptyLabel="No courses"
             />
+          </Field>
+          <Field label="Warning example" warning="This date is outside the term window.">
+            <Input type="date" />
           </Field>
         </Grid>
         <Inline gap="md">
@@ -198,7 +227,21 @@ export function ComponentsGalleryDemos() {
           <DatePicker aria-label="Due date" />
           <FileInput label="Attachment" />
         </Fieldset>
+        <Inline gap="sm">
+          <Button size="sm" variant="secondary" onClick={() => setUnsavedDemo((v) => !v)}>
+            Toggle UnsavedChangesBanner
+          </Button>
+        </Inline>
+        <UnsavedChangesBanner
+          visible={unsavedDemo}
+          description="Save your changes or discard them before leaving."
+          saveStatus="idle"
+          onDiscard={() => setUnsavedDemo(false)}
+          onSave={() => setUnsavedDemo(false)}
+        />
       </GalleryBlock>
+
+      <ReorderableGalleryDemo />
 
       <GalleryBlock
         id="dialog"

@@ -15,8 +15,8 @@
 | **Report Version** | 1.0 |
 | **Product Description** | Cloud-based learning management system (LMS) for K-12 and higher education. Delivered as a single-page web application (SPA) accessible at app.lextures.com. |
 | **Contact** | accessibility@lextures.com |
-| **Notes** | This report covers the web application. Mobile-specific testing is planned for a future VPAT revision. |
-| **Evaluation Methods** | Automated axe-core scan on every pull request; manual screen-reader testing with VoiceOver (macOS) and NVDA (Windows); keyboard-only navigation walkthrough. |
+| **Notes** | This report covers the web application. Mobile-specific testing is planned for a future VPAT revision. WCAG 2.2 Level AA criteria were uplifted under UX.5 (2026-08); third-party re-attestation pending. |
+| **Evaluation Methods** | Automated axe-core scan on every pull request; WCAG 2.2 static ratchets (`a11y:target-size`, `a11y:drag-alt`, `a11y:contracts`); manual screen-reader testing with VoiceOver (macOS) and NVDA (Windows); keyboard-only navigation walkthrough. |
 
 ---
 
@@ -27,6 +27,7 @@ This report covers the degree of conformance for the following accessibility sta
 | Standard/Guideline | Included In Report |
 |---|---|
 | WCAG 2.1 (https://www.w3.org/TR/WCAG21/) | Level A (Yes), Level AA (Yes), Level AAA (No) |
+| WCAG 2.2 (https://www.w3.org/TR/WCAG22/) | Level A (Yes), Level AA (Yes), Level AAA (No) — UX.5 uplift 2026-08 |
 | Revised Section 508 (36 CFR Part 1194) | Yes |
 | EN 301 549 v3.2.1 | Yes |
 
@@ -103,6 +104,21 @@ This report covers the degree of conformance for the following accessibility sta
 | 3.3.3 | Error Suggestion | Supports | Validation errors include actionable descriptions of how to fix the input. |
 | 3.3.4 | Error Prevention (Legal, Financial, Data) | Supports | Destructive actions (delete course, remove student) require confirmation dialogs. |
 | 4.1.3 | Status Messages | Supports | Toast notifications and form status messages are announced via ARIA live regions (role="status" / role="alert"). |
+
+### Table 3: WCAG 2.2 additions (Level A / AA)
+
+New criteria in WCAG 2.2 relative to 2.1. Engineering programme: UX.5
+(`docs/completed/ui-ux/UX.5-wcag-2.2-aa-conformance-uplift.md`). Gap report:
+`docs/accessibility/wcag-2.2-conformance-gap-report.md`.
+
+| SC | Title | Conformance Level | Remarks |
+|---|---|---|---|
+| 2.4.11 | Focus Not Obscured (Minimum) | Supports | Sticky chrome height is published as `--lx-sticky-offset`; focusable content uses `scroll-margin-block-start` so focused controls are not entirely hidden by the top bar, quiz focus bar, reading focus bar, or toast stack. |
+| 2.5.7 | Dragging Movements | Partially Supports | Module and module-item reorder offer drag, keyboard (Space/arrows), and single-pointer **Move to…** menu. Other drag surfaces expose keyboard reorder via shared `@dnd-kit` KeyboardSensor; click-to-move rollout is tracked in `clients/web/drag-surfaces-inventory.json`. |
+| 2.5.8 | Target Size (Minimum) | Supports | Design-system control sizes enforce ≥24×24 CSS px; CI ratchet `npm run a11y:target-size`. Spacing exceptions documented in `target-size-exceptions.json`. |
+| 3.2.6 | Consistent Help | Supports | Canonical help control (`HelpWidgetMenu`) appears in the authenticated top bar in a consistent relative order on all shell routes. |
+| 3.3.7 | Redundant Entry | Supports | Multi-step flows retain prior values (onboarding state, magic-link email prefill from login). Inventory: `docs/accessibility/wcag-2.2-multi-step-inventory.md`. |
+| 3.3.8 | Accessible Authentication (Minimum) | Supports | Login/signup/MFA use password-manager autocomplete; paste is not blocked; OTP remains visible; passkeys are a first-class primary MFA alternative; magic link is a passwordless path without a cognitive function test. |
 
 ---
 

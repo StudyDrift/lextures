@@ -1,6 +1,14 @@
 # UX.7 — Navigation Information Architecture
 
-> Implementation plan. Source: [audit.md](audit.md) §4 G-5, G-5d.
+> Implementation plan. Source: [audit.md](../../plan/ui-ux/audit.md) §4 G-5, G-5d.
+> **Shipped** (2026-08): navigation registry (`lib/nav`) for global + course scopes,
+> registry-driven sidebars, collapsible sections, pin/hide/reset personalisation
+> (`settings.user_nav_preferences` + `/api/v1/nav/preferences`), persistent top-bar
+> search, palette synonyms (e.g. marks → Gradebook), icon/label collision CI
+> (`npm run nav:check`), `ffNavigationV2` flag for task-based taxonomy + primary
+> budget + More disclosure. Residual: settings/admin registry migration (UX.8),
+> full tree/first-click research gate closeout, credential hub merge, shared
+> native JSON artefact, 4-week nav_item_click priority re-rank.
 
 ## Metadata
 
@@ -10,7 +18,7 @@
 | **Section** | UI/UX — Information Architecture |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / HS |
-| **Status (today)** | THIN — flat, alphabetical, feature-flag-driven, up to 40 links |
+| **Status (today)** | SHIPPED (registry + personalisation + top-bar search; V2 taxonomy behind flag; residual settings/admin + research gate) |
 | **Estimated effort** | L (1–2mo) |
 | **Owner (proposed)** | Product Design + Web |
 | **Depends on** | UX.2 (nav components), UX.15 (nav labels are hardcoded English) |
@@ -52,7 +60,7 @@ prioritisation, no personalisation, and no persistent search field in the top ba
   *arrangement and disclosure*, not availability.
 - Changing URLs. Route paths stay stable to preserve deep links, bookmarks, the
   CC deep-link/highlight targeting, and native-client parity.
-- Settings/admin restructure — that is [UX.8](UX.8-settings-and-admin-ia-unification.md).
+- Settings/admin restructure — that is [UX.8](../../plan/ui-ux/UX.8-settings-and-admin-ia-unification.md).
 - Redesigning destination pages themselves.
 - Native client navigation (though the taxonomy MUST be shared; see §12).
 
@@ -157,7 +165,7 @@ prioritisation, no personalisation, and no persistent search field in the top ba
 - **Accessibility** — Sidebar is a `nav` landmark with an accessible name;
   sections use a disclosure pattern with correct `aria-expanded`; the current page
   is `aria-current="page"`; collapsed sidebar tooltips are accessible components,
-  not `title` (see [UX.4](../../completed/ui-ux/UX.4-aria-widget-and-focus-management-remediation.md)).
+  not `title` (see [UX.4](UX.4-aria-widget-and-focus-management-remediation.md)).
 - **Scalability** — Adding a destination is a registry entry. The structure must
   hold at 150 destinations.
 - **Reliability** — If personalisation fails to load, the default navigation
@@ -167,7 +175,7 @@ prioritisation, no personalisation, and no persistent search field in the top ba
   `nav_pin_add/remove`, `nav_hide`. These directly drive the priority ranks.
 - **Maintainability** — One registry file per scope; no navigation logic in JSX.
 - **Internationalization** — Every label from an i18n key (today they are
-  hardcoded English — see [UX.15](UX.15-i18n-coverage-and-rtl-completion.md)).
+  hardcoded English — see [UX.15](../../plan/ui-ux/UX.15-i18n-coverage-and-rtl-completion.md)).
   Sidebar mirrors in RTL. Synonyms are per-locale.
 - **Backward compatibility** — All routes unchanged. Deep links, CC checklist
   highlight targeting, and native-client parity preserved.
@@ -325,12 +333,12 @@ opt-in and explainability treatment.)*
 
 ## 13. Dependencies & Sequencing
 
-- **Must ship after** — [UX.2](../../completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md)
-  (disclosure/tooltip components), [UX.15](UX.15-i18n-coverage-and-rtl-completion.md)
+- **Must ship after** — [UX.2](UX.2-core-component-library-and-adoption-ratchet.md)
+  (disclosure/tooltip components), [UX.15](../../plan/ui-ux/UX.15-i18n-coverage-and-rtl-completion.md)
   (labels must be i18n keys before they are centralised — or the two land
   together).
-- **Must ship before** — [UX.8](UX.8-settings-and-admin-ia-unification.md)
-  (settings nav is a registry scope), [UX.9](UX.9-role-aware-dashboard.md).
+- **Must ship before** — [UX.8](../../plan/ui-ux/UX.8-settings-and-admin-ia-unification.md)
+  (settings nav is a registry scope), [UX.9](../../plan/ui-ux/UX.9-role-aware-dashboard.md).
 - **Gated by research** — AC-10 tree testing MUST pass **before** implementation.
 - **Shared infra** — user-research participant recruitment; telemetry pipeline.
 
@@ -436,13 +444,13 @@ opt-in and explainability treatment.)*
   `clients/web/src/components/command-palette/command-palette-dialog.tsx`,
   `clients/web/src/components/settings/platform-feature-definitions.ts`,
   `clients/web/src/app.tsx` (200 routes)
-- Research: [research.md](research.md) R-4, R-7, R-8, R-9, R-10, R-11, R-12,
+- Research: [research.md](../../plan/ui-ux/research.md) R-4, R-7, R-8, R-9, R-10, R-11, R-12,
   R-13, R-14, R-15, R-29, R-30, R-33, R-34
-- Audit: [audit.md](audit.md) G-5, G-5d, G-12
+- Audit: [audit.md](../../plan/ui-ux/audit.md) G-5, G-5d, G-12
 - External: [NN/g — Top 3 IA Questions about Navigation Menus](https://www.nngroup.com/articles/ia-questions-navigation-menus/),
   [NN/g — Low Findability and Discoverability](https://www.nngroup.com/articles/navigation-ia-tests/),
   [NN/g — Intranet IA Trends](https://www.nngroup.com/articles/intranet-information-architecture-ia/)
-- Related plans: [UX.8](UX.8-settings-and-admin-ia-unification.md),
-  [UX.9](UX.9-role-aware-dashboard.md),
-  [UX.15](UX.15-i18n-coverage-and-rtl-completion.md),
+- Related plans: [UX.8](../../plan/ui-ux/UX.8-settings-and-admin-ia-unification.md),
+  [UX.9](../../plan/ui-ux/UX.9-role-aware-dashboard.md),
+  [UX.15](../../plan/ui-ux/UX.15-i18n-coverage-and-rtl-completion.md),
   `../checklist/` (CC deep-link targeting), `../settings/` (PS pinning precedent)

@@ -42,6 +42,8 @@ export type PlatformFeaturesSnapshot = {
   autoCaptioningEnabled?: boolean
   ffReadingPreferences?: boolean
   ffTypeScale?: boolean
+  /** UX.7 — task-based nav taxonomy, primary budget, More disclosure. Default false. */
+  ffNavigationV2?: boolean
   ffPinnedSettings?: boolean
   ffHighContrastReducedMotion?: boolean
   ffMotionNavigation?: boolean
@@ -182,6 +184,7 @@ const defaults: PlatformFeaturesSnapshot = {
   autoCaptioningEnabled: false,
   ffReadingPreferences: false,
   ffTypeScale: false,
+  ffNavigationV2: false,
   ffPinnedSettings: true,
   ffHighContrastReducedMotion: false,
   ffMotionNavigation: true,
@@ -443,56 +446,42 @@ export function readingPreferencesApiEnabled(s?: PlatformFeaturesSnapshot): bool
   )
 }
 
+/** Motion kill-switches default on until platform features have loaded. */
+function motionDefaultOn(
+  flag: (s: PlatformFeaturesSnapshot) => boolean | undefined,
+  s?: PlatformFeaturesSnapshot,
+): boolean {
+  const snap = s ?? snapshot
+  if (!s && !loaded) return true
+  return flag(snap) !== false
+}
+
 /** AN.2: splash/route/section transitions (default on; kill-switch via Settings). */
 export function motionNavigationEnabled(s?: PlatformFeaturesSnapshot): boolean {
-  const snap = s ?? snapshot
-  if (!s && !loaded) {
-    return true
-  }
-  return snap.ffMotionNavigation !== false
+  return motionDefaultOn((snap) => snap.ffMotionNavigation, s)
 }
 
 /** AN.3: skeleton→content load choreography (default on; kill-switch via Settings). */
 export function motionRevealEnabled(s?: PlatformFeaturesSnapshot): boolean {
-  const snap = s ?? snapshot
-  if (!s && !loaded) {
-    return true
-  }
-  return snap.ffMotionReveal !== false
+  return motionDefaultOn((snap) => snap.ffMotionReveal, s)
 }
 
 /** AN.4: list insert/remove/reorder motion (default on; kill-switch via Settings). */
 export function motionListsEnabled(s?: PlatformFeaturesSnapshot): boolean {
-  const snap = s ?? snapshot
-  if (!s && !loaded) {
-    return true
-  }
-  return snap.ffMotionLists !== false
+  return motionDefaultOn((snap) => snap.ffMotionLists, s)
 }
 
 /** AN.5: overlay/surface enter-exit motion (default on; kill-switch via Settings). */
 export function motionOverlaysEnabled(s?: PlatformFeaturesSnapshot): boolean {
-  const snap = s ?? snapshot
-  if (!s && !loaded) {
-    return true
-  }
-  return snap.ffMotionOverlays !== false
+  return motionDefaultOn((snap) => snap.ffMotionOverlays, s)
 }
 
 /** AN.6: control micro-interactions (default on; kill-switch via Settings). */
 export function motionControlsEnabled(s?: PlatformFeaturesSnapshot): boolean {
-  const snap = s ?? snapshot
-  if (!s && !loaded) {
-    return true
-  }
-  return snap.ffMotionControls !== false
+  return motionDefaultOn((snap) => snap.ffMotionControls, s)
 }
 
 /** AN.7: delight & progress moments (default on; kill-switch via Settings). */
 export function motionDelightEnabled(s?: PlatformFeaturesSnapshot): boolean {
-  const snap = s ?? snapshot
-  if (!s && !loaded) {
-    return true
-  }
-  return snap.ffMotionDelight !== false
+  return motionDefaultOn((snap) => snap.ffMotionDelight, s)
 }

@@ -1,10 +1,11 @@
-import { type FormEvent, useState } from 'react'
+import { type FormEvent, useEffect, useState } from 'react'
 import { apiUrl } from '../../lib/api'
 import { readApiErrorMessage } from '../../lib/errors'
 
 type Props = {
   /** Optional app path to resume after sign-in (same-origin). */
   redirectTo?: string
+  /** Prefill from password form (UX.5 FR-13 — no redundant re-entry). */
   defaultEmail?: string
 }
 
@@ -12,6 +13,12 @@ export function MagicLinkRequestForm({ redirectTo, defaultEmail = '' }: Props) {
   const [email, setEmail] = useState(defaultEmail)
   const [status, setStatus] = useState<'idle' | 'loading' | 'error' | 'sent'>('idle')
   const [message, setMessage] = useState<string | null>(null)
+
+  // UX.5 FR-13: prefill from the password form so the user is not retyped.
+  useEffect(() => {
+    if (status !== 'idle') return
+    if (defaultEmail) setEmail(defaultEmail)
+  }, [defaultEmail, status])
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
@@ -65,11 +72,12 @@ export function MagicLinkRequestForm({ redirectTo, defaultEmail = '' }: Props) {
         </label>
         <input
           id="magic-link-email"
-          name="magic-link-email"
+          name="username"
           type="email"
-          autoComplete="email"
+          autoComplete="username"
           aria-required="true"
           required
+          spellCheck={false}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className="w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-fg-default outline-none ring-indigo-500/20 transition-[background-color,color,border-color] placeholder:text-fg-subtle focus:border-indigo-400 focus:ring-2"

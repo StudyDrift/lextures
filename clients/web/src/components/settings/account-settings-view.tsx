@@ -1,7 +1,7 @@
 import {
   type ChangeEvent,
+  type ComponentProps,
   type FormEvent,
-  type ReactNode,
   useCallback,
   useEffect,
   useId,
@@ -10,6 +10,7 @@ import {
 } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { z } from 'zod'
 import { ImageIcon, Monitor, Save, Trash2, Upload, X } from 'lucide-react'
 import { useConfirm } from '../use-confirm'
 import { OidcConnectedAccountsPanel } from '../oidc-connected-accounts-panel'
@@ -22,8 +23,10 @@ import { LocaleFormatSettingsPanel } from './locale-format-settings-panel'
 import { LocaleSwitcher } from './locale-switcher'
 import { SettingsSection } from './settings-section'
 import { SegmentedControl } from './segmented-control'
+import { Button, ErrorSummary, Field, Input } from '../ui'
 import { apiUrl, authorizedFetch } from '../../lib/api'
-import { readApiErrorMessage } from '../../lib/errors'
+import { readApiErrorMessage, readApiFieldErrors } from '../../lib/errors'
+import { useForm, useFormField, useFormState, useUnsavedChanges } from '../../lib/form'
 import { passwordStrengthEnglish, passwordStrengthKey, type PasswordStrengthKey } from '../../lib/password-strength'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
 import { clearSessionTokens, getRefreshToken } from '../../lib/session-tokens'
@@ -73,32 +76,56 @@ function defaultAvatarPrompt(firstName: string, lastName: string): string {
     : 'Create a friendly profile avatar illustration with clean background, centered portrait framing, and modern style.'
 }
 
-function SettingsField({
-  label,
-  htmlFor,
-  hint,
-  children,
-}: {
-  label: string
-  htmlFor?: string
-  hint?: string
-  children: ReactNode
-}) {
-  return (
-    <div>
-      <label htmlFor={htmlFor} className="mb-1.5 block text-sm font-medium text-fg-default">
-        {label}
-      </label>
-      {children}
-      {hint ? <p className="mt-1 text-xs text-fg-muted">{hint}</p> : null}
-    </div>
-  )
-}
-
 const inputClass =
   'w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-border-default dark:bg-surface-raised dark:text-fg-default'
-const disabledInputClass =
-  'w-full rounded-xl border border-border-default bg-surface-base px-3 py-2.5 text-sm text-fg-muted dark:border-border-default/50 dark:text-fg-muted'
+
+/** UX.6 pilot schema for account profile text fields. */
+const accountProfileSchema = z.object({
+  firstName: z.string().max(80),
+  lastName: z.string().max(80),
+  phoneNumber: z
+    .string()
+    .max(30)
+    .refine((v) => v.trim() === '' || /^[+0-9().\-\s]{7,30}$/.test(v.trim()), {
+      message: 'Enter a valid phone number, including country code if needed.',
+    }),
+  avatarUrl: z
+    .string()
+    .max(2048)
+    .refine((v) => v.trim() === '' || /^https?:\/\//i.test(v.trim()), {
+      message: 'Enter a valid URL, including https://.',
+    }),
+})
+
+type AccountProfileFormValues = z.infer<typeof accountProfileSchema>
+
+function ProfileTextField({
+  formApi,
+  name,
+  label,
+  description,
+  ...inputProps
+}: {
+  formApi: ReturnType<typeof useForm<AccountProfileFormValues>>
+  name: keyof AccountProfileFormValues & string
+  label: string
+  description?: string
+} & Omit<ComponentProps<typeof Input>, 'name' | 'value' | 'onBlur' | 'invalid'>) {
+  const field = useFormField(formApi, name)
+  const { onChange: controlOnChange, ...controlRest } = field.controlProps
+  return (
+    <Field label={label} description={description} error={field.error} htmlFor={field.id}>
+      <Input
+        {...controlRest}
+        {...inputProps}
+        onChange={(e) => {
+          controlOnChange(e)
+          inputProps.onChange?.(e)
+        }}
+      />
+    </Field>
+  )
+}
 
 export function AccountSettingsView() {
   const { t } = useTranslation('common')
@@ -111,16 +138,89 @@ export function AccountSettingsView() {
   const [displayTimezone, setDisplayTimezone] = useState(detectBrowserTimeZone())
 
   const [accountLoading, setAccountLoading] = useState(false)
-  const [accountSaving, setAccountSaving] = useState(false)
   const [deleteAccountBusy, setDeleteAccountBusy] = useState(false)
   const [accountMessage, setAccountMessage] = useState<string | null>(null)
   const [accountError, setAccountError] = useState<string | null>(null)
   const [email, setEmail] = useState('')
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName] = useState('')
-  const [phoneNumber, setPhoneNumber] = useState('')
-  const [avatarUrl, setAvatarUrl] = useState('')
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null)
+
+  const profileForm = useForm<AccountProfileFormValues>({
+    formId: 'account-profile',
+    schema: accountProfileSchema,
+    defaultValues: { firstName: '', lastName: '', phoneNumber: '', avatarUrl: '' },
+    labels: {
+      firstName: 'First name',
+      lastName: 'Last name',
+      phoneNumber: 'Phone number',
+      avatarUrl: 'Image URL',
+    },
+    onSubmit: async (values, { setServerErrors, setFormError, reset }) => {
+      setAccountMessage(null)
+      setAccountError(null)
+      try {
+        const res = await authorizedFetch('/api/v1/settings/account', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            firstName: values.firstName,
+            lastName: values.lastName,
+            phoneNumber: values.phoneNumber.trim() || null,
+            avatarUrl: values.avatarUrl.trim() || null,
+            uiTheme,
+            showHelpPopover,
+          }),
+        })
+        const raw: unknown = await res.json().catch(() => ({}))
+        if (!res.ok) {
+          const fieldErrors = readApiFieldErrors(raw)
+          if (fieldErrors.length > 0) {
+            setServerErrors(fieldErrors)
+          } else {
+            const msg = readApiErrorMessage(raw)
+            setFormError(msg)
+            setAccountError(msg)
+          }
+          return
+        }
+        const data = raw as AccountProfile
+        const nextAvatar = data.avatarUrl ?? ''
+        reset({
+          firstName: data.firstName ?? '',
+          lastName: data.lastName ?? '',
+          phoneNumber: data.phoneNumber ?? '',
+          avatarUrl: nextAvatar,
+        })
+        setAvatarPreviewUrl(nextAvatar || null)
+        setStudentId(data.sid?.trim() ? data.sid.trim() : null)
+        setSessionManagementUiEnabled(data.sessionManagementUiEnabled === true)
+        if (data.showHelpPopover !== undefined) {
+          setShowHelpPopover(data.showHelpPopover)
+        }
+        const loc = data.locale?.trim() || detectBrowserLocale()
+        const tz = data.timezone?.trim() || detectBrowserTimeZone()
+        setDisplayLocale(loc)
+        setDisplayTimezone(tz)
+        setLocaleProfile({ locale: data.locale ?? null, timezone: data.timezone ?? null })
+        setAccountMessage('Saved.')
+        toastSaveOk('Account saved')
+        window.dispatchEvent(new Event('studydrift-profile-updated'))
+      } catch {
+        const msg = t('common.form.retrySave', {
+          defaultValue: 'Could not save. Your entries are still here — try again.',
+        })
+        setFormError(msg)
+        setAccountError(msg)
+        toastMutationError(msg)
+      }
+    },
+  })
+  const profileFormState = useFormState(profileForm)
+  useUnsavedChanges(
+    profileFormState.isDirty,
+    t('common.form.unsavedLeaveConfirm', {
+      defaultValue: 'You have unsaved changes. Leave this page and discard them?',
+    }),
+  )
   const [avatarModalOpen, setAvatarModalOpen] = useState(false)
   const [avatarPrompt, setAvatarPrompt] = useState('')
   const [avatarGenStatus, setAvatarGenStatus] = useState<'idle' | 'loading' | 'error'>('idle')
@@ -167,11 +267,13 @@ export function AccountSettingsView() {
       const data = raw as AccountProfile
       setEmail(data.email ?? '')
       const names = nameFieldsFromProfile(data)
-      setFirstName(names.firstName)
-      setLastName(names.lastName)
-      setPhoneNumber(data.phoneNumber ?? '')
       const currentAvatar = data.avatarUrl ?? ''
-      setAvatarUrl(currentAvatar)
+      profileForm.reset({
+        firstName: names.firstName,
+        lastName: names.lastName,
+        phoneNumber: data.phoneNumber ?? '',
+        avatarUrl: currentAvatar,
+      })
       setAvatarPreviewUrl(currentAvatar || null)
       setUiTheme(parseUiTheme(data.uiTheme))
       setStudentId(data.sid?.trim() ? data.sid.trim() : null)
@@ -296,7 +398,7 @@ export function AccountSettingsView() {
     const reader = new FileReader()
     reader.onload = () => {
       const result = typeof reader.result === 'string' ? reader.result : ''
-      setAvatarUrl(result)
+      profileForm.setValue('avatarUrl', result)
       setAvatarPreviewUrl(result || null)
       setAccountError(null)
       setAccountMessage('Image selected. Save to apply it.')
@@ -309,6 +411,7 @@ export function AccountSettingsView() {
   }
 
   function openGenerateAvatarModal() {
+    const { firstName, lastName } = profileForm.getValues()
     setAvatarPrompt(defaultAvatarPrompt(firstName, lastName))
     setAvatarGenStatus('idle')
     setAvatarGenMessage(null)
@@ -334,7 +437,7 @@ export function AccountSettingsView() {
       }
       const data = raw as { imageUrl?: string }
       if (data.imageUrl) {
-        setAvatarUrl(data.imageUrl)
+        profileForm.setValue('avatarUrl', data.imageUrl)
         setAvatarPreviewUrl(data.imageUrl)
       }
       setAvatarGenStatus('idle')
@@ -351,6 +454,7 @@ export function AccountSettingsView() {
     applyUiTheme(next)
     setAccountError(null)
     try {
+      const { firstName, lastName, avatarUrl } = profileForm.getValues()
       const res = await authorizedFetch('/api/v1/settings/account', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -409,6 +513,7 @@ export function AccountSettingsView() {
     setShowHelpPopover(next)
     setAccountError(null)
     try {
+      const { firstName, lastName, avatarUrl } = profileForm.getValues()
       const res = await authorizedFetch('/api/v1/settings/account', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -551,57 +656,6 @@ export function AccountSettingsView() {
     }
   }
 
-  async function onSaveAccount(e: FormEvent) {
-    e.preventDefault()
-    setAccountSaving(true)
-    setAccountMessage(null)
-    setAccountError(null)
-    try {
-      const res = await authorizedFetch('/api/v1/settings/account', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          firstName,
-          lastName,
-          phoneNumber: phoneNumber.trim() || null,
-          avatarUrl: avatarUrl.trim() || null,
-          uiTheme,
-          showHelpPopover,
-        }),
-      })
-      const raw: unknown = await res.json().catch(() => ({}))
-      if (!res.ok) {
-        setAccountError(readApiErrorMessage(raw))
-        return
-      }
-      const data = raw as AccountProfile
-      setFirstName(data.firstName ?? '')
-      setLastName(data.lastName ?? '')
-      setPhoneNumber(data.phoneNumber ?? '')
-      setStudentId(data.sid?.trim() ? data.sid.trim() : null)
-      setSessionManagementUiEnabled(data.sessionManagementUiEnabled === true)
-      const nextAvatar = data.avatarUrl ?? ''
-      setAvatarUrl(nextAvatar)
-      setAvatarPreviewUrl(nextAvatar || null)
-      if (data.showHelpPopover !== undefined) {
-        setShowHelpPopover(data.showHelpPopover)
-      }
-      const loc = data.locale?.trim() || detectBrowserLocale()
-      const tz = data.timezone?.trim() || detectBrowserTimeZone()
-      setDisplayLocale(loc)
-      setDisplayTimezone(tz)
-      setLocaleProfile({ locale: data.locale ?? null, timezone: data.timezone ?? null })
-      setAccountMessage('Saved.')
-      toastSaveOk('Account saved')
-      window.dispatchEvent(new Event('studydrift-profile-updated'))
-    } catch {
-      setAccountError('Could not save account settings.')
-      toastMutationError('Could not save account settings.')
-    } finally {
-      setAccountSaving(false)
-    }
-  }
-
   if (accountLoading) {
     return <p className="text-sm text-fg-muted">Loading…</p>
   }
@@ -626,7 +680,34 @@ export function AccountSettingsView() {
         title="Profile"
         description="Your name and photo appear in the app header and across courses."
       >
-        <form id={accountFormId} className="space-y-5" onSubmit={onSaveAccount}>
+        <form
+          id={accountFormId}
+          className="space-y-5"
+          noValidate
+          onSubmit={(e) => {
+            void profileForm.handleSubmit(e)
+          }}
+        >
+          <p className="text-xs text-fg-muted">
+            {t('common.validation.requiredLegend', {
+              defaultValue: 'Required fields are marked with an asterisk (*).',
+            })}
+          </p>
+          <ErrorSummary
+            title={t('common.validation.errorSummaryTitle', {
+              defaultValue: 'Please fix the following errors',
+            })}
+            errors={profileFormState.summary.map((s) => ({
+              id: s.id,
+              label: s.label,
+              message: s.message,
+            }))}
+          />
+          {profileFormState.formError ? (
+            <p className="rounded-xl border border-danger-fg/40 bg-danger-surface px-4 py-3 text-sm text-danger-fg">
+              {profileFormState.formError}
+            </p>
+          ) : null}
           <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
             <div className="flex shrink-0 flex-col items-center gap-3">
               <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-border-default bg-surface-sunken dark:border-border-default dark:bg-surface-overlay">
@@ -637,15 +718,11 @@ export function AccountSettingsView() {
                 )}
               </div>
               <div className="flex flex-wrap justify-center gap-2">
-                <button
-                  type="button"
-                  onClick={openGenerateAvatarModal}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-xs font-medium text-fg-muted hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-900 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:border-indigo-400 dark:hover:bg-neutral-700"
-                >
+                <Button type="button" variant="secondary" size="sm" onClick={openGenerateAvatarModal}>
                   <ImageIcon className="h-3.5 w-3.5" aria-hidden />
                   Generate
-                </button>
-                <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-xs font-medium text-fg-muted hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-900 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:border-indigo-400 dark:hover:bg-neutral-700">
+                </Button>
+                <label className="inline-flex min-h-6 cursor-pointer items-center gap-1.5 rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-xs font-medium text-fg-muted hover:border-border-strong dark:border-border-default dark:bg-surface-overlay dark:text-fg-default">
                   <Upload className="h-3.5 w-3.5" aria-hidden />
                   Upload
                   <input type="file" accept="image/*" className="hidden" onChange={onAvatarUpload} />
@@ -655,58 +732,49 @@ export function AccountSettingsView() {
 
             <div className="min-w-0 flex-1 space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
-                <SettingsField label="First name">
-                  <input
-                    form={accountFormId}
-                    type="text"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    maxLength={80}
-                    className={inputClass}
-                  />
-                </SettingsField>
-                <SettingsField label="Last name">
-                  <input
-                    form={accountFormId}
-                    type="text"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    maxLength={80}
-                    className={inputClass}
-                  />
-                </SettingsField>
+                <ProfileTextField
+                  formApi={profileForm}
+                  name="firstName"
+                  label="First name"
+                  form={accountFormId}
+                  autoComplete="given-name"
+                  maxLength={80}
+                />
+                <ProfileTextField
+                  formApi={profileForm}
+                  name="lastName"
+                  label="Last name"
+                  form={accountFormId}
+                  autoComplete="family-name"
+                  maxLength={80}
+                />
               </div>
 
-              <SettingsField label="Email" htmlFor="account-email">
-                <input id="account-email" type="text" value={email} disabled className={disabledInputClass} />
-              </SettingsField>
+              <Field label="Email" htmlFor="account-email">
+                <Input id="account-email" type="email" value={email} disabled autoComplete="email" />
+              </Field>
 
-              <SettingsField
+              <ProfileTextField
+                formApi={profileForm}
+                name="phoneNumber"
                 label="Phone number"
-                htmlFor="account-phone"
-                hint="Used for SMS notifications when enabled on the Notifications page."
-              >
-                <input
-                  id="account-phone"
-                  form={accountFormId}
-                  type="tel"
-                  autoComplete="tel"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  maxLength={30}
-                  placeholder="+1 (555) 555-0100"
-                  className={inputClass}
-                />
-              </SettingsField>
+                description="Used for SMS notifications when enabled on the Notifications page."
+                form={accountFormId}
+                type="tel"
+                autoComplete="tel"
+                maxLength={30}
+                placeholder="+1 (555) 555-0100"
+                inputMode="tel"
+              />
 
               {studentId ? (
-                <SettingsField
+                <Field
                   label="Student ID"
                   htmlFor="account-sid"
-                  hint="Assigned by your institution. Contact an administrator if this should be updated."
+                  description="Assigned by your institution. Contact an administrator if this should be updated."
                 >
-                  <input id="account-sid" type="text" value={studentId} disabled className={disabledInputClass} />
-                </SettingsField>
+                  <Input id="account-sid" type="text" value={studentId} disabled />
+                </Field>
               ) : null}
 
               <details className="group">
@@ -714,16 +782,17 @@ export function AccountSettingsView() {
                   Advanced: image URL
                 </summary>
                 <div className="mt-3">
-                  <input
+                  <ProfileTextField
+                    formApi={profileForm}
+                    name="avatarUrl"
+                    label="Image URL"
                     form={accountFormId}
                     type="url"
-                    value={avatarUrl}
+                    autoComplete="off"
+                    placeholder="https://example.com/avatar.png"
                     onChange={(e) => {
-                      setAvatarUrl(e.target.value)
                       setAvatarPreviewUrl(e.target.value.trim() || null)
                     }}
-                    placeholder="https://example.com/avatar.png"
-                    className={inputClass}
                   />
                 </div>
               </details>
@@ -731,19 +800,15 @@ export function AccountSettingsView() {
           </div>
 
           {accountMessage ? (
-            <p className="text-sm text-emerald-700 dark:text-emerald-400" role="status">
+            <p className="text-sm text-success-fg" role="status">
               {accountMessage}
             </p>
           ) : null}
 
-          <button
-            type="submit"
-            disabled={accountSaving}
-            className="inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-surface-raised dark:shadow-none"
-          >
+          <Button type="submit" disabled={profileFormState.isSubmitting} className="gap-2">
             <Save className="h-4 w-4" aria-hidden />
-            {accountSaving ? 'Saving…' : 'Save profile'}
-          </button>
+            {profileFormState.isSubmitting ? 'Saving…' : 'Save profile'}
+          </Button>
         </form>
       </SettingsSection>
 
@@ -1072,7 +1137,7 @@ export function AccountSettingsView() {
           <LocaleFormatSettingsPanel
             timezone={displayTimezone}
             onTimezoneChange={(v) => void persistDisplayTimezone(v)}
-            disabled={accountSaving}
+            disabled={profileFormState.isSubmitting}
             embedded
           />
 

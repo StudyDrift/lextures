@@ -569,7 +569,8 @@ const coursePageDefs: CoursePageDef[] = [
   {
     suffix: '/gradebook',
     title: 'Gradebook',
-    hint: 'gradebook grades scores',
+    // UX.7 FR-18 — synonyms (marks/scores) so palette finds Gradebook by user vocabulary.
+    hint: 'gradebook grades scores marks markbook grade book',
     requiredPermission: courseGradebookViewPermission,
   },
   {

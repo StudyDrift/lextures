@@ -1,0 +1,10 @@
+{
+  "notes": "UX.5 FR-1 exceptions for WCAG 2.2 SC 2.5.8. Each entry must cite an exception: inline | spacing | essential | ua-default.",
+  "exceptions": [
+    {
+      "file": "src/components/ui/utils.ts",
+      "reason": "size token definitions (not rendered controls)",
+      "exception": "n/a"
+    }
+  ]
+}

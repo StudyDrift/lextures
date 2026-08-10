@@ -3,6 +3,8 @@ import type { CourseStructureItem } from '../../../lib/courses-api'
 import {
   buildReorderPayloadFromItems,
   moveChildInStructure,
+  moveChildToIndex,
+  moveModuleToIndex,
   reorderChildrenInStructure,
   reorderModulesInStructure,
   structureReorderDropAction,
@@ -98,6 +100,28 @@ describe('reorderModulesInStructure', () => {
     const modules = next!.filter((i) => i.kind === 'module').map((m) => m.id)
     expect(modules).toEqual(['m2', 'm1', 'm3'])
     expect(next!.find((i) => i.id === 'a1')?.parentId).toBe('m1')
+  })
+})
+
+describe('moveModuleToIndex (UX.5 click-to-move)', () => {
+  it('moves a module to an absolute index', () => {
+    const next = moveModuleToIndex(sampleStructure(), 'm3', 0)
+    expect(next).not.toBeNull()
+    const modules = next!.filter((i) => i.kind === 'module').map((m) => m.id)
+    expect(modules).toEqual(['m3', 'm1', 'm2'])
+  })
+
+  it('returns null for no-op', () => {
+    expect(moveModuleToIndex(sampleStructure(), 'm1', 0)).toBeNull()
+  })
+})
+
+describe('moveChildToIndex (UX.5 click-to-move)', () => {
+  it('moves a child to an absolute sibling index', () => {
+    const next = moveChildToIndex(sampleStructure(), 'm1', 'a2', 0)
+    expect(next).not.toBeNull()
+    const m1Kids = next!.filter((i) => i.parentId === 'm1').map((c) => c.id)
+    expect(m1Kids).toEqual(['a2', 'a1'])
   })
 })
 

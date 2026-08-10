@@ -10024,6 +10024,53 @@
         }
       ],
       "reviewed": true
+    },
+    {
+      "id": "UX.5",
+      "path": "docs/completed/ui-ux/UX.5-wcag-2.2-aa-conformance-uplift.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "not-applicable",
+      "rationale": "WCAG 2.2 AA engineering uplift: sticky offset, reorderable Move-to/click-to-move, target-size and drag-alternative CI ratchets. Regression detection is structural (npm run scripts) plus unit tests rather than a dedicated Playwright journey; residual third-party audit is out of e2e scope.",
+      "owner": "Web Platform",
+      "reviewed": true
+    },
+    {
+      "id": "UX.6",
+      "path": "docs/completed/ui-ux/UX.6-form-and-validation-system.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "not-applicable",
+      "rationale": "Shared form/validation primitives (Field, ErrorSummary, form store, API problem mapping) with unit tests and form-field lint baseline. Auth/account adoption is covered by existing login/signup flows; no dedicated form-system Playwright suite required for the foundation story.",
+      "owner": "Web Platform",
+      "reviewed": true
+    },
+    {
+      "id": "UX.7",
+      "path": "docs/completed/ui-ux/UX.7-navigation-information-architecture.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "smoke",
+      "rationale": "Registry-driven global/course nav with collision CI (npm run nav:check), unit resolve/collision tests, and existing keyboard/navigation Playwright smoke. Task taxonomy is gated by ffNavigationV2.",
+      "owner": "Web Platform",
+      "specs": [
+        {
+          "path": "e2e/tests/navigation.spec.ts"
+        },
+        {
+          "path": "e2e/tests/keyboard-navigation.spec.ts"
+        }
+      ],
+      "reviewed": true
     }
   ]
 }

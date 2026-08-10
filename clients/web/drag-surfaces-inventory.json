@@ -1,0 +1,60 @@
+{
+  "notes": "UX.5 drag inventory. alternative: click-to-move | move-menu | keyboard-only | documented | n/a-non-reorder. Primary module surface ships MoveToPositionMenu; remaining surfaces are keyboard-enabled via shared KeyboardSensor and tracked for click-to-move adoption.",
+  "surfaces": [
+    {
+      "file": "src/pages/lms/course-modules.tsx",
+      "alternative": "move-menu",
+      "note": "MoveToPositionMenu + KeyboardSensor + live region announcements"
+    },
+    {
+      "file": "src/pages/lms/course-catalog-kanban.tsx",
+      "alternative": "keyboard-only",
+      "note": "Pointer drag + keyboard sensor; click-to-move follow-up"
+    },
+    {
+      "file": "src/pages/lms/portfolio-editor-page.tsx",
+      "alternative": "keyboard-only",
+      "note": "KeyboardSensor via defaultKeyboardSensorOptions"
+    },
+    {
+      "file": "src/pages/lms/courses.tsx",
+      "alternative": "keyboard-only",
+      "note": "Pinned/course card reorder with shared KeyboardSensor"
+    },
+    {
+      "file": "src/pages/lms/course-calendar.tsx",
+      "alternative": "keyboard-only",
+      "note": "Event drag with keyboard alternative"
+    },
+    {
+      "file": "src/pages/lms/enrollment-groups-panel.tsx",
+      "alternative": "keyboard-only",
+      "note": "Group member reorder"
+    },
+    {
+      "file": "src/components/boards/layouts/columns-layout.tsx",
+      "alternative": "keyboard-only",
+      "note": "Board column cards; keyboard sortable"
+    },
+    {
+      "file": "src/components/notebook/course-notebook-sidebar.tsx",
+      "alternative": "keyboard-only",
+      "note": "Notebook tree reorder"
+    },
+    {
+      "file": "src/components/todos/student-todo-kanban.tsx",
+      "alternative": "keyboard-only",
+      "note": "Todo kanban columns"
+    },
+    {
+      "file": "src/components/layout/side-nav-pinned-courses.tsx",
+      "alternative": "keyboard-only",
+      "note": "Pinned course chips"
+    },
+    {
+      "file": "src/components/settings-panel/pinned-settings-group.tsx",
+      "alternative": "keyboard-only",
+      "note": "Pinned settings with shared KeyboardSensor"
+    }
+  ]
+}

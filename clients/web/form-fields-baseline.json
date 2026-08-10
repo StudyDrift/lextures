@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "updated": "2026-08-10",
+  "metrics": {
+    "inputs_outside_field_component": 1364,
+    "fields_without_label": 184,
+    "files_with_raw_controls": 337
+  },
+  "note": "UX.6 ratchet — counts must not increase. Migrate forms to Field + Input."
+}

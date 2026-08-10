@@ -671,7 +671,7 @@ to this standard when the mechanism exists.
 | G-3, G-4, G-5a, G-5c ARIA | [UX.4](../../completed/ui-ux/UX.4-aria-widget-and-focus-management-remediation.md) |
 | G-5b WCAG 2.2 | [UX.5](UX.5-wcag-2.2-aa-conformance-uplift.md) |
 | G-8 Forms | [UX.6](UX.6-form-and-validation-system.md) |
-| G-5, G-5d Navigation | [UX.7](UX.7-navigation-information-architecture.md) |
+| G-5, G-5d Navigation | [UX.7](../../completed/ui-ux/UX.7-navigation-information-architecture.md) |
 | G-12 Settings IA | [UX.8](UX.8-settings-and-admin-ia-unification.md) |
 | G-6 Dashboard | [UX.9](UX.9-role-aware-dashboard.md) |
 | G-15 Course surfaces | [UX.10](UX.10-course-home-and-learning-flow.md) |

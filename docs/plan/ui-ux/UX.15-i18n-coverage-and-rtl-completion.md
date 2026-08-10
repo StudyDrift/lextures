@@ -239,7 +239,7 @@ type AccountSettings = {
   foreign-language spans carry `lang`; the locale switcher is a labelled listbox
   with each option in its own language and script ("العربية", not "Arabic").
 - **Copy & i18n** — this plan *is* the copy work. Namespace reorganisation (FR-4)
-  should mirror the [UX.7](UX.7-navigation-information-architecture.md) taxonomy so
+  should mirror the [UX.7](../../completed/ui-ux/UX.7-navigation-information-architecture.md) taxonomy so
   translators see a coherent product.
 
 ## 11. AI / ML Considerations
@@ -283,7 +283,7 @@ but:
 - **Must ship after** — [UX.2](../../completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md)
   (components take strings as props, so translating a component translates every
   call site).
-- **Should ship before or with** — [UX.7](UX.7-navigation-information-architecture.md).
+- **Should ship before or with** — [UX.7](../../completed/ui-ux/UX.7-navigation-information-architecture.md).
   The navigation registry centralises labels; doing i18n first means the registry is
   born with keys rather than literals. **These two should be coordinated closely.**
 - **Feeds** — [UX.14](UX.14-responsive-and-small-viewport-experience.md) (pseudo-locale
@@ -400,6 +400,6 @@ but:
   [Unicode CLDR Plural Rules](https://cldr.unicode.org/index/cldr-spec/plural-rules),
   [MDN — Intl](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl)
 - Related plans: [UX.2](../../completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md),
-  [UX.7](UX.7-navigation-information-architecture.md),
+  [UX.7](../../completed/ui-ux/UX.7-navigation-information-architecture.md),
   [UX.14](UX.14-responsive-and-small-viewport-experience.md),
   `../../completed/11-i18n-l10n/`, `../ai-providers/` (AP.* for translation drafts)
