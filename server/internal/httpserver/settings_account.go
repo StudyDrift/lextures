@@ -190,7 +190,12 @@ func (d Deps) handlePatchSettingsAccount() http.HandlerFunc {
 		if req.Timezone != nil {
 			norm, err := l10n.NormalizeTimezone(*req.Timezone)
 			if err != nil {
-				apierr.WriteJSON(w, http.StatusUnprocessableEntity, apierr.CodeInvalidInput, "Invalid IANA timezone identifier.")
+				// UX.6 field-addressable 422 (keeps WriteValidationFailed reachable for TD.2 deadcode).
+				apierr.WriteValidationFailed(w, "Invalid IANA timezone identifier.", []apierr.FieldViolation{{
+					Path:    "timezone",
+					Code:    "invalid",
+					Message: "Invalid IANA timezone identifier.",
+				}})
 				return
 			}
 			timezonePtr = &norm
