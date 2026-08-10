@@ -20,3 +20,12 @@ export {
   focusFirstMenuitem,
   type MenuKeyHandlers,
 } from './menu-keyboard'
+export {
+  STICKY_OFFSET_CSS_VAR,
+  DEFAULT_STICKY_OFFSET_PX,
+  measureStickyChromeOffset,
+  applyStickyOffset,
+  readStickyOffset,
+  syncStickyOffset,
+} from './sticky-offset'
+export { useStickyOffset } from './use-sticky-offset'

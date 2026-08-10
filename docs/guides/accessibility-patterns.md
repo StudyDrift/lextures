@@ -4,7 +4,18 @@ Keyboard, focus, and ARIA contracts for `clients/web`. Prefer **WAI-ARIA APG**
 patterns implemented once in `components/ui/*` over bespoke roles in feature code.
 
 Related: [component library](./component-library.md), [design tokens](../design-tokens.md),
+[forms](./forms.md) (UX.6),
 plan [UX.4](../completed/ui-ux/UX.4-aria-widget-and-focus-management-remediation.md).
+
+## Forms (UX.6)
+
+- Compose controls with `Field` so label, description, and error share one `id` /
+  `aria-describedby` / `aria-invalid` / `aria-required` contract.
+- On failed submit, render `ErrorSummary` (`role="alert"`, focus target) with links
+  to each field — do not leave focus on the submit button.
+- Prefer `aria-describedby` for errors (broader AT support than `aria-errormessage`).
+- Validation timing: blur (touched), change only once errored, full check on submit.
+- See [forms.md](./forms.md) for zod, server 422 mapping, and dirty-form warnings.
 
 ## Rules of thumb
 
@@ -112,12 +123,83 @@ Skip link: `SkipLink` → `#main-content`.
 Use `announce()` / `LiveRegion` for async results, saves, and validation that
 should not move focus. Prefer `polite` unless the message is urgent.
 
+## Focus not obscured (WCAG 2.2 SC 2.4.11)
+
+The shell maintains `--lx-sticky-offset` from the rendered sticky chrome
+(`useStickyOffset` in `AppShell`). Focusable content under `.lms-scope` uses
+`scroll-margin-block-start: var(--lx-sticky-offset)` so Tab never leaves a field
+entirely under the top bar / quiz focus bar / reading focus bar.
+
+- Mark sticky chrome with `header.lms-chrome` or `data-lx-sticky-chrome`.
+- Toasts sit top-right with an offset under the sticky bar; focusables also get
+  `scroll-margin-inline-end` so they are not entirely covered.
+
+```ts
+import { useStickyOffset, syncStickyOffset } from '../lib/a11y'
+// useStickyOffset() — already mounted in AppShell
+```
+
+## Reorderable / dragging alternatives (WCAG 2.2 SC 2.5.7)
+
+Every `@dnd-kit` surface needs a **single-pointer** alternative in addition to
+keyboard reorder. Prefer the design-system helpers:
+
+```ts
+import { MoveToPositionMenu, useClickToMove } from '../components/ui'
+import { moveItemToIndex } from '../lib/reorderable/move-to-index'
+import { KeyboardSensor, defaultKeyboardSensorOptions } from '../lib/dnd/keyboardSensorConfig'
+```
+
+Contract:
+
+1. **Drag** (optional) via PointerSensor.
+2. **Keyboard** — `Space` lift, arrows move, `Space` drop, `Escape` cancel
+   (`KeyboardSensor` + `defaultKeyboardSensorOptions`).
+3. **Click / menu** — `MoveToPositionMenu` ("Move to…") or click-source →
+   click-target via `useClickToMove`.
+4. **Announce** results with `announce()` / live region
+   (`"Module 3 moved to position 1 of 7"`).
+
+Inventory + CI: `clients/web/drag-surfaces-inventory.json` and
+`npm run a11y:drag-alt` (`drag_surfaces_without_alternative`).
+
+## Target size (WCAG 2.2 SC 2.5.8)
+
+UX.2 size tokens enforce ≥24×24 CSS px (`sizeClasses` / `iconSizeClasses` in
+`components/ui/utils.ts`). Prefer those controls. In dense toolbars, use the
+*spacing* exception rather than sub-24 targets.
+
+```bash
+npm run a11y:target-size   # target_size_violations ratchet
+```
+
+Justified exceptions: `clients/web/target-size-exceptions.json`.
+Touch-primary surfaces should target **44×44** where practical (FR-4).
+
+## Consistent help (WCAG 2.2 SC 3.2.6)
+
+Authenticated shell routes expose a single help entry in the top bar
+(`HelpWidgetMenu`, `data-lx-help-entry`) in a stable relative order (feedback →
+help → notifications → account).
+
+## Accessible authentication (WCAG 2.2 SC 3.3.8)
+
+- Password fields: `autoComplete="current-password"` / `"new-password"`; **never**
+  block paste (password managers).
+- Username/email: `autoComplete="username"`.
+- OTP: `autoComplete="one-time-code"`, `type="text"`, visible for re-reading.
+- Passkeys are a first-class primary alternative on MFA challenge/setup.
+- Magic link remains a passwordless alternative without a cognitive function test.
+
 ## CI ratchets
 
 ```bash
 cd clients/web
 npm run a11y:contracts     # fail on regression vs baseline
 npm run a11y:baseline      # rewrite after intentional migration batches
+npm run a11y:target-size   # UX.5 target size static ratchet
+npm run a11y:drag-alt      # UX.5 drag single-pointer alternatives
+npm run a11y:wcag22        # contracts + target-size + drag-alt
 npm run ds:coverage        # UX.2 interactive coverage (includes raw role=menu/tablist)
 ```
 
@@ -130,6 +212,8 @@ Metrics:
 | `role_menu_without_keyboard` | `role=menu` without arrow contract |
 | `role_tablist_without_keyboard` | `role=tablist` without arrow contract |
 | `title_attribute_tooltips` | Quoted `title=` pseudo-tooltips in feature TSX |
+| `target_size_violations` | Suspect sub-24px interactive hosts (static) |
+| `drag_surfaces_without_alternative` | dnd-kit surfaces missing single-pointer alt |
 
 Coverage may only increase; defect counts may only decrease.
 

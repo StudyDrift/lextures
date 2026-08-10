@@ -85,7 +85,7 @@ on the highest-value, lowest-patience persona in the product.
   link to the specific control and highlight it.
 - **FR-6.** Settings search MUST also be reachable from the command palette, so
   `⌘K → "retention"` works from anywhere.
-- **FR-7.** Settings navigation MUST be a scope of the [UX.7](UX.7-navigation-information-architecture.md)
+- **FR-7.** Settings navigation MUST be a scope of the [UX.7](../../completed/ui-ux/UX.7-navigation-information-architecture.md)
   registry, inheriting its ordering, collision checks and audience filtering.
 - **FR-8.** Every settings page MUST use a consistent shell: page title,
   one-sentence description, scope badge ("Affects your organisation"), sections,
@@ -98,7 +98,7 @@ on the highest-value, lowest-patience persona in the product.
   statement** before saving ("This will apply to 1,240 users in 32 courses").
 - **FR-12.** Every settings change MUST be attributable in the existing audit log,
   and the page MUST link to the relevant audit entries.
-- **FR-13.** All settings forms MUST be built on [UX.6](UX.6-form-and-validation-system.md).
+- **FR-13.** All settings forms MUST be built on [UX.6](../../completed/ui-ux/UX.6-form-and-validation-system.md).
 - **FR-14.** The existing PS (Pinned Editor Settings) pattern from `../settings/`
   SHOULD be extended so admins can pin frequently-changed settings.
 
@@ -258,8 +258,8 @@ treatment.)*
 
 ## 13. Dependencies & Sequencing
 
-- **Must ship after** — [UX.7](UX.7-navigation-information-architecture.md)
-  (settings nav is a registry scope), [UX.6](UX.6-form-and-validation-system.md)
+- **Must ship after** — [UX.7](../../completed/ui-ux/UX.7-navigation-information-architecture.md)
+  (settings nav is a registry scope), [UX.6](../../completed/ui-ux/UX.6-form-and-validation-system.md)
   (restructured pages should land on the new form system).
 - **Must ship before** — nothing blocking, but it materially improves admin
   onboarding and should precede any large admin-facing feature push.
@@ -360,7 +360,7 @@ treatment.)*
   `docs/accessibility/focus-anchor-highlight.md`
 - Research: [research.md](research.md) R-9, R-10, R-11, R-15, R-29
 - Audit: [audit.md](audit.md) G-12, G-5
-- Related plans: [UX.6](UX.6-form-and-validation-system.md),
-  [UX.7](UX.7-navigation-information-architecture.md),
+- Related plans: [UX.6](../../completed/ui-ux/UX.6-form-and-validation-system.md),
+  [UX.7](../../completed/ui-ux/UX.7-navigation-information-architecture.md),
   `../settings/` (PS pinned-settings precedent), `../checklist/` (deep-link
   highlight precedent), `../../completed/18-admin-experience/`

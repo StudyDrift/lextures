@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "StudyDrift API",
-    "description": "Lextures LMS HTTP API. Generate TypeScript types: npx openapi-typescript http://localhost:8080/api/openapi.json -o src/lib/api-types.generated.ts (with the API running). AP.9 (0.2.0): Multi-provider AI GA. Deprecated: openRouterApiKey / clearOpenRouterApiKey on /api/v1/settings/ai and openRouterConfigured on /api/v1/platform/features — use /api/v1/settings/ai/providers and aiConfigured. Dual-read of platform_app_settings.openrouter_api_key continues for ≥1 minor release; see docs/api-changelog-ai-providers.md. TD.3 (0.2.1): Restored valid OpenAPI document (reattached components, fixed paths brace structure). CC.2: course checklist state API and dismissals.",
+    "description": "Lextures LMS HTTP API. Generate TypeScript types: npx openapi-typescript http://localhost:8080/api/openapi.json -o src/lib/api-types.generated.ts (with the API running). AP.9 (0.2.0): Multi-provider AI GA. Deprecated: openRouterApiKey / clearOpenRouterApiKey on /api/v1/settings/ai and openRouterConfigured on /api/v1/platform/features \u2014 use /api/v1/settings/ai/providers and aiConfigured. Dual-read of platform_app_settings.openrouter_api_key continues for \u22651 minor release; see docs/api-changelog-ai-providers.md. TD.3 (0.2.1): Restored valid OpenAPI document (reattached components, fixed paths brace structure). CC.2: course checklist state API and dismissals.",
     "version": "0.2.1"
   },
   "tags": [
@@ -48,7 +48,7 @@
     },
     {
       "name": "transcripts",
-      "description": "Academic transcript preview, issuance, orders, lifecycle, fees, and electronic delivery (T01–T06)"
+      "description": "Academic transcript preview, issuance, orders, lifecycle, fees, and electronic delivery (T01\u2013T06)"
     },
     {
       "name": "content-tools",
@@ -2551,7 +2551,7 @@
         "tags": [
           "auth"
         ],
-        "summary": "Native Sign in with Apple (AuthenticationServices identity token → Lextures tokens)",
+        "summary": "Native Sign in with Apple (AuthenticationServices identity token \u2192 Lextures tokens)",
         "requestBody": {
           "required": true,
           "content": {
@@ -2604,7 +2604,7 @@
         "tags": [
           "auth"
         ],
-        "summary": "Native Google Sign-In (Credential Manager ID token → Lextures tokens)",
+        "summary": "Native Google Sign-In (Credential Manager ID token \u2192 Lextures tokens)",
         "requestBody": {
           "required": true,
           "content": {
@@ -3356,7 +3356,7 @@
         ],
         "responses": {
           "200": {
-            "description": "{ courses: PublicMarketplaceCourse[], total, nextCursor } — no owned field"
+            "description": "{ courses: PublicMarketplaceCourse[], total, nextCursor } \u2014 no owned field"
           },
           "400": {
             "description": "Invalid filter"
@@ -3536,7 +3536,7 @@
             "description": "Sign in required"
           },
           "402": {
-            "description": "Paid course — use checkout; body includes checkoutHint"
+            "description": "Paid course \u2014 use checkout; body includes checkoutHint"
           },
           "404": {
             "description": "Not listed or feature disabled"
@@ -3573,7 +3573,7 @@
             "description": "{ checkoutUrl, sessionId } or { alreadyOwned, courseCode, courseId }"
           },
           "400": {
-            "description": "Free course — use claim instead"
+            "description": "Free course \u2014 use claim instead"
           },
           "401": {
             "description": "Sign in required"
@@ -4298,7 +4298,7 @@
         "tags": [
           "accommodations"
         ],
-        "summary": "List a learner’s accommodation records (coordinator perm)",
+        "summary": "List a learner\u2019s accommodation records (coordinator perm)",
         "security": [
           {
             "bearerAuth": []
@@ -4465,7 +4465,7 @@
           "accommodations",
           "me"
         ],
-        "summary": "List this learner’s active (by date range) accommodation summary entries",
+        "summary": "List this learner\u2019s active (by date range) accommodation summary entries",
         "security": [
           {
             "bearerAuth": []
@@ -4486,7 +4486,7 @@
         "tags": [
           "admin"
         ],
-        "summary": "Start IRT 2PL calibration job (202 + jobId); fits a/b for active uncalibrated or pilot items with ≥200 responses; optional conceptId scopes to one concept",
+        "summary": "Start IRT 2PL calibration job (202 + jobId); fits a/b for active uncalibrated or pilot items with \u2265200 responses; optional conceptId scopes to one concept",
         "security": [
           {
             "bearerAuth": []
@@ -7744,7 +7744,7 @@
         "tags": [
           "courses"
         ],
-        "summary": "Force-rename a player (plan IQ.9); empty body → Player N",
+        "summary": "Force-rename a player (plan IQ.9); empty body \u2192 Player N",
         "security": [
           {
             "bearerAuth": []
@@ -8947,7 +8947,7 @@
           "courses"
         ],
         "summary": "Board realtime WebSocket (plan VC.4)",
-        "description": "Upgrades to a Y.js sync WebSocket. First text frame must be JSON {\"authToken\":\"…\"}. Binary framing matches collab-docs: byte 0 = sync (persist+relay), byte 1 = awareness (relay only). Requires ffBoardsRealtime, per-course visualBoardsEnabled, enrollment, and a non-archived board. Oversized or flooding clients are disconnected.",
+        "description": "Upgrades to a Y.js sync WebSocket. First text frame must be JSON {\"authToken\":\"\u2026\"}. Binary framing matches collab-docs: byte 0 = sync (persist+relay), byte 1 = awareness (relay only). Requires ffBoardsRealtime, per-course visualBoardsEnabled, enrollment, and a non-archived board. Oversized or flooding clients are disconnected.",
         "parameters": [
           {
             "name": "course_code",
@@ -15070,6 +15070,125 @@
           }
         }
       }
+    },
+    "/api/v1/nav/preferences": {
+      "get": {
+        "tags": [
+          "me"
+        ],
+        "summary": "Get navigation preferences for a scope (UX.7)",
+        "operationId": "getNavPreferences",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "global"
+            },
+            "description": "global | settings | admin | course:<code> | course-settings:<code>"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Navigation preferences",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NavPreferences"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "me"
+        ],
+        "summary": "Replace navigation preferences for a scope (UX.7)",
+        "operationId": "putNavPreferences",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NavPreferences"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Saved preferences",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NavPreferences"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "me"
+        ],
+        "summary": "Reset navigation preferences for a scope (UX.7)",
+        "operationId": "deleteNavPreferences",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "global"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Defaults after reset",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NavPreferences"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -15432,7 +15551,7 @@
           },
           "sourceRef": {
             "type": "object",
-            "description": "topic/passage text or contentId — never student data",
+            "description": "topic/passage text or contentId \u2014 never student data",
             "properties": {
               "topic": {
                 "type": "string"
@@ -18332,6 +18451,114 @@
             "type": "array",
             "items": {
               "type": "object"
+            }
+          }
+        }
+      },
+      "ValidationFieldViolation": {
+        "type": "object",
+        "description": "One field-level validation failure (UX.6).",
+        "required": [
+          "path",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Dot/bracket path, e.g. sections[0].code",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "code": {
+            "type": "string",
+            "description": "Stable machine code, e.g. already_taken, required",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "message": {
+            "type": "string",
+            "description": "Fallback human text (client prefers i18n via code)",
+            "maxLength": 512
+          },
+          "params": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Optional ICU interpolation params (no secrets)"
+          }
+        }
+      },
+      "ValidationErrorResponse": {
+        "type": "object",
+        "description": "HTTP 422 field-addressable validation envelope (UX.6). Adopted incrementally on write endpoints.",
+        "required": [
+          "error",
+          "message",
+          "fields"
+        ],
+        "properties": {
+          "error": {
+            "type": "string",
+            "enum": [
+              "validation_failed"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable summary (i18n key preferred on client)"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationFieldViolation"
+            }
+          }
+        }
+      },
+      "NavPreferences": {
+        "type": "object",
+        "required": [
+          "scope",
+          "pinned",
+          "hidden",
+          "collapsed"
+        ],
+        "properties": {
+          "scope": {
+            "type": "string"
+          },
+          "pinned": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "hidden": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "collapsed": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "responses": {
+      "ValidationError": {
+        "description": "Field-addressable validation failure (UX.6)",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ValidationErrorResponse"
             }
           }
         }

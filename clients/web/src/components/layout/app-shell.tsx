@@ -12,6 +12,7 @@ import { CourseChecklistSummaryProvider } from '../../context/course-checklist-s
 import { CourseNavFeaturesProvider } from '../../context/course-nav-features-context'
 import { ContentFilterProvider } from '../../context/content-filter-context'
 import { PlatformFeaturesProvider } from '../../context/platform-features-context'
+import { NavPreferencesProvider } from '../../context/nav-preferences-context'
 import { ReadingPreferencesProvider } from '../../context/reading-preferences-context'
 import { QuizFocusTopBar } from './quiz-focus-top-bar'
 import { ReadingFocusTopBar } from './reading-focus-top-bar'
@@ -27,7 +28,7 @@ import { LmsExperienceRoot } from './lms-experience-root'
 import { LegalUpdateBanner } from '../legal/legal-update-banner'
 import { OfflineBanner } from '../offline-banner'
 import { SkipLink } from '../skip-link'
-import { useFocusOnRoute } from '../../lib/a11y'
+import { useFocusOnRoute, useStickyOffset } from '../../lib/a11y'
 import { ReadingRuler } from '../a11y/ReadingRuler'
 import { RouteTransition } from '../route-transition'
 
@@ -51,6 +52,8 @@ function AppShellLayout() {
   }`
 
   useFocusOnRoute()
+  // UX.5 FR-9 — keep --lx-sticky-offset in sync with chrome height for 2.4.11.
+  useStickyOffset()
 
   useEffect(() => {
     setReadingFocus(false)
@@ -104,6 +107,7 @@ function AppShellLayout() {
 export function AppShell() {
   return (
     <PlatformFeaturesProvider>
+    <NavPreferencesProvider>
     <ContentFilterProvider>
     <ReadingPreferencesProvider>
     <InboxUnreadProvider>
@@ -131,6 +135,7 @@ export function AppShell() {
     </InboxUnreadProvider>
     </ReadingPreferencesProvider>
     </ContentFilterProvider>
+    </NavPreferencesProvider>
     </PlatformFeaturesProvider>
   )
 }

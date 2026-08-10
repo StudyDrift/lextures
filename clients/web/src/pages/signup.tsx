@@ -167,10 +167,11 @@ export default function Signup() {
               </label>
               <input
                 id="email"
-                name="email"
+                name="username"
                 type="email"
-                autoComplete="email"
+                autoComplete="username"
                 required
+                spellCheck={false}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className={authFieldClass}

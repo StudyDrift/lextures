@@ -314,7 +314,7 @@ The primary region for students consumes the existing recommendation engine
 - **Must ship after** — [UX.1](UX.1-semantic-design-token-system.md) (status
   colour), [UX.2](../../completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md) (cards,
   disclosure), [UX.3](UX.3-typography-and-reading-system.md) (scale),
-  [UX.7](UX.7-navigation-information-architecture.md) (audience model reused),
+  [UX.7](../../completed/ui-ux/UX.7-navigation-information-architecture.md) (audience model reused),
   [UX.12](UX.12-loading-empty-error-offline-states.md) (per-widget states).
 - **Should ship alongside** — [`TD.14`](../tech_debt/TD.14-decompose-god-components.md)
   for the 1,487-line decomposition.
@@ -421,7 +421,7 @@ The primary region for students consumes the existing recommendation engine
 - Research: [research.md](research.md) R-1, R-4, R-5, R-6, R-8, R-9, R-16, R-18,
   R-31, R-32
 - Audit: [audit.md](audit.md) G-6, G-1, G-9, G-15, G-17
-- Related plans: [UX.7](UX.7-navigation-information-architecture.md),
+- Related plans: [UX.7](../../completed/ui-ux/UX.7-navigation-information-architecture.md),
   [UX.12](UX.12-loading-empty-error-offline-states.md),
   [UX.16](UX.16-progress-motivation-and-learner-agency.md),
   [UX.17](UX.17-perceived-performance-and-web-vitals-budget.md),

@@ -20,6 +20,8 @@ A GitHub issue is auto-created from `.github/ISSUE_TEMPLATE/vpat-update.yml` on 
 - [ ] Review any screen-reader testing notes from the release QA cycle
 - [ ] Check the 10.7 audit backlog for recently closed remediation items
 - [ ] Note the new product version and release date
+- [ ] Run `npm run a11y:wcag22` in `clients/web/` (target size + drag alternatives + ARIA contracts)
+- [ ] Review `docs/accessibility/wcag-2.2-conformance-gap-report.md` for residual 2.2 risk
 
 ---
 

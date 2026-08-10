@@ -106,6 +106,51 @@ export function reorderModulesInStructure(
   return flattenOrderedStructure([...nonModules, ...nextModules], childrenByModule)
 }
 
+/**
+ * UX.5 — absolute-index module move (click-to-move / "Move to…" menu).
+ * `toIndex` is 0-based among top-level modules only.
+ */
+export function moveModuleToIndex(
+  items: CourseStructureItem[],
+  moduleId: string,
+  toIndex: number,
+): CourseStructureItem[] | null {
+  const childrenByModule = buildModuleChildrenMap(items)
+  const topLevel = items
+    .filter((i) => !i.parentId)
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+  const modules = topLevel.filter((i) => i.kind === 'module')
+  const fromIndex = modules.findIndex((m) => m.id === moduleId)
+  if (fromIndex < 0 || toIndex < 0 || toIndex >= modules.length || fromIndex === toIndex) {
+    return null
+  }
+  const nonModules = topLevel.filter((i) => i.kind !== 'module')
+  const nextModules = arrayMove(modules, fromIndex, toIndex)
+  return flattenOrderedStructure([...nonModules, ...nextModules], childrenByModule)
+}
+
+/**
+ * UX.5 — absolute-index child move within a module.
+ */
+export function moveChildToIndex(
+  items: CourseStructureItem[],
+  moduleId: string,
+  childId: string,
+  toIndex: number,
+): CourseStructureItem[] | null {
+  const childrenByModule = buildModuleChildrenMap(items)
+  const children = [...(childrenByModule.get(moduleId) ?? [])]
+  const fromIndex = children.findIndex((c) => c.id === childId)
+  if (fromIndex < 0 || toIndex < 0 || toIndex >= children.length || fromIndex === toIndex) {
+    return null
+  }
+  childrenByModule.set(moduleId, arrayMove(children, fromIndex, toIndex))
+  const topLevel = items
+    .filter((i) => !i.parentId)
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+  return flattenOrderedStructure(topLevel, childrenByModule)
+}
+
 export function reorderChildrenInStructure(
   items: CourseStructureItem[],
   moduleId: string,

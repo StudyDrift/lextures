@@ -48,6 +48,10 @@ const SKIP = new Set([
   'toastSaveOk',
   'toastMutationError',
   'toastWithUndo',
+  // UX.6 utilities / context (not visual gallery demos)
+  'FieldContext',
+  'useFieldContext',
+  'mergeDescribedBy',
 ])
 
 function isTypeName(n) {
@@ -58,6 +62,8 @@ function isTypeName(n) {
     n.endsWith('Option') ||
     n.endsWith('Item') ||
     n.endsWith('Action') ||
+    n.endsWith('Handle') ||
+    n.endsWith('Value') ||
     n === 'ControlSize' ||
     n === 'MenuItem' ||
     n === 'BreadcrumbItem' ||

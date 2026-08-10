@@ -14,9 +14,11 @@ export function QuizFocusTopBar({ model }: { model: QuizShellFocusMode }) {
 
   return (
     <header
-      className={`flex min-h-14 shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b px-3 py-2 shadow-md print:hidden sm:px-4 md:px-6 ${barTint}`}
+      className={`lms-chrome flex min-h-14 shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b px-3 py-2 shadow-md print:hidden sm:px-4 md:px-6 ${barTint}`}
       role="banner"
       aria-label="Quiz session"
+      data-quiz-focus-bar
+      data-lx-sticky-chrome
     >
       <div className="min-w-0 flex-1 basis-[min(100%,14rem)]">
         <p className="truncate text-xs font-semibold uppercase tracking-wide opacity-80">Assessment</p>

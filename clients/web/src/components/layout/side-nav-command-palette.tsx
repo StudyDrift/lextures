@@ -51,7 +51,7 @@ export function TopBarMobileCommandPaletteButton() {
       aria-label="Search courses, people, pages, and actions"
       data-command-palette-anchor="topbar"
       onClick={() => open()}
-      className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-fg-muted transition-[background-color,color,border-color] hover:bg-surface-sunken focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/35 md:hidden dark:text-fg-muted dark:hover:bg-surface-overlay dark:focus-visible:ring-neutral-500/40"
+      className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-fg-muted transition-[background-color,color,border-color] hover:bg-surface-sunken focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/35 sm:hidden dark:text-fg-muted dark:hover:bg-surface-overlay dark:focus-visible:ring-neutral-500/40"
     >
       <Search className="h-5 w-5" strokeWidth={1.75} aria-hidden />
     </button>

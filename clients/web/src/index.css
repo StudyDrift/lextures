@@ -1769,9 +1769,40 @@ html[data-motion-delight='off'] .lx-delight-particle {
  * Paired with a "Here" chip so the signal is not colour-only (WCAG 1.4.1).
  * No pulsing / looping / flashing under any setting (WCAG 2.3.1).
  */
+/*
+ * UX.5 FR-8/FR-9 — Focus Not Obscured (Minimum).
+ * `--lx-sticky-offset` is set at runtime by useStickyOffset() from measured chrome.
+ * Fallback 3.5rem matches TopBar h-14 when JS has not run yet.
+ */
+:root {
+  --lx-sticky-offset: 3.5rem;
+}
+
 [data-focus-anchor],
-[data-setting-row] {
-  scroll-margin-top: 5rem;
+[data-setting-row],
+.lms-scope :where(
+  a[href],
+  button,
+  input,
+  select,
+  textarea,
+  [tabindex]:not([tabindex='-1']),
+  [contenteditable='true']
+) {
+  scroll-margin-block-start: var(--lx-sticky-offset, 3.5rem);
+  scroll-margin-block-end: 1.5rem;
+}
+
+/* Toast stack sits top-right; leave end margin so focused content can clear it (FR-10). */
+.lms-scope :where(
+  a[href],
+  button,
+  input,
+  select,
+  textarea,
+  [tabindex]:not([tabindex='-1'])
+) {
+  scroll-margin-inline-end: 12rem;
 }
 
 .lx-focus-anchor-highlight {

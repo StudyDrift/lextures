@@ -55,6 +55,7 @@ function HelpWidgetTrigger({
       aria-haspopup="dialog"
       onClick={onToggle}
       data-testid="help-widget-trigger"
+      data-lx-help-entry
       className={`relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-[background-color,color,border-color] focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30 ${ open ? 'bg-indigo-100 text-accent-fg dark:bg-indigo-900/40 dark:text-indigo-300' : 'text-fg-muted hover:bg-surface-sunken dark:text-fg-muted dark:hover:bg-surface-overlay' }`}
     >
       <HelpCircle className="h-5 w-5" aria-hidden />

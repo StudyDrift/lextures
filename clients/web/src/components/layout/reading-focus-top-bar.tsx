@@ -4,7 +4,11 @@ import { useReadingShellFocus } from './reading-shell-focus-context'
 export function ReadingFocusTopBar() {
   const { setReadingFocus } = useReadingShellFocus()
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-border-default bg-surface-raised px-3 shadow-sm print:hidden sm:px-5 dark:border-border-default dark:bg-surface-raised">
+    <header
+      className="lms-chrome flex h-14 shrink-0 items-center justify-between gap-3 border-b border-border-default bg-surface-raised px-3 shadow-sm print:hidden sm:px-5 dark:border-border-default dark:bg-surface-raised"
+      data-reading-focus-bar
+      data-lx-sticky-chrome
+    >
       <div className="flex min-w-0 items-center gap-2 text-sm font-medium text-fg-default">
         <BookOpen className="h-4 w-4 shrink-0 text-accent-fg" aria-hidden />
         <span className="truncate">Reading focus</span>

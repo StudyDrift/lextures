@@ -295,14 +295,7 @@ export default function MfaLogin() {
           {mfaFlow.mode === 'setup' && !totpQrUrl && (
             <div className="mb-6 space-y-3">
               <p className="text-sm text-fg-muted">Choose how to add two-factor authentication.</p>
-              <button
-                type="button"
-                onClick={() => void startTotpEnrol()}
-                disabled={status === 'loading'}
-                className="flex w-full items-center justify-center rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:border-indigo-300 hover:bg-surface-base disabled:opacity-60"
-              >
-                Use authenticator app (QR code)
-              </button>
+              {/* UX.5 FR-17 — passkey is a first-class primary alternative (no cognitive test). */}
               <button
                 type="button"
                 onClick={() => void runPasskeyCeremony()}
@@ -310,6 +303,14 @@ export default function MfaLogin() {
                 className="flex w-full items-center justify-center rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:opacity-60"
               >
                 {webauthnBusy ? 'Waiting for passkey…' : 'Register a passkey'}
+              </button>
+              <button
+                type="button"
+                onClick={() => void startTotpEnrol()}
+                disabled={status === 'loading'}
+                className="flex w-full items-center justify-center rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:border-indigo-300 hover:bg-surface-base disabled:opacity-60"
+              >
+                Use authenticator app (QR code)
               </button>
             </div>
           )}
@@ -325,6 +326,28 @@ export default function MfaLogin() {
             </div>
           )}
 
+          {mfaFlow.mode === 'challenge' && (
+            <div className="mb-6 space-y-3">
+              <button
+                type="button"
+                onClick={() => void runPasskeyCeremony()}
+                disabled={webauthnBusy}
+                data-testid="mfa-passkey-primary"
+                className="flex w-full items-center justify-center rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:opacity-60"
+              >
+                {webauthnBusy ? 'Waiting for passkey…' : 'Use passkey'}
+              </button>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center" aria-hidden>
+                  <div className="w-full border-t border-border-default" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-surface-raised px-2 text-fg-subtle">or enter a code</span>
+                </div>
+              </div>
+            </div>
+          )}
+
           <form className="space-y-5" onSubmit={onTotpSubmit}>
             <div>
               <label htmlFor="mfa-code" className="mb-1.5 block text-sm font-medium text-fg-muted">
@@ -332,11 +355,13 @@ export default function MfaLogin() {
               </label>
               <input
                 id="mfa-code"
-                name="mfa-code"
+                name="one-time-code"
+                type="text"
                 inputMode="numeric"
                 autoComplete="one-time-code"
                 aria-label="One-time code (6 digits)"
                 required={mfaFlow.mode === 'challenge' || totpCredId !== null}
+                // UX.5 FR-18: code stays visible for re-reading; paste is not blocked.
                 value={code}
                 onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                 className="w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 font-mono text-lg tracking-widest text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2"
@@ -351,34 +376,18 @@ export default function MfaLogin() {
             <button
               type="submit"
               disabled={status === 'loading' || code.length !== 6}
-              className="flex w-full items-center justify-center rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex w-full items-center justify-center rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:border-indigo-300 hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {status === 'loading' ? 'Verifying…' : mfaFlow.mode === 'setup' ? 'Confirm enrolment' : 'Continue'}
+              {status === 'loading' ? 'Verifying…' : mfaFlow.mode === 'setup' ? 'Confirm enrolment' : 'Continue with code'}
             </button>
           </form>
 
           {mfaFlow.mode === 'challenge' && (
             <>
-              <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center" aria-hidden>
-                  <div className="w-full border-t border-border-default" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-surface-raised px-2 text-fg-subtle">or</span>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => void runPasskeyCeremony()}
-                disabled={webauthnBusy}
-                className="mb-4 flex w-full items-center justify-center rounded-xl border border-border-default bg-surface-raised px-4 py-2.5 text-sm font-semibold text-fg-default shadow-sm transition-[background-color,color,border-color] hover:border-indigo-300 hover:bg-surface-base disabled:opacity-60"
-              >
-                {webauthnBusy ? 'Waiting for passkey…' : 'Use passkey'}
-              </button>
               {!showBackup ? (
                 <button
                   type="button"
-                  className="text-sm font-medium text-accent-fg hover:text-indigo-500"
+                  className="mt-4 text-sm font-medium text-accent-fg hover:text-indigo-500"
                   onClick={() => setShowBackup(true)}
                 >
                   Use a backup code instead
@@ -390,10 +399,12 @@ export default function MfaLogin() {
                   </label>
                   <input
                     id="backup"
+                    type="text"
                     className="w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 font-mono text-sm text-fg-default outline-none focus:border-indigo-400 focus:ring-2"
                     value={backup}
                     onChange={(e) => setBackup(e.target.value.toUpperCase())}
-                    autoComplete="off"
+                    autoComplete="one-time-code"
+                    spellCheck={false}
                   />
                   <button
                     type="submit"
