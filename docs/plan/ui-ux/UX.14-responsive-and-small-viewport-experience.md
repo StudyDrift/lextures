@@ -92,7 +92,7 @@ unverified across the product.
   card behaves correctly in a sidebar and in a main column.
 - **FR-7.** The app shell MUST adapt: sidebar → drawer below `md`; top bar
   condenses without losing the search affordance
-  ([UX.7](../../completed/ui-ux/UX.7-navigation-information-architecture.md) FR-16); focus/reading bars
+  ([UX.7](UX.7-navigation-information-architecture.md) FR-16); focus/reading bars
   remain usable.
 - **FR-8.** Modals MUST become **bottom sheets** below `md`, with drag-to-dismiss
   **and** a visible close control (drag alone is not accessible).

@@ -16,8 +16,6 @@ Lextures is an LMS (Learning Management System) with two main services:
 
 **Component library (UX.2):** Use `clients/web/src/components/ui/*` (barrel: `components/ui`) for buttons, dialogs, menus, tabs, form controls, and other interaction primitives. Do **not** hand-roll `<button>`, raw `role="dialog"` / `role="menu"` / `role="tablist"`, or `title=` tooltips in feature code. Gallery: `/design/components`. Guide: [docs/guides/component-library.md](docs/guides/component-library.md). CI: `npm run ds:coverage` and `npm run ds:gallery` in `clients/web/`.
 
-**Navigation registry (UX.7):** Global and in-course sidebar destinations live in `clients/web/src/lib/nav/` (`registry-global.ts`, `registry-course.ts`). New destinations MUST be registry entries (id, route, label, icon, section, priority, audience, flags/permissions) — do **not** append hand-written `<SideNavLink>` lists. Unique icons/labels within a scope are enforced by `npm run nav:check`. Guide: [docs/guides/navigation-registry.md](docs/guides/navigation-registry.md). Task-based taxonomy is behind `ffNavigationV2`.
-
 ### Starting services
 
 1. **Database**: `docker compose -f docker-compose.yml up -d postgres` (from repo root)

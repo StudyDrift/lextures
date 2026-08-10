@@ -339,7 +339,7 @@ engines (`../adaptive/` AC.*, `fetchLearnerRecommendations`).
 - **Must ship after** — [UX.1](UX.1-semantic-design-token-system.md),
   [UX.2](../../completed/ui-ux/UX.2-core-component-library-and-adoption-ratchet.md),
   [UX.3](UX.3-typography-and-reading-system.md) (the reading experience *is* the
-  type system), [UX.7](../../completed/ui-ux/UX.7-navigation-information-architecture.md),
+  type system), [UX.7](UX.7-navigation-information-architecture.md),
   [UX.12](UX.12-loading-empty-error-offline-states.md), and
   [`TD.14`](../tech_debt/TD.14-decompose-god-components.md) — **TD.14 is a hard
   prerequisite**; these components cannot be safely changed as they stand.

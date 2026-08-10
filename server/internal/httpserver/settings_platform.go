@@ -212,7 +212,6 @@ type platformSettingsJSON struct {
 	SOC2ModuleEnabled            bool    `json:"soc2ModuleEnabled"`
 	FFReadingPreferences         bool    `json:"ffReadingPreferences"`
 	FFTypeScale                  bool    `json:"ffTypeScale"`
-	FFNavigationV2               bool    `json:"ffNavigationV2"`
 	FFPinnedSettings             bool    `json:"ffPinnedSettings"`
 	FFMotionNavigation           bool    `json:"ffMotionNavigation"`
 	FFMotionReveal               bool    `json:"ffMotionReveal"`
@@ -488,7 +487,6 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			SOC2ModuleEnabled:                  merged.SOC2ModuleEnabled,
 			FFReadingPreferences:               merged.FFReadingPreferences,
 			FFTypeScale:                        merged.FFTypeScale,
-			FFNavigationV2:                     merged.FFNavigationV2,
 			FFPinnedSettings:                   merged.FFPinnedSettings,
 			FFMotionNavigation:                 merged.FFMotionNavigation,
 			FFMotionReveal:                     merged.FFMotionReveal,
@@ -747,7 +745,6 @@ type putPlatformBody struct {
 	SOC2ModuleEnabled            *bool    `json:"soc2ModuleEnabled"`
 	FFReadingPreferences         *bool    `json:"ffReadingPreferences"`
 	FFTypeScale                  *bool    `json:"ffTypeScale"`
-	FFNavigationV2               *bool    `json:"ffNavigationV2"`
 	FFPinnedSettings             *bool    `json:"ffPinnedSettings"`
 	FFMotionNavigation           *bool    `json:"ffMotionNavigation"`
 	FFMotionReveal               *bool    `json:"ffMotionReveal"`
@@ -1197,7 +1194,6 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("soc2moduleenabled", body.SOC2ModuleEnabled, func(v bool) { wr.SOC2ModuleEnabled = &v })
 		setBool("ffreadingpreferences", body.FFReadingPreferences, func(v bool) { wr.FFReadingPreferences = &v })
 		setBool("fftypescale", body.FFTypeScale, func(v bool) { wr.FFTypeScale = &v })
-		setBool("ffnavigationv2", body.FFNavigationV2, func(v bool) { wr.FFNavigationV2 = &v })
 		setBool("ffpinnedsettings", body.FFPinnedSettings, func(v bool) { wr.FFPinnedSettings = &v })
 		setMotion := func(v bool) {
 			wr.FFMotionNavigation = &v
@@ -1467,7 +1463,6 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			SOC2ModuleEnabled:                  merged.SOC2ModuleEnabled,
 			FFReadingPreferences:               merged.FFReadingPreferences,
 			FFTypeScale:                        merged.FFTypeScale,
-			FFNavigationV2:                     merged.FFNavigationV2,
 			FFPinnedSettings:                   merged.FFPinnedSettings,
 			FFMotionNavigation:                 merged.FFMotionNavigation,
 			FFMotionReveal:                     merged.FFMotionReveal,
