@@ -172,7 +172,8 @@ test.describe('MKTC.4 creator coupon manager', () => {
     await dialog.getByLabel(/Percent off/i).fill('25')
     await dialog.getByRole('button', { name: /Create coupon/i }).click()
 
-    await expect(coupons.getByText(couponCode.toUpperCase())).toBeVisible({ timeout: 15_000 })
+    const codeCell = coupons.locator('code', { hasText: couponCode.toUpperCase() })
+    await expect(codeCell).toBeVisible({ timeout: 15_000 })
 
     await page.getByRole('button', { name: new RegExp(`Copy share link for ${couponCode}`, 'i') }).click()
     const clip = await page.evaluate(() => navigator.clipboard.readText())
@@ -186,6 +187,6 @@ test.describe('MKTC.4 creator coupon manager', () => {
     await page.getByRole('button', { name: new RegExp(`Actions for ${couponCode}`, 'i') }).click()
     await page.getByRole('menuitem', { name: /Archive/i }).click()
     await page.getByRole('button', { name: /^Archive$/i }).click()
-    await expect(coupons.getByText(couponCode.toUpperCase())).toHaveCount(0, { timeout: 10_000 })
+    await expect(codeCell).toHaveCount(0, { timeout: 10_000 })
   })
 })
