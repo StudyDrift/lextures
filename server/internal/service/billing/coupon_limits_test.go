@@ -8,6 +8,17 @@ import (
 	"github.com/google/uuid"
 )
 
+// resetCouponLimitsForTest clears all in-memory coupon limit state (tests only).
+func resetCouponLimitsForTest() {
+	couponLimitMu.Lock()
+	defer couponLimitMu.Unlock()
+	couponUCBuckets = map[userCourseKey]windowBucket{}
+	couponUserHour = map[uuid.UUID]hourBucket{}
+	couponIPHour = map[string]hourBucket{}
+	couponFailState = map[userCourseKey]failState{}
+	couponExportHour = map[uuid.UUID]hourBucket{}
+}
+
 func TestCheckCouponApplyLimit_PerUserCourseMinute(t *testing.T) {
 	resetCouponLimitsForTest()
 	user := uuid.New()

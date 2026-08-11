@@ -164,6 +164,10 @@ func (d Deps) handleMarketplaceCourseDetail() http.HandlerFunc {
 		// Optional ?coupon= for share-link discounted price in one round trip (MKTC.3 FR-18).
 		// Never 4xx for a bad code — include coupon.applied:false + reason.
 		couponQuery := strings.TrimSpace(r.URL.Query().Get("coupon"))
+		// MKTC.7: iOS browser handoff records coupon_web_redirect_total{platform="ios"}.
+		if strings.EqualFold(strings.TrimSpace(r.URL.Query().Get("src")), "ios") {
+			telemetry.RecordCouponWebRedirect("ios")
+		}
 
 		owned := false
 		if courseID, parseErr := uuid.Parse(course.ID); parseErr == nil {

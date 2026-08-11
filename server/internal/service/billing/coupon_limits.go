@@ -84,17 +84,6 @@ var (
 	couponExportHour = map[uuid.UUID]hourBucket{}
 )
 
-// resetCouponLimitsForTest clears all in-memory coupon limit state (tests only).
-func resetCouponLimitsForTest() {
-	couponLimitMu.Lock()
-	defer couponLimitMu.Unlock()
-	couponUCBuckets = map[userCourseKey]windowBucket{}
-	couponUserHour = map[uuid.UUID]hourBucket{}
-	couponIPHour = map[string]hourBucket{}
-	couponFailState = map[userCourseKey]failState{}
-	couponExportHour = map[uuid.UUID]hourBucket{}
-}
-
 // CheckCouponApplyLimit enforces layered apply limits and cool-down (FR-1, FR-2).
 // On allow it increments the rate buckets. Cool-down is checked first and does not
 // consume a rate slot when already cooling down.

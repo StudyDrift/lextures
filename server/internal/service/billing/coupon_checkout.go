@@ -460,6 +460,10 @@ func PromoteCouponRedemptionFromWebhook(
 			if chargedCents > 0 {
 				_ = repoBilling.UpdateRedemptionChargedCents(ctx, pool, red.ID, chargedCents)
 			}
+			// FR-10: link entitlement when redeem raced ahead of entitlement creation.
+			if entitlementID != nil && red.EntitlementID == nil {
+				_ = repoBilling.LinkRedemptionEntitlement(ctx, pool, red.ID, *entitlementID)
+			}
 			if created {
 				telemetry.RecordCouponRedeemed()
 				if red.DiscountCents > 0 {

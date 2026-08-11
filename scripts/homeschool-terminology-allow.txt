@@ -78,3 +78,6 @@ www/scripts/prerender-courses.mjs:self-learner
 
 # Unit tests assert sitemap excludes the old slug and stub builder targets /homeschool.
 www/scripts/prerender-courses.test.mjs:self-learner
+
+# SEO plans document the permanent /self-learner → /homeschool redirect stub (HS.2 / FR-4).
+docs/plan/seo/**

@@ -4,6 +4,7 @@ import { usePlatformFeatures } from '../../context/platform-features-context'
 import { readApiErrorMessage } from '../../lib/errors'
 import { PLATFORM_SECRET_PLACEHOLDER } from '../../lib/platform-settings'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
+import { Input } from '../ui'
 import { FeatureToggleRow } from './feature-toggle-row'
 import {
   PLATFORM_FEATURE_DEFINITIONS,
@@ -843,7 +844,7 @@ export function PlatformSettingsPanel() {
               Cap on percent-off coupons creators can create (1–100). Use this to limit liability if
               discount abuse emerges. Fixed-amount coupons are unchanged.
             </p>
-            <input
+            <Input
               id="coupon-max-percent-off"
               type="number"
               min={1}
@@ -868,7 +869,7 @@ export function PlatformSettingsPanel() {
                   setBaseline(data)
                 })
               }}
-              className="mt-3 w-full max-w-xs rounded-lg border border-border-default bg-surface-raised px-3 py-2 font-mono text-sm text-fg-default focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 disabled:cursor-not-allowed disabled:opacity-60 dark:border-border-default dark:bg-surface-raised dark:text-fg-default"
+              className="mt-3 max-w-xs font-mono"
             />
           </div>
 

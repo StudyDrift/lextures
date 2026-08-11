@@ -57,10 +57,27 @@ extension LMSAPI {
 
     static func fetchMarketplaceCourseDetail(
         slug: String,
-        accessToken: String
+        accessToken: String,
+        couponCode: String? = nil,
+        source: String? = nil
     ) async throws -> MarketplaceCourseDetail? {
+        var items: [URLQueryItem] = []
+        if let couponCode, !couponCode.isEmpty {
+            items.append(URLQueryItem(name: "coupon", value: couponCode))
+        }
+        if let source, !source.isEmpty {
+            items.append(URLQueryItem(name: "src", value: source))
+        }
+        var path = "/api/v1/marketplace/courses/\(encodePath(slug))"
+        if !items.isEmpty {
+            var components = URLComponents()
+            components.queryItems = items
+            if let query = components.percentEncodedQuery, !query.isEmpty {
+                path += "?\(query)"
+            }
+        }
         let (data, response) = try await client.request(
-            path: "/api/v1/marketplace/courses/\(encodePath(slug))",
+            path: path,
             authorized: true,
             accessToken: accessToken
         )

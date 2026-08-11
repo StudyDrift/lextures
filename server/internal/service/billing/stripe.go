@@ -173,6 +173,8 @@ func HandleWebhookEvent(ctx context.Context, pool *pgxpool.Pool, event stripe.Ev
 	switch event.Type {
 	case "checkout.session.completed":
 		return handleCheckoutCompleted(ctx, pool, event, opts)
+	case "checkout.session.expired":
+		return handleCheckoutExpired(ctx, pool, event)
 	case "invoice.payment_succeeded":
 		return handleInvoicePaymentSucceeded(ctx, pool, event)
 	case "invoice.payment_failed":
@@ -184,6 +186,18 @@ func HandleWebhookEvent(ctx context.Context, pool *pgxpool.Pool, event stripe.Ev
 	default:
 		return &WebhookResult{EventType: string(event.Type)}, nil
 	}
+}
+
+// handleCheckoutExpired releases a coupon reservation tied to an abandoned Checkout Session (MKTC.3 FR-17).
+func handleCheckoutExpired(ctx context.Context, pool *pgxpool.Pool, event stripe.Event) (*WebhookResult, error) {
+	var sess stripe.CheckoutSession
+	if err := json.Unmarshal(event.Data.Raw, &sess); err != nil {
+		return nil, err
+	}
+	if sid := strings.TrimSpace(sess.ID); sid != "" {
+		_ = repoBilling.ReleaseCouponReservationBySession(ctx, pool, sid, "checkout_expired")
+	}
+	return &WebhookResult{EventType: string(event.Type)}, nil
 }
 
 func handleCheckoutCompleted(ctx context.Context, pool *pgxpool.Pool, event stripe.Event, opts WebhookOptions) (*WebhookResult, error) {

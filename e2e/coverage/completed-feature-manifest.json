@@ -4067,7 +4067,7 @@
         "authorization": true,
         "dependency": "n/a",
         "rollback": false,
-        "notes": "Matrix covers course flag; generation/serving journeys tracked under AC.2\u2013AC.6 gaps."
+        "notes": "Matrix covers course flag; generation/serving journeys tracked under AC.2–AC.6 gaps."
       }
     },
     {
@@ -4154,7 +4154,7 @@
       "risk": "critical",
       "client": "web",
       "coverage": "smoke",
-      "rationale": "API bind/refresh + instructor workspace post-assessment picker and effectiveness chip; full pre\u2192serve\u2192post causal journey remains backlog.",
+      "rationale": "API bind/refresh + instructor workspace post-assessment picker and effectiveness chip; full pre→serve→post causal journey remains backlog.",
       "owner": "Learning Platform",
       "specs": [
         {
@@ -4259,7 +4259,7 @@
         "authorization": true,
         "dependency": "n/a",
         "rollback": false,
-        "notes": "CT.1 foundations only; authoring UI and student runtime tracked under CT.2\u2013CT.3."
+        "notes": "CT.1 foundations only; authoring UI and student runtime tracked under CT.2–CT.3."
       }
     },
     {
@@ -4361,7 +4361,7 @@
       "risk": "major",
       "client": "web",
       "coverage": "journey",
-      "rationale": "Playwright covers sandbox_probe iframe mount, interact\u2192save\u2192grade loop, hostile cookie/parent/storage/fetch containment, and admin migration dry-run reporting.",
+      "rationale": "Playwright covers sandbox_probe iframe mount, interact→save→grade loop, hostile cookie/parent/storage/fetch containment, and admin migration dry-run reporting.",
       "owner": "Learning Platform",
       "specs": [
         {
@@ -4499,7 +4499,7 @@
       "risk": "major",
       "client": "web",
       "coverage": "journey",
-      "rationale": "Playwright covers ask \u2192 cited dry-run answer persistence, reload restore, daily rate-limit message, and instructor enrollment reset clearing the transcript.",
+      "rationale": "Playwright covers ask → cited dry-run answer persistence, reload restore, daily rate-limit message, and instructor enrollment reset clearing the transcript.",
       "owner": "AI Platform",
       "specs": [
         {
@@ -4526,7 +4526,7 @@
       "risk": "major",
       "client": "web",
       "coverage": "journey",
-      "rationale": "Playwright covers answer-key redaction, wrong\u2192retry\u2192correct scoring, sequential locking, attempt exhaustion, idempotent submit, host render, and instructor option-distribution analytics.",
+      "rationale": "Playwright covers answer-key redaction, wrong→retry→correct scoring, sequential locking, attempt exhaustion, idempotent submit, host render, and instructor option-distribution analytics.",
       "owner": "Assessment",
       "specs": [
         {
@@ -4553,7 +4553,7 @@
       "risk": "major",
       "client": "web",
       "coverage": "journey",
-      "rationale": "Playwright covers reveal redaction, confidence-required gate, commit\u2192reveal, irreversibility (action + PUT), peer small-n suppression, reflection, host render/reload persistence, and CT.4 reset restoring the gate.",
+      "rationale": "Playwright covers reveal redaction, confidence-required gate, commit→reveal, irreversibility (action + PUT), peer small-n suppression, reflection, host render/reload persistence, and CT.4 reset restoring the gate.",
       "owner": "Assessment",
       "specs": [
         {
@@ -4715,7 +4715,7 @@
       "risk": "major",
       "client": "web",
       "coverage": "journey",
-      "rationale": "Playwright covers sensitive-field redaction, sequential lock, wrong\u2192hint\u2192algebraic normalisation correct, attempt exhaustion\u2192reveal_step, locale numeric input, analytics facets, and UI mount.",
+      "rationale": "Playwright covers sensitive-field redaction, sequential lock, wrong→hint→algebraic normalisation correct, attempt exhaustion→reveal_step, locale numeric input, analytics facets, and UI mount.",
       "owner": "Assessment",
       "specs": [
         {
@@ -4921,7 +4921,7 @@
       "risk": "critical",
       "client": "mobile",
       "coverage": "not-applicable",
-      "rationale": "Mobile client story: Content Tool host + state persistence (fence\u2192instance, ToolFrame, autosave/conflict/offline, noop_probe). Covered by native unit suites + shared fixtures; web Playwright is not the coverage surface.",
+      "rationale": "Mobile client story: Content Tool host + state persistence (fence→instance, ToolFrame, autosave/conflict/offline, noop_probe). Covered by native unit suites + shared fixtures; web Playwright is not the coverage surface.",
       "owner": "Mobile",
       "reviewed": true,
       "flags": {
@@ -4943,7 +4943,7 @@
       "risk": "major",
       "client": "mobile",
       "coverage": "not-applicable",
-      "rationale": "Mobile client story: sandboxed WebView tool host (CT.5 bridge, opaque origin, native\u2192sandbox\u2192placeholder). Covered by native unit suites + shared bridge fixtures (AC-16); web Playwright is not the coverage surface.",
+      "rationale": "Mobile client story: sandboxed WebView tool host (CT.5 bridge, opaque origin, native→sandbox→placeholder). Covered by native unit suites + shared bridge fixtures (AC-16); web Playwright is not the coverage surface.",
       "owner": "Mobile",
       "reviewed": true,
       "flags": {
@@ -5009,7 +5009,7 @@
       "risk": "major",
       "client": "mobile",
       "coverage": "not-applicable",
-      "rationale": "Mobile client story: native pack-3 renderers (sort_sequence, highlight_annotate, diagram_hotspot) on the CT.M3 host with tap-to-assign alternatives (WCAG \u00a72.5.7). Covered by ContentToolPack3Logic unit suites + shared pack3-logic fixtures (AC-15); web Playwright is not the coverage surface.",
+      "rationale": "Mobile client story: native pack-3 renderers (sort_sequence, highlight_annotate, diagram_hotspot) on the CT.M3 host with tap-to-assign alternatives (WCAG §2.5.7). Covered by ContentToolPack3Logic unit suites + shared pack3-logic fixtures (AC-15); web Playwright is not the coverage surface.",
       "owner": "Mobile",
       "reviewed": true,
       "flags": {
@@ -5116,7 +5116,7 @@
         "authorization": true,
         "dependency": "n/a",
         "rollback": true,
-        "notes": "No feature flag. Snapshot TTL via CHECKLIST_SNAPSHOT_TTL. Unblocks CC.3\u2013CC.7/CC.9."
+        "notes": "No feature flag. Snapshot TTL via CHECKLIST_SNAPSHOT_TTL. Unblocks CC.3–CC.7/CC.9."
       }
     },
     {
@@ -5159,7 +5159,7 @@
       "risk": "major",
       "client": "ops",
       "coverage": "smoke",
-      "rationale": "22 structure/outcomes checklist rules (recommended tier) evaluated server-side. Playwright covers outcomes.assessment-mapping evidence rows (5 assignments, map 2\u21923, evidence shrinks); UI expandable table lands with CC.7/CC.8.",
+      "rationale": "22 structure/outcomes checklist rules (recommended tier) evaluated server-side. Playwright covers outcomes.assessment-mapping evidence rows (5 assignments, map 2→3, evidence shrinks); UI expandable table lands with CC.7/CC.8.",
       "owner": "Learning Platform",
       "reviewed": true,
       "specs": [
@@ -5188,7 +5188,7 @@
       "risk": "major",
       "client": "ops",
       "coverage": "smoke",
-      "rationale": "26 assessment/grading/feedback/interaction checklist rules (recommended tier) evaluated server-side. Playwright covers grading.group-weights (87%\u2192todo, 100%\u2192done) and feedback.rubrics-on-high-stakes evidence targeting assignment.rubric; accommodations privacy asserted in Go tests. UI lands with CC.7/CC.8.",
+      "rationale": "26 assessment/grading/feedback/interaction checklist rules (recommended tier) evaluated server-side. Playwright covers grading.group-weights (87%→todo, 100%→done) and feedback.rubrics-on-high-stakes evidence targeting assignment.rubric; accommodations privacy asserted in Go tests. UI lands with CC.7/CC.8.",
       "owner": "Learning Platform",
       "reviewed": true,
       "specs": [
@@ -5217,7 +5217,7 @@
       "risk": "major",
       "client": "ops",
       "coverage": "smoke",
-      "rationale": "20 accessibility/UDL/launch checklist rules (recommended tier) with shared ContentDoc parse and SSRF-hardened link-health checker (disabled by default). Playwright covers a11y.image-alt-text progress\u2192done and launch.student-preview after View as: Student; linkhealth SSRF/cap asserted in Go tests. UI lands with CC.7/CC.8.",
+      "rationale": "20 accessibility/UDL/launch checklist rules (recommended tier) with shared ContentDoc parse and SSRF-hardened link-health checker (disabled by default). Playwright covers a11y.image-alt-text progress→done and launch.student-preview after View as: Student; linkhealth SSRF/cap asserted in Go tests. UI lands with CC.7/CC.8.",
       "owner": "Learning Platform",
       "reviewed": true,
       "specs": [
@@ -5264,7 +5264,7 @@
         "authorization": true,
         "dependency": "n/a",
         "rollback": true,
-        "notes": "No feature flag. Client gating is UX-only; server enforces item:create (CC.2). Unblocks CC.8\u2013CC.10."
+        "notes": "No feature flag. Client gating is UX-only; server enforces item:create (CC.2). Unblocks CC.8–CC.10."
       }
     },
     {
@@ -7982,6 +7982,197 @@
       "reviewed": true
     },
     {
+      "id": "MKTC.1",
+      "path": "docs/completed/marketplace/MKTC.1-coupon-data-model-and-discount-engine.md",
+      "markets": [
+        "HS",
+        "HE",
+        "K12"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "api-contract",
+      "rationale": "Discount engine + ledger covered by Go tests and coupon checkout paths exercised by learner coupon e2e.",
+      "owner": "Marketplace",
+      "specs": [
+        {
+          "path": "e2e/tests/course-marketplace-learner-coupons.spec.ts"
+        },
+        {
+          "path": "e2e/tests/course-coupons.spec.ts"
+        }
+      ],
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": true,
+        "rollback": true,
+        "notes": "ffCourseCoupons + ffStripeBilling; platform couponMaxPercentOff in MKTC.7."
+      },
+      "reviewed": true
+    },
+    {
+      "id": "MKTC.2",
+      "path": "docs/completed/marketplace/MKTC.2-creator-coupon-management-api.md",
+      "markets": [
+        "HS",
+        "HE",
+        "K12"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "api-contract",
+      "rationale": "Creator coupon CRUD/share-link API covered via course-coupons Playwright setup and HTTP assertions.",
+      "owner": "Marketplace",
+      "specs": [
+        {
+          "path": "e2e/tests/course-coupons.spec.ts"
+        }
+      ],
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": true,
+        "rollback": true
+      },
+      "reviewed": true
+    },
+    {
+      "id": "MKTC.3",
+      "path": "docs/completed/marketplace/MKTC.3-coupon-aware-checkout-and-redemption.md",
+      "markets": [
+        "HS",
+        "HE",
+        "K12"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "journey",
+      "rationale": "Learner apply/URL/remove/100%-off enroll journey in course-marketplace-learner-coupons.spec.ts.",
+      "owner": "Marketplace",
+      "specs": [
+        {
+          "path": "e2e/tests/course-marketplace-learner-coupons.spec.ts"
+        }
+      ],
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": true,
+        "rollback": true
+      },
+      "reviewed": true
+    },
+    {
+      "id": "MKTC.4",
+      "path": "docs/completed/marketplace/MKTC.4-web-creator-coupon-manager.md",
+      "markets": [
+        "HS",
+        "HE",
+        "K12"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "journey",
+      "rationale": "Creator coupon manager UI covered by course-coupons.spec.ts.",
+      "owner": "Marketplace",
+      "specs": [
+        {
+          "path": "e2e/tests/course-coupons.spec.ts"
+        }
+      ],
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": true,
+        "rollback": true
+      },
+      "reviewed": true
+    },
+    {
+      "id": "MKTC.5",
+      "path": "docs/completed/marketplace/MKTC.5-web-learner-coupon-entry-and-url-codes.md",
+      "markets": [
+        "HS",
+        "HE",
+        "K12"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "journey",
+      "rationale": "Learner coupon field, URL codes, reject/remove covered by course-marketplace-learner-coupons.spec.ts.",
+      "owner": "Marketplace",
+      "specs": [
+        {
+          "path": "e2e/tests/course-marketplace-learner-coupons.spec.ts"
+        }
+      ],
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": true,
+        "rollback": true
+      },
+      "reviewed": true
+    },
+    {
+      "id": "MKTC.6",
+      "path": "docs/completed/marketplace/MKTC.6-mobile-coupon-redemption.md",
+      "markets": [
+        "HS",
+        "HE",
+        "K12"
+      ],
+      "risk": "major",
+      "client": "mobile",
+      "coverage": "not-applicable",
+      "rationale": "Mobile client story; web Playwright suite is not the coverage surface (same disposition as MOB.7).",
+      "owner": "Mobile",
+      "reviewed": true
+    },
+    {
+      "id": "MKTC.7",
+      "path": "docs/completed/marketplace/MKTC.7-abuse-prevention-analytics-and-rollout.md",
+      "markets": [
+        "HS",
+        "HE",
+        "K12"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "smoke",
+      "rationale": "Flag-off absence + creator/learner coupon paths exercise abuse/flag surfaces; deeper analytics/export remain ops-oriented.",
+      "owner": "Marketplace",
+      "specs": [
+        {
+          "path": "e2e/tests/course-coupons.spec.ts"
+        },
+        {
+          "path": "e2e/tests/course-marketplace-learner-coupons.spec.ts"
+        }
+      ],
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": true,
+        "authorization": true,
+        "dependency": true,
+        "rollback": true,
+        "notes": "ffCourseCoupons + couponMaxPercentOff platform ceiling."
+      },
+      "reviewed": true
+    },
+    {
       "id": "M0.1",
       "path": "docs/completed/mobile/M0.1-push-deep-links.md",
       "markets": [
@@ -9863,7 +10054,7 @@
       "risk": "minor",
       "client": "web",
       "coverage": "journey",
-      "rationale": "Playwright journey selects across paragraphs on a content page and asserts \u2318/Ctrl+C copies every paragraph.",
+      "rationale": "Playwright journey selects across paragraphs on a content page and asserts ⌘/Ctrl+C copies every paragraph.",
       "owner": "Web Platform",
       "specs": [
         {

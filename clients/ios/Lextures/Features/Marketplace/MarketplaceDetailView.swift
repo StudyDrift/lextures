@@ -707,6 +707,17 @@ struct MarketplaceDetailView: View {
             "coupon_web_redirect",
             attributes: ["slug": slug]
         )
+        // Server metric coupon_web_redirect_total{platform="ios"} (MKTC.7).
+        if let token = session.accessToken {
+            Task {
+                _ = try? await LMSAPI.fetchMarketplaceCourseDetail(
+                    slug: slug,
+                    accessToken: token,
+                    couponCode: code,
+                    source: "ios"
+                )
+            }
+        }
         LinkOpener.open(
             LinkOpener.Request(
                 urlString: path,
