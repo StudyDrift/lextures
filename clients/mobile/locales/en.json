@@ -2694,6 +2694,7 @@
     "mobile.marketplace.aboutTitle": "About",
     "mobile.marketplace.buy": "Buy",
     "mobile.marketplace.buyOnWeb": "Buy on web",
+    "mobile.marketplace.buyWithPrice": "Buy — %@",
     "mobile.marketplace.claimError": "Could not enroll in this course.",
     "mobile.marketplace.claimPaidError": "This course requires purchase.",
     "mobile.marketplace.claiming": "Enrolling…",

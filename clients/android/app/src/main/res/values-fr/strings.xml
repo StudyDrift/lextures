@@ -3071,6 +3071,7 @@ I noticed %2$s in our course and wanted to check in. Let me know if you need hel
     <string name="mobile_marketplace_aboutTitle">À propos</string>
     <string name="mobile_marketplace_buy">Acheter</string>
     <string name="mobile_marketplace_buyOnWeb">Acheter sur le web</string>
+    <string name="mobile_marketplace_buyWithPrice">Acheter — %1$s</string>
     <string name="mobile_marketplace_claimError">Impossible de s’inscrire à ce cours.</string>
     <string name="mobile_marketplace_claimPaidError">Ce cours nécessite un achat.</string>
     <string name="mobile_marketplace_claiming">Inscription…</string>

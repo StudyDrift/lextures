@@ -3101,6 +3101,7 @@
     "mobile.marketplace.aboutTitle": "À propos",
     "mobile.marketplace.buy": "Acheter",
     "mobile.marketplace.buyOnWeb": "Acheter sur le web",
+    "mobile.marketplace.buyWithPrice": "Acheter — %@",
     "mobile.marketplace.claimError": "Impossible de s’inscrire à ce cours.",
     "mobile.marketplace.claimPaidError": "Ce cours nécessite un achat.",
     "mobile.marketplace.claiming": "Inscription…",

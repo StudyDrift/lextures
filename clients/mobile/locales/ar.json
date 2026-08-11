@@ -3117,6 +3117,7 @@
     "mobile.marketplace.aboutTitle": "حول",
     "mobile.marketplace.buy": "شراء",
     "mobile.marketplace.buyOnWeb": "الشراء عبر الويب",
+    "mobile.marketplace.buyWithPrice": "شراء — %@",
     "mobile.marketplace.claimError": "تعذر التسجيل في هذه الدورة.",
     "mobile.marketplace.claimPaidError": "هذه الدورة تتطلب الشراء.",
     "mobile.marketplace.claiming": "جارٍ التسجيل…",
