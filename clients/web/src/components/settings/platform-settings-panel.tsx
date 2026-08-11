@@ -4,6 +4,7 @@ import { usePlatformFeatures } from '../../context/platform-features-context'
 import { readApiErrorMessage } from '../../lib/errors'
 import { PLATFORM_SECRET_PLACEHOLDER } from '../../lib/platform-settings'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
+import { Input } from '../ui'
 import { FeatureToggleRow } from './feature-toggle-row'
 import {
   PLATFORM_FEATURE_DEFINITIONS,
@@ -56,6 +57,14 @@ function normalizePlatformPayload(data: PlatformSettingsPayload) {
   data.sesFrom ??= ''
   data.sesConfigurationSet ??= ''
   data.ffEmailSes ??= false
+  if (
+    typeof data.couponMaxPercentOff !== 'number' ||
+    Number.isNaN(data.couponMaxPercentOff) ||
+    data.couponMaxPercentOff <= 0 ||
+    data.couponMaxPercentOff > 100
+  ) {
+    data.couponMaxPercentOff = 100
+  }
   data.sources = { ...emptyForm().sources, ...data.sources }
 }
 
@@ -196,6 +205,8 @@ function emptyForm(): PlatformSettingsPayload {
     ffReportCards: false,
     ffPublicCatalog: false,
     ffCourseMarketplace: true,
+    ffCourseCoupons: true,
+    couponMaxPercentOff: 100,
     ffContentToolMarketplace: false,
     ffFeedback: true,
     ffVisualBoards: true,
@@ -262,6 +273,7 @@ function emptyForm(): PlatformSettingsPayload {
       sesRegion: 'environment',
       sesFrom: 'environment',
       sesConfigurationSet: 'environment',
+      couponMaxPercentOff: 'default',
     },
   }
 }
@@ -478,6 +490,9 @@ export function PlatformSettingsPanel() {
       })
       maybe('smtpPort', baseline.smtpPort, form.smtpPort, () => {
         body.smtpPort = form.smtpPort
+      })
+      maybe('couponMaxPercentOff', baseline.couponMaxPercentOff, form.couponMaxPercentOff, () => {
+        body.couponMaxPercentOff = form.couponMaxPercentOff
       })
       maybe('smtpFrom', baseline.smtpFrom, form.smtpFrom, () => {
         body.smtpFrom = form.smtpFrom.trim()
@@ -822,6 +837,43 @@ export function PlatformSettingsPanel() {
           </div>
 
           <div className="mt-4 border-t border-border-subtle pt-4 dark:border-border-subtle">
+            <label className="text-sm font-semibold text-fg-default" htmlFor="coupon-max-percent-off">
+              Maximum coupon discount {sourceBadge(form.sources.couponMaxPercentOff)}
+            </label>
+            <p className="mt-1 text-sm text-fg-muted">
+              Cap on percent-off coupons creators can create (1–100). Use this to limit liability if
+              discount abuse emerges. Fixed-amount coupons are unchanged.
+            </p>
+            <Input
+              id="coupon-max-percent-off"
+              type="number"
+              min={1}
+              max={100}
+              step={1}
+              value={form.couponMaxPercentOff}
+              disabled={featureSaving}
+              onChange={(e) => {
+                const n = Number.parseFloat(e.target.value)
+                update(
+                  'couponMaxPercentOff',
+                  Number.isFinite(n) ? Math.min(100, Math.max(1, n)) : 100,
+                )
+              }}
+              onBlur={() => {
+                if (form.couponMaxPercentOff === baseline.couponMaxPercentOff) return
+                void putPlatformSettings({
+                  couponMaxPercentOff: form.couponMaxPercentOff,
+                  updateMask: ['couponMaxPercentOff'],
+                }).then((data) => {
+                  setForm(data)
+                  setBaseline(data)
+                })
+              }}
+              className="mt-3 max-w-xs font-mono"
+            />
+          </div>
+
+          <div className="mt-4 border-t border-border-subtle pt-4 dark:border-border-subtle">
             <label className="text-sm font-semibold text-fg-default">
               MFA requirement {sourceBadge(form.sources.mfaEnforcement)}
             </label>
@@ -868,7 +920,7 @@ export function PlatformSettingsPanel() {
           <button
             type="submit"
             disabled={saving}
-            className="rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-surface-raised"
+            className="rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm motion-safe:transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-surface-raised"
           >
             {saving ? 'Saving…' : 'Save changes'}
           </button>

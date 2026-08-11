@@ -1,4 +1,7 @@
-# MainTabView is the app shell; splitting it further is deferred.
+# MainTabView is the app shell; coupon deep-link helpers live in AppShellModel+MarketplaceCoupons.
 file_length:
   warning: 800
   error: 1200
+type_body_length:
+  warning: 350
+  error: 450

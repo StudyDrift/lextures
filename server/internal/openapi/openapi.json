@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "StudyDrift API",
-    "description": "Lextures LMS HTTP API. Generate TypeScript types: npx openapi-typescript http://localhost:8080/api/openapi.json -o src/lib/api-types.generated.ts (with the API running). AP.9 (0.2.0): Multi-provider AI GA. Deprecated: openRouterApiKey / clearOpenRouterApiKey on /api/v1/settings/ai and openRouterConfigured on /api/v1/platform/features \u2014 use /api/v1/settings/ai/providers and aiConfigured. Dual-read of platform_app_settings.openrouter_api_key continues for \u22651 minor release; see docs/api-changelog-ai-providers.md. TD.3 (0.2.1): Restored valid OpenAPI document (reattached components, fixed paths brace structure). CC.2: course checklist state API and dismissals.",
+    "description": "Lextures LMS HTTP API. Generate TypeScript types: npx openapi-typescript http://localhost:8080/api/openapi.json -o src/lib/api-types.generated.ts (with the API running). AP.9 (0.2.0): Multi-provider AI GA. Deprecated: openRouterApiKey / clearOpenRouterApiKey on /api/v1/settings/ai and openRouterConfigured on /api/v1/platform/features — use /api/v1/settings/ai/providers and aiConfigured. Dual-read of platform_app_settings.openrouter_api_key continues for ≥1 minor release; see docs/api-changelog-ai-providers.md. TD.3 (0.2.1): Restored valid OpenAPI document (reattached components, fixed paths brace structure). CC.2: course checklist state API and dismissals.",
     "version": "0.2.1"
   },
   "tags": [
@@ -48,7 +48,7 @@
     },
     {
       "name": "transcripts",
-      "description": "Academic transcript preview, issuance, orders, lifecycle, fees, and electronic delivery (T01\u2013T06)"
+      "description": "Academic transcript preview, issuance, orders, lifecycle, fees, and electronic delivery (T01–T06)"
     },
     {
       "name": "content-tools",
@@ -2551,7 +2551,7 @@
         "tags": [
           "auth"
         ],
-        "summary": "Native Sign in with Apple (AuthenticationServices identity token \u2192 Lextures tokens)",
+        "summary": "Native Sign in with Apple (AuthenticationServices identity token → Lextures tokens)",
         "requestBody": {
           "required": true,
           "content": {
@@ -2604,7 +2604,7 @@
         "tags": [
           "auth"
         ],
-        "summary": "Native Google Sign-In (Credential Manager ID token \u2192 Lextures tokens)",
+        "summary": "Native Google Sign-In (Credential Manager ID token → Lextures tokens)",
         "requestBody": {
           "required": true,
           "content": {
@@ -3356,7 +3356,7 @@
         ],
         "responses": {
           "200": {
-            "description": "{ courses: PublicMarketplaceCourse[], total, nextCursor } \u2014 no owned field"
+            "description": "{ courses: PublicMarketplaceCourse[], total, nextCursor } — no owned field"
           },
           "400": {
             "description": "Invalid filter"
@@ -3478,7 +3478,7 @@
         "tags": [
           "courses"
         ],
-        "summary": "Marketplace course detail by catalog slug or course code (plan MKT3)",
+        "summary": "Marketplace course detail by catalog slug or course code (plan MKT3 / MKTC.3)",
         "security": [
           {
             "bearerAuth": []
@@ -3492,11 +3492,20 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "coupon",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional coupon code; when present response includes coupon preview object (plan MKTC.3 FR-18). Invalid codes return applied:false, never 4xx."
           }
         ],
         "responses": {
           "200": {
-            "description": "{ course, owned, priceCents, priceCurrency, listPriceCents, whatsIncluded, rating }"
+            "description": "{ course, owned, priceCents, priceCurrency, listPriceCents, whatsIncluded, rating, coupon? }"
           },
           "401": {
             "description": "Sign in required"
@@ -3512,7 +3521,7 @@
         "tags": [
           "courses"
         ],
-        "summary": "Claim a free marketplace course (entitlement + enrollment) (plan MKT4)",
+        "summary": "Claim a free marketplace course, or redeem a 100%-off coupon on a paid course (plan MKT4 / MKTC.3)",
         "security": [
           {
             "bearerAuth": []
@@ -3530,19 +3539,38 @@
         ],
         "responses": {
           "200": {
-            "description": "{ enrolled, entitlementId, alreadyOwned?, firstItemId?, courseCode }"
+            "description": "{ enrolled, entitlementId, alreadyOwned?, firstItemId?, courseCode, grantedFree? }"
           },
           "401": {
             "description": "Sign in required"
           },
           "402": {
-            "description": "Paid course \u2014 use checkout; body includes checkoutHint"
+            "description": "Paid course — use checkout; body includes checkoutHint"
           },
           "404": {
             "description": "Not listed or feature disabled"
           },
           "429": {
             "description": "Rate limited"
+          },
+          "422": {
+            "description": "Coupon not applicable: { error, reason, listPriceCents, currency }"
+          }
+        },
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "couponCode": {
+                    "type": "string",
+                    "description": "Optional first-party course coupon (100%-off path for paid courses)"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -3552,7 +3580,7 @@
         "tags": [
           "courses"
         ],
-        "summary": "Start Stripe Checkout for a paid marketplace course (plan MKT4)",
+        "summary": "Start Stripe Checkout for a paid marketplace course; optional couponCode (plan MKT4 / MKTC.3)",
         "security": [
           {
             "bearerAuth": []
@@ -3570,10 +3598,10 @@
         ],
         "responses": {
           "200": {
-            "description": "{ checkoutUrl, sessionId } or { alreadyOwned, courseCode, courseId }"
+            "description": "{ sessionId, checkoutUrl, chargedCents, currency } or { grantedFree, enrolled, entitlementId, courseCode, firstItemId? } or { alreadyOwned, courseCode, courseId }"
           },
           "400": {
-            "description": "Free course \u2014 use claim instead"
+            "description": "Free course — use claim instead"
           },
           "401": {
             "description": "Sign in required"
@@ -3583,6 +3611,25 @@
           },
           "429": {
             "description": "Rate limited"
+          },
+          "422": {
+            "description": "Coupon not applicable: { error, reason, listPriceCents, currency }"
+          }
+        },
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "couponCode": {
+                    "type": "string",
+                    "description": "Optional first-party course coupon; server re-evaluates and reserves a seat"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -4298,7 +4345,7 @@
         "tags": [
           "accommodations"
         ],
-        "summary": "List a learner\u2019s accommodation records (coordinator perm)",
+        "summary": "List a learner’s accommodation records (coordinator perm)",
         "security": [
           {
             "bearerAuth": []
@@ -4465,7 +4512,7 @@
           "accommodations",
           "me"
         ],
-        "summary": "List this learner\u2019s active (by date range) accommodation summary entries",
+        "summary": "List this learner’s active (by date range) accommodation summary entries",
         "security": [
           {
             "bearerAuth": []
@@ -4486,7 +4533,7 @@
         "tags": [
           "admin"
         ],
-        "summary": "Start IRT 2PL calibration job (202 + jobId); fits a/b for active uncalibrated or pilot items with \u2265200 responses; optional conceptId scopes to one concept",
+        "summary": "Start IRT 2PL calibration job (202 + jobId); fits a/b for active uncalibrated or pilot items with ≥200 responses; optional conceptId scopes to one concept",
         "security": [
           {
             "bearerAuth": []
@@ -7744,7 +7791,7 @@
         "tags": [
           "courses"
         ],
-        "summary": "Force-rename a player (plan IQ.9); empty body \u2192 Player N",
+        "summary": "Force-rename a player (plan IQ.9); empty body → Player N",
         "security": [
           {
             "bearerAuth": []
@@ -8947,7 +8994,7 @@
           "courses"
         ],
         "summary": "Board realtime WebSocket (plan VC.4)",
-        "description": "Upgrades to a Y.js sync WebSocket. First text frame must be JSON {\"authToken\":\"\u2026\"}. Binary framing matches collab-docs: byte 0 = sync (persist+relay), byte 1 = awareness (relay only). Requires ffBoardsRealtime, per-course visualBoardsEnabled, enrollment, and a non-archived board. Oversized or flooding clients are disconnected.",
+        "description": "Upgrades to a Y.js sync WebSocket. First text frame must be JSON {\"authToken\":\"…\"}. Binary framing matches collab-docs: byte 0 = sync (persist+relay), byte 1 = awareness (relay only). Requires ffBoardsRealtime, per-course visualBoardsEnabled, enrollment, and a non-archived board. Oversized or flooding clients are disconnected.",
         "parameters": [
           {
             "name": "course_code",
@@ -15070,6 +15117,549 @@
           }
         }
       }
+    },
+    "/api/v1/courses/{course_code}/coupons": {
+      "get": {
+        "tags": [
+          "courses",
+          "billing"
+        ],
+        "summary": "List course coupons (creator)",
+        "description": "Returns coupons for the course with live seat counts. Requires course item:create and ffCourseMarketplace + ffCourseCoupons (plan MKTC.2).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeArchived",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "When true, include archived coupons"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Coupon list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "coupons"
+                  ],
+                  "properties": {
+                    "coupons": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/CourseCoupon"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden (missing course item:create)"
+          },
+          "404": {
+            "description": "Not found, feature disabled, or foreign coupon id"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "courses",
+          "billing"
+        ],
+        "summary": "Create a course coupon",
+        "description": "Creates one coupon. Code is normalized (trim, upper-case). Duplicate non-archived codes return 409.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCourseCouponBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created coupon",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "coupon"
+                  ],
+                  "properties": {
+                    "coupon": {
+                      "$ref": "#/components/schemas/CourseCoupon"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden (missing course item:create)"
+          },
+          "404": {
+            "description": "Not found, feature disabled, or foreign coupon id"
+          },
+          "409": {
+            "description": "Duplicate non-archived code"
+          },
+          "422": {
+            "description": "Unprocessable (immutable field, free course, cap below usage, window)"
+          },
+          "429": {
+            "description": "Write rate limited (30/min/user)"
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/coupons/{coupon_id}": {
+      "patch": {
+        "tags": [
+          "courses",
+          "billing"
+        ],
+        "summary": "Update a course coupon",
+        "description": "Partial update of note, window, caps, and status. Discount value fields are immutable.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "coupon_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCourseCouponBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated coupon",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "coupon"
+                  ],
+                  "properties": {
+                    "coupon": {
+                      "$ref": "#/components/schemas/CourseCoupon"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden (missing course item:create)"
+          },
+          "404": {
+            "description": "Not found, feature disabled, or foreign coupon id"
+          },
+          "422": {
+            "description": "Unprocessable (immutable field, free course, cap below usage, window)"
+          },
+          "429": {
+            "description": "Write rate limited (30/min/user)"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "courses",
+          "billing"
+        ],
+        "summary": "Archive a course coupon (soft delete)",
+        "description": "Sets status=archived. Redemption history is retained.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "coupon_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Archived coupon",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "coupon"
+                  ],
+                  "properties": {
+                    "coupon": {
+                      "$ref": "#/components/schemas/CourseCoupon"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden (missing course item:create)"
+          },
+          "404": {
+            "description": "Not found, feature disabled, or foreign coupon id"
+          },
+          "429": {
+            "description": "Write rate limited (30/min/user)"
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/coupons/{coupon_id}/redemptions": {
+      "get": {
+        "tags": [
+          "courses",
+          "billing"
+        ],
+        "summary": "List redemptions for a coupon",
+        "description": "Cursor-paginated redemption ledger for one coupon (plan MKTC.2 FR-6).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "coupon_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 25,
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Opaque cursor from a previous nextCursor"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Redemption page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "redemptions",
+                    "nextCursor"
+                  ],
+                  "properties": {
+                    "redemptions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/CouponRedemptionRow"
+                      }
+                    },
+                    "nextCursor": {
+                      "type": "string",
+                      "description": "Empty when no further pages"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden (missing course item:create)"
+          },
+          "404": {
+            "description": "Not found, feature disabled, or foreign coupon id"
+          }
+        }
+      }
+    },
+    "/api/v1/marketplace/courses/{slug}/coupon/preview": {
+      "post": {
+        "tags": [
+          "courses"
+        ],
+        "summary": "Preview a course coupon code without creating a reservation (plan MKTC.3 FR-1)",
+        "description": "Requires authentication and ffCourseMarketplace + ffCourseCoupons. Returns 200 for both applied and not-applied outcomes with a typed reason. Layered rate limits (plan MKTC.7): 15/min & 60/hour per (user,course), 100/hour per user, 200/hour per IP; 10 consecutive fails impose a 15-minute cool-down (429 reason=cooldown).",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "code"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "example": "LAUNCH25"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "CouponPreviewResponse: { applied, code, reason, listPriceCents, discountCents, chargedCents, currency, freeAfterDiscount, endsAt, seatsRemaining }"
+          },
+          "401": {
+            "description": "Sign in required"
+          },
+          "404": {
+            "description": "Course not found or coupons feature disabled"
+          },
+          "429": {
+            "description": "RATE_LIMITED with Retry-After; body may include reason rate_limited|cooldown"
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/coupons/summary": {
+      "get": {
+        "tags": [
+          "courses",
+          "billing"
+        ],
+        "summary": "Coupon performance summary for a course (plan MKTC.7 FR-7)",
+        "description": "Returns per-coupon redeemed/refunded counts and revenue figures in one aggregate. Requires course item:create and ffCourseMarketplace + ffCourseCoupons.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "CouponSummaryResponse",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CouponSummaryResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden (missing course item:create)"
+          },
+          "404": {
+            "description": "Not found or feature disabled"
+          }
+        }
+      }
+    },
+    "/api/v1/courses/{course_code}/coupons/{coupon_id}/redemptions.csv": {
+      "get": {
+        "tags": [
+          "courses",
+          "billing"
+        ],
+        "summary": "Export coupon redemptions as CSV (plan MKTC.7 FR-9)",
+        "description": "Streams CSV of all redemptions for one coupon. Rate limited to 5/hour/user; audited. Requires course item:create and coupon flags.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "course_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "coupon_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "CSV stream",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found or feature disabled"
+          },
+          "429": {
+            "description": "Export rate limited (5/hour/user); Retry-After set"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -15432,7 +16022,7 @@
           },
           "sourceRef": {
             "type": "object",
-            "description": "topic/passage text or contentId \u2014 never student data",
+            "description": "topic/passage text or contentId — never student data",
             "properties": {
               "topic": {
                 "type": "string"
@@ -18393,6 +18983,425 @@
             "items": {
               "$ref": "#/components/schemas/ValidationFieldViolation"
             }
+          }
+        }
+      },
+      "CourseCouponSeats": {
+        "type": "object",
+        "required": [
+          "consumed",
+          "reserved",
+          "redeemed",
+          "remaining"
+        ],
+        "properties": {
+          "consumed": {
+            "type": "integer"
+          },
+          "reserved": {
+            "type": "integer"
+          },
+          "redeemed": {
+            "type": "integer"
+          },
+          "remaining": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "null when unlimited"
+          }
+        }
+      },
+      "CourseCoupon": {
+        "type": "object",
+        "required": [
+          "id",
+          "courseId",
+          "code",
+          "discountType",
+          "percentOff",
+          "amountOffCents",
+          "currency",
+          "startsAt",
+          "endsAt",
+          "maxRedemptions",
+          "maxRedemptionsPerUser",
+          "seats",
+          "status",
+          "note",
+          "shareUrl",
+          "publicShareUrl",
+          "createdBy",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "courseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "description": "Normalized A–Z0–9_-, 4–32 chars"
+          },
+          "discountType": {
+            "type": "string",
+            "enum": [
+              "percent",
+              "fixed"
+            ]
+          },
+          "percentOff": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "amountOffCents": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "currency": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "startsAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "endsAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "maxRedemptions": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "maxRedemptionsPerUser": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "seats": {
+            "$ref": "#/components/schemas/CourseCouponSeats"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "disabled",
+              "archived"
+            ]
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "shareUrl": {
+            "type": "string",
+            "description": "In-app marketplace URL with ?coupon="
+          },
+          "publicShareUrl": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Marketing-site URL when is_public"
+          },
+          "createdBy": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "clamps_to_free",
+                "low_entropy"
+              ]
+            }
+          }
+        }
+      },
+      "CreateCourseCouponBody": {
+        "type": "object",
+        "required": [
+          "code",
+          "discountType"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "discountType": {
+            "type": "string",
+            "enum": [
+              "percent",
+              "fixed"
+            ]
+          },
+          "percentOff": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "maximum": 100
+          },
+          "amountOffCents": {
+            "type": "integer",
+            "exclusiveMinimum": 0
+          },
+          "currency": {
+            "type": "string"
+          },
+          "startsAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "endsAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "maxRedemptions": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "maxRedemptionsPerUser": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "example": {
+          "code": "launch25",
+          "discountType": "percent",
+          "percentOff": 25,
+          "maxRedemptions": 50
+        }
+      },
+      "UpdateCourseCouponBody": {
+        "type": "object",
+        "properties": {
+          "startsAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "endsAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "maxRedemptions": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "maxRedemptionsPerUser": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "disabled"
+            ]
+          }
+        },
+        "description": "Partial update. code/discountType/percentOff/amountOffCents/currency are immutable (422)."
+      },
+      "CouponRedemptionRow": {
+        "type": "object",
+        "required": [
+          "id",
+          "userId",
+          "userName",
+          "userEmail",
+          "status",
+          "listPriceCents",
+          "discountCents",
+          "chargedCents",
+          "currency",
+          "reservedAt",
+          "redeemedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "userEmail": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "reserved",
+              "redeemed",
+              "released"
+            ]
+          },
+          "listPriceCents": {
+            "type": "integer"
+          },
+          "discountCents": {
+            "type": "integer"
+          },
+          "chargedCents": {
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "reservedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "redeemedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "CouponSummaryRow": {
+        "type": "object",
+        "required": [
+          "couponId",
+          "code",
+          "redeemedCount",
+          "refundedCount",
+          "grossListCents",
+          "discountCents",
+          "netChargedCents",
+          "currency"
+        ],
+        "properties": {
+          "couponId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "redeemedCount": {
+            "type": "integer"
+          },
+          "refundedCount": {
+            "type": "integer",
+            "description": "Redeemed then released (refund path)"
+          },
+          "grossListCents": {
+            "type": "integer"
+          },
+          "discountCents": {
+            "type": "integer"
+          },
+          "netChargedCents": {
+            "type": "integer",
+            "description": "Excludes refunds"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "firstRedeemedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastRedeemedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "CouponSummaryResponse": {
+        "type": "object",
+        "required": [
+          "rows",
+          "currency"
+        ],
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CouponSummaryRow"
+            }
+          },
+          "currency": {
+            "type": "string",
+            "description": "Course list currency fallback"
           }
         }
       }

@@ -156,6 +156,12 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.FFPublicCatalog = mergeBool(db.FFPublicCatalog, false)
 	// Course marketplace defaults ON (exception to the usual default-off convention; plan MKT1).
 	out.FFCourseMarketplace = mergeBool(db.FFCourseMarketplace, true)
+	// Course coupons default OFF until GA (plan MKTC.2 / MKTC.7).
+	// NOTE: do not flip default ON here — orchestrator flips after UI (MKTC.7 §15).
+	// MKTC.7 GA: default ON; explicit DB false remains off (AC-12).
+	out.FFCourseCoupons = mergeBool(db.FFCourseCoupons, true)
+	// Discount ceiling: NULL/unset → 100 (uncapped). Explicit DB value is honoured (MKTC.7 FR-5).
+	out.CouponMaxPercentOff = mergePercentOff(db.CouponMaxPercentOff, 100)
 	out.FFContentToolMarketplace = mergeBool(db.FFContentToolMarketplace, false)
 	out.FFFeedback = true
 	// Collaboration boards are course-scoped only; platform master switch removed.

@@ -36,6 +36,11 @@ e2e/scripts/bootstrap-completed-coverage-manifest.ts:15-self-learner-specific
 docs/plan/README.md:15-self-learner-specific
 docs/plan/README.md:Self-Learner
 
+# MKTC coupon plans cite the frozen 15-self-learner-specific archive (15.3 billing, 15.8 revenue share, 15.13 tax).
+docs/plan/marketplace/README.md:15-self-learner-specific
+docs/plan/marketplace/MKTC.1-coupon-data-model-and-discount-engine.md:15-self-learner-specific
+docs/plan/marketplace/MKTC.3-coupon-aware-checkout-and-redemption.md:15-self-learner-specific
+
 # --- DO NOT RENAME: persisted client storage raw value "selfLearner" ---
 
 # iOS UserDefaults Kind raw value — must stay "selfLearner" after enum case rename (HS.4).
@@ -73,3 +78,6 @@ www/scripts/prerender-courses.mjs:self-learner
 
 # Unit tests assert sitemap excludes the old slug and stub builder targets /homeschool.
 www/scripts/prerender-courses.test.mjs:self-learner
+
+# SEO plans document the permanent /self-learner → /homeschool redirect stub (HS.2 / FR-4).
+docs/plan/seo/**

@@ -34,6 +34,10 @@ type InvoicePDFInput struct {
 	TaxInclusive    bool
 	Description     string
 	IsCredit        bool
+	// Optional first-party coupon breakdown (MKTC.3 FR-14).
+	CouponCode      string
+	ListPriceCents  int // catalog price before discount; 0 → omit lines
+	DiscountCents   int
 }
 
 // BuildTaxInvoicePDF renders a tax-compliant invoice as PDF bytes.
@@ -104,9 +108,22 @@ func BuildTaxInvoicePDF(in InvoicePDFInput) ([]byte, error) {
 	pdf.Cell(40, 7, "Amount")
 	pdf.Ln(8)
 	pdf.SetFont("Helvetica", "", 10)
-	pdf.Cell(120, 6, in.Description)
-	pdf.Cell(40, 6, formatCurrency(in.SubtotalCents, in.Currency))
-	pdf.Ln(8)
+	if in.CouponCode != "" && in.ListPriceCents > 0 && in.DiscountCents > 0 {
+		// FR-14: list price, coupon discount, charged amount as separate lines.
+		pdf.Cell(120, 6, in.Description+" (list price)")
+		pdf.Cell(40, 6, formatCurrency(in.ListPriceCents, in.Currency))
+		pdf.Ln(6)
+		pdf.Cell(120, 6, fmt.Sprintf("Coupon %s", in.CouponCode))
+		pdf.Cell(40, 6, "-"+formatCurrency(in.DiscountCents, in.Currency))
+		pdf.Ln(6)
+		pdf.Cell(120, 6, "Amount charged")
+		pdf.Cell(40, 6, formatCurrency(in.SubtotalCents, in.Currency))
+		pdf.Ln(8)
+	} else {
+		pdf.Cell(120, 6, in.Description)
+		pdf.Cell(40, 6, formatCurrency(in.SubtotalCents, in.Currency))
+		pdf.Ln(8)
+	}
 
 	taxLabel := taxLineLabel(in.TaxType, in.ReverseCharge)
 	if in.TaxRate != nil && !in.ReverseCharge {

@@ -3,11 +3,13 @@ import {
   buildMarketplaceParams,
   claimMarketplaceCourse,
   checkoutMarketplaceCourse,
+  isMarketplaceGrantedFree,
   marketplaceCardAccessibleName,
   marketplaceClaimPath,
   marketplaceCheckoutPath,
   marketplaceCoursePath,
   MarketplaceApiError,
+  previewMarketplaceCoupon,
   searchMarketplaceCourses,
   fetchMarketplaceCourse,
 } from '../marketplace-api'
@@ -127,6 +129,98 @@ describe('checkoutMarketplaceCourse', () => {
     const res = await checkoutMarketplaceCourse('paid')
     expect(res).toMatchObject({ checkoutUrl: 'https://checkout.stripe.com/x' })
   })
+
+  it('sends couponCode in body when provided', async () => {
+    authorizedFetch.mockResolvedValue(
+      new Response(
+        JSON.stringify({ sessionId: 'cs_1', checkoutUrl: 'https://checkout.stripe.com/x' }),
+        { status: 200 },
+      ),
+    )
+    await checkoutMarketplaceCourse('paid', { couponCode: 'LAUNCH25' })
+    expect(authorizedFetch).toHaveBeenCalledWith(
+      '/api/v1/marketplace/courses/paid/checkout',
+      expect.objectContaining({
+        body: JSON.stringify({ couponCode: 'LAUNCH25' }),
+      }),
+    )
+  })
+
+  it('detects free-grant checkout response', async () => {
+    authorizedFetch.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          enrolled: true,
+          entitlementId: 'e1',
+          courseCode: 'PAID1',
+          grantedFree: true,
+          firstItemId: 'i1',
+        }),
+        { status: 200 },
+      ),
+    )
+    const res = await checkoutMarketplaceCourse('paid', { couponCode: 'FREE100' })
+    expect(isMarketplaceGrantedFree(res)).toBe(true)
+  })
+
+  it('surfaces 422 coupon reason', async () => {
+    authorizedFetch.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          error: { code: 'UNPROCESSABLE_ENTITY', message: 'expired' },
+          reason: 'expired',
+          listPriceCents: 4000,
+          currency: 'usd',
+        }),
+        { status: 422 },
+      ),
+    )
+    await expect(checkoutMarketplaceCourse('paid', { couponCode: 'OLD' })).rejects.toMatchObject({
+      status: 422,
+      reason: 'expired',
+      listPriceCents: 4000,
+    } satisfies Partial<MarketplaceApiError>)
+  })
+})
+
+describe('previewMarketplaceCoupon', () => {
+  beforeEach(() => {
+    authorizedFetch.mockReset()
+  })
+
+  it('posts code and returns preview', async () => {
+    authorizedFetch.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          applied: true,
+          code: 'LAUNCH25',
+          reason: 'ok',
+          listPriceCents: 4000,
+          discountCents: 1000,
+          chargedCents: 3000,
+          currency: 'usd',
+          freeAfterDiscount: false,
+          endsAt: null,
+          seatsRemaining: null,
+        }),
+        { status: 200 },
+      ),
+    )
+    const prev = await previewMarketplaceCoupon('paid', 'LAUNCH25')
+    expect(authorizedFetch).toHaveBeenCalledWith(
+      '/api/v1/marketplace/courses/paid/coupon/preview',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ code: 'LAUNCH25' }),
+      }),
+    )
+    expect(prev.chargedCents).toBe(3000)
+  })
+
+  it('maps 429 to MarketplaceApiError', async () => {
+    authorizedFetch.mockResolvedValue(new Response('{}', { status: 429 }))
+    await expect(previewMarketplaceCoupon('paid', 'X')).rejects.toMatchObject({ status: 429 })
+  })
 })
 
 describe('searchMarketplaceCourses', () => {
@@ -216,5 +310,53 @@ describe('fetchMarketplaceCourse', () => {
     expect(authorizedFetch).toHaveBeenCalledWith('/api/v1/marketplace/courses/paid')
     expect(detail.priceCents).toBe(2000)
     expect(detail.whatsIncluded.moduleCount).toBe(2)
+  })
+
+  it('appends coupon query when provided', async () => {
+    authorizedFetch.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          course: {
+            id: '1',
+            slug: 'paid',
+            courseCode: 'PAID1',
+            title: 'Paid',
+            heroImageUrl: null,
+            category: null,
+            level: null,
+            language: 'en',
+            priceCents: 4000,
+            priceCurrency: 'usd',
+            listPriceCents: null,
+            enrollmentCount: 0,
+            averageRating: null,
+            owned: false,
+          },
+          owned: false,
+          priceCents: 3000,
+          priceCurrency: 'usd',
+          whatsIncluded: { moduleCount: 1, itemCount: 1 },
+          rating: { average: null, count: 0 },
+          coupon: {
+            applied: true,
+            code: 'LAUNCH25',
+            reason: 'ok',
+            listPriceCents: 4000,
+            discountCents: 1000,
+            chargedCents: 3000,
+            currency: 'usd',
+            freeAfterDiscount: false,
+            endsAt: null,
+            seatsRemaining: null,
+          },
+        }),
+        { status: 200 },
+      ),
+    )
+    const detail = await fetchMarketplaceCourse('paid', { coupon: 'LAUNCH25' })
+    expect(authorizedFetch).toHaveBeenCalledWith(
+      '/api/v1/marketplace/courses/paid?coupon=LAUNCH25',
+    )
+    expect(detail.coupon?.applied).toBe(true)
   })
 })

@@ -232,6 +232,8 @@ data class MobilePlatformFeatures(
     val selfReflectionEnabled: Boolean = false,
     val ffPublicCatalog: Boolean = false,
     val ffCourseMarketplace: Boolean = false,
+    /** Course coupon codes (MKTC.6). Default off when unset. */
+    val ffCourseCoupons: Boolean = false,
     val ffSelfPacedMode: Boolean = false,
     val ffCourseReviews: Boolean = false,
     val ffCompletionCredentials: Boolean = false,
@@ -342,6 +344,7 @@ data class MobilePlatformFeatures(
             selfReflectionEnabled = features?.selfReflectionEnabled == true,
             ffPublicCatalog = features?.ffPublicCatalog == true,
             ffCourseMarketplace = features?.ffCourseMarketplace == true,
+            ffCourseCoupons = features?.ffCourseCoupons == true,
             ffSelfPacedMode = features?.ffSelfPacedMode == true,
             ffCourseReviews = features?.ffCourseReviews == true,
             ffCompletionCredentials = features?.ffCompletionCredentials == true,

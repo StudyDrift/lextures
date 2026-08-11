@@ -15,7 +15,7 @@ The prerender script:
 1. Fetches all listed+published courses from `GET {API_BASE}/api/v1/public/marketplace/courses` (paginated).
 2. For each course, fetches detail (including server-built `jsonLd`) and writes `dist/courses/<slug>/index.html` with per-page `<title>`, description, canonical, OG/Twitter tags, and Course JSON-LD.
 3. Writes `dist/courses/index.html` for the storefront.
-4. Writes `dist/sitemap.xml` (static routes + every course URL) and `dist/robots.txt`.
+4. Writes `dist/sitemap.xml` (static routes + blog/docs posts + every course URL) and `dist/robots.txt`.
 
 ## Environment
 
@@ -35,7 +35,13 @@ New listings appear in the sitemap/prerender after the next www deploy. Prefer a
 
 ## Search Console
 
-After deploy, submit `https://lextures.com/sitemap.xml` in Google Search Console and monitor coverage for `/courses/*`.
+After deploy, submit (or resubmit) `https://lextures.com/sitemap.xml` in Google Search Console:
+
+1. Open [Google Search Console](https://search.google.com/search-console) for the `lextures.com` property.
+2. Go to **Sitemaps** → enter `sitemap.xml` → **Submit**.
+3. Monitor **Pages** / coverage for `/courses/*`, `/blog/*`, and `/docs/*`.
+
+`robots.txt` already includes `Sitemap: https://lextures.com/sitemap.xml` so crawlers discover it automatically.
 
 ## Runtime head updates
 

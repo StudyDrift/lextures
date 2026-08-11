@@ -28,8 +28,12 @@ function buildMarketplaceParams(query = {}) {
   return s ? `?${s}` : ''
 }
 
-function enrollHandoffUrl(slug) {
-  return `https://self.lextures.com/explore/${encodeURIComponent(slug)}?ref=www-courses`
+function enrollHandoffUrl(slug, opts = {}) {
+  const params = new URLSearchParams()
+  params.set('ref', 'www-courses')
+  const coupon = (opts.coupon ?? '').replace(/\s+/g, '').toUpperCase().slice(0, 32)
+  if (coupon) params.set('coupon', coupon)
+  return `https://self.lextures.com/marketplace/${encodeURIComponent(slug)}?${params.toString()}`
 }
 
 function requireMarketplaceSlug(slug) {
@@ -67,8 +71,22 @@ describe('marketplace-api helpers', () => {
   it('builds enroll handoff URL with ref', () => {
     assert.equal(
       enrollHandoffUrl('intro-python'),
-      'https://self.lextures.com/explore/intro-python?ref=www-courses',
+      'https://self.lextures.com/marketplace/intro-python?ref=www-courses',
     )
+  })
+
+  it('appends coupon to enroll handoff URL', () => {
+    assert.equal(
+      enrollHandoffUrl('intro-python', { coupon: 'launch25' }),
+      'https://self.lextures.com/marketplace/intro-python?ref=www-courses&coupon=LAUNCH25',
+    )
+  })
+
+  it('truncates oversized coupon codes', () => {
+    const long = 'A'.repeat(40)
+    const url = enrollHandoffUrl('x', { coupon: long })
+    assert.match(url, /coupon=A{32}/)
+    assert.doesNotMatch(url, /coupon=A{33}/)
   })
 
   it('rejects empty marketplace slug', () => {

@@ -169,9 +169,18 @@ export default function ExploreCoursePage() {
                 {formatPrice(course.priceCents)}
               </span>
               <Link
-                to={`/marketplace/${encodeURIComponent(course.slug)}`}
+                to={(() => {
+                  const base = `/marketplace/${encodeURIComponent(course.slug)}`
+                  const params = new URLSearchParams()
+                  const ref = searchParams.get('ref')?.trim()
+                  if (ref) params.set('ref', ref)
+                  const coupon = searchParams.get('coupon')?.trim()
+                  if (coupon) params.set('coupon', coupon.slice(0, 32))
+                  const qs = params.toString()
+                  return qs ? `${base}?${qs}` : base
+                })()}
                 aria-describedby={priceId}
-                className="rounded-lg bg-accent-solid px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500"
+                className="rounded-lg bg-accent-solid px-5 py-2.5 text-sm font-semibold text-fg-on-accent hover:opacity-90"
               >
                 Enroll now
               </Link>

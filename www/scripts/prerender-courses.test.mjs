@@ -7,7 +7,9 @@ import {
   buildSitemap,
   escapeHtml,
   injectHead,
+  parseMarkdownDate,
   resolveApiAssetUrl,
+  STATIC_ROUTES,
   truncateMeta,
 } from './prerender-courses.mjs'
 
@@ -93,6 +95,43 @@ describe('buildSitemap', () => {
     const xml = buildSitemap([])
     assert.match(xml, /<loc>https:\/\/lextures.com\/homeschool<\/loc>/)
     assert.doesNotMatch(xml, /self-learner/)
+  })
+
+  it('includes conversion and legal static routes for Search Console', () => {
+    const xml = buildSitemap([])
+    assert.match(xml, /<loc>https:\/\/lextures.com\/request-information<\/loc>/)
+    assert.match(xml, /<loc>https:\/\/lextures.com\/accessibility\/vpat<\/loc>/)
+    assert.match(xml, /<loc>https:\/\/lextures.com\/privacy-rights\/california<\/loc>/)
+    assert.match(xml, /<loc>https:\/\/lextures.com\/privacy\/history<\/loc>/)
+    assert.match(xml, /<loc>https:\/\/lextures.com\/terms\/history<\/loc>/)
+  })
+
+  it('includes blog and docs content entries with lastmod', () => {
+    const xml = buildSitemap(
+      [],
+      [
+        { loc: '/blog/adaptive-ai-and-education', lastmod: '2026-05-06', priority: '0.6' },
+        { loc: '/docs/creating-a-new-course', lastmod: '2024-05-20', priority: '0.6' },
+      ],
+    )
+    assert.match(xml, /<loc>https:\/\/lextures.com\/blog\/adaptive-ai-and-education<\/loc>/)
+    assert.match(xml, /<lastmod>2026-05-06<\/lastmod>/)
+    assert.match(xml, /<loc>https:\/\/lextures.com\/docs\/creating-a-new-course<\/loc>/)
+    assert.match(xml, /<lastmod>2024-05-20<\/lastmod>/)
+  })
+
+  it('STATIC_ROUTES never lists the legacy self-learner path', () => {
+    assert.ok(!STATIC_ROUTES.some(r => r.loc.includes('self-learner')))
+  })
+})
+
+describe('parseMarkdownDate', () => {
+  it('reads quoted and bare frontmatter dates', () => {
+    assert.equal(parseMarkdownDate('---\ndate: "2026-05-06"\n---\nbody'), '2026-05-06')
+    assert.equal(parseMarkdownDate('---\ndate: 2024-05-20\n---\nbody'), '2024-05-20')
+  })
+  it('returns null without frontmatter date', () => {
+    assert.equal(parseMarkdownDate('# No frontmatter'), null)
   })
 })
 

@@ -681,6 +681,13 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     pack: 'marketplace',
   },
   {
+    key: 'ffCourseCoupons',
+    label: 'Course coupon codes',
+    description:
+      'Let course creators create and manage discount coupon codes for paid marketplace courses. Default on at GA; tenants that set this off keep it off. Share links work on mobile (partial discounts complete on the web on iOS).',
+    pack: 'marketplace',
+  },
+  {
     key: 'ffContentToolMarketplace',
     label: 'Content tool marketplace',
     description:

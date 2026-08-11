@@ -28,11 +28,13 @@ type TaxAddress struct {
 
 // TaxQuoteRequest is the checkout quote payload.
 type TaxQuoteRequest struct {
-	CourseID *uuid.UUID
-	Plan     string
-	Address  TaxAddress
-	TaxID    string
-	TaxIDType string
+	CourseID   *uuid.UUID
+	Plan       string
+	Address    TaxAddress
+	TaxID      string
+	TaxIDType  string
+	CouponCode string    // optional first-party course coupon (MKTC.3 FR-13)
+	UserID     uuid.UUID // required when CouponCode is set (eligibility)
 }
 
 // TaxQuoteLine is one line in a tax quote response.
@@ -296,7 +298,27 @@ func quoteSubtotal(ctx context.Context, pool *pgxpool.Pool, cfg StripeConfig, re
 		if currency == "" {
 			currency = "usd"
 		}
-		return price.PriceCents, currency, price.Title, nil
+		subtotal := price.PriceCents
+		label := price.Title
+		// FR-13: tax quote uses discounted subtotal when a valid coupon applies.
+		if code := strings.TrimSpace(req.CouponCode); code != "" && req.UserID != uuid.Nil {
+			owned, _ := repoBilling.MarketplaceAccess(ctx, pool, req.UserID, *req.CourseID)
+			prev, perr := PreviewCoupon(ctx, pool, PreviewCouponInput{
+				CourseID:       *req.CourseID,
+				UserID:         req.UserID,
+				Code:           code,
+				CoursePrice:    price.PriceCents,
+				CourseCurrency: currency,
+				AlreadyOwned:   owned,
+			})
+			if perr == nil && prev != nil && prev.Applied {
+				subtotal = prev.ChargedCents
+				if prev.Code != "" {
+					label = fmt.Sprintf("%s (coupon %s)", price.Title, prev.Code)
+				}
+			}
+		}
+		return subtotal, currency, label, nil
 	case req.Plan == "monthly" || req.Plan == "annual":
 		// Subscription quote uses configured price; amount resolved at Stripe checkout.
 		return 1000, "usd", "Subscription", nil

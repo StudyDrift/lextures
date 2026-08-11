@@ -94,3 +94,24 @@ With no `--only` / `--deploy`, every embedded course including the smoke fixture
 
 External link reachability is a separate CI step (e.g. `lychee` over URLs printed by
 `marketplace-courses-validate`). Provisioning itself does not call the network.
+
+## How discounts are computed (MKTC.1)
+
+Creator coupon codes are course-scoped and stored in `billing.course_coupons`. The pure
+discount engine lives in `server/internal/service/coupons` — it has **no database import**
+and is the single source of truth for:
+
+- `NormalizeCode` / `ValidateCode` — trim, upper-case, strip internal whitespace; shape
+  `^[A-Z0-9][A-Z0-9_-]{3,31}$`
+- `ApplyDiscount(listCents, currency, coupon)` — percent (half-up to minor unit) or fixed;
+  residual charges below the provider floor (`currency.MinimumChargeCents`) clamp to free
+- `Evaluate(coupon, EvalContext)` — typed reasons: `ok`, `not_found`, `inactive`,
+  `not_started`, `expired`, `exhausted`, `already_used`, `currency_mismatch`, `course_free`,
+  `owned`
+
+Seat caps are enforced in `server/internal/repos/billing` via `ReserveCoupon` under a
+row lock; the ledger is `billing.coupon_redemptions`. Learner preview, discounted checkout,
+webhook promotion, and 100%-off free grants are wired in MKTC.3
+(`service/billing/coupon_checkout.go` + marketplace purchase handlers). See
+[docs/runbooks/coupons.md](runbooks/coupons.md) and
+[docs/help/using-a-coupon-code.md](help/using-a-coupon-code.md).

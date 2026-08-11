@@ -57,10 +57,27 @@ extension LMSAPI {
 
     static func fetchMarketplaceCourseDetail(
         slug: String,
-        accessToken: String
+        accessToken: String,
+        couponCode: String? = nil,
+        source: String? = nil
     ) async throws -> MarketplaceCourseDetail? {
+        var items: [URLQueryItem] = []
+        if let couponCode, !couponCode.isEmpty {
+            items.append(URLQueryItem(name: "coupon", value: couponCode))
+        }
+        if let source, !source.isEmpty {
+            items.append(URLQueryItem(name: "src", value: source))
+        }
+        var path = "/api/v1/marketplace/courses/\(encodePath(slug))"
+        if !items.isEmpty {
+            var components = URLComponents()
+            components.queryItems = items
+            if let query = components.percentEncodedQuery, !query.isEmpty {
+                path += "?\(query)"
+            }
+        }
         let (data, response) = try await client.request(
-            path: "/api/v1/marketplace/courses/\(encodePath(slug))",
+            path: path,
             authorized: true,
             accessToken: accessToken
         )
@@ -71,11 +88,51 @@ extension LMSAPI {
         return try decode(MarketplaceCourseDetail.self, from: data)
     }
 
-    static func claimMarketplaceCourse(slug: String, accessToken: String) async throws -> MarketplaceClaimResult {
+    /// Coupon preview (MKTC.6) — POST body `{ "code" }`.
+    static func previewMarketplaceCoupon(
+        slug: String,
+        code: String,
+        accessToken: String
+    ) async throws -> CouponPreview {
+        let normalized = MarketplaceLogic.normalizeCouponCode(code)
+        let body = MarketplaceCouponPreviewBody(code: normalized)
+        let bodyData = try JSONEncoder().encode(body)
+        let (data, response) = try await client.requestRaw(
+            path: "/api/v1/marketplace/courses/\(encodePath(slug))/coupon/preview",
+            method: "POST",
+            bodyData: bodyData,
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            let message = parseAPIErrorMessage(from: data)
+            if response.statusCode == 429 {
+                MarketplaceObservability.record("coupon_applied", attributes: ["result": "rate_limited"])
+            } else {
+                MarketplaceObservability.record("coupon_applied", attributes: ["result": "error"])
+            }
+            throw APIError.httpStatus(response.statusCode, message: message)
+        }
+        let preview = try decode(CouponPreview.self, from: data)
+        MarketplaceObservability.record(
+            "coupon_applied",
+            attributes: [
+                "result": preview.applied ? "ok" : (preview.reason.isEmpty ? "rejected" : preview.reason),
+            ]
+        )
+        return preview
+    }
+
+    static func claimMarketplaceCourse(
+        slug: String,
+        couponCode: String? = nil,
+        accessToken: String
+    ) async throws -> MarketplaceClaimResult {
+        let bodyData = try encodeMarketplaceCouponBody(couponCode)
         let (data, response) = try await client.requestRaw(
             path: "/api/v1/marketplace/courses/\(encodePath(slug))/claim",
             method: "POST",
-            bodyData: Data("{}".utf8),
+            bodyData: bodyData,
             authorized: true,
             accessToken: accessToken
         )
@@ -83,22 +140,28 @@ extension LMSAPI {
             throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
         }
         let result = try decode(MarketplaceClaimResult.self, from: data)
-        MarketplaceObservability.record(
-            "marketplace_claim",
-            attributes: ["already_owned": result.alreadyOwned == true ? "1" : "0"]
-        )
+        var attrs: [String: String] = [
+            "already_owned": result.alreadyOwned == true ? "1" : "0",
+        ]
+        if result.grantedFree == true {
+            attrs["granted_free"] = "1"
+            MarketplaceObservability.record("coupon_free_grant", attributes: attrs)
+        }
+        MarketplaceObservability.record("marketplace_claim", attributes: attrs)
         return result
     }
 
-    /// Paid marketplace checkout (MOB.7) — Stripe session URL or already-owned.
+    /// Paid marketplace checkout (MOB.7) — Stripe session URL, free grant, or already-owned.
     static func checkoutMarketplaceCourse(
         slug: String,
+        couponCode: String? = nil,
         accessToken: String
     ) async throws -> MarketplaceCheckoutResult {
+        let bodyData = try encodeMarketplaceCouponBody(couponCode)
         let (data, response) = try await client.requestRaw(
             path: "/api/v1/marketplace/courses/\(encodePath(slug))/checkout",
             method: "POST",
-            bodyData: Data("{}".utf8),
+            bodyData: bodyData,
             authorized: true,
             accessToken: accessToken
         )
@@ -106,12 +169,30 @@ extension LMSAPI {
             throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
         }
         let result = try decode(MarketplaceCheckoutResult.self, from: data)
+        var attrs: [String: String] = [:]
+        if result.alreadyOwned == true { attrs["already_owned"] = "1" }
+        if couponCode != nil { attrs["coupon"] = "1" }
+        if result.grantedFree == true {
+            attrs["granted_free"] = "1"
+            MarketplaceObservability.record("coupon_free_grant", attributes: attrs)
+        } else if couponCode != nil {
+            MarketplaceObservability.record("coupon_checkout_started", attributes: attrs)
+        }
         if result.alreadyOwned == true {
             MarketplaceObservability.record("marketplace_checkout_started", attributes: ["already_owned": "1"])
         } else {
-            MarketplaceObservability.record("marketplace_checkout_started")
+            MarketplaceObservability.record("marketplace_checkout_started", attributes: attrs)
         }
         return result
+    }
+
+    private static func encodeMarketplaceCouponBody(_ couponCode: String?) throws -> Data {
+        guard let raw = couponCode?.trimmingCharacters(in: .whitespacesAndNewlines), !raw.isEmpty else {
+            return Data("{}".utf8)
+        }
+        let code = MarketplaceLogic.normalizeCouponCode(raw)
+        if code.isEmpty { return Data("{}".utf8) }
+        return try JSONEncoder().encode(MarketplaceCouponCodeBody(couponCode: code))
     }
 
     static func fetchMyPurchases(accessToken: String) async throws -> [CoursePurchase] {

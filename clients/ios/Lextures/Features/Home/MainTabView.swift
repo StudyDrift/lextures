@@ -48,6 +48,10 @@ final class AppShellModel {
     var universalSearchEnabled = MobileIaPreferences.isUniversalSearchEnabled
     var profileDepthEnabled = MobileProfileDepthPreferences.isEnabled
     var pendingMoreDestination: MoreDestination?
+    /// Marketplace course slug from deep link (session memory only; MKTC.6).
+    var pendingMarketplaceSlug: String?
+    /// Pending coupon handoff from deep link: `(slug, code)` — not persisted (MKTC.6 FR-5).
+    var pendingCoupon: (slug: String, code: String)?
     var pendingReview = false
     var pendingInsights = false
     var pendingCheckout: PendingCheckoutContext?
@@ -231,42 +235,50 @@ final class AppShellModel {
         case .credentials:
             selectShellTab(.profile)
             pendingMoreDestination = WalletLogic.walletEnabled(platformFeatures) ? .wallet : .credentials
-        case .coursesList:
+        case .coursesList, .course:
             selectShellTab(.courses)
         case let .settings(section):
-            selectShellTab(.profile)
-            pendingProfileSettingsRoute = section
-            switch section {
-            case .auditLog:
-                pendingSettingsAdminPage = .auditLog
-            case .adminHub:
-                pendingSettingsAdminPage = nil
-            case .account, .notifications, .learnerProfile:
-                break
-            }
+            openSettingsDeepLink(section)
         case let .checkoutSuccess(courseId):
             checkoutReturnPhase = .success(courseId: courseId)
         case .checkoutCancel:
             pendingCheckout = nil
             checkoutReturnPhase = .cancel
-        case .course:
-            selectShellTab(.courses)
         case let .parent(studentId, section):
-            if roleSnapshot.hasParentDashboard {
-                setRoleContext(.parent)
-            }
-            if let studentId {
-                MobileIaPreferences.saveSelectedChildId(studentId)
-                pendingParentStudentId = studentId
-            }
-            pendingParentRoute = parentRoute(studentId: studentId, section: section)
-            selectShellTab(.children)
+            openParentDeepLink(studentId: studentId, section: section)
         case let .boardLink(token):
             pendingBoardLinkToken = token
         case let .liveQuizPlay(code):
             pendingLiveQuizCode = code
             showLiveQuizPlay = true
+        case let .marketplace(slug, couponCode):
+            openMarketplaceDeepLink(slug: slug, couponCode: couponCode)
         }
+    }
+
+    private func openSettingsDeepLink(_ section: SettingsDeepLinkSection) {
+        selectShellTab(.profile)
+        pendingProfileSettingsRoute = section
+        switch section {
+        case .auditLog:
+            pendingSettingsAdminPage = .auditLog
+        case .adminHub:
+            pendingSettingsAdminPage = nil
+        case .account, .notifications, .learnerProfile:
+            break
+        }
+    }
+
+    private func openParentDeepLink(studentId: String?, section: ParentDeepLinkSection) {
+        if roleSnapshot.hasParentDashboard {
+            setRoleContext(.parent)
+        }
+        if let studentId {
+            MobileIaPreferences.saveSelectedChildId(studentId)
+            pendingParentStudentId = studentId
+        }
+        pendingParentRoute = parentRoute(studentId: studentId, section: section)
+        selectShellTab(.children)
     }
 
     private func parentRoute(studentId: String?, section: ParentDeepLinkSection) -> ParentRoute? {

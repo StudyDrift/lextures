@@ -192,8 +192,27 @@ export function formatMarketplacePrice(
   }
 }
 
-export function enrollHandoffUrl(slug: string): string {
-  return `${APP_ORIGIN}/explore/${encodeURIComponent(slug)}?ref=www-courses`
+/** Max coupon characters echoed into handoff URLs / copy (MKTC.5 FR-13). */
+export const COUPON_HANDOFF_MAX_LEN = 32
+
+/**
+ * App storefront handoff. Optional coupon is forwarded for MKTC.5 share links.
+ * Lands on marketplace detail (AC-9); explore still works via FR-14 forwarding.
+ */
+export function enrollHandoffUrl(slug: string, opts?: { coupon?: string }): string {
+  const params = new URLSearchParams()
+  params.set('ref', 'www-courses')
+  const coupon = (opts?.coupon ?? '').replace(/\s+/g, '').toUpperCase().slice(0, COUPON_HANDOFF_MAX_LEN)
+  if (coupon) {
+    params.set('coupon', coupon)
+  }
+  return `${APP_ORIGIN}/marketplace/${encodeURIComponent(slug)}?${params.toString()}`
+}
+
+/** Safe display fragment for an unvalidated coupon code (text only, truncated). */
+export function displayHandoffCoupon(raw: string | null | undefined): string {
+  if (!raw) return ''
+  return String(raw).replace(/\s+/g, '').toUpperCase().slice(0, COUPON_HANDOFF_MAX_LEN)
 }
 
 export function courseCardAccessibleName(

@@ -75,6 +75,8 @@ data class MarketplaceClaimResult(
     val alreadyOwned: Boolean = false,
     val firstItemId: String? = null,
     val courseCode: String = "",
+    /** True when a 100% coupon granted free access (MKTC.3 / MKTC.6). */
+    val grantedFree: Boolean = false,
 )
 
 @Serializable
@@ -84,7 +86,45 @@ data class MarketplaceCheckoutResult(
     val alreadyOwned: Boolean = false,
     val courseCode: String? = null,
     val courseId: String? = null,
+    /** True when checkout was short-circuited to a free grant (MKTC.3 / MKTC.6). */
+    val grantedFree: Boolean = false,
+    val enrolled: Boolean = false,
+    val entitlementId: String? = null,
+    val firstItemId: String? = null,
+    val chargedCents: Int? = null,
+    val currency: String? = null,
+    val discountCents: Int? = null,
+    val listPriceCents: Int? = null,
 )
+
+/** Learner coupon preview (MKTC.3 / MKTC.6). */
+@Serializable
+data class CouponPreview(
+    val applied: Boolean = false,
+    val code: String = "",
+    val reason: String = "not_found",
+    val listPriceCents: Int = 0,
+    val discountCents: Int = 0,
+    val chargedCents: Int = 0,
+    val currency: String = "usd",
+    val freeAfterDiscount: Boolean = false,
+    val endsAt: String? = null,
+    val seatsRemaining: Int? = null,
+    val clampedToFree: Boolean = false,
+)
+
+/** Session-only deep-link coupon handoff (MKTC.6 FR-5 — not persisted). */
+data class PendingMarketplaceCoupon(
+    val slug: String,
+    val code: String,
+)
+
+/** HTTP error for coupon preview/claim/checkout with typed reason (422) or rate limit (429). */
+class CouponApiError(
+    val status: Int,
+    val reason: String?,
+    val apiMessage: String?,
+) : Exception(apiMessage ?: "Coupon request failed (HTTP $status).")
 
 @Serializable
 data class CoursePurchase(

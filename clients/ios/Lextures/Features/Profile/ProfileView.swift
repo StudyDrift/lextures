@@ -214,6 +214,9 @@ struct ProfileView: View {
             .onChange(of: shell.pendingProfileSettingsRoute) { _, route in
                 if route != nil { openPendingProfileSettingsIfNeeded() }
             }
+            .onChange(of: shell.pendingMoreDestination) { _, dest in
+                if dest != nil { openPendingMoreDestinationIfNeeded() }
+            }
         }
     }
 

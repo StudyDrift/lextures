@@ -9,7 +9,6 @@ internal/background/config_source.go:StaticConfigSource.Config
 internal/background/jobqueue.go:Registry.Types
 internal/httpserver/canvas_assignment_submissions_import.go:canvasFirstSubmissionAttachment
 internal/httpserver/canvas_submission_sync.go:canvasInstructorCommentFromSubmission
-internal/l10n/locale.go:NormalizeLocale
 internal/logging/diploma_metrics.go:DiplomaMetrics.Snapshot
 internal/logging/metrics.go:RedactionMetrics.Reset
 internal/logging/transcript_notification_metrics.go:TranscriptNotificationMetrics.Snapshot

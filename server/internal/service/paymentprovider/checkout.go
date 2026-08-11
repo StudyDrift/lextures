@@ -29,6 +29,13 @@ type StartCheckoutRequest struct {
 	CancelURL          string
 	PlatformTaxEnabled bool
 	TaxCode            string
+	// First-party course coupon (plan MKTC.3).
+	HasFirstPartyCoupon bool
+	DiscountCents       int
+	ChargedCents        int
+	CouponID            string
+	CouponCode          string
+	ListPriceCents      int // 0 → use catalog price
 }
 
 // StartCheckout creates a hosted checkout session via the selected provider.
@@ -63,6 +70,22 @@ func StartCheckout(ctx context.Context, pool *pgxpool.Pool, cfg Config, req Star
 		if code := strings.TrimSpace(req.AffiliateCode); code != "" {
 			meta["affiliate_code"] = code
 		}
+		if req.HasFirstPartyCoupon {
+			// FR-9 metadata for webhook redemption promotion.
+			if cid := strings.TrimSpace(req.CouponID); cid != "" {
+				meta["coupon_id"] = cid
+			}
+			if code := strings.TrimSpace(req.CouponCode); code != "" {
+				meta["coupon_code"] = code
+			}
+			meta["coupon_discount_cents"] = fmt.Sprintf("%d", req.DiscountCents)
+			listCents := req.ListPriceCents
+			if listCents <= 0 {
+				listCents = price.PriceCents
+			}
+			meta["list_price_cents"] = fmt.Sprintf("%d", listCents)
+			meta["charged_cents"] = fmt.Sprintf("%d", req.ChargedCents)
+		}
 		taxCode := NormalizeTaxCode(req.TaxCode)
 		if providerName == ProviderStripe {
 			customerID, err := ensureStripeCustomer(ctx, pool, cfg, req.UserID, req.Email)
@@ -71,21 +94,28 @@ func StartCheckout(ctx context.Context, pool *pgxpool.Pool, cfg Config, req Star
 			}
 			meta["stripe_customer_id"] = customerID
 		}
+		listPrice := price.PriceCents
+		if req.ListPriceCents > 0 {
+			listPrice = req.ListPriceCents
+		}
 		result, err := provider.CreateCheckoutSession(ctx, CheckoutRequest{
-			UserID:             req.UserID,
-			Email:              req.Email,
-			CourseID:           req.CourseID,
-			CourseTitle:        price.Title,
-			PriceCents:         price.PriceCents,
-			Currency:           price.Currency,
-			OrgID:              price.OrgID,
-			AffiliateCode:      req.AffiliateCode,
-			SuccessURL:         req.SuccessURL,
-			CancelURL:          req.CancelURL,
-			Country:            req.Country,
-			PlatformTaxEnabled: req.PlatformTaxEnabled,
-			TaxCode:            taxCode,
-			Metadata:           meta,
+			UserID:              req.UserID,
+			Email:               req.Email,
+			CourseID:            req.CourseID,
+			CourseTitle:         price.Title,
+			PriceCents:          listPrice,
+			Currency:            price.Currency,
+			OrgID:               price.OrgID,
+			AffiliateCode:       req.AffiliateCode,
+			SuccessURL:          req.SuccessURL,
+			CancelURL:           req.CancelURL,
+			Country:             req.Country,
+			PlatformTaxEnabled:  req.PlatformTaxEnabled,
+			TaxCode:             taxCode,
+			Metadata:            meta,
+			HasFirstPartyCoupon: req.HasFirstPartyCoupon,
+			DiscountCents:       req.DiscountCents,
+			ChargedCents:        req.ChargedCents,
 		})
 		if err != nil {
 			return nil, err

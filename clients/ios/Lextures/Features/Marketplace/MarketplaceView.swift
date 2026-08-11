@@ -22,6 +22,8 @@ struct MarketplaceView: View {
     @State private var loadingMore = false
     @State private var errorMessage: String?
     @State private var hasSearched = false
+    /// Deep-link / shell handoff to a specific course detail (MKTC.6).
+    @State private var pendingCourseRoute: MarketplaceRoute?
 
     var body: some View {
         ZStack {
@@ -86,10 +88,25 @@ struct MarketplaceView: View {
                 MarketplaceDetailView(slug: slug)
             }
         }
+        .navigationDestination(item: $pendingCourseRoute) { route in
+            switch route {
+            case .course(let slug):
+                MarketplaceDetailView(slug: slug)
+            }
+        }
         .task {
+            openPendingMarketplaceDetailIfNeeded()
             await loadCategories()
             await searchCourses(reset: true)
         }
+        .onChange(of: shell.pendingMarketplaceSlug) { _, slug in
+            if slug != nil { openPendingMarketplaceDetailIfNeeded() }
+        }
+    }
+
+    private func openPendingMarketplaceDetailIfNeeded() {
+        guard let slug = shell.consumePendingMarketplaceSlug(), !slug.isEmpty else { return }
+        pendingCourseRoute = .course(slug)
     }
 
     @ViewBuilder

@@ -42,6 +42,9 @@ type Config struct {
 
 	CanvasAllowedHostSuffixes []string
 	PublicWebOrigin           string
+	// MarketingSiteOrigin is the public marketing/www origin for share links (plan MKTC.2).
+	// Env: MARKETING_SITE_ORIGIN. Default https://lextures.com.
+	MarketingSiteOrigin string
 
 	// BrandingMultitenantHostSuffix matches "{slug}.<suffix>" to tenant.organizations.slug (plan 5.7).
 	// Example: "lextures.io" maps greenvalley.lextures.io → slug greenvalley. Empty disables subdomain mapping.
@@ -535,6 +538,14 @@ type Config struct {
 	// Distinct from FFMarketplace (plugin/OAuth app marketplace, plan 16.9). Default ON.
 	// Managed in Settings → Global platform (not process env).
 	FFCourseMarketplace bool
+	// FFCourseCoupons enables creator-managed course coupon codes (plan MKTC.2).
+	// Default OFF until GA (plan MKTC.7). Managed in Settings → Global platform (not process env).
+	// NOTE (MKTC.7): do not flip the platformconfig default to ON here — orchestrator
+	// flips after UI + GA bar. Leave default OFF.
+	FFCourseCoupons bool
+	// CouponMaxPercentOff caps creator percent coupons (plan MKTC.7 FR-5).
+	// Default 100 = uncapped. Managed in Settings → Global platform.
+	CouponMaxPercentOff float64
 	// FFFeedback is always on (platform master removed). In-app product feedback (plan FB0).
 	// Retained for API compatibility with platform settings payloads.
 	FFFeedback bool
@@ -881,6 +892,7 @@ func Load() Config {
 
 		CanvasAllowedHostSuffixes:     canvasAllowedHostSuffixes(),
 		PublicWebOrigin:               trimTrailingSlash(stringDefault(firstNonEmptyTrimmed("PUBLIC_WEB_ORIGIN"), "http://localhost:5173")),
+		MarketingSiteOrigin:           trimTrailingSlash(stringDefault(firstNonEmptyTrimmed("MARKETING_SITE_ORIGIN"), "https://lextures.com")),
 		BrandingMultitenantHostSuffix: strings.TrimSpace(strings.ToLower(firstNonEmptyTrimmed("BRANDING_MULTITENANT_HOST_SUFFIX"))),
 
 		PlatformSecretsKey: platformSecretsKeyFromEnv(),

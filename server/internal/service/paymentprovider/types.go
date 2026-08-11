@@ -39,6 +39,19 @@ type CheckoutRequest struct {
 	// so Checkout works with Managed Payments accounts.
 	TaxCode  string
 	Metadata map[string]string
+	// First-party course coupon (plan MKTC.3). When HasFirstPartyCoupon is true,
+	// UnitAmount is ChargedCents and Stripe promotion codes are disabled.
+	HasFirstPartyCoupon bool
+	DiscountCents       int
+	ChargedCents        int // discounted unit amount (pre-tax)
+}
+
+// UnitAmount is the line-item amount sent to the payment provider.
+func (r CheckoutRequest) UnitAmount() int {
+	if r.HasFirstPartyCoupon {
+		return r.ChargedCents
+	}
+	return r.PriceCents
 }
 
 // SubscriptionRequest starts a recurring checkout.

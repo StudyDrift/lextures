@@ -51,6 +51,7 @@ func (p *PayPalProvider) CreateCheckoutSession(ctx context.Context, req Checkout
 	}
 	idempotencyKey := fmt.Sprintf("paypal:checkout:%s:%s", req.UserID, strings.TrimSpace(req.Metadata["checkout_key"]))
 	customID := paypalCustomID(req.UserID, req.CourseID, idempotencyKey)
+	unitAmount := req.UnitAmount()
 	body := map[string]any{
 		"intent": "CAPTURE",
 		"purchase_units": []map[string]any{{
@@ -59,7 +60,7 @@ func (p *PayPalProvider) CreateCheckoutSession(ctx context.Context, req Checkout
 			"custom_id":    customID,
 			"amount": map[string]any{
 				"currency_code": currency,
-				"value":         formatPayPalAmount(req.PriceCents),
+				"value":         formatPayPalAmount(unitAmount),
 			},
 		}},
 		"payment_source": map[string]any{
@@ -112,7 +113,7 @@ func (p *PayPalProvider) CreateCheckoutSession(ctx context.Context, req Checkout
 		CheckoutURL:    checkoutURL,
 		Provider:       ProviderPayPal,
 		IdempotencyKey: idempotencyKey,
-		AmountCents:    req.PriceCents,
+		AmountCents:    unitAmount,
 		Currency:       strings.ToLower(currency),
 	}, nil
 }

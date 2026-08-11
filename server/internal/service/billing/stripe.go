@@ -37,6 +37,13 @@ type CheckoutRequest struct {
 	SuccessURL         string
 	CancelURL          string
 	PlatformTaxEnabled bool
+	// First-party course coupon (plan MKTC.3).
+	HasFirstPartyCoupon bool
+	DiscountCents       int
+	ChargedCents        int
+	CouponID            string
+	CouponCode          string
+	ListPriceCents      int
 }
 
 // CheckoutResult is a Stripe Checkout redirect.
@@ -94,16 +101,22 @@ func CreateCheckoutSession(ctx context.Context, pool *pgxpool.Pool, cfg StripeCo
 		PublicWebOrigin:      cfg.PublicWebOrigin,
 	}
 	result, err := paymentprovider.StartCheckout(ctx, pool, pcfg, paymentprovider.StartCheckoutRequest{
-		UserID:             req.UserID,
-		Email:              req.Email,
-		CourseID:           req.CourseID,
-		Plan:               req.Plan,
-		PromoCode:          req.PromoCode,
-		AffiliateCode:      req.AffiliateCode,
-		SuccessURL:         req.SuccessURL,
-		CancelURL:          req.CancelURL,
-		PlatformTaxEnabled: req.PlatformTaxEnabled,
-		TaxCode:            taxCode,
+		UserID:              req.UserID,
+		Email:               req.Email,
+		CourseID:            req.CourseID,
+		Plan:                req.Plan,
+		PromoCode:           req.PromoCode,
+		AffiliateCode:       req.AffiliateCode,
+		SuccessURL:          req.SuccessURL,
+		CancelURL:           req.CancelURL,
+		PlatformTaxEnabled:  req.PlatformTaxEnabled,
+		TaxCode:             taxCode,
+		HasFirstPartyCoupon: req.HasFirstPartyCoupon,
+		DiscountCents:       req.DiscountCents,
+		ChargedCents:        req.ChargedCents,
+		CouponID:            req.CouponID,
+		CouponCode:          req.CouponCode,
+		ListPriceCents:      req.ListPriceCents,
 	})
 	if err != nil {
 		return nil, err
@@ -160,6 +173,8 @@ func HandleWebhookEvent(ctx context.Context, pool *pgxpool.Pool, event stripe.Ev
 	switch event.Type {
 	case "checkout.session.completed":
 		return handleCheckoutCompleted(ctx, pool, event, opts)
+	case "checkout.session.expired":
+		return handleCheckoutExpired(ctx, pool, event)
 	case "invoice.payment_succeeded":
 		return handleInvoicePaymentSucceeded(ctx, pool, event)
 	case "invoice.payment_failed":
@@ -171,6 +186,18 @@ func HandleWebhookEvent(ctx context.Context, pool *pgxpool.Pool, event stripe.Ev
 	default:
 		return &WebhookResult{EventType: string(event.Type)}, nil
 	}
+}
+
+// handleCheckoutExpired releases a coupon reservation tied to an abandoned Checkout Session (MKTC.3 FR-17).
+func handleCheckoutExpired(ctx context.Context, pool *pgxpool.Pool, event stripe.Event) (*WebhookResult, error) {
+	var sess stripe.CheckoutSession
+	if err := json.Unmarshal(event.Data.Raw, &sess); err != nil {
+		return nil, err
+	}
+	if sid := strings.TrimSpace(sess.ID); sid != "" {
+		_ = repoBilling.ReleaseCouponReservationBySession(ctx, pool, sid, "checkout_expired")
+	}
+	return &WebhookResult{EventType: string(event.Type)}, nil
 }
 
 func handleCheckoutCompleted(ctx context.Context, pool *pgxpool.Pool, event stripe.Event, opts WebhookOptions) (*WebhookResult, error) {
@@ -253,6 +280,30 @@ func handleCheckoutCompleted(ctx context.Context, pool *pgxpool.Pool, event stri
 		}
 		if created && amount > 0 {
 			telemetry.RecordMarketplacePurchaseCompleted()
+		}
+	}
+	// Coupon redemption promotion (plan MKTC.3 FR-10).
+	if strings.TrimSpace(sess.Metadata["coupon_id"]) != "" {
+		var entID *uuid.UUID
+		if ent != nil {
+			id := ent.ID
+			entID = &id
+		}
+		// Prefer pre-tax subtotal when tax is separable.
+		charged := amount
+		if sess.TotalDetails != nil && sess.TotalDetails.AmountTax > 0 {
+			sub := int(sess.AmountSubtotal)
+			if sub > 0 {
+				charged = sub
+			} else {
+				charged = amount - int(sess.TotalDetails.AmountTax)
+				if charged < 0 {
+					charged = amount
+				}
+			}
+		}
+		if err := PromoteCouponRedemptionFromWebhook(ctx, pool, sess.ID, event.ID, entID, sess.Metadata, charged); err != nil {
+			return nil, err
 		}
 	}
 	return &WebhookResult{EventType: string(event.Type), Created: created}, nil
@@ -424,6 +475,8 @@ func handleChargeRefunded(ctx context.Context, pool *pgxpool.Pool, event stripe.
 		}
 		if refunded {
 			telemetry.RecordMarketplaceRefund()
+			// FR-11: release coupon seat so the pool can be reused.
+			_ = ReleaseCouponOnRefund(ctx, pool, userID, courseID)
 		}
 	} else if opts.TaxCollectionEnabled && courseID != uuid.Nil {
 		_, _ = repoBilling.ReverseEntitlementTaxByCourse(ctx, pool, courseID)

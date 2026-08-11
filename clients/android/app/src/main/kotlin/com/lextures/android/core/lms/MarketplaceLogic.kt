@@ -33,10 +33,33 @@ enum class MarketplaceSortMode(val apiValue: String) {
     Price("price"),
 }
 
-/** Marketplace helpers (MKT6 / MOB.7). Paid path: Stripe checkout handoff when flagged. */
+/** Android purchase decision for a coupon preview (MKTC.6). */
+sealed class AndroidPurchaseRoute {
+    data object FreeGrant : AndroidPurchaseRoute()
+    data object StripeCheckout : AndroidPurchaseRoute()
+    data object Reject : AndroidPurchaseRoute()
+    data object FlagOff : AndroidPurchaseRoute()
+}
+
+/** Marketplace helpers (MKT6 / MOB.7 / MKTC.6). Paid path: Stripe checkout handoff when flagged. */
 object MarketplaceLogic {
     const val MAX_PRICE_MAJOR = 99_999.99
     const val MIN_PAID_CENTS = 50
+    /** Max characters retained from a URL or typed code (server normalizes further). */
+    const val COUPON_INPUT_MAX_LEN = 32
+
+    private val COUPON_REASON_KEYS = setOf(
+        "ok",
+        "not_found",
+        "inactive",
+        "not_started",
+        "expired",
+        "exhausted",
+        "already_used",
+        "currency_mismatch",
+        "course_free",
+        "owned",
+    )
 
     val currencies = listOf(
         "usd", "eur", "gbp", "cad", "aud", "jpy", "chf", "sek", "nok", "dkk", "nzd", "sgd", "hkd", "mxn",
@@ -45,6 +68,10 @@ object MarketplaceLogic {
     /** In-app claim/buy + Purchased courses library (MOB.7). Default off via platform flag. */
     fun purchaseEnabled(features: MobilePlatformFeatures): Boolean =
         features.ffCourseMarketplace && features.ffMobileMarketplacePurchase
+
+    /** Coupons UI + preview when marketplace and coupons flags are both on (MKTC.6). */
+    fun couponsEnabled(features: MobilePlatformFeatures): Boolean =
+        features.ffCourseMarketplace && features.ffCourseCoupons
 
     fun isPaid(priceCents: Int): Boolean = priceCents > 0
 
@@ -56,6 +83,102 @@ object MarketplaceLogic {
     }
 
     fun marketplaceWebPath(slug: String): String = "/marketplace/$slug"
+
+    /** Upper-case, strip whitespace, drop non [A-Z0-9_-], truncate to [COUPON_INPUT_MAX_LEN]. */
+    fun normalizeCouponCode(raw: String): String {
+        val upper = raw.replace(Regex("\\s+"), "").uppercase()
+        val filtered = upper.replace(Regex("[^A-Z0-9_-]"), "")
+        return filtered.take(COUPON_INPUT_MAX_LEN)
+    }
+
+    /**
+     * Validate a raw deep-link/query coupon before use (length ≤ 32, usable charset after normalize).
+     * Empty / oversized / only-illegal characters → false.
+     */
+    fun isValidCouponParam(raw: String?): Boolean {
+        val trimmed = raw?.trim().orEmpty()
+        if (trimmed.isEmpty() || trimmed.length > COUPON_INPUT_MAX_LEN) return false
+        return normalizeCouponCode(trimmed).isNotEmpty()
+    }
+
+    /**
+     * Read `?coupon=` from a full URL, path+query, or bare query string.
+     * Returns a normalized code or null when missing/invalid.
+     */
+    fun parseCouponFromQuery(rawUrlOrQuery: String): String? {
+        val raw = rawUrlOrQuery.trim()
+        if (raw.isEmpty()) return null
+        val query = when {
+            raw.contains('?') -> raw.substringAfter('?').substringBefore('#')
+            raw.contains('=') && !raw.contains("://") && !raw.startsWith("/") -> raw.removePrefix("?")
+            else -> {
+                runCatching {
+                    val uriString = when {
+                        raw.startsWith("lextures://") -> {
+                            val stripped = raw.removePrefix("lextures://")
+                            "https://lextures.com/" + stripped.trimStart('/')
+                        }
+                        raw.startsWith("http://") || raw.startsWith("https://") -> raw
+                        raw.startsWith("/") -> "https://lextures.com$raw"
+                        else -> return null
+                    }
+                    java.net.URI(uriString).rawQuery
+                }.getOrNull() ?: return null
+            }
+        }
+        if (query.isNullOrBlank()) return null
+        var found: String? = null
+        for (part in query.split('&')) {
+            if (part.isEmpty()) continue
+            val eq = part.indexOf('=')
+            val key = if (eq >= 0) part.substring(0, eq) else part
+            val value = if (eq >= 0) part.substring(eq + 1) else ""
+            if (key.equals("coupon", ignoreCase = true) && value.isNotEmpty()) {
+                found = runCatching {
+                    java.net.URLDecoder.decode(value, Charsets.UTF_8.name())
+                }.getOrDefault(value)
+                break
+            }
+        }
+        if (found == null || !isValidCouponParam(found)) return null
+        return normalizeCouponCode(found)
+    }
+
+    /** Map a server reason token to `mobile.marketplace.coupon.reason.*` key. */
+    fun couponReasonKey(reason: String?): String {
+        val r = reason?.lowercase()?.trim().orEmpty().ifEmpty { "not_found" }
+        val key = if (r in COUPON_REASON_KEYS) r else "not_found"
+        return "mobile.marketplace.coupon.reason.$key"
+    }
+
+    /**
+     * Pure Android purchase branch for a coupon preview.
+     * freeGrant | stripeCheckout | reject | flagOff
+     */
+    fun purchaseRoute(
+        preview: CouponPreview?,
+        couponsOn: Boolean,
+        marketplaceOn: Boolean = true,
+    ): AndroidPurchaseRoute {
+        if (!marketplaceOn || !couponsOn) return AndroidPurchaseRoute.FlagOff
+        if (preview == null || !preview.applied) return AndroidPurchaseRoute.Reject
+        return if (preview.freeAfterDiscount || preview.chargedCents <= 0) {
+            AndroidPurchaseRoute.FreeGrant
+        } else {
+            AndroidPurchaseRoute.StripeCheckout
+        }
+    }
+
+    fun parseCouponReasonFromBody(body: String): String? {
+        if (body.isBlank()) return null
+        return runCatching {
+            val el = kotlinx.serialization.json.Json.parseToJsonElement(body)
+            val obj = el as? kotlinx.serialization.json.JsonObject ?: return@runCatching null
+            obj["reason"]?.let {
+                (it as? kotlinx.serialization.json.JsonPrimitive)?.content?.takeIf { c -> c.isNotBlank() }
+            }
+        }.getOrNull()
+    }
 
     fun cacheKey(
         query: String,

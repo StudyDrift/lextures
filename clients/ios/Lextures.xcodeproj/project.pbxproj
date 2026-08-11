@@ -336,6 +336,7 @@
 		6C1521FBB2154270A2EF9759 /* CatalogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAEF4B92CA7B430C86285B61 /* CatalogView.swift */; };
 		6C6A537138D34FF883A6FDBC /* WhiteboardLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 278B080C58A949CAB3178EB2 /* WhiteboardLogicTests.swift */; };
 		6CA4A9FAD45D475EBDE8A71A /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4A8269E66CB463CA7F4B2C8 /* MainTabView.swift */; };
+		3E687D8DD5A44C87B3F3F5A8 /* AppShellModel+MarketplaceCoupons.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC5624E684414D238D989DC4 /* AppShellModel+MarketplaceCoupons.swift */; };
 		6CFD9F5F0B3F47DE8DF65223 /* ReviewsReceivedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F7313121CA44CFD9B309689 /* ReviewsReceivedView.swift */; };
 		6D6AF76CF4F44F88AD37DF12 /* FeedChannelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88764457D11E45ABB17D3725 /* FeedChannelView.swift */; };
 		6DC3FE49BA614639ACD1C290 /* I18nTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11E8798613F04596AE2F39DC /* I18nTests.swift */; };
@@ -1280,6 +1281,7 @@
 		B3F2FE3FC7BA453BBFB0EF0D /* SearchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTests.swift; sourceTree = "<group>"; };
 		B45AE36FE7C1481EAF54D05A /* BoardsLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardsLogicTests.swift; sourceTree = "<group>"; };
 		B4A8269E66CB463CA7F4B2C8 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		AC5624E684414D238D989DC4 /* AppShellModel+MarketplaceCoupons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppShellModel+MarketplaceCoupons.swift"; sourceTree = "<group>"; };
 		B4C7BAE8681D4F42A962B46C /* LMSAPIBoardPosts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIBoardPosts.swift; sourceTree = "<group>"; };
 		B6476DF53A774E5BB623C56F /* LMSFeatureModelsAuditLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsAuditLog.swift; sourceTree = "<group>"; };
 		B7127C7AF79949219C8BD4D8 /* CardArrangeMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardArrangeMenu.swift; sourceTree = "<group>"; };
@@ -1795,6 +1797,7 @@
 				F8F144A8A6014A03A92BBAE6 /* AnnouncementsViews.swift */,
 				7D5137790B5649D2B78E28EA /* BroadcastComposerView.swift */,
 				B4A8269E66CB463CA7F4B2C8 /* MainTabView.swift */,
+				AC5624E684414D238D989DC4 /* AppShellModel+MarketplaceCoupons.swift */,
 				4A4C0B06F38344D2905225DB /* MoreHubView.swift */,
 				51E2EE6C5DBC4CC28F9E157A /* ShellHeaderBar.swift */,
 				ECA426FCD87A41A69B1CE007 /* TeachHubView.swift */,
@@ -3580,6 +3583,7 @@
 				D7CFEA6F6F274D64BE7B6AF8 /* AnnouncementsViews.swift in Sources */,
 				DBBD13510D5743CB86A56A28 /* BroadcastComposerView.swift in Sources */,
 				6CA4A9FAD45D475EBDE8A71A /* MainTabView.swift in Sources */,
+				3E687D8DD5A44C87B3F3F5A8 /* AppShellModel+MarketplaceCoupons.swift in Sources */,
 				BEFFA6893A1F4233A2B036EB /* MoreHubView.swift in Sources */,
 				1E0E3C768D6444D7939B2091 /* ShellHeaderBar.swift in Sources */,
 				8EB1E3E316CE4F34A5AB5DD8 /* TeachHubView.swift in Sources */,

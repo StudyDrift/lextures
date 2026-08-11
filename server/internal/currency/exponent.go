@@ -41,6 +41,12 @@ func StripeMinimumMinorUnits(code string) int {
 	return 50
 }
 
+// MinimumChargeCents is the payment-provider floor for a non-zero charge in
+// Stripe smallest units (plan MKTC.1 FR-12). Alias of StripeMinimumMinorUnits.
+func MinimumChargeCents(code string) int {
+	return StripeMinimumMinorUnits(code)
+}
+
 // MaxCatalogMinorUnits caps marketplace course fees in Stripe smallest units.
 func MaxCatalogMinorUnits(code string) int {
 	if IsZeroDecimal(code) {

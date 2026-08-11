@@ -28,6 +28,8 @@ enum DeepLinkDestination: Equatable {
     case boardLink(token: String)
     /// Live quiz join / play (`/play` or `/play/{code}`).
     case liveQuizPlay(code: String?)
+    /// Marketplace course detail (`/marketplace/{slug}`), optional coupon from `?coupon=`.
+    case marketplace(slug: String, couponCode: String?)
 }
 
 enum ParentDeepLinkSection: Equatable {
@@ -74,10 +76,47 @@ enum DeepLinkRouter {
         if let parent = resolveParent(from: trimmed) {
             return parent
         }
+        if let marketplace = resolveMarketplace(from: trimmed) {
+            return marketplace
+        }
         if let path = extractPath(from: trimmed) {
             return resolvePath(path)
         }
         return .home
+    }
+
+    /// `/marketplace/{slug}` (+ optional `?coupon=` via `MarketplaceLogic.parseCouponFromQuery`).
+    private static func resolveMarketplace(from raw: String) -> DeepLinkDestination? {
+        let urlString: String
+        if raw.hasPrefix("lextures://") {
+            let stripped = String(raw.dropFirst("lextures://".count))
+            let path = stripped.hasPrefix("/") ? stripped : "/\(stripped)"
+            urlString = "https://lextures.com\(path)"
+        } else if raw.hasPrefix("/") {
+            urlString = "https://lextures.com\(raw)"
+        } else {
+            urlString = raw
+        }
+        guard let url = URL(string: urlString),
+              let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            return nil
+        }
+        if let host = components.host?.lowercased(),
+           host != "lextures.com",
+           !host.hasSuffix(".lextures.com"),
+           host != "localhost",
+           !raw.hasPrefix("/"),
+           !raw.hasPrefix("lextures://") {
+            return nil
+        }
+        let segments = components.path.split(separator: "/").map(String.init)
+        guard segments.first?.lowercased() == "marketplace", segments.count >= 2 else {
+            return nil
+        }
+        let slug = segments[1].trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !slug.isEmpty else { return nil }
+        let couponCode = components.query.map { MarketplaceLogic.parseCouponFromQuery($0) } ?? nil
+        return .marketplace(slug: slug, couponCode: couponCode)
     }
 
     private static func extractPath(from value: String) -> String? {

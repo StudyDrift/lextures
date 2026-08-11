@@ -414,6 +414,10 @@ struct MobilePlatformFeatures: Equatable {
     var selfReflectionEnabled = false
     var ffPublicCatalog = false
     var ffCourseMarketplace = false
+    /// Course coupon codes (MKTC.6). Off by default.
+    var ffCourseCoupons = false
+    /// Partial-discount "Continue in browser" affordance; default on, remote-killable (FR-15).
+    var iosCouponWebRedirectEnabled = true
     var ffSelfPacedMode = false
     var ffCourseReviews = false
     var ffCompletionCredentials = false
@@ -507,6 +511,8 @@ struct MobilePlatformFeatures: Equatable {
             selfReflectionEnabled: features?.selfReflectionEnabled == true,
             ffPublicCatalog: features?.ffPublicCatalog == true,
             ffCourseMarketplace: features?.ffCourseMarketplace == true,
+            ffCourseCoupons: features?.ffCourseCoupons == true,
+            iosCouponWebRedirectEnabled: features?.iosCouponWebRedirectEnabled != false,
             ffSelfPacedMode: features?.ffSelfPacedMode == true,
             ffCourseReviews: features?.ffCourseReviews == true,
             ffCompletionCredentials: features?.ffCompletionCredentials == true,

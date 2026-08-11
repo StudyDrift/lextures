@@ -163,6 +163,8 @@ type Row struct {
 	FFSelfPacedMode                    *bool
 	FFPublicCatalog                    *bool
 	FFCourseMarketplace                *bool
+	FFCourseCoupons                    *bool
+	CouponMaxPercentOff                *float64
 	FFContentToolMarketplace           *bool
 	FFFeedback                         *bool
 	FFVisualBoards                     *bool
@@ -388,6 +390,8 @@ type Write struct {
 	FFSelfPacedMode                    *bool
 	FFPublicCatalog                    *bool
 	FFCourseMarketplace                *bool
+	FFCourseCoupons                    *bool
+	CouponMaxPercentOff                *float64
 	FFContentToolMarketplace           *bool
 	FFFeedback                         *bool
 	FFVisualBoards                     *bool
@@ -609,6 +613,8 @@ SELECT
 	ff_self_paced_mode,
 	ff_public_catalog,
 	ff_course_marketplace,
+	ff_course_coupons,
+	coupon_max_percent_off,
 	ff_content_tool_marketplace,
 	ff_feedback,
 	ff_visual_boards,
@@ -823,6 +829,8 @@ WHERE id = 1
 		&r.FFSelfPacedMode,
 		&r.FFPublicCatalog,
 		&r.FFCourseMarketplace,
+		&r.FFCourseCoupons,
+		&r.CouponMaxPercentOff,
 		&r.FFContentToolMarketplace,
 		&r.FFFeedback,
 		&r.FFVisualBoards,

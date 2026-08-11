@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useConfirm } from '../../components/use-confirm'
 import { CourseHeroImage } from '../../components/course-hero-image'
 import { usePermissions } from '../../context/use-permissions'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 import { courseItemCreatePermission } from '../../lib/courses-api'
 import {
   fetchCourseCatalogListing,
@@ -18,6 +19,7 @@ import {
   priceCentsToMajorUnits,
   validateMarketplaceAmount,
 } from '../../lib/marketplace-price'
+import { CourseCouponsPanel } from './course-coupons-panel'
 
 type CourseMarketplaceSettingsSectionProps = {
   courseCode: string
@@ -32,6 +34,7 @@ export function CourseMarketplaceSettingsSection({
 }: CourseMarketplaceSettingsSectionProps) {
   const { t, i18n } = useTranslation('common')
   const { allows } = usePermissions()
+  const { ffCourseCoupons } = usePlatformFeatures()
   const { confirm, ConfirmDialogHost } = useConfirm()
   const feeHelpId = useId()
   const feeErrorId = useId()
@@ -46,6 +49,11 @@ export function CourseMarketplaceSettingsSection({
 
   const canEdit = allows(courseItemCreatePermission(courseCode))
   const isDraft = listing?.publishState === 'draft'
+  const showCouponsPanel =
+    ffCourseCoupons === true &&
+    canEdit &&
+    listing != null &&
+    (listing.marketplaceListed || listing.priceCents > 0)
 
   const reload = useCallback(async () => {
     setLoading(true)
@@ -309,6 +317,14 @@ export function CourseMarketplaceSettingsSection({
           </div>
         ) : null}
       </form>
+      {showCouponsPanel && listing ? (
+        <CourseCouponsPanel
+          courseCode={courseCode}
+          priceCents={listing.priceCents}
+          priceCurrency={listing.priceCurrency || 'usd'}
+          priceFormDirty={isDirty}
+        />
+      ) : null}
       {ConfirmDialogHost}
     </>
   )

@@ -736,6 +736,13 @@ PUT	/api/v1/courses/{course_code}/content-tools/settings	session
 GET	/api/v1/courses/{course_code}/content-tools/state-resets	session
 POST	/api/v1/courses/{course_code}/content-tools/state-resets	session
 POST	/api/v1/courses/{course_code}/content-tools/state-resets/{reset_id}/restore	session
+GET	/api/v1/courses/{course_code}/coupons	anonymous
+POST	/api/v1/courses/{course_code}/coupons	anonymous
+GET	/api/v1/courses/{course_code}/coupons/summary	anonymous
+DELETE	/api/v1/courses/{course_code}/coupons/{coupon_id}	anonymous
+PATCH	/api/v1/courses/{course_code}/coupons/{coupon_id}	anonymous
+GET	/api/v1/courses/{course_code}/coupons/{coupon_id}/redemptions	anonymous
+GET	/api/v1/courses/{course_code}/coupons/{coupon_id}/redemptions.csv	anonymous
 POST	/api/v1/courses/{course_code}/course-context	session
 POST	/api/v1/courses/{course_code}/course-files	session
 DELETE	/api/v1/courses/{course_code}/course-files/{file_id}	session
@@ -1204,6 +1211,7 @@ GET	/api/v1/marketplace/courses	session
 GET	/api/v1/marketplace/courses/{slug}	session
 POST	/api/v1/marketplace/courses/{slug}/checkout	session
 POST	/api/v1/marketplace/courses/{slug}/claim	session
+POST	/api/v1/marketplace/courses/{slug}/coupon/preview	session
 GET	/api/v1/me	session
 GET	/api/v1/me/access-keys	session
 POST	/api/v1/me/access-keys	session

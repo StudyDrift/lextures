@@ -1,0 +1,7 @@
+# Marketplace detail grows with coupon redemption UI (MKTC.6).
+type_body_length:
+  warning: 400
+  error: 800
+file_length:
+  warning: 600
+  error: 1000
