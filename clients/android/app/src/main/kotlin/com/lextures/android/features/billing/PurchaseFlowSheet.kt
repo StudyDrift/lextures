@@ -28,7 +28,9 @@ import com.lextures.android.core.i18n.L
 import com.lextures.android.core.i18n.LocalePreferences
 import com.lextures.android.core.lms.BillingLogic
 import com.lextures.android.core.lms.CheckoutTaxQuote
+import com.lextures.android.core.lms.CouponApiError
 import com.lextures.android.core.lms.LmsApi
+import com.lextures.android.core.lms.MarketplaceLogic
 import com.lextures.android.core.lms.MarketplaceObservability
 import com.lextures.android.core.lms.PendingCheckoutContext
 import com.lextures.android.features.home.HomeShellState
@@ -50,7 +52,13 @@ fun PurchaseFlowSheet(
     currency: String,
     onDismiss: () -> Unit,
     marketplaceSlug: String? = null,
+    couponCode: String? = null,
+    listPriceCents: Int? = null,
+    discountCents: Int? = null,
+    chargedCents: Int? = null,
     onAlreadyOwned: (() -> Unit)? = null,
+    onGrantedFree: ((courseCode: String) -> Unit)? = null,
+    onCouponRejected: ((reason: String?) -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -62,12 +70,51 @@ fun PurchaseFlowSheet(
     var purchasing by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(accessToken, shell?.platformFeatures?.ffTaxCollection, courseId) {
+    val effectiveList = listPriceCents ?: priceCents
+    val effectiveDiscount = discountCents ?: 0
+    val effectiveCharged = chargedCents ?: priceCents
+    val hasCoupon = !couponCode.isNullOrBlank() && effectiveDiscount > 0
+
+    LaunchedEffect(accessToken, shell?.platformFeatures?.ffTaxCollection, courseId, couponCode) {
         val token = accessToken ?: return@LaunchedEffect
+        // Coupon path uses server chargedCents in the sheet so Custom Tab amount matches (MKTC.6 AC-2).
+        if (!couponCode.isNullOrBlank()) {
+            quote = null
+            loadingQuote = false
+            return@LaunchedEffect
+        }
         if (shell?.platformFeatures?.ffTaxCollection != true) return@LaunchedEffect
         loadingQuote = true
         quote = runCatching { LmsApi.fetchCheckoutQuote(courseId, token) }.getOrNull()
         loadingQuote = false
+    }
+
+    fun couponReasonMessage(reason: String?): String {
+        val key = MarketplaceLogic.couponReasonKey(reason)
+        val resId = when (key) {
+            "mobile.marketplace.coupon.reason.ok" ->
+                com.lextures.android.R.string.mobile_marketplace_coupon_reason_ok
+            "mobile.marketplace.coupon.reason.not_found" ->
+                com.lextures.android.R.string.mobile_marketplace_coupon_reason_not_found
+            "mobile.marketplace.coupon.reason.inactive" ->
+                com.lextures.android.R.string.mobile_marketplace_coupon_reason_inactive
+            "mobile.marketplace.coupon.reason.not_started" ->
+                com.lextures.android.R.string.mobile_marketplace_coupon_reason_not_started
+            "mobile.marketplace.coupon.reason.expired" ->
+                com.lextures.android.R.string.mobile_marketplace_coupon_reason_expired
+            "mobile.marketplace.coupon.reason.exhausted" ->
+                com.lextures.android.R.string.mobile_marketplace_coupon_reason_exhausted
+            "mobile.marketplace.coupon.reason.already_used" ->
+                com.lextures.android.R.string.mobile_marketplace_coupon_reason_already_used
+            "mobile.marketplace.coupon.reason.currency_mismatch" ->
+                com.lextures.android.R.string.mobile_marketplace_coupon_reason_currency_mismatch
+            "mobile.marketplace.coupon.reason.course_free" ->
+                com.lextures.android.R.string.mobile_marketplace_coupon_reason_course_free
+            "mobile.marketplace.coupon.reason.owned" ->
+                com.lextures.android.R.string.mobile_marketplace_coupon_reason_owned
+            else -> com.lextures.android.R.string.mobile_marketplace_coupon_reason_not_found
+        }
+        return L.text(context, localePrefs, resId)
     }
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
@@ -110,6 +157,21 @@ fun PurchaseFlowSheet(
                             Text(L.text(context, localePrefs, com.lextures.android.R.string.mobile_billing_subtotal))
                             Text(BillingLogic.formatMoney(q.subtotalCents, q.currency), fontWeight = FontWeight.SemiBold)
                         }
+                        if (hasCoupon) {
+                            val discountMoney = BillingLogic.formatMoney(effectiveDiscount, q.currency)
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text(
+                                    L.format(
+                                        context,
+                                        localePrefs,
+                                        com.lextures.android.R.string.mobile_marketplace_coupon_sheetLine,
+                                        discountMoney,
+                                        couponCode.orEmpty(),
+                                    ),
+                                )
+                                Text("−$discountMoney", fontWeight = FontWeight.SemiBold)
+                            }
+                        }
                         if (q.taxAmountCents > 0) {
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                 Text(L.text(context, localePrefs, com.lextures.android.R.string.mobile_billing_tax))
@@ -128,15 +190,54 @@ fun PurchaseFlowSheet(
                         )
                     }
                 } else {
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(
-                            L.text(context, localePrefs, com.lextures.android.R.string.mobile_billing_total),
-                            fontWeight = FontWeight.Bold,
-                        )
-                        Text(
-                            BillingLogic.formatMoney(priceCents, currency),
-                            fontWeight = FontWeight.Bold,
-                        )
+                    // Server-backed subtotal / coupon / total when tax quote is unavailable.
+                    if (hasCoupon || listPriceCents != null) {
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text(L.text(context, localePrefs, com.lextures.android.R.string.mobile_billing_subtotal))
+                            Text(
+                                BillingLogic.formatMoney(effectiveList, currency),
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                        }
+                        if (hasCoupon) {
+                            val discountMoney = BillingLogic.formatMoney(effectiveDiscount, currency)
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text(
+                                    L.format(
+                                        context,
+                                        localePrefs,
+                                        com.lextures.android.R.string.mobile_marketplace_coupon_sheetLine,
+                                        discountMoney,
+                                        couponCode.orEmpty(),
+                                    ),
+                                )
+                                Text(
+                                    "−$discountMoney",
+                                    fontWeight = FontWeight.SemiBold,
+                                )
+                            }
+                        }
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text(
+                                L.text(context, localePrefs, com.lextures.android.R.string.mobile_billing_total),
+                                fontWeight = FontWeight.Bold,
+                            )
+                            Text(
+                                BillingLogic.formatMoney(effectiveCharged, currency),
+                                fontWeight = FontWeight.Bold,
+                            )
+                        }
+                    } else {
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text(
+                                L.text(context, localePrefs, com.lextures.android.R.string.mobile_billing_total),
+                                fontWeight = FontWeight.Bold,
+                            )
+                            Text(
+                                BillingLogic.formatMoney(priceCents, currency),
+                                fontWeight = FontWeight.Bold,
+                            )
+                        }
                     }
                 }
             }
@@ -154,11 +255,28 @@ fun PurchaseFlowSheet(
                                 title = title,
                             )
                             if (!marketplaceSlug.isNullOrBlank()) {
-                                val result = LmsApi.checkoutMarketplaceCourse(marketplaceSlug, token)
+                                val result = LmsApi.checkoutMarketplaceCourse(
+                                    marketplaceSlug,
+                                    token,
+                                    couponCode,
+                                )
                                 if (result.alreadyOwned) {
                                     shell?.pendingCheckout = null
+                                    if (shell?.pendingCoupon?.slug == marketplaceSlug) {
+                                        shell.pendingCoupon = null
+                                    }
                                     onDismiss()
                                     onAlreadyOwned?.invoke()
+                                    return@launch
+                                }
+                                if (result.grantedFree) {
+                                    shell?.pendingCheckout = null
+                                    if (shell?.pendingCoupon?.slug == marketplaceSlug) {
+                                        shell.pendingCoupon = null
+                                    }
+                                    onDismiss()
+                                    onGrantedFree?.invoke(result.courseCode ?: courseCode)
+                                        ?: onAlreadyOwned?.invoke()
                                     return@launch
                                 }
                                 val url = result.checkoutUrl
@@ -189,6 +307,36 @@ fun PurchaseFlowSheet(
                             )
                             onDismiss()
                             BillingCheckout.openCheckoutUrl(context, result.checkoutUrl)
+                        } catch (e: CouponApiError) {
+                            shell?.pendingCheckout = null
+                            when (e.status) {
+                                422 -> {
+                                    errorMessage = couponReasonMessage(e.reason)
+                                    onCouponRejected?.invoke(e.reason)
+                                }
+                                429 -> {
+                                    errorMessage = L.text(
+                                        context,
+                                        localePrefs,
+                                        com.lextures.android.R.string.mobile_marketplace_coupon_rateLimited,
+                                    )
+                                }
+                                else -> {
+                                    errorMessage = L.text(
+                                        context,
+                                        localePrefs,
+                                        com.lextures.android.R.string.mobile_billing_checkoutError,
+                                    )
+                                }
+                            }
+                            if (!marketplaceSlug.isNullOrBlank()) {
+                                MarketplaceObservability.record(
+                                    "marketplace_purchase_failed",
+                                    mapOf(
+                                        "reason" to (e.reason ?: e.status.toString()),
+                                    ),
+                                )
+                            }
                         } catch (_: Exception) {
                             shell?.pendingCheckout = null
                             errorMessage = L.text(

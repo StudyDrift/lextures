@@ -53,6 +53,10 @@ struct PlatformFeatures: Decodable {
     var selfReflectionEnabled: Bool?
     var ffPublicCatalog: Bool?
     var ffCourseMarketplace: Bool?
+    /// Course coupon codes on marketplace (MKTC). Off by default until GA.
+    var ffCourseCoupons: Bool?
+    /// When false, hide the tappable external browser handoff for partial coupons (App Store kill switch).
+    var iosCouponWebRedirectEnabled: Bool?
     var ffSelfPacedMode: Bool?
     var ffCourseReviews: Bool?
     var ffCompletionCredentials: Bool?

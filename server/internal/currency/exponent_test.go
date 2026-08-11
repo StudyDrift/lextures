@@ -29,6 +29,18 @@ func TestMinorUnitsToMajorUnits(t *testing.T) {
 	}
 }
 
+func TestMinimumChargeCents(t *testing.T) {
+	if got := MinimumChargeCents("usd"); got != 50 {
+		t.Fatalf("usd floor: got %d want 50", got)
+	}
+	if got := MinimumChargeCents("jpy"); got != 50 {
+		t.Fatalf("jpy floor: got %d want 50", got)
+	}
+	if MinimumChargeCents("usd") != StripeMinimumMinorUnits("usd") {
+		t.Fatal("MinimumChargeCents must match StripeMinimumMinorUnits")
+	}
+}
+
 func TestValidateCatalogPrice(t *testing.T) {
 	if err := ValidateCatalogPrice(1999, "usd"); err != nil {
 		t.Fatalf("valid usd price: %v", err)

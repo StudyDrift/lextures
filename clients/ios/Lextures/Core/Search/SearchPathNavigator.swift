@@ -57,6 +57,9 @@ enum SearchPathNavigator {
         case "catalog":
             return .more(.catalog)
         case "marketplace":
+            if segments.count >= 2 {
+                return .deepLink(DeepLinkRouter.resolve(path))
+            }
             return .more(.marketplace)
         case "paths":
             return .more(.paths)

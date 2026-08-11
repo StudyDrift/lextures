@@ -21,6 +21,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/board"
 	ctrepo "github.com/lextures/lextures/server/internal/repos/contenttools"
 	ccrepo "github.com/lextures/lextures/server/internal/repos/coursechecklist"
+	repoBilling "github.com/lextures/lextures/server/internal/repos/billing"
 	repo "github.com/lextures/lextures/server/internal/repos/gdpr"
 	icrepo "github.com/lextures/lextures/server/internal/repos/introcourse"
 	lprepo "github.com/lextures/lextures/server/internal/repos/learnerprofile"
@@ -326,7 +327,11 @@ SELECT email, display_name, first_name, last_name, timezone, created_at, custom_
 		ContentTools     ctrepo.UserContentToolsExport  `json:"contentTools,omitempty"`
 		PinnedSettings   []map[string]any               `json:"pinnedSettings,omitempty"`
 		CourseChecklist  []map[string]any               `json:"courseChecklist,omitempty"`
-		ExportedAt       string                         `json:"exportedAt"`
+		// CouponRedemptions is the billing ledger of coupon reservations/redemptions (MKTC.1).
+		// Course coupons created_by this user are not learner PII and are omitted; rows
+		// cascade-delete on user erasure (ON DELETE CASCADE).
+		CouponRedemptions []map[string]any `json:"couponRedemptions,omitempty"`
+		ExportedAt        string           `json:"exportedAt"`
 	}
 
 	cs := make([]consentSummary, 0, len(consents))
@@ -362,6 +367,7 @@ SELECT email, display_name, first_name, last_name, timezone, created_at, custom_
 	}
 	pinnedExport := dsarPinnedSettingsExport(ctx, pool, userID)
 	checklistExport := dsarCourseChecklistExport(ctx, pool, userID)
+	couponExport := dsarCouponRedemptionsExport(ctx, pool, userID)
 
 	var customFields map[string]any
 	if len(customRaw) > 0 {
@@ -369,20 +375,21 @@ SELECT email, display_name, first_name, last_name, timezone, created_at, custom_
 	}
 
 	doc := archiveDoc{
-		UserID:          userID.String(),
-		Profile:         p,
-		Consents:        cs,
-		CustomFields:    customFields,
-		AIInferenceLog:  aiLog,
-		LearnerProfile:  learnerProfileExport,
-		ProductFeedback: productFeedbackExport,
-		Boards:          boardsExport,
-		LiveQuizzes:     liveQuizExport,
-		AdaptiveContent: aceExport,
-		ContentTools:    ctExport,
-		PinnedSettings:  pinnedExport,
-		CourseChecklist: checklistExport,
-		ExportedAt:      time.Now().UTC().Format(time.RFC3339),
+		UserID:            userID.String(),
+		Profile:           p,
+		Consents:          cs,
+		CustomFields:      customFields,
+		AIInferenceLog:    aiLog,
+		LearnerProfile:    learnerProfileExport,
+		ProductFeedback:   productFeedbackExport,
+		Boards:            boardsExport,
+		LiveQuizzes:       liveQuizExport,
+		AdaptiveContent:   aceExport,
+		ContentTools:      ctExport,
+		PinnedSettings:    pinnedExport,
+		CourseChecklist:   checklistExport,
+		CouponRedemptions: couponExport,
+		ExportedAt:        time.Now().UTC().Format(time.RFC3339),
 	}
 	b, err := json.Marshal(doc)
 	if err != nil {
@@ -476,6 +483,37 @@ func dsarProductFeedbackExport(ctx context.Context, pool *pgxpool.Pool, userID u
 			"context":   r.Context,
 			"createdAt": r.CreatedAt.UTC().Format(time.RFC3339),
 		})
+	}
+	return out
+}
+
+// dsarCouponRedemptionsExport includes billing.coupon_redemptions for the subject (MKTC.1).
+// Erasure is handled by ON DELETE CASCADE on user_id; no extra erase step is required.
+func dsarCouponRedemptionsExport(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) []map[string]any {
+	rows, err := repoBilling.ListCouponRedemptionsForUser(ctx, pool, userID)
+	if err != nil || len(rows) == 0 {
+		return nil
+	}
+	out := make([]map[string]any, 0, len(rows))
+	for _, r := range rows {
+		m := map[string]any{
+			"id":             r.ID.String(),
+			"couponId":       r.CouponID.String(),
+			"courseId":       r.CourseID.String(),
+			"status":         r.Status,
+			"listPriceCents": r.ListPriceCents,
+			"discountCents":  r.DiscountCents,
+			"chargedCents":   r.ChargedCents,
+			"currency":       r.Currency,
+			"reservedAt":     r.ReservedAt.UTC().Format(time.RFC3339),
+		}
+		if r.RedeemedAt != nil {
+			m["redeemedAt"] = r.RedeemedAt.UTC().Format(time.RFC3339)
+		}
+		if r.ReleasedAt != nil {
+			m["releasedAt"] = r.ReleasedAt.UTC().Format(time.RFC3339)
+		}
+		out = append(out, m)
 	}
 	return out
 }

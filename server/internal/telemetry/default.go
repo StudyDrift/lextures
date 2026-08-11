@@ -168,3 +168,108 @@ func RecordAIProvider(provider, model, outcome string, seconds, costDollars floa
 		m.ObserveAIProvider(provider, model, outcome, seconds, costDollars)
 	}
 }
+
+// RecordCouponReserve records a coupon reservation attempt (plan MKTC.1).
+func RecordCouponReserve(result string) {
+	if m := defaultMetrics.Load(); m != nil {
+		m.RecordCouponReserve(result)
+	}
+}
+
+// RecordCouponRedeem records a coupon redeem attempt (plan MKTC.1).
+func RecordCouponRedeem(result string) {
+	if m := defaultMetrics.Load(); m != nil {
+		m.RecordCouponRedeem(result)
+	}
+}
+
+// RecordCouponRelease records a coupon release (plan MKTC.1).
+func RecordCouponRelease(reason string) {
+	if m := defaultMetrics.Load(); m != nil {
+		m.RecordCouponRelease(reason)
+	}
+}
+
+// RecordCouponReservationExpired records expired reservation sweeps (plan MKTC.1).
+func RecordCouponReservationExpired(n int) {
+	if m := defaultMetrics.Load(); m != nil {
+		m.RecordCouponReservationExpired(n)
+	}
+}
+
+// RecordCouponAdminRequest records a creator coupon admin API request (plan MKTC.2).
+func RecordCouponAdminRequest(route, result string) {
+	if m := defaultMetrics.Load(); m != nil {
+		m.RecordCouponAdminRequest(route, result)
+	}
+}
+
+// RecordCouponCreated records a coupon create (plan MKTC.2).
+func RecordCouponCreated(discountType string) {
+	if m := defaultMetrics.Load(); m != nil {
+		m.RecordCouponCreated(discountType)
+	}
+}
+
+// RecordCouponStatusChanged records a coupon status transition (plan MKTC.2).
+func RecordCouponStatusChanged(to string) {
+	if m := defaultMetrics.Load(); m != nil {
+		m.RecordCouponStatusChanged(to)
+	}
+}
+
+// RecordCouponApply records a learner coupon preview/apply attempt (plan MKTC.3).
+func RecordCouponApply(result string) {
+	if m := defaultMetrics.Load(); m != nil {
+		m.RecordCouponApply(result)
+	}
+}
+
+// RecordCouponCheckoutCreated records a discounted marketplace checkout session (plan MKTC.3).
+func RecordCouponCheckoutCreated(discounted bool) {
+	if m := defaultMetrics.Load(); m != nil {
+		m.RecordCouponCheckoutCreated(discounted)
+	}
+}
+
+// RecordCouponRedeemed records a completed coupon redemption (plan MKTC.3).
+func RecordCouponRedeemed() {
+	if m := defaultMetrics.Load(); m != nil {
+		m.RecordCouponRedeemed()
+	}
+}
+
+// RecordCouponDiscountCents records discount cents granted (plan MKTC.3).
+func RecordCouponDiscountCents(n int) {
+	if m := defaultMetrics.Load(); m != nil {
+		m.RecordCouponDiscountCents(n)
+	}
+}
+
+// RecordCouponFreeGrant records a 100%-off / clamp-to-free grant (plan MKTC.3).
+func RecordCouponFreeGrant() {
+	if m := defaultMetrics.Load(); m != nil {
+		m.RecordCouponFreeGrant()
+	}
+}
+
+// RecordCouponClampedToFree records a residual charge clamped to free (plan MKTC.3).
+func RecordCouponClampedToFree() {
+	if m := defaultMetrics.Load(); m != nil {
+		m.RecordCouponClampedToFree()
+	}
+}
+
+// RecordCouponApplyCooldown records a cool-down rejection on coupon apply (plan MKTC.7).
+func RecordCouponApplyCooldown() {
+	if m := defaultMetrics.Load(); m != nil {
+		m.RecordCouponApplyCooldown()
+	}
+}
+
+// RecordCouponWebRedirect records a mobile→web coupon checkout redirect (plan MKTC.7).
+func RecordCouponWebRedirect(platform string) {
+	if m := defaultMetrics.Load(); m != nil {
+		m.RecordCouponWebRedirect(platform)
+	}
+}

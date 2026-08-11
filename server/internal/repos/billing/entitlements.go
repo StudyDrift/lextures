@@ -20,10 +20,11 @@ const (
 	StatusExpired  = "expired"
 	StatusRefunded = "refunded"
 
-	// Acquisition sources for course_purchase entitlements (plan MKT1).
+	// Acquisition sources for course_purchase entitlements (plan MKT1 / MKTC.1).
 	AcquisitionStripe = "stripe"
 	AcquisitionFree   = "free"
 	AcquisitionComp   = "comp"
+	AcquisitionCoupon = "coupon" // 100%-off grant via course coupon (MKTC.1 FR-14)
 )
 
 // Entitlement is a row in billing.user_entitlements.
@@ -62,12 +63,13 @@ type CreateInput struct {
 	AcquisitionSource string // stripe (default) | apple
 }
 
-// CourseGrantInput is the payload for free/comp/stripe/apple course_purchase grants (plan MKT1).
-// Free claims may omit StripeEventID; grants are idempotent per (user_id, course_id).
+// CourseGrantInput is the payload for free/comp/stripe/apple/coupon course_purchase grants
+// (plans MKT1, MKTC.1). Free/coupon claims may omit StripeEventID; grants are idempotent
+// per (user_id, course_id).
 type CourseGrantInput struct {
 	UserID            uuid.UUID
 	CourseID          uuid.UUID
-	AcquisitionSource string // stripe | free | comp | apple
+	AcquisitionSource string // stripe | free | comp | apple | coupon
 	AmountPaidCents   int
 	Currency          string
 	StripeEventID     *string
@@ -135,7 +137,7 @@ func CreateCourseGrantIdempotent(ctx context.Context, pool *pgxpool.Pool, in Cou
 		}
 	}
 	switch src {
-	case AcquisitionStripe, AcquisitionFree, AcquisitionComp, AcquisitionApple:
+	case AcquisitionStripe, AcquisitionFree, AcquisitionComp, AcquisitionApple, AcquisitionCoupon:
 	default:
 		return nil, false, errors.New("invalid acquisition_source")
 	}

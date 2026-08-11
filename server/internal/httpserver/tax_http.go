@@ -51,11 +51,12 @@ func (d Deps) handleCheckoutQuote() http.HandlerFunc {
 			return
 		}
 		var body struct {
-			CourseID *string                `json:"courseId"`
-			Plan     string                 `json:"plan"`
-			Address  svcBilling.TaxAddress  `json:"address"`
-			TaxID    string                 `json:"taxId"`
-			TaxIDType string                `json:"taxIdType"`
+			CourseID   *string               `json:"courseId"`
+			Plan       string                `json:"plan"`
+			Address    svcBilling.TaxAddress `json:"address"`
+			TaxID      string                `json:"taxId"`
+			TaxIDType  string                `json:"taxIdType"`
+			CouponCode string                `json:"couponCode"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
@@ -85,12 +86,18 @@ func (d Deps) handleCheckoutQuote() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "Stripe is not configured.")
 			return
 		}
+		couponCode := strings.TrimSpace(body.CouponCode)
+		if !d.effectiveConfig().FFCourseCoupons {
+			couponCode = ""
+		}
 		result, err := svcBilling.ComputeTaxQuote(r.Context(), d.Pool, cfg, orgID, d.effectiveConfig().FFTaxCollection, svcBilling.TaxQuoteRequest{
-			CourseID:  courseID,
-			Plan:      body.Plan,
-			Address:   body.Address,
-			TaxID:     body.TaxID,
-			TaxIDType: body.TaxIDType,
+			CourseID:   courseID,
+			Plan:       body.Plan,
+			Address:    body.Address,
+			TaxID:      body.TaxID,
+			TaxIDType:  body.TaxIDType,
+			CouponCode: couponCode,
+			UserID:     userID,
 		})
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Could not compute tax quote.")
@@ -358,6 +365,16 @@ func (d Deps) handleTaxInvoiceDownload() http.HandlerFunc {
 			}
 		}
 		pdfInput := svcBilling.InvoicePDFFromEntitlement(ent, inv, settings, customerTaxID)
+		// FR-14: show list / coupon / charged when a coupon redemption is linked.
+		if ent.CourseID != nil {
+			if red, rerr := repoBilling.GetRedeemedByUserAndCourse(r.Context(), d.Pool, ent.UserID, *ent.CourseID); rerr == nil && red != nil && red.DiscountCents > 0 {
+				if c, cerr := repoBilling.GetCouponByID(r.Context(), d.Pool, red.CouponID); cerr == nil && c != nil {
+					pdfInput.CouponCode = c.Code
+					pdfInput.ListPriceCents = red.ListPriceCents
+					pdfInput.DiscountCents = red.DiscountCents
+				}
+			}
+		}
 		pdfBytes, err := svcBilling.BuildTaxInvoicePDF(pdfInput)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not generate invoice.")

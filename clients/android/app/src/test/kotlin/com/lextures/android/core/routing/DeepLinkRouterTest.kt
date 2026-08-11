@@ -96,6 +96,35 @@ class DeepLinkRouterTest {
     }
 
     @Test
+    fun resolvesMarketplaceWithCoupon() {
+        val destination = DeepLinkRouter.resolve(
+            "https://lextures.com/marketplace/spanish-a1?coupon=launch25",
+        )
+        assertTrue(destination is DeepLinkDestination.Marketplace)
+        destination as DeepLinkDestination.Marketplace
+        assertEquals("spanish-a1", destination.slug)
+        assertEquals("LAUNCH25", destination.coupon)
+    }
+
+    @Test
+    fun resolvesMarketplaceCustomScheme() {
+        val destination = DeepLinkRouter.resolve("lextures://marketplace/cs101?coupon=SAVE10")
+        assertTrue(destination is DeepLinkDestination.Marketplace)
+        destination as DeepLinkDestination.Marketplace
+        assertEquals("cs101", destination.slug)
+        assertEquals("SAVE10", destination.coupon)
+    }
+
+    @Test
+    fun resolvesMarketplaceWithoutCoupon() {
+        val destination = DeepLinkRouter.resolve("/marketplace/intro-cs")
+        assertTrue(destination is DeepLinkDestination.Marketplace)
+        destination as DeepLinkDestination.Marketplace
+        assertEquals("intro-cs", destination.slug)
+        assertEquals(null, destination.coupon)
+    }
+
+    @Test
     fun resolvesCourseBoardsPath() {
         val list = DeepLinkRouter.resolve("/courses/cs101/boards")
         assertTrue(list is DeepLinkDestination.Course)

@@ -28,6 +28,8 @@ const (
 	JobTypeContentToolSummaryRebuild       = "scheduled.content_tool_summary_rebuild"
 	JobTypeCourseChecklistRetention           = "scheduled.course_checklist_retention"
 	JobTypeCourseChecklistLinkHealthRetention = "scheduled.course_checklist_link_health_retention"
+	JobTypeCouponReservationSweep             = "scheduled.coupon_reservation_sweep"
+	JobTypeCouponAttemptsRetention            = "scheduled.coupon_attempts_retention"
 )
 
 // ScheduledJob is one configuration-driven entry in the schedule list. New
@@ -225,6 +227,20 @@ func BuiltinJobs() []ScheduledJob {
 			Spec:           "45 3 * * *", // daily 03:45 UTC
 			JobType:        JobTypeCourseChecklistLinkHealthRetention,
 			Description:    "Purge course checklist link-health cache rows older than 30 days (CC.6).",
+			DefaultEnabled: true,
+		},
+		{
+			Name:           "coupon_reservation_sweep",
+			Spec:           "*/5 * * * *", // every 5 minutes
+			JobType:        JobTypeCouponReservationSweep,
+			Description:    "Release expired course-coupon checkout reservations (MKTC.1).",
+			DefaultEnabled: true,
+		},
+		{
+			Name:           "coupon_attempts_retention",
+			Spec:           "20 4 * * *", // daily 04:20 UTC
+			JobType:        JobTypeCouponAttemptsRetention,
+			Description:    "Purge coupon apply attempt rows older than 30 days (MKTC.7).",
 			DefaultEnabled: true,
 		},
 	}

@@ -123,6 +123,45 @@ func TestMerge_CourseMarketplaceDBOverridesDefault(t *testing.T) {
 	}
 }
 
+// Plan MKTC.7: CouponMaxPercentOff defaults to 100 when unset.
+func TestMerge_CouponMaxPercentOffDefault(t *testing.T) {
+	got := Merge(config.Config{}, nil)
+	if got.CouponMaxPercentOff != 100 {
+		t.Fatalf("default ceiling: got %v want 100", got.CouponMaxPercentOff)
+	}
+	v := 50.0
+	got = Merge(config.Config{}, &Row{CouponMaxPercentOff: &v})
+	if got.CouponMaxPercentOff != 50 {
+		t.Fatalf("explicit ceiling: got %v want 50", got.CouponMaxPercentOff)
+	}
+}
+
+// Plan MKTC.7 GA: FFCourseCoupons defaults ON when platform settings row is unset.
+func TestMerge_CourseCouponsDefaultOnWhenDBUnset(t *testing.T) {
+	got := Merge(config.Config{}, nil)
+	if !got.FFCourseCoupons {
+		t.Fatal("expected FFCourseCoupons true (default ON) when DB unset")
+	}
+	// Env seed is ignored for this flag; merge uses DB-or-default only.
+	got = Merge(config.Config{FFCourseCoupons: false}, nil)
+	if !got.FFCourseCoupons {
+		t.Fatal("expected default ON when DB unset even if env seed is false")
+	}
+}
+
+func TestMerge_CourseCouponsDBOverridesDefault(t *testing.T) {
+	on := true
+	got := Merge(config.Config{}, &Row{FFCourseCoupons: &on})
+	if !got.FFCourseCoupons {
+		t.Fatal("expected DB true to enable course coupons")
+	}
+	off := false
+	got = Merge(config.Config{}, &Row{FFCourseCoupons: &off})
+	if got.FFCourseCoupons {
+		t.Fatal("expected explicit DB false to keep course coupons off (AC-12)")
+	}
+}
+
 func TestMerge_EmailSESDefaultOff(t *testing.T) {
 	got := Merge(config.Config{}, nil)
 	if got.FFEmailSES {

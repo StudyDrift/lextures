@@ -15,3 +15,14 @@ func (d Deps) courseMarketplaceOff(w http.ResponseWriter) bool {
 	}
 	return false
 }
+
+// couponsFeatureOff writes 404 when course marketplace or course coupons are disabled
+// (plan MKTC.2 FR-8). Requires both FFCourseMarketplace and FFCourseCoupons.
+func (d Deps) couponsFeatureOff(w http.ResponseWriter) bool {
+	cfg := d.effectiveConfig()
+	if !cfg.FFCourseMarketplace || !cfg.FFCourseCoupons {
+		apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course coupons are not enabled.")
+		return true
+	}
+	return false
+}

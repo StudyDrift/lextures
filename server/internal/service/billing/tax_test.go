@@ -72,6 +72,28 @@ func TestBuildTaxInvoicePDF(t *testing.T) {
 	}
 }
 
+func TestBuildTaxInvoicePDF_WithCouponLines(t *testing.T) {
+	pdf, err := BuildTaxInvoicePDF(InvoicePDFInput{
+		InvoiceNumber:  "INV-COUPON-001",
+		SellerName:     "Lextures Inc",
+		CustomerEmail:  "buyer@example.com",
+		SubtotalCents:  3000,
+		TaxAmountCents: 0,
+		TotalCents:     3000,
+		Currency:       "usd",
+		Description:    "Course purchase",
+		CouponCode:     "LAUNCH25",
+		ListPriceCents: 4000,
+		DiscountCents:  1000,
+	})
+	if err != nil {
+		t.Fatalf("BuildTaxInvoicePDF: %v", err)
+	}
+	if len(pdf) < 100 || pdf[0] != '%' {
+		t.Fatalf("invalid PDF: %d bytes", len(pdf))
+	}
+}
+
 func TestReverseChargeMessage(t *testing.T) {
 	if reverseChargeMessage(true) == "" {
 		t.Fatal("expected message for reverse charge")

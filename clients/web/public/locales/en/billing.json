@@ -4,11 +4,15 @@
   "billing.checkout.success.ready.title": "Payment confirmed",
   "billing.checkout.success.ready.description": "Your access is ready. Start learning!",
   "billing.checkout.success.ready.continue": "Continue",
+  "billing.checkout.success.ready.couponSaved": "Coupon {{code}} applied — you saved {{amount}}.",
+  "billing.checkout.success.ready.couponApplied": "Coupon {{code}} applied.",
+  "billing.checkout.success.ready.saved": "You saved {{amount}}.",
   "billing.checkout.success.timeout.title": "Still processing",
   "billing.checkout.success.timeout.description": "Your payment may still be processing. Check billing settings in a moment.",
   "billing.checkout.success.timeout.billingLink": "Open billing settings",
   "billing.checkout.cancel.title": "Checkout cancelled",
   "billing.checkout.cancel.description": "No charge was made. You can return to the course catalog when you are ready.",
+  "billing.checkout.cancel.couponKept": "Your coupon {{code}} is still ready to use.",
   "billing.checkout.cancel.backToCourses": "Back to courses",
   "billing.checkout.cancel.backToCourse": "Back to course"
 }

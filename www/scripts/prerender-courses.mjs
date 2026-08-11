@@ -16,13 +16,15 @@
  *   SKIP_COURSE_PRERENDER=1 — skip course pages; still write /courses + sitemap shell + redirect stub
  */
 
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
 const DIST = path.join(ROOT, 'dist')
+const BLOG_DIR = path.join(ROOT, 'src', 'blog')
+const DOCS_DIR = path.join(ROOT, 'src', 'docs')
 
 const API_BASE = (
   process.env.API_BASE ||
@@ -44,6 +46,7 @@ function resolveApiAssetUrl(url, apiBase = API_BASE) {
   return trimmed
 }
 
+/** Public indexable routes (excludes /self-learner redirect stub). */
 const STATIC_ROUTES = [
   { loc: '/', priority: '1.0' },
   { loc: '/pricing', priority: '0.8' },
@@ -52,15 +55,68 @@ const STATIC_ROUTES = [
   { loc: '/blog', priority: '0.7' },
   { loc: '/courses', priority: '0.9' },
   { loc: '/get-started', priority: '0.8' },
+  { loc: '/request-information', priority: '0.7' },
   { loc: '/higher-ed', priority: '0.6' },
   { loc: '/k-12', priority: '0.6' },
   { loc: '/parents', priority: '0.6' },
   { loc: '/homeschool', priority: '0.6' },
   { loc: '/privacy', priority: '0.3' },
+  { loc: '/privacy/history', priority: '0.2' },
+  { loc: '/privacy-rights/california', priority: '0.3' },
   { loc: '/terms', priority: '0.3' },
+  { loc: '/terms/history', priority: '0.2' },
   { loc: '/security', priority: '0.3' },
   { loc: '/accessibility', priority: '0.3' },
+  { loc: '/accessibility/vpat', priority: '0.3' },
 ]
+
+/** Parse YAML-ish frontmatter `date:` (quoted or bare) from markdown. */
+function parseMarkdownDate(raw) {
+  const match = String(raw || '').match(/^---\r?\n([\s\S]*?)\r?\n---/)
+  if (!match) return null
+  const dateLine = match[1].split('\n').find(l => /^\s*date\s*:/i.test(l))
+  if (!dateLine) return null
+  const value = dateLine
+    .slice(dateLine.indexOf(':') + 1)
+    .trim()
+    .replace(/^["']|["']$/g, '')
+  return value || null
+}
+
+/**
+ * List markdown content pages under a directory as sitemap entries.
+ * @param {string} dir absolute path
+ * @param {string} urlPrefix e.g. '/blog'
+ * @param {string} priority
+ * @returns {Promise<Array<{ loc: string, lastmod: string | null, priority: string }>>}
+ */
+async function loadMarkdownRoutes(dir, urlPrefix, priority) {
+  let names
+  try {
+    names = await readdir(dir)
+  } catch {
+    return []
+  }
+  const entries = []
+  for (const name of names) {
+    if (!name.endsWith('.md')) continue
+    const slug = name.slice(0, -3)
+    if (!slug) continue
+    let lastmod = null
+    try {
+      const raw = await readFile(path.join(dir, name), 'utf8')
+      lastmod = parseMarkdownDate(raw)
+    } catch {
+      // ignore unreadable files
+    }
+    entries.push({
+      loc: `${urlPrefix}/${encodeURIComponent(slug)}`,
+      lastmod,
+      priority,
+    })
+  }
+  return entries.sort((a, b) => a.loc.localeCompare(b.loc))
+}
 
 function escapeHtml(value) {
   return String(value)
@@ -201,8 +257,19 @@ async function mapPool(items, concurrency, fn) {
   return results
 }
 
-function buildSitemap(courseEntries) {
+/**
+ * Build sitemap.xml for Google Search Console and other crawlers.
+ * @param {Array<{ slug: string, lastmod?: string }>} courseEntries
+ * @param {Array<{ loc: string, lastmod?: string | null, priority?: string }>} [contentEntries]
+ *   Extra content routes (blog posts, docs articles) with path under site origin.
+ */
+function buildSitemap(courseEntries, contentEntries = []) {
   const today = new Date().toISOString().slice(0, 10)
+  const toLastmod = value => {
+    if (!value) return today
+    const s = String(value).slice(0, 10)
+    return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s : today
+  }
   const urls = [
     ...STATIC_ROUTES.map(
       r => `  <url>
@@ -211,10 +278,17 @@ function buildSitemap(courseEntries) {
     <priority>${r.priority}</priority>
   </url>`,
     ),
+    ...contentEntries.map(
+      e => `  <url>
+    <loc>${SITE_ORIGIN}${e.loc.startsWith('/') ? e.loc : `/${e.loc}`}</loc>
+    <lastmod>${toLastmod(e.lastmod)}</lastmod>
+    <priority>${e.priority || '0.6'}</priority>
+  </url>`,
+    ),
     ...courseEntries.map(
       c => `  <url>
     <loc>${SITE_ORIGIN}/courses/${encodeURIComponent(c.slug)}</loc>
-    <lastmod>${(c.lastmod || today).slice(0, 10)}</lastmod>
+    <lastmod>${toLastmod(c.lastmod)}</lastmod>
     <priority>0.8</priority>
   </url>`,
     ),
@@ -310,11 +384,16 @@ async function main() {
     'utf8',
   )
 
-  await writeFile(path.join(DIST, 'sitemap.xml'), buildSitemap(sitemapCourses), 'utf8')
+  const contentEntries = [
+    ...(await loadMarkdownRoutes(BLOG_DIR, '/blog', '0.6')),
+    ...(await loadMarkdownRoutes(DOCS_DIR, '/docs', '0.6')),
+  ]
+
+  await writeFile(path.join(DIST, 'sitemap.xml'), buildSitemap(sitemapCourses, contentEntries), 'utf8')
   await writeFile(path.join(DIST, 'robots.txt'), buildRobots(), 'utf8')
 
   console.log(
-    `[prerender] Done: ${prerendered} HTML page(s), ${sitemapCourses.length} course URL(s) in sitemap, /self-learner redirect stub (${SITE_ORIGIN})`,
+    `[prerender] Done: ${prerendered} HTML page(s), ${sitemapCourses.length} course + ${contentEntries.length} content URL(s) in sitemap, /self-learner redirect stub (${SITE_ORIGIN})`,
   )
 }
 
@@ -328,6 +407,9 @@ export {
   buildRobots,
   buildLegacyAudienceRedirectHtml,
   resolveApiAssetUrl,
+  parseMarkdownDate,
+  loadMarkdownRoutes,
+  STATIC_ROUTES,
 }
 
 const isMain =

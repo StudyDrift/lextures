@@ -1,5 +1,7 @@
 package com.lextures.android.core.routing
 
+import com.lextures.android.core.lms.MarketplaceLogic
+
 enum class SettingsDeepLinkSection {
     Account,
     Notifications,
@@ -37,6 +39,8 @@ sealed class DeepLinkDestination {
     data class BoardLink(val token: String) : DeepLinkDestination()
     /** Live quiz join / play (`/play` or `/play/{code}`). */
     data class LiveQuizPlay(val code: String? = null) : DeepLinkDestination()
+    /** Marketplace course detail (`/marketplace/{slug}` optional `?coupon=`). */
+    data class Marketplace(val slug: String, val coupon: String? = null) : DeepLinkDestination()
 }
 
 enum class ParentDeepLinkSection {
@@ -84,9 +88,12 @@ object DeepLinkRouter {
     private fun extractPath(value: String): String? {
         if (value.startsWith("lextures://")) {
             val stripped = value.removePrefix("lextures://")
-            return if (stripped.startsWith("/")) stripped else "/$stripped"
+            val withSlash = if (stripped.startsWith("/")) stripped else "/$stripped"
+            return withSlash.substringBefore('?').substringBefore('#')
         }
-        if (value.startsWith("/")) return value
+        if (value.startsWith("/")) {
+            return value.substringBefore('?').substringBefore('#')
+        }
         if (value.startsWith("http://") || value.startsWith("https://")) {
             val uri = runCatching { java.net.URI(value) }.getOrNull() ?: return null
             val host = uri.host?.lowercase().orEmpty()
@@ -172,6 +179,15 @@ object DeepLinkRouter {
                 segments.firstOrNull()?.equals("play", ignoreCase = true) == true -> {
                     val code = segments.getOrNull(1)?.trim()?.takeIf { it.isNotEmpty() }
                     DeepLinkDestination.LiveQuizPlay(code)
+                }
+                segments.firstOrNull()?.equals("marketplace", ignoreCase = true) == true -> {
+                    val slug = segments.getOrNull(1)?.trim().orEmpty()
+                    if (slug.isEmpty()) {
+                        DeepLinkDestination.Home
+                    } else {
+                        val coupon = MarketplaceLogic.parseCouponFromQuery(raw)
+                        DeepLinkDestination.Marketplace(slug = slug, coupon = coupon)
+                    }
                 }
                 else -> DeepLinkDestination.Home
             }

@@ -11,6 +11,7 @@ import (
 	"github.com/lextures/lextures/server/internal/objectcache"
 	repoBilling "github.com/lextures/lextures/server/internal/repos/billing"
 	repoCourse "github.com/lextures/lextures/server/internal/repos/course"
+	svcBilling "github.com/lextures/lextures/server/internal/service/billing"
 	"github.com/lextures/lextures/server/internal/telemetry"
 )
 
@@ -160,6 +161,10 @@ func (d Deps) handleMarketplaceCourseDetail() http.HandlerFunc {
 			return
 		}
 
+		// Optional ?coupon= for share-link discounted price in one round trip (MKTC.3 FR-18).
+		// Never 4xx for a bad code — include coupon.applied:false + reason.
+		couponQuery := strings.TrimSpace(r.URL.Query().Get("coupon"))
+
 		owned := false
 		if courseID, parseErr := uuid.Parse(course.ID); parseErr == nil {
 			if ok, accessErr := repoBilling.MarketplaceAccess(r.Context(), d.Pool, userID, courseID); accessErr == nil {
@@ -171,7 +176,7 @@ func (d Deps) handleMarketplaceCourseDetail() http.HandlerFunc {
 				included = repoCourse.MarketplaceWhatsIncluded{}
 			}
 			telemetry.RecordMarketplaceDetailView(owned)
-			writeJSON(w, http.StatusOK, map[string]any{
+			resp := map[string]any{
 				"course":         course,
 				"owned":          owned,
 				"priceCents":     course.PriceCents,
@@ -182,7 +187,16 @@ func (d Deps) handleMarketplaceCourseDetail() http.HandlerFunc {
 					"average": course.AverageRating,
 					"count":   course.RatingCount,
 				},
-			})
+			}
+			if couponQuery != "" && d.effectiveConfig().FFCourseCoupons {
+				if prev, perr := svcBilling.PreviewCoupon(r.Context(), d.Pool, svcBilling.PreviewCouponInput{
+					CourseID: courseID, UserID: userID, Code: couponQuery,
+					CoursePrice: course.PriceCents, CourseCurrency: course.PriceCurrency, AlreadyOwned: owned,
+				}); perr == nil && prev != nil {
+					resp["coupon"] = prev
+				}
+			}
+			writeJSON(w, http.StatusOK, resp)
 			return
 		}
 		telemetry.RecordMarketplaceDetailView(false)

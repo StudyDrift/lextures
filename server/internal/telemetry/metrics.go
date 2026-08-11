@@ -31,36 +31,50 @@ var durationBuckets = []float64{0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5
 type Metrics struct {
 	registry *prometheus.Registry
 
-	httpRequests         *prometheus.CounterVec
-	httpDuration         *prometheus.HistogramVec
-	httpInFlight         prometheus.Gauge
-	aiProviderCalls      *prometheus.CounterVec
-	aiProviderLatency    *prometheus.HistogramVec
-	aiProviderCostTotal  *prometheus.CounterVec
-	businessEvents       *prometheus.CounterVec
-	bannerActive         *prometheus.GaugeVec
-	healthChecks         *prometheus.CounterVec
-	buildInfo            *prometheus.GaugeVec
-	marketplaceFlagState       *prometheus.GaugeVec
-	marketplaceListingSaved    *prometheus.CounterVec
-	marketplaceStorefrontViews *prometheus.CounterVec
-	marketplaceDetailViews     *prometheus.CounterVec
-	marketplaceFacetUsage      *prometheus.CounterVec
-	marketplaceClaimTotal        *prometheus.CounterVec
-	marketplaceCheckoutCreated   *prometheus.CounterVec
-	marketplacePurchaseCompleted *prometheus.CounterVec
-	marketplaceRefundTotal       *prometheus.CounterVec
-	myPurchasesViews             *prometheus.CounterVec
-	purchasedBadgeRenders        *prometheus.CounterVec
-	publicMarketplaceListTotal   *prometheus.CounterVec
-	feedbackSubmittedTotal       *prometheus.CounterVec
-	feedbackSubmitErrorsTotal    *prometheus.CounterVec
-	feedbackAdminListLatency     prometheus.Histogram
-	onboardingEventInsertFailed  *prometheus.CounterVec
-	pinnedSettingsWritesTotal    *prometheus.CounterVec
-	pinnedSettingsRejectsTotal   *prometheus.CounterVec
-	// pinnedSettingsPinsGauge is a histogram of pin-list length observed on write (PS.4 FR-12).
-	pinnedSettingsPinsGauge prometheus.Histogram
+	httpRequests                  *prometheus.CounterVec
+	httpDuration                  *prometheus.HistogramVec
+	httpInFlight                  prometheus.Gauge
+	aiProviderCalls               *prometheus.CounterVec
+	aiProviderLatency             *prometheus.HistogramVec
+	aiProviderCostTotal           *prometheus.CounterVec
+	businessEvents                *prometheus.CounterVec
+	bannerActive                  *prometheus.GaugeVec
+	healthChecks                  *prometheus.CounterVec
+	buildInfo                     *prometheus.GaugeVec
+	marketplaceFlagState          *prometheus.GaugeVec
+	marketplaceListingSaved       *prometheus.CounterVec
+	marketplaceStorefrontViews    *prometheus.CounterVec
+	marketplaceDetailViews        *prometheus.CounterVec
+	marketplaceFacetUsage         *prometheus.CounterVec
+	marketplaceClaimTotal         *prometheus.CounterVec
+	marketplaceCheckoutCreated    *prometheus.CounterVec
+	marketplacePurchaseCompleted  *prometheus.CounterVec
+	marketplaceRefundTotal        *prometheus.CounterVec
+	myPurchasesViews              *prometheus.CounterVec
+	purchasedBadgeRenders         *prometheus.CounterVec
+	publicMarketplaceListTotal    *prometheus.CounterVec
+	feedbackSubmittedTotal        *prometheus.CounterVec
+	feedbackSubmitErrorsTotal     *prometheus.CounterVec
+	feedbackAdminListLatency      prometheus.Histogram
+	onboardingEventInsertFailed   *prometheus.CounterVec
+	pinnedSettingsWritesTotal     *prometheus.CounterVec
+	pinnedSettingsRejectsTotal    *prometheus.CounterVec
+	pinnedSettingsPinsGauge       prometheus.Histogram
+	couponReserveTotal            *prometheus.CounterVec
+	couponRedeemTotal             *prometheus.CounterVec
+	couponReleaseTotal            *prometheus.CounterVec
+	couponReservationExpiredTotal prometheus.Counter
+	couponAdminRequestTotal       *prometheus.CounterVec
+	couponCreatedTotal            *prometheus.CounterVec
+	couponStatusChangedTotal      *prometheus.CounterVec
+	couponApplyTotal              *prometheus.CounterVec
+	couponCheckoutCreatedTotal    *prometheus.CounterVec
+	couponRedeemedTotal           prometheus.Counter
+	couponDiscountCentsTotal      prometheus.Counter
+	couponFreeGrantTotal          prometheus.Counter
+	couponClampedToFreeTotal      prometheus.Counter
+	couponApplyCooldownTotal      prometheus.Counter
+	couponWebRedirectTotal        *prometheus.CounterVec
 }
 
 // NewMetrics builds a self-contained registry (not the global default, so tests
@@ -263,6 +277,7 @@ func NewMetrics(deployColor ...string) *Metrics {
 		collectors.NewGoCollector(),
 		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
 	)
+	m.registerCouponMetrics(reg)
 	return m
 }
 
@@ -580,11 +595,4 @@ func (m *Metrics) RecordOnboardingEventInsertFailed(program string) {
 		program = "unknown"
 	}
 	m.onboardingEventInsertFailed.WithLabelValues(program).Inc()
-}
-
-func boolLabel(v bool) string {
-	if v {
-		return "true"
-	}
-	return "false"
 }

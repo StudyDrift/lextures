@@ -9,7 +9,6 @@ internal/background/config_source.go:StaticConfigSource.Config
 internal/background/jobqueue.go:Registry.Types
 internal/httpserver/canvas_assignment_submissions_import.go:canvasFirstSubmissionAttachment
 internal/httpserver/canvas_submission_sync.go:canvasInstructorCommentFromSubmission
-internal/l10n/locale.go:NormalizeLocale
 internal/logging/diploma_metrics.go:DiplomaMetrics.Snapshot
 internal/logging/metrics.go:RedactionMetrics.Reset
 internal/logging/transcript_notification_metrics.go:TranscriptNotificationMetrics.Snapshot
@@ -115,6 +114,7 @@ internal/service/commoncartridge/manifest.go:walkElements
 internal/service/competencygating/service.go:Service.Health
 internal/service/coppa/service.go:ClassifyMinor
 internal/service/coppa/service.go:FlagMinorAccount
+internal/service/coupons/evaluate.go:Evaluate
 internal/service/courseexportimport/service.go:New
 internal/service/courseexportimport/service.go:Service.Health
 internal/service/courseimageupload/service.go:New
@@ -191,6 +191,9 @@ internal/service/tutorsession/metrics.go:Snapshot
 internal/service/tutorsession/service.go:DisclosureMessage
 internal/service/zipimport/service.go:New
 internal/service/zipimport/service.go:Service.Health
+internal/telemetry/default.go:RecordCouponRedeem
+internal/telemetry/default.go:RecordCouponRelease
+internal/telemetry/default.go:RecordCouponReserve
 internal/telemetry/default.go:SetDefaultForTest
 internal/webhooks/sign.go:VerifySignature
 internal/workers/avscan/worker.go:EnqueueForObject

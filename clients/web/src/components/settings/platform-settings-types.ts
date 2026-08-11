@@ -136,6 +136,9 @@ export type PlatformSettingsPayload = {
   ffReportCards: boolean
   ffPublicCatalog: boolean
   ffCourseMarketplace: boolean
+  ffCourseCoupons: boolean
+  /** Platform cap on creator percent coupons (0–100]. Default 100. MKTC.7. */
+  couponMaxPercentOff: number
   ffContentToolMarketplace: boolean
   ffFeedback: boolean
   ffVisualBoards: boolean
@@ -201,5 +204,6 @@ export type PlatformSettingsPayload = {
     sesRegion: FieldSource
     sesFrom: FieldSource
     sesConfigurationSet: FieldSource
+    couponMaxPercentOff: FieldSource
   }
 }

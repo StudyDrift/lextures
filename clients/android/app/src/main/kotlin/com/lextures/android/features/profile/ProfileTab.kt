@@ -1649,8 +1649,21 @@ fun ProfileTab(
         }
     }
 
-    androidx.compose.runtime.LaunchedEffect(shell.pendingMoreDestination) {
-        shell.consumePendingMoreDestination()?.let { showMoreHub = true }
+    androidx.compose.runtime.LaunchedEffect(shell.pendingMoreDestination, shell.pendingMarketplaceSlug) {
+        val dest = shell.pendingMoreDestination
+        val marketplaceSlug = shell.pendingMarketplaceSlug
+        if (dest == null && marketplaceSlug == null) return@LaunchedEffect
+        if (dest == com.lextures.android.core.navigation.MoreDestination.Marketplace || marketplaceSlug != null) {
+            shell.consumePendingMoreDestination()
+            shell.pendingMarketplaceSlug = null
+            openMoreDestination = com.lextures.android.core.navigation.MoreDestination.Marketplace
+            if (marketplaceSlug != null) {
+                openMarketplaceSlug = marketplaceSlug
+            }
+        } else if (dest != null) {
+            shell.consumePendingMoreDestination()
+            showMoreHub = true
+        }
     }
 
     androidx.compose.runtime.LaunchedEffect(shell.pendingBilling) {

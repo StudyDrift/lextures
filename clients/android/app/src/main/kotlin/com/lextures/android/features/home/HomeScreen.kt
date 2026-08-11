@@ -137,6 +137,13 @@ class HomeShellState {
     /** Live quiz join code pending presentation (MOB.5). Null code opens blank join. */
     var pendingLiveQuizCode by mutableStateOf<String?>(null)
     var showLiveQuizPlay by mutableStateOf(false)
+    /**
+     * Marketplace deep-link handoff (MKTC.6). Session memory only — never persisted.
+     * [PendingMarketplaceCoupon.slug] opens detail; [PendingMarketplaceCoupon.code] auto-applies when coupons are on.
+     */
+    var pendingCoupon by mutableStateOf<com.lextures.android.core.lms.PendingMarketplaceCoupon?>(null)
+    /** Marketplace course slug to open under More → Marketplace (deep link without/with coupon). */
+    var pendingMarketplaceSlug by mutableStateOf<String?>(null)
     /** MB.1 full-screen in-app browser session. */
     var inAppBrowserSession by mutableStateOf<com.lextures.android.core.routing.LinkOpener.BrowserSession?>(null)
     var linkBlockedNotice by mutableStateOf(false)
@@ -312,6 +319,22 @@ class HomeShellState {
                     pendingLiveQuizCode = destination.code
                     showLiveQuizPlay = true
                     rootDestination
+                }
+                is DeepLinkDestination.Marketplace -> {
+                    pendingMarketplaceSlug = destination.slug
+                    val coupon = destination.coupon?.let { com.lextures.android.core.lms.MarketplaceLogic.normalizeCouponCode(it) }
+                        ?.takeIf { it.isNotEmpty() }
+                    if (coupon != null) {
+                        pendingCoupon = com.lextures.android.core.lms.PendingMarketplaceCoupon(
+                            slug = destination.slug,
+                            code = coupon,
+                        )
+                        com.lextures.android.core.lms.MarketplaceObservability.record("coupon_from_deeplink")
+                    } else {
+                        pendingCoupon = null
+                    }
+                    pendingMoreDestination = com.lextures.android.core.navigation.MoreDestination.Marketplace
+                    RootDestination.Profile
                 }
             },
         )

@@ -136,4 +136,185 @@ final class MarketplaceLogicTests: XCTestCase {
         )
         XCTAssertFalse(k2.contains(.marketplace))
     }
+
+    // MARK: - Coupons (MKTC.6)
+
+    func testNormalizeCouponCode() {
+        XCTAssertEqual(MarketplaceLogic.normalizeCouponCode("  launch-25  "), "LAUNCH-25")
+        XCTAssertEqual(MarketplaceLogic.normalizeCouponCode("ab cd"), "ABCD")
+        XCTAssertEqual(MarketplaceLogic.normalizeCouponCode("hello@world!"), "HELLOWORLD")
+        XCTAssertEqual(MarketplaceLogic.normalizeCouponCode("a_b-c1"), "A_B-C1")
+        let long = String(repeating: "a", count: 40)
+        XCTAssertEqual(MarketplaceLogic.normalizeCouponCode(long).count, 32)
+        XCTAssertEqual(MarketplaceLogic.normalizeCouponCode(""), "")
+    }
+
+    func testIsValidCouponParam() {
+        XCTAssertTrue(MarketplaceLogic.isValidCouponParam("LAUNCH25"))
+        XCTAssertTrue(MarketplaceLogic.isValidCouponParam("launch-25"))
+        XCTAssertTrue(MarketplaceLogic.isValidCouponParam("A_B-1"))
+        XCTAssertFalse(MarketplaceLogic.isValidCouponParam(""))
+        XCTAssertFalse(MarketplaceLogic.isValidCouponParam("bad code"))
+        XCTAssertFalse(MarketplaceLogic.isValidCouponParam("hello@world"))
+        XCTAssertFalse(MarketplaceLogic.isValidCouponParam(String(repeating: "x", count: 33)))
+        XCTAssertTrue(MarketplaceLogic.isValidCouponParam(String(repeating: "x", count: 32)))
+    }
+
+    func testParseCouponFromQuery() {
+        XCTAssertEqual(MarketplaceLogic.parseCouponFromQuery("?coupon=launch25"), "LAUNCH25")
+        XCTAssertEqual(MarketplaceLogic.parseCouponFromQuery("coupon=SAVE_10&ref=1"), "SAVE_10")
+        XCTAssertEqual(MarketplaceLogic.parseCouponFromQuery("COUPON=mixed-Case"), "MIXED-CASE")
+        XCTAssertNil(MarketplaceLogic.parseCouponFromQuery("?ref=1"))
+        XCTAssertNil(MarketplaceLogic.parseCouponFromQuery("?coupon=bad%20code"))
+        XCTAssertNil(MarketplaceLogic.parseCouponFromQuery("?coupon="))
+        XCTAssertNil(MarketplaceLogic.parseCouponFromQuery(""))
+        // Oversized rejected before normalize
+        XCTAssertNil(MarketplaceLogic.parseCouponFromQuery("?coupon=" + String(repeating: "a", count: 33)))
+    }
+
+    func testCouponReasonKey() {
+        XCTAssertEqual(
+            MarketplaceLogic.couponReasonKey("expired"),
+            "mobile.marketplace.coupon.reason.expired"
+        )
+        XCTAssertEqual(
+            MarketplaceLogic.couponReasonKey("NOT_FOUND"),
+            "mobile.marketplace.coupon.reason.not_found"
+        )
+        XCTAssertEqual(
+            MarketplaceLogic.couponReasonKey("unknown_token"),
+            "mobile.marketplace.coupon.reason.not_found"
+        )
+        XCTAssertEqual(
+            MarketplaceLogic.couponReasonKey(nil),
+            "mobile.marketplace.coupon.reason.not_found"
+        )
+        for reason in [
+            "ok", "not_found", "inactive", "not_started", "expired",
+            "exhausted", "already_used", "currency_mismatch", "course_free", "owned",
+        ] {
+            let key = MarketplaceLogic.couponReasonKey(reason)
+            XCTAssertEqual(key, "mobile.marketplace.coupon.reason.\(reason)")
+        }
+    }
+
+    func testCouponsEnabledRequiresBothFlags() {
+        var features = MobilePlatformFeatures()
+        XCTAssertFalse(MarketplaceLogic.couponsEnabled(features))
+        features.ffCourseMarketplace = true
+        XCTAssertFalse(MarketplaceLogic.couponsEnabled(features))
+        features.ffCourseCoupons = true
+        XCTAssertTrue(MarketplaceLogic.couponsEnabled(features))
+    }
+
+    func testPurchaseRouteBranches() {
+        var features = MobilePlatformFeatures()
+        let appliedFree = CouponPreview(
+            applied: true,
+            code: "FREE100",
+            reason: "ok",
+            listPriceCents: 4000,
+            discountCents: 4000,
+            chargedCents: 0,
+            currency: "usd",
+            freeAfterDiscount: true
+        )
+        let appliedPartial = CouponPreview(
+            applied: true,
+            code: "SAVE25",
+            reason: "ok",
+            listPriceCents: 4000,
+            discountCents: 1000,
+            chargedCents: 3000,
+            currency: "usd",
+            freeAfterDiscount: false
+        )
+        let rejected = CouponPreview(
+            applied: false,
+            code: "NOPE",
+            reason: "expired",
+            listPriceCents: 4000,
+            discountCents: 0,
+            chargedCents: 4000,
+            currency: "usd",
+            freeAfterDiscount: false
+        )
+
+        // Flag off
+        XCTAssertEqual(
+            MarketplaceLogic.purchaseRoute(preview: appliedPartial, features: features),
+            .flagOff
+        )
+
+        features.ffCourseMarketplace = true
+        features.ffCourseCoupons = true
+
+        XCTAssertEqual(
+            MarketplaceLogic.purchaseRoute(preview: nil, features: features),
+            .inAppFullPrice
+        )
+        XCTAssertEqual(
+            MarketplaceLogic.purchaseRoute(preview: rejected, features: features),
+            .reject
+        )
+        XCTAssertEqual(
+            MarketplaceLogic.purchaseRoute(preview: appliedFree, features: features),
+            .freeGrant
+        )
+        XCTAssertEqual(
+            MarketplaceLogic.purchaseRoute(preview: appliedPartial, features: features),
+            .webRedirect
+        )
+
+        let appliedZeroDiscount = CouponPreview(
+            applied: true,
+            code: "ZERO",
+            reason: "ok",
+            listPriceCents: 4000,
+            discountCents: 0,
+            chargedCents: 4000,
+            currency: "usd",
+            freeAfterDiscount: false
+        )
+        XCTAssertEqual(
+            MarketplaceLogic.purchaseRoute(preview: appliedZeroDiscount, features: features),
+            .inAppFullPrice
+        )
+    }
+
+    func testMarketplaceWebPathWithCoupon() {
+        XCTAssertEqual(
+            MarketplaceLogic.marketplaceWebPath(slug: "spanish-a1"),
+            "/marketplace/spanish-a1"
+        )
+        XCTAssertEqual(
+            MarketplaceLogic.marketplaceWebPath(slug: "spanish-a1", couponCode: "launch25"),
+            "/marketplace/spanish-a1?coupon=LAUNCH25"
+        )
+    }
+
+    func testDeepLinkMarketplaceCoupon() {
+        guard case let .marketplace(slug, coupon) = DeepLinkRouter.resolve(
+            "https://lextures.com/marketplace/spanish-a1?coupon=launch25"
+        ) else {
+            return XCTFail("expected marketplace destination")
+        }
+        XCTAssertEqual(slug, "spanish-a1")
+        XCTAssertEqual(coupon, "LAUNCH25")
+
+        guard case let .marketplace(slug2, coupon2) = DeepLinkRouter.resolve(
+            "lextures://marketplace/demo-course"
+        ) else {
+            return XCTFail("expected marketplace without coupon")
+        }
+        XCTAssertEqual(slug2, "demo-course")
+        XCTAssertNil(coupon2)
+
+        guard case let .marketplace(_, bad) = DeepLinkRouter.resolve(
+            "/marketplace/x?coupon=not%20valid"
+        ) else {
+            return XCTFail("expected marketplace")
+        }
+        XCTAssertNil(bad)
+    }
 }

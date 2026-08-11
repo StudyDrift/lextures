@@ -5026,10 +5026,13 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Marketplace course detail by catalog slug or course code (plan MKT3) */
+        /** Marketplace course detail by catalog slug or course code (plan MKT3 / MKTC.3) */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    /** @description Optional coupon code; when present response includes coupon preview object (plan MKTC.3 FR-18). Invalid codes return applied:false, never 4xx. */
+                    coupon?: string;
+                };
                 header?: never;
                 path: {
                     slug: string;
@@ -5038,7 +5041,7 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description { course, owned, priceCents, priceCurrency, listPriceCents, whatsIncluded, rating } */
+                /** @description { course, owned, priceCents, priceCurrency, listPriceCents, whatsIncluded, rating, coupon? } */
                 200: {
                     headers: {
                         [name: string]: unknown;
@@ -5078,7 +5081,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Claim a free marketplace course (entitlement + enrollment) (plan MKT4) */
+        /** Claim a free marketplace course, or redeem a 100%-off coupon on a paid course (plan MKT4 / MKTC.3) */
         post: {
             parameters: {
                 query?: never;
@@ -5088,9 +5091,16 @@ export interface paths {
                 };
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        /** @description Optional first-party course coupon (100%-off path for paid courses) */
+                        couponCode?: string;
+                    };
+                };
+            };
             responses: {
-                /** @description { enrolled, entitlementId, alreadyOwned?, firstItemId?, courseCode } */
+                /** @description { enrolled, entitlementId, alreadyOwned?, firstItemId?, courseCode, grantedFree? } */
                 200: {
                     headers: {
                         [name: string]: unknown;
@@ -5113,6 +5123,13 @@ export interface paths {
                 };
                 /** @description Not listed or feature disabled */
                 404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Coupon not applicable: { error, reason, listPriceCents, currency } */
+                422: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -5142,7 +5159,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Start Stripe Checkout for a paid marketplace course (plan MKT4) */
+        /** Start Stripe Checkout for a paid marketplace course; optional couponCode (plan MKT4 / MKTC.3) */
         post: {
             parameters: {
                 query?: never;
@@ -5152,9 +5169,16 @@ export interface paths {
                 };
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        /** @description Optional first-party course coupon; server re-evaluates and reserves a seat */
+                        couponCode?: string;
+                    };
+                };
+            };
             responses: {
-                /** @description { checkoutUrl, sessionId } or { alreadyOwned, courseCode, courseId } */
+                /** @description { sessionId, checkoutUrl, chargedCents, currency } or { grantedFree, enrolled, entitlementId, courseCode, firstItemId? } or { alreadyOwned, courseCode, courseId } */
                 200: {
                     headers: {
                         [name: string]: unknown;
@@ -5177,6 +5201,13 @@ export interface paths {
                 };
                 /** @description Not listed, feature disabled, or payments disabled */
                 404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Coupon not applicable: { error, reason, listPriceCents, currency } */
+                422: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -17030,6 +17061,444 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/courses/{course_code}/coupons": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List course coupons (creator)
+         * @description Returns coupons for the course with live seat counts. Requires course item:create and ffCourseMarketplace + ffCourseCoupons (plan MKTC.2).
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description When true, include archived coupons */
+                    includeArchived?: boolean;
+                };
+                header?: never;
+                path: {
+                    course_code: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Coupon list */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            coupons: components["schemas"]["CourseCoupon"][];
+                        };
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Forbidden (missing course item:create) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found, feature disabled, or foreign coupon id */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        /**
+         * Create a course coupon
+         * @description Creates one coupon. Code is normalized (trim, upper-case). Duplicate non-archived codes return 409.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    course_code: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateCourseCouponBody"];
+                };
+            };
+            responses: {
+                /** @description Created coupon */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            coupon: components["schemas"]["CourseCoupon"];
+                        };
+                    };
+                };
+                /** @description Invalid input */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Forbidden (missing course item:create) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found, feature disabled, or foreign coupon id */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Duplicate non-archived code */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Unprocessable (immutable field, free course, cap below usage, window) */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Write rate limited (30/min/user) */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_code}/coupons/{coupon_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Archive a course coupon (soft delete)
+         * @description Sets status=archived. Redemption history is retained.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    course_code: string;
+                    coupon_id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Archived coupon */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            coupon: components["schemas"]["CourseCoupon"];
+                        };
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Forbidden (missing course item:create) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found, feature disabled, or foreign coupon id */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Write rate limited (30/min/user) */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        /**
+         * Update a course coupon
+         * @description Partial update of note, window, caps, and status. Discount value fields are immutable.
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    course_code: string;
+                    coupon_id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UpdateCourseCouponBody"];
+                };
+            };
+            responses: {
+                /** @description Updated coupon */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            coupon: components["schemas"]["CourseCoupon"];
+                        };
+                    };
+                };
+                /** @description Invalid input */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Forbidden (missing course item:create) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found, feature disabled, or foreign coupon id */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Unprocessable (immutable field, free course, cap below usage, window) */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Write rate limited (30/min/user) */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/api/v1/courses/{course_code}/coupons/{coupon_id}/redemptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List redemptions for a coupon
+         * @description Cursor-paginated redemption ledger for one coupon (plan MKTC.2 FR-6).
+         */
+        get: {
+            parameters: {
+                query?: {
+                    limit?: number;
+                    /** @description Opaque cursor from a previous nextCursor */
+                    cursor?: string;
+                };
+                header?: never;
+                path: {
+                    course_code: string;
+                    coupon_id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Redemption page */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            redemptions: components["schemas"]["CouponRedemptionRow"][];
+                            /** @description Empty when no further pages */
+                            nextCursor: string;
+                        };
+                    };
+                };
+                /** @description Invalid input */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Forbidden (missing course item:create) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not found, feature disabled, or foreign coupon id */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/marketplace/courses/{slug}/coupon/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Preview a course coupon code without creating a reservation (plan MKTC.3 FR-1)
+         * @description Requires authentication and ffCourseMarketplace + ffCourseCoupons. Returns 200 for both applied and not-applied outcomes with a typed reason. Rate limited per user (15/min, 60/hour) and per IP.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    slug: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @example LAUNCH25 */
+                        code: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description CouponPreviewResponse: { applied, code, reason, listPriceCents, discountCents, chargedCents, currency, freeAfterDiscount, endsAt, seatsRemaining } */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Sign in required */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Course not found or coupons feature disabled */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Rate limited */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -18119,6 +18588,100 @@ export interface components {
             /** @description Human-readable summary (i18n key preferred on client) */
             message: string;
             fields: components["schemas"]["ValidationFieldViolation"][];
+        };
+        CourseCouponSeats: {
+            consumed: number;
+            reserved: number;
+            redeemed: number;
+            /** @description null when unlimited */
+            remaining: number | null;
+        };
+        CourseCoupon: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            courseId: string;
+            /** @description Normalized A–Z0–9_-, 4–32 chars */
+            code: string;
+            /** @enum {string} */
+            discountType: "percent" | "fixed";
+            percentOff: number | null;
+            amountOffCents: number | null;
+            currency: string | null;
+            /** Format: date-time */
+            startsAt: string | null;
+            /** Format: date-time */
+            endsAt: string | null;
+            maxRedemptions: number | null;
+            maxRedemptionsPerUser: number;
+            seats: components["schemas"]["CourseCouponSeats"];
+            /** @enum {string} */
+            status: "active" | "disabled" | "archived";
+            note: string | null;
+            /** @description In-app marketplace URL with ?coupon= */
+            shareUrl: string;
+            /** @description Marketing-site URL when is_public */
+            publicShareUrl: string | null;
+            /** Format: uuid */
+            createdBy: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            warnings?: "clamps_to_free"[];
+        };
+        /**
+         * @example {
+         *       "code": "launch25",
+         *       "discountType": "percent",
+         *       "percentOff": 25,
+         *       "maxRedemptions": 50
+         *     }
+         */
+        CreateCourseCouponBody: {
+            code: string;
+            /** @enum {string} */
+            discountType: "percent" | "fixed";
+            percentOff?: number;
+            amountOffCents?: number;
+            currency?: string;
+            /** Format: date-time */
+            startsAt?: string | null;
+            /** Format: date-time */
+            endsAt?: string | null;
+            maxRedemptions?: number | null;
+            maxRedemptionsPerUser?: number;
+            note?: string | null;
+        };
+        /** @description Partial update. code/discountType/percentOff/amountOffCents/currency are immutable (422). */
+        UpdateCourseCouponBody: {
+            /** Format: date-time */
+            startsAt?: string | null;
+            /** Format: date-time */
+            endsAt?: string | null;
+            maxRedemptions?: number | null;
+            maxRedemptionsPerUser?: number;
+            note?: string | null;
+            /** @enum {string} */
+            status?: "active" | "disabled";
+        };
+        CouponRedemptionRow: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            userId: string;
+            userName: string | null;
+            userEmail: string | null;
+            /** @enum {string} */
+            status: "reserved" | "redeemed" | "released";
+            listPriceCents: number;
+            discountCents: number;
+            chargedCents: number;
+            currency: string;
+            /** Format: date-time */
+            reservedAt: string;
+            /** Format: date-time */
+            redeemedAt: string | null;
         };
     };
     responses: {

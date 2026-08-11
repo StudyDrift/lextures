@@ -54,6 +54,8 @@ export const COURSES_COPY = {
   notFoundBody: 'This course is not listed or may have been removed.',
   backToCourses: 'Back to courses',
   viewOnLextures: 'View on Lextures',
+  /** Neutral line when ?coupon= is present — no discounted price (MKTC.5 FR-12). */
+  couponWillApply: (code: string) => `Coupon ${code} will be applied at checkout.`,
   breadcrumbCourses: 'Courses',
   students: (n: number) => (n === 1 ? '1 student' : `${n.toLocaleString()} students`),
   ratingLabel: (avg: number, count: number) =>

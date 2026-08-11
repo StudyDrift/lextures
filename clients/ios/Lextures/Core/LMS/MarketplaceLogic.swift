@@ -65,10 +65,33 @@ enum MarketplaceSortMode: String, CaseIterable, Identifiable {
     }
 }
 
-/// Marketplace helpers (MKT6 / MOB.7). Paid path: Stripe checkout handoff when flagged.
+/// iOS purchase path when a coupon is considered (MKTC.6).
+enum MarketplaceIOSPurchaseRoute: Equatable {
+    case freeGrant
+    case inAppFullPrice
+    case webRedirect
+    case reject
+    case flagOff
+}
+
+/// Marketplace helpers (MKT6 / MOB.7 / MKTC.6). Paid path: Stripe checkout handoff when flagged.
 enum MarketplaceLogic {
     static let maxPriceMajor = 99_999.99
     static let minPaidCents = 50
+    static let couponInputMaxLen = 32
+
+    private static let couponReasonTokens: Set<String> = [
+        "ok",
+        "not_found",
+        "inactive",
+        "not_started",
+        "expired",
+        "exhausted",
+        "already_used",
+        "currency_mismatch",
+        "course_free",
+        "owned",
+    ]
 
     static let currencies = [
         "usd", "eur", "gbp", "cad", "aud", "jpy", "chf", "sek", "nok", "dkk", "nzd", "sgd", "hkd", "mxn",
@@ -79,6 +102,95 @@ enum MarketplaceLogic {
         features.ffCourseMarketplace && features.ffMobileMarketplacePurchase
     }
 
+    /// Coupon UI + preview (MKTC.6). Requires marketplace + coupons flags.
+    static func couponsEnabled(_ features: MobilePlatformFeatures) -> Bool {
+        features.ffCourseMarketplace && features.ffCourseCoupons
+    }
+
+    private static let couponNormalizedCharset = CharacterSet(charactersIn: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")
+    private static let couponParamCharset = CharacterSet(charactersIn: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-")
+
+    /// Upper-case, strip whitespace, keep [A-Z0-9_-], max 32 (MKTC.6 / web parity).
+    static func normalizeCouponCode(_ raw: String) -> String {
+        let upperNoSpace = raw
+            .uppercased()
+            .unicodeScalars
+            .filter { !$0.properties.isWhitespace }
+            .map(String.init)
+            .joined()
+        let filtered = upperNoSpace.unicodeScalars
+            .filter { couponNormalizedCharset.contains($0) }
+            .map(String.init)
+            .joined()
+        return String(filtered.prefix(couponInputMaxLen))
+    }
+
+    /// Map a server reason token to `mobile.marketplace.coupon.reason.*`.
+    static func couponReasonKey(_ reason: String?) -> String {
+        let r = (reason ?? "not_found").lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        let token = couponReasonTokens.contains(r) ? r : "not_found"
+        return "mobile.marketplace.coupon.reason.\(token)"
+    }
+
+    /// Length ≤ 32 and charset [A-Za-z0-9_-] (deep-link safety before normalize).
+    static func isValidCouponParam(_ raw: String) -> Bool {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, trimmed.count <= couponInputMaxLen else { return false }
+        return trimmed.unicodeScalars.allSatisfy { couponParamCharset.contains($0) }
+    }
+
+    /// Read `?coupon=` from a query string (`?coupon=X`, `coupon=X`, or full query).
+    static func parseCouponFromQuery(_ query: String) -> String? {
+        var q = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        if q.isEmpty { return nil }
+        if q.hasPrefix("?") { q = String(q.dropFirst()) }
+        // Support absolute URL or path?query by taking the query portion.
+        if let question = q.firstIndex(of: "?") {
+            q = String(q[q.index(after: question)...])
+        }
+        guard let components = URLComponents(string: "https://lextures.local/?\(q)"),
+              let items = components.queryItems else {
+            return nil
+        }
+        guard let raw = items.first(where: { $0.name.lowercased() == "coupon" })?.value,
+              isValidCouponParam(raw) else {
+            return nil
+        }
+        let code = normalizeCouponCode(raw)
+        return code.isEmpty ? nil : code
+    }
+
+    /// Pure iOS purchase branch from preview + feature flags (MKTC.6 AC-13).
+    static func purchaseRoute(
+        preview: CouponPreview?,
+        features: MobilePlatformFeatures
+    ) -> MarketplaceIOSPurchaseRoute {
+        guard couponsEnabled(features) else { return .flagOff }
+        guard let preview else { return .inAppFullPrice }
+        if !preview.applied {
+            return .reject
+        }
+        if preview.freeAfterDiscount || preview.chargedCents <= 0 {
+            return .freeGrant
+        }
+        if preview.discountCents > 0 {
+            return .webRedirect
+        }
+        return .inAppFullPrice
+    }
+
+    /// Storefront path with optional coupon query for browser handoff.
+    static func marketplaceWebPath(slug: String, couponCode: String? = nil) -> String {
+        let base = "/marketplace/\(slug)"
+        guard let raw = couponCode, !raw.isEmpty else { return base }
+        let code = normalizeCouponCode(raw)
+        guard !code.isEmpty else { return base }
+        var allowed = CharacterSet.urlQueryAllowed
+        allowed.remove(charactersIn: "&=?")
+        let encoded = code.addingPercentEncoding(withAllowedCharacters: allowed) ?? code
+        return "\(base)?coupon=\(encoded)"
+    }
+
     static func isPaid(priceCents: Int) -> Bool { priceCents > 0 }
 
     static func isFree(priceCents: Int) -> Bool { priceCents <= 0 }
@@ -86,10 +198,6 @@ enum MarketplaceLogic {
     static func formatPrice(cents: Int, currency: String = "usd", freeLabel: String? = nil) -> String {
         if cents <= 0 { return freeLabel ?? L.text("mobile.marketplace.free") }
         return PathsLogic.formatPrice(cents: cents, currency: currency.uppercased())
-    }
-
-    static func marketplaceWebPath(slug: String) -> String {
-        "/marketplace/\(slug)"
     }
 
     static func cacheKey(

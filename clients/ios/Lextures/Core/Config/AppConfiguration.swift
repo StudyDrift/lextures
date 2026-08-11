@@ -47,4 +47,14 @@ enum AppConfiguration {
     /// Public web pages (privacy/trust center, accessibility statement) are served
     /// from the same origin as the API in this monorepo deployment.
     static func webURL(path: String) -> URL { apiURL(path: path) }
+
+    /// iOS partial-coupon external browser handoff (MKTC.6 FR-15). Process env
+    /// `IOS_COUPON_WEB_REDIRECT=0|false` forces off without a platform payload change.
+    static var iosCouponWebRedirectEnabled: Bool {
+        if let env = ProcessInfo.processInfo.environment["IOS_COUPON_WEB_REDIRECT"]?.lowercased(),
+           !env.isEmpty {
+            return !(env == "0" || env == "false" || env == "no" || env == "off")
+        }
+        return true
+    }
 }

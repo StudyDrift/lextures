@@ -165,6 +165,8 @@ type platformSettingsJSON struct {
 	FFSelfPacedMode                    bool `json:"ffSelfPacedMode"`
 	FFPublicCatalog                    bool `json:"ffPublicCatalog"`
 	FFCourseMarketplace                bool `json:"ffCourseMarketplace"`
+	FFCourseCoupons                    bool    `json:"ffCourseCoupons"`
+	CouponMaxPercentOff                float64 `json:"couponMaxPercentOff"`
 	FFContentToolMarketplace           bool `json:"ffContentToolMarketplace"`
 	FFFeedback                         bool `json:"ffFeedback"`
 	FFVisualBoards                     bool `json:"ffVisualBoards"`
@@ -441,6 +443,8 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFSelfPacedMode:                    merged.FFSelfPacedMode,
 			FFPublicCatalog:                    merged.FFPublicCatalog,
 			FFCourseMarketplace:                merged.FFCourseMarketplace,
+			FFCourseCoupons:                    merged.FFCourseCoupons,
+			CouponMaxPercentOff:                merged.CouponMaxPercentOff,
 			FFContentToolMarketplace:           merged.FFContentToolMarketplace,
 			FFFeedback:                         merged.FFFeedback,
 			FFVisualBoards:                     merged.FFVisualBoards,
@@ -698,6 +702,8 @@ type putPlatformBody struct {
 	FFSelfPacedMode                    *bool `json:"ffSelfPacedMode"`
 	FFPublicCatalog                    *bool `json:"ffPublicCatalog"`
 	FFCourseMarketplace                *bool `json:"ffCourseMarketplace"`
+	FFCourseCoupons                    *bool    `json:"ffCourseCoupons"`
+	CouponMaxPercentOff                *float64 `json:"couponMaxPercentOff"`
 	FFContentToolMarketplace           *bool `json:"ffContentToolMarketplace"`
 	FFFeedback                         *bool `json:"ffFeedback"`
 	FFVisualBoards                     *bool `json:"ffVisualBoards"`
@@ -854,6 +860,13 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		if body.LearnerModelEMAAlpha != nil {
 			if *body.LearnerModelEMAAlpha <= 0 || *body.LearnerModelEMAAlpha > 1 {
 				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "learnerModelEmaAlpha must be in the range (0, 1].")
+				return
+			}
+		}
+		if body.CouponMaxPercentOff != nil {
+			if *body.CouponMaxPercentOff <= 0 || *body.CouponMaxPercentOff > 100 {
+				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput,
+					"couponMaxPercentOff must be greater than 0 and at most 100.")
 				return
 			}
 		}
@@ -1155,6 +1168,11 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffselfpacedmode", body.FFSelfPacedMode, func(v bool) { wr.FFSelfPacedMode = &v })
 		setBool("ffpubliccatalog", body.FFPublicCatalog, func(v bool) { wr.FFPublicCatalog = &v })
 		setBool("ffcoursemarketplace", body.FFCourseMarketplace, func(v bool) { wr.FFCourseMarketplace = &v })
+		setBool("ffcoursecoupons", body.FFCourseCoupons, func(v bool) { wr.FFCourseCoupons = &v })
+		set("couponmaxpercentoff", body.CouponMaxPercentOff != nil, func() {
+			v := *body.CouponMaxPercentOff
+			wr.CouponMaxPercentOff = &v
+		})
 		setBool("ffcontenttoolmarketplace", body.FFContentToolMarketplace, func(v bool) { wr.FFContentToolMarketplace = &v })
 		// ffFeedback, mobile parity flags, ffVisualBoards / ffInteractiveQuizzes, and collapsed
 		// IQ mode flags are always-on at platform level; ignore PUT writes (Merge hard-wires).
@@ -1417,6 +1435,8 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFSelfPacedMode:                    merged.FFSelfPacedMode,
 			FFPublicCatalog:                    merged.FFPublicCatalog,
 			FFCourseMarketplace:                merged.FFCourseMarketplace,
+			FFCourseCoupons:                    merged.FFCourseCoupons,
+			CouponMaxPercentOff:                merged.CouponMaxPercentOff,
 			FFContentToolMarketplace:           merged.FFContentToolMarketplace,
 			FFFeedback:                         merged.FFFeedback,
 			FFVisualBoards:                     merged.FFVisualBoards,

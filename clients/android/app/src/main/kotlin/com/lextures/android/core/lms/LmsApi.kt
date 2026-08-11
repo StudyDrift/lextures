@@ -3196,38 +3196,109 @@ object LmsApi {
             decode(body)
         }
 
-    suspend fun claimMarketplaceCourse(slug: String, accessToken: String): MarketplaceClaimResult =
+    private fun marketplaceCouponBody(couponCode: String?): String {
+        val code = couponCode?.trim().orEmpty()
+        if (code.isEmpty()) return "{}"
+        return json.encodeToString(
+            buildJsonObject { put("couponCode", code) },
+        )
+    }
+
+    private fun throwMarketplaceCouponHttp(code: Int, body: String): Nothing {
+        val reason = MarketplaceLogic.parseCouponReasonFromBody(body)
+        val message = parseApiErrorMessage(body)
+        if (code == 422 || code == 429) {
+            throw CouponApiError(code, reason, message)
+        }
+        throw ApiError.HttpStatus(code, message)
+    }
+
+    /** Preview a coupon without reserving a seat (MKTC.3 / MKTC.6). */
+    suspend fun previewMarketplaceCoupon(
+        slug: String,
+        code: String,
+        accessToken: String,
+    ): CouponPreview = withContext(Dispatchers.IO) {
+        val normalized = MarketplaceLogic.normalizeCouponCode(code)
+        val (body, status) = client.request(
+            "/api/v1/marketplace/courses/${encodePath(slug)}/coupon/preview",
+            method = "POST",
+            body = json.encodeToString(buildJsonObject { put("code", normalized) }),
+            accessToken = accessToken,
+        )
+        if (status == 429) {
+            MarketplaceObservability.record("coupon_applied", mapOf("result" to "rate_limited"))
+            throw CouponApiError(429, null, parseApiErrorMessage(body))
+        }
+        if (status !in 200..299) throwMarketplaceCouponHttp(status, body)
+        val preview = decode<CouponPreview>(body)
+        MarketplaceObservability.record(
+            "coupon_applied",
+            mapOf("result" to if (preview.applied) "ok" else (preview.reason.ifBlank { "not_found" })),
+        )
+        preview
+    }
+
+    suspend fun claimMarketplaceCourse(
+        slug: String,
+        accessToken: String,
+        couponCode: String? = null,
+    ): MarketplaceClaimResult =
         withContext(Dispatchers.IO) {
             val (body, code) = client.request(
                 "/api/v1/marketplace/courses/${encodePath(slug)}/claim",
                 method = "POST",
-                body = "{}",
+                body = marketplaceCouponBody(couponCode),
                 accessToken = accessToken,
             )
-            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            if (code !in 200..299) throwMarketplaceCouponHttp(code, body)
             val result = decode<MarketplaceClaimResult>(body)
             MarketplaceObservability.record(
                 "marketplace_claim",
-                mapOf("already_owned" to if (result.alreadyOwned) "1" else "0"),
+                buildMap {
+                    put("already_owned", if (result.alreadyOwned) "1" else "0")
+                    if (result.grantedFree) put("granted_free", "1")
+                    if (!couponCode.isNullOrBlank()) put("coupon", "1")
+                },
             )
+            if (result.grantedFree) {
+                MarketplaceObservability.record("coupon_free_grant")
+            }
             result
         }
 
-    /** Paid marketplace checkout (MOB.7) — Stripe session URL or already-owned. */
-    suspend fun checkoutMarketplaceCourse(slug: String, accessToken: String): MarketplaceCheckoutResult =
+    /** Paid marketplace checkout (MOB.7 / MKTC.6) — Stripe session URL, free grant, or already-owned. */
+    suspend fun checkoutMarketplaceCourse(
+        slug: String,
+        accessToken: String,
+        couponCode: String? = null,
+    ): MarketplaceCheckoutResult =
         withContext(Dispatchers.IO) {
+            if (!couponCode.isNullOrBlank()) {
+                MarketplaceObservability.record(
+                    "coupon_checkout_started",
+                    mapOf("discounted" to "1"),
+                )
+            }
             val (body, code) = client.request(
                 "/api/v1/marketplace/courses/${encodePath(slug)}/checkout",
                 method = "POST",
-                body = "{}",
+                body = marketplaceCouponBody(couponCode),
                 accessToken = accessToken,
             )
-            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            if (code !in 200..299) throwMarketplaceCouponHttp(code, body)
             val result = decode<MarketplaceCheckoutResult>(body)
             MarketplaceObservability.record(
                 "marketplace_checkout_started",
-                if (result.alreadyOwned) mapOf("already_owned" to "1") else emptyMap(),
+                buildMap {
+                    if (result.alreadyOwned) put("already_owned", "1")
+                    if (result.grantedFree) put("granted_free", "1")
+                    if (!couponCode.isNullOrBlank()) put("coupon", "1")
+                },
             )
+            if (result.grantedFree) {
+                MarketplaceObservability.record("coupon_free_grant")
+            }
             result
         }
 

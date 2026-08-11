@@ -1,7 +1,6 @@
 package com.lextures.android.features.marketplace
 
 import com.lextures.android.core.routing.LinkOpener
-import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,7 +12,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -24,10 +26,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.net.toUri
 import com.lextures.android.R
 import com.lextures.android.core.auth.AuthSession
 import com.lextures.android.core.config.AppConfiguration
@@ -35,6 +41,8 @@ import com.lextures.android.core.design.textPrimary
 import com.lextures.android.core.design.textSecondary
 import com.lextures.android.core.i18n.L
 import com.lextures.android.core.i18n.LocalLocalePreferences
+import com.lextures.android.core.lms.CouponApiError
+import com.lextures.android.core.lms.CouponPreview
 import com.lextures.android.core.lms.CourseSummary
 import com.lextures.android.core.lms.LmsApi
 import com.lextures.android.core.lms.MarketplaceCourseDetail
@@ -52,6 +60,14 @@ import com.lextures.android.features.home.LmsEmptyState
 import com.lextures.android.features.home.LmsErrorBanner
 import com.lextures.android.features.home.LmsSkeletonList
 import kotlinx.coroutines.launch
+
+private enum class CouponFieldStatus {
+    Idle,
+    Checking,
+    Applied,
+    Rejected,
+    RateLimited,
+}
 
 @Composable
 fun MarketplaceDetailScreen(
@@ -74,7 +90,94 @@ fun MarketplaceDetailScreen(
     var openCourse by remember { mutableStateOf<CourseSummary?>(null) }
     var showPurchase by remember { mutableStateOf(false) }
 
+    var couponInput by remember { mutableStateOf("") }
+    var couponStatus by remember { mutableStateOf(CouponFieldStatus.Idle) }
+    var couponPreview by remember { mutableStateOf<CouponPreview?>(null) }
+    var couponError by remember { mutableStateOf<String?>(null) }
+    var couponAnnouncement by remember { mutableStateOf("") }
+    var autoApplyDone by remember(slug) { mutableStateOf(false) }
+
     val purchaseEnabled = MarketplaceLogic.purchaseEnabled(shell.platformFeatures)
+    val couponsOn = MarketplaceLogic.couponsEnabled(shell.platformFeatures)
+
+    fun couponReasonMessage(reason: String?): String {
+        val key = MarketplaceLogic.couponReasonKey(reason)
+        val resId = couponReasonStringRes(key)
+        return if (resId != 0) L.text(context, localePrefs, resId) else reason.orEmpty()
+    }
+
+    fun clearCoupon(clearShellPending: Boolean = true) {
+        couponPreview = null
+        couponStatus = CouponFieldStatus.Idle
+        couponError = null
+        couponInput = ""
+        couponAnnouncement = ""
+        if (clearShellPending && shell.pendingCoupon?.slug == slug) {
+            shell.pendingCoupon = null
+        }
+    }
+
+    fun applyPreviewResult(preview: CouponPreview, fromDeeplink: Boolean) {
+        val code = MarketplaceLogic.normalizeCouponCode(preview.code.ifBlank { couponInput })
+        couponInput = code
+        if (preview.applied) {
+            couponPreview = preview
+            couponStatus = CouponFieldStatus.Applied
+            couponError = null
+            val freeLabel = L.text(context, localePrefs, R.string.mobile_marketplace_free)
+            val priceText = MarketplaceLogic.formatPrice(preview.chargedCents, preview.currency, freeLabel)
+            couponAnnouncement = L.format(
+                context,
+                localePrefs,
+                R.string.mobile_marketplace_coupon_applied,
+                code,
+                priceText,
+            )
+            if (fromDeeplink) {
+                MarketplaceObservability.record("coupon_from_deeplink", mapOf("result" to "ok"))
+            }
+        } else {
+            couponPreview = null
+            couponStatus = CouponFieldStatus.Rejected
+            couponError = couponReasonMessage(preview.reason)
+            if (fromDeeplink) {
+                MarketplaceObservability.record(
+                    "coupon_from_deeplink",
+                    mapOf("result" to preview.reason.ifBlank { "not_found" }),
+                )
+            }
+        }
+    }
+
+    fun runCouponPreview(codeRaw: String, fromDeeplink: Boolean) {
+        val token = accessToken ?: return
+        val code = MarketplaceLogic.normalizeCouponCode(codeRaw)
+        if (code.isEmpty() || !couponsOn) return
+        couponStatus = CouponFieldStatus.Checking
+        couponError = null
+        scope.launch {
+            try {
+                val preview = LmsApi.previewMarketplaceCoupon(slug, code, token)
+                applyPreviewResult(preview, fromDeeplink)
+            } catch (e: CouponApiError) {
+                if (e.status == 429) {
+                    couponStatus = CouponFieldStatus.RateLimited
+                    couponPreview = null
+                    couponError = L.text(context, localePrefs, R.string.mobile_marketplace_coupon_rateLimited)
+                } else {
+                    couponStatus = CouponFieldStatus.Rejected
+                    couponPreview = null
+                    couponError = couponReasonMessage(e.reason).ifBlank {
+                        L.text(context, localePrefs, R.string.mobile_marketplace_coupon_reason_not_found)
+                    }
+                }
+            } catch (_: Exception) {
+                couponStatus = CouponFieldStatus.Rejected
+                couponPreview = null
+                couponError = L.text(context, localePrefs, R.string.mobile_marketplace_coupon_reason_not_found)
+            }
+        }
+    }
 
     LaunchedEffect(accessToken, slug) {
         MarketplaceObservability.record("marketplace_viewed")
@@ -90,6 +193,10 @@ fun MarketplaceDetailScreen(
                     errorMessage = L.text(context, localePrefs, R.string.mobile_marketplace_landingNotFound)
                 } else {
                     detail = loaded
+                    if (loaded.owned || loaded.course.owned) {
+                        if (shell.pendingCoupon?.slug == slug) shell.pendingCoupon = null
+                        clearCoupon(clearShellPending = true)
+                    }
                 }
             }
         } catch (_: Exception) {
@@ -97,6 +204,32 @@ fun MarketplaceDetailScreen(
         } finally {
             loading = false
         }
+    }
+
+    // Auto-apply pending / deep-link coupon once detail is loaded (flag off ⇒ ignore FR-11 / AC-11).
+    LaunchedEffect(detail, couponsOn, accessToken, slug, autoApplyDone) {
+        if (autoApplyDone || detail == null || accessToken == null) return@LaunchedEffect
+        if (!couponsOn) {
+            if (shell.pendingCoupon?.slug == slug) shell.pendingCoupon = null
+            autoApplyDone = true
+            return@LaunchedEffect
+        }
+        val course = detail ?: return@LaunchedEffect
+        if (course.owned || course.course.owned || !MarketplaceLogic.isPaid(course.priceCents)) {
+            if (shell.pendingCoupon?.slug == slug) shell.pendingCoupon = null
+            autoApplyDone = true
+            return@LaunchedEffect
+        }
+        val pending = shell.pendingCoupon
+        val code = when {
+            pending != null && pending.slug == slug && MarketplaceLogic.isValidCouponParam(pending.code) ->
+                MarketplaceLogic.normalizeCouponCode(pending.code)
+            else -> null
+        }
+        autoApplyDone = true
+        if (code.isNullOrEmpty()) return@LaunchedEffect
+        couponInput = code
+        runCouponPreview(code, fromDeeplink = true)
     }
 
     if (openCourse != null) {
@@ -125,7 +258,136 @@ fun MarketplaceDetailScreen(
             val current = detail!!
             val course = current.course
             val freeLabel = L.text(context, localePrefs, R.string.mobile_marketplace_free)
-            val priceLabel = MarketplaceLogic.formatPrice(current.priceCents, current.priceCurrency, freeLabel)
+            val couponApplied = couponStatus == CouponFieldStatus.Applied && couponPreview?.applied == true
+            val displayPriceCents = if (couponApplied) couponPreview!!.chargedCents else current.priceCents
+            val displayCurrency = if (couponApplied) couponPreview!!.currency else current.priceCurrency
+            val listPriceForStrike = if (couponApplied) {
+                couponPreview!!.listPriceCents
+            } else {
+                current.listPriceCents ?: current.priceCents
+            }
+            val priceLabel = MarketplaceLogic.formatPrice(displayPriceCents, displayCurrency, freeLabel)
+            val wasLabel = if (
+                couponApplied &&
+                listPriceForStrike > displayPriceCents
+            ) {
+                L.format(
+                    context,
+                    localePrefs,
+                    R.string.mobile_marketplace_coupon_was,
+                    MarketplaceLogic.formatPrice(listPriceForStrike, displayCurrency, freeLabel),
+                )
+            } else {
+                null
+            }
+            val savingsLabel = if (
+                couponApplied &&
+                (couponPreview?.discountCents ?: 0) > 0
+            ) {
+                L.format(
+                    context,
+                    localePrefs,
+                    R.string.mobile_marketplace_coupon_savings,
+                    MarketplaceLogic.formatPrice(couponPreview!!.discountCents, displayCurrency, freeLabel),
+                )
+            } else {
+                null
+            }
+            val priceA11y = if (wasLabel != null) {
+                L.format(
+                    context,
+                    localePrefs,
+                    R.string.mobile_marketplace_coupon_priceA11y,
+                    priceLabel,
+                    MarketplaceLogic.formatPrice(listPriceForStrike, displayCurrency, freeLabel),
+                )
+            } else {
+                priceLabel
+            }
+            val freeAfterCoupon = couponApplied && (
+                couponPreview!!.freeAfterDiscount || couponPreview!!.chargedCents <= 0
+            )
+            val activeCouponCode = if (couponApplied) couponPreview!!.code else null
+            val showCouponUi = couponsOn &&
+                !course.owned &&
+                MarketplaceLogic.isPaid(current.priceCents)
+
+            fun openOwnedCourse(courseCode: String) {
+                val token = accessToken ?: return
+                scope.launch {
+                    runCatching {
+                        val summary = LmsApi.fetchCourse(courseCode, token)
+                        detail = current.copy(course = current.course.copy(owned = true), owned = true)
+                        shell.pendingCoupon = null
+                        clearCoupon(clearShellPending = false)
+                        shell.select(RootDestination.Courses)
+                        shell.activeCourse = summary
+                        shell.activeCourseSection = CourseWorkspaceSection.Modules
+                        openCourse = summary
+                    }.onFailure {
+                        claimError = L.text(context, localePrefs, R.string.mobile_marketplace_openCourseError)
+                    }
+                }
+            }
+
+            fun enrollFreeWithCoupon(code: String) {
+                val token = accessToken ?: return
+                claiming = true
+                claimError = null
+                scope.launch {
+                    try {
+                        MarketplaceObservability.record(
+                            "coupon_checkout_started",
+                            mapOf("discounted" to "1"),
+                        )
+                        val result = try {
+                            LmsApi.claimMarketplaceCourse(slug, token, code)
+                        } catch (_: Exception) {
+                            val checkout = LmsApi.checkoutMarketplaceCourse(slug, token, code)
+                            if (checkout.grantedFree || checkout.alreadyOwned || checkout.enrolled) {
+                                com.lextures.android.core.lms.MarketplaceClaimResult(
+                                    enrolled = checkout.enrolled || checkout.grantedFree || checkout.alreadyOwned,
+                                    alreadyOwned = checkout.alreadyOwned,
+                                    courseCode = checkout.courseCode.orEmpty(),
+                                    grantedFree = checkout.grantedFree,
+                                    firstItemId = checkout.firstItemId,
+                                    entitlementId = checkout.entitlementId.orEmpty(),
+                                )
+                            } else {
+                                throw ApiError.HttpStatus(500, "Free grant failed")
+                            }
+                        }
+                        val codeForOpen = result.courseCode.ifBlank { course.courseCode }
+                        shell.pendingCoupon = null
+                        clearCoupon(clearShellPending = false)
+                        openOwnedCourse(codeForOpen)
+                    } catch (e: CouponApiError) {
+                        if (e.status == 422) {
+                            clearCoupon()
+                            couponStatus = CouponFieldStatus.Rejected
+                            couponError = couponReasonMessage(e.reason)
+                            claimError = couponError
+                        } else if (e.status == 429) {
+                            couponStatus = CouponFieldStatus.RateLimited
+                            couponError = L.text(context, localePrefs, R.string.mobile_marketplace_coupon_rateLimited)
+                            claimError = couponError
+                        } else {
+                            claimError = L.text(context, localePrefs, R.string.mobile_marketplace_claimError)
+                        }
+                    } catch (e: ApiError.HttpStatus) {
+                        claimError = if (e.code == 402) {
+                            L.text(context, localePrefs, R.string.mobile_marketplace_claimPaidError)
+                        } else {
+                            L.text(context, localePrefs, R.string.mobile_marketplace_claimError)
+                        }
+                    } catch (_: Exception) {
+                        claimError = L.text(context, localePrefs, R.string.mobile_marketplace_claimError)
+                    } finally {
+                        claiming = false
+                    }
+                }
+            }
+
             Column(
                 modifier = modifier
                     .fillMaxSize()
@@ -215,36 +477,168 @@ fun MarketplaceDetailScreen(
 
                 claimError?.let { LmsErrorBanner(message = it) }
 
-                LmsCard {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        Text(priceLabel, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = textPrimary())
-                        when {
-                            course.owned -> Button(onClick = {
-                                val token = accessToken ?: return@Button
-                                scope.launch {
-                                    runCatching {
-                                        val summary = LmsApi.fetchCourse(course.courseCode, token)
-                                        shell.select(RootDestination.Courses)
-                                        shell.activeCourse = summary
-                                        shell.activeCourseSection = CourseWorkspaceSection.Modules
-                                        openCourse = summary
-                                    }.onFailure {
-                                        claimError = L.text(context, localePrefs, R.string.mobile_marketplace_openCourseError)
+                if (showCouponUi) {
+                    LmsCard {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(
+                                L.text(context, localePrefs, R.string.mobile_marketplace_coupon_disclosure),
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = textPrimary(),
+                            )
+                            when (couponStatus) {
+                                CouponFieldStatus.Applied -> {
+                                    Text(
+                                        L.format(
+                                            context,
+                                            localePrefs,
+                                            R.string.mobile_marketplace_coupon_applied,
+                                            couponPreview?.code.orEmpty(),
+                                            priceLabel,
+                                        ),
+                                        fontSize = 13.sp,
+                                        color = textPrimary(),
+                                    )
+                                    savingsLabel?.let {
+                                        Text(it, fontSize = 12.sp, color = textSecondary())
+                                    }
+                                    TextButton(onClick = { clearCoupon() }) {
+                                        Text(L.text(context, localePrefs, R.string.mobile_marketplace_coupon_remove))
                                     }
                                 }
+                                else -> {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    ) {
+                                        OutlinedTextField(
+                                            value = couponInput,
+                                            onValueChange = {
+                                                couponInput = MarketplaceLogic.normalizeCouponCode(it)
+                                                if (couponStatus == CouponFieldStatus.Rejected ||
+                                                    couponStatus == CouponFieldStatus.RateLimited
+                                                ) {
+                                                    couponStatus = CouponFieldStatus.Idle
+                                                    couponError = null
+                                                }
+                                            },
+                                            label = {
+                                                Text(L.text(context, localePrefs, R.string.mobile_marketplace_coupon_label))
+                                            },
+                                            placeholder = {
+                                                Text(L.text(context, localePrefs, R.string.mobile_marketplace_coupon_placeholder))
+                                            },
+                                            singleLine = true,
+                                            enabled = couponStatus != CouponFieldStatus.Checking,
+                                            isError = couponError != null,
+                                            supportingText = couponError?.let { { Text(it) } },
+                                            modifier = Modifier.weight(1f),
+                                        )
+                                        Button(
+                                            onClick = { runCouponPreview(couponInput, fromDeeplink = false) },
+                                            enabled = couponInput.isNotBlank() &&
+                                                couponStatus != CouponFieldStatus.Checking &&
+                                                accessToken != null,
+                                        ) {
+                                            if (couponStatus == CouponFieldStatus.Checking) {
+                                                CircularProgressIndicator(
+                                                    modifier = Modifier.padding(4.dp),
+                                                    strokeWidth = 2.dp,
+                                                )
+                                            } else {
+                                                Text(
+                                                    L.text(
+                                                        context,
+                                                        localePrefs,
+                                                        if (couponStatus == CouponFieldStatus.Checking) {
+                                                            R.string.mobile_marketplace_coupon_applying
+                                                        } else {
+                                                            R.string.mobile_marketplace_coupon_apply
+                                                        },
+                                                    ),
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            if (couponAnnouncement.isNotBlank()) {
+                                Text(
+                                    couponAnnouncement,
+                                    modifier = Modifier.semantics {
+                                        liveRegion = LiveRegionMode.Polite
+                                        contentDescription = couponAnnouncement
+                                    },
+                                    fontSize = 1.sp,
+                                    color = textSecondary().copy(alpha = 0f),
+                                )
+                            }
+                        }
+                    }
+                }
+
+                LmsCard {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .semantics {
+                                contentDescription = priceA11y
+                                liveRegion = LiveRegionMode.Polite
+                            },
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Column {
+                            Text(priceLabel, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = textPrimary())
+                            wasLabel?.let {
+                                Text(
+                                    it,
+                                    fontSize = 12.sp,
+                                    color = textSecondary(),
+                                    textDecoration = TextDecoration.LineThrough,
+                                )
+                            }
+                            savingsLabel?.let {
+                                Text(it, fontSize = 12.sp, color = textSecondary())
+                            }
+                        }
+                        when {
+                            course.owned -> Button(onClick = {
+                                openOwnedCourse(course.courseCode)
                             }) {
                                 Text(L.text(context, localePrefs, R.string.mobile_marketplace_goToCourse))
                             }
                             MarketplaceLogic.isPaid(current.priceCents) -> {
                                 if (purchaseEnabled) {
-                                    Button(
-                                        onClick = { showPurchase = true },
-                                        enabled = accessToken != null,
-                                    ) {
-                                        Text(L.text(context, localePrefs, R.string.mobile_marketplace_buy))
+                                    if (freeAfterCoupon && activeCouponCode != null) {
+                                        Button(
+                                            onClick = { enrollFreeWithCoupon(activeCouponCode) },
+                                            enabled = accessToken != null && !claiming,
+                                        ) {
+                                            Text(
+                                                if (claiming) {
+                                                    L.text(context, localePrefs, R.string.mobile_marketplace_claiming)
+                                                } else {
+                                                    L.text(context, localePrefs, R.string.mobile_marketplace_enrollFree)
+                                                },
+                                            )
+                                        }
+                                    } else {
+                                        val buyLabel = if (couponApplied) {
+                                            L.format(
+                                                context,
+                                                localePrefs,
+                                                R.string.mobile_marketplace_buyWithPrice,
+                                                priceLabel,
+                                            )
+                                        } else {
+                                            L.text(context, localePrefs, R.string.mobile_marketplace_buy)
+                                        }
+                                        Button(
+                                            onClick = { showPurchase = true },
+                                            enabled = accessToken != null,
+                                        ) {
+                                            Text(buyLabel)
+                                        }
                                     }
                                 } else {
                                     Button(onClick = {
@@ -263,14 +657,7 @@ fun MarketplaceDetailScreen(
                                     scope.launch {
                                         try {
                                             val result = LmsApi.claimMarketplaceCourse(slug, token)
-                                            val summary = LmsApi.fetchCourse(
-                                                result.courseCode.ifBlank { course.courseCode },
-                                                token,
-                                            )
-                                            shell.select(RootDestination.Courses)
-                                            shell.activeCourse = summary
-                                            shell.activeCourseSection = CourseWorkspaceSection.Modules
-                                            openCourse = summary
+                                            openOwnedCourse(result.courseCode.ifBlank { course.courseCode })
                                         } catch (e: ApiError.HttpStatus) {
                                             claimError = if (e.code == 402) {
                                                 L.text(context, localePrefs, R.string.mobile_marketplace_claimPaidError)
@@ -316,6 +703,8 @@ fun MarketplaceDetailScreen(
             }
 
             if (showPurchase) {
+                val sheetPrice = if (couponApplied) couponPreview!!.chargedCents else current.priceCents
+                val sheetCurrency = if (couponApplied) couponPreview!!.currency else current.priceCurrency
                 PurchaseFlowSheet(
                     session = session,
                     shell = shell,
@@ -323,27 +712,45 @@ fun MarketplaceDetailScreen(
                     courseId = current.course.id,
                     courseCode = current.course.courseCode,
                     title = current.course.title,
-                    priceCents = current.priceCents,
-                    currency = current.priceCurrency,
+                    priceCents = sheetPrice,
+                    currency = sheetCurrency,
                     marketplaceSlug = slug,
+                    couponCode = activeCouponCode,
+                    listPriceCents = if (couponApplied) couponPreview!!.listPriceCents else null,
+                    discountCents = if (couponApplied) couponPreview!!.discountCents else null,
+                    chargedCents = if (couponApplied) couponPreview!!.chargedCents else null,
                     onDismiss = { showPurchase = false },
+                    onCouponRejected = { reason ->
+                        showPurchase = false
+                        clearCoupon()
+                        couponStatus = CouponFieldStatus.Rejected
+                        couponError = couponReasonMessage(reason)
+                        claimError = couponError
+                    },
                     onAlreadyOwned = {
-                        val token = accessToken ?: return@PurchaseFlowSheet
-                        scope.launch {
-                            runCatching {
-                                val summary = LmsApi.fetchCourse(current.course.courseCode, token)
-                                detail = current.copy(course = current.course.copy(owned = true), owned = true)
-                                shell.select(RootDestination.Courses)
-                                shell.activeCourse = summary
-                                shell.activeCourseSection = CourseWorkspaceSection.Modules
-                                openCourse = summary
-                            }.onFailure {
-                                claimError = L.text(context, localePrefs, R.string.mobile_marketplace_openCourseError)
-                            }
-                        }
+                        openOwnedCourse(current.course.courseCode)
+                    },
+                    onGrantedFree = { courseCode ->
+                        shell.pendingCoupon = null
+                        clearCoupon(clearShellPending = false)
+                        openOwnedCourse(courseCode.ifBlank { current.course.courseCode })
                     },
                 )
             }
         }
     }
+}
+
+private fun couponReasonStringRes(key: String): Int = when (key) {
+    "mobile.marketplace.coupon.reason.ok" -> R.string.mobile_marketplace_coupon_reason_ok
+    "mobile.marketplace.coupon.reason.not_found" -> R.string.mobile_marketplace_coupon_reason_not_found
+    "mobile.marketplace.coupon.reason.inactive" -> R.string.mobile_marketplace_coupon_reason_inactive
+    "mobile.marketplace.coupon.reason.not_started" -> R.string.mobile_marketplace_coupon_reason_not_started
+    "mobile.marketplace.coupon.reason.expired" -> R.string.mobile_marketplace_coupon_reason_expired
+    "mobile.marketplace.coupon.reason.exhausted" -> R.string.mobile_marketplace_coupon_reason_exhausted
+    "mobile.marketplace.coupon.reason.already_used" -> R.string.mobile_marketplace_coupon_reason_already_used
+    "mobile.marketplace.coupon.reason.currency_mismatch" -> R.string.mobile_marketplace_coupon_reason_currency_mismatch
+    "mobile.marketplace.coupon.reason.course_free" -> R.string.mobile_marketplace_coupon_reason_course_free
+    "mobile.marketplace.coupon.reason.owned" -> R.string.mobile_marketplace_coupon_reason_owned
+    else -> R.string.mobile_marketplace_coupon_reason_not_found
 }

@@ -34,8 +34,17 @@ func mergeBool(db *bool, whenUnset bool) bool {
 }
 
 // mergeFloat64 returns the DB value when set and valid (in (0,1]); otherwise the default.
+// Used for EMA alpha and similar unit-interval settings.
 func mergeFloat64(db *float64, whenUnset float64) float64 {
 	if db != nil && *db > 0 && *db <= 1 {
+		return *db
+	}
+	return whenUnset
+}
+
+// mergePercentOff returns the DB percent (0,100] when set; otherwise whenUnset (plan MKTC.7).
+func mergePercentOff(db *float64, whenUnset float64) float64 {
+	if db != nil && *db > 0 && *db <= 100 {
 		return *db
 	}
 	return whenUnset

@@ -1,7 +1,8 @@
-/** Authenticated in-app course marketplace API client (plan MKT3). */
+/** Authenticated in-app course marketplace API client (plan MKT3 / MKTC.5). */
 
 import { authorizedFetch } from './api'
 import { readApiErrorMessage } from './errors'
+import type { CouponReason } from './marketplace-coupon'
 import { formatMarketplacePrice } from './marketplace-price'
 
 export type MarketplaceCard = {
@@ -36,6 +37,21 @@ export type MarketplaceWhatsIncluded = {
   estimatedDurationMinutes?: number
 }
 
+/** Learner coupon preview (MKTC.3 FR-1 / MKTC.5). Distinct from creator draft preview. */
+export type MarketplaceCouponPreview = {
+  applied: boolean
+  code: string
+  reason: CouponReason
+  listPriceCents: number
+  discountCents: number
+  chargedCents: number
+  currency: string
+  freeAfterDiscount: boolean
+  endsAt: string | null
+  seatsRemaining: number | null
+  clampedToFree?: boolean
+}
+
 export type MarketplaceCourseDetail = {
   course: MarketplaceCard
   owned: boolean
@@ -44,6 +60,8 @@ export type MarketplaceCourseDetail = {
   listPriceCents?: number | null
   whatsIncluded: MarketplaceWhatsIncluded
   rating: { average: number | null; count: number }
+  /** Embedded when detail is fetched with ?coupon= (MKTC.3 FR-18). */
+  coupon?: MarketplaceCouponPreview | null
 }
 
 export type MarketplaceSearchResponse = {
@@ -111,8 +129,17 @@ export async function fetchMarketplaceCategories(): Promise<MarketplaceCategory[
   return data.categories ?? []
 }
 
-export async function fetchMarketplaceCourse(slug: string): Promise<MarketplaceCourseDetail> {
-  const res = await authorizedFetch(`/api/v1/marketplace/courses/${encodeURIComponent(slug)}`)
+export async function fetchMarketplaceCourse(
+  slug: string,
+  opts?: { coupon?: string },
+): Promise<MarketplaceCourseDetail> {
+  const qs =
+    opts?.coupon && opts.coupon.trim()
+      ? `?coupon=${encodeURIComponent(opts.coupon.trim())}`
+      : ''
+  const res = await authorizedFetch(
+    `/api/v1/marketplace/courses/${encodeURIComponent(slug)}${qs}`,
+  )
   return jsonOrThrow<MarketplaceCourseDetail>(res)
 }
 
@@ -122,23 +149,49 @@ export type MarketplaceClaimResult = {
   alreadyOwned?: boolean
   firstItemId?: string
   courseCode: string
+  grantedFree?: boolean
+}
+
+export type MarketplaceGrantedFreeResult = MarketplaceClaimResult & {
+  grantedFree: true
+  enrolled: true
 }
 
 export type MarketplaceCheckoutResult =
-  | { checkoutUrl: string; sessionId: string; alreadyOwned?: false }
+  | {
+      checkoutUrl: string
+      sessionId: string
+      alreadyOwned?: false
+      chargedCents?: number
+      currency?: string
+    }
   | { alreadyOwned: true; courseCode: string; courseId: string; checkoutUrl?: never }
+  | MarketplaceGrantedFreeResult
 
 export class MarketplaceApiError extends Error {
   readonly status: number
   readonly code?: string
   readonly checkoutHint?: string
+  /** Coupon reject reason on 422 (MKTC.3 FR-5 / MKTC.5 FR-8). */
+  readonly reason?: string
+  readonly listPriceCents?: number
+  readonly currency?: string
 
-  constructor(status: number, message: string, code?: string, checkoutHint?: string) {
+  constructor(
+    status: number,
+    message: string,
+    code?: string,
+    checkoutHint?: string,
+    extra?: { reason?: string; listPriceCents?: number; currency?: string },
+  ) {
     super(message)
     this.name = 'MarketplaceApiError'
     this.status = status
     this.code = code
     this.checkoutHint = checkoutHint
+    this.reason = extra?.reason
+    this.listPriceCents = extra?.listPriceCents
+    this.currency = extra?.currency
   }
 }
 
@@ -154,32 +207,96 @@ async function marketplaceMutationOrThrow<T>(res: Response): Promise<T> {
       raw && typeof raw === 'object' && 'checkoutHint' in raw
         ? String((raw as { checkoutHint?: unknown }).checkoutHint ?? '')
         : undefined
-    throw new MarketplaceApiError(res.status, message, code, checkoutHint || undefined)
+    const reason =
+      raw && typeof raw === 'object' && 'reason' in raw
+        ? String((raw as { reason?: unknown }).reason ?? '')
+        : undefined
+    const listPriceCents =
+      raw && typeof raw === 'object' && typeof (raw as { listPriceCents?: unknown }).listPriceCents === 'number'
+        ? (raw as { listPriceCents: number }).listPriceCents
+        : undefined
+    const currency =
+      raw && typeof raw === 'object' && typeof (raw as { currency?: unknown }).currency === 'string'
+        ? (raw as { currency: string }).currency
+        : undefined
+    throw new MarketplaceApiError(res.status, message, code, checkoutHint || undefined, {
+      reason: reason || undefined,
+      listPriceCents,
+      currency,
+    })
   }
   return raw as T
 }
 
-/** Free claim: entitlement + enrollment (plan MKT4). */
-export async function claimMarketplaceCourse(slug: string): Promise<MarketplaceClaimResult> {
+function couponBody(couponCode?: string): string {
+  if (couponCode && couponCode.trim()) {
+    return JSON.stringify({ couponCode: couponCode.trim() })
+  }
+  return '{}'
+}
+
+/** Preview a coupon without reserving a seat (MKTC.3 FR-1). */
+export async function previewMarketplaceCoupon(
+  slug: string,
+  code: string,
+): Promise<MarketplaceCouponPreview> {
+  const res = await authorizedFetch(
+    `/api/v1/marketplace/courses/${encodeURIComponent(slug)}/coupon/preview`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code }),
+    },
+  )
+  if (res.status === 429) {
+    throw new MarketplaceApiError(429, 'Coupon preview rate limit exceeded.', 'RATE_LIMITED')
+  }
+  return marketplaceMutationOrThrow<MarketplaceCouponPreview>(res)
+}
+
+/** Free claim: entitlement + enrollment (plan MKT4 / MKTC.3 coupon free-grant). */
+export async function claimMarketplaceCourse(
+  slug: string,
+  opts?: { couponCode?: string },
+): Promise<MarketplaceClaimResult> {
   const res = await authorizedFetch(`/api/v1/marketplace/courses/${encodeURIComponent(slug)}/claim`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: '{}',
+    body: couponBody(opts?.couponCode),
   })
   return marketplaceMutationOrThrow<MarketplaceClaimResult>(res)
 }
 
-/** Paid checkout: returns Stripe Checkout URL (plan MKT4). */
-export async function checkoutMarketplaceCourse(slug: string): Promise<MarketplaceCheckoutResult> {
+/**
+ * Paid checkout: Stripe Checkout URL, already-owned, or free-grant when coupon zeros the price
+ * (plan MKT4 / MKTC.3 / MKTC.5).
+ */
+export async function checkoutMarketplaceCourse(
+  slug: string,
+  opts?: { couponCode?: string },
+): Promise<MarketplaceCheckoutResult> {
   const res = await authorizedFetch(
     `/api/v1/marketplace/courses/${encodeURIComponent(slug)}/checkout`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: '{}',
+      body: couponBody(opts?.couponCode),
     },
   )
   return marketplaceMutationOrThrow<MarketplaceCheckoutResult>(res)
+}
+
+export function isMarketplaceGrantedFree(
+  result: MarketplaceCheckoutResult | MarketplaceClaimResult,
+): result is MarketplaceGrantedFreeResult {
+  return (
+    typeof result === 'object' &&
+    result != null &&
+    'grantedFree' in result &&
+    (result as MarketplaceGrantedFreeResult).grantedFree === true &&
+    'enrolled' in result &&
+    (result as MarketplaceClaimResult).enrolled === true
+  )
 }
 
 /** Accessible name for a marketplace card link (title + price/Free + owned). */

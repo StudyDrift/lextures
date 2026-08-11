@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { getBearerToken } from '../../lib/auth'
 import { RequireAuth } from '../require-auth'
@@ -46,5 +46,27 @@ describe('RequireAuth', () => {
     )
     expect(screen.getByText('Login page')).toBeInTheDocument()
     expect(screen.queryByText('Authed home')).toBeNull()
+  })
+
+  it('preserves query string (including coupon) in return path', () => {
+    vi.mocked(getBearerToken).mockReturnValue(null)
+    let loginState: { from?: string } | undefined
+    function LoginProbe() {
+      const loc = useLocation()
+      loginState = loc.state as { from?: string }
+      return <div>Login page</div>
+    }
+    render(
+      <MemoryRouter initialEntries={['/marketplace/demo?coupon=LAUNCH25&ref=www']}>
+        <Routes>
+          <Route element={<RequireAuth />}>
+            <Route path="/marketplace/:slug" element={<div>Detail</div>} />
+          </Route>
+          <Route path="/login" element={<LoginProbe />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+    expect(screen.getByText('Login page')).toBeInTheDocument()
+    expect(loginState?.from).toBe('/marketplace/demo?coupon=LAUNCH25&ref=www')
   })
 })

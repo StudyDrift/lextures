@@ -34,12 +34,14 @@ func (p *StripeProvider) CreateCheckoutSession(ctx context.Context, req Checkout
 		return nil, fmt.Errorf("paymentprovider: stripe customer required")
 	}
 	idempotencyKey := fmt.Sprintf("checkout:%s:%s", req.UserID, strings.TrimSpace(req.Metadata["checkout_key"]))
+	// FR-9: disable Stripe promotion codes when a first-party coupon is applied so discounts cannot stack.
+	allowPromo := !req.HasFirstPartyCoupon
 	params := &stripe.CheckoutSessionParams{
 		Customer:            stripe.String(customerID),
 		Mode:                stripe.String(string(stripe.CheckoutSessionModePayment)),
 		SuccessURL:          stripe.String(req.SuccessURL),
 		CancelURL:           stripe.String(req.CancelURL),
-		AllowPromotionCodes: stripe.Bool(true),
+		AllowPromotionCodes: stripe.Bool(allowPromo),
 		Metadata:            copyMetadata(req.Metadata),
 	}
 	params.Metadata["user_id"] = req.UserID.String()
@@ -56,6 +58,7 @@ func (p *StripeProvider) CreateCheckoutSession(ctx context.Context, req Checkout
 	if currency == "" {
 		currency = "usd"
 	}
+	unitAmount := req.UnitAmount()
 	taxCode := NormalizeTaxCode(req.TaxCode)
 	params.PaymentIntentData = &stripe.CheckoutSessionPaymentIntentDataParams{
 		Metadata: params.Metadata,
@@ -67,7 +70,7 @@ func (p *StripeProvider) CreateCheckoutSession(ctx context.Context, req Checkout
 				Name:    stripe.String(req.CourseTitle),
 				TaxCode: stripe.String(taxCode),
 			},
-			UnitAmount: stripe.Int64(int64(req.PriceCents)),
+			UnitAmount: stripe.Int64(int64(unitAmount)),
 		},
 		Quantity: stripe.Int64(1),
 	}}
@@ -81,7 +84,10 @@ func (p *StripeProvider) CreateCheckoutSession(ctx context.Context, req Checkout
 	slog.Info(
 		"stripe checkout session amount",
 		"currency", currency,
-		"unit_amount", req.PriceCents,
+		"unit_amount", unitAmount,
+		"list_price_cents", req.PriceCents,
+		"discount_cents", req.DiscountCents,
+		"first_party_coupon", req.HasFirstPartyCoupon,
 		"course_id", req.CourseID,
 	)
 	sess, err := checkoutsession.New(params)
@@ -93,7 +99,7 @@ func (p *StripeProvider) CreateCheckoutSession(ctx context.Context, req Checkout
 		CheckoutURL:    sess.URL,
 		Provider:       ProviderStripe,
 		IdempotencyKey: idempotencyKey,
-		AmountCents:    req.PriceCents,
+		AmountCents:    unitAmount,
 		Currency:       currency,
 	}, nil
 }

@@ -157,3 +157,60 @@ test('Marketplace listing: list free course, set price, draft rejected', async (
   const unlisted = await getListing(token, courseCode)
   expect(unlisted.marketplaceListed).toBe(false)
 })
+
+async function setCourseCouponsFlag(token: string, on: boolean) {
+  const res = await fetch(`${API_BASE}/api/v1/settings/platform`, {
+    method: 'PUT',
+    headers: authHeaders(token),
+    body: JSON.stringify({ ffCourseCoupons: on, updateMask: ['ffCourseCoupons'] }),
+  })
+  expect(res.ok).toBeTruthy()
+}
+
+test('Course coupons API smoke: create and list (MKTC.2)', async () => {
+  const token = await getAdminToken()
+  await setCourseMarketplaceFlag(token, true)
+  await setCourseCouponsFlag(token, true)
+
+  const title = `Coupon Course ${uid()}`
+  const courseCode = await createCourse(token, title)
+  await publishCourse(token, courseCode, title)
+  await putListing(token, courseCode, {
+    marketplaceListed: true,
+    priceCents: 2500,
+    priceCurrency: 'usd',
+    slug: `coupon-${uid('slug')}`,
+  })
+
+  const createRes = await fetch(`${API_BASE}/api/v1/courses/${encodeURIComponent(courseCode)}/coupons`, {
+    method: 'POST',
+    headers: authHeaders(token),
+    body: JSON.stringify({
+      code: 'launch25',
+      discountType: 'percent',
+      percentOff: 25,
+    }),
+  })
+  expect(createRes.status).toBe(201)
+  const created = (await createRes.json()) as {
+    coupon: { code: string; shareUrl: string; status: string }
+  }
+  expect(created.coupon.code).toBe('LAUNCH25')
+  expect(created.coupon.shareUrl).toContain('?coupon=LAUNCH25')
+  expect(created.coupon.status).toBe('active')
+
+  const listRes = await fetch(`${API_BASE}/api/v1/courses/${encodeURIComponent(courseCode)}/coupons`, {
+    headers: authHeaders(token),
+  })
+  expect(listRes.ok).toBeTruthy()
+  const list = (await listRes.json()) as { coupons: Array<{ code: string }> }
+  expect(list.coupons.some((c) => c.code === 'LAUNCH25')).toBeTruthy()
+
+  // Flag off → 404
+  await setCourseCouponsFlag(token, false)
+  const offRes = await fetch(`${API_BASE}/api/v1/courses/${encodeURIComponent(courseCode)}/coupons`, {
+    headers: authHeaders(token),
+  })
+  expect(offRes.status).toBe(404)
+  await setCourseCouponsFlag(token, true)
+})

@@ -11,6 +11,7 @@ import { resolveApiAssetUrl } from '../lib/api-base'
 import { COURSES_COPY } from '../lib/courses-copy'
 import { truncateMetaDescription } from '../lib/document-head'
 import {
+  displayHandoffCoupon,
   fetchPublicMarketplaceCourse,
   fetchPublicMarketplaceReviews,
   MarketplaceApiError,
@@ -21,11 +22,22 @@ import { useDocumentHead } from '../lib/use-document-head'
 
 const SITE_ORIGIN = 'https://lextures.com'
 
+function readCouponFromWindowSearch(): string {
+  if (typeof window === 'undefined') return ''
+  try {
+    const params = new URLSearchParams(window.location.search)
+    return displayHandoffCoupon(params.get('coupon'))
+  } catch {
+    return ''
+  }
+}
+
 type CourseDetailPageProps = {
   slug: string
 }
 
 export function CourseDetailPage({ slug }: CourseDetailPageProps) {
+  const [coupon] = useState(() => readCouponFromWindowSearch())
   const [detail, setDetail] = useState<PublicMarketplaceCourseDetail | null>(null)
   const [reviews, setReviews] = useState<CourseReview[]>([])
   const [reviewsSummary, setReviewsSummary] = useState<{ average: number | null; count: number }>({
@@ -73,7 +85,10 @@ export function CourseDetailPage({ slug }: CourseDetailPageProps) {
         if (cancelled) return
         setDetail(d)
         setLoading(false)
-        window.gtag?.('event', 'course_detail_view', { slug })
+        window.gtag?.('event', 'course_detail_view', {
+          slug,
+          hasCoupon: Boolean(readCouponFromWindowSearch()),
+        })
       })
       .catch((e: unknown) => {
         if (cancelled) return
@@ -256,13 +271,13 @@ export function CourseDetailPage({ slug }: CourseDetailPageProps) {
 
           <aside className="hidden lg:block">
             <div className="sticky top-24">
-              <EnrollPanel course={course} />
+              <EnrollPanel course={course} coupon={coupon} />
             </div>
           </aside>
         </div>
       </div>
 
-      <EnrollPanel course={course} sticky />
+      <EnrollPanel course={course} sticky coupon={coupon} />
     </MarketingPageShell>
   )
 }
