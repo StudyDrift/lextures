@@ -337,7 +337,7 @@ export function CourseCouponCreateDialog({
                 disabled={isEdit || submitting}
                 autoComplete="off"
                 spellCheck={false}
-                className="min-w-0 flex-1 font-mono uppercase tracking-wide"
+                className="min-h-6 min-w-0 flex-1 font-mono uppercase tracking-wide"
                 maxLength={32}
               />
               {!isEdit ? (

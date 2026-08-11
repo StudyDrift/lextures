@@ -201,7 +201,7 @@ func (d Deps) handlePatchCourseCoupon() http.HandlerFunc {
 
 		// Apply field updates first (if any mutable fields present besides status).
 		updated := cur
-		hasFieldPatch := len(raw) > 0 && !(len(raw) == 1 && body.Status != nil)
+		hasFieldPatch := len(raw) > 0 && (len(raw) != 1 || body.Status == nil)
 		if hasFieldPatch {
 			// Only call Update when something other than status is present.
 			fieldKeys := 0
