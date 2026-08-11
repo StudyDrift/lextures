@@ -172,21 +172,22 @@ test.describe('MKTC.4 creator coupon manager', () => {
     await dialog.getByLabel(/Percent off/i).fill('25')
     await dialog.getByRole('button', { name: /Create coupon/i }).click()
 
-    const codeCell = coupons.locator('code', { hasText: couponCode.toUpperCase() })
-    await expect(codeCell).toBeVisible({ timeout: 15_000 })
+    // Desktop table + mobile list both render the code in the DOM.
+    const couponRow = coupons.getByRole('row', { name: new RegExp(couponCode, 'i') })
+    await expect(couponRow).toBeVisible({ timeout: 15_000 })
 
-    await page.getByRole('button', { name: new RegExp(`Copy share link for ${couponCode}`, 'i') }).click()
+    await couponRow.getByRole('button', { name: new RegExp(`Copy share link for ${couponCode}`, 'i') }).click()
     const clip = await page.evaluate(() => navigator.clipboard.readText())
     expect(clip).toContain(`coupon=${couponCode.toUpperCase()}`)
     expect(clip).toMatch(/marketplace\//)
 
-    await page.getByRole('button', { name: new RegExp(`Actions for ${couponCode}`, 'i') }).click()
+    await couponRow.getByRole('button', { name: new RegExp(`Actions for ${couponCode}`, 'i') }).click()
     await page.getByRole('menuitem', { name: /Pause/i }).click()
-    await expect(page.getByText(/Paused/i).first()).toBeVisible({ timeout: 10_000 })
+    await expect(couponRow.getByText(/Paused/i)).toBeVisible({ timeout: 10_000 })
 
-    await page.getByRole('button', { name: new RegExp(`Actions for ${couponCode}`, 'i') }).click()
+    await couponRow.getByRole('button', { name: new RegExp(`Actions for ${couponCode}`, 'i') }).click()
     await page.getByRole('menuitem', { name: /Archive/i }).click()
     await page.getByRole('button', { name: /^Archive$/i }).click()
-    await expect(codeCell).toHaveCount(0, { timeout: 10_000 })
+    await expect(couponRow).toHaveCount(0, { timeout: 10_000 })
   })
 })
