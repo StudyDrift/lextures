@@ -119,8 +119,7 @@ async function putListing(token: string, courseCode: string, priceCents: number)
 async function loginAsAdmin(page: Page, token: string) {
   await page.goto(`${WEB_BASE}/`)
   await page.evaluate((t) => {
-    localStorage.setItem('access_token', t)
-    localStorage.setItem('token', t)
+    localStorage.setItem('studydrift_access_token', t)
   }, token)
 }
 

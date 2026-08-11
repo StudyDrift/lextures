@@ -84,23 +84,42 @@ async function listOnMarketplace(
   courseCode: string,
   priceCents: number,
 ): Promise<{ slug: string }> {
+  const get = await fetch(
+    `${API_BASE}/api/v1/courses/${encodeURIComponent(courseCode)}/catalog-listing`,
+    { headers: authHeaders(token) },
+  )
+  expect(get.ok).toBeTruthy()
+  const { listing } = (await get.json()) as {
+    listing: {
+      isPublic: boolean
+      category: string | null
+      difficultyLevel: string | null
+      language: string
+      priceCents: number
+      priceCurrency: string
+      slug: string
+      marketplaceListed: boolean
+    }
+  }
+  const slug = listing.slug || courseCode.toLowerCase()
   const res = await fetch(
-    `${API_BASE}/api/v1/courses/${encodeURIComponent(courseCode)}/marketplace`,
+    `${API_BASE}/api/v1/courses/${encodeURIComponent(courseCode)}/catalog-listing`,
     {
       method: 'PUT',
       headers: authHeaders(token),
       body: JSON.stringify({
-        listed: true,
+        isPublic: listing.isPublic,
+        category: listing.category,
+        difficultyLevel: listing.difficultyLevel,
+        language: listing.language || 'en',
         priceCents,
         priceCurrency: 'usd',
-        category: 'E2E',
-        level: 'beginner',
+        slug,
+        marketplaceListed: true,
       }),
     },
   )
   expect(res.ok).toBeTruthy()
-  const body = (await res.json()) as { slug?: string; course?: { slug?: string } }
-  const slug = body.slug || body.course?.slug || courseCode.toLowerCase()
   return { slug }
 }
 
@@ -149,7 +168,7 @@ test.describe('MKTC.5 learner coupons', () => {
     await setFlags(adminToken, {
       ffCourseMarketplace: true,
       ffCourseCoupons: true,
-      ffBilling: true,
+      ffStripeBilling: true,
     })
     const title = `MKTC5 ${uid()}`
     courseCode = await createCourse(adminToken, title)
