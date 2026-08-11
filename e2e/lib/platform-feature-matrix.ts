@@ -519,7 +519,7 @@ export const PLATFORM_FEATURE_MATRIX: readonly PlatformFeatureMatrixEntry[] = [
   },
   {
     key: 'ffCourseCoupons',
-    label: 'Course coupons',
+    label: 'Course coupon codes',
     category: 'commerce',
     ownershipSource: 'database',
     sourceKey: null,
