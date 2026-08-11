@@ -133,8 +133,10 @@ test.describe('MKTC.4 creator coupon manager', () => {
     await putListing(token, code, 4000)
     await loginAsAdmin(page, token)
     await page.goto(`${WEB_BASE}/courses/${encodeURIComponent(code)}/settings/features`)
-    await expect(page.getByRole('heading', { name: /Marketplace/i })).toBeVisible({ timeout: 30_000 })
-    await expect(page.getByRole('heading', { name: /Coupon codes/i })).toHaveCount(0)
+    await expect(page.getByRole('heading', { name: 'Marketplace', exact: true })).toBeVisible({
+      timeout: 30_000,
+    })
+    await expect(page.locator('#course-coupons-heading')).toHaveCount(0)
   })
 
   test('create percent coupon, copy share link, pause and archive', async ({ page, context }) => {
@@ -148,7 +150,7 @@ test.describe('MKTC.4 creator coupon manager', () => {
     await loginAsAdmin(page, token)
     await page.goto(`${WEB_BASE}/courses/${encodeURIComponent(courseCode)}/settings/features`)
 
-    await expect(page.getByRole('heading', { name: /Coupon codes/i })).toBeVisible({ timeout: 30_000 })
+    await expect(page.locator('#course-coupons-heading')).toBeVisible({ timeout: 30_000 })
     await page.getByRole('button', { name: /New coupon/i }).first().click()
 
     const couponCode = `SAVE${Math.floor(Math.random() * 9000 + 1000)}`
