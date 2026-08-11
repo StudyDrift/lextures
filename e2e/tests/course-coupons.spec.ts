@@ -123,6 +123,13 @@ async function loginAsAdmin(page: Page, token: string) {
   }, token)
 }
 
+async function dismissLegalBanner(page: Page) {
+  const ack = page.getByRole('button', { name: /I acknowledge/i })
+  if (await ack.isVisible().catch(() => false)) {
+    await ack.click()
+  }
+}
+
 test.describe('MKTC.4 creator coupon manager', () => {
   test('panel is absent when ffCourseCoupons is off', async ({ page }) => {
     const token = await getAdminToken()
@@ -133,6 +140,7 @@ test.describe('MKTC.4 creator coupon manager', () => {
     await putListing(token, code, 4000)
     await loginAsAdmin(page, token)
     await page.goto(`${WEB_BASE}/courses/${encodeURIComponent(code)}/settings/features`)
+    await dismissLegalBanner(page)
     await expect(page.getByRole('heading', { name: 'Marketplace', exact: true })).toBeVisible({
       timeout: 30_000,
     })
@@ -140,6 +148,7 @@ test.describe('MKTC.4 creator coupon manager', () => {
   })
 
   test('create percent coupon, copy share link, pause and archive', async ({ page, context }) => {
+    test.setTimeout(90_000)
     await context.grantPermissions(['clipboard-read', 'clipboard-write'])
     const token = await getAdminToken()
     await setFlags(token, { ffCourseMarketplace: true, ffCourseCoupons: true })
@@ -149,16 +158,21 @@ test.describe('MKTC.4 creator coupon manager', () => {
     await putListing(token, courseCode, 4000)
     await loginAsAdmin(page, token)
     await page.goto(`${WEB_BASE}/courses/${encodeURIComponent(courseCode)}/settings/features`)
+    await dismissLegalBanner(page)
 
-    await expect(page.locator('#course-coupons-heading')).toBeVisible({ timeout: 30_000 })
-    await page.getByRole('button', { name: /New coupon/i }).first().click()
+    const coupons = page.getByRole('region', { name: 'Coupon codes' })
+    await expect(coupons).toBeVisible({ timeout: 30_000 })
+    await coupons.getByRole('button', { name: /New coupon/i }).first().click()
+
+    const dialog = page.getByRole('dialog', { name: /New coupon/i })
+    await expect(dialog).toBeVisible({ timeout: 15_000 })
 
     const couponCode = `SAVE${Math.floor(Math.random() * 9000 + 1000)}`
-    await page.getByLabel(/^Code$/i).fill(couponCode)
-    await page.getByLabel(/Percent off/i).fill('25')
-    await page.getByRole('button', { name: /Create coupon/i }).click()
+    await dialog.getByLabel(/^Code/i).fill(couponCode)
+    await dialog.getByLabel(/Percent off/i).fill('25')
+    await dialog.getByRole('button', { name: /Create coupon/i }).click()
 
-    await expect(page.getByText(couponCode.toUpperCase())).toBeVisible({ timeout: 15_000 })
+    await expect(coupons.getByText(couponCode.toUpperCase())).toBeVisible({ timeout: 15_000 })
 
     await page.getByRole('button', { name: new RegExp(`Copy share link for ${couponCode}`, 'i') }).click()
     const clip = await page.evaluate(() => navigator.clipboard.readText())
@@ -172,6 +186,6 @@ test.describe('MKTC.4 creator coupon manager', () => {
     await page.getByRole('button', { name: new RegExp(`Actions for ${couponCode}`, 'i') }).click()
     await page.getByRole('menuitem', { name: /Archive/i }).click()
     await page.getByRole('button', { name: /^Archive$/i }).click()
-    await expect(page.getByText(couponCode.toUpperCase())).toHaveCount(0, { timeout: 10_000 })
+    await expect(coupons.getByText(couponCode.toUpperCase())).toHaveCount(0, { timeout: 10_000 })
   })
 })
