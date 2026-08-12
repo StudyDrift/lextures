@@ -6,7 +6,7 @@ export function HeroSection() {
       <WindLines variant="hero" />
 
       <div className="relative z-[2] mx-auto grid max-w-[1180px] items-center gap-10 px-7 pb-[92px] pt-[76px] lg:grid-cols-[1.05fr_0.95fr]">
-        <div className="min-w-0" style={{ animation: 'lx-fade-up 0.7s ease both' }}>
+        <div className="min-w-0">
           <span
             className="inline-flex items-center gap-2 rounded-full px-3.5 py-[7px] text-[13px] font-semibold uppercase tracking-[0.04em]"
             style={{ color: '#4fa894', backgroundColor: 'rgba(106,197,176,0.14)' }}
@@ -58,10 +58,14 @@ export function HeroSection() {
           <img
             src="/logo.svg"
             alt="Lextures — a ship built of books"
-            className="relative w-[min(380px,78%)]"
+            width={380}
+            height={380}
+            className="relative w-[min(380px,78%)] lx-motion"
+            fetchPriority="high"
+            decoding="async"
             style={{
               filter: 'drop-shadow(0 26px 40px rgba(34,51,59,0.16))',
-              animation: 'lx-bob 7s ease-in-out infinite',
+              animation: 'lx-bob 7s ease-in-out 2s infinite',
               transformOrigin: '50% 90%',
             }}
           />

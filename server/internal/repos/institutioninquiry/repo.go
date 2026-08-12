@@ -22,6 +22,7 @@ type Inquiry struct {
 	Message           string
 	IPAddress         *string
 	UserAgent         *string
+	FirstTouchChannel string
 }
 
 // Insert persists one lead and returns its id.
@@ -30,8 +31,8 @@ func Insert(ctx context.Context, db *pgxpool.Pool, in Inquiry) (uuid.UUID, error
 	err := db.QueryRow(ctx, `
 		INSERT INTO institution_inquiries (
 			organization_type, organization_name, contact_name, email, role,
-			enrollment_size, hosting_preference, message, ip_address, user_agent
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+			enrollment_size, hosting_preference, message, ip_address, user_agent, first_touch_channel
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 		RETURNING id
 	`,
 		in.OrganizationType,
@@ -44,6 +45,7 @@ func Insert(ctx context.Context, db *pgxpool.Pool, in Inquiry) (uuid.UUID, error
 		in.Message,
 		in.IPAddress,
 		in.UserAgent,
+		in.FirstTouchChannel,
 	).Scan(&id)
 	return id, err
 }

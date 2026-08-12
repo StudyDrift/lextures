@@ -30,6 +30,8 @@ func (d Deps) registerOrgRoutes(r chi.Router) {
 	r.Put("/api/v1/orgs/{orgId}/settings/support-widget", d.handleOrgSupportWidgetItem())
 	r.Get("/api/v1/orgs/{orgId}/settings/org-type", d.handleOrgTypeItem())
 	r.Put("/api/v1/orgs/{orgId}/settings/org-type", d.handleOrgTypeItem())
+	r.Get("/api/v1/orgs/{orgId}/settings/research-participation", d.handleResearchParticipationGet())
+	r.Put("/api/v1/orgs/{orgId}/settings/research-participation", d.handleResearchParticipationPut())
 	// MB.1 — org override for mobile external-link handling.
 	r.Get("/api/v1/orgs/{orgId}/settings/mobile-link-handling", d.handleGetOrgMobileLinkHandling())
 	r.Put("/api/v1/orgs/{orgId}/settings/mobile-link-handling", d.handlePutOrgMobileLinkHandling())

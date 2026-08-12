@@ -1,12 +1,16 @@
 import { ArrowLeft } from 'lucide-react'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
 import { Header } from '../components/header'
 import { SiteFooter } from '../components/site-footer'
-import { formatDate, getArticle } from '../utils/docs'
+import { Byline } from '../components/byline'
+import { MarkdownBody } from '../components/markdown-body'
+import { articlePath, formatDate, getCategorizedArticle } from '../utils/docs'
+import { getHelpCategory } from '../docs/_categories'
+import { RelatedContent } from '../components/related-content'
+import { ContextualLinks } from '../components/contextual-links'
 
-export function DocsPost({ slug }: { slug: string }) {
-  const article = getArticle(slug)
+export function DocsPost({ category: categoryId, slug }: { category: string; slug: string }) {
+  const article = getCategorizedArticle(categoryId, slug)
+  const category = getHelpCategory(categoryId)
 
   if (!article) {
     return (
@@ -28,15 +32,14 @@ export function DocsPost({ slug }: { slug: string }) {
       <Header />
 
       <main>
-        {/* Post header */}
         <div className="border-b border-slate-200 bg-white py-12 sm:py-16">
           <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <a
-              href="/docs"
+              href={category ? `/docs/${category.id}` : '/docs'}
               className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 no-underline transition-colors hover:text-slate-900"
             >
               <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
-              Documentation
+              {category?.title || 'Help center'}
             </a>
             <time
               dateTime={article.date}
@@ -48,23 +51,33 @@ export function DocsPost({ slug }: { slug: string }) {
               {article.title}
             </h1>
             <p className="mt-4 text-lg leading-relaxed text-slate-600">{article.description}</p>
-            <p className="mt-4 text-sm text-slate-400">By {article.author}</p>
+            <dl className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-600">
+              <div><dt className="inline font-semibold">Roles: </dt><dd className="inline">{article.roles.join(', ')}</dd></div>
+              <div><dt className="inline font-semibold">Segments: </dt><dd className="inline">{article.segments.join(', ')}</dd></div>
+              <div><dt className="inline font-semibold">Verified: </dt><dd className="inline">{article.verifiedAgainst}</dd></div>
+            </dl>
           </div>
         </div>
 
-        {/* Post body */}
         <div className="py-12 sm:py-16">
           <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <div className="prose-content">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                {article.content}
-              </ReactMarkdown>
-            </div>
+            <article>
+              <MarkdownBody html={article.html} className="prose-content" />
+              <ContextualLinks kind="docs" />
+              <Byline
+                authorSlug={article.author}
+                datePublished={article.date}
+                dateModified={article.updated || article.date}
+                reviewedBySlug={article.reviewedBy}
+                className="mt-12"
+              />
+              <RelatedContent path={articlePath(article)} />
+            </article>
 
             <div className="mt-16 border-t border-slate-200/80 pt-10">
-              <a href="/docs" className="btn-secondary inline-flex gap-2">
+              <a href={`/docs/${article.category}`} className="btn-secondary inline-flex gap-2">
                 <ArrowLeft className="h-4 w-4" aria-hidden />
-                Back to documentation
+                Back to {category?.title || 'help center'}
               </a>
             </div>
           </div>

@@ -1,0 +1,331 @@
+# SEO.14 — Multimodal: Video, Images & Social Preview Assets
+
+> Completed 2026-08-11. The build now emits deterministic per-page raster cards and an image sitemap; reusable accessible figure, inline-diagram, privacy-preserving video-facade, transcript, and media-schema infrastructure is in place. YouTube channel creation and the 24-video editorial cadence remain operational marketing work rather than repository implementation.
+
+> Implementation plan. Source: [docs/plan/seo/audit.md](audit.md) §S1 (F-10) and
+> [research §3](research.md#3-what-actually-earns-an-ai-citation).
+
+## Metadata
+
+| Field | Value |
+|---|---|
+| **Feature ID** | SEO.14 |
+| **Section** | SEO — Organic & AI-Search Ranking |
+| **Severity** | MAJOR |
+| **Markets** | K12 / HE / HS |
+| **Status (today)** | MISSING (`og:image` is an SVG that no major platform renders; no video, no diagrams, no per-page social cards, no image sitemap) |
+| **Estimated effort** | M (2–4w for the system; continuous for content) |
+| **Owner (proposed)** | Web platform + Marketing |
+| **Depends on** | SEO.1, SEO.3, SEO.6 |
+| **Unblocks** | — |
+
+---
+
+## 1. Problem Statement
+
+`DEFAULT_OG_IMAGE` is `lextures-mark.svg` — and **LinkedIn, X, Facebook, Slack and iMessage do not
+render SVG OG images** (audit F-10). Every share of every Lextures URL, on the one surface where a
+mention costs nothing, currently produces a blank or broken card. Beyond that we publish no video, no
+diagrams, and no per-page imagery. This is expensive because multimodality is one of the largest
+measured citation factors: pages combining text + images + video + structured data see **156% higher
+selection rates**, and full multimodal-plus-schema integration delivers up to **317% more citations**
+([research §3](research.md#3-what-actually-earns-an-ai-citation)). YouTube is also a top source of AI
+citations in its own right, and we have no channel.
+
+## 2. Goals
+
+- Ship an automated **per-page social card** system so every URL unfurls correctly, everywhere.
+- Ship an **image system**: original diagrams and screenshots on every substantive page, with
+  structured data and an image sitemap.
+- Launch a **video program**: 24 videos in 12 months, embedded on the pages they support, with
+  transcripts on-page.
+- Make every visual asset accessible and citable — alt text, data tables, transcripts, captions.
+- Reach measurable multimodal coverage: ≥80% of indexable content pages carry an original image, and
+  the top 30 pages carry video.
+
+## 3. Non-Goals
+
+- A full brand-video or advertising production program.
+- Hosting video ourselves (we embed YouTube for the citation and discovery value; self-hosting loses
+  both).
+- Stock photography. Original diagrams and real product screenshots only — stock imagery adds page
+  weight and no information.
+- Podcast production (SEO.13 covers guest appearances).
+
+## 4. Personas & User Stories
+
+- **As someone sharing a Lextures article in a Slack channel**, I want a card with the article's title
+  and a relevant image, so that colleagues click it.
+- **As a teacher trying to understand adaptive item selection**, I want a diagram, so that I get it in
+  ten seconds instead of three paragraphs.
+- **As a buyer evaluating the gradebook**, I want a 90-second video of the real thing, so that I know
+  what I am buying.
+- **As a screen-reader user**, I want every diagram's information available as text, so that the
+  explanation is not image-only.
+- **As an AI assistant**, I want captioned video, transcripts, and described images, so that I can use
+  and cite the content.
+
+## 5. Functional Requirements
+
+**Social cards**
+
+- **FR-1.** `DEFAULT_OG_IMAGE` MUST become a **PNG or JPEG** at 1200×630 (the SVG must not be used as
+  an `og:image` anywhere).
+- **FR-2.** Every indexable page MUST have a **unique** OG image, generated at build time from a
+  template: page title, section label (Guide / Help / Comparison / Research), author avatar where
+  applicable, and brand marks. Generation is deterministic — same inputs produce the same bytes — so
+  builds stay reproducible.
+- **FR-3.** OG images MUST be ≤ 300 KB, 1200×630, served with a long `Cache-Control` and a
+  content-hashed filename so updates invalidate cleanly.
+- **FR-4.** Pages MUST emit `og:image`, `og:image:width`, `og:image:height`, `og:image:alt`,
+  `twitter:card=summary_large_image`, and `twitter:image` (SEO.1 FR-5 carries them into the served
+  HTML).
+- **FR-5.** A page MAY override the generated card with a hand-made image (research reports, launches).
+- **FR-6.** CI MUST assert that every indexable page has an OG image that resolves to 200 with a
+  raster content-type.
+
+**Images & diagrams**
+
+- **FR-7.** Every substantive content page (guide, pillar, comparison, help article, research report)
+  MUST carry ≥1 original image: a diagram, an annotated screenshot, or a chart.
+- **FR-8.** Diagrams MUST be authored as **inline SVG** (text as real text, not paths) so they are
+  crawlable, theme-aware, and legible at any zoom — with a raster fallback for OG usage.
+- **FR-9.** Every image MUST have descriptive `alt` conveying the same information as the image;
+  decorative images use `alt=""`. Complex diagrams and charts MUST additionally have a text
+  description or data table adjacent to them (SEO.6, SEO.12 FR-21).
+- **FR-10.** Product screenshots MUST be generated by the automated pipeline from SEO.7 (FR-15), never
+  hand-captured, so they can be regenerated when the UI changes.
+- **FR-11.** Images MUST be AVIF with WebP fallback, explicitly sized, lazy below the fold, with
+  `fetchpriority="high"` only on the LCP image (SEO.4 FR-12).
+- **FR-12.** An **image sitemap** MUST be emitted (`/sitemaps/images.xml`) or image entries included in
+  the page sitemaps, with `image:title` and `image:caption`.
+- **FR-13.** Image filenames and directory paths MUST be descriptive (`adaptive-item-selection-flow.avif`,
+  not `img-4.avif`).
+- **FR-14.** `ImageObject` schema MUST be emitted for primary page images with `caption`,
+  `contentUrl`, and `license`, and referenced from the `Article`/`Course` node (SEO.3).
+
+**Video**
+
+- **FR-15.** Launch a **YouTube channel** as a claimed entity property (SEO.13 FR-5 Tier 2), fully
+  branded, with the site linked and a channel description matching the `Organization` description.
+- **FR-16.** Produce **24 videos in 12 months** (2/month), in three formats:
+  - *Product walkthroughs* (90–180 s) — one per `/platform/*` page and top help articles
+  - *Concept explainers* (3–6 min) — one per pillar cluster (SEO.8), reusing the diagrams from FR-8
+  - *Research findings* (2–4 min) — one per SEO.12 report
+- **FR-17.** Every video MUST be embedded on the page it supports, with a **full transcript rendered
+  on-page** (not only in the player) — the transcript is the citable, indexable artefact.
+- **FR-18.** Every video MUST have accurate human-reviewed captions (auto-captions corrected), a
+  descriptive title, a description linking the source page, and chapter markers.
+- **FR-19.** Embeds MUST be **facade-loaded**: a static poster image plus a play control that loads the
+  player on interaction, so a video never costs LCP or INP on a content page (SEO.4).
+- **FR-20.** Pages with video MUST emit `VideoObject` with `name`, `description`, `thumbnailUrl`,
+  `uploadDate`, `duration`, `contentUrl`/`embedUrl`, and `transcript`.
+- **FR-21.** Videos MUST NOT be the only source of any instruction — every step shown must exist in
+  text on the same page (SEO.7 FR-17).
+
+## 6. Non-Functional Requirements
+
+- **Performance** — images and video are the top LCP/CLS risks. Explicit dimensions everywhere, facade
+  embeds (FR-19), AVIF/WebP, and per-page image weight ≤ 400 KB total on content pages. All within the
+  SEO.4 budget.
+- **Security** — YouTube embeds use `youtube-nocookie.com`, `loading="lazy"`, a restrictive `allow`
+  attribute, and no third-party script until interaction. Generated OG images must escape page titles
+  (they are rendered into an image from untrusted-ish content on course pages).
+- **Privacy & Compliance** — screenshots contain no real learner data (SEO.7 FR-16); videos must not
+  show real student names or work; anyone appearing on camera consents in writing (S04). The
+  facade-embed pattern also means no YouTube cookie is set unless the user chooses to play.
+- **Accessibility** — this is the plan with the largest accessibility surface: alt text (FR-9),
+  captions (FR-18), transcripts (FR-17), diagrams as real text (FR-8), text equivalents for complex
+  visuals, no information conveyed by colour alone, and audio description where a video shows
+  something not narrated. WCAG 2.2 AA — specifically 1.1.1, 1.2.1–1.2.5, 1.4.5, 1.4.11.
+- **Scalability** — card generation must handle 10k+ course pages; it MUST be incremental and cached
+  by content hash.
+- **Reliability** — card generation failure MUST fall back to the default card and warn, never fail
+  the build.
+- **Observability** — track: pages with/without original images, OG-card coverage, video views and
+  watch time per source page, YouTube-sourced referrals, image-search impressions in GSC, and video
+  citations in AI answers.
+- **Maintainability** — one card template module; one diagram-authoring convention; screenshots
+  regenerate from the SEO.7 pipeline.
+- **Internationalization** — card templates must handle long titles and non-Latin scripts without
+  clipping; transcripts are locale-specific (SEO.17).
+- **Backward compatibility** — the existing SVG mark stays as a logo/favicon; only its use as
+  `og:image` is removed.
+
+## 7. Acceptance Criteria
+
+- **AC-1.** *Given* any indexable URL, *When* its OG tags are inspected, *Then* `og:image` is a raster
+  image that returns 200, is 1200×630, ≤300 KB, and has non-empty `og:image:alt`.
+- **AC-2.** *Given* 10 different pages, *When* each is shared into Slack, LinkedIn and X, *Then* each
+  card shows that page's own title and image.
+- **AC-3.** *Given* the build, *When* a page has no OG image, *Then* CI fails naming the page.
+- **AC-4.** *Given* every content page, *When* audited, *Then* ≥80% carry ≥1 original image, and every
+  image has descriptive `alt` or is explicitly decorative.
+- **AC-5.** *Given* a diagram, *When* inspected, *Then* it is inline SVG with selectable text, renders
+  correctly in light and dark themes, and has an adjacent text description.
+- **AC-6.** *Given* a page with an embedded video, *When* loaded, *Then* no YouTube request is made
+  until the play control is activated, and LCP/CLS remain within the SEO.4 budget.
+- **AC-7.** *Given* any published video, *When* checked, *Then* it has human-reviewed captions, a
+  full on-page transcript, chapter markers, and `VideoObject` schema including `transcript`.
+- **AC-8.** *Given* 12 months, *When* counted, *Then* 24 videos are published and the top 30 pages by
+  traffic have an associated video.
+- **AC-9.** *Given* a course page whose title contains markup or emoji, *When* its card is generated,
+  *Then* the text renders safely and does not overflow the template.
+- **AC-10.** *Given* GSC after 6 months, *When* reviewed, *Then* image and video impressions are
+  non-zero and growing, and ≥5 pages show video-result appearances.
+
+## 8. Data Model
+
+No database changes.
+
+| Artefact | Path | Notes |
+|---|---|---|
+| Card template | `www/scripts/og-card/template.tsx` + `render.mjs` | Satori/resvg-style build-time render |
+| Generated cards | `dist/og/<content-hash>.png` | Content-hashed, long-cached |
+| Diagrams | `www/src/assets/diagrams/<slug>.svg` | Inline SVG, theme tokens, real text |
+| Screenshots | `www/public/assets/screenshots/**` | Regenerated by the SEO.7 pipeline |
+| Video registry | `www/src/lib/videos.ts` | `{id, title, youtubeId, duration, uploadDate, pageSlug, transcriptPath}` |
+| Transcripts | `www/src/transcripts/<video>.md` | Rendered on-page (FR-17) |
+| Image sitemap | `dist/sitemaps/images.xml` | FR-12 |
+
+## 9. API Surface
+
+None. YouTube Data API MAY be used at build time to fetch duration/upload date for `VideoObject`;
+failures fall back to values committed in `videos.ts`.
+
+## 10. UI / UX
+
+- **New components:** `<Figure>` (image + caption + optional text description), `<Diagram>` (inline
+  SVG + description toggle), `<VideoEmbed>` (facade + transcript disclosure), `<Transcript>`.
+- **Modified:** article and help templates gain a hero-image slot; `/platform/*` pages gain a
+  walkthrough video; research reports gain chart figures (SEO.12).
+- **Flows**
+  1. Reader hits a concept explainer article → diagram → video → transcript → related help article.
+  2. Someone shares a URL → correct card → click-through.
+  3. Buyer watches a `/platform/gradebook` walkthrough → `/request-information`.
+- **States** — video facade shows poster + duration + play control; failed embed shows the transcript
+  and a direct YouTube link; missing image renders no placeholder box (avoids CLS and clutter).
+- **Responsive** — 16:9 aspect-ratio containers prevent shift; diagrams scroll horizontally in their
+  own container on small screens; transcripts collapse to a disclosure under 640 px but remain in the
+  DOM (so they stay extractable).
+- **Accessibility** — see NFRs; the transcript disclosure must be a real button with `aria-expanded`,
+  and transcript content must remain in the DOM when collapsed.
+- **Copy & i18n** — `www.media.transcript`, `.playVideo`, `.figureDescription`, `.duration`.
+
+## 11. AI / ML Considerations
+
+- **Multimodality is a measured citation multiplier** (156% selection, up to 317% citations with
+  schema). The combination that matters is text + image + video + structured data on the *same* page —
+  which is why FR-7, FR-16 and FR-20 are scoped to the same page rather than treated as separate
+  channels.
+- **Transcripts are the actual citable artefact.** A video alone contributes little to text retrieval;
+  the on-page transcript (FR-17) is what an assistant reads and quotes. Rendering it on-page rather
+  than only in the player is the entire point.
+- **Diagrams as inline SVG with real text** (FR-8) means the diagram's labels are crawlable content
+  rather than pixels — a small decision with outsized effect for both AI and accessibility.
+- AI may be used for first-pass captions and transcript cleanup, but captions MUST be human-reviewed
+  (FR-18) — an inaccurate caption is an accessibility failure, not a quality nit.
+
+## 12. Integration Points
+
+- **External:** YouTube (channel + embeds + optional Data API), image encoding toolchain
+  (sharp/AVIF), OG-card renderer (Satori + resvg or equivalent).
+- **Internal modules touched:** `www/src/lib/document-head.ts` (`DEFAULT_OG_IMAGE`, image dimensions),
+  `www/src/lib/route-manifest.ts` (`ogImage`), `www/scripts/generate-site.mjs`,
+  `www/scripts/og-card/*`, `www/vite.config.ts` (image pipeline), `www/src/components/content/*`,
+  `www/src/lib/videos.ts`, SEO.7's screenshot pipeline.
+- **Events:** video play, transcript expand → GA4.
+
+## 13. Dependencies & Sequencing
+
+- **Must ship after:** [SEO.1](SEO.1-static-rendering-and-crawlability.md) (cards must be in served
+  HTML), [SEO.3](SEO.3-structured-data-and-entity-graph.md) (`ImageObject`, `VideoObject`),
+  [SEO.6](SEO.6-answer-first-content-system.md) (`<Figure>` integrates with the content components).
+- **Must ship before:** nothing hard-blocks; [SEO.12](SEO.12-original-research-and-data-program.md)
+  needs the chart/figure components for its reports, so the image half should precede report #1.
+- **Shared infra:** YouTube channel (SEO.13 Tier 2), video production capacity, design time for
+  diagrams.
+
+## 14. Risks & Mitigations
+
+| Risk | Likelihood | Impact | Mitigation |
+|---|---|---|---|
+| Card generation slows or destabilises the build | M | M | Content-hash caching + incremental generation; FR fallback to default card on failure, warn not fail |
+| Video production capacity does not exist | **H** | M | 2/month is deliberately modest; walkthroughs are screen recordings with voiceover, not productions; explainers reuse existing diagrams |
+| Video embeds wreck Core Web Vitals | M | H | FR-19 facade loading; AC-6 asserts no third-party request before interaction |
+| Images published without adequate alt text | M | H | FR-9 + CI check that every `<img>`/`<Figure>` has `alt` or explicit `decorative`; manual review of complex diagrams |
+| Screenshots go stale as the UI changes | H | M | FR-10 automated regeneration via the SEO.7 pipeline; staleness surfaces in the SEO.16 lifecycle report |
+| Course titles break the card template | M | L | AC-9 hostile-input test; template truncates with ellipsis and escapes text |
+| YouTube dependency (takedown, policy change) | L | M | Transcripts and diagrams live on our domain; video is additive, never the only source (FR-21) |
+
+## 15. Rollout Plan
+
+- **Feature flag:** none.
+- **Sequencing**
+  1. **Fix the SVG OG bug first** (FR-1) — a one-line default change plus one 1200×630 PNG. Highest
+     value per hour in this plan.
+  2. Card generation system (FR-2–FR-6) for static pages, then extended to blog/docs, then courses.
+  3. `<Figure>`/`<Diagram>` components + image pipeline + image sitemap; retrofit the top 20 pages.
+  4. YouTube channel setup + branding (coordinate with SEO.13).
+  5. First 6 videos: `/platform/*` walkthroughs, with transcripts.
+  6. Steady state: 2 videos/month; every new guide ships with ≥1 diagram.
+  7. Retrofit remaining pages to the 80% image-coverage target.
+- **Dogfood:** share 10 URLs internally across Slack, LinkedIn and iMessage before and after step 1 and
+  compare.
+- **GA criteria:** AC-1…AC-10; 80% image coverage; 24 videos at 12 months.
+- **Rollback:** cards fall back to the default; embeds can be replaced with transcript-plus-link.
+
+## 16. Test Plan
+
+- **Unit** — card template rendering incl. long titles, emoji and markup (AC-9); image-format
+  selection; `VideoObject`/`ImageObject` schema builders; transcript parsing.
+- **Integration** — build asserts every indexable page has a resolvable raster OG image (AC-3);
+  image sitemap contains every page image; card cache invalidates on title change.
+- **End-to-end (Playwright)** — no YouTube network request before play (AC-6); transcript present in
+  DOM when collapsed; figures render server-side with JS disabled; CLS = 0 on pages with images and
+  video.
+- **Security** — `youtube-nocookie` origin and restrictive `allow`; card generation escapes untrusted
+  titles; no user-supplied URL can be rendered into a card.
+- **Accessibility** — axe on pages with figures and video; manual review of every diagram's text
+  description; caption accuracy spot-check on every video; keyboard operation of the facade play
+  control and transcript disclosure; contrast of diagram text in both themes.
+- **Performance / load** — per-page image weight ≤400 KB; LCP unaffected by below-fold media; card
+  generation time budget in CI.
+- **Manual exploratory** — share-card matrix across Slack, LinkedIn, X, Facebook, iMessage, WhatsApp,
+  Discord; watch each video with captions on and sound off.
+
+## 17. Documentation & Training
+
+- `www/docs/social-cards.md` — how cards are generated, how to override, how to debug an unfurl.
+- `www/docs/diagram-authoring.md` — inline-SVG conventions, theme tokens, text-not-paths rule, text
+  description requirement.
+- `www/docs/video-production.md` — formats, length targets, caption and transcript workflow, upload
+  checklist, schema requirements.
+- Update the add-a-page checklist with the image and OG requirements.
+
+## 18. Open Questions
+
+1. Who produces video — internal screen recordings, or a contractor for the explainer format?
+2. Do we need a design resource for diagrams, or can engineers author inline SVG from a shared
+   template library?
+3. Should research charts (SEO.12) share the `<Diagram>` component or have their own chart system?
+4. Do we want per-author card variants for blog posts (author photo on the card lifts CTR but adds
+   template complexity)?
+5. Is there an existing brand asset kit with the correct logo lockups for 1200×630 cards?
+
+## 19. References
+
+- Existing files: `www/src/lib/document-head.ts` (:11 `DEFAULT_OG_IMAGE`), `www/index.html`,
+  `www/public/assets/lextures-mark.svg`, `www/public/assets/screenshots/*`, `www/public/docs-*.png`
+- Audit findings: [F-10](audit.md#f-10-ogimage-is-an-svg)
+- Research: [§3 What actually earns an AI citation](research.md#3-what-actually-earns-an-ai-citation),
+  [§8](research.md#8-off-site-where-ai-citations-actually-come-from)
+- External: [Open Graph protocol](https://ogp.me/),
+  [Google — Video SEO best practices](https://developers.google.com/search/docs/appearance/video),
+  [Google — Image SEO best practices](https://developers.google.com/search/docs/appearance/google-images),
+  [W3C WAI — Images tutorial](https://www.w3.org/WAI/tutorials/images/),
+  [WCAG 2.2 — Time-based media](https://www.w3.org/WAI/WCAG22/Understanding/time-based-media)
+- Related plans: [SEO.3](SEO.3-structured-data-and-entity-graph.md),
+  [SEO.4](../../completed/seo/SEO.4-core-web-vitals-and-page-experience.md), [SEO.7](SEO.7-help-center-expansion.md),
+  [SEO.12](SEO.12-original-research-and-data-program.md),
+  [SEO.13](../../completed/seo/SEO.13-offsite-entity-mentions-and-digital-pr.md)

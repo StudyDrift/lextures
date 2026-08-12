@@ -79,5 +79,14 @@ www/scripts/prerender-courses.mjs:self-learner
 # Unit tests assert sitemap excludes the old slug and stub builder targets /homeschool.
 www/scripts/prerender-courses.test.mjs:self-learner
 
+# Route-manifest redirects preserve the permanent legacy URL and document its frozen shape.
+www/src/lib/redirects.ts:self-learner
+
+# Static-site generation emits the permanent legacy redirect stub.
+www/scripts/generate-site.mjs:self-learner
+
+# Static-site tests assert the legacy URL redirects and never enters the sitemap.
+www/scripts/generate-site.test.mjs:self-learner
+
 # SEO plans document the permanent /self-learner → /homeschool redirect stub (HS.2 / FR-4).
 docs/plan/seo/**

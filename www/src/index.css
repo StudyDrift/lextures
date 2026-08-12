@@ -2,6 +2,43 @@
 
 /* Lextures — our humanist sans for learning surfaces and brand moments. */
 @font-face {
+  font-family: "Lextures Fallback";
+  src: local("Arial"), local("Helvetica");
+  size-adjust: 101%;
+  ascent-override: 94%;
+  descent-override: 24%;
+  line-gap-override: 0%;
+}
+
+/* Answer-first content primitives (SEO.6). */
+.content-card, .content-callout, .content-definition, .content-stat { margin: 1.5rem 0; border: 1px solid rgb(226 232 240); border-radius: .75rem; padding: 1.25rem; background: rgb(248 250 252); }
+.content-takeaways h2, .content-faq h2, .content-sources h2 { margin-top: 0; }
+.content-answer { border-left: .25rem solid rgb(37 99 235); font-size: 1.075rem; }
+.content-definition { display: block; font-style: normal; }
+.content-definition strong { display: block; margin-bottom: .5rem; }
+.content-table-scroll { max-width: 100%; overflow-x: auto; }
+.content-table-scroll table { width: 100%; border-collapse: collapse; }
+.content-table-scroll th, .content-table-scroll td { border: 1px solid rgb(203 213 225); padding: .75rem; text-align: left; }
+.content-table-summary { font-weight: 600; }
+.content-faq-item { border-bottom: 1px solid rgb(226 232 240); padding: 1rem 0; }
+.content-faq-item summary { cursor: pointer; font-weight: 600; }
+.content-callout strong { display: block; margin-bottom: .25rem; }
+.content-callout-warning { border-left: .25rem solid rgb(217 119 6); }
+.content-callout-tip { border-left: .25rem solid rgb(22 163 74); }
+.content-stat blockquote { margin: 0; font-size: 1.5rem; }
+.content-citation { margin-left: .15rem; }
+.content-figure, .content-video { margin: 2rem 0; }
+.content-figure img, .content-video img { display: block; max-width: 100%; height: auto; border-radius: .75rem; }
+.content-figure figcaption, .content-video figcaption { margin-top: .65rem; color: var(--text-soft); font-size: .925rem; }
+.content-media-description, .content-transcript { margin-top: .75rem; }
+.content-diagram-scroll { max-width: 100%; overflow-x: auto; }
+.content-diagram-scroll svg { min-width: 42rem; max-width: 100%; height: auto; }
+.content-video-frame { position: relative; aspect-ratio: 16 / 9; background: var(--deep); overflow: hidden; border-radius: .75rem; }
+.content-video-play { position: absolute; inset: 50% auto auto 50%; translate: -50% -50%; padding: .8rem 1.1rem; border-radius: 999px; background: var(--panel); color: var(--ink); font-weight: 700; text-decoration: none; }
+.content-video iframe { display: block; width: 100%; aspect-ratio: 16 / 9; border: 0; margin-top: .75rem; }
+.content-transcript summary { cursor: pointer; font-weight: 700; }
+.content-transcript time { font-variant-numeric: tabular-nums; color: var(--text-soft); }
+@font-face {
   font-family: "Lextures";
   src: url("/fonts/lextures-400.woff2") format("woff2");
   font-style: normal;
@@ -30,10 +67,86 @@
   font-display: swap;
 }
 
+/* SEO.4 FR-8/FR-9 — self-hosted Spectral + metric-compatible fallbacks. */
+@font-face {
+  font-family: "Spectral Fallback";
+  src: local("Georgia"), local("Times New Roman");
+  size-adjust: 105%;
+  ascent-override: 90%;
+  descent-override: 22%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Spectral";
+  src: url("/fonts/spectral-400.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Spectral";
+  src: url("/fonts/spectral-500.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Spectral";
+  src: url("/fonts/spectral-600.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Spectral";
+  src: url("/fonts/spectral-400-italic.woff2") format("woff2");
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Spectral";
+  src: url("/fonts/spectral-600-italic.woff2") format("woff2");
+  font-style: italic;
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* SEO.4 FR-8/FR-9 — self-hosted IBM Plex Mono + metric-compatible fallback. */
+@font-face {
+  font-family: "IBM Plex Mono Fallback";
+  src: local("Menlo"), local("Consolas"), local("Courier New");
+  size-adjust: 100%;
+  ascent-override: 98%;
+  descent-override: 30%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("/fonts/ibm-plex-mono-400.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("/fonts/ibm-plex-mono-500.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 @theme {
-  --font-serif: "Spectral", ui-serif, Georgia, serif;
-  --font-sans: "Lextures", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-serif: "Spectral", "Spectral Fallback", ui-serif, Georgia, serif;
+  --font-sans: "Lextures", "Lextures Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", "IBM Plex Mono Fallback", ui-monospace, monospace;
 
   /* Legacy aliases for inner pages during rollout */
   --color-surface: #f6f1e7;
@@ -45,7 +158,7 @@
 }
 
 @utility font-lextures {
-  font-family: "Lextures", ui-sans-serif, system-ui, sans-serif;
+  font-family: "Lextures", "Lextures Fallback", ui-sans-serif, system-ui, sans-serif;
 }
 
 :root {
@@ -105,7 +218,13 @@
     *::before,
     *::after {
       animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
+    }
+
+    /* SEO.4 FR-14 — wind-lines and bob stay on a static frame */
+    .lx-motion {
+      animation: none !important;
     }
   }
 
@@ -131,6 +250,27 @@
     color: var(--ink-nav);
   }
 }
+
+.comparison-article { max-width: 960px; margin: 0 auto; padding: 3rem 1.25rem 5rem; }
+.comparison-article > section, .comparison-policy { margin-top: 3rem; }
+.comparison-article h2, .comparison-cta h2 { font-family: var(--font-display, serif); color: var(--ink-nav); font-size: clamp(1.55rem,3vw,2rem); font-weight: 600; }
+.comparison-article p, .comparison-article li, .comparison-article dd { line-height: 1.75; }
+.comparison-article a { color: var(--teal-deep); text-decoration: underline; text-underline-offset: 3px; }
+.comparison-disclosure { margin-top: 2rem; padding: 1rem 1.25rem; border: 1px solid var(--line-card); border-radius: var(--radius-card); background: var(--teal-tint); color: var(--ink); }
+.comparison-verified { font-size: .875rem; color: var(--text-soft); }
+.content-table-scroll { overflow-x: auto; margin-top: 1rem; }
+.content-comparison table { width: 100%; min-width: 680px; border-collapse: collapse; background: var(--panel); }
+.content-comparison caption { text-align: left; font-weight: 600; padding: 1rem 0; color: var(--ink); }
+.content-comparison th, .content-comparison td { border: 1px solid var(--line-card); padding: .85rem; text-align: left; vertical-align: top; }
+.content-comparison th { color: var(--ink-nav); background: var(--panel-sunken); }
+.content-faq-item { padding: 1rem 0; border-bottom: 1px solid var(--line-card); }
+.content-faq-item summary { color: var(--ink-nav); font-weight: 600; }
+.integration-spec { display: grid; gap: 1px; border: 1px solid var(--line-card); background: var(--line-card); }
+.integration-spec div { display: grid; grid-template-columns: minmax(10rem, 1fr) 3fr; gap: 1rem; padding: 1rem; background: var(--panel); }
+.integration-spec dt { font-weight: 600; color: var(--ink-nav); }
+.comparison-cta { padding: 4rem 1.25rem; text-align: center; background: var(--panel-sunken); }
+.comparison-cta p { margin: 1rem auto 1.5rem; max-width: 44rem; }
+@media (max-width: 767px) { .content-comparison table { min-width: 0; } .content-comparison thead { position: absolute; clip: rect(0 0 0 0); } .content-comparison tr { display: block; margin: 1rem 0; border: 1px solid var(--line-card); } .content-comparison th, .content-comparison td { display: block; border: 0; border-bottom: 1px solid var(--line-card); } .content-comparison td::before { display: block; font-size: .75rem; font-weight: 700; text-transform: uppercase; color: var(--text-soft); } .content-comparison td:nth-child(2)::before { content: 'Lextures / best fit'; } .content-comparison td:nth-child(3)::before { content: 'Compared product / evidence'; } .integration-spec div { grid-template-columns: 1fr; } }
 
 @utility btn-primary {
   @apply inline-flex cursor-pointer items-center justify-center gap-2 font-semibold text-white transition-all duration-150;

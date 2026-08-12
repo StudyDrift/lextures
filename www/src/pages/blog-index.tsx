@@ -2,12 +2,16 @@ import { ArrowLeft, ArrowRight, BookOpen, Search } from 'lucide-react'
 import { useState, useMemo, useEffect, type ChangeEvent } from 'react'
 import { Header } from '../components/header'
 import { SiteFooter } from '../components/site-footer'
+import { authorDisplayName } from '../lib/authors'
 import { allPosts, formatDate } from '../utils/blog'
+import { EDITORIAL_PILLARS, editorialPillar } from '../lib/editorial-pillars'
 
 const POSTS_PER_PAGE = 10
 
 export function BlogIndex() {
   const [searchQuery, setSearchQuery] = useState('')
+  const [pillarFilter, setPillarFilter] = useState(() => typeof window === 'undefined' ? '' : new URLSearchParams(window.location.search).get('pillar') || '')
+  const [authorFilter, setAuthorFilter] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
 
   useEffect(() => {
@@ -16,16 +20,14 @@ export function BlogIndex() {
 
   const filteredPosts = useMemo(() => {
     const query = searchQuery.toLowerCase().trim()
-    if (!query) return allPosts
-
     return allPosts.filter(
-      (post) =>
+      (post) => (!pillarFilter || post.pillar === pillarFilter) && (!authorFilter || post.author === authorFilter) && (!query ||
         post.title.toLowerCase().includes(query) ||
         post.description.toLowerCase().includes(query) ||
         post.author.toLowerCase().includes(query) ||
-        post.content.toLowerCase().includes(query)
+        post.content.toLowerCase().includes(query))
     )
-  }, [searchQuery])
+  }, [searchQuery, pillarFilter, authorFilter])
 
   const totalPages = Math.ceil(filteredPosts.length / POSTS_PER_PAGE)
   const paginatedPosts = useMemo(() => {
@@ -61,7 +63,7 @@ export function BlogIndex() {
               Thoughts on adaptive learning, educational technology, and building software for institutions that run at scale.
             </p>
 
-            <div className="mt-10 max-w-md">
+            <div className="mt-10 grid max-w-3xl gap-3 sm:grid-cols-3">
               <div className="relative">
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                   <Search className="h-4 w-4 text-slate-400" aria-hidden />
@@ -74,6 +76,16 @@ export function BlogIndex() {
                   onChange={handleSearchChange}
                 />
               </div>
+              <label className="sr-only" htmlFor="pillar-filter">Filter by guide</label>
+              <select id="pillar-filter" className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm" value={pillarFilter} onChange={event => { setPillarFilter(event.target.value); setCurrentPage(1) }}>
+                <option value="">All guides</option>
+                {EDITORIAL_PILLARS.map(pillar => <option key={pillar.id} value={pillar.id}>{pillar.title}</option>)}
+              </select>
+              <label className="sr-only" htmlFor="author-filter">Filter by author</label>
+              <select id="author-filter" className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm" value={authorFilter} onChange={event => { setAuthorFilter(event.target.value); setCurrentPage(1) }}>
+                <option value="">All authors</option>
+                {[...new Set(allPosts.map(post => post.author))].map(author => <option key={author} value={author}>{authorDisplayName(author)}</option>)}
+              </select>
             </div>
           </div>
         </section>
@@ -114,7 +126,9 @@ export function BlogIndex() {
                           <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-600">
                             {post.description}
                           </p>
-                          <p className="mt-2 text-sm text-slate-400">By {post.author}</p>
+                          <p className="mt-2 text-sm text-slate-400">
+                            By {authorDisplayName(post.author)} · {editorialPillar(post.pillar)?.title}
+                          </p>
                         </div>
                         <a
                           href={`/blog/${post.slug}`}

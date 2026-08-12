@@ -23,13 +23,24 @@ function sliderPercent(users: number): number {
 }
 
 export function PricingCalculatorPage() {
-  const [users, setUsers] = useState(CALCULATOR_DEFAULT_USERS)
+  const [users, setUsers] = useState(() => {
+    if (typeof window === 'undefined') return CALCULATOR_DEFAULT_USERS
+    const candidate = Number(new URLSearchParams(window.location.search).get('students'))
+    return Number.isFinite(candidate) ? Math.min(CALCULATOR_MAX_USERS, Math.max(CALCULATOR_MIN_USERS, candidate)) : CALCULATOR_DEFAULT_USERS
+  })
   const sliderId = useId()
   const rateId = useId()
 
   useEffect(() => {
     document.title = 'Pricing calculator — Lextures'
   }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const url = new URL(window.location.href)
+    url.searchParams.set('students', String(users))
+    window.history.replaceState({}, '', url)
+  }, [users])
 
   const rate = useMemo(() => pricePerStudent(users), [users])
   const total = useMemo(() => estimatedTotal(users), [users])

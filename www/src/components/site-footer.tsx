@@ -1,40 +1,55 @@
 import { SITE_LINKS } from '../lib/site-links'
+import { LocaleSwitcher } from './locale-controls'
 
 const NAV_COLUMNS = [
   {
-    heading: 'Product',
+    heading: 'Platform',
     links: [
-      { label: 'Features', href: '/#features' },
-      { label: 'Pricing', href: '/pricing' },
-      { label: 'Documentation', href: '/docs' },
-      { label: 'Start studying', href: SITE_LINKS.homeschool },
+      { label: 'Overview', href: '/platform' }, { label: 'Adaptive learning', href: '/platform/adaptive-learning' },
+      { label: 'Assessment', href: '/platform/assessment' }, { label: 'Grading', href: '/platform/grading' },
+      { label: 'Analytics', href: '/platform/analytics' }, { label: 'Accessibility', href: '/platform/accessibility' },
+      { label: 'AI', href: '/platform/ai' },
     ],
   },
   {
-    heading: 'Institutions',
+    heading: 'Solutions',
     links: [
       { label: 'Higher education', href: '/higher-ed' },
-      { label: 'K–12', href: '/k-12' },
+      { label: 'K–12', href: '/k12' },
       { label: 'Parents', href: '/parents' },
       { label: 'Homeschool', href: '/homeschool' },
     ],
   },
   {
-    heading: 'Project',
+    heading: 'Resources',
     links: [
-      { label: 'GitHub', href: SITE_LINKS.github },
+      { label: 'Resource hub', href: '/resources' },
       { label: 'Blog', href: '/blog' },
-      { label: 'Self-hosting', href: '/docs/self-hosting' },
-      { label: 'Security', href: SITE_LINKS.security },
+      { label: 'Guides', href: '/guides' }, { label: 'Glossary', href: '/glossary' },
+      { label: 'Research', href: '/resources/research' }, { label: 'Templates', href: '/templates' },
+      { label: 'Standards', href: '/standards' }, { label: 'Free tools', href: '/tools' },
+      { label: 'Documentation', href: '/docs' },
+      { label: 'Courses', href: '/courses' },
     ],
   },
   {
-    heading: 'Legal',
+    heading: 'Company',
     links: [
-      { label: 'Privacy policy', href: SITE_LINKS.privacy },
-      { label: 'Terms of service', href: SITE_LINKS.terms },
+      { label: 'About', href: '/about' }, { label: 'Authors', href: '/authors' },
+      { label: 'Press', href: SITE_LINKS.press },
+      { label: 'Contact', href: '/request-information' }, { label: 'Compare', href: '/compare' },
+      { label: 'Alternatives', href: '/alternatives' }, { label: 'Integrations', href: '/integrations' },
+      { label: 'GitHub', href: SITE_LINKS.github },
+    ],
+  },
+  {
+    heading: 'Trust',
+    links: [
+      { label: 'Trust center', href: '/trust' }, { label: 'Security', href: SITE_LINKS.security },
       { label: 'Accessibility', href: SITE_LINKS.accessibility },
-      { label: 'California privacy rights', href: SITE_LINKS.californiaPrivacyRights },
+      { label: 'Privacy policy', href: SITE_LINKS.privacy }, { label: 'Terms of service', href: SITE_LINKS.terms },
+      { label: 'Sitemap', href: '/sitemap.xml' },
+      { label: 'AI crawler index (llms.txt)', href: '/llms.txt' },
     ],
   },
 ]
@@ -43,7 +58,7 @@ export function SiteFooter() {
   return (
     <footer style={{ backgroundColor: '#22333b', color: '#b8c6c4' }}>
       <div className="mx-auto max-w-[1200px] px-5 py-14 md:px-10 xl:px-14">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_repeat(4,minmax(0,1fr))]">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.2fr_repeat(5,minmax(0,1fr))]">
           <div>
             <div className="flex items-center gap-2.5">
               <img
@@ -100,6 +115,7 @@ export function SiteFooter() {
           style={{ color: '#8ea09d' }}
         >
           <span>© {new Date().getFullYear()} Lextures LLC.</span>
+          <LocaleSwitcher />
         </div>
       </div>
     </footer>

@@ -1,0 +1,15 @@
+LEXTURES FACT SHEET
+
+Legal name: Lextures LLC
+Founded: January 2024
+Founder: Chase Willden
+Product: Adaptive learning management system
+Audiences: K-12, higher education, and homeschool
+Availability: Hosted service or self-hosted under AGPL-3.0
+Website: https://lextures.com/
+Press contact: chase@lextures.com
+
+Approved boilerplate:
+Adaptive learning management system for K-12, higher education, and homeschool: IRT-routed quizzes, gradebook, roster sync, self-hosting under AGPL-3.0, and a public course marketplace.
+
+Updated: 2026-08-11

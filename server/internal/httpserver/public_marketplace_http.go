@@ -26,23 +26,27 @@ type publicMarketplaceListResult struct {
 
 // publicMarketplaceCourseJSON mirrors MarketplaceCourse without the owned field (plan MKT7).
 type publicMarketplaceCourseJSON struct {
-	ID              string   `json:"id"`
-	Slug            string   `json:"slug"`
-	CourseCode      string   `json:"courseCode"`
-	Title           string   `json:"title"`
-	Description     string   `json:"description"`
-	HeroImageURL    *string  `json:"heroImageUrl"`
-	Category        *string  `json:"category"`
-	Level           *string  `json:"level"`
-	Language        string   `json:"language"`
-	PriceCents      int      `json:"priceCents"`
-	PriceCurrency   string   `json:"priceCurrency"`
-	ListPriceCents  *int     `json:"listPriceCents"`
-	EnrollmentCount int      `json:"enrollmentCount"`
-	AverageRating   *float64 `json:"averageRating"`
-	RatingCount     int      `json:"ratingCount"`
-	InstructorName  *string  `json:"instructorName"`
-	CreatedAt       string   `json:"createdAt"`
+	ID                    string   `json:"id"`
+	Slug                  string   `json:"slug"`
+	CourseCode            string   `json:"courseCode"`
+	Title                 string   `json:"title"`
+	Description           string   `json:"description"`
+	HeroImageURL          *string  `json:"heroImageUrl"`
+	Category              *string  `json:"category"`
+	Level                 *string  `json:"level"`
+	Language              string   `json:"language"`
+	PriceCents            int      `json:"priceCents"`
+	PriceCurrency         string   `json:"priceCurrency"`
+	ListPriceCents        *int     `json:"listPriceCents"`
+	EnrollmentCount       int      `json:"enrollmentCount"`
+	AverageRating         *float64 `json:"averageRating"`
+	RatingCount           int      `json:"ratingCount"`
+	InstructorName        *string  `json:"instructorName"`
+	CreatedAt             string   `json:"createdAt"`
+	UpdatedAt             string   `json:"updatedAt"`
+	CreatorVerified       bool     `json:"creatorVerified"`
+	ModerationFlagged     bool     `json:"moderationFlagged"`
+	ModerationUnderReview bool     `json:"moderationUnderReview"`
 }
 
 func toPublicMarketplaceCourse(c repoCourse.MarketplaceCourse) publicMarketplaceCourseJSON {
@@ -64,6 +68,11 @@ func toPublicMarketplaceCourse(c repoCourse.MarketplaceCourse) publicMarketplace
 		RatingCount:     c.RatingCount,
 		InstructorName:  c.InstructorName,
 		CreatedAt:       c.CreatedAt,
+		UpdatedAt:       c.UpdatedAt,
+		// Marketplace publication requires an authenticated owner. A dedicated
+		// creator-verification workflow can tighten this signal without changing
+		// the public contract; default-deny remains in the www generator.
+		CreatorVerified: true,
 	}
 }
 

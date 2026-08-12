@@ -8,6 +8,140 @@
   ],
   "entries": [
     {
+      "id": "SEO.15",
+      "path": "docs/completed/seo/SEO.15-measurement-search-console-and-ai-share-of-voice.md",
+      "markets": ["ALL"], "risk": "major", "client": "web", "coverage": "not-applicable",
+      "rationale": "Search measurement collectors and report generation are operational automation covered by deterministic Node tests; no signed-in product journey applies.",
+      "owner": "Web Platform", "specs": [{ "path": "www/scripts/seo-measurement/core.test.mjs" }], "reviewed": true
+    },
+    {
+      "id": "SEO.14",
+      "path": "docs/completed/seo/SEO.14-multimodal-video-images-and-social-assets.md",
+      "markets": ["ALL"], "risk": "minor", "client": "web", "coverage": "not-applicable",
+      "rationale": "Image optimization, social-card generation, and media metadata are deterministic build concerns covered by marketing-site tests; no signed-in journey applies.",
+      "owner": "Web Platform", "specs": [{ "path": "www/scripts/og-card/core.test.mjs" }], "reviewed": true
+    },
+    {
+      "id": "SEO.13",
+      "path": "docs/completed/seo/SEO.13-offsite-entity-mentions-and-digital-pr.md",
+      "markets": ["ALL"], "risk": "minor", "client": "web", "coverage": "not-applicable",
+      "rationale": "Off-site profile validation and press assets are public-site governance concerns covered by deterministic Node tests; no signed-in journey applies.",
+      "owner": "Marketing", "specs": [{ "path": "www/scripts/check-offsite-profiles.test.mjs" }], "reviewed": true
+    },
+    {
+      "id": "SEO.12",
+      "path": "docs/completed/seo/SEO.12-original-research-and-data-program.md",
+      "markets": ["ALL"], "risk": "major", "client": "web", "coverage": "not-applicable",
+      "rationale": "Public research publishing and consent APIs are covered by service and static-site tests; the plan does not define a signed-in E2E journey.",
+      "owner": "Research", "specs": [{ "path": "server/internal/httpserver/research_participation_nodb_test.go" }], "reviewed": true
+    },
+    {
+      "id": "SEO.11",
+      "path": "docs/completed/seo/SEO.11-marketplace-catalog-seo.md",
+      "markets": ["ALL"], "risk": "major", "client": "web", "coverage": "not-applicable",
+      "rationale": "Marketplace prerendering and structured catalog output are server/build-time behavior covered by deterministic tests; no signed-in journey applies.",
+      "owner": "Marketplace", "specs": [{ "path": "www/scripts/marketplace-seo.test.mjs" }], "reviewed": true
+    },
+    {
+      "id": "SEO.10",
+      "path": "docs/completed/seo/SEO.10-programmatic-utility-pages.md",
+      "markets": ["ALL"], "risk": "major", "client": "web", "coverage": "not-applicable",
+      "rationale": "Utility-page quality gates and static output are deterministic marketing build concerns covered by Node tests; no signed-in journey applies.",
+      "owner": "Web Platform", "specs": [{ "path": "www/scripts/generate/utility-check.test.mjs" }], "reviewed": true
+    },
+    {
+      "id": "SEO.9",
+      "path": "docs/completed/seo/SEO.9-comparison-alternatives-and-integration-pages.md",
+      "markets": ["ALL"], "risk": "major", "client": "web", "coverage": "not-applicable",
+      "rationale": "Comparison-page disclosure and source requirements are public content-contract concerns covered by deterministic content tests; no signed-in journey applies.",
+      "owner": "Marketing", "specs": [{ "path": "www/scripts/content-lint/core.test.mjs" }], "reviewed": true
+    },
+    {
+      "id": "SEO.8",
+      "path": "docs/completed/seo/SEO.8-editorial-engine-and-content-calendar.md",
+      "markets": ["ALL"], "risk": "major", "client": "web", "coverage": "not-applicable",
+      "rationale": "Editorial scheduling, lifecycle, and freshness automation are deterministic Node workflows; no signed-in product journey applies.",
+      "owner": "Docs / Content", "specs": [{ "path": "www/scripts/editorial.test.mjs" }], "reviewed": true
+    },
+    {
+      "id": "SEO.7",
+      "path": "docs/completed/seo/SEO.7-help-center-expansion.md",
+      "markets": ["ALL"], "risk": "major", "client": "web", "coverage": "not-applicable",
+      "rationale": "Help-center generation, inventory, and freshness are static-site behavior covered by deterministic Node tests; no signed-in journey applies.",
+      "owner": "Docs / Content", "specs": [{ "path": "www/scripts/help-center.test.mjs" }], "reviewed": true
+    },
+    {
+      "id": "SEO.5",
+      "path": "docs/completed/seo/SEO.5-information-architecture-and-internal-linking.md",
+      "markets": ["ALL"], "risk": "major", "client": "web", "coverage": "not-applicable",
+      "rationale": "Route hierarchy and internal-link invariants are deterministic static-site checks; no signed-in product journey applies.",
+      "owner": "Web Platform", "specs": [{ "path": "www/scripts/generate-site.test.mjs" }], "reviewed": true
+    },
+    {
+      "id": "SEO.4",
+      "path": "docs/completed/seo/SEO.4-core-web-vitals-and-page-experience.md",
+      "markets": ["ALL"], "risk": "major", "client": "web", "coverage": "not-applicable",
+      "rationale": "Performance budgets and Core Web Vitals instrumentation are build and audit concerns covered by deterministic checks; no signed-in journey applies.",
+      "owner": "Web Platform", "specs": [{ "path": "www/scripts/check-perf-budget.test.mjs" }], "reviewed": true
+    },
+    {
+      "id": "SEO.3",
+      "path": "docs/completed/seo/SEO.3-structured-data-and-entity-graph.md",
+      "markets": ["ALL"], "risk": "major", "client": "web", "coverage": "not-applicable",
+      "rationale": "Structured-data graph validation is deterministic generated-markup behavior covered by marketing-site tests; no signed-in journey applies.",
+      "owner": "Web Platform", "specs": [{ "path": "www/scripts/seo-check/core.test.mjs" }], "reviewed": true
+    },
+    {
+      "id": "SEO.2",
+      "path": "docs/completed/seo/SEO.2-crawler-access-sitemaps-and-llms-txt.md",
+      "markets": ["ALL"], "risk": "major", "client": "web", "coverage": "not-applicable",
+      "rationale": "Crawler policy, robots, sitemap, and LLM catalog outputs are deterministic build artifacts covered by Node tests; no signed-in journey applies.",
+      "owner": "Web Platform", "specs": [{ "path": "www/scripts/seo-artifacts.test.mjs" }], "reviewed": true
+    },
+    {
+      "id": "SEO.1",
+      "path": "docs/completed/seo/SEO.1-static-rendering-and-crawlability.md",
+      "markets": ["ALL"], "risk": "major", "client": "web", "coverage": "not-applicable",
+      "rationale": "Static rendering and crawlability are generated-site invariants covered by deterministic Node tests; no signed-in product journey applies.",
+      "owner": "Web Platform", "specs": [{ "path": "www/scripts/generate-site.test.mjs" }], "reviewed": true
+    },
+    {
+      "id": "SEO.17",
+      "path": "docs/completed/seo/SEO.17-international-seo-and-hreflang.md",
+      "markets": ["K12", "HE", "HS"],
+      "risk": "minor",
+      "client": "web",
+      "coverage": "not-applicable",
+      "rationale": "Locale routing gates, hreflang reciprocity, HTML/sitemap parity, and non-indexable-target protection are deterministic build and Node-test concerns; no signed-in product journey applies.",
+      "owner": "Web Platform",
+      "specs": [{ "path": "www/scripts/seo-check/checks/hreflang.test.mjs" }],
+      "reviewed": true
+    },
+    {
+      "id": "SEO.16",
+      "path": "docs/completed/seo/SEO.16-seo-governance-and-ci-guardrails.md",
+      "markets": ["K12", "HE", "HS"],
+      "risk": "major",
+      "client": "web",
+      "coverage": "not-applicable",
+      "rationale": "Generated-site invariants, lifecycle policy, and live crawler verification are exercised by deterministic Node tests and dedicated CI workflows; no signed-in product journey applies.",
+      "owner": "Web Platform",
+      "specs": [{ "path": "www/scripts/seo-check/core.test.mjs" }],
+      "reviewed": true
+    },
+    {
+      "id": "SEO.6",
+      "path": "docs/completed/seo/SEO.6-answer-first-content-system.md",
+      "markets": ["ALL"],
+      "risk": "major",
+      "client": "web",
+      "coverage": "smoke",
+      "rationale": "Build-time content contract, security policy, scoring, artifact generation, and static component rendering are covered by unit and marketing-site build tests; the internal content-kit route provides the rendered smoke surface.",
+      "owner": "Docs / Content",
+      "specs": [{ "path": "www/scripts/content-lint/core.test.mjs" }],
+      "reviewed": true
+    },
+    {
       "id": "08",
       "path": "docs/completed/01-adaptive-learning-core/08-openapi-irt-calibration-doc-fix.md",
       "markets": [

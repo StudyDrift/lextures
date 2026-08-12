@@ -21,35 +21,42 @@ func BuildCourseJSONLD(c repoCourse.PublicCatalogCourse, baseURL string) map[str
 
 // BuildCourseJSONLDAt is like BuildCourseJSONLD but lets callers choose the
 // path prefix (e.g. "/courses/" for the www marketplace storefront, plan MKT7/MKT10).
+//
+// SEO.3: nodes include a stable absolute @id. @context is omitted so the www
+// graph builder owns the single @graph envelope (FR-1 / §9).
 func BuildCourseJSONLDAt(c repoCourse.PublicCatalogCourse, baseURL, pathPrefix string) map[string]any {
 	if pathPrefix == "" {
 		pathPrefix = "/explore/"
 	}
+	base := strings.TrimRight(baseURL, "/")
 	ld := map[string]any{
-		"@context":    "https://schema.org",
 		"@type":       "Course",
 		"name":        c.Title,
 		"description": c.Description,
 		"provider": map[string]any{
+			"@id":   base + "/#organization",
 			"@type": "Organization",
 			"name":  ProviderName,
 		},
 	}
-	if baseURL != "" && c.Slug != "" {
-		ld["url"] = strings.TrimRight(baseURL, "/") + pathPrefix + c.Slug
+	if base != "" && c.Slug != "" {
+		courseURL := base + pathPrefix + c.Slug
+		ld["url"] = courseURL
+		ld["@id"] = courseURL + "#course"
 	}
 	if c.Category != nil && *c.Category != "" {
 		ld["about"] = *c.Category
+		ld["teaches"] = *c.Category
 	}
 	if c.Language != "" {
 		ld["inLanguage"] = c.Language
 	}
-	if c.AverageRating != nil {
+	if c.AverageRating != nil && c.RatingCount >= 5 {
 		ld["aggregateRating"] = map[string]any{
 			"@type":       "AggregateRating",
 			"ratingValue": *c.AverageRating,
 			"bestRating":  5,
-			"ratingCount": c.EnrollmentCount,
+			"ratingCount": c.RatingCount,
 		}
 	}
 

@@ -1,222 +1,57 @@
-import { ArrowLeft, ArrowRight, HelpCircle, Search } from 'lucide-react'
-import { useState, useMemo, useEffect, type ChangeEvent } from 'react'
+import { HelpCircle, Search } from 'lucide-react'
+import { useMemo, useState } from 'react'
 import { Header } from '../components/header'
 import { SiteFooter } from '../components/site-footer'
-import { allArticles, formatDate } from '../utils/docs'
+import { HELP_CATEGORIES } from '../docs/_categories'
 
-const ARTICLES_PER_PAGE = 10
+type SearchItem = { title: string; description: string; path: string; headings: string[]; category: string }
 
 export function DocsIndex() {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [currentPage, setCurrentPage] = useState(1)
+  const [query, setQuery] = useState('')
+  const [items, setItems] = useState<SearchItem[] | null>(null)
+  const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [currentPage])
-
-  const filteredArticles = useMemo(() => {
-    const query = searchQuery.toLowerCase().trim()
-    if (!query) return allArticles
-
-    return allArticles.filter(
-      (article) =>
-        article.title.toLowerCase().includes(query) ||
-        article.description.toLowerCase().includes(query) ||
-        article.author.toLowerCase().includes(query) ||
-        article.content.toLowerCase().includes(query)
-    )
-  }, [searchQuery])
-
-  const totalPages = Math.ceil(filteredArticles.length / ARTICLES_PER_PAGE)
-  const paginatedArticles = useMemo(() => {
-    const start = (currentPage - 1) * ARTICLES_PER_PAGE
-    return filteredArticles.slice(start, start + ARTICLES_PER_PAGE)
-  }, [filteredArticles, currentPage])
-
-  // Reset to first page when search query changes
-  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value)
-    setCurrentPage(1)
+  async function loadIndex() {
+    if (items || loading) return
+    setLoading(true)
+    try {
+      const response = await fetch('/docs-search-index.json')
+      setItems(response.ok ? await response.json() : [])
+    } finally {
+      setLoading(false)
+    }
   }
 
-  return (
-    <div className="relative min-h-screen overflow-x-hidden bg-white text-slate-900">
-      <Header />
+  const results = useMemo(() => {
+    const needle = query.trim().toLowerCase()
+    if (!needle || !items) return []
+    return items.filter(item => [item.title, item.description, item.category, ...item.headings].join(' ').toLowerCase().includes(needle)).slice(0, 20)
+  }, [items, query])
 
-      <main>
-        <section className="border-b border-slate-200 bg-white py-16 sm:py-20">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 ring-1 ring-indigo-200">
-                <HelpCircle className="h-5 w-5" aria-hidden />
-              </div>
-              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-indigo-500">
-                Lextures Documentation
-              </p>
-            </div>
-            <h1 className="mt-5 text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl">
-              Knowledge Base
-            </h1>
-            <p className="mt-4 max-w-xl text-lg leading-relaxed text-slate-600">
-              Guides, tutorials, and documentation to help you get the most out of Lextures.
-            </p>
-
-            <div className="mt-10 w-full">
-              <div className="relative group">
-                <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center">
-                  <Search className="h-5 w-5 text-slate-400 group-focus-within:text-accent transition-colors" aria-hidden />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Search documentation..."
-                  className="block w-full rounded-full border border-slate-200 bg-white py-3.5 pl-12 pr-6 text-base placeholder-stone-400 shadow-sm outline-none transition-all hover:border-stone-300 hover:shadow-md focus:border-indigo-500 focus:ring-2 focus:ring-accent-muted/30 focus:shadow-md"
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                />
-              </div>
-            </div>
+  return <div className="relative min-h-screen bg-white text-slate-900">
+    <Header />
+    <main>
+      <section className="border-b border-slate-200 py-16 sm:py-20">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-3 text-indigo-600"><HelpCircle className="h-6 w-6" aria-hidden /><span className="text-sm font-semibold uppercase tracking-widest">Lextures help center</span></div>
+          <h1 className="mt-5 text-4xl font-semibold tracking-tight sm:text-5xl">How can we help?</h1>
+          <p className="mt-4 max-w-3xl text-lg leading-relaxed text-slate-600">Find practical answers for setting up, teaching, learning, administering, integrating, and self-hosting Lextures. Search all articles or browse a category to see its complete set of guides.</p>
+          <div role="search" className="relative mt-8 max-w-3xl">
+            <label htmlFor="docs-search" className="sr-only">Search help articles</label>
+            <Search className="pointer-events-none absolute left-4 top-3.5 h-5 w-5 text-slate-400" aria-hidden />
+            <input id="docs-search" type="search" role="searchbox" aria-controls="docs-search-results" value={query} onFocus={loadIndex} onChange={event => { setQuery(event.target.value); void loadIndex() }} placeholder="Search titles, descriptions, and headings" className="w-full rounded-xl border border-slate-300 py-3 pl-12 pr-4" />
           </div>
-        </section>
-
-        <section className="py-16 sm:py-20">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            {filteredArticles.length === 0 ? (
-              <div className="py-20 text-center">
-                <p className="text-lg text-slate-500">No articles found matching your search.</p>
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="mt-4 text-sm font-semibold text-accent hover:underline"
-                >
-                  Clear search
-                </button>
-              </div>
-            ) : (
-              <>
-                <div className="divide-y divide-stone-200/80">
-                  {paginatedArticles.map((article) => (
-                    <article key={article.slug} className="group py-10 first:pt-0">
-                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-8">
-                        <div className="flex-1">
-                          <time
-                            dateTime={article.date}
-                            className="text-xs font-medium uppercase tracking-widest text-slate-400"
-                          >
-                            {formatDate(article.date)}
-                          </time>
-                          <h2 className="mt-2 text-xl font-semibold leading-snug text-slate-900 sm:text-2xl">
-                            <a
-                              href={`/docs/${article.slug}`}
-                              className="no-underline transition-colors hover:text-accent"
-                            >
-                              {article.title}
-                            </a>
-                          </h2>
-                          <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-600">
-                            {article.description}
-                          </p>
-                          <p className="mt-2 text-sm text-slate-400">By {article.author}</p>
-                        </div>
-                        <a
-                          href={`/docs/${article.slug}`}
-                          className="btn-primary shrink-0 gap-2 self-start"
-                          aria-label={`Read ${article.title}`}
-                        >
-                          Read
-                          <ArrowRight className="h-4 w-4" aria-hidden />
-                        </a>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-
-                {totalPages > 1 && (
-                  <nav className="mt-16 flex items-center justify-between border-t border-slate-200 pt-8" aria-label="Pagination">
-                    <div className="flex flex-1 justify-between sm:hidden">
-                      <button
-                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                        disabled={currentPage === 1}
-                        className="btn-secondary px-4 py-2 disabled:opacity-50"
-                      >
-                        Previous
-                      </button>
-                      <button
-                        onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                        disabled={currentPage === totalPages}
-                        className="btn-secondary px-4 py-2 disabled:opacity-50"
-                      >
-                        Next
-                      </button>
-                    </div>
-                    <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-                      <div>
-                        <p className="text-sm text-slate-500">
-                          Showing <span className="font-medium">{(currentPage - 1) * ARTICLES_PER_PAGE + 1}</span> to{' '}
-                          <span className="font-medium">
-                            {Math.min(currentPage * ARTICLES_PER_PAGE, filteredArticles.length)}
-                          </span>{' '}
-                          of <span className="font-medium">{filteredArticles.length}</span> results
-                        </p>
-                      </div>
-                      <div>
-                        <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
-                          <button
-                            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                            disabled={currentPage === 1}
-                            className="relative inline-flex items-center rounded-l-md px-2 py-2 text-slate-400 ring-1 ring-inset ring-stone-200 hover:bg-slate-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
-                          >
-                            <span className="sr-only">Previous</span>
-                            <ArrowLeft className="h-5 w-5" aria-hidden />
-                          </button>
-                          {[...Array(totalPages)].map((_, i) => {
-                            const pageNumber = i + 1
-                            // Simple logic to show current, first, last, and neighbors
-                            if (
-                              totalPages > 7 &&
-                              pageNumber !== 1 &&
-                              pageNumber !== totalPages &&
-                              Math.abs(pageNumber - currentPage) > 1
-                            ) {
-                              if (Math.abs(pageNumber - currentPage) === 2) {
-                                return <span key={pageNumber} className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-slate-400 ring-1 ring-inset ring-stone-200 focus:outline-offset-0">...</span>
-                              }
-                              return null
-                            }
-
-                            return (
-                              <button
-                                key={pageNumber}
-                                onClick={() => setCurrentPage(pageNumber)}
-                                aria-current={currentPage === pageNumber ? 'page' : undefined}
-                                className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 ${
-                                  currentPage === pageNumber
-                                    ? 'z-10 bg-accent text-white focus-visible:outline-indigo-500'
-                                    : 'text-slate-900 ring-1 ring-inset ring-stone-200 hover:bg-slate-50 focus:outline-offset-0'
-                                }`}
-                              >
-                                {pageNumber}
-                              </button>
-                            )
-                          })}
-                          <button
-                            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                            disabled={currentPage === totalPages}
-                            className="relative inline-flex items-center rounded-r-md px-2 py-2 text-slate-400 ring-1 ring-inset ring-stone-200 hover:bg-slate-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
-                          >
-                            <span className="sr-only">Next</span>
-                            <ArrowRight className="h-5 w-5" aria-hidden />
-                          </button>
-                        </nav>
-                      </div>
-                    </div>
-                  </nav>
-                )}
-              </>
-            )}
-          </div>
-        </section>
-      </main>
-
-      <SiteFooter />
-    </div>
-  )
+          <p className="sr-only" aria-live="polite">{query ? loading ? 'Loading help search' : `${results.length} results found` : ''}</p>
+          {query && <ul id="docs-search-results" className="mt-4 max-w-3xl divide-y rounded-xl border border-slate-200 bg-white">
+            {!loading && results.length === 0 && <li className="p-5 text-slate-600">No matching articles. Try a feature name or browse the categories below.</li>}
+            {results.map(item => <li key={item.path} className="p-5"><a className="font-semibold text-indigo-700" href={item.path}>{item.title}</a><p className="mt-1 text-sm text-slate-600">{item.description}</p></li>)}
+          </ul>}
+        </div>
+      </section>
+      <section className="py-16"><div className="mx-auto grid max-w-6xl gap-5 px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-3 lg:px-8">
+        {HELP_CATEGORIES.map(category => <a key={category.id} href={`/docs/${category.id}`} className="rounded-xl border border-slate-200 p-6 no-underline transition hover:border-indigo-300 hover:shadow-sm"><h2 className="text-xl font-semibold">{category.title}</h2><p className="mt-3 text-sm leading-6 text-slate-600">{category.description}</p></a>)}
+      </div></section>
+    </main>
+    <SiteFooter />
+  </div>
 }

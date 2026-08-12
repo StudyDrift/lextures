@@ -35,6 +35,7 @@ type MarketplaceCourse struct {
 	RatingCount     int      `json:"ratingCount"`
 	InstructorName  *string  `json:"instructorName"`
 	CreatedAt       string   `json:"createdAt"`
+	UpdatedAt       string   `json:"updatedAt"`
 	Owned           bool     `json:"owned"`
 }
 
@@ -95,7 +96,8 @@ const marketplaceCatalogSelect = `
     c.rating_count,
     NULLIF(TRIM(COALESCE(u.display_name,
         TRIM(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, '')))), '') AS instructor_name,
-    c.created_at::text
+    c.created_at::text,
+    c.updated_at::text
 `
 
 const marketplaceCatalogFrom = `
@@ -112,6 +114,7 @@ func scanMarketplaceCourse(scan func(dest ...any) error) (MarketplaceCourse, err
 		&c.ID, &c.Slug, &c.CourseCode, &c.Title, &c.Description, &c.HeroImageURL,
 		&c.Category, &c.Level, &c.Language, &c.PriceCents, &c.PriceCurrency, &c.ListPriceCents,
 		&c.EnrollmentCount, &c.AverageRating, &c.RatingCount, &c.InstructorName, &c.CreatedAt,
+		&c.UpdatedAt,
 	)
 	return c, err
 }

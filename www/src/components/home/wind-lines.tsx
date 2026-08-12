@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react'
+
 type WindPath = {
   d: string
   stroke: string
@@ -53,15 +55,55 @@ const VARIANTS: Record<
   },
 }
 
+function prefersReducedMotion(): boolean {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return false
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+}
+
+function isLowEndDevice(): boolean {
+  if (typeof navigator === 'undefined') return false
+  const cores = navigator.hardwareConcurrency || 8
+  const conn = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection
+  return cores <= 4 || Boolean(conn?.saveData)
+}
+
 /** Drifting current-of-wind lines used as an ambient background motif across sections. */
 export function WindLines({ variant }: { variant: Variant }) {
   const { viewBox, preserve, opacity, paths } = VARIANTS[variant]
+  const [animate, setAnimate] = useState(false)
+
+  // SEO.4 FR-14 — do not start motion before first paint; respect reduced-motion & low-end.
+  useEffect(() => {
+    if (prefersReducedMotion() || isLowEndDevice()) {
+      setAnimate(false)
+      return
+    }
+    let raf = 0
+    let cancelled = false
+    // Defer past first paint / LCP
+    raf = requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (!cancelled && !document.hidden) setAnimate(true)
+      })
+    })
+    const onVis = () => {
+      if (document.hidden) setAnimate(false)
+      else if (!prefersReducedMotion() && !isLowEndDevice()) setAnimate(true)
+    }
+    document.addEventListener('visibilitychange', onVis)
+    return () => {
+      cancelled = true
+      cancelAnimationFrame(raf)
+      document.removeEventListener('visibilitychange', onVis)
+    }
+  }, [])
+
   return (
     <svg
       viewBox={viewBox}
       preserveAspectRatio={preserve}
       aria-hidden
-      className="pointer-events-none absolute inset-0 h-full w-full"
+      className="pointer-events-none absolute inset-0 h-full w-full lx-motion"
       style={{ opacity }}
     >
       <g fill="none" strokeLinecap="round" strokeWidth={variant === 'hero' ? 2.4 : 2}>
@@ -72,7 +114,11 @@ export function WindLines({ variant }: { variant: Variant }) {
             stroke={p.stroke}
             strokeOpacity={p.opacity}
             strokeDasharray={p.dash}
-            style={{ animation: `${p.anim} ${p.dur}s linear infinite` }}
+            style={
+              animate
+                ? { animation: `${p.anim} ${p.dur}s linear infinite` }
+                : undefined
+            }
           />
         ))}
       </g>

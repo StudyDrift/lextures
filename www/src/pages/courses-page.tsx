@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { startTransition, useEffect, useRef, useState } from 'react'
 import { GraduationCap } from 'lucide-react'
 import { CourseFilters, type CourseFilterState } from '../components/courses/course-filters'
 import { CourseGrid } from '../components/courses/course-grid'
@@ -12,11 +12,19 @@ import {
   type MarketplaceCategory,
   type PublicMarketplaceCourse,
 } from '../lib/marketplace-api'
-import { useDocumentHead } from '../lib/use-document-head'
+import { useSsrData } from '../lib/ssr-context'
 
-const SITE_ORIGIN = 'https://lextures.com'
+const EMPTY_FILTERS: CourseFilterState = {
+  q: '',
+  category: '',
+  level: '',
+  language: '',
+  freeOnly: false,
+  sort: 'popular',
+}
 
 function readFiltersFromUrl(): CourseFilterState {
+  if (typeof window === 'undefined') return { ...EMPTY_FILTERS }
   const params = new URLSearchParams(window.location.search)
   return {
     q: params.get('q') ?? '',
@@ -29,6 +37,7 @@ function readFiltersFromUrl(): CourseFilterState {
 }
 
 function writeFiltersToUrl(filters: CourseFilterState): void {
+  if (typeof window === 'undefined') return
   const params = new URLSearchParams()
   if (filters.q) params.set('q', filters.q)
   if (filters.category) params.set('category', filters.category)
@@ -42,19 +51,16 @@ function writeFiltersToUrl(filters: CourseFilterState): void {
 }
 
 export function CoursesPage() {
-  useDocumentHead({
-    title: COURSES_COPY.pageTitle,
-    description: COURSES_COPY.pageDescription,
-    canonical: `${SITE_ORIGIN}/courses`,
-  })
+  const ssr = useSsrData()
+  const ssrIndex = ssr.coursesIndex
 
   const [filters, setFilters] = useState<CourseFilterState>(() => readFiltersFromUrl())
   const [debouncedQ, setDebouncedQ] = useState(filters.q)
   const [categories, setCategories] = useState<MarketplaceCategory[]>([])
-  const [courses, setCourses] = useState<PublicMarketplaceCourse[]>([])
-  const [total, setTotal] = useState(0)
+  const [courses, setCourses] = useState<PublicMarketplaceCourse[]>(() => ssrIndex?.courses ?? [])
+  const [total, setTotal] = useState(() => ssrIndex?.total ?? 0)
   const [nextCursor, setNextCursor] = useState('')
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(() => !ssrIndex)
   const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [unavailable, setUnavailable] = useState(false)
@@ -76,7 +82,7 @@ export function CoursesPage() {
   }, [])
 
   useEffect(() => {
-    window.gtag?.('event', 'courses_view')
+    if (typeof window !== 'undefined') window.gtag?.('event', 'courses_view')
   }, [])
 
   useEffect(() => {
@@ -99,9 +105,11 @@ export function CoursesPage() {
         setTotal(res.total)
         setNextCursor(res.nextCursor)
         setLoading(false)
-        if (debouncedQ) window.gtag?.('event', 'courses_search', { q: debouncedQ })
-        if (filters.category || filters.level || filters.freeOnly) {
-          window.gtag?.('event', 'courses_filter')
+        if (typeof window !== 'undefined') {
+          if (debouncedQ) window.gtag?.('event', 'courses_search', { q: debouncedQ })
+          if (filters.category || filters.level || filters.freeOnly) {
+            window.gtag?.('event', 'courses_filter')
+          }
         }
       })
       .catch((e: unknown) => {
@@ -148,7 +156,6 @@ export function CoursesPage() {
         <WindLines variant="hero" />
         <div
           className="relative z-[2] mx-auto max-w-[960px] px-5 py-14 md:px-10 md:py-16 xl:px-14"
-          style={{ animation: 'lx-fade-up 0.7s ease both' }}
         >
           <span
             className="inline-flex items-center gap-2 rounded-full px-3.5 py-[7px] text-[13px] font-semibold uppercase tracking-[0.04em]"
@@ -170,7 +177,14 @@ export function CoursesPage() {
       </section>
 
       <section className="mx-auto max-w-[1100px] px-5 pb-20 md:px-10 xl:px-14">
-        <CourseFilters value={filters} categories={categories} onChange={setFilters} />
+        <CourseFilters
+          value={filters}
+          categories={categories}
+          onChange={next => {
+            // SEO.4 FR-15 — keep filter interactions under long-task threshold.
+            startTransition(() => setFilters(next))
+          }}
+        />
         <div className="mt-8">
           <CourseGrid
             courses={courses}

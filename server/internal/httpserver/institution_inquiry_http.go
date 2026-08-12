@@ -75,6 +75,7 @@ type institutionInquiryRequest struct {
 	EnrollmentSize    string `json:"enrollment_size"`
 	HostingPreference string `json:"hosting_preference"`
 	Message           string `json:"message"`
+	FirstTouchChannel string `json:"first_touch_channel"`
 }
 
 // POST /api/v1/public/institution-inquiries
@@ -102,6 +103,10 @@ func (d Deps) handlePublicInstitutionInquiry() http.HandlerFunc {
 		enrollment := inquiryTrim(req.EnrollmentSize, 80)
 		hosting := inquiryTrim(req.HostingPreference, 120)
 		message := inquiryTrim(req.Message, 5000)
+		firstTouch := inquiryTrim(req.FirstTouchChannel, 80)
+		if firstTouch == "" {
+			firstTouch = "direct"
+		}
 
 		switch {
 		case orgType == "":
@@ -145,6 +150,7 @@ func (d Deps) handlePublicInstitutionInquiry() http.HandlerFunc {
 			Message:           message,
 			IPAddress:         onboardingStrPtr(ip),
 			UserAgent:         onboardingStrPtr(r.Header.Get("User-Agent")),
+			FirstTouchChannel: firstTouch,
 		}
 		if role != "" {
 			in.Role = &role

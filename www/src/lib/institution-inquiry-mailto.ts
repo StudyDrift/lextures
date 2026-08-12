@@ -9,6 +9,7 @@ export type InstitutionInquiryForm = {
   enrollmentSize: string
   hostingPreference: string
   message: string
+  firstTouchChannel: string
 }
 
 function line(label: string, value: string): string {
@@ -26,6 +27,7 @@ export function buildInstitutionInquiryMailto(form: InstitutionInquiryForm): str
     line('Role / title', form.role),
     line('Enrollment size', form.enrollmentSize),
     line('Hosting preference', form.hostingPreference),
+    line('First-touch channel', form.firstTouchChannel),
     '',
     'Message:',
     form.message.trim(),

@@ -72,9 +72,10 @@ export function CourseHeroPlaceholder({ title }: { title: string }) {
 
 type CourseCardProps = {
   course: PublicMarketplaceCourse
+  priority?: boolean
 }
 
-export function CourseCard({ course }: CourseCardProps) {
+export function CourseCard({ course, priority = false }: CourseCardProps) {
   const href = `/courses/${encodeURIComponent(course.slug || course.courseCode)}`
   const price = formatMarketplacePrice(course.priceCents, course.priceCurrency, COURSES_COPY.free)
   const accessibleName = `${course.title}, ${price}`
@@ -95,12 +96,23 @@ export function CourseCard({ course }: CourseCardProps) {
       >
         <div className="aspect-[16/9] w-full overflow-hidden" style={{ backgroundColor: 'var(--paper)' }}>
           {heroImageUrl ? (
-            <img
-              src={heroImageUrl}
-              alt=""
-              loading="lazy"
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-            />
+            <picture>
+              {heroImageUrl.endsWith('.avif') && (
+                <source srcSet={heroImageUrl} type="image/avif" />
+              )}
+              {heroImageUrl.endsWith('.avif') && (
+                <source srcSet={heroImageUrl.replace(/\.avif$/, '.webp')} type="image/webp" />
+              )}
+              <img
+                src={heroImageUrl.endsWith('.avif') ? heroImageUrl.replace(/\.avif$/, '.webp') : heroImageUrl}
+                alt=""
+                loading={priority ? 'eager' : 'lazy'}
+                fetchPriority={priority ? 'high' : 'auto'}
+                width={640}
+                height={360}
+                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+              />
+            </picture>
           ) : (
             <CourseHeroPlaceholder title={course.title} />
           )}

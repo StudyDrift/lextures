@@ -60,6 +60,34 @@
     }
   ],
   "paths": {
+    "/api/v1/orgs/{orgId}/settings/research-participation": {
+      "parameters": [
+        { "name": "orgId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+      ],
+      "get": {
+        "tags": ["settings"],
+        "summary": "Read an organization's aggregate research participation decision",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Explicit decision, or unresolved when no decision exists", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ResearchParticipationSetting" } } } },
+          "401": { "description": "Authentication required" },
+          "403": { "description": "No organization access" }
+        }
+      },
+      "put": {
+        "tags": ["settings"],
+        "summary": "Set an organization's aggregate research participation decision",
+        "description": "Requires organization administration access and writes an admin audit event.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["participation"], "properties": { "participation": { "type": "string", "enum": ["opt_in", "opt_out"] } } } } } },
+        "responses": {
+          "200": { "description": "Saved decision", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ResearchParticipationSetting" } } } },
+          "400": { "description": "Invalid decision" },
+          "401": { "description": "Authentication required" },
+          "403": { "description": "Organization administrator required" }
+        }
+      }
+    },
     "/api/v1/transcripts/recipients": {
       "get": {
         "tags": [
@@ -15670,6 +15698,16 @@
       }
     },
     "schemas": {
+      "ResearchParticipationSetting": {
+        "type": "object",
+        "required": ["orgId", "participation", "resolved"],
+        "properties": {
+          "orgId": { "type": "string", "format": "uuid" },
+          "participation": { "type": "string", "enum": ["opt_in", "opt_out"], "nullable": true },
+          "resolved": { "type": "boolean", "description": "False means records are excluded pending a contract and jurisdiction decision." },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
       "CatalogListing": {
         "type": "object",
         "properties": {

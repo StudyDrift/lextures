@@ -123,14 +123,14 @@ is undocumented intent — one defensive edit by anyone unfamiliar with the
 [three crawler jobs](research.md#2-ai-crawlers-do-not-run-javascript) silently costs 18–34% of
 citations per blocked engine.
 
-→ **[SEO.2](SEO.2-crawler-access-sitemaps-and-llms-txt.md)**
+→ **[SEO.2](../../completed/seo/SEO.2-crawler-access-sitemaps-and-llms-txt.md)**
 
 ### F-5. No `llms.txt`, no plain-text content mirror
 
 Nothing at `/llms.txt` or `/llms-full.txt`. Given F-1, even a crawler that *wanted* to understand the
 site has no map and no HTML to fall back on.
 
-→ **[SEO.2](SEO.2-crawler-access-sitemaps-and-llms-txt.md)**
+→ **[SEO.2](../../completed/seo/SEO.2-crawler-access-sitemaps-and-llms-txt.md)**
 
 ### F-6. `lastmod` is the build date on every URL
 
@@ -139,7 +139,7 @@ site has no map and no HTML to fall back on.
 information; search engines learn to ignore the field. Real per-document `lastmod` (git mtime for
 markdown, `updatedAt` for courses) is required before `lastmod`-driven recrawl works.
 
-→ **[SEO.2](SEO.2-crawler-access-sitemaps-and-llms-txt.md)**
+→ **[SEO.2](../../completed/seo/SEO.2-crawler-access-sitemaps-and-llms-txt.md)**
 
 ### F-7. No Bing / IndexNow path
 
@@ -147,7 +147,7 @@ There is no Bing Webmaster Tools verification file, no IndexNow key, and no post
 step. Bing's index is the retrieval layer for ChatGPT Search and Copilot — together the largest
 non-Google answer surface. We are not in it.
 
-→ **[SEO.2](SEO.2-crawler-access-sitemaps-and-llms-txt.md)**
+→ **[SEO.2](../../completed/seo/SEO.2-crawler-access-sitemaps-and-llms-txt.md)**
 
 ### F-8. Structured data is one type, on pages that do not ship
 
@@ -246,7 +246,7 @@ course marketplace client, the markdown renderer and the hero canvas. Against th
 thresholds (**LCP < 2.0 s**, **INP < 200 ms**) this is the dominant risk, and INP is the most-failed
 vital industry-wide.
 
-→ **[SEO.4](SEO.4-core-web-vitals-and-page-experience.md)**
+→ **[SEO.4](../../completed/seo/SEO.4-core-web-vitals-and-page-experience.md)**
 
 ### F-17. Fonts are loaded twice, one of them render-blocking third-party
 
@@ -256,14 +256,14 @@ vital industry-wide.
 third-party round-trip on the critical path — and a GDPR surface (Google Fonts CDN logs visitor IPs)
 that sits oddly next to our own privacy positioning.
 
-→ **[SEO.4](SEO.4-core-web-vitals-and-page-experience.md)**
+→ **[SEO.4](../../completed/seo/SEO.4-core-web-vitals-and-page-experience.md)**
 
 ### F-18. `hero-canvas.tsx` runs an animation loop above the fold
 
 284 lines of canvas animation rendering in the LCP region. Needs measurement against INP and against
 `prefers-reduced-motion` (which the AN plan set already established as a house rule).
 
-→ **[SEO.4](SEO.4-core-web-vitals-and-page-experience.md)**
+→ **[SEO.4](../../completed/seo/SEO.4-core-web-vitals-and-page-experience.md)**
 
 ### F-19. The header exposes three links; there is no internal link graph
 
@@ -296,7 +296,7 @@ for AI assistants (GA4's native "AI Assistant" channel excludes Perplexity and r
 sessions), no UTM convention, no CRM handoff field, and no server-side view of AI-bot crawl activity.
 We cannot currently answer "did ChatGPT send us anyone?" — let alone "are we cited?".
 
-→ **[SEO.15](SEO.15-measurement-search-console-and-ai-share-of-voice.md)**
+→ **[SEO.15](../../completed/seo/SEO.15-measurement-search-console-and-ai-share-of-voice.md)**
 
 ### F-22. No SEO regression gate in CI
 
@@ -313,7 +313,7 @@ The product ships i18n including an RTL locale (per the UX plan set), but www is
 `hreflang`, no locale routing, and `<html lang="en">` hard-coded. Non-English institutional buyers
 find nothing.
 
-→ **[SEO.17](SEO.17-international-seo-and-hreflang.md)**
+→ **[SEO.17](../../completed/seo/SEO.17-international-seo-and-hreflang.md)**
 
 ---
 
@@ -341,17 +341,17 @@ find nothing.
 | Finding | Severity | Plan |
 |---|---|---|
 | F-1, F-2, F-3 | **BLOCKER** | [SEO.1](SEO.1-static-rendering-and-crawlability.md) |
-| F-4, F-5, F-6, F-7 | BLOCKER | [SEO.2](SEO.2-crawler-access-sitemaps-and-llms-txt.md) |
+| F-4, F-5, F-6, F-7 | BLOCKER | [SEO.2](../../completed/seo/SEO.2-crawler-access-sitemaps-and-llms-txt.md) |
 | F-8, F-9, F-11 | MAJOR | [SEO.3](SEO.3-structured-data-and-entity-graph.md) |
-| F-16, F-17, F-18 | MAJOR | [SEO.4](SEO.4-core-web-vitals-and-page-experience.md) |
+| F-16, F-17, F-18 | MAJOR | [SEO.4](../../completed/seo/SEO.4-core-web-vitals-and-page-experience.md) |
 | F-19, F-20 | MAJOR | [SEO.5](SEO.5-information-architecture-and-internal-linking.md) |
 | F-13 | MAJOR | [SEO.6](SEO.6-answer-first-content-system.md) |
 | F-14 | MAJOR | [SEO.7](SEO.7-help-center-expansion.md) |
 | F-12 | MAJOR | [SEO.8](SEO.8-editorial-engine-and-content-calendar.md) |
 | F-15 | MAJOR | [SEO.9](SEO.9-comparison-alternatives-and-integration-pages.md) · [SEO.10](SEO.10-programmatic-utility-pages.md) |
 | F-2 (catalog scale) | MAJOR | [SEO.11](SEO.11-marketplace-catalog-seo.md) |
-| — (opportunity) | MAJOR | [SEO.12](SEO.12-original-research-and-data-program.md) · [SEO.13](SEO.13-offsite-entity-mentions-and-digital-pr.md) |
+| — (opportunity) | MAJOR | [SEO.12](SEO.12-original-research-and-data-program.md) · [SEO.13](../../completed/seo/SEO.13-offsite-entity-mentions-and-digital-pr.md) |
 | F-10 | MAJOR | [SEO.14](SEO.14-multimodal-video-images-and-social-assets.md) |
-| F-21 | MAJOR | [SEO.15](SEO.15-measurement-search-console-and-ai-share-of-voice.md) |
+| F-21 | MAJOR | [SEO.15](../../completed/seo/SEO.15-measurement-search-console-and-ai-share-of-voice.md) |
 | F-22 | MAJOR | [SEO.16](SEO.16-seo-governance-and-ci-guardrails.md) |
-| F-23 | MINOR | [SEO.17](SEO.17-international-seo-and-hreflang.md) |
+| F-23 | MINOR | [SEO.17](../../completed/seo/SEO.17-international-seo-and-hreflang.md) |

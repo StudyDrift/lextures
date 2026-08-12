@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
 import { ArrowLeft } from 'lucide-react'
+import { MarkdownBody } from '../components/markdown-body'
 import { CourseHeroPlaceholder, RatingStars } from '../components/courses/course-card'
 import { EnrollPanel } from '../components/courses/enroll-panel'
 import { ReviewList } from '../components/courses/review-list'
@@ -19,8 +18,9 @@ import {
   type PublicMarketplaceCourseDetail,
 } from '../lib/marketplace-api'
 import { useDocumentHead } from '../lib/use-document-head'
-
-const SITE_ORIGIN = 'https://lextures.com'
+import { useSsrData } from '../lib/ssr-context'
+import { canonicalUrl, SITE_ORIGIN } from '../lib/site-origin'
+import { courseDetailGraph } from '../lib/schema/page-graphs'
 
 function readCouponFromWindowSearch(): string {
   if (typeof window === 'undefined') return ''
@@ -37,34 +37,51 @@ type CourseDetailPageProps = {
 }
 
 export function CourseDetailPage({ slug }: CourseDetailPageProps) {
+  const ssr = useSsrData()
+  const ssrDetail =
+    ssr.courseDetail?.course &&
+    (ssr.courseDetail.course.slug === slug || ssr.courseDetail.course.courseCode === slug)
+      ? ssr.courseDetail
+      : null
+
   const [coupon] = useState(() => readCouponFromWindowSearch())
-  const [detail, setDetail] = useState<PublicMarketplaceCourseDetail | null>(null)
+  const [detail, setDetail] = useState<PublicMarketplaceCourseDetail | null>(() => ssrDetail)
   const [reviews, setReviews] = useState<CourseReview[]>([])
   const [reviewsSummary, setReviewsSummary] = useState<{ average: number | null; count: number }>({
     average: null,
     count: 0,
   })
   const [showReviews, setShowReviews] = useState(true)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(() => !ssrDetail)
   const [notFound, setNotFound] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [reloadKey, setReloadKey] = useState(0)
 
   const course = detail?.course
-  const title = course ? `${course.title} — Lextures` : COURSES_COPY.pageTitle
+  const courseKind = course ? [course.level, course.category].filter(Boolean).join(' ') : ''
+  const title = course
+    ? `${course.title} — ${courseKind ? `${courseKind} course` : 'online course'} | Lextures`
+    : COURSES_COPY.pageTitle
   const description = course
     ? truncateMetaDescription(course.description || COURSES_COPY.pageDescription)
     : COURSES_COPY.pageDescription
-  const canonical = `${SITE_ORIGIN}/courses/${encodeURIComponent(slug)}`
+  const canonical = canonicalUrl(`/courses/${encodeURIComponent(slug)}`)
   const heroImageUrl = resolveApiAssetUrl(course?.heroImageUrl)
   const image = heroImageUrl || undefined
 
+  // Override manifest defaults once course payload is available (unique title/JSON-LD).
+  const courseJsonLd = detail
+    ? courseDetailGraph(
+        { path: `/courses/${slug}`, origin: SITE_ORIGIN, params: { slug } },
+        detail,
+      )
+    : null
   useDocumentHead({
     title,
     description,
     canonical,
     image,
-    jsonLd: detail?.jsonLd ?? null,
+    jsonLd: courseJsonLd,
   })
 
   useEffect(() => {
@@ -76,7 +93,11 @@ export function CourseDetailPage({ slug }: CourseDetailPageProps) {
       return
     }
 
-    setLoading(true)
+    // Skip network when SSG already provided matching detail (still refresh reviews).
+    const hasSsr = Boolean(ssrDetail)
+    if (!hasSsr) {
+      setLoading(true)
+    }
     setError(null)
     setNotFound(false)
     let cancelled = false
@@ -85,13 +106,20 @@ export function CourseDetailPage({ slug }: CourseDetailPageProps) {
         if (cancelled) return
         setDetail(d)
         setLoading(false)
-        window.gtag?.('event', 'course_detail_view', {
-          slug,
-          hasCoupon: Boolean(readCouponFromWindowSearch()),
-        })
+        if (typeof window !== 'undefined') {
+          window.gtag?.('event', 'course_detail_view', {
+            slug,
+            hasCoupon: Boolean(readCouponFromWindowSearch()),
+          })
+        }
       })
       .catch((e: unknown) => {
         if (cancelled) return
+        if (hasSsr) {
+          // Keep prerendered content when a live refresh fails.
+          setLoading(false)
+          return
+        }
         setLoading(false)
         if (e instanceof MarketplaceApiError && e.status === 404) {
           setNotFound(true)
@@ -117,7 +145,7 @@ export function CourseDetailPage({ slug }: CourseDetailPageProps) {
     return () => {
       cancelled = true
     }
-  }, [slug, reloadKey])
+  }, [slug, reloadKey, ssrDetail])
 
   const load = () => setReloadKey(k => k + 1)
 
@@ -243,20 +271,35 @@ export function CourseDetailPage({ slug }: CourseDetailPageProps) {
                 >
                   About this course
                 </h2>
-                <div
+                <MarkdownBody
+                  markdown={course.description}
                   className="prose-content mt-4 text-[16px] leading-relaxed"
-                  style={{ color: 'var(--text)' }}
-                >
-                  <ReactMarkdown remarkPlugins={[remarkGfm]} skipHtml>
-                    {course.description}
-                  </ReactMarkdown>
-                </div>
+                />
               </section>
             )}
 
             <div className="mt-10">
               <WhatsIncluded data={detail.whatsIncluded} />
             </div>
+
+            <section className="mt-10" aria-labelledby="enrollment-heading">
+              <h2 id="enrollment-heading" className="font-display text-[22px] font-semibold" style={{ color: 'var(--ink-nav)' }}>
+                Enrollment and course access
+              </h2>
+              <p className="mt-4 text-[16px] leading-relaxed" style={{ color: 'var(--text-soft)' }}>
+                Enroll through Lextures to add this course to your learning dashboard. Your progress is saved as you work, and the enrollment panel shows the current price before you continue.
+              </p>
+              <p className="mt-3 text-[16px] leading-relaxed" style={{ color: 'var(--text-soft)' }}>
+                Coupons and refunds follow the terms shown during checkout. Course accessibility depends on the materials supplied by the instructor; contact the instructor before enrolling if you need a specific format or accommodation.
+              </p>
+              {course.category && (
+                <p className="mt-3 text-[16px]">
+                  <a href={`/courses?category=${encodeURIComponent(course.category)}`} className="underline">
+                    Browse more {course.category} courses
+                  </a>
+                </p>
+              )}
+            </section>
 
             {showReviews && (
               <div className="mt-10">

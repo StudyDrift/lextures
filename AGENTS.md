@@ -8,6 +8,7 @@ Lextures is an LMS (Learning Management System) with two main services:
 
 - **Go API** (`server/`): Go 1.25, Chi router, pgx for PostgreSQL, JWT auth. Runs on port 8080.
 - **React SPA** (`clients/web/`): React 19, Vite 8, TypeScript 6, Tailwind CSS v4. Runs on port 5173.
+- **Marketing site** (`www/`): Vite + React static site. Routes and SEO metadata live in `www/src/lib/route-manifest.tsx` only — **no route without a manifest entry**. `npm run build` runs `scripts/generate-site.mjs` (SSG via `renderToString`). Docs: [www/docs/site-generation.md](www/docs/site-generation.md), [www/docs/adding-a-page.md](www/docs/adding-a-page.md).
 - **PostgreSQL 16**: Primary data store (Docker container, port 5432). Credentials: `studydrift/studydrift`, database `studydrift`.
 
 **Conventions:** [docs/ARCHITECTURE_CONVENTIONS.md](docs/ARCHITECTURE_CONVENTIONS.md) — package layout, layering, file/package budgets, naming, and automated ratchets (`make lint-structure`).
@@ -47,6 +48,8 @@ Frontend env: `VITE_API_URL=http://localhost:8080` (set when running `npm run de
 | Go lint | `golangci-lint run ./...` | `server/` |
 | Frontend lint | `npm run lint` (oxlint) | `clients/web/` |
 | Marketing site lint | `npm run lint` (oxlint) | `www/` |
+| Marketing site build (SSG) | `npm run build` | `www/` |
+| Marketing site unit tests | `npm test` | `www/` |
 | Frontend typecheck | `npm run typecheck` | `clients/web/` |
 | Frontend tests | `npm run test` | `clients/web/` |
 | Frontend dev server | `npm run dev` | `clients/web/` |

@@ -1395,6 +1395,8 @@ PATCH	/api/v1/orgs/{orgId}/settings/mobile-link-handling	anonymous
 PUT	/api/v1/orgs/{orgId}/settings/mobile-link-handling	anonymous
 GET	/api/v1/orgs/{orgId}/settings/org-type	anonymous
 PUT	/api/v1/orgs/{orgId}/settings/org-type	anonymous
+GET	/api/v1/orgs/{orgId}/settings/research-participation	anonymous
+PUT	/api/v1/orgs/{orgId}/settings/research-participation	anonymous
 GET	/api/v1/orgs/{orgId}/settings/support-widget	anonymous
 PUT	/api/v1/orgs/{orgId}/settings/support-widget	anonymous
 GET	/api/v1/orgs/{orgId}/tax/report	anonymous

@@ -1,48 +1,39 @@
-# Marketplace SEO prerender (plan MKT10)
+# Marketplace SEO prerender
 
-The www marketing site is a static SPA on GitHub Pages. Course pages are made crawlable by a **build-time prerender** step that runs after `vite build`.
+> **Superseded by [site-generation.md](./site-generation.md)** (SEO.1).
+>
+> Course prerender is now part of the full-site static generator
+> (`scripts/generate-site.mjs`). That script renders every manifest route
+> (including `/courses` and `/courses/:slug`) with `renderToString`, writes
+> `.seo-manifest.json`, and degrades gracefully when the marketplace API is
+> down.
 
-## How it works
+See:
 
-`npm run build` runs:
+- [site-generation.md](./site-generation.md) — architecture, env vars, failure modes
+- [adding-a-page.md](./adding-a-page.md) — how to add routes
 
-```
-tsc -b && vite build && node scripts/prerender-courses.mjs
-```
+## Catalog policy
 
-The prerender script:
+Production builds fetch every listed, published marketplace course with bounded concurrency (default
+8). Course pages use a distinctive title containing the course level and subject, creator-authored
+summary metadata, a canonical URL, and a `Course` graph. Rating markup is emitted only after five
+reviews. Creator markdown is escaped and external links receive `nofollow ugc noopener`.
 
-1. Fetches all listed+published courses from `GET {API_BASE}/api/v1/public/marketplace/courses` (paginated).
-2. For each course, fetches detail (including server-built `jsonLd`) and writes `dist/courses/<slug>/index.html` with per-page `<title>`, description, canonical, OG/Twitter tags, and Course JSON-LD.
-3. Writes `dist/courses/index.html` for the storefront.
-4. Writes `dist/sitemap.xml` (static routes + blog/docs posts + every course URL) and `dist/robots.txt`.
+The generator applies the SEO.11 quality floor in `scripts/marketplace-seo.mjs`. A listing must have
+300 characters of original description, sufficiently distinct creator copy, 3 modules or 5 content
+items, an image, complete subject/level/language/price metadata, a verified creator, and clear
+moderation status. Failing pages remain usable but receive `noindex,follow` and are excluded from
+sitemaps. `dist/.catalog-quality.json` records every check and its threshold.
 
-## Environment
+Subject and level hubs are emitted only when at least three matching courses exist. They contain
+orienting copy, crawlable course links, and `ItemList` schema. Multi-dimensional filtering stays on
+the `/courses` client view and does not create indexable facet URLs.
 
-| Variable | Default | Purpose |
-|---|---|---|
-| `API_BASE` / `VITE_API_BASE_URL` | `https://self.lextures.com` | Public marketplace API origin |
-| `SITE_ORIGIN` | `https://lextures.com` | Canonical / sitemap origin |
-| `SKIP_COURSE_PRERENDER=1` | unset | Escape hatch: write `/courses` + sitemap shell only; **do not** fail the build when the API is unreachable |
+## Freshness and recovery
 
-## Failure mode
-
-If the API is unreachable and `SKIP_COURSE_PRERENDER` is unset, the build **fails loudly** so we never deploy empty/stale course pages silently.
-
-## Freshness
-
-New listings appear in the sitemap/prerender after the next www deploy. Prefer a **daily scheduled CI rebuild** (plus manual trigger) so Search Console stays current. Rebuild-on-publish webhook is a fast-follow.
-
-## Search Console
-
-After deploy, submit (or resubmit) `https://lextures.com/sitemap.xml` in Google Search Console:
-
-1. Open [Google Search Console](https://search.google.com/search-console) for the `lextures.com` property.
-2. Go to **Sitemaps** → enter `sitemap.xml` → **Submit**.
-3. Monitor **Pages** / coverage for `/courses/*`, `/blog/*`, and `/docs/*`.
-
-`robots.txt` already includes `Sitemap: https://lextures.com/sitemap.xml` so crawlers discover it automatically.
-
-## Runtime head updates
-
-`CoursesPage` and `CourseDetailPage` call `useDocumentHead` so client-side navigation keeps `document.title`, meta, canonical, and JSON-LD in sync with the prerendered values (idempotent on hydrate).
+The Pages workflow runs hourly as well as on www changes and manual dispatch. IndexNow receives new
+and materially changed manifest URLs after deployment. `FORCE_COURSE_REBUILD=1` (or the manual
+workflow checkbox) forces a full catalog rebuild. `.course-cache.json` stores course update versions
+for incremental discovery. If the API is unavailable, generation attempts to reuse course HTML from
+the previous deployment rather than replacing the catalog with an empty result.

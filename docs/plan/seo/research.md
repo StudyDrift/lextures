@@ -22,7 +22,7 @@ the whole plan set:
 3. **Traffic and visibility have decoupled.** Only 12–18% of Perplexity citations produce a click
    ([SparkToro via AuthorityTech](https://authoritytech.io/curated/ai-referral-traffic-brand-citation-measurement-2026)).
    Optimising for sessions alone will under-report the channel by ~5×; we must measure citations and
-   share-of-voice as first-class KPIs (see [SEO.15](SEO.15-measurement-search-console-and-ai-share-of-voice.md)).
+   share-of-voice as first-class KPIs (see [SEO.15](../../completed/seo/SEO.15-measurement-search-console-and-ai-share-of-voice.md)).
 
 **Implication for Lextures.** Buyers of a learning platform (district curriculum directors, HE
 instructional designers, homeschool parents) are exactly the population now asking an assistant
@@ -185,7 +185,7 @@ Google does **not** penalise content for being AI-generated — it penalises low
 regardless of origin ([Google](https://developers.google.com/search/docs/fundamentals/using-gen-ai-content)).
 
 > **The "inauthentic mentions" clause is why our off-site program
-> ([SEO.13](SEO.13-offsite-entity-mentions-and-digital-pr.md)) is built around disclosed, genuine
+> ([SEO.13](../../completed/seo/SEO.13-offsite-entity-mentions-and-digital-pr.md)) is built around disclosed, genuine
 > participation.** Astroturfing Reddit is now an explicitly named spam vector *and* the community
 > platforms enforce it harder than Google does.
 
@@ -252,7 +252,7 @@ differentiated answer to exactly that query class — and they are currently inv
 ## 11. What this means for Lextures — the five bets
 
 1. **Fix retrievability first.** Nothing else compounds until every URL returns real HTML at
-   `200 OK`. (→ [SEO.1](SEO.1-static-rendering-and-crawlability.md), [SEO.2](SEO.2-crawler-access-sitemaps-and-llms-txt.md))
+   `200 OK`. (→ [SEO.1](SEO.1-static-rendering-and-crawlability.md), [SEO.2](../../completed/seo/SEO.2-crawler-access-sitemaps-and-llms-txt.md))
 2. **Become a resolvable entity.** Organization schema + `sameAs` + Wikidata + named authors is the
    cheapest available lever on AI citation. (→ [SEO.3](SEO.3-structured-data-and-entity-graph.md))
 3. **Write for passage extraction, not for word count.** Answer-first blocks, 134–167-word
@@ -262,7 +262,7 @@ differentiated answer to exactly that query class — and they are currently inv
    (→ [SEO.9](SEO.9-comparison-alternatives-and-integration-pages.md), [SEO.10](SEO.10-programmatic-utility-pages.md))
 5. **Manufacture mentions honestly.** Original research + disclosed community participation +
    directory/review presence, because 85% of the mentions that matter are not on our domain.
-   (→ [SEO.12](SEO.12-original-research-and-data-program.md), [SEO.13](SEO.13-offsite-entity-mentions-and-digital-pr.md))
+   (→ [SEO.12](SEO.12-original-research-and-data-program.md), [SEO.13](../../completed/seo/SEO.13-offsite-entity-mentions-and-digital-pr.md))
 
 ---
 

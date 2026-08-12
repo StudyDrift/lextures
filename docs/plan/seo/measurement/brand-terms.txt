@@ -1,0 +1,4 @@
+# JavaScript-compatible, case-insensitive regex source. One expression per line.
+\blextures?\b
+\blextures\.com\b
+\bstudydrift\b

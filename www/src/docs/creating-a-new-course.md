@@ -2,7 +2,7 @@
 title: Creating a New Course
 date: 2024-05-20
 description: A step-by-step guide for instructors and administrators to create and configure a new course on Lextures.
-author: Lextures Support
+author: chase-willden
 ---
 
 Creating a new course in Lextures is an intuitive, 3-step guided process. Whether you are launching a brand-new curriculum or setting up a standard class section, the wizard helps you lay a strong foundation for your students. Follow this guide to get started.

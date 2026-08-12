@@ -20,7 +20,15 @@ export type PublicMarketplaceCourse = {
   averageRating: number | null
   ratingCount: number
   instructorName: string | null
+  instructorSlug?: string | null
+  instructorId?: string | null
+  creatorVerified?: boolean
+  moderationFlagged?: boolean
+  moderationUnderReview?: boolean
+  imageSeoCompliant?: boolean
   createdAt: string
+  /** Present when the public API exposes it; used for sitemap lastmod (SEO.2). */
+  updatedAt?: string | null
 }
 
 export type MarketplaceCategory = {
@@ -38,6 +46,13 @@ export type PublicMarketplaceCourseDetail = {
   course: PublicMarketplaceCourse
   whatsIncluded: MarketplaceWhatsIncluded
   jsonLd?: Record<string, unknown>
+  indexable?: boolean
+  qualityChecks?: Array<{
+    key: string
+    passed: boolean
+    threshold: string
+    actual?: unknown
+  }>
 }
 
 export type MarketplaceSearchResponse = {

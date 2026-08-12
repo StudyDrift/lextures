@@ -44,8 +44,17 @@ export function HeroCanvas() {
     const reduceMotion =
       typeof window.matchMedia === 'function' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const lowEnd =
+      (typeof navigator !== 'undefined' &&
+        ((navigator.hardwareConcurrency || 8) <= 4 ||
+          Boolean(
+            (navigator as Navigator & { connection?: { saveData?: boolean } }).connection
+              ?.saveData,
+          ))) ||
+      false
 
-    const ATOM_COUNT = reduceMotion ? 15 : 40
+    // SEO.4 FR-14 — fewer atoms on reduced-motion / low-end; never LCP (decorative).
+    const ATOM_COUNT = reduceMotion || lowEnd ? 12 : 40
     const BOND_DIST = 80
     const BREAK_DIST = 120
     const REPEL_DIST = 200
@@ -235,9 +244,28 @@ export function HeroCanvas() {
       }
     }
 
+    let running = false
+
     function tick() {
+      // SEO.4 FR-14 — pause when tab hidden; no rAF while document.hidden.
+      if (document.hidden) {
+        running = false
+        return
+      }
       drawFrame()
       raf = requestAnimationFrame(tick)
+      running = true
+    }
+
+    function startLoop() {
+      if (reduceMotion || lowEnd || running || document.hidden) return
+      raf = requestAnimationFrame(tick)
+      running = true
+    }
+
+    function stopLoop() {
+      cancelAnimationFrame(raf)
+      running = false
     }
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -252,33 +280,60 @@ export function HeroCanvas() {
       mouse.current = { x: -1000, y: -1000 }
     }
 
+    const handleVisibility = () => {
+      if (document.hidden) {
+        stopLoop()
+      } else if (!reduceMotion && !lowEnd) {
+        startLoop()
+      } else {
+        drawFrame()
+      }
+    }
+
     window.addEventListener('mousemove', handleMouseMove)
     window.addEventListener('mouseleave', handleMouseLeave)
+    document.addEventListener('visibilitychange', handleVisibility)
 
     resize()
     init()
-    if (!reduceMotion) {
-      tick()
-    } else {
+    // Defer animation past first paint so canvas is never the LCP bottleneck.
+    if (reduceMotion || lowEnd) {
       drawFrame()
+    } else {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          drawFrame()
+          startLoop()
+        })
+      })
     }
 
     const ro = new ResizeObserver(() => {
       resize()
       init()
-      if (reduceMotion) {
+      if (reduceMotion || lowEnd || document.hidden) {
         drawFrame()
       }
     })
     ro.observe(canvas)
 
     return () => {
-      cancelAnimationFrame(raf)
+      stopLoop()
       ro.disconnect()
       window.removeEventListener('mousemove', handleMouseMove)
       window.removeEventListener('mouseleave', handleMouseLeave)
+      document.removeEventListener('visibilitychange', handleVisibility)
     }
   }, [])
 
-  return <canvas ref={ref} className="absolute inset-0 h-full w-full" aria-hidden />
+  // Decorative only — role presentation + empty so it never becomes LCP text target.
+  return (
+    <canvas
+      ref={ref}
+      className="absolute inset-0 h-full w-full"
+      aria-hidden
+      role="presentation"
+      data-lcp-exclude="true"
+    />
+  )
 }
