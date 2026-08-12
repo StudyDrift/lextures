@@ -15,10 +15,11 @@ import { apiGetContextualArticles, apiLogin, apiSignup } from '../fixtures/api.j
 import { bootstrapGlobalAdmin, setPlatformFlag } from '../lib/feature-lifecycle-helpers.js'
 
 async function enableMarketingContent() {
-  const email = `help-widget-ga-${Date.now()}@example.com`
-  await apiSignup(email)
+  const email = `help-widget-ga-${Date.now()}@test.invalid`
+  const password = 'E2eTestPass1!help-widget'
+  await apiSignup({ email, password })
   await bootstrapGlobalAdmin(email)
-  const ga = await apiLogin(email)
+  const ga = await apiLogin({ email, password })
   await setPlatformFlag(ga.access_token, 'ffMarketingContent', true)
 }
 
