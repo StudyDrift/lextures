@@ -328,6 +328,7 @@ if [[ "${E2E_LIGHTHOUSE:-}" == "1" ]]; then
   fi
   E2E_BASE_URL="http://localhost:5173" \
     E2E_API_URL="http://localhost:${E2E_API_PORT}" \
+    DATABASE_URL="${DATABASE_URL}" \
     npm run lighthouse:dashboard:dark
   exit $?
 fi
@@ -351,9 +352,11 @@ done
 if [[ "${#PLAYWRIGHT_TEST_ARGS[@]}" -gt 0 ]]; then
   E2E_BASE_URL="http://localhost:5173" \
     E2E_API_URL="http://localhost:${E2E_API_PORT}" \
+    DATABASE_URL="${DATABASE_URL}" \
     npx playwright test "${PLAYWRIGHT_TEST_ARGS[@]}"
 else
   E2E_BASE_URL="http://localhost:5173" \
     E2E_API_URL="http://localhost:${E2E_API_PORT}" \
+    DATABASE_URL="${DATABASE_URL}" \
     npx playwright test
 fi
