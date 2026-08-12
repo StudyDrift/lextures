@@ -2,7 +2,7 @@
 title: Self-hosting Lextures
 date: 2026-06-01
 description: Install Lextures with Docker Compose, create the first Global Admin account, and open the local web app.
-author: Lextures Team
+author: chase-willden
 ---
 
 Lextures is AGPL-3.0 licensed and runs on your own infrastructure with Docker Compose. This guide covers a **development** install (hot reload for the API and web app). For production-style nginx hosting, use the same bootstrap steps with `docker-compose.prod.yml` (see the [Getting started](https://github.com/StudyDrift/lextures/blob/main/docs/getting-started.md) doc in the repository).

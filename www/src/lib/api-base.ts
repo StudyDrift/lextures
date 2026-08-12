@@ -9,6 +9,7 @@ export function resolveApiAssetUrl(url: string | null | undefined): string | nul
   const trimmed = url.trim()
   if (!trimmed) return null
   if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed
+  if (trimmed.startsWith('/assets/course-images/')) return trimmed
   if (trimmed.startsWith('/')) return `${API_BASE}${trimmed}`
   return trimmed
 }

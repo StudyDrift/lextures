@@ -27,6 +27,7 @@ export function toInstitutionInquiryPayload(form: InstitutionInquiryForm) {
     enrollment_size: form.enrollmentSize.trim(),
     hosting_preference: form.hostingPreference.trim(),
     message: form.message.trim(),
+    first_touch_channel: form.firstTouchChannel.trim(),
   }
 }
 

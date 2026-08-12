@@ -105,8 +105,8 @@ export function CourseGrid({
         {COURSES_COPY.resultsCount(total)}
       </p>
       <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {courses.map(c => (
-          <CourseCard key={c.id} course={c} />
+        {courses.map((c, index) => (
+          <CourseCard key={c.id} course={c} priority={index === 0} />
         ))}
       </ul>
       {nextCursor && (

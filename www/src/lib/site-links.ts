@@ -11,6 +11,8 @@ export function tenantOrigin(schoolCode: string) {
 export const SITE_LINKS = {
   homeschool: `${HOMESCHOOL_ORIGIN}/`,
   github: 'https://github.com/StudyDrift/lextures',
+  press: '/press',
+  pressEmail: 'chase@lextures.com',
   institutionInquiryEmail: 'chase@lextures.com',
   privacy: '/privacy',
   privacyHistory: '/privacy/history',

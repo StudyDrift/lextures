@@ -11,6 +11,7 @@ import {
   SCHOOL_NOT_FOUND_MESSAGE,
 } from '../lib/school-code'
 import { SITE_LINKS, TENANT_HOST_SUFFIX, tenantOrigin } from '../lib/site-links'
+import { getFirstTouch, trackEvent } from '../lib/analytics'
 
 // Fire-and-forget — never awaited, never surfaces errors to the user.
 function trackOnboarding(program: string, schoolCode?: string) {
@@ -239,6 +240,7 @@ export function GetStartedPage() {
   const [step, setStep] = useState<Step>('choose')
 
   function handleChoose(path: Path) {
+    trackEvent('get_started_started', { path, first_touch_channel: getFirstTouch()?.channel ?? 'direct' })
     if (path === 'homeschool') {
       trackOnboarding(ONBOARDING_PROGRAM_HOMESCHOOL)
       window.location.href = SITE_LINKS.homeschool

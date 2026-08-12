@@ -7,6 +7,7 @@ import { ImageModelPicker } from '../../components/image-model-picker'
 import { RequirePermission } from '../../components/require-permission'
 import { LtiToolsSettingsPanel } from '../../components/settings/lti-tools-settings-panel'
 import { OrganizationsPanel } from '../../components/settings/organizations-panel'
+import { ResearchParticipationPanel } from '../../components/settings/research-participation-panel'
 import { OrgUnitsPanel } from '../../components/settings/org-units-panel'
 import { TermsSettingsPanel } from '../../components/settings/terms-settings-panel'
 import { PlatformSettingsPanel } from '../../components/settings/platform-settings-panel'
@@ -1131,6 +1132,7 @@ export default function Settings() {
               }
             >
               <OrganizationsPanel />
+              <ResearchParticipationPanel />
             </RequirePermission>
           </div>
         )}

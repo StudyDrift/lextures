@@ -2,7 +2,7 @@
 title: Navigating the Course Interface
 date: 2024-05-20
 description: A comprehensive guide to understanding the Lextures learning environment.
-author: Lextures Support
+author: chase-willden
 ---
 
 Once you've entered a course, you'll find a consistent, focused environment designed to help you stay on track. Here's a breakdown of the key areas you'll interact with.

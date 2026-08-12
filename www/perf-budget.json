@@ -1,0 +1,50 @@
+{
+  "$schema": "./perf-budget.schema.json",
+  "version": 1,
+  "description": "SEO.4 Core Web Vitals & page-experience budgets for www. CI fails when exceeded.",
+  "classes": {
+    "content": {
+      "description": "Static / interactive:false pages (legal, blog, docs, about, authors, marketing shells without marketplace client)",
+      "jsGzipKb": 60,
+      "cssGzipKb": 25,
+      "totalGzipKb": 350,
+      "requests": 20,
+      "labLcpMs": 1800,
+      "labTbtMs": 150,
+      "cls": 0.05
+    },
+    "interactive": {
+      "description": "Hydrated pages (/pricing/calculator, /courses, /courses/*, /request-information, home with motion)",
+      "jsGzipKb": 150,
+      "cssGzipKb": 25,
+      "totalGzipKb": 600,
+      "requests": 30,
+      "labLcpMs": 2000,
+      "labTbtMs": 250,
+      "cls": 0.05
+    }
+  },
+  "routeClass": {
+    "/": "interactive",
+    "/pricing/calculator": "interactive",
+    "/courses": "interactive",
+    "/courses/*": "interactive",
+    "/request-information": "interactive",
+    "/get-started": "interactive",
+    "default": "content"
+  },
+  "overrides": [],
+  "benchmarkUrls": [
+    "/",
+    "/pricing",
+    "/k12",
+    "/higher-ed",
+    "/homeschool",
+    "/blog/the-synthetic-renaissance",
+    "/docs/self-hosting",
+    "/courses",
+    "/pricing/calculator",
+    "/privacy"
+  ],
+  "notes": "Bundle-size and request checks run on every generated indexable route via check-perf-budget.mjs. Lighthouse lab metrics are hard assertions for the benchmark list in lighthouserc.json."
+}

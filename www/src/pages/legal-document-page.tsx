@@ -1,12 +1,10 @@
-import { useEffect, useMemo, type ReactNode } from 'react'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
+import { useMemo } from 'react'
 import { Header } from '../components/header'
 import { LegalNav } from '../components/legal-nav'
 import { SiteFooter } from '../components/site-footer'
+import { MarkdownBody } from '../components/markdown-body'
 import {
   extractTocEntries,
-  slugifyHeading,
   type LegalDocumentConfig,
 } from '../lib/legal-documents'
 
@@ -15,63 +13,13 @@ type LegalDocumentPageProps = {
   showHistory?: boolean
 }
 
-function LegalJsonLd({ legalDoc }: { legalDoc: LegalDocumentConfig }) {
-  useEffect(() => {
-    const scriptId = 'legal-json-ld'
-    let el = window.document.getElementById(scriptId) as HTMLScriptElement | null
-    if (!el) {
-      el = window.document.createElement('script')
-      el.id = scriptId
-      el.type = 'application/ld+json'
-      window.document.head.appendChild(el)
-    }
-    const payload = {
-      '@context': 'https://schema.org',
-      '@type': legalDoc.jsonLdType,
-      name: legalDoc.title,
-      url: `${window.location.origin}${legalDoc.path}`,
-      dateModified: legalDoc.version,
-      publisher: { '@type': 'Organization', name: 'Lextures, Inc.' },
-    }
-    el.textContent = JSON.stringify(payload)
-    return () => {
-      el?.remove()
-    }
-  }, [legalDoc])
-
-  return null
-}
-
-function LegalMarkdownLink({ href, children }: { href?: string; children?: ReactNode }) {
-  if (href?.startsWith('/')) {
-    return (
-      <a href={href} className="text-accent underline underline-offset-2 hover:text-accent-hover">
-        {children}
-      </a>
-    )
-  }
-  return (
-    <a
-      href={href}
-      className="text-accent underline underline-offset-2 hover:text-accent-hover"
-      {...(href?.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-    >
-      {children}
-    </a>
-  )
-}
-
 export function LegalDocumentPage({ document: doc, showHistory }: LegalDocumentPageProps) {
   const markdown = showHistory ? doc.historyMarkdown : doc.bodyMarkdown
+  const html = showHistory ? doc.historyHtml : doc.bodyHtml
   const toc = useMemo(() => extractTocEntries(markdown), [markdown])
-
-  useEffect(() => {
-    window.document.title = showHistory ? `${doc.title} — History` : `${doc.title} — Lextures`
-  }, [doc.title, showHistory])
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-white text-slate-900">
-      <LegalJsonLd legalDoc={doc} />
       <Header />
 
       <div className="mx-auto flex max-w-5xl flex-col gap-8 px-4 py-8 sm:px-6 lg:flex-row lg:py-10">
@@ -85,7 +33,7 @@ export function LegalDocumentPage({ document: doc, showHistory }: LegalDocumentP
                 On this page
               </p>
               <ol className="space-y-1.5">
-                {toc.map((entry) => (
+                {toc.map(entry => (
                   <li key={entry.id}>
                     <a
                       href={`#${entry.id}`}
@@ -138,25 +86,10 @@ export function LegalDocumentPage({ document: doc, showHistory }: LegalDocumentP
             </p>
           </header>
 
-          <div className="prose-content legal-prose [&_h2]:scroll-mt-28 [&_h2]:border-b [&_h2]:border-slate-200 [&_h2]:pb-2 [&_table]:w-full [&_table]:border-collapse [&_td]:border [&_td]:border-slate-200 [&_td]:p-2 [&_th]:border [&_th]:border-slate-200 [&_th]:bg-slate-50 [&_th]:p-2">
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              components={{
-                h2: ({ children }) => {
-                  const text = String(children)
-                  const id = slugifyHeading(text)
-                  return (
-                    <h2 id={id} tabIndex={-1}>
-                      {children}
-                    </h2>
-                  )
-                },
-                a: ({ href, children }) => <LegalMarkdownLink href={href}>{children}</LegalMarkdownLink>,
-              }}
-            >
-              {markdown}
-            </ReactMarkdown>
-          </div>
+          <MarkdownBody
+            html={html}
+            className="prose-content legal-prose [&_h2]:scroll-mt-28 [&_h2]:border-b [&_h2]:border-slate-200 [&_h2]:pb-2 [&_table]:w-full [&_table]:border-collapse [&_td]:border [&_td]:border-slate-200 [&_td]:p-2 [&_th]:border [&_th]:border-slate-200 [&_th]:bg-slate-50 [&_th]:p-2"
+          />
         </article>
       </div>
 

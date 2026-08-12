@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "ai_assistant": {
+    "utm_medium": ["ai"],
+    "referrer_hosts": ["chatgpt.com","chat.openai.com","perplexity.ai","gemini.google.com","claude.ai","copilot.microsoft.com","bing.com/chat","you.com","grok.com","poe.com"]
+  }
+}

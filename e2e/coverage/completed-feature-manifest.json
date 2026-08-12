@@ -8,6 +8,42 @@
   ],
   "entries": [
     {
+      "id": "SEO.17",
+      "path": "docs/completed/seo/SEO.17-international-seo-and-hreflang.md",
+      "markets": ["K12", "HE", "HS"],
+      "risk": "minor",
+      "client": "web",
+      "coverage": "not-applicable",
+      "rationale": "Locale routing gates, hreflang reciprocity, HTML/sitemap parity, and non-indexable-target protection are deterministic build and Node-test concerns; no signed-in product journey applies.",
+      "owner": "Web Platform",
+      "specs": [{ "path": "www/scripts/seo-check/checks/hreflang.test.mjs" }],
+      "reviewed": true
+    },
+    {
+      "id": "SEO.16",
+      "path": "docs/completed/seo/SEO.16-seo-governance-and-ci-guardrails.md",
+      "markets": ["K12", "HE", "HS"],
+      "risk": "major",
+      "client": "web",
+      "coverage": "not-applicable",
+      "rationale": "Generated-site invariants, lifecycle policy, and live crawler verification are exercised by deterministic Node tests and dedicated CI workflows; no signed-in product journey applies.",
+      "owner": "Web Platform",
+      "specs": [{ "path": "www/scripts/seo-check/core.test.mjs" }],
+      "reviewed": true
+    },
+    {
+      "id": "SEO.6",
+      "path": "docs/completed/seo/SEO.6-answer-first-content-system.md",
+      "markets": ["ALL"],
+      "risk": "major",
+      "client": "web",
+      "coverage": "smoke",
+      "rationale": "Build-time content contract, security policy, scoring, artifact generation, and static component rendering are covered by unit and marketing-site build tests; the internal content-kit route provides the rendered smoke surface.",
+      "owner": "Docs / Content",
+      "specs": [{ "path": "www/scripts/content-lint/core.test.mjs" }],
+      "reviewed": true
+    },
+    {
       "id": "08",
       "path": "docs/completed/01-adaptive-learning-core/08-openapi-irt-calibration-doc-fix.md",
       "markets": [

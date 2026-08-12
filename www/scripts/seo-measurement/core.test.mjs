@@ -1,0 +1,7 @@
+import assert from 'node:assert/strict'; import test from 'node:test'; import fs from 'node:fs'; import path from 'node:path'
+import {brandRegex,crawlAlerts,freshness,pageFamily,validatePrompts,visibilitySummary} from './core.mjs'
+const defs=path.resolve(import.meta.dirname,'../../../docs/plan/seo/measurement'), prompts=JSON.parse(fs.readFileSync(path.join(defs,'prompts.yaml'),'utf8'))
+test('fixed prompt set has six balanced categories',()=>assert.deepEqual(validatePrompts(prompts),[]))
+test('brand and page-family classifiers',()=>{const regex=brandRegex(fs.readFileSync(path.join(defs,'brand-terms.txt'),'utf8'));assert.equal(regex.test('Lextures pricing'),true);assert.equal(regex.test('Canvas pricing'),false);assert.equal(pageFamily('https://lextures.com/resources/guides/a'),'/resources')})
+test('AI share retains competitive evidence',()=>{const v=visibilitySummary([{prompt_id:'brand-01',engine:'chatgpt',mentioned:true,cited_urls:['https://lextures.com/'],competitors:['Canvas'],entity_accuracy:false,entity_errors:['category']}],prompts);assert.equal(v.shareOfVoice,1);assert.deepEqual(v.competitors,[['Canvas',1]]);assert.equal(v.entityErrors.length,1)})
+test('failures are visible rather than zeros',()=>{assert.equal(crawlAlerts([{bot:'GPTBot',requests:40,status_4xx:3}],[{bot:'GPTBot',requests:100}]).length,2);const s=freshness([{source:'gsc',ok:false,last_success:'2026-08-10T00:00:00Z'}],new Date('2026-08-11T00:00:00Z'));assert.equal(s.find(v=>v.source==='gsc').state,'failed');assert.equal(s.find(v=>v.source==='bing').state,'missing')})

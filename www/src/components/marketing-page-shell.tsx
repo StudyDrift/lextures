@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Header } from './header'
 import { SiteFooter } from './site-footer'
 import { WindLines } from './home/wind-lines'
+import { LocaleSuggestion, TranslationStaleNotice } from './locale-controls'
 
 type MarketingPageShellProps = {
   children: ReactNode
@@ -14,6 +15,8 @@ export function MarketingPageShell({ children }: MarketingPageShellProps) {
       style={{ backgroundColor: 'var(--paper)', color: 'var(--text)' }}
     >
       <Header />
+      <LocaleSuggestion />
+      <TranslationStaleNotice />
       <main>{children}</main>
       <SiteFooter />
     </div>

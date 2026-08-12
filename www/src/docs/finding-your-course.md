@@ -2,7 +2,7 @@
 title: Finding Your Course for the First Time
 date: 2024-05-20
 description: A visually-guided walkthrough to help you locate and enter your courses on Lextures.
-author: Lextures Support
+author: chase-willden
 ---
 
 Welcome to Lextures! Whether you're a new student or an instructor, getting to your course content should be the easiest part of your day. Follow this simple 3-step guide to get started.

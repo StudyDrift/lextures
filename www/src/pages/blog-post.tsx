@@ -1,9 +1,12 @@
 import { ArrowLeft } from 'lucide-react'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
 import { Header } from '../components/header'
 import { SiteFooter } from '../components/site-footer'
+import { Byline } from '../components/byline'
+import { MarkdownBody } from '../components/markdown-body'
 import { formatDate, getPost } from '../utils/blog'
+import { RelatedContent } from '../components/related-content'
+import { ContextualLinks } from '../components/contextual-links'
+import { editorialPillar, pillarHref } from '../lib/editorial-pillars'
 
 export function BlogPost({ slug }: { slug: string }) {
   const post = getPost(slug)
@@ -22,13 +25,13 @@ export function BlogPost({ slug }: { slug: string }) {
       </div>
     )
   }
+  const pillar = editorialPillar(post.pillar)
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-white text-slate-900">
       <Header />
 
       <main>
-        {/* Post header */}
         <div className="border-b border-slate-200 bg-white py-12 sm:py-16">
           <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <a
@@ -48,18 +51,28 @@ export function BlogPost({ slug }: { slug: string }) {
               {post.title}
             </h1>
             <p className="mt-4 text-lg leading-relaxed text-slate-600">{post.description}</p>
-            <p className="mt-4 text-sm text-slate-400">By {post.author}</p>
           </div>
         </div>
 
-        {/* Post body */}
         <div className="py-12 sm:py-16">
           <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <div className="prose-content">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                {post.content}
-              </ReactMarkdown>
-            </div>
+            <article>
+              <MarkdownBody html={post.html} className="prose-content" />
+              {pillar && <aside className="mt-10 rounded-xl border border-slate-200 bg-slate-50 p-5" aria-label="Editorial guide">
+                <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">Part of the guide</p>
+                <a className="mt-1 block text-lg font-semibold" href={pillarHref(pillar.id)}>{pillar.title}</a>
+                <p className="mt-2 text-sm text-slate-600">This cluster connects practical answers on one topic. The full pillar publishes after five reviewed cluster articles are live.</p>
+              </aside>}
+              <ContextualLinks kind="blog" />
+              <Byline
+                authorSlug={post.author}
+                datePublished={post.date}
+                dateModified={post.updated || post.date}
+                reviewedBySlug={post.reviewedBy}
+                className="mt-12"
+              />
+              <RelatedContent path={`/blog/${slug}`} />
+            </article>
 
             <div className="mt-16 border-t border-slate-200/80 pt-10">
               <a href="/blog" className="btn-secondary inline-flex gap-2">

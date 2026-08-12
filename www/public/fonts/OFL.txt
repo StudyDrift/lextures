@@ -92,3 +92,12 @@ INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
 DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 OTHER DEALINGS IN THE FONT SOFTWARE.
+
+-----------------------------------------------------------
+Spectral — Copyright 2017 The Spectral Project Authors
+(https://github.com/productiontype/Spectral)
+Licensed under the SIL Open Font License, Version 1.1.
+
+IBM Plex Mono — Copyright 2017 IBM Corp.
+Licensed under the SIL Open Font License, Version 1.1.
+https://github.com/IBM/plex

@@ -2,33 +2,103 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Lextures</title>
-    <script>
-      // GitHub Pages SPA fallback: rewrite /docs/... and /blog/... to /?/... so index.html loads.
-      // https://github.com/rafgraph/spa-github-pages
-      ;(function (l) {
-        var pathSegmentsToKeep = 0
-        l.replace(
-          l.protocol +
-            '//' +
-            l.hostname +
-            (l.port ? ':' + l.port : '') +
-            l.pathname
-              .split('/')
-              .slice(0, 1 + pathSegmentsToKeep)
-              .join('/') +
-            '/?/' +
-            l.pathname
-              .slice(1)
-              .split('/')
-              .slice(pathSegmentsToKeep)
-              .join('/')
-              .replace(/&/g, '~and~') +
-            (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
-            l.hash,
-        )
-      })(window.location)
-    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex,follow" />
+    <meta
+      name="description"
+      content="The page you requested does not exist. Browse Lextures docs, blog, pricing, or courses."
+    />
+    <link rel="canonical" href="https://lextures.com/404" />
+    <title>Page not found — Lextures</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <style>
+      :root {
+        --paper: #f7f4ef;
+        --ink: #22333b;
+        --soft: #56676a;
+        --coral: #f2684e;
+        --panel: #fff;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        background: var(--paper);
+        color: var(--ink);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1.25rem;
+      }
+      main {
+        max-width: 36rem;
+        text-align: center;
+      }
+      .code {
+        font-size: 0.8125rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--coral);
+      }
+      h1 {
+        margin: 1rem 0 0;
+        font-size: clamp(1.75rem, 4vw, 2.5rem);
+        line-height: 1.15;
+      }
+      p {
+        margin: 1rem 0 0;
+        color: var(--soft);
+        font-size: 1.0625rem;
+        line-height: 1.55;
+      }
+      nav {
+        margin-top: 2rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        justify-content: center;
+      }
+      a {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.65rem 1.15rem;
+        border-radius: 999px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9375rem;
+        color: var(--ink);
+        background: var(--panel);
+        border: 1px solid rgba(38, 58, 60, 0.12);
+      }
+      a:hover {
+        border-color: rgba(38, 58, 60, 0.28);
+      }
+      a.primary {
+        background: var(--ink);
+        color: #fff;
+        border-color: var(--ink);
+      }
+    </style>
   </head>
-  <body></body>
+  <body>
+    <main>
+      <p class="code">404</p>
+      <h1>Page not found</h1>
+      <p>
+        That URL is not part of the Lextures site. Try one of the hubs below, or start from the
+        homepage.
+      </p>
+      <nav aria-label="Suggested pages">
+        <a class="primary" href="/">Home</a>
+        <a href="/docs">Docs</a>
+        <a href="/blog">Blog</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/courses">Courses</a>
+      </nav>
+    </main>
+  </body>
 </html>

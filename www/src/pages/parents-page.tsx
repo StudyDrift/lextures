@@ -16,7 +16,7 @@ export function ParentsPage() {
         lead="When your district enables the parent portal, you get read-only access to each linked child's courses, assignment scores, and upcoming work — without logging in as your student."
         primaryHref="/get-started"
         primaryLabel="Try it free"
-        secondaryHref="/k-12"
+        secondaryHref="/k12"
         secondaryLabel="K–12 overview"
       />
 

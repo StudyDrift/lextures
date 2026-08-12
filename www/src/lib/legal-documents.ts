@@ -2,23 +2,11 @@ import privacyPolicyMd from '../content/legal/privacy-policy.md?raw'
 import privacyHistoryMd from '../content/legal/privacy-history.md?raw'
 import termsOfServiceMd from '../content/legal/terms-of-service.md?raw'
 import termsHistoryMd from '../content/legal/terms-history.md?raw'
+import { renderMarkdown, slugifyHeading } from './markdown'
+import { LEGAL_VERSIONS, type LegalDocumentId } from './legal-versions'
 import { SITE_LINKS } from './site-links'
 
-/** Keep in sync with server/internal/httpserver/legal_http.go currentLegalVersions. */
-export const LEGAL_VERSIONS = {
-  privacy_policy: {
-    version: '2026-05-21',
-    effectiveDate: '2026-05-21',
-    effectiveDateLabel: 'May 21, 2026',
-  },
-  terms_of_service: {
-    version: '2026-05-21',
-    effectiveDate: '2026-05-21',
-    effectiveDateLabel: 'May 21, 2026',
-  },
-} as const
-
-export type LegalDocumentId = keyof typeof LEGAL_VERSIONS
+export { slugifyHeading, LEGAL_VERSIONS, type LegalDocumentId }
 
 export type LegalDocumentConfig = {
   id: LegalDocumentId
@@ -27,6 +15,8 @@ export type LegalDocumentConfig = {
   historyPath: string
   bodyMarkdown: string
   historyMarkdown: string
+  bodyHtml: string
+  historyHtml: string
   version: string
   effectiveDateLabel: string
   jsonLdType: 'PrivacyPolicy' | 'TermsOfService'
@@ -39,6 +29,8 @@ export const PRIVACY_POLICY: LegalDocumentConfig = {
   historyPath: SITE_LINKS.privacyHistory,
   bodyMarkdown: privacyPolicyMd,
   historyMarkdown: privacyHistoryMd,
+  bodyHtml: renderMarkdown(privacyPolicyMd),
+  historyHtml: renderMarkdown(privacyHistoryMd),
   version: LEGAL_VERSIONS.privacy_policy.version,
   effectiveDateLabel: LEGAL_VERSIONS.privacy_policy.effectiveDateLabel,
   jsonLdType: 'PrivacyPolicy',
@@ -51,17 +43,11 @@ export const TERMS_OF_SERVICE: LegalDocumentConfig = {
   historyPath: SITE_LINKS.termsHistory,
   bodyMarkdown: termsOfServiceMd,
   historyMarkdown: termsHistoryMd,
+  bodyHtml: renderMarkdown(termsOfServiceMd),
+  historyHtml: renderMarkdown(termsHistoryMd),
   version: LEGAL_VERSIONS.terms_of_service.version,
   effectiveDateLabel: LEGAL_VERSIONS.terms_of_service.effectiveDateLabel,
   jsonLdType: 'TermsOfService',
-}
-
-export function slugifyHeading(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^\w\s-]/g, '')
-    .trim()
-    .replace(/\s+/g, '-')
 }
 
 /** Extract level-2 headings from markdown for the table of contents. */

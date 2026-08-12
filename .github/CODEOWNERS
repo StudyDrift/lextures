@@ -1,0 +1,8 @@
+# Site-wide SEO control points require web-platform review.
+/www/src/lib/route-manifest.tsx @lextures/web-platform
+/www/src/lib/schema/ @lextures/web-platform
+/www/src/lib/redirects.ts @lextures/web-platform
+/www/src/lib/crawler-policy.ts @lextures/web-platform
+/www/public/robots.txt @lextures/web-platform
+/.github/workflows/pages-www.yml @lextures/web-platform
+/.github/workflows/seo-weekly.yml @lextures/web-platform

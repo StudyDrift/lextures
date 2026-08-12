@@ -42,10 +42,10 @@ Five bets, in dependency order. Each is defended in [research.md §11](research.
 - **No scaled content abuse.** Every programmatic page must let a user *do* something. The March 2026
   core update cost offenders 50–80% of traffic. [SEO.10](SEO.10-programmatic-utility-pages.md)
   encodes a hard quality floor and a `noindex` rule for pages that fall below it.
-- **No astroturfing.** [SEO.13](SEO.13-offsite-entity-mentions-and-digital-pr.md) requires disclosed
+- **No astroturfing.** [SEO.13](../../completed/seo/SEO.13-offsite-entity-mentions-and-digital-pr.md) requires disclosed
   affiliation on every community post, with a named accountable owner.
 - **No claim without a source.** Editorial standard in [SEO.6](SEO.6-answer-first-content-system.md);
-  enforced by the CI link/citation check in [SEO.16](SEO.16-seo-governance-and-ci-guardrails.md).
+  enforced by the CI link/citation check in [SEO.16](../../completed/seo/SEO.16-seo-governance-and-ci-guardrails.md).
 - **Privacy first in research.** [SEO.12](SEO.12-original-research-and-data-program.md) runs through
   the existing DPIA process ([S06](../standards/S06-dpia-pia-algorithmic-impact.md)) with k-anonymity
   thresholds and tenant opt-out before any aggregate is published.
@@ -58,16 +58,16 @@ Five bets, in dependency order. Each is defended in [research.md §11](research.
 
 | ID | Plan | Effort | Severity |
 |---|---|---|---|
-| **SEO.1** | [Static rendering & crawlability foundation](SEO.1-static-rendering-and-crawlability.md) | M | **BLOCKER** |
-| **SEO.2** | [Crawler access, sitemaps, llms.txt & index submission](SEO.2-crawler-access-sitemaps-and-llms-txt.md) | S | **BLOCKER** |
-| **SEO.3** | [Structured data & brand entity graph](SEO.3-structured-data-and-entity-graph.md) | M | MAJOR |
-| **SEO.4** | [Core Web Vitals & page-experience budget](SEO.4-core-web-vitals-and-page-experience.md) | M | MAJOR |
+| **SEO.1** | [Static rendering & crawlability foundation](../../completed/seo/SEO.1-static-rendering-and-crawlability.md) | M | **BLOCKER** |
+| **SEO.2** | [Crawler access, sitemaps, llms.txt & index submission](../../completed/seo/SEO.2-crawler-access-sitemaps-and-llms-txt.md) | S | **BLOCKER** |
+| **SEO.3** | [Structured data & brand entity graph](../../completed/seo/SEO.3-structured-data-and-entity-graph.md) | M | MAJOR |
+| **SEO.4** | [Core Web Vitals & page-experience budget](../../completed/seo/SEO.4-core-web-vitals-and-page-experience.md) | M | MAJOR — completed |
 
 ### Phase 1 — Architecture & content system (weeks 5–12)
 
 | ID | Plan | Effort | Severity |
 |---|---|---|---|
-| **SEO.5** | [Information architecture, URL policy & internal linking](SEO.5-information-architecture-and-internal-linking.md) | M | MAJOR |
+| **SEO.5** | [Information architecture, URL policy & internal linking](../../completed/seo/SEO.5-information-architecture-and-internal-linking.md) | M | MAJOR |
 | **SEO.6** | [Answer-first content system & extractability primitives](SEO.6-answer-first-content-system.md) | M | MAJOR |
 | **SEO.7** | [Help center expansion (6 → 60+ articles)](SEO.7-help-center-expansion.md) | L | MAJOR |
 
@@ -75,26 +75,26 @@ Five bets, in dependency order. Each is defended in [research.md §11](research.
 
 | ID | Plan | Effort | Severity |
 |---|---|---|---|
-| **SEO.8** | [Editorial engine: pillars, clusters & 12-month calendar](SEO.8-editorial-engine-and-content-calendar.md) | XL | MAJOR |
+| **SEO.8** | [Editorial engine: pillars, clusters & 12-month calendar](../../completed/seo/SEO.8-editorial-engine-and-content-calendar.md) | XL | MAJOR — completed |
 | **SEO.9** | [Comparison, alternatives & integration pages](SEO.9-comparison-alternatives-and-integration-pages.md) | L | MAJOR |
 | **SEO.10** | [Programmatic utility pages](SEO.10-programmatic-utility-pages.md) | L | MAJOR |
-| **SEO.11** | [Marketplace catalog SEO at scale](SEO.11-marketplace-catalog-seo.md) | M | MAJOR |
+| **SEO.11** | [Marketplace catalog SEO at scale](../../completed/seo/SEO.11-marketplace-catalog-seo.md) | M | MAJOR — completed |
 
 ### Phase 3 — Authority & off-site (weeks 13–52)
 
 | ID | Plan | Effort | Severity |
 |---|---|---|---|
 | **SEO.12** | [Original research & data program](SEO.12-original-research-and-data-program.md) | L | MAJOR |
-| **SEO.13** | [Off-site entity, mentions & digital PR](SEO.13-offsite-entity-mentions-and-digital-pr.md) | L | MAJOR |
+| **SEO.13** | [Off-site entity, mentions & digital PR](../../completed/seo/SEO.13-offsite-entity-mentions-and-digital-pr.md) | L | MAJOR — completed |
 | **SEO.14** | [Multimodal: video, images & social preview assets](SEO.14-multimodal-video-images-and-social-assets.md) | M | MAJOR |
 
 ### Phase 4 — Measurement & governance (weeks 3–ongoing)
 
 | ID | Plan | Effort | Severity |
 |---|---|---|---|
-| **SEO.15** | [Measurement: Search Console, GA4 & AI share-of-voice](SEO.15-measurement-search-console-and-ai-share-of-voice.md) | M | MAJOR |
-| **SEO.16** | [SEO governance, CI guardrails & content lifecycle](SEO.16-seo-governance-and-ci-guardrails.md) | M | MAJOR |
-| **SEO.17** | [International SEO & hreflang](SEO.17-international-seo-and-hreflang.md) | M | MINOR |
+| **SEO.15** | [Measurement: Search Console, GA4 & AI share-of-voice](../../completed/seo/SEO.15-measurement-search-console-and-ai-share-of-voice.md) | M | MAJOR — completed |
+| **SEO.16** | [SEO governance, CI guardrails & content lifecycle](../../completed/seo/SEO.16-seo-governance-and-ci-guardrails.md) | M | MAJOR |
+| **SEO.17** | [International SEO & hreflang](../../completed/seo/SEO.17-international-seo-and-hreflang.md) | M | MINOR — completed |
 
 ---
 
@@ -134,7 +134,7 @@ Week   1   2   3   4   5   6   7   8   9  10  11  12 ......  26 ......  52
 
 ## Targets
 
-Measured from a baseline captured in [SEO.15](SEO.15-measurement-search-console-and-ai-share-of-voice.md) at week 3.
+Measured from a baseline captured in [SEO.15](../../completed/seo/SEO.15-measurement-search-console-and-ai-share-of-voice.md) at week 3.
 
 | KPI | Baseline (Aug 2026) | 3 months | 6 months | 12 months |
 |---|---|---|---|---|

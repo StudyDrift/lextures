@@ -1,8 +1,22 @@
 name: Deploy marketing site (www)
 
 on:
+  workflow_dispatch:
+    inputs:
+      full_catalog_rebuild:
+        description: Regenerate every marketplace course page
+        required: false
+        default: false
+        type: boolean
+  schedule:
+    # Daily safety rebuild plus hourly catalog freshness polling (SEO.11 FR-5/FR-6).
+    - cron: '17 * * * *'
   push:
     branches: [main]
+    paths:
+      - 'www/**'
+      - '.github/workflows/pages-www.yml'
+  pull_request:
     paths:
       - 'www/**'
       - '.github/workflows/pages-www.yml'
@@ -24,6 +38,9 @@ jobs:
         working-directory: www
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history for honest git lastmod on content pages (SEO.2 FR-7)
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -37,17 +54,141 @@ jobs:
       - name: Lint (oxlint)
         run: npm run lint
 
+      - name: Unit tests
+        run: npm test
+
       - name: Build
         env:
-          # Public marketplace API may not be deployed yet; prerender uses SKIP until then.
-          SKIP_COURSE_PRERENDER: "1"
+          # Course prerender runs in production (SEO.1 FR-7). On API failure the
+          # generator reuses previous-deploy course HTML and continues (exit 0).
+          SITE_ORIGIN: https://lextures.com
+          API_BASE: https://self.lextures.com
+          FORCE_COURSE_REBUILD: ${{ inputs.full_catalog_rebuild && '1' || '0' }}
         run: npm run build
+
+      - name: Assert performance budget (SEO.4)
+        run: npm run perf-budget
+
+      - name: SEO governance checks
+        run: npm run seo:check
+
+      - name: Content lifecycle policy
+        env:
+          SEO_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: npm run seo:lifecycle
+
+      - name: Upload SEO governance report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: www-seo-check
+          path: www/dist/.seo-check.json
+          retention-days: 30
+
+      - name: Lighthouse page-experience budget (SEO.4)
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 4173 &
+          npm run lighthouse:ci
+
+      - name: Upload performance reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: www-performance-reports
+          path: |
+            www/dist/stats.html
+            www/.lighthouseci
+          retention-days: 30
+
+      - name: Assert SEO crawlability
+        run: |
+          set -euo pipefail
+          test -f dist/.seo-manifest.json
+          test -f dist/sitemap.xml
+          test -f dist/robots.txt
+          test -f dist/llms.txt
+          test -f dist/llms-full.txt
+          test -f dist/404.html
+          # Sitemap must be an index (SEO.2)
+          grep -q '<sitemapindex' dist/sitemap.xml
+          test -d dist/sitemaps
+          # robots: named agents + sitemap index, no redundant Allow: /courses
+          grep -q 'User-agent: GPTBot' dist/robots.txt
+          grep -q 'User-agent: OAI-SearchBot' dist/robots.txt
+          grep -q 'User-agent: PerplexityBot' dist/robots.txt
+          grep -q 'Sitemap: https://lextures.com/sitemap.xml' dist/robots.txt
+          ! grep -q 'Allow: /courses' dist/robots.txt
+          # llms.txt curated
+          grep -q '# Lextures' dist/llms.txt
+          # IndexNow key file present
+          KEY=$(node --input-type=module -e "import {readFileSync} from 'node:fs'; const m=JSON.parse(readFileSync('./dist/.seo-manifest.json','utf8')); process.stdout.write(m.indexNowKey||'')")
+          test -n "$KEY"
+          test -f "dist/${KEY}.txt"
+          grep -qx "$KEY" "dist/${KEY}.txt"
+          # Sample of high-value routes must exist as real HTML with an h1
+          for path in \
+            dist/index.html \
+            dist/pricing/index.html \
+            dist/k-12/index.html \
+            dist/higher-ed/index.html \
+            dist/homeschool/index.html \
+            dist/security/index.html \
+            dist/accessibility/vpat/index.html \
+            dist/blog/index.html \
+            dist/docs/index.html \
+            dist/courses/index.html
+          do
+            test -f "$path"
+            grep -q '<h1' "$path"
+            grep -q '<link rel="canonical"' "$path"
+            grep -q '<meta name="description"' "$path"
+          done
+          # SEO.4 AC-3 — no Google Fonts
+          ! grep -R -l 'fonts.googleapis.com\|fonts.gstatic.com' dist --include='*.html' | head -1 | grep -q .
+          # SEO.4 FR-4 — content page uses static-island, not full React entry
+          grep -q 'static-island' dist/privacy/index.html
+          grep -q 'data-interactive="false"' dist/privacy/index.html
+          grep -q 'data-interactive="true"' dist/pricing/calculator/index.html
+          # Content pages advertise markdown alternate + sibling file
+          grep -q 'type="text/markdown"' dist/docs/self-hosting/index.html
+          test -f dist/docs/self-hosting.md
+          # 404 must be noindex
+          grep -q 'noindex' dist/404.html
+          # Titles unique among seo-manifest urls (www is "type": "module")
+          node --input-type=module -e "
+            import { readFileSync } from 'node:fs';
+            const m = JSON.parse(readFileSync('./dist/.seo-manifest.json', 'utf8'));
+            const titles = m.urls.map(u => u.title);
+            const dups = titles.filter((t,i) => titles.indexOf(t) !== i);
+            if (dups.length) { console.error('duplicate titles', dups); process.exit(1); }
+            for (const u of m.urls) {
+              if (!u.title || !u.description || !u.canonical) process.exit(1);
+              if (u.description.length > 160) { console.error('long desc', u.path); process.exit(1); }
+              if (!u.canonical.startsWith('https://lextures.com')) process.exit(1);
+            }
+            // lastmod must not be today's date for every URL (stale build-date signal)
+            const days = m.urls.map(u => u.lastmod).filter(Boolean);
+            const unique = new Set(days);
+            if (days.length > 5 && unique.size === 1) {
+              console.error('all lastmod values identical — likely build-date regression', [...unique]);
+              process.exit(1);
+            }
+            console.log('seo-manifest ok:', m.urls.length, 'urls;', m.sitemaps?.length || 0, 'sitemaps');
+          "
 
       - uses: actions/upload-pages-artifact@v3
         with:
           path: www/dist
 
+      # Persist manifest for IndexNow URL diff on next deploy
+      - uses: actions/upload-artifact@v4
+        with:
+          name: seo-manifest
+          path: www/dist/.seo-manifest.json
+          retention-days: 30
+
   deploy:
+    if: github.event_name == 'push'
     needs: build
     runs-on: ubuntu-latest
     environment:
@@ -56,3 +197,71 @@ jobs:
     steps:
       - id: deploy
         uses: actions/deploy-pages@v4
+
+  # SEO.2 FR-16…FR-19: IndexNow + Google sitemap ping after successful deploy.
+  # Failures warn only (exit 0) so deploys are never blocked.
+  index-submit:
+    if: github.event_name == 'push'
+    needs: deploy
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: www
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: www/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download current seo-manifest
+        uses: actions/download-artifact@v4
+        with:
+          name: seo-manifest
+          path: www/dist
+
+      - name: Restore previous seo-manifest
+        uses: actions/cache/restore@v4
+        id: cache-prev
+        with:
+          path: www/seo-manifest-prev.json
+          key: seo-manifest-prev-${{ github.run_id }}
+          restore-keys: |
+            seo-manifest-prev-
+
+      - name: Submit IndexNow + ping Google
+        env:
+          SITE_ORIGIN: https://lextures.com
+          SEO_MANIFEST_PATH: dist/.seo-manifest.json
+          SEO_MANIFEST_PREV_PATH: seo-manifest-prev.json
+        run: node scripts/submit-indexnow.mjs
+        continue-on-error: true
+
+      - name: Save manifest as previous for next deploy
+        run: cp dist/.seo-manifest.json seo-manifest-prev.json
+
+      - name: Cache previous seo-manifest
+        uses: actions/cache/save@v4
+        with:
+          path: www/seo-manifest-prev.json
+          key: seo-manifest-prev-${{ github.run_id }}
+
+  seo-smoke:
+    if: github.event_name == 'push'
+    needs: deploy
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: www
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify deployed sitemap and AI crawler HTML
+        run: npm run seo:smoke -- --origin=https://lextures.com

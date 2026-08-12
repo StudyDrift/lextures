@@ -19,15 +19,19 @@ func TestBuildCourseJSONLD_RequiredFields(t *testing.T) {
 		InstructorName:  strp("Ada Lovelace"),
 		Category:        strp("Programming"),
 		AverageRating:   f64p(4.5),
+		RatingCount:     5,
 		EnrollmentCount: 1200,
 	}
 	ld := BuildCourseJSONLD(c, "https://lextures.com")
 
-	if ld["@context"] != "https://schema.org" {
-		t.Fatalf("@context = %v", ld["@context"])
+	if _, hasContext := ld["@context"]; hasContext {
+		t.Fatalf("expected no @context (graph builder owns it), got %v", ld["@context"])
 	}
 	if ld["@type"] != "Course" {
 		t.Fatalf("@type = %v", ld["@type"])
+	}
+	if ld["@id"] != "https://lextures.com/explore/intro-python#course" {
+		t.Fatalf("@id = %v", ld["@id"])
 	}
 	if ld["name"] != "Intro to Python" {
 		t.Fatalf("name = %v", ld["name"])
@@ -65,6 +69,14 @@ func TestBuildCourseJSONLD_RequiredFields(t *testing.T) {
 	rating, ok := ld["aggregateRating"].(map[string]any)
 	if !ok || rating["ratingValue"] != 4.5 {
 		t.Fatalf("aggregateRating = %v", ld["aggregateRating"])
+	}
+}
+
+func TestBuildCourseJSONLD_OmitsSparseRating(t *testing.T) {
+	c := repoCourse.PublicCatalogCourse{Slug: "new", Title: "New", AverageRating: f64p(5), RatingCount: 4}
+	ld := BuildCourseJSONLD(c, "https://lextures.com")
+	if _, ok := ld["aggregateRating"]; ok {
+		t.Fatal("aggregateRating must require at least five verified reviews")
 	}
 }
 

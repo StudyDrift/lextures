@@ -7,6 +7,7 @@ import {
 } from '../lib/institution-inquiry-api'
 import type { InstitutionInquiryForm } from '../lib/institution-inquiry-mailto'
 import { SITE_LINKS } from '../lib/site-links'
+import { getFirstTouch, trackEvent } from '../lib/analytics'
 
 const INITIAL_FORM: InstitutionInquiryForm = {
   organizationType: 'University',
@@ -17,6 +18,7 @@ const INITIAL_FORM: InstitutionInquiryForm = {
   enrollmentSize: '',
   hostingPreference: 'Not sure yet',
   message: '',
+  firstTouchChannel: 'direct',
 }
 
 const fieldClass =
@@ -48,6 +50,7 @@ export function RequestInformationPage() {
 
   useEffect(() => {
     document.title = 'Request information — Lextures'
+    setForm(current => ({ ...current, firstTouchChannel: getFirstTouch()?.channel ?? 'direct' }))
   }, [])
 
   function updateField<K extends keyof InstitutionInquiryForm>(key: K, value: InstitutionInquiryForm[K]) {
@@ -62,6 +65,7 @@ export function RequestInformationPage() {
     setSubmitting(true)
     try {
       await submitInstitutionInquiry(form)
+      trackEvent('request_information_submitted', { first_touch_channel: form.firstTouchChannel })
       setSubmitted(true)
     } catch (err) {
       if (err instanceof InstitutionInquiryApiError) {
@@ -127,6 +131,7 @@ export function RequestInformationPage() {
             </div>
           ) : (
             <form className="mt-10 space-y-5" onSubmit={e => void handleSubmit(e)}>
+              <input type="hidden" name="first_touch_channel" value={form.firstTouchChannel} />
               <div>
                 <FieldLabel htmlFor="organizationType">Organization type</FieldLabel>
                 <select

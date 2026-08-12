@@ -5,9 +5,6 @@ import {
   MarketingPageShell,
 } from '../components/marketing-page-shell'
 import { SITE_LINKS } from '../lib/site-links'
-import { useDocumentHead } from '../lib/use-document-head'
-
-const SITE_ORIGIN = 'https://lextures.com'
 
 const FEATURES = [
   {
@@ -44,13 +41,6 @@ const USE_CASES = [
 ]
 
 export function HomeschoolPage() {
-  useDocumentHead({
-    title: 'Homeschool — Lextures',
-    description:
-      'Create or enroll in courses, practice with IRT-routed quizzes, and clear spaced-repetition reviews from your phone. Self-host for free, or sign up at self.lextures.com.',
-    canonical: `${SITE_ORIGIN}/homeschool`,
-  })
-
   return (
     <MarketingPageShell>
       <AudienceHero
