@@ -543,6 +543,9 @@ type Config struct {
 	// NOTE (MKTC.7): do not flip the platformconfig default to ON here — orchestrator
 	// flips after UI + GA bar. Leave default OFF.
 	FFCourseCoupons bool
+	// FFMarketingContent enables the database-backed public-content workspace (plan MC).
+	// Default OFF. Managed in Settings → Global platform.
+	FFMarketingContent bool
 	// CouponMaxPercentOff caps creator percent coupons (plan MKTC.7 FR-5).
 	// Default 100 = uncapped. Managed in Settings → Global platform.
 	CouponMaxPercentOff float64

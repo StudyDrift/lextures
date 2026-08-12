@@ -5,7 +5,7 @@
  */
 import MarkdownIt from 'markdown-it'
 
-export { renderMarkdownLite } from './markdown-lite'
+export { renderMarkdownLite } from './markdown-lite.ts'
 
 const md = new MarkdownIt({
   html: false,

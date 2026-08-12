@@ -137,6 +137,7 @@ export type PlatformSettingsPayload = {
   ffPublicCatalog: boolean
   ffCourseMarketplace: boolean
   ffCourseCoupons: boolean
+  ffMarketingContent: boolean
   /** Platform cap on creator percent coupons (0–100]. Default 100. MKTC.7. */
   couponMaxPercentOff: number
   ffContentToolMarketplace: boolean

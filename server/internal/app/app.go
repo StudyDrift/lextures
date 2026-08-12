@@ -39,10 +39,15 @@ import (
 	"github.com/lextures/lextures/server/internal/platformstate"
 	"github.com/lextures/lextures/server/internal/redisclient"
 	"github.com/lextures/lextures/server/internal/repos/jobqueue"
+	"github.com/lextures/lextures/server/internal/repos/marketingcontent"
 	"github.com/lextures/lextures/server/internal/repos/orgbranding"
 	"github.com/lextures/lextures/server/internal/repos/platformconfig"
 	"github.com/lextures/lextures/server/internal/scheduler"
+	acsvc "github.com/lextures/lextures/server/internal/service/adaptivecontent"
 	botsservice "github.com/lextures/lextures/server/internal/service/bots"
+	"github.com/lextures/lextures/server/internal/service/clamav"
+	"github.com/lextures/lextures/server/internal/service/contenttools"
+	"github.com/lextures/lextures/server/internal/service/coursechecklist"
 	emailtemplatesvc "github.com/lextures/lextures/server/internal/service/emailtemplates"
 	"github.com/lextures/lextures/server/internal/service/filestorage"
 	"github.com/lextures/lextures/server/internal/service/integrations"
@@ -50,9 +55,6 @@ import (
 	learnerprofileservice "github.com/lextures/lextures/server/internal/service/learnerprofile"
 	learnerprofilederivers "github.com/lextures/lextures/server/internal/service/learnerprofile/derivers"
 	marketplacecoursesservice "github.com/lextures/lextures/server/internal/service/marketplacecourses"
-	acsvc "github.com/lextures/lextures/server/internal/service/adaptivecontent"
-	"github.com/lextures/lextures/server/internal/service/contenttools"
-	"github.com/lextures/lextures/server/internal/service/coursechecklist"
 	"github.com/lextures/lextures/server/internal/service/oidcauth"
 	"github.com/lextures/lextures/server/internal/service/storagequota"
 	"github.com/lextures/lextures/server/internal/smsnotificationqueue"
@@ -313,6 +315,9 @@ func Run(ctx context.Context, fsys fs.FS) error {
 		LearnerProfileService:     learnerProfileSvc,
 		IntroCourseService:        introCourseSvc,
 	}
+	if cfg.ClamAVStub || strings.TrimSpace(os.Getenv("CLAMAV_ADDR")) != "" {
+		deps.MarketingMediaScanner = clamav.NewClient(cfg.ClamAVAddr, cfg.ClamAVStub)
+	}
 	// Re-wire T10 transcript notify hooks with the live NotifHub for SSE bell updates.
 	background.RegisterTranscriptNotifyHooks(pool, platform.Config(), deps.NotifHub)
 	background.StartCanvasImportConsumer(ctx, canvasImportQueue, deps)
@@ -432,6 +437,12 @@ func telemetrySources(pool *pgxpool.Pool, rc *redisclient.Client) telemetry.Sour
 				Depth:       st.Depth,
 				ByType:      st.ByType,
 			}, true
+		}
+		s.MarketingContent = func() (map[[2]string]int64, bool) {
+			ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+			defer cancel()
+			counts, err := marketingcontent.ArticleCounts(ctx, pool)
+			return counts, err == nil
 		}
 	}
 	if rc != nil {

@@ -39,9 +39,10 @@ type JobQueueSnapshot struct {
 // omits those series. Reading at scrape time (pull model) keeps gauges current
 // without a background goroutine (plan 17.7 NFR Scalability).
 type Sources struct {
-	DBPool   func() DBPoolSnapshot
-	Redis    func() RedisPoolSnapshot
-	JobQueue func() (JobQueueSnapshot, bool)
+	DBPool           func() DBPoolSnapshot
+	Redis            func() RedisPoolSnapshot
+	JobQueue         func() (JobQueueSnapshot, bool)
+	MarketingContent func() (map[[2]string]int64, bool)
 }
 
 // resourceCollector implements prometheus.Collector and emits DB pool, Redis
@@ -50,21 +51,22 @@ type Sources struct {
 type resourceCollector struct {
 	sources Sources
 
-	dbTotal        *prometheus.Desc
-	dbAcquired     *prometheus.Desc
-	dbIdle         *prometheus.Desc
-	dbMax          *prometheus.Desc
-	dbUtilization  *prometheus.Desc
-	redisTotal     *prometheus.Desc
-	redisIdle      *prometheus.Desc
-	redisStale     *prometheus.Desc
-	redisHits      *prometheus.Desc
-	redisMisses    *prometheus.Desc
-	redisTimeouts  *prometheus.Desc
-	jobDepth       *prometheus.Desc
-	jobByStatus    *prometheus.Desc
-	jobByType      *prometheus.Desc
-	jobDeadLetters *prometheus.Desc
+	dbTotal                  *prometheus.Desc
+	dbAcquired               *prometheus.Desc
+	dbIdle                   *prometheus.Desc
+	dbMax                    *prometheus.Desc
+	dbUtilization            *prometheus.Desc
+	redisTotal               *prometheus.Desc
+	redisIdle                *prometheus.Desc
+	redisStale               *prometheus.Desc
+	redisHits                *prometheus.Desc
+	redisMisses              *prometheus.Desc
+	redisTimeouts            *prometheus.Desc
+	jobDepth                 *prometheus.Desc
+	jobByStatus              *prometheus.Desc
+	jobByType                *prometheus.Desc
+	jobDeadLetters           *prometheus.Desc
+	marketingContentArticles *prometheus.Desc
 }
 
 func newResourceCollector(s Sources) *resourceCollector {
@@ -72,22 +74,23 @@ func newResourceCollector(s Sources) *resourceCollector {
 		return prometheus.NewDesc(prometheus.BuildFQName(namespace, "", name), help, labels, nil)
 	}
 	return &resourceCollector{
-		sources:        s,
-		dbTotal:        d("db_pool_total_connections", "Total connections in the pgx pool."),
-		dbAcquired:     d("db_pool_acquired_connections", "Currently acquired (in-use) pgx connections."),
-		dbIdle:         d("db_pool_idle_connections", "Idle pgx connections."),
-		dbMax:          d("db_pool_max_connections", "Maximum configured pgx connections."),
-		dbUtilization:  d("db_pool_utilization_ratio", "Acquired/max ratio of the pgx pool (0..1)."),
-		redisTotal:     d("redis_pool_total_connections", "Total connections in the Redis pool."),
-		redisIdle:      d("redis_pool_idle_connections", "Idle connections in the Redis pool."),
-		redisStale:     d("redis_pool_stale_connections", "Stale connections removed from the Redis pool."),
-		redisHits:      d("redis_pool_hits_total", "Free connection hits in the Redis pool."),
-		redisMisses:    d("redis_pool_misses_total", "Free connection misses in the Redis pool."),
-		redisTimeouts:  d("redis_pool_timeouts_total", "Pool timeouts waiting for a Redis connection."),
-		jobDepth:       d("job_queue_depth", "Total backlog (pending+running+failed) in the durable job queue."),
-		jobByStatus:    d("job_queue_jobs", "Job-queue rows by status.", "status"),
-		jobByType:      d("job_queue_depth_by_type", "Job-queue backlog by job type.", "job_type"),
-		jobDeadLetters: d("job_queue_dead_letters", "Un-redriven dead-letter rows in the job queue."),
+		sources:                  s,
+		dbTotal:                  d("db_pool_total_connections", "Total connections in the pgx pool."),
+		dbAcquired:               d("db_pool_acquired_connections", "Currently acquired (in-use) pgx connections."),
+		dbIdle:                   d("db_pool_idle_connections", "Idle pgx connections."),
+		dbMax:                    d("db_pool_max_connections", "Maximum configured pgx connections."),
+		dbUtilization:            d("db_pool_utilization_ratio", "Acquired/max ratio of the pgx pool (0..1)."),
+		redisTotal:               d("redis_pool_total_connections", "Total connections in the Redis pool."),
+		redisIdle:                d("redis_pool_idle_connections", "Idle connections in the Redis pool."),
+		redisStale:               d("redis_pool_stale_connections", "Stale connections removed from the Redis pool."),
+		redisHits:                d("redis_pool_hits_total", "Free connection hits in the Redis pool."),
+		redisMisses:              d("redis_pool_misses_total", "Free connection misses in the Redis pool."),
+		redisTimeouts:            d("redis_pool_timeouts_total", "Pool timeouts waiting for a Redis connection."),
+		jobDepth:                 d("job_queue_depth", "Total backlog (pending+running+failed) in the durable job queue."),
+		jobByStatus:              d("job_queue_jobs", "Job-queue rows by status.", "status"),
+		jobByType:                d("job_queue_depth_by_type", "Job-queue backlog by job type.", "job_type"),
+		jobDeadLetters:           d("job_queue_dead_letters", "Un-redriven dead-letter rows in the job queue."),
+		marketingContentArticles: d("marketing_content_articles", "Live marketing-content articles by kind and status.", "kind", "status"),
 	}
 }
 
@@ -107,6 +110,7 @@ func (c *resourceCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.jobByStatus
 	ch <- c.jobByType
 	ch <- c.jobDeadLetters
+	ch <- c.marketingContentArticles
 }
 
 func (c *resourceCollector) Collect(ch chan<- prometheus.Metric) {
@@ -149,6 +153,13 @@ func (c *resourceCollector) Collect(ch chan<- prometheus.Metric) {
 			g(c.jobDeadLetters, float64(s.DeadLetters))
 			for jt, n := range s.ByType {
 				g(c.jobByType, float64(n), jt)
+			}
+		}
+	}
+	if c.sources.MarketingContent != nil {
+		if counts, ok := c.sources.MarketingContent(); ok {
+			for labels, n := range counts {
+				g(c.marketingContentArticles, float64(n), labels[0], labels[1])
 			}
 		}
 	}

@@ -160,6 +160,8 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	// NOTE: do not flip default ON here — orchestrator flips after UI (MKTC.7 §15).
 	// MKTC.7 GA: default ON; explicit DB false remains off (AC-12).
 	out.FFCourseCoupons = mergeBool(db.FFCourseCoupons, true)
+	// Marketing content stays opt-in until the authoring and public APIs ship (MC.1).
+	out.FFMarketingContent = mergeBool(db.FFMarketingContent, false)
 	// Discount ceiling: NULL/unset → 100 (uncapped). Explicit DB value is honoured (MKTC.7 FR-5).
 	out.CouponMaxPercentOff = mergePercentOff(db.CouponMaxPercentOff, 100)
 	out.FFContentToolMarketplace = mergeBool(db.FFContentToolMarketplace, false)

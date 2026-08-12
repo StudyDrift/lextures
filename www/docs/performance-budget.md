@@ -61,3 +61,9 @@ If a legitimate feature needs more budget:
 
 - [site-generation.md](./site-generation.md) — SSG + `interactive` semantics
 - [adding-a-page.md](./adding-a-page.md) — checklist includes “does this route need hydration?”
+# Content images
+
+Database-backed articles receive image dimensions and rendition metadata from the public content
+API. Render them as a `<picture>` with explicit `width` and `height`, lazy loading, async decoding,
+and modern formats before the original. Do not infer dimensions by downloading the image at render
+time; the legacy local-image dimensions map applies only to file-based content.

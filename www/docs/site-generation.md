@@ -119,6 +119,19 @@ Performance budgets: [performance-budget.md](./performance-budget.md).
 | Sitemap ↔ manifest mismatch | Build **fails** naming the URL |
 | Marketplace API down | WARN + previous-deploy course reuse; site still deploys |
 
+## Public content API
+
+Database-backed marketing content is available anonymously under
+`/api/v1/public/content` when `ff_marketing_content` is enabled. Builds should fetch
+`/index` first, compare each article's 16-character `contentHash`, and fetch only changed
+blog or docs detail routes. `/index` also supplies sitemap dates, categories, active authors,
+and redirects. Published responses support strong ETags and are cacheable for 60 seconds;
+send `If-None-Match` on repeated builds.
+
+If the content API is unavailable, keep the previous deployment's generated article HTML and
+log a warning. Draft preview links are the exception: they use a short-lived
+`preview_token`, are `no-store`, and must never be persisted into build caches or sitemaps.
+
 Structured data details: [structured-data.md](./structured-data.md). Author bylines: [authoring-bylines.md](./authoring-bylines.md).
 | IndexNow / Google ping failure | WARN only — deploy still succeeds |
 | Unknown path in production | Host serves `404.html` (`noindex`) |

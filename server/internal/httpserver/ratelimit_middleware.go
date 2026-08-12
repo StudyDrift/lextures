@@ -3,9 +3,12 @@ package httpserver
 import (
 	"net/http"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/redis/go-redis/v9"
 
+	"github.com/lextures/lextures/server/internal/config"
 	"github.com/lextures/lextures/server/internal/publicapi"
 	"github.com/lextures/lextures/server/internal/ratelimit"
 )
@@ -13,14 +16,14 @@ import (
 // authSensitivePaths get the stricter per-IP auth limit (plan 17.6 FR-1):
 // login, registration, and password-reset request endpoints.
 var authSensitivePaths = map[string]bool{
-	"/api/v1/auth/login":              true,
-	"/api/v1/auth/signup":             true,
-	"/api/v1/auth/forgot-password":    true,
-	"/api/v1/auth/reset-password":     true,
+	"/api/v1/auth/login":                 true,
+	"/api/v1/auth/signup":                true,
+	"/api/v1/auth/forgot-password":       true,
+	"/api/v1/auth/reset-password":        true,
 	"/api/v1/auth/parent-invite/consume": true,
-	"/api/v1/auth/magic-link/request": true,
-	"/api/v1/auth/oidc/apple/native":  true,
-	"/api/v1/auth/oidc/google/native": true,
+	"/api/v1/auth/magic-link/request":    true,
+	"/api/v1/auth/oidc/apple/native":     true,
+	"/api/v1/auth/oidc/google/native":    true,
 }
 
 // buildRateLimiter constructs the request limiter from config + Redis. IPs are
@@ -72,9 +75,13 @@ func (d Deps) rateLimitMiddleware(limiter *ratelimit.Limiter) func(http.Handler)
 			// clients are governed by their per-token quota instead (FR-7), so we
 			// skip the global IP limit for Bearer-token API requests.
 			if !publicapi.IsAccessKeyRequest(r) {
-				dec := limiter.Allow(ctx, limiter.IPKey(ip, "global"), cfg.Global, ratelimit.LimitTypeGlobal)
+				rule, group := cfg.Global, "global"
+				if strings.HasPrefix(r.URL.Path, "/api/v1/public/content/") {
+					rule, group = config.RateLimitRule{Limit: 600, Window: time.Minute}, "public_content"
+				}
+				dec := limiter.Allow(ctx, limiter.IPKey(ip, group), rule, ratelimit.LimitTypeGlobal)
 				if !dec.Allowed {
-					if d.rejectRateLimited(w, r, dec, "global", ratelimit.LimitTypeGlobal, cfg.MonitorOnly) {
+					if d.rejectRateLimited(w, r, dec, group, ratelimit.LimitTypeGlobal, cfg.MonitorOnly) {
 						return
 					}
 				} else {

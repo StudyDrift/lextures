@@ -48,6 +48,14 @@ func MarketplacePageKey(f repoCourse.MarketplaceFilter) string {
 	return prefix + "marketplace:page:" + hex.EncodeToString(sum[:8])
 }
 
+// MarketingContentKey keys immutable public-content snapshots by route, query,
+// and the repository content version. Publishing creates a new namespace, so
+// stale manifests can never mask newly published content.
+func MarketingContentKey(route, query, version string) string {
+	sum := sha256.Sum256([]byte(route + "?" + query + "@" + version))
+	return prefix + "marketing-content:" + hex.EncodeToString(sum[:8])
+}
+
 // UserCalendarKey caches a generated iCal body for a user (all courses or scoped).
 func UserCalendarKey(userID string, courseID *string) string {
 	if courseID != nil && strings.TrimSpace(*courseID) != "" {

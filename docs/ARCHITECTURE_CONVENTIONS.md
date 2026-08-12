@@ -35,6 +35,10 @@ New code goes in the thinnest package that already owns the concern. Prefer a ne
 file over growing a god-file; prefer a new package only when there is a real seam
 (see budgets below).
 
+`internal/repos/marketingcontent` owns all SQL for the platform-global
+`marketing` schema, including articles, append-only revisions, authors,
+categories, tags, and redirects (MC.1).
+
 ### TypeScript (`clients/web/src/`)
 
 | Area | Path | Responsibility |

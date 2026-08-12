@@ -34,6 +34,7 @@ import (
 	integrationsservice "github.com/lextures/lextures/server/internal/service/integrations"
 	introcourseservice "github.com/lextures/lextures/server/internal/service/introcourse"
 	learnerprofileservice "github.com/lextures/lextures/server/internal/service/learnerprofile"
+	"github.com/lextures/lextures/server/internal/service/marketingmedia"
 	"github.com/lextures/lextures/server/internal/service/oidcauth"
 	"github.com/lextures/lextures/server/internal/service/openrouter"
 	statuspageservice "github.com/lextures/lextures/server/internal/service/statuspage"
@@ -44,7 +45,7 @@ import (
 
 // Deps is the minimal set of server dependencies. Expand with auth, LTI, etc. during the migration.
 type Deps struct {
-	Pool      *pgxpool.Pool
+	Pool *pgxpool.Pool
 	// Health is the dedicated readiness/liveness probe (plan 17.8). When nil,
 	// NewHandler builds a probe from Pool and Redis for tests.
 	Health    *HealthProbe
@@ -87,6 +88,8 @@ type Deps struct {
 	Scheduler *scheduler.Scheduler
 	// Storage is the object-storage driver (plan 8.1). When nil, falls back to local disk reads.
 	Storage filestorage.Driver
+	// MarketingMediaScanner is optional; production wires it when CLAMAV_ADDR is explicitly configured.
+	MarketingMediaScanner marketingmedia.Scanner
 	// DRM is the DRM / watermarking service (plan 8.10). When nil, DRM endpoints return 501.
 	DRM *drmservice.Service
 	// StorageQuota enforces per-tenant/course/user storage limits (plan 8.5).
@@ -181,6 +184,7 @@ func NewHandler(d Deps) http.Handler {
 	r.Get("/api/v1/public/org-branding/{orgId}/{asset}", d.handlePublicOrgBrandAsset())
 	d.registerPublicCatalogRoutes(r)
 	d.registerPublicMarketplaceRoutes(r)
+	d.registerPublicMarketingContentRoutes(r)
 	r.Get("/api/v1/search", d.handleSearchIndex())
 	r.Get("/api/v1/search/query", d.handleSearchQuery())
 	r.Get("/api/v1/reports/learning-activity", d.handleLearningActivityReport())
@@ -214,6 +218,7 @@ func NewHandler(d Deps) http.Handler {
 	d.registerAdminJobRoutes(r)
 	d.registerAdminSchedulerRoutes(r)
 	d.registerAdminContentToolsRoutes(r)
+	d.registerMarketingContentAdminRoutes(r)
 	d.registerSCIMRoutes(r)
 	r.Route("/api/v1", func(s chi.Router) { d.registerAccommodationRoutes(s) })
 	d.registerAttendanceRoutes(r)
