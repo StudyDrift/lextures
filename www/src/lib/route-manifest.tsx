@@ -152,7 +152,7 @@ const ENGLISH_ROUTE_MANIFEST: Array<Omit<RouteDescriptor, 'locale'>> = [
     changefreq: 'monthly',
     sitemap: true,
     priority: '0.8',
-    interactive: true,
+    interactive: false,
     jsonLd: aboutPageGraph,
     parent: '/', navGroup: 'company',
   },
