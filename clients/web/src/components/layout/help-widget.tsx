@@ -274,7 +274,7 @@ function HelpWidgetPanel({ open, onClose }: { open: boolean; onClose: () => void
           size="sm"
           onClick={onClose}
           aria-label={t('help.widget.close', { defaultValue: 'Close help panel' })}
-          className="text-fg-subtle hover:text-fg-muted"
+          className="min-h-6 min-w-6 text-fg-subtle hover:text-fg-muted"
         >
           <X className="h-4 w-4" />
         </IconButton>
@@ -373,7 +373,7 @@ function HelpWidgetPanel({ open, onClose }: { open: boolean; onClose: () => void
             <Button
               type="button"
               onClick={handleOpenHelpCenter}
-              className="w-full"
+              className="min-h-6 w-full"
             >
               <MessageCircle className="h-4 w-4" />
               {t('help.widget.visitHelpCenter', { defaultValue: 'Visit Help Center' })}
@@ -414,7 +414,7 @@ function HelpReader({
           variant="ghost"
           size="sm"
           onClick={onBack}
-          className="gap-1 px-1 text-fg-muted dark:text-fg-default"
+          className="min-h-6 gap-1 px-1 text-fg-muted dark:text-fg-default"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           {t('help.widget.back', { defaultValue: 'Back' })}

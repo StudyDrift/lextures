@@ -25,7 +25,7 @@ type View = 'write' | 'split' | 'preview' | 'details'
 function EditorMenu({ label, items, variant = 'ghost', icon }: { label: string; items: MenuItem[]; variant?: 'secondary' | 'ghost'; icon?: React.ReactNode }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLButtonElement>(null)
-  return <><Button ref={ref} size="sm" variant={variant} aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((value) => !value)}>{icon}{label}<ChevronDown aria-hidden className="h-3.5 w-3.5 opacity-70" /></Button><Menu open={open} onOpenChange={setOpen} anchorRef={ref} items={items} /></>
+  return <><Button ref={ref} size="sm" variant={variant} className="min-h-6" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((value) => !value)}>{icon}{label}<ChevronDown aria-hidden className="h-3.5 w-3.5 opacity-70" /></Button><Menu open={open} onOpenChange={setOpen} anchorRef={ref} items={items} /></>
 }
 
 function writePayload(article: MarketingArticle): MarketingArticleWrite {
@@ -281,8 +281,8 @@ export default function ArticleEditorPage() {
           <p className="truncate text-xs text-fg-muted"><span className="hidden sm:inline">{article.kind === 'blog' ? 'Blog post' : 'Help article'} · </span><span role="status">{saveState}</span></p>
         </div>
         <div className="flex items-center gap-2">
-          <Button size="sm" variant="secondary" onClick={() => void openPreview()}><Eye className="h-4 w-4" /> <span className="hidden sm:inline">Preview</span></Button>
-          <Button size="sm" loading={saving} disabled={!dirty} onClick={() => void saveArticle()}><Save className="h-4 w-4" /> Save</Button>
+          <Button size="sm" variant="secondary" className="min-h-6" onClick={() => void openPreview()}><Eye className="h-4 w-4" /> <span className="hidden sm:inline">Preview</span></Button>
+          <Button size="sm" className="min-h-6" loading={saving} disabled={!dirty} onClick={() => void saveArticle()}><Save className="h-4 w-4" /> Save</Button>
           {!isNew ? <EditorMenu label="Actions" variant="secondary" items={[
             ...(canAuthor ? [{ id: 'submit', label: 'Submit for review', onSelect: () => setTransition('submit') }] : []),
             ...(canReview ? [{ id: 'approve', label: 'Approve', onSelect: () => setTransition('approve') }, { id: 'request_changes', label: 'Request changes', onSelect: () => setTransition('request_changes') }] : []),
@@ -308,11 +308,11 @@ export default function ArticleEditorPage() {
         />
         <span aria-hidden className="mx-1 hidden h-5 w-px bg-border-default sm:block" />
         <EditorMenu label="Insert block" items={directives.map((v) => ({ id: v.id, label: v.label, onSelect: () => insertDirective(v.markdown) }))} />
-        <Button size="sm" variant="ghost" aria-pressed={simple} onClick={() => setSimple((v) => !v)}><Braces className="h-4 w-4" /> <span className="hidden lg:inline">{simple ? 'Visual editor' : 'Markdown source'}</span></Button>
-        <Button size="sm" variant="ghost" disabled={isNew} onClick={() => setRevisionsOpen(true)}><History className="h-4 w-4" /> <span className="hidden lg:inline">Revisions</span></Button>
-        <Button size="sm" variant="ghost" onClick={() => setShortcutsOpen(true)}><Keyboard className="h-4 w-4" /> <span className="hidden lg:inline">Shortcuts</span></Button>
+        <Button size="sm" variant="ghost" className="min-h-6" aria-pressed={simple} onClick={() => setSimple((v) => !v)}><Braces className="h-4 w-4" /> <span className="hidden lg:inline">{simple ? 'Visual editor' : 'Markdown source'}</span></Button>
+        <Button size="sm" variant="ghost" className="min-h-6" disabled={isNew} onClick={() => setRevisionsOpen(true)}><History className="h-4 w-4" /> <span className="hidden lg:inline">Revisions</span></Button>
+        <Button size="sm" variant="ghost" className="min-h-6" onClick={() => setShortcutsOpen(true)}><Keyboard className="h-4 w-4" /> <span className="hidden lg:inline">Shortcuts</span></Button>
         <div className="ms-auto">
-          <Button size="sm" variant="ghost" className="hidden md:inline-flex" aria-pressed={metadataOpen} onClick={() => setMetadataOpen((v) => !v)}><PanelRight className="h-4 w-4" /> Details</Button>
+          <Button size="sm" variant="ghost" className="hidden min-h-6 md:inline-flex" aria-pressed={metadataOpen} onClick={() => setMetadataOpen((v) => !v)}><PanelRight className="h-4 w-4" /> Details</Button>
         </div>
       </div>
     </div>
@@ -338,7 +338,7 @@ export default function ArticleEditorPage() {
     </div>
 
     <section id="article-findings" aria-live="polite" className="sticky bottom-0 z-20 border-t border-border-default bg-surface-raised/95 backdrop-blur supports-[backdrop-filter]:bg-surface-raised/80">
-      <Button type="button" variant="ghost" aria-expanded={findingsOpen} onClick={() => setFindingsOpen((v) => !v)} className="flex h-auto w-full items-center justify-start gap-3 rounded-none px-4 py-2.5 text-start sm:px-6">
+      <Button type="button" variant="ghost" aria-expanded={findingsOpen} onClick={() => setFindingsOpen((v) => !v)} className="flex h-auto min-h-6 w-full items-center justify-start gap-3 rounded-none px-4 py-2.5 text-start sm:px-6">
         <span className="text-xs font-medium text-fg-muted">Quality</span>
         <span aria-hidden className="h-1.5 w-24 overflow-hidden rounded-full bg-surface-sunken sm:w-40"><span className={`block h-full rounded-full motion-safe:transition-[width] ${scoreBar}`} style={{ width: `${Math.max(0, Math.min(100, score ?? 0))}%` }} /></span>
         <span className={`text-sm font-semibold tabular-nums ${scoreTone}`}>{validating ? 'checking…' : score == null ? '—' : Math.round(score)}</span>
