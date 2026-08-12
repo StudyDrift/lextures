@@ -42,7 +42,7 @@ func TestArticleRevisionConflictAndSlugRedirectDB(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	publishedAt := time.Now().UTC()
+	publishedAt := time.Now().UTC().Add(-time.Second)
 	created, err := InsertArticle(ctx, tx, NewArticle{
 		Kind: "blog", Slug: "before-" + suffix, Locale: "en", Title: "Before",
 		BodyMD: "revision one", Status: "published", AuthorSlug: "author-" + suffix,
@@ -115,7 +115,7 @@ func TestPublicContentProjectionVisibilityAndSearchDB(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	now := time.Now().UTC()
+	now := time.Now().UTC().Add(-time.Second)
 	published, err := InsertArticle(ctx, tx, NewArticle{Kind: "doc", Slug: "published-" + suffix, Locale: "en", Title: "Rubric guide", Description: "Public description", BodyMD: "A rubric helps assessment.", Status: "published", AuthorSlug: authorSlug, CategoryID: &category.ID, PublishedAt: &now, ActorID: actor})
 	if err != nil {
 		t.Fatal(err)

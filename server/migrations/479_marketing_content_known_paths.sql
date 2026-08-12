@@ -14,15 +14,18 @@ ON CONFLICT (path) DO UPDATE SET source = 'article', updated_at = now();
 CREATE OR REPLACE FUNCTION marketing.sync_content_article_path() RETURNS trigger
 LANGUAGE plpgsql AS $$
 BEGIN
-    IF TG_OP = 'DELETE' OR NEW.status <> 'published' OR NEW.deleted_at IS NOT NULL THEN
+    IF TG_OP = 'DELETE' THEN
         DELETE FROM marketing.content_known_paths WHERE source = 'article' AND path = OLD.path;
+        RETURN OLD;
     END IF;
-    IF TG_OP <> 'DELETE' AND NEW.status = 'published' AND NEW.deleted_at IS NULL THEN
-        INSERT INTO marketing.content_known_paths(path, source, updated_at)
-        VALUES (NEW.path, 'article', now())
-        ON CONFLICT (path) DO UPDATE SET source = 'article', updated_at = now();
+    IF NEW.status <> 'published' OR NEW.deleted_at IS NOT NULL THEN
+        DELETE FROM marketing.content_known_paths WHERE source = 'article' AND path = COALESCE(OLD.path, NEW.path);
+        RETURN NEW;
     END IF;
-    RETURN COALESCE(NEW, OLD);
+    INSERT INTO marketing.content_known_paths(path, source, updated_at)
+    VALUES (NEW.path, 'article', now())
+    ON CONFLICT (path) DO UPDATE SET source = 'article', updated_at = now();
+    RETURN NEW;
 END $$;
 
 DROP TRIGGER IF EXISTS trg_mc_article_known_path ON marketing.content_articles;
