@@ -4,6 +4,9 @@ ALTER TABLE institution_inquiries
     ADD COLUMN IF NOT EXISTS crm_opportunity_id TEXT;
 
 ALTER TABLE institution_inquiries
+    DROP CONSTRAINT IF EXISTS institution_inquiries_first_touch_len;
+
+ALTER TABLE institution_inquiries
     ADD CONSTRAINT institution_inquiries_first_touch_len
     CHECK (char_length(first_touch_channel) BETWEEN 1 AND 80);
 

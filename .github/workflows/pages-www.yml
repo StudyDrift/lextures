@@ -129,7 +129,7 @@ jobs:
           for path in \
             dist/index.html \
             dist/pricing/index.html \
-            dist/k-12/index.html \
+            dist/k12/index.html \
             dist/higher-ed/index.html \
             dist/homeschool/index.html \
             dist/security/index.html \

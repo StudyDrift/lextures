@@ -131,6 +131,25 @@ describe('injectDocument', () => {
     assert.doesNotMatch(out, /window\.__LEXTURES_SSR__/)
     assert.doesNotMatch(out, /fonts\.googleapis/)
   })
+
+  it('inserts meta name=description when the shell has none', () => {
+    const shell = `<!doctype html><html><head>
+    <title>Old Title</title>
+  </head><body><div id="root"></div></body></html>`
+    const tags = buildHeadTags({
+      title: 'Home — Lextures',
+      description: 'Shell has no description meta yet.',
+      canonical: 'https://lextures.com/',
+    })
+    const out = injectDocument(shell, {
+      headTags: tags,
+      bodyHtml: '<h1>Home</h1>',
+      ssrData: { path: '/' },
+      interactive: true,
+    })
+    assert.match(out, /<meta name="description" content="Shell has no description meta yet\." \/>/)
+    assert.match(out, /<title>Home — Lextures<\/title>/)
+  })
 })
 
 describe('injectHead (compat)', () => {

@@ -332,12 +332,18 @@ export function injectDocument(
     html = html.replace(/<\/head>/i, `    <title>Lextures</title>\n  </head>`)
   }
 
-  // Replace or insert description
-  if (/<meta\s+name=["']description["']/i.test(html)) {
-    html = html.replace(/<meta\s+name=["']description["'][^>]*>/i, () => {
-      const m = headTags.match(/<meta name="description"[^>]*>/i)
-      return m ? m[0] : ''
-    })
+  // Replace or insert description. The Vite shell often has no description meta
+  // (generator owns per-route head); without an insert path here, the tag is
+  // filtered out of the inject block below and never appears in dist HTML.
+  const descriptionTag = (headTags.match(/<meta name="description"[^>]*>/i) || [])[0]
+  if (descriptionTag) {
+    if (/<meta\s+name=["']description["']/i.test(html)) {
+      html = html.replace(/<meta\s+name=["']description["'][^>]*>/i, descriptionTag)
+    } else if (/<title>[^<]*<\/title>/i.test(html)) {
+      html = html.replace(/<title>[^<]*<\/title>/i, (title) => `${title}\n    ${descriptionTag}`)
+    } else {
+      html = html.replace(/<\/head>/i, `    ${descriptionTag}\n  </head>`)
+    }
   }
 
   // Strip managed tags then inject full block (skip title/description already handled)
