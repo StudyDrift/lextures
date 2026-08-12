@@ -22,7 +22,6 @@ export const REDIRECTS: RedirectRule[] = [
   { from: '/docs/creating-a-new-course', to: '/docs/getting-started/creating-a-new-course', status: 301, addedAt: '2026-08-11', reason: 'Move legacy help article into the categorized help center.' },
   { from: '/docs/finding-your-course', to: '/docs/getting-started/finding-your-course', status: 301, addedAt: '2026-08-11', reason: 'Move legacy help article into the categorized help center.' },
   { from: '/docs/navigating-the-course-interface', to: '/docs/getting-started/navigating-the-course-interface', status: 301, addedAt: '2026-08-11', reason: 'Move legacy help article into the categorized help center.' },
-  { from: '/docs/self-hosting', to: '/docs/self-hosting/self-hosting-requirements-install', status: 301, addedAt: '2026-08-11', reason: 'Replace the legacy self-hosting article with the categorized installation guide.' },
   { from: '/docs/connecting-lextures-to-zapier', to: '/docs/integrations/connecting-lextures-to-zapier', status: 301, addedAt: '2026-08-11', reason: 'Move legacy help article into the categorized help center.' },
   { from: '/docs/using-lextures-with-make', to: '/docs/integrations/using-lextures-with-make', status: 301, addedAt: '2026-08-11', reason: 'Move legacy help article into the categorized help center.' },
   { from: '/self-learner', to: '/homeschool', status: 301, addedAt: '2026-08-11', reason: 'Consolidate the legacy independent-learner audience page.' },
