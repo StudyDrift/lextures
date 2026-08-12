@@ -384,17 +384,17 @@ func TestMerge_EnvOnlyStubsPreserved(t *testing.T) {
 func TestMerge_DefaultOnSecurityAndBaselines(t *testing.T) {
 	got := Merge(config.Config{}, nil)
 	for name, on := range map[string]bool{
-		"SessionManagementUIEnabled": got.SessionManagementUIEnabled,
-		"MFAEnabled":                 got.MFAEnabled,
-		"EmailNotificationsEnabled":  got.EmailNotificationsEnabled,
-		"GradebookCSVEnabled":        got.GradebookCSVEnabled,
+		"SessionManagementUIEnabled":  got.SessionManagementUIEnabled,
+		"MFAEnabled":                  got.MFAEnabled,
+		"EmailNotificationsEnabled":   got.EmailNotificationsEnabled,
+		"GradebookCSVEnabled":         got.GradebookCSVEnabled,
 		"ResubmissionWorkflowEnabled": got.ResubmissionWorkflowEnabled,
-		"AnnotationEnabled":          got.AnnotationEnabled,
-		"AdminConsoleEnabled":        got.AdminConsoleEnabled,
-		"AdminSearchEnabled":         got.AdminSearchEnabled,
-		"FFWhatifGrades":             got.FFWhatifGrades,
-		"FFPeerReview":               got.FFPeerReview,
-		"FFConditionalRelease":       got.FFConditionalRelease,
+		"AnnotationEnabled":           got.AnnotationEnabled,
+		"AdminConsoleEnabled":         got.AdminConsoleEnabled,
+		"AdminSearchEnabled":          got.AdminSearchEnabled,
+		"FFWhatifGrades":              got.FFWhatifGrades,
+		"FFPeerReview":                got.FFPeerReview,
+		"FFConditionalRelease":        got.FFConditionalRelease,
 	} {
 		if !on {
 			t.Fatalf("expected %s default ON when DB unset", name)
@@ -421,3 +421,14 @@ func TestMerge_LpAdaptCollapse(t *testing.T) {
 	}
 }
 
+func TestMergeMarketingContentDefaultsOff(t *testing.T) {
+	got := Merge(config.Config{FFMarketingContent: true}, nil)
+	if got.FFMarketingContent {
+		t.Fatal("expected marketing content off when DB setting is unset")
+	}
+	on := true
+	got = Merge(config.Config{}, &Row{FFMarketingContent: &on})
+	if !got.FFMarketingContent {
+		t.Fatal("expected DB setting to enable marketing content")
+	}
+}

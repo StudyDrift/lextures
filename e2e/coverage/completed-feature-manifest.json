@@ -10,135 +10,311 @@
     {
       "id": "SEO.15",
       "path": "docs/completed/seo/SEO.15-measurement-search-console-and-ai-share-of-voice.md",
-      "markets": ["ALL"], "risk": "major", "client": "web", "coverage": "not-applicable",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "not-applicable",
       "rationale": "Search measurement collectors and report generation are operational automation covered by deterministic Node tests; no signed-in product journey applies.",
-      "owner": "Web Platform", "specs": [{ "path": "www/scripts/seo-measurement/core.test.mjs" }], "reviewed": true
+      "owner": "Web Platform",
+      "specs": [
+        {
+          "path": "www/scripts/seo-measurement/core.test.mjs"
+        }
+      ],
+      "reviewed": true
     },
     {
       "id": "SEO.14",
       "path": "docs/completed/seo/SEO.14-multimodal-video-images-and-social-assets.md",
-      "markets": ["ALL"], "risk": "minor", "client": "web", "coverage": "not-applicable",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "minor",
+      "client": "web",
+      "coverage": "not-applicable",
       "rationale": "Image optimization, social-card generation, and media metadata are deterministic build concerns covered by marketing-site tests; no signed-in journey applies.",
-      "owner": "Web Platform", "specs": [{ "path": "www/scripts/og-card/core.test.mjs" }], "reviewed": true
+      "owner": "Web Platform",
+      "specs": [
+        {
+          "path": "www/scripts/og-card/core.test.mjs"
+        }
+      ],
+      "reviewed": true
     },
     {
       "id": "SEO.13",
       "path": "docs/completed/seo/SEO.13-offsite-entity-mentions-and-digital-pr.md",
-      "markets": ["ALL"], "risk": "minor", "client": "web", "coverage": "not-applicable",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "minor",
+      "client": "web",
+      "coverage": "not-applicable",
       "rationale": "Off-site profile validation and press assets are public-site governance concerns covered by deterministic Node tests; no signed-in journey applies.",
-      "owner": "Marketing", "specs": [{ "path": "www/scripts/check-offsite-profiles.test.mjs" }], "reviewed": true
+      "owner": "Marketing",
+      "specs": [
+        {
+          "path": "www/scripts/check-offsite-profiles.test.mjs"
+        }
+      ],
+      "reviewed": true
     },
     {
       "id": "SEO.12",
       "path": "docs/completed/seo/SEO.12-original-research-and-data-program.md",
-      "markets": ["ALL"], "risk": "major", "client": "web", "coverage": "not-applicable",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "not-applicable",
       "rationale": "Public research publishing and consent APIs are covered by service and static-site tests; the plan does not define a signed-in E2E journey.",
-      "owner": "Research", "specs": [{ "path": "server/internal/httpserver/research_participation_nodb_test.go" }], "reviewed": true
+      "owner": "Research",
+      "specs": [
+        {
+          "path": "server/internal/httpserver/research_participation_nodb_test.go"
+        }
+      ],
+      "reviewed": true
     },
     {
       "id": "SEO.11",
       "path": "docs/completed/seo/SEO.11-marketplace-catalog-seo.md",
-      "markets": ["ALL"], "risk": "major", "client": "web", "coverage": "not-applicable",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "not-applicable",
       "rationale": "Marketplace prerendering and structured catalog output are server/build-time behavior covered by deterministic tests; no signed-in journey applies.",
-      "owner": "Marketplace", "specs": [{ "path": "www/scripts/marketplace-seo.test.mjs" }], "reviewed": true
+      "owner": "Marketplace",
+      "specs": [
+        {
+          "path": "www/scripts/marketplace-seo.test.mjs"
+        }
+      ],
+      "reviewed": true
     },
     {
       "id": "SEO.10",
       "path": "docs/completed/seo/SEO.10-programmatic-utility-pages.md",
-      "markets": ["ALL"], "risk": "major", "client": "web", "coverage": "not-applicable",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "not-applicable",
       "rationale": "Utility-page quality gates and static output are deterministic marketing build concerns covered by Node tests; no signed-in journey applies.",
-      "owner": "Web Platform", "specs": [{ "path": "www/scripts/generate/utility-check.test.mjs" }], "reviewed": true
+      "owner": "Web Platform",
+      "specs": [
+        {
+          "path": "www/scripts/generate/utility-check.test.mjs"
+        }
+      ],
+      "reviewed": true
     },
     {
       "id": "SEO.9",
       "path": "docs/completed/seo/SEO.9-comparison-alternatives-and-integration-pages.md",
-      "markets": ["ALL"], "risk": "major", "client": "web", "coverage": "not-applicable",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "not-applicable",
       "rationale": "Comparison-page disclosure and source requirements are public content-contract concerns covered by deterministic content tests; no signed-in journey applies.",
-      "owner": "Marketing", "specs": [{ "path": "www/scripts/content-lint/core.test.mjs" }], "reviewed": true
+      "owner": "Marketing",
+      "specs": [
+        {
+          "path": "www/scripts/content-lint/core.test.mjs"
+        }
+      ],
+      "reviewed": true
     },
     {
       "id": "SEO.8",
       "path": "docs/completed/seo/SEO.8-editorial-engine-and-content-calendar.md",
-      "markets": ["ALL"], "risk": "major", "client": "web", "coverage": "not-applicable",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "not-applicable",
       "rationale": "Editorial scheduling, lifecycle, and freshness automation are deterministic Node workflows; no signed-in product journey applies.",
-      "owner": "Docs / Content", "specs": [{ "path": "www/scripts/editorial.test.mjs" }], "reviewed": true
+      "owner": "Docs / Content",
+      "specs": [
+        {
+          "path": "www/scripts/editorial.test.mjs"
+        }
+      ],
+      "reviewed": true
     },
     {
       "id": "SEO.7",
       "path": "docs/completed/seo/SEO.7-help-center-expansion.md",
-      "markets": ["ALL"], "risk": "major", "client": "web", "coverage": "not-applicable",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "not-applicable",
       "rationale": "Help-center generation, inventory, and freshness are static-site behavior covered by deterministic Node tests; no signed-in journey applies.",
-      "owner": "Docs / Content", "specs": [{ "path": "www/scripts/help-center.test.mjs" }], "reviewed": true
+      "owner": "Docs / Content",
+      "specs": [
+        {
+          "path": "www/scripts/help-center.test.mjs"
+        }
+      ],
+      "reviewed": true
     },
     {
       "id": "SEO.5",
       "path": "docs/completed/seo/SEO.5-information-architecture-and-internal-linking.md",
-      "markets": ["ALL"], "risk": "major", "client": "web", "coverage": "not-applicable",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "not-applicable",
       "rationale": "Route hierarchy and internal-link invariants are deterministic static-site checks; no signed-in product journey applies.",
-      "owner": "Web Platform", "specs": [{ "path": "www/scripts/generate-site.test.mjs" }], "reviewed": true
+      "owner": "Web Platform",
+      "specs": [
+        {
+          "path": "www/scripts/generate-site.test.mjs"
+        }
+      ],
+      "reviewed": true
     },
     {
       "id": "SEO.4",
       "path": "docs/completed/seo/SEO.4-core-web-vitals-and-page-experience.md",
-      "markets": ["ALL"], "risk": "major", "client": "web", "coverage": "not-applicable",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "not-applicable",
       "rationale": "Performance budgets and Core Web Vitals instrumentation are build and audit concerns covered by deterministic checks; no signed-in journey applies.",
-      "owner": "Web Platform", "specs": [{ "path": "www/scripts/check-perf-budget.test.mjs" }], "reviewed": true
+      "owner": "Web Platform",
+      "specs": [
+        {
+          "path": "www/scripts/check-perf-budget.test.mjs"
+        }
+      ],
+      "reviewed": true
     },
     {
       "id": "SEO.3",
       "path": "docs/completed/seo/SEO.3-structured-data-and-entity-graph.md",
-      "markets": ["ALL"], "risk": "major", "client": "web", "coverage": "not-applicable",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "not-applicable",
       "rationale": "Structured-data graph validation is deterministic generated-markup behavior covered by marketing-site tests; no signed-in journey applies.",
-      "owner": "Web Platform", "specs": [{ "path": "www/scripts/seo-check/core.test.mjs" }], "reviewed": true
+      "owner": "Web Platform",
+      "specs": [
+        {
+          "path": "www/scripts/seo-check/core.test.mjs"
+        }
+      ],
+      "reviewed": true
     },
     {
       "id": "SEO.2",
       "path": "docs/completed/seo/SEO.2-crawler-access-sitemaps-and-llms-txt.md",
-      "markets": ["ALL"], "risk": "major", "client": "web", "coverage": "not-applicable",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "not-applicable",
       "rationale": "Crawler policy, robots, sitemap, and LLM catalog outputs are deterministic build artifacts covered by Node tests; no signed-in journey applies.",
-      "owner": "Web Platform", "specs": [{ "path": "www/scripts/seo-artifacts.test.mjs" }], "reviewed": true
+      "owner": "Web Platform",
+      "specs": [
+        {
+          "path": "www/scripts/seo-artifacts.test.mjs"
+        }
+      ],
+      "reviewed": true
     },
     {
       "id": "SEO.1",
       "path": "docs/completed/seo/SEO.1-static-rendering-and-crawlability.md",
-      "markets": ["ALL"], "risk": "major", "client": "web", "coverage": "not-applicable",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "not-applicable",
       "rationale": "Static rendering and crawlability are generated-site invariants covered by deterministic Node tests; no signed-in product journey applies.",
-      "owner": "Web Platform", "specs": [{ "path": "www/scripts/generate-site.test.mjs" }], "reviewed": true
+      "owner": "Web Platform",
+      "specs": [
+        {
+          "path": "www/scripts/generate-site.test.mjs"
+        }
+      ],
+      "reviewed": true
     },
     {
       "id": "SEO.17",
       "path": "docs/completed/seo/SEO.17-international-seo-and-hreflang.md",
-      "markets": ["K12", "HE", "HS"],
+      "markets": [
+        "K12",
+        "HE",
+        "HS"
+      ],
       "risk": "minor",
       "client": "web",
       "coverage": "not-applicable",
       "rationale": "Locale routing gates, hreflang reciprocity, HTML/sitemap parity, and non-indexable-target protection are deterministic build and Node-test concerns; no signed-in product journey applies.",
       "owner": "Web Platform",
-      "specs": [{ "path": "www/scripts/seo-check/checks/hreflang.test.mjs" }],
+      "specs": [
+        {
+          "path": "www/scripts/seo-check/checks/hreflang.test.mjs"
+        }
+      ],
       "reviewed": true
     },
     {
       "id": "SEO.16",
       "path": "docs/completed/seo/SEO.16-seo-governance-and-ci-guardrails.md",
-      "markets": ["K12", "HE", "HS"],
+      "markets": [
+        "K12",
+        "HE",
+        "HS"
+      ],
       "risk": "major",
       "client": "web",
       "coverage": "not-applicable",
       "rationale": "Generated-site invariants, lifecycle policy, and live crawler verification are exercised by deterministic Node tests and dedicated CI workflows; no signed-in product journey applies.",
       "owner": "Web Platform",
-      "specs": [{ "path": "www/scripts/seo-check/core.test.mjs" }],
+      "specs": [
+        {
+          "path": "www/scripts/seo-check/core.test.mjs"
+        }
+      ],
       "reviewed": true
     },
     {
       "id": "SEO.6",
       "path": "docs/completed/seo/SEO.6-answer-first-content-system.md",
-      "markets": ["ALL"],
+      "markets": [
+        "ALL"
+      ],
       "risk": "major",
       "client": "web",
       "coverage": "smoke",
       "rationale": "Build-time content contract, security policy, scoring, artifact generation, and static component rendering are covered by unit and marketing-site build tests; the internal content-kit route provides the rendered smoke surface.",
       "owner": "Docs / Content",
-      "specs": [{ "path": "www/scripts/content-lint/core.test.mjs" }],
+      "specs": [
+        {
+          "path": "www/scripts/content-lint/core.test.mjs"
+        }
+      ],
       "reviewed": true
     },
     {
@@ -4201,7 +4377,7 @@
         "authorization": true,
         "dependency": "n/a",
         "rollback": false,
-        "notes": "Matrix covers course flag; generation/serving journeys tracked under AC.2–AC.6 gaps."
+        "notes": "Matrix covers course flag; generation/serving journeys tracked under AC.2\u2013AC.6 gaps."
       }
     },
     {
@@ -4288,7 +4464,7 @@
       "risk": "critical",
       "client": "web",
       "coverage": "smoke",
-      "rationale": "API bind/refresh + instructor workspace post-assessment picker and effectiveness chip; full pre→serve→post causal journey remains backlog.",
+      "rationale": "API bind/refresh + instructor workspace post-assessment picker and effectiveness chip; full pre\u2192serve\u2192post causal journey remains backlog.",
       "owner": "Learning Platform",
       "specs": [
         {
@@ -4393,7 +4569,7 @@
         "authorization": true,
         "dependency": "n/a",
         "rollback": false,
-        "notes": "CT.1 foundations only; authoring UI and student runtime tracked under CT.2–CT.3."
+        "notes": "CT.1 foundations only; authoring UI and student runtime tracked under CT.2\u2013CT.3."
       }
     },
     {
@@ -4495,7 +4671,7 @@
       "risk": "major",
       "client": "web",
       "coverage": "journey",
-      "rationale": "Playwright covers sandbox_probe iframe mount, interact→save→grade loop, hostile cookie/parent/storage/fetch containment, and admin migration dry-run reporting.",
+      "rationale": "Playwright covers sandbox_probe iframe mount, interact\u2192save\u2192grade loop, hostile cookie/parent/storage/fetch containment, and admin migration dry-run reporting.",
       "owner": "Learning Platform",
       "specs": [
         {
@@ -4633,7 +4809,7 @@
       "risk": "major",
       "client": "web",
       "coverage": "journey",
-      "rationale": "Playwright covers ask → cited dry-run answer persistence, reload restore, daily rate-limit message, and instructor enrollment reset clearing the transcript.",
+      "rationale": "Playwright covers ask \u2192 cited dry-run answer persistence, reload restore, daily rate-limit message, and instructor enrollment reset clearing the transcript.",
       "owner": "AI Platform",
       "specs": [
         {
@@ -4660,7 +4836,7 @@
       "risk": "major",
       "client": "web",
       "coverage": "journey",
-      "rationale": "Playwright covers answer-key redaction, wrong→retry→correct scoring, sequential locking, attempt exhaustion, idempotent submit, host render, and instructor option-distribution analytics.",
+      "rationale": "Playwright covers answer-key redaction, wrong\u2192retry\u2192correct scoring, sequential locking, attempt exhaustion, idempotent submit, host render, and instructor option-distribution analytics.",
       "owner": "Assessment",
       "specs": [
         {
@@ -4687,7 +4863,7 @@
       "risk": "major",
       "client": "web",
       "coverage": "journey",
-      "rationale": "Playwright covers reveal redaction, confidence-required gate, commit→reveal, irreversibility (action + PUT), peer small-n suppression, reflection, host render/reload persistence, and CT.4 reset restoring the gate.",
+      "rationale": "Playwright covers reveal redaction, confidence-required gate, commit\u2192reveal, irreversibility (action + PUT), peer small-n suppression, reflection, host render/reload persistence, and CT.4 reset restoring the gate.",
       "owner": "Assessment",
       "specs": [
         {
@@ -4849,7 +5025,7 @@
       "risk": "major",
       "client": "web",
       "coverage": "journey",
-      "rationale": "Playwright covers sensitive-field redaction, sequential lock, wrong→hint→algebraic normalisation correct, attempt exhaustion→reveal_step, locale numeric input, analytics facets, and UI mount.",
+      "rationale": "Playwright covers sensitive-field redaction, sequential lock, wrong\u2192hint\u2192algebraic normalisation correct, attempt exhaustion\u2192reveal_step, locale numeric input, analytics facets, and UI mount.",
       "owner": "Assessment",
       "specs": [
         {
@@ -5055,7 +5231,7 @@
       "risk": "critical",
       "client": "mobile",
       "coverage": "not-applicable",
-      "rationale": "Mobile client story: Content Tool host + state persistence (fence→instance, ToolFrame, autosave/conflict/offline, noop_probe). Covered by native unit suites + shared fixtures; web Playwright is not the coverage surface.",
+      "rationale": "Mobile client story: Content Tool host + state persistence (fence\u2192instance, ToolFrame, autosave/conflict/offline, noop_probe). Covered by native unit suites + shared fixtures; web Playwright is not the coverage surface.",
       "owner": "Mobile",
       "reviewed": true,
       "flags": {
@@ -5077,7 +5253,7 @@
       "risk": "major",
       "client": "mobile",
       "coverage": "not-applicable",
-      "rationale": "Mobile client story: sandboxed WebView tool host (CT.5 bridge, opaque origin, native→sandbox→placeholder). Covered by native unit suites + shared bridge fixtures (AC-16); web Playwright is not the coverage surface.",
+      "rationale": "Mobile client story: sandboxed WebView tool host (CT.5 bridge, opaque origin, native\u2192sandbox\u2192placeholder). Covered by native unit suites + shared bridge fixtures (AC-16); web Playwright is not the coverage surface.",
       "owner": "Mobile",
       "reviewed": true,
       "flags": {
@@ -5143,7 +5319,7 @@
       "risk": "major",
       "client": "mobile",
       "coverage": "not-applicable",
-      "rationale": "Mobile client story: native pack-3 renderers (sort_sequence, highlight_annotate, diagram_hotspot) on the CT.M3 host with tap-to-assign alternatives (WCAG §2.5.7). Covered by ContentToolPack3Logic unit suites + shared pack3-logic fixtures (AC-15); web Playwright is not the coverage surface.",
+      "rationale": "Mobile client story: native pack-3 renderers (sort_sequence, highlight_annotate, diagram_hotspot) on the CT.M3 host with tap-to-assign alternatives (WCAG \u00a72.5.7). Covered by ContentToolPack3Logic unit suites + shared pack3-logic fixtures (AC-15); web Playwright is not the coverage surface.",
       "owner": "Mobile",
       "reviewed": true,
       "flags": {
@@ -5250,7 +5426,7 @@
         "authorization": true,
         "dependency": "n/a",
         "rollback": true,
-        "notes": "No feature flag. Snapshot TTL via CHECKLIST_SNAPSHOT_TTL. Unblocks CC.3–CC.7/CC.9."
+        "notes": "No feature flag. Snapshot TTL via CHECKLIST_SNAPSHOT_TTL. Unblocks CC.3\u2013CC.7/CC.9."
       }
     },
     {
@@ -5293,7 +5469,7 @@
       "risk": "major",
       "client": "ops",
       "coverage": "smoke",
-      "rationale": "22 structure/outcomes checklist rules (recommended tier) evaluated server-side. Playwright covers outcomes.assessment-mapping evidence rows (5 assignments, map 2→3, evidence shrinks); UI expandable table lands with CC.7/CC.8.",
+      "rationale": "22 structure/outcomes checklist rules (recommended tier) evaluated server-side. Playwright covers outcomes.assessment-mapping evidence rows (5 assignments, map 2\u21923, evidence shrinks); UI expandable table lands with CC.7/CC.8.",
       "owner": "Learning Platform",
       "reviewed": true,
       "specs": [
@@ -5322,7 +5498,7 @@
       "risk": "major",
       "client": "ops",
       "coverage": "smoke",
-      "rationale": "26 assessment/grading/feedback/interaction checklist rules (recommended tier) evaluated server-side. Playwright covers grading.group-weights (87%→todo, 100%→done) and feedback.rubrics-on-high-stakes evidence targeting assignment.rubric; accommodations privacy asserted in Go tests. UI lands with CC.7/CC.8.",
+      "rationale": "26 assessment/grading/feedback/interaction checklist rules (recommended tier) evaluated server-side. Playwright covers grading.group-weights (87%\u2192todo, 100%\u2192done) and feedback.rubrics-on-high-stakes evidence targeting assignment.rubric; accommodations privacy asserted in Go tests. UI lands with CC.7/CC.8.",
       "owner": "Learning Platform",
       "reviewed": true,
       "specs": [
@@ -5351,7 +5527,7 @@
       "risk": "major",
       "client": "ops",
       "coverage": "smoke",
-      "rationale": "20 accessibility/UDL/launch checklist rules (recommended tier) with shared ContentDoc parse and SSRF-hardened link-health checker (disabled by default). Playwright covers a11y.image-alt-text progress→done and launch.student-preview after View as: Student; linkhealth SSRF/cap asserted in Go tests. UI lands with CC.7/CC.8.",
+      "rationale": "20 accessibility/UDL/launch checklist rules (recommended tier) with shared ContentDoc parse and SSRF-hardened link-health checker (disabled by default). Playwright covers a11y.image-alt-text progress\u2192done and launch.student-preview after View as: Student; linkhealth SSRF/cap asserted in Go tests. UI lands with CC.7/CC.8.",
       "owner": "Learning Platform",
       "reviewed": true,
       "specs": [
@@ -5398,7 +5574,7 @@
         "authorization": true,
         "dependency": "n/a",
         "rollback": true,
-        "notes": "No feature flag. Client gating is UX-only; server enforces item:create (CC.2). Unblocks CC.8–CC.10."
+        "notes": "No feature flag. Client gating is UX-only; server enforces item:create (CC.2). Unblocks CC.8\u2013CC.10."
       }
     },
     {
@@ -7834,6 +8010,166 @@
       "reviewed": true
     },
     {
+      "id": "MC.1",
+      "path": "docs/completed/marketing-content/MC.1-content-data-model-and-migrations.md",
+      "markets": [
+        "K12",
+        "HE",
+        "HS"
+      ],
+      "risk": "major",
+      "client": "ops",
+      "coverage": "api-contract",
+      "rationale": "Schema, RBAC seeds, and repo invariants for marketing content; covered by Go repository/DB tests. No signed-in product UI journey yet (workspace ships in later MC plans).",
+      "owner": "Server platform",
+      "specs": [
+        {
+          "path": "server/internal/repos/marketingcontent/repo_db_test.go"
+        },
+        {
+          "path": "server/internal/repos/marketingcontent/articles_test.go"
+        }
+      ],
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": false,
+        "authorization": true,
+        "dependency": "n/a",
+        "rollback": true,
+        "notes": "ff_marketing_content + marketing-content RBAC permissions; admin workspace journeys land with MC.9/MC.10."
+      },
+      "reviewed": true
+    },
+    {
+      "id": "MC.2",
+      "path": "docs/completed/marketing-content/MC.2-authoring-api-and-revisions.md",
+      "markets": [
+        "K12",
+        "HE",
+        "HS"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "api-contract",
+      "rationale": "Admin authoring/workflow API and revision transitions covered by Go HTTP and service tests; full editor journey deferred to MC.10.",
+      "owner": "Server platform",
+      "specs": [
+        {
+          "path": "server/internal/httpserver/marketing_content_nodb_test.go"
+        },
+        {
+          "path": "server/internal/service/marketingcontent/workflow_test.go"
+        }
+      ],
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": false,
+        "authorization": true,
+        "dependency": true,
+        "rollback": true,
+        "notes": "Depends on MC.1 schema/permissions; feature-off returns 404."
+      },
+      "reviewed": true
+    },
+    {
+      "id": "MC.3",
+      "path": "docs/completed/marketing-content/MC.3-public-content-read-api.md",
+      "markets": [
+        "K12",
+        "HE",
+        "HS"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "api-contract",
+      "rationale": "Anonymous public content read/index/search API covered by Go HTTP tests; marketing-site cutover journeys are later MC plans.",
+      "owner": "Server platform",
+      "specs": [
+        {
+          "path": "server/internal/httpserver/public_marketing_content_http_test.go"
+        },
+        {
+          "path": "server/internal/httpserver/marketing_content_nodb_test.go"
+        }
+      ],
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": false,
+        "authorization": "n/a",
+        "dependency": true,
+        "rollback": true,
+        "notes": "Public routes gated by ff_marketing_content; no authz beyond publish state."
+      },
+      "reviewed": true
+    },
+    {
+      "id": "MC.4",
+      "path": "docs/completed/marketing-content/MC.4-content-rendering-and-validation-service.md",
+      "markets": [
+        "K12",
+        "HE",
+        "HS"
+      ],
+      "risk": "major",
+      "client": "ops",
+      "coverage": "api-contract",
+      "rationale": "Go renderer + content-contract validator covered by package tests and lint/render path on the admin API; editor preview UI is MC.10.",
+      "owner": "Server platform + Docs/Content",
+      "specs": [
+        {
+          "path": "server/internal/service/marketingcontent/render/render_test.go"
+        },
+        {
+          "path": "server/internal/service/marketingcontent/validate/validate_test.go"
+        }
+      ],
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": false,
+        "authorization": true,
+        "dependency": true,
+        "rollback": "n/a",
+        "notes": "Lint/render invoked from admin marketing routes gated by the feature flag."
+      },
+      "reviewed": true
+    },
+    {
+      "id": "MC.5",
+      "path": "docs/completed/marketing-content/MC.5-marketing-media-library.md",
+      "markets": [
+        "K12",
+        "HE",
+        "HS"
+      ],
+      "risk": "major",
+      "client": "web",
+      "coverage": "api-contract",
+      "rationale": "Media library upload/metadata/rendition storage covered by Go repo and feature-flag HTTP tests; workspace media picker UI is later MC work.",
+      "owner": "Server platform + Web platform",
+      "specs": [
+        {
+          "path": "server/internal/repos/marketingcontent/media_test.go"
+        },
+        {
+          "path": "server/internal/httpserver/marketing_content_nodb_test.go"
+        }
+      ],
+      "flags": {
+        "settingsToggle": true,
+        "disabledState": true,
+        "enabledJourney": false,
+        "authorization": true,
+        "dependency": true,
+        "rollback": true,
+        "notes": "Admin media routes gated by ff_marketing_content + marketing-content permissions."
+      },
+      "reviewed": true
+    },
+    {
       "id": "MC0",
       "path": "docs/completed/marketplace-courses/MC0-authoring-provisioning-foundation.md",
       "markets": [
@@ -10188,7 +10524,7 @@
       "risk": "minor",
       "client": "web",
       "coverage": "journey",
-      "rationale": "Playwright journey selects across paragraphs on a content page and asserts ⌘/Ctrl+C copies every paragraph.",
+      "rationale": "Playwright journey selects across paragraphs on a content page and asserts \u2318/Ctrl+C copies every paragraph.",
       "owner": "Web Platform",
       "specs": [
         {

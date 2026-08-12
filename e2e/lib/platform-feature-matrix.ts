@@ -746,6 +746,18 @@ export const PLATFORM_FEATURE_MATRIX: readonly PlatformFeatureMatrixEntry[] = [
     gatedSurface: null,
   },
   {
+    key: 'ffMarketingContent',
+    label: 'Marketing content workspace',
+    category: 'admin',
+    ownershipSource: 'database',
+    sourceKey: null,
+    runtimeKey: 'ffMarketingContent',
+    settingsOnlyRationale: null,
+    secretSensitive: false,
+    uiSample: false,
+    gatedSurface: null,
+  },
+  {
     key: 'ffMotionNavigation',
     label: 'Motion / animation',
     category: 'accessibility',

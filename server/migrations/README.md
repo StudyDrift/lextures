@@ -3,6 +3,11 @@
 Versioned SQL migrations for the Lextures Postgres schema. Applied at API startup when
 `RUN_MIGRATIONS=true` (or manually via `go run ./cmd/migrate`).
 
+The `marketing` schema, introduced by migrations 477–478 (MC.1), owns the
+database-backed blog/help-center articles, revisions, taxonomy, authors, and
+redirects. Application SQL for it belongs exclusively to
+`internal/repos/marketingcontent`.
+
 ## Naming convention
 
 | File | Purpose |

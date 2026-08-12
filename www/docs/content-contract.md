@@ -1,5 +1,9 @@
 # Answer-first content contract
 
+The normative Markdown/directive and validation specification is
+[`docs/guides/marketing-content-dialect.md`](../../docs/guides/marketing-content-dialect.md).
+The same deterministic contract now runs on API saves and publish transitions as well as builds.
+
 Editorial pages use safe Markdown directives. Content is compiled to static HTML; imports, JSX, raw HTML, and unknown directives fail lint for new `.mdx` content.
 
 Every new page must provide the validated front matter below, open with three to five complete conclusions, answer its `primaryQuestion` in 40–60 words, cite numeric claims inline, include descriptive internal links, and close with three to six FAQ entries. Question headings, 120–180-word self-contained passages, lists/tables/steps, and primary citations determine the extractability score. New pages must score 8.0; 6.0–7.9 warns and scores below 6.0 fail. Older Markdown remains listed as grandfathered in the quality report until refreshed.

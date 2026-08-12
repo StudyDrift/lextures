@@ -90,6 +90,7 @@ test-results/
 # Local dev / IDE tooling (machine-specific)
 .antigravitycli/
 server/bin
+server/server
 
 # Native mobile local API configuration
 clients/mobile-dev.env

@@ -688,6 +688,13 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     pack: 'marketplace',
   },
   {
+    key: 'ffMarketingContent',
+    label: 'Marketing content workspace',
+    description:
+      'Lets permitted users write and publish the public blog and help center from inside Lextures. Requires a marketing-content permission to see.',
+    pack: 'admin',
+  },
+  {
     key: 'ffContentToolMarketplace',
     label: 'Content tool marketplace',
     description:
