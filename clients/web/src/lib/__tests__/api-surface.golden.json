@@ -2034,6 +2034,12 @@
     "respondToConsentStudy",
     "updateConsentStudy"
   ],
+  "research-participation-api.ts": [
+    "ResearchParticipation",
+    "ResearchParticipationSetting",
+    "getResearchParticipation",
+    "setResearchParticipation"
+  ],
   "revenue-share-api.ts": [
     "AFFILIATE_REF_COOKIE",
     "AFFILIATE_REF_MAX_AGE_DAYS",
