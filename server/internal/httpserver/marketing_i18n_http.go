@@ -110,9 +110,6 @@ func (d Deps) handleMarketingLocaleCreate() http.HandlerFunc {
 			return
 		}
 		body.Code = mcrepo.NormalizeLocaleCode(body.Code)
-		if body.Code == "" || body.Code == mcrepo.DefaultLocale && body.IsDefault {
-			// creating en is a no-op upsert; other empty codes are invalid
-		}
 		if body.Code == "" {
 			apierr.WriteJSON(w, 400, apierr.CodeInvalidInput, "locale code is invalid.")
 			return

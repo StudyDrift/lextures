@@ -204,7 +204,7 @@ func (d Deps) handleMarketingBriefCreate() http.HandlerFunc {
 			apierr.WriteInternal(w, r, "Failed to create brief.", err)
 			return
 		}
-		defer tx.Rollback(r.Context())
+		defer func() { _ = tx.Rollback(r.Context()) }()
 		out, err := mcrepo.InsertBrief(r.Context(), tx, b)
 		if err == nil {
 			err = tx.Commit(r.Context())

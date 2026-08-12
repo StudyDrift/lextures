@@ -322,7 +322,7 @@ func (g *GitHubDispatcher) request(ctx context.Context, s Settings, method, path
 	if e != nil {
 		return nil, e
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	data, _ := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return nil, fmt.Errorf("github dispatch: status %d: %s", resp.StatusCode, strings.TrimSpace(string(data)))

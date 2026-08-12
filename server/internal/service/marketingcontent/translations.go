@@ -124,16 +124,14 @@ func (s *Service) MarkSynced(ctx context.Context, id, actor uuid.UUID) (*repo.Ar
 		if err != nil {
 			return err
 		}
-		sourceID := a.SourceArticleID
-		if sourceID == nil {
+		if a.SourceArticleID == nil {
 			src, srcErr := repo.DefaultLocaleSource(ctx, tx, a.TranslationGroupID)
 			if srcErr != nil {
 				return srcErr
 			}
-			sourceID = &src.ID
 			a = src
 		} else {
-			src, srcErr := repo.GetArticleByID(ctx, tx, *sourceID)
+			src, srcErr := repo.GetArticleByID(ctx, tx, *a.SourceArticleID)
 			if srcErr != nil {
 				return srcErr
 			}

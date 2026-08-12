@@ -28,7 +28,7 @@ func TestRecordChangeCoalescesAndUrgentBypassesDebounceDB(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 	var actor uuid.UUID
 	if err = tx.QueryRow(ctx, `SELECT id FROM "user".users LIMIT 1`).Scan(&actor); err != nil {
 		t.Fatal(err)

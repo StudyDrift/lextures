@@ -314,7 +314,7 @@ func (s *Service) MarkReviewed(ctx context.Context, id, actor uuid.UUID) (repo.A
 	if err != nil {
 		return repo.Article{}, err
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 	a, err := repo.GetArticleByID(ctx, tx, id)
 	if err != nil {
 		return repo.Article{}, err
@@ -426,7 +426,7 @@ func (s *Service) CheckLinks(ctx context.Context) error {
 				req.Header.Set("User-Agent", "Lextures-Content-Link-Health/1.0")
 				resp, e := client.Do(req)
 				if e == nil && resp.StatusCode == http.StatusMethodNotAllowed {
-					resp.Body.Close()
+					_ = resp.Body.Close()
 					req, _ = http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
 					req.Header.Set("User-Agent", "Lextures-Content-Link-Health/1.0")
 					resp, e = client.Do(req)
@@ -435,7 +435,7 @@ func (s *Service) CheckLinks(ctx context.Context) error {
 					failure = e.Error()
 				} else {
 					code = resp.StatusCode
-					resp.Body.Close()
+					_ = resp.Body.Close()
 					if code >= 400 {
 						failure = fmt.Sprintf("HTTP %d", code)
 					}

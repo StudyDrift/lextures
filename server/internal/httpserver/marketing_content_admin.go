@@ -187,9 +187,10 @@ func (d Deps) handleMarketingArticleGet() http.HandlerFunc {
 			return
 		}
 		live := "draft"
-		if a.Status == "scheduled" {
+		switch a.Status {
+		case "scheduled":
 			live = "scheduled"
-		} else if a.Status == "published" {
+		case "published":
 			live = "live"
 		}
 		if latest != nil {
