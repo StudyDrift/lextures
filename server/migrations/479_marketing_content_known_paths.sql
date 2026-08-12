@@ -1,10 +1,10 @@
-CREATE TABLE marketing.content_known_paths (
+CREATE TABLE IF NOT EXISTS marketing.content_known_paths (
     path TEXT PRIMARY KEY,
     source TEXT NOT NULL CHECK (source IN ('article', 'static_route')),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_mc_known_paths_source ON marketing.content_known_paths(source);
+CREATE INDEX IF NOT EXISTS idx_mc_known_paths_source ON marketing.content_known_paths(source);
 
 INSERT INTO marketing.content_known_paths(path, source)
 SELECT path, 'article' FROM marketing.content_articles
@@ -25,5 +25,6 @@ BEGIN
     RETURN COALESCE(NEW, OLD);
 END $$;
 
+DROP TRIGGER IF EXISTS trg_mc_article_known_path ON marketing.content_articles;
 CREATE TRIGGER trg_mc_article_known_path AFTER INSERT OR UPDATE OR DELETE
 ON marketing.content_articles FOR EACH ROW EXECUTE FUNCTION marketing.sync_content_article_path();

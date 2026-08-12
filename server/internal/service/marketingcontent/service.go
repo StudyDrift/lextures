@@ -48,7 +48,18 @@ func (s *Service) Lint(ctx context.Context, kind, body string, metadata validato
 	if err != nil {
 		return validator.Report{Findings: []validator.Finding{{Rule: "validator_error", Severity: "warn", Message: "Known paths could not be loaded."}}, Stats: renderStats(body), ValidatorError: true}
 	}
-	return validator.Article(validator.Input{Kind: kind, BodyMD: body, Metadata: metadata, KnownPaths: paths})
+	report := validator.Article(validator.Input{Kind: kind, BodyMD: body, Metadata: metadata, KnownPaths: paths})
+	// MC.4 preview/search surfaces: keep HTML + PlainText on the live lint path so the
+	// sanitizing renderer stays reachable from cmd/server (not test-only).
+	if html, renderErr := render.HTML(body); renderErr != nil {
+		report.Findings = append(report.Findings, validator.Finding{
+			Rule: "render.error", Severity: "error", Message: "Content could not be rendered: " + renderErr.Error(), Line: 1, Column: 1,
+		})
+	} else {
+		report.HTML = html
+		report.PlainText = render.PlainText(body)
+	}
+	return report
 }
 
 func renderStats(body string) render.StatsResult { return render.Stats(body) }

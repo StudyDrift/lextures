@@ -1,10 +1,10 @@
 package marketingcontent
 
-// MC.1 intentionally establishes the repository surface before MC.2/MC.3 add
-// HTTP consumers. Keeping the function values in package initialization makes
-// that staged, compile-checked contract explicit without exposing placeholder
-// routes while the feature flag remains off.
-var repositorySurface = []any{
+// MC.1 establishes the repository surface before later plans add every HTTP
+// consumer. Referencing the functions in a blank package-level value keeps the
+// staged contract compile-checked and reachable for deadcode without an unused
+// named variable (golangci unused).
+var _ = []any{
 	ListArticles,
 	GetArticleByID,
 	GetArticleByPath,

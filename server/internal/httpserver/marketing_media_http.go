@@ -53,7 +53,7 @@ func (d Deps) handleMarketingMediaUpload() http.HandlerFunc {
 			apierr.WriteJSON(w, 400, apierr.CodeInvalidInput, "file is required.")
 			return
 		}
-		defer f.Close()
+		defer func() { _ = f.Close() }()
 		data, e := io.ReadAll(io.LimitReader(f, marketingMediaMaxBytes+1))
 		if e != nil {
 			apierr.WriteInternal(w, r, "Failed to read image.", e)
@@ -229,7 +229,7 @@ func (d Deps) handlePublicMarketingMedia() http.HandlerFunc {
 			apierr.WriteJSON(w, 404, apierr.CodeNotFound, "Media not found.")
 			return
 		}
-		defer obj.Close()
+		defer func() { _ = obj.Close() }()
 		w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
 		w.Header().Set("Content-Type", rend.MIME)
 		w.Header().Set("X-Content-Type-Options", "nosniff")

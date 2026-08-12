@@ -28,6 +28,9 @@ type Report struct {
 	Findings       []Finding          `json:"findings"`
 	Stats          render.StatsResult `json:"stats"`
 	ValidatorError bool               `json:"validatorError,omitempty"`
+	// HTML / PlainText are populated by Service.Lint for editor preview and search extraction (MC.4).
+	HTML      string `json:"html,omitempty"`
+	PlainText string `json:"plainText,omitempty"`
 }
 type rule struct {
 	id    string

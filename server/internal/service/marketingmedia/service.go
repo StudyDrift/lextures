@@ -16,7 +16,6 @@ import (
 	"path"
 	"strings"
 
-	"github.com/chai2010/webp"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -125,39 +124,39 @@ func (s *Service) Create(ctx context.Context, in Upload) (*repo.MediaAsset, bool
 		if cfg.Width <= target {
 			continue
 		}
-		scaled := resize(img, target, cfg.Height*target/cfg.Width)
-		for _, format := range []string{"webp", ext} {
-			if format == "gif" || format == "avif" || format == "webp" && ext == "webp" {
-				if format != "webp" || ext == "webp" {
-					continue
-				}
-			}
-			var b bytes.Buffer
-			outMime := mimeForExt(format)
-			var encErr error
-			switch format {
-			case "webp":
-				encErr = webp.Encode(&b, scaled, &webp.Options{Lossless: true, Quality: 90})
-			case "jpg":
-				encErr = jpeg.Encode(&b, scaled, &jpeg.Options{Quality: 90})
-			default:
-				format = "png"
-				outMime = "image/png"
-				encErr = png.Encode(&b, scaled)
-			}
-			if encErr != nil {
-				cleanup()
-				return nil, false, encErr
-			}
-			name := fmt.Sprintf("%dw", target)
-			key := fmt.Sprintf("marketing/media/%s/%s.%s", id, name, format)
-			if e = s.Storage.PutObject(ctx, key, bytes.NewReader(b.Bytes()), int64(b.Len()), outMime); e != nil {
-				cleanup()
-				return nil, false, e
-			}
-			written = append(written, key)
-			rends = append(rends, repo.MediaRendition{Name: name, Ext: format, MIME: outMime, Width: target, Height: cfg.Height * target / cfg.Width, Key: key, URL: publicURL(id, name, format), Bytes: int64(b.Len())})
+		// Pure-Go encoders only (no CGO/libwebp). Prefer JPEG for photographic
+		// uploads; otherwise PNG. Original bytes remain available as "original".
+		format := "png"
+		if ext == "jpg" || ext == "jpeg" {
+			format = "jpg"
 		}
+		if ext == "gif" || ext == "avif" {
+			continue
+		}
+		scaled := resize(img, target, cfg.Height*target/cfg.Width)
+		var b bytes.Buffer
+		outMime := mimeForExt(format)
+		var encErr error
+		switch format {
+		case "jpg":
+			encErr = jpeg.Encode(&b, scaled, &jpeg.Options{Quality: 90})
+		default:
+			format = "png"
+			outMime = "image/png"
+			encErr = png.Encode(&b, scaled)
+		}
+		if encErr != nil {
+			cleanup()
+			return nil, false, encErr
+		}
+		name := fmt.Sprintf("%dw", target)
+		key := fmt.Sprintf("marketing/media/%s/%s.%s", id, name, format)
+		if e = s.Storage.PutObject(ctx, key, bytes.NewReader(b.Bytes()), int64(b.Len()), outMime); e != nil {
+			cleanup()
+			return nil, false, e
+		}
+		written = append(written, key)
+		rends = append(rends, repo.MediaRendition{Name: name, Ext: format, MIME: outMime, Width: target, Height: cfg.Height * target / cfg.Width, Key: key, URL: publicURL(id, name, format), Bytes: int64(b.Len())})
 	}
 	w, h := cfg.Width, cfg.Height
 	m := repo.MediaAsset{ID: id, Checksum: checksum, MIMEType: mime, ByteSize: int64(len(in.Data)), Width: &w, Height: &h, AltText: strings.TrimSpace(in.AltText), Decorative: in.Decorative, Title: strings.TrimSpace(in.Title), Credit: strings.TrimSpace(in.Credit), StorageKey: originalKey, Renditions: rends, UploadedBy: &in.ActorID}
@@ -166,7 +165,7 @@ func (s *Service) Create(ctx context.Context, in Upload) (*repo.MediaAsset, bool
 		cleanup()
 		return nil, false, e
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 	created, e := repo.InsertMedia(ctx, tx, m)
 	if e != nil {
 		cleanup()
