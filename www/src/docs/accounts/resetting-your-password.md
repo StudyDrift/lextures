@@ -3,6 +3,7 @@ title: "Resetting your password"
 description: "Request a password reset, use the time-limited link, choose a strong replacement, and recover when email is unavailable. Learn the key checks and safe next st."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-accounts
 primaryQuestion: "How do I use resetting your password in Lextures?"

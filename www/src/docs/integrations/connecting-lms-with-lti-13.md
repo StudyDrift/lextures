@@ -3,6 +3,7 @@ title: "Connecting Lextures to your LMS with LTI 1.3"
 description: "Register an LTI deployment, exchange identifiers, test launches and grade return, and control who can use the connection. Learn the key checks and safe next s."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-integrations
 primaryQuestion: "How do I use connecting lextures to your lms with lti 1.3 in Lextures?"

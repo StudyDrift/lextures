@@ -3,6 +3,7 @@ title: "Publishing a marketplace course listing"
 description: "Prepare listing details, learner expectations, pricing, and preview material before requesting publication. Learn the key checks and safe next steps.."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-marketplace
 primaryQuestion: "How do I use publishing a marketplace course listing in Lextures?"

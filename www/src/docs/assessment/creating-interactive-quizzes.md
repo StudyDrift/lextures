@@ -3,6 +3,7 @@ title: "Creating and hosting an interactive quiz"
 description: "Build an interactive quiz, configure participation, preview it, and host a session learners can join. Learn the key checks and safe next steps.."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-assessment
 primaryQuestion: "How do I use creating and hosting an interactive quiz in Lextures?"

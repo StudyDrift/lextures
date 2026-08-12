@@ -3,6 +3,7 @@ title: "Handling marketplace refunds"
 description: "Review an order, follow the applicable refund policy, record the outcome, and understand effects on access and payout. Learn the key checks and safe next step."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-marketplace
 primaryQuestion: "How do I use handling marketplace refunds in Lextures?"

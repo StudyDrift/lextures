@@ -3,6 +3,7 @@ title: "Building a rubric that grades consistently"
 description: "Create criteria and rating levels, attach the rubric, and calibrate expectations before scoring learner work. Learn the key checks and safe next steps.."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-grading
 primaryQuestion: "How do I use building a rubric that grades consistently in Lextures?"

@@ -3,6 +3,7 @@ title: "Exporting outcome and mastery results"
 description: "Choose a reporting scope, export the current evidence, and protect the learner records contained in the file. Learn the key checks and safe next steps.."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-outcomes
 primaryQuestion: "How do I use exporting outcome and mastery results in Lextures?"

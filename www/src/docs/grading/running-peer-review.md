@@ -3,6 +3,7 @@ title: "Running a peer review assignment"
 description: "Configure reviewer allocation, guidance, deadlines, and visibility so peer feedback is useful and appropriately scoped. Learn the key checks and safe next ste."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-grading
 primaryQuestion: "How do I use running a peer review assignment in Lextures?"

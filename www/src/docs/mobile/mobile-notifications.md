@@ -3,6 +3,7 @@ title: "Managing mobile notifications"
 description: "Choose device and account notification settings, then confirm operating-system permissions when alerts do not arrive. Learn the key checks and safe next steps."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-mobile
 primaryQuestion: "How do I use managing mobile notifications in Lextures?"

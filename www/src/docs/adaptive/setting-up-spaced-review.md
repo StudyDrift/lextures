@@ -3,6 +3,7 @@ title: "Setting up spaced review for a course"
 description: "Enable review, choose eligible content, confirm scheduling rules, and explain the review queue to learners. Learn the key checks and safe next steps.."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-adaptive
 primaryQuestion: "How do I use setting up spaced review for a course in Lextures?"

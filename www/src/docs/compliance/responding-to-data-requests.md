@@ -3,6 +3,7 @@ title: "Responding to a data subject request"
 description: "Verify the requester, locate relevant records, coordinate review, export or delete as authorized, and document completion. Learn the key checks and safe next."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-compliance
 primaryQuestion: "How do I use responding to a data subject request in Lextures?"

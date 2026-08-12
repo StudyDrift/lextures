@@ -3,6 +3,7 @@ title: "Authoring accessible course content"
 description: "Use headings, link text, alternatives, captions, tables, and checks that help learners navigate course material. Learn the key checks and safe next steps.."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-accessibility
 primaryQuestion: "How do I use authoring accessible course content in Lextures?"

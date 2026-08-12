@@ -3,6 +3,7 @@ title: "Creating course outcomes"
 description: "Write measurable outcomes, organize them, and make them available for assignment and assessment alignment. Learn the key checks and safe next steps.."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-outcomes
 primaryQuestion: "How do I use creating course outcomes in Lextures?"

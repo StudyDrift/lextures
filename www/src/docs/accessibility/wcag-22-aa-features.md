@@ -3,6 +3,7 @@ title: "Which WCAG 2.2 AA features Lextures supports"
 description: "Review keyboard, focus, semantics, contrast, zoom, and assistive-technology support alongside the current conformance report. Learn the key checks and safe ne."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-accessibility
 primaryQuestion: "How do I use which wcag 2.2 aa features lextures supports in Lextures?"

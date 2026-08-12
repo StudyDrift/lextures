@@ -3,6 +3,7 @@ title: "Setting up multifactor authentication"
 description: "Enroll a second factor, save recovery options, and apply organization requirements without locking out administrators. Learn the key checks and safe next step."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-accounts
 primaryQuestion: "How do I use setting up multifactor authentication in Lextures?"

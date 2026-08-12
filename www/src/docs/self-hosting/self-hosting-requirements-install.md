@@ -3,6 +3,7 @@ title: "Self-hosting Lextures: requirements and install"
 description: "Prepare PostgreSQL and application configuration, run migrations, create the first administrator, and verify a new deployment. Learn the key checks and safe n."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-self-hosting
 primaryQuestion: "How do I use self-hosting lextures: requirements and install in Lextures?"

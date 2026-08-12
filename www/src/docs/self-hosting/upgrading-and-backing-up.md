@@ -3,6 +3,7 @@ title: "Upgrading and backing up a self-hosted instance"
 description: "Back up durable data, read release notes, test migrations, upgrade services, and verify recovery before reopening access. Learn the key checks and safe next s."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-self-hosting
 primaryQuestion: "How do I use upgrading and backing up a self-hosted instance in Lextures?"

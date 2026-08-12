@@ -3,6 +3,7 @@ title: "Aligning assignments to standards and outcomes"
 description: "Connect activities to outcomes, define evidence, and review alignment before learners begin the work. Learn the key checks and safe next steps.."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-outcomes
 primaryQuestion: "How do I use aligning assignments to standards and outcomes in Lextures?"

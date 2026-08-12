@@ -3,6 +3,7 @@ title: "Creating course coupons"
 description: "Set a coupon value and validity window, test eligibility, and retire promotions without changing prior orders. Learn the key checks and safe next steps.."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-marketplace
 primaryQuestion: "How do I use creating course coupons in Lextures?"

@@ -3,6 +3,7 @@ title: "Following multiple children"
 description: "Add authorized learner relationships and switch between children while keeping each course and progress view distinct. Learn the key checks and safe next step."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-parents
 primaryQuestion: "How do I use following multiple children in Lextures?"

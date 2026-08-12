@@ -3,6 +3,7 @@ title: "How Lextures handles FERPA-protected records"
 description: "Understand the controls Lextures provides while institutions retain responsibility for access, policy, contracts, and lawful use. Learn the key checks and saf."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-compliance
 primaryQuestion: "How do I use how lextures handles ferpa-protected records in Lextures?"

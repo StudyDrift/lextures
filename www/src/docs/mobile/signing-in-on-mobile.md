@@ -3,6 +3,7 @@ title: "Signing in on a mobile device"
 description: "Connect the mobile app to the correct hosted or self-hosted site and complete the organization sign-in flow. Learn the key checks and safe next steps.."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-mobile
 primaryQuestion: "How do I use signing in on a mobile device in Lextures?"

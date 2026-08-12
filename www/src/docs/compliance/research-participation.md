@@ -3,6 +3,7 @@ title: "Control aggregate research participation"
 description: "Record whether your organization may join future de-identified Lextures research, understand what opt-out changes, and verify the audit record."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-compliance
 primaryQuestion: "How does an administrator control aggregate research participation?"

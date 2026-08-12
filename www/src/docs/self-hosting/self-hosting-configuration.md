@@ -3,6 +3,7 @@ title: "Configuring a self-hosted instance"
 description: "Set public origin, authentication, file storage, email, queue, and secrets using environment-specific configuration. Learn the key checks and safe next steps.."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-self-hosting
 primaryQuestion: "How do I use configuring a self-hosted instance in Lextures?"

@@ -3,6 +3,7 @@ title: "Building modules and content pages"
 description: "Organize pages and activities into modules with a sequence learners can understand and instructors can maintain. Learn the key checks and safe next steps.."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-courses
 primaryQuestion: "How do I use building modules and content pages in Lextures?"

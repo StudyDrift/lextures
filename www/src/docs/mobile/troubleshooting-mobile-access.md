@@ -3,6 +3,7 @@ title: "Troubleshooting mobile access"
 description: "Check site address, account status, connectivity, application version, and organization policy before escalating access issues. Learn the key checks and safe."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-mobile
 primaryQuestion: "How do I use troubleshooting mobile access in Lextures?"

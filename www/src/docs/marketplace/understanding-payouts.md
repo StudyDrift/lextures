@@ -3,6 +3,7 @@ title: "Understanding marketplace payouts"
 description: "Review eligible sales, adjustments, payout status, and the account details needed to receive funds. Learn the key checks and safe next steps.."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-marketplace
 primaryQuestion: "How do I use understanding marketplace payouts in Lextures?"

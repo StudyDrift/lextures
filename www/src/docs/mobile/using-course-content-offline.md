@@ -3,6 +3,7 @@ title: "Preparing course content for limited connectivity"
 description: "Identify content available on mobile, prepare before losing connectivity, and confirm changes synchronize after reconnection. Learn the key checks and safe ne."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-mobile
 primaryQuestion: "How do I use preparing course content for limited connectivity in Lextures?"

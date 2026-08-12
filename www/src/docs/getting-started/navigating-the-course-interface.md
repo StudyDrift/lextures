@@ -3,6 +3,7 @@ title: "Navigating the course interface"
 description: "Use course navigation to move among modules, assessments, grades, people, and settings without losing your place. Learn the key checks and safe next steps.."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-getting-started
 primaryQuestion: "How do I use navigating the course interface in Lextures?"

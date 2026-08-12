@@ -3,6 +3,7 @@ title: "Managing organization hierarchy"
 description: "Represent districts, schools, departments, and other units without duplicating people or weakening permission boundaries. Learn the key checks and safe next s."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-admin
 primaryQuestion: "How do I use managing organization hierarchy in Lextures?"

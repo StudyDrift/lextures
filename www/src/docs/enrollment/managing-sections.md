@@ -3,6 +3,7 @@ title: "Managing course sections"
 description: "Create sections, place learners correctly, and use section scope for dates, communication, and reporting. Learn the key checks and safe next steps.."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-enrollment
 primaryQuestion: "How do I use managing course sections in Lextures?"

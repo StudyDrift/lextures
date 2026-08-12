@@ -3,6 +3,7 @@ title: "Setting up the parent portal"
 description: "Enable guardian access, choose visible information, communicate expectations, and verify the portal before inviting families. Learn the key checks and safe ne."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-parents
 primaryQuestion: "How do I use setting up the parent portal in Lextures?"

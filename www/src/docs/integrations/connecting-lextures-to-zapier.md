@@ -3,6 +3,7 @@ title: "Connecting Lextures to Zapier"
 description: "Connect an authorized account, select an event and action, test sample data, and monitor an automation after activation. Learn the key checks and safe next st."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-integrations
 primaryQuestion: "How do I use connecting lextures to zapier in Lextures?"

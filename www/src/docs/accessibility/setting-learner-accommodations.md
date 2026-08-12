@@ -3,6 +3,7 @@ title: "Setting learner accommodations"
 description: "Record an approved accommodation, limit its scope, verify the learner experience, and keep sensitive details out of notes. Learn the key checks and safe next."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-accessibility
 primaryQuestion: "How do I use setting learner accommodations in Lextures?"

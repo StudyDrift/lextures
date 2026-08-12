@@ -3,6 +3,7 @@ title: "Curving and scaling grades"
 description: "Apply a transparent grade adjustment, preview its effect, and preserve the original evidence for audit and review. Learn the key checks and safe next steps.."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-grading
 primaryQuestion: "How do I use curving and scaling grades in Lextures?"

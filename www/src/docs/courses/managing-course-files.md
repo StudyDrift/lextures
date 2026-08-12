@@ -3,6 +3,7 @@ title: "Uploading and managing course files"
 description: "Upload course files, replace outdated versions, write useful link text, and prevent accidental access to drafts. Learn the key checks and safe next steps.."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-courses
 primaryQuestion: "How do I use uploading and managing course files in Lextures?"

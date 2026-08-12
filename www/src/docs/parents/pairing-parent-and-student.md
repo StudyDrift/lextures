@@ -3,6 +3,7 @@ title: "Pairing a parent to a student account"
 description: "Create or approve the correct guardian relationship and verify access without sharing a learner password. Learn the key checks and safe next steps.."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-parents
 primaryQuestion: "How do I use pairing a parent to a student account in Lextures?"

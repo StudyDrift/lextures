@@ -3,6 +3,7 @@ title: "Inviting people to a course"
 description: "Invite learners and educators, assign the intended course role, and resolve pending or expired invitations. Learn the key checks and safe next steps.."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-enrollment
 primaryQuestion: "How do I use inviting people to a course in Lextures?"

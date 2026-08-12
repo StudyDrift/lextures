@@ -3,6 +3,7 @@ title: "Creating and monitoring webhooks"
 description: "Choose events, protect the endpoint secret, handle retries, and monitor delivery without exposing learner data. Learn the key checks and safe next steps.."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-integrations
 primaryQuestion: "How do I use creating and monitoring webhooks in Lextures?"

@@ -3,6 +3,7 @@ title: "How roster sync from your SIS works"
 description: "Understand roster ownership, matching, scheduled changes, exceptions, and the checks administrators perform after a sync. Learn the key checks and safe next s."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-enrollment
 primaryQuestion: "How do I use how roster sync from your sis works in Lextures?"

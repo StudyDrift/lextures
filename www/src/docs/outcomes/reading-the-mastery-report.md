@@ -3,6 +3,7 @@ title: "Reading the mastery report"
 description: "Read outcome evidence, filters, confidence, and gaps without confusing a report signal with a final instructional decision. Learn the key checks and safe next."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-outcomes
 primaryQuestion: "How do I use reading the mastery report in Lextures?"

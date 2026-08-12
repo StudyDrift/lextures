@@ -3,6 +3,7 @@ title: "Reading the learner model"
 description: "Interpret evidence and confidence by concept while keeping instructional judgment and recent context in the decision. Learn the key checks and safe next steps."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-adaptive
 primaryQuestion: "How do I use reading the learner model in Lextures?"

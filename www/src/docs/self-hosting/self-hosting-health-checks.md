@@ -3,6 +3,7 @@ title: "Monitoring a self-hosted instance"
 description: "Check application, database, queue, storage, certificates, backups, and user-facing flows on a repeatable schedule. Learn the key checks and safe next steps.."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-self-hosting
 primaryQuestion: "How do I use monitoring a self-hosted instance in Lextures?"

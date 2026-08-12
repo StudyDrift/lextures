@@ -3,6 +3,7 @@ title: "Finding your course"
 description: "Find courses from the dashboard, enrollment links, and organization course lists, then diagnose a missing course. Learn the key checks and safe next steps.."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-getting-started
 primaryQuestion: "How do I use finding your course in Lextures?"

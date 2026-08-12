@@ -3,6 +3,7 @@ title: "What student data Lextures stores, and for how long"
 description: "Identify major learner-data categories and configure or request retention actions according to the applicable agreement and policy. Learn the key checks and s."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-compliance
 primaryQuestion: "How do I use what student data lextures stores, and for how long in Lextures?"

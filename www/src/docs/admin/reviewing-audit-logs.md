@@ -3,6 +3,7 @@ title: "Reviewing audit logs"
 description: "Filter administrative events, inspect relevant context, export only when needed, and preserve evidence during an investigation. Learn the key checks and safe."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-admin
 primaryQuestion: "How do I use reviewing audit logs in Lextures?"

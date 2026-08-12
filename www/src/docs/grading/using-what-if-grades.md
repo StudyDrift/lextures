@@ -3,6 +3,7 @@ title: "Using what-if grades"
 description: "Model possible scores without changing official records and reset the view when planning is complete. Learn the key checks and safe next steps.."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-grading
 primaryQuestion: "How do I use using what-if grades in Lextures?"

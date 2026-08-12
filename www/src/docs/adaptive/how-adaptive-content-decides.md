@@ -3,6 +3,7 @@ title: "How adaptive content decides what a learner sees"
 description: "Understand the evidence, concept relationships, educator rules, and safeguards used to select a learner next step. Learn the key checks and safe next steps.."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-adaptive
 primaryQuestion: "How do I use how adaptive content decides what a learner sees in Lextures?"

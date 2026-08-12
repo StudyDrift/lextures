@@ -3,6 +3,7 @@ title: "Building and reusing question banks"
 description: "Create reusable questions, organize them, and draw from a bank without losing control of coverage and review. Learn the key checks and safe next steps.."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-assessment
 primaryQuestion: "How do I use building and reusing question banks in Lextures?"

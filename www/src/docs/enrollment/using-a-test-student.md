@@ -3,6 +3,7 @@ title: "Using a test learner safely"
 description: "Preview the learner experience with a test identity without mixing synthetic activity into real learner records. Learn the key checks and safe next steps.."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-enrollment
 primaryQuestion: "How do I use using a test learner safely in Lextures?"

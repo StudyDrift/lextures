@@ -3,6 +3,7 @@ title: "How accommodations are applied automatically"
 description: "Understand how authorized learner accommodations affect supported activities while preserving the underlying course requirements. Learn the key checks and saf."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-accessibility
 primaryQuestion: "How do I use how accommodations are applied automatically in Lextures?"

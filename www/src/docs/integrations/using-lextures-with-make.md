@@ -3,6 +3,7 @@ title: "Using Lextures with Make"
 description: "Build a Make scenario with scoped access, mapped fields, test records, and failure monitoring for recurring workflows. Learn the key checks and safe next step."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-integrations
 primaryQuestion: "How do I use using lextures with make in Lextures?"

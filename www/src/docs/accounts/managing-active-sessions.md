@@ -3,6 +3,7 @@ title: "Reviewing and ending active sessions"
 description: "Inspect account sessions, end ones you do not recognize, and follow the security response path when access looks suspicious. Learn the key checks and safe nex."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-accounts
 primaryQuestion: "How do I use reviewing and ending active sessions in Lextures?"

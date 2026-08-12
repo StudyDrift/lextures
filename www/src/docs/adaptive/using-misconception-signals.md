@@ -3,6 +3,7 @@ title: "Using misconception signals"
 description: "Review recurring incorrect patterns, inspect their evidence, and plan a targeted response without labeling a learner. Learn the key checks and safe next steps."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-adaptive
 primaryQuestion: "How do I use using misconception signals in Lextures?"

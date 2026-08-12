@@ -3,6 +3,7 @@ title: "Course checklist: what ready to launch means"
 description: "Check navigation, dates, published content, enrollment, grading, accessibility, and learner preview before launch. Learn the key checks and safe next steps.."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-courses
 primaryQuestion: "How do I use course checklist: what ready to launch means in Lextures?"

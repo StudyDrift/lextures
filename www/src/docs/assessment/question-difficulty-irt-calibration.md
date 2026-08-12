@@ -3,6 +3,7 @@ title: "How question difficulty and IRT calibration work"
 description: "Understand how response evidence informs question difficulty and learner estimates without treating either as a fixed label. Learn the key checks and safe nex."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-assessment
 primaryQuestion: "How do I use how question difficulty and irt calibration work in Lextures?"

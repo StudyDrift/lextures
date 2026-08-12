@@ -3,6 +3,7 @@ title: "Setting up SAML/OIDC single sign-on"
 description: "Configure an identity provider, map stable identifiers, test with a limited group, and plan recovery before enforcement. Learn the key checks and safe next st."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-accounts
 primaryQuestion: "How do I use setting up saml/oidc single sign-on in Lextures?"

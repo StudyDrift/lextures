@@ -3,6 +3,7 @@ title: "Editing the course syllabus"
 description: "Choose a syllabus starting point, edit policies and schedules, and publish a useful course-level reference. Learn the key checks and safe next steps.."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-courses
 primaryQuestion: "How do I use editing the course syllabus in Lextures?"

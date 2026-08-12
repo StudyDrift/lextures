@@ -3,6 +3,7 @@ title: "Reviewing privacy subprocessors"
 description: "Find the current subprocessor information, assess relevant processing, and route contract or notification questions correctly. Learn the key checks and safe n."
 date: 2026-08-11
 updated: 2026-08-11
+reviewDue: 2027-02-11
 author: chase-willden
 cluster: help-compliance
 primaryQuestion: "How do I use reviewing privacy subprocessors in Lextures?"
