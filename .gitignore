@@ -83,6 +83,8 @@ server/tmp/
 .claude/worktrees
 .cache
 data/
+!www/src/data/
+!www/src/data/*.ts
 test-results/
 
 # Local dev / IDE tooling (machine-specific)
