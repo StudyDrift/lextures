@@ -10,6 +10,7 @@ import {
   type PublicContentReaderArticle,
   type PublicContentSearchResult,
 } from '../../lib/public-content-api'
+import { Button, IconButton } from '../ui'
 
 interface HelpArticle {
   title: string
@@ -267,14 +268,16 @@ function HelpWidgetPanel({ open, onClose }: { open: boolean; onClose: () => void
             {t('help.widget.title', { defaultValue: 'Help' })}
           </span>
         </div>
-        <button
+        <IconButton
           type="button"
+          variant="ghost"
+          size="sm"
           onClick={onClose}
           aria-label={t('help.widget.close', { defaultValue: 'Close help panel' })}
-          className="rounded p-1 text-fg-subtle hover:bg-surface-sunken hover:text-fg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:hover:bg-neutral-700 dark:hover:text-fg-default"
+          className="text-fg-subtle hover:text-fg-muted"
         >
           <X className="h-4 w-4" />
-        </button>
+        </IconButton>
       </div>
 
       {reader ? (
@@ -367,15 +370,15 @@ function HelpWidgetPanel({ open, onClose }: { open: boolean; onClose: () => void
           </div>
 
           <div className="border-t border-border-subtle px-4 py-3 dark:border-border-default">
-            <button
+            <Button
               type="button"
               onClick={handleOpenHelpCenter}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent-solid px-4 py-2 text-sm font-medium text-white hover:bg-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
+              className="w-full"
             >
               <MessageCircle className="h-4 w-4" />
               {t('help.widget.visitHelpCenter', { defaultValue: 'Visit Help Center' })}
               <span className="sr-only">{t('help.widget.opensInNewTab', { defaultValue: '(opens in a new tab)' })}</span>
-            </button>
+            </Button>
           </div>
         </>
       )}
@@ -406,14 +409,16 @@ function HelpReader({
   return (
     <div role="document" aria-label={title} className="flex max-h-96 flex-col">
       <div className="flex items-center gap-2 border-b border-border-subtle px-4 py-2 dark:border-border-default">
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="sm"
           onClick={onBack}
-          className="flex items-center gap-1 rounded p-1 text-sm text-fg-muted hover:bg-surface-sunken focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:text-fg-default dark:hover:bg-neutral-700"
+          className="gap-1 px-1 text-fg-muted dark:text-fg-default"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           {t('help.widget.back', { defaultValue: 'Back' })}
-        </button>
+        </Button>
       </div>
       <div className="flex-1 overflow-y-auto px-4 py-3" lang={reader.article?.locale}>
         <h2 ref={headingRef} tabIndex={-1} className="mb-2 text-base font-semibold text-fg-default focus:outline-none">

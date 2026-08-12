@@ -64,14 +64,14 @@ function EditorPane({
   const path = article.path || `${article.locale && article.locale !== 'en' ? `/${article.locale}` : ''}${article.kind === 'blog' ? '/blog/' : '/docs/…/'}${article.slug || '…'}`
   return <section className="min-w-0 overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-sm" aria-label="Article body editor">
     <div className="border-b border-border-subtle px-5 pb-4 pt-6 sm:px-9">
-      <input
+      <Input
         value={article.title}
         onChange={(event) => onTitleChange(event.target.value)}
         onBlur={onBlur}
         disabled={!canAuthor}
         aria-label="Article title"
         placeholder="Untitled article"
-        className="w-full bg-transparent text-2xl font-semibold tracking-tight text-fg-default outline-none placeholder:text-fg-subtle disabled:opacity-60 sm:text-3xl"
+        className="w-full border-0 bg-transparent p-0 text-2xl font-semibold tracking-tight text-fg-default shadow-none placeholder:text-fg-subtle disabled:opacity-60 sm:text-3xl"
       />
       <p className="mt-2 font-mono text-xs text-fg-muted">{path}</p>
     </div>
@@ -338,7 +338,7 @@ export default function ArticleEditorPage() {
     </div>
 
     <section id="article-findings" aria-live="polite" className="sticky bottom-0 z-20 border-t border-border-default bg-surface-raised/95 backdrop-blur supports-[backdrop-filter]:bg-surface-raised/80">
-      <button type="button" aria-expanded={findingsOpen} onClick={() => setFindingsOpen((v) => !v)} className="flex w-full items-center gap-3 px-4 py-2.5 text-start hover:bg-surface-sunken sm:px-6">
+      <Button type="button" variant="ghost" aria-expanded={findingsOpen} onClick={() => setFindingsOpen((v) => !v)} className="flex h-auto w-full items-center justify-start gap-3 rounded-none px-4 py-2.5 text-start sm:px-6">
         <span className="text-xs font-medium text-fg-muted">Quality</span>
         <span aria-hidden className="h-1.5 w-24 overflow-hidden rounded-full bg-surface-sunken sm:w-40"><span className={`block h-full rounded-full motion-safe:transition-[width] ${scoreBar}`} style={{ width: `${Math.max(0, Math.min(100, score ?? 0))}%` }} /></span>
         <span className={`text-sm font-semibold tabular-nums ${scoreTone}`}>{validating ? 'checking…' : score == null ? '—' : Math.round(score)}</span>
@@ -349,7 +349,7 @@ export default function ArticleEditorPage() {
           {!findings.length ? <span className="text-xs text-fg-muted">{score == null ? 'Not checked yet' : 'No findings'}</span> : null}
           <ChevronDown aria-hidden className={`h-4 w-4 text-fg-muted motion-safe:transition-transform ${findingsOpen ? '' : 'rotate-180'}`} />
         </span>
-      </button>
+      </Button>
       {findingsOpen ? <div className="max-h-64 overflow-y-auto border-t border-border-subtle px-4 py-3 sm:px-6">
         {findings.length
           ? <ul className="space-y-1.5 text-sm">{findings.map((finding, index) => <li key={`${finding.rule}-${index}`} className="flex flex-wrap items-baseline gap-x-2">

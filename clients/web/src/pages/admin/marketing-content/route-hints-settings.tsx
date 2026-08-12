@@ -205,16 +205,17 @@ function RouteHintForm({ onCreated }: { onCreated: () => void }) {
           <ul className="mt-1 max-h-40 overflow-y-auto rounded-md border border-border-default bg-surface-base">
             {results.map((a) => (
               <li key={a.id}>
-                <button
+                <Button
                   type="button"
-                  className="block w-full px-3 py-1.5 text-start text-sm hover:bg-surface-sunken"
+                  variant="ghost"
+                  className="h-auto w-full justify-start rounded-none px-3 py-1.5 text-sm"
                   onClick={() => {
                     setSelected(a);
                     setResults([]);
                   }}
                 >
                   {a.title}
-                </button>
+                </Button>
               </li>
             ))}
           </ul>

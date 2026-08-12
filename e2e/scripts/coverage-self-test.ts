@@ -43,8 +43,9 @@ function test(name: string, fn: () => void): void {
 
 console.log('e2e:coverage:test')
 
-test('exclusions skip README and assets', () => {
+test('exclusions skip README, ARCHIVE, and assets', () => {
   assert.equal(isExcludedCompletedPath('docs/completed/transcripts/README.md'), true)
+  assert.equal(isExcludedCompletedPath('docs/completed/marketing-content/ARCHIVE.md'), true)
   assert.equal(isExcludedCompletedPath('docs/completed/assets/x.png'), true)
   assert.equal(isExcludedCompletedPath('docs/completed/e2e/E2E.1-x.md'), false)
 })

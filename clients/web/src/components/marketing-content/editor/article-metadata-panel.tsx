@@ -1,7 +1,6 @@
-import { useState, type ReactNode } from 'react'
-import { ChevronDown } from 'lucide-react'
+import { type ReactNode } from 'react'
 import type { MarketingArticle } from '../../../lib/marketing-content-api'
-import { Badge, Checkbox, Field, Input, Select, Textarea } from '../../ui'
+import { Badge, Checkbox, Disclosure, Field, Input, Select, Textarea } from '../../ui'
 import { commaList } from './article-editor-utils'
 
 type Option = { id?: string; slug?: string; title?: string; name?: string }
@@ -15,14 +14,22 @@ type Props = {
 }
 
 function Group({ title, children, collapsible = false, defaultOpen = true }: { title: string; children: ReactNode; collapsible?: boolean; defaultOpen?: boolean }) {
-  const [open, setOpen] = useState(defaultOpen)
-  const body = <div className="space-y-4 px-4 pb-4">{children}</div>
-  return <section className="rounded-xl border border-border-default bg-surface-raised">
-    {collapsible
-      ? <h3 className="m-0"><button type="button" aria-expanded={open} onClick={() => setOpen((v) => !v)} className="flex w-full items-center justify-between gap-2 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-fg-muted hover:text-fg-default">{title}<ChevronDown aria-hidden className={`h-4 w-4 motion-safe:transition-transform ${open ? 'rotate-180' : ''}`} /></button></h3>
-      : <h3 className="px-4 pb-2 pt-3 text-xs font-semibold uppercase tracking-wide text-fg-muted">{title}</h3>}
-    {open ? body : null}
-  </section>
+  if (collapsible) {
+    return (
+      <Disclosure
+        title={<span className="text-xs font-semibold uppercase tracking-wide text-fg-muted">{title}</span>}
+        defaultOpen={defaultOpen}
+      >
+        <div className="space-y-4">{children}</div>
+      </Disclosure>
+    )
+  }
+  return (
+    <section className="rounded-xl border border-border-default bg-surface-raised">
+      <h3 className="px-4 pb-2 pt-3 text-xs font-semibold uppercase tracking-wide text-fg-muted">{title}</h3>
+      <div className="space-y-4 px-4 pb-4">{children}</div>
+    </section>
+  )
 }
 
 export function ArticleMetadataPanel({ article, onChange, categories, authors, knownPaths, isNew }: Props) {
@@ -43,7 +50,7 @@ export function ArticleMetadataPanel({ article, onChange, categories, authors, k
   }
 
   return <div className="space-y-3">
-    <Group title="Essentials">
+    <Group title={'Essentials'}>
       <Field label="Kind" description={isNew ? undefined : 'Locked after creation.'}>
         <Select value={article.kind} disabled={!isNew} onChange={(e) => onChange({ kind: e.target.value as MarketingArticle['kind'] })}><option value="blog">Blog post</option><option value="doc">Help article</option></Select>
       </Field>
@@ -109,7 +116,7 @@ export function ArticleMetadataPanel({ article, onChange, categories, authors, k
       </Field>
     </Group>
 
-    <Group title="Advanced" collapsible defaultOpen={false}>
+    <Group title={'Advanced'} collapsible defaultOpen={false}>
       <Checkbox checked={article.noindex} onChange={(e) => onChange({ noindex: e.target.checked })} label="Exclude from search engines" />
       <Field label="Canonical override" description="Point search engines at a different URL.">
         <Input type="url" value={article.canonicalOverride ?? ''} onChange={(e) => onChange({ canonicalOverride: e.target.value || null })} />

@@ -3,6 +3,7 @@
   "generatedNote": "Reviewed baseline bootstrap for E2E.4. Classifications and rationales are human-maintainable; regenerate only with intent.",
   "exclusions": [
     "readme-indexes: Section README.md index files",
+    "archive-notes: Section ARCHIVE.md operational notes (not feature stories)",
     "assets-dir: Static assets under docs/completed/assets",
     "non-markdown: Non-Markdown files (images, etc.)"
   ],
@@ -8175,7 +8176,7 @@
       "markets": ["K12", "HE", "HS"],
       "risk": "major", "client": "ops", "coverage": "api-contract",
       "rationale": "Importer parsing, idempotency, reporting, and generated-output parity are deterministic migration/build concerns.",
-      "owner": "Web Platform", "specs": [{"path": "server/internal/service/marketingcontentimport/frontmatter_test.go"}, {"path": "www/scripts/parity-check.mjs"}], "reviewed": true
+      "owner": "Web Platform", "specs": [{"path": "server/internal/service/marketingcontentimport/frontmatter_test.go"}], "reviewed": true
     },
     {
       "id": "MC.7",

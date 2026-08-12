@@ -133,6 +133,57 @@ export function truncateMeta(text, maxLen = 160) {
   return `${(lastSpace > 40 ? cut.slice(0, lastSpace) : cut).trimEnd()}…`
 }
 
+/** Soft cap for SEO titles — keep in sync with `document-head.ts`. */
+export function truncateTitle(text, maxLen = 60) {
+  const cleaned = String(text || '')
+    .replace(/\s+/g, ' ')
+    .trim()
+  if (cleaned.length <= maxLen) return cleaned
+  const cut = cleaned.slice(0, maxLen - 1)
+  const lastSpace = cut.lastIndexOf(' ')
+  return `${(lastSpace > 20 ? cut.slice(0, lastSpace) : cut).trimEnd()}…`
+}
+
+function decodeBasicEntities(value) {
+  return String(value || '')
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+}
+
+/**
+ * Normalize HTML copied from a previous deploy during content-API fallback:
+ * enforce the 60-char title budget and expose the og:image URL so the build
+ * can materialize the raster into `dist/`.
+ */
+export function normalizeFallbackContentHtml(html) {
+  const source = String(html || '')
+  const titleRaw = source.match(/<title>([^<]+)<\/title>/i)?.[1] || ''
+  const title = truncateTitle(decodeBasicEntities(titleRaw))
+  const escapedTitle = escapeHtml(title)
+  let next = source.replace(/<title>[^<]*<\/title>/i, `<title>${escapedTitle}</title>`)
+  for (const property of ['og:title', 'twitter:title']) {
+    const reAttrFirst = new RegExp(
+      `(<meta\\b[^>]*property=["']${property}["'][^>]*content=["'])[^"']*(["'])`,
+      'i',
+    )
+    const reContentFirst = new RegExp(
+      `(<meta\\b[^>]*content=["'])[^"']*(["'][^>]*property=["']${property}["'])`,
+      'i',
+    )
+    if (reAttrFirst.test(next)) next = next.replace(reAttrFirst, `$1${escapedTitle}$2`)
+    else if (reContentFirst.test(next)) next = next.replace(reContentFirst, `$1${escapedTitle}$2`)
+  }
+  const image =
+    decodeBasicEntities(
+      next.match(/<meta\b[^>]*property=["']og:image["'][^>]*content=["']([^"']+)/i)?.[1] ||
+        next.match(/<meta\b[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i)?.[1] ||
+        '',
+    )
+  return { html: next, title, image }
+}
+
 /** Always emit @graph envelope (SEO.3 FR-1) with script-safe escaping (FR-3). */
 export function serializeJsonLd(nodes) {
   let graphNodes
@@ -1176,14 +1227,44 @@ async function main() {
       try {
         const response = await fetch(`${LIVE_ORIGIN}${routePath}`, { headers: { 'User-Agent': PRERENDER_UA } })
         if (!response.ok) throw new Error(`HTTP ${response.status}`)
-        const html = await response.text()
+        const normalized = normalizeFallbackContentHtml(await response.text())
+        const html = normalized.html
         const outFile = outputPathForRoute(routePath)
         await mkdir(path.dirname(outFile), { recursive: true }); await writeFile(outFile, html, 'utf8')
         const read = pattern => html.match(pattern)?.[1]?.replace(/&quot;/g, '"').replace(/&amp;/g, '&') || ''
-        const title = read(/<title>([^<]+)<\/title>/i)
+        const title = normalized.title || read(/<title>([^<]+)<\/title>/i)
         const description = read(/<meta\s+name=["']description["']\s+content=["']([^"']*)/i)
         const canonical = read(/<link\s+rel=["']canonical["']\s+href=["']([^"']*)/i) || `${SITE_ORIGIN}${routePath}`
         const robots = read(/<meta\s+name=["']robots["']\s+content=["']([^"']*)/i) || 'index,follow'
+        if (normalized.image) {
+          try {
+            const imageUrl = new URL(normalized.image, SITE_ORIGIN)
+            if ((imageUrl.origin === SITE_ORIGIN || imageUrl.origin === LIVE_ORIGIN) && imageUrl.pathname.startsWith('/og/')) {
+              const imageFile = path.join(DIST, imageUrl.pathname.slice(1))
+              try {
+                await access(imageFile)
+              } catch {
+                const imageResponse = await fetch(`${LIVE_ORIGIN}${imageUrl.pathname}`, { headers: { 'User-Agent': PRERENDER_UA } })
+                if (imageResponse.ok) {
+                  await mkdir(path.dirname(imageFile), { recursive: true })
+                  await writeFile(imageFile, Buffer.from(await imageResponse.arrayBuffer()))
+                } else {
+                  console.warn(`[generate-site] WARN: previous OG image unavailable for ${routePath}: HTTP ${imageResponse.status}`)
+                }
+              }
+              if (!robots.includes('noindex')) {
+                imageSitemapEntries.push({
+                  path: routePath,
+                  image: `${SITE_ORIGIN}${imageUrl.pathname}`,
+                  title,
+                  caption: `${title} — Lextures social preview`,
+                })
+              }
+            }
+          } catch (error) {
+            console.warn(`[generate-site] WARN: previous OG image unavailable for ${routePath}: ${error.message || error}`)
+          }
+        }
         generatedPages.push({ path: routePath, html, noindex: robots.includes('noindex'), fallback: true })
         seoUrls.push({ path: routePath, title, description, canonical, lastmod: null, robots, sitemap: !robots.includes('noindex'), section: sitemapSectionForPath(routePath), priority: '0.6', schemaTypes: [], bytes: Buffer.byteLength(html) })
         generated++; contentSnapshot.fallbackUsed = true
