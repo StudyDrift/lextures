@@ -149,9 +149,10 @@ jobs:
           grep -q 'static-island' dist/privacy/index.html
           grep -q 'data-interactive="false"' dist/privacy/index.html
           grep -q 'data-interactive="true"' dist/pricing/calculator/index.html
-          # Content pages advertise markdown alternate + sibling file
-          grep -q 'type="text/markdown"' dist/docs/self-hosting/index.html
-          test -f dist/docs/self-hosting.md
+          # Content articles advertise markdown alternate + sibling file.
+          # Category hubs (e.g. /docs/self-hosting) are HTML indexes without source Markdown.
+          grep -q 'type="text/markdown"' dist/docs/self-hosting/self-hosting-requirements-install/index.html
+          test -f dist/docs/self-hosting/self-hosting-requirements-install.md
           # 404 must be noindex
           grep -q 'noindex' dist/404.html
           # Titles unique among seo-manifest urls (www is "type": "module")
