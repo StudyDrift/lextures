@@ -6,6 +6,8 @@ export type BadgeTone = 'neutral' | 'accent' | 'info' | 'success' | 'warning' | 
 export type BadgeProps = HTMLAttributes<HTMLSpanElement> & {
   children: ReactNode
   tone?: BadgeTone
+  /** @deprecated Use tone. Kept for compatibility with older feature compositions. */
+  variant?: BadgeTone
 }
 
 const toneClass: Record<BadgeTone, string> = {
@@ -17,12 +19,13 @@ const toneClass: Record<BadgeTone, string> = {
   danger: 'bg-danger-surface text-danger-fg',
 }
 
-export function Badge({ children, tone = 'neutral', className = '', ...props }: BadgeProps) {
+export function Badge({ children, tone, variant, className = '', ...props }: BadgeProps) {
+  const resolvedTone = tone ?? variant ?? 'neutral'
   return (
     <span
       className={cx(
         'inline-flex min-h-6 items-center rounded-full px-2.5 py-0.5 text-xs font-semibold',
-        toneClass[tone],
+        toneClass[resolvedTone],
         className,
       )}
       {...props}

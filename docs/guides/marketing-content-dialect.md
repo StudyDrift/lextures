@@ -15,6 +15,15 @@ Scores below 6.0 fail, scores from 6.0 through 7.9 warn, and scores of 8.0 or ab
 unknown directive, missing metadata, unresolved internal-link, and missing image-alt findings are
 always errors.
 
+Author profile links are stored as consented JSON in the author registry:
+
+```json
+{ "sameAs": ["https://github.com/example"], "website": "https://example.com" }
+```
+
+Active authors use these links on schema.org `Person` nodes. Retired authors keep plain-text
+bylines, but do not emit a `Person` node or author page.
+
 ## Directives
 
 Directives start and end on their own lines. They cannot be nested.

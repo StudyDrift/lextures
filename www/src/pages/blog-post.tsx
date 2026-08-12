@@ -7,9 +7,11 @@ import { formatDate, getPost } from '../utils/blog'
 import { RelatedContent } from '../components/related-content'
 import { ContextualLinks } from '../components/contextual-links'
 import { editorialPillar, pillarHref } from '../lib/editorial-pillars'
+import { useSsrData } from '../lib/ssr-context'
 
 export function BlogPost({ slug }: { slug: string }) {
-  const post = getPost(slug)
+  const ssr = useSsrData()
+  const post = (ssr.article?.kind === 'blog' ? ssr.article : undefined) ?? getPost(slug)
 
   if (!post) {
     return (
@@ -71,7 +73,7 @@ export function BlogPost({ slug }: { slug: string }) {
                 reviewedBySlug={post.reviewedBy}
                 className="mt-12"
               />
-              <RelatedContent path={`/blog/${slug}`} />
+              <RelatedContent path={post.path || `/blog/${slug}`} />
             </article>
 
             <div className="mt-16 border-t border-slate-200/80 pt-10">

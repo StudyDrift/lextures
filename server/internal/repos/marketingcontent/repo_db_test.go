@@ -135,7 +135,7 @@ func TestPublicContentProjectionVisibilityAndSearchDB(t *testing.T) {
 	if _, err := GetPublishedArticleByPath(ctx, tx, draft.Path); !errors.Is(err, pgx.ErrNoRows) {
 		t.Fatalf("draft public lookup error = %v, want pgx.ErrNoRows", err)
 	}
-	results, err := SearchPublished(ctx, tx, "rubric", "doc", 10)
+	results, err := SearchPublished(ctx, tx, "rubric", "doc", "en", 10)
 	if err != nil {
 		t.Fatal(err)
 	}

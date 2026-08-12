@@ -7,9 +7,11 @@ import { articlePath, formatDate, getCategorizedArticle } from '../utils/docs'
 import { getHelpCategory } from '../docs/_categories'
 import { RelatedContent } from '../components/related-content'
 import { ContextualLinks } from '../components/contextual-links'
+import { useSsrData } from '../lib/ssr-context'
 
 export function DocsPost({ category: categoryId, slug }: { category: string; slug: string }) {
-  const article = getCategorizedArticle(categoryId, slug)
+  const ssr = useSsrData()
+  const article = (ssr.article?.kind === 'doc' ? ssr.article : undefined) ?? getCategorizedArticle(categoryId, slug)
   const category = getHelpCategory(categoryId)
 
   if (!article) {
@@ -71,7 +73,7 @@ export function DocsPost({ category: categoryId, slug }: { category: string; slu
                 reviewedBySlug={article.reviewedBy}
                 className="mt-12"
               />
-              <RelatedContent path={articlePath(article)} />
+              <RelatedContent path={article.path || articlePath(article)} />
             </article>
 
             <div className="mt-16 border-t border-slate-200/80 pt-10">

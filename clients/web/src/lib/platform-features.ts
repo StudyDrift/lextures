@@ -122,6 +122,7 @@ export type PlatformFeaturesSnapshot = {
   ffLessonGenerator?: boolean
   ffPersistentTutor?: boolean
   ffCalendarFeeds?: boolean
+  ffMarketingContent?: boolean
   aiStudyBuddyEnabled?: boolean
   gdprModuleEnabled?: boolean
   aiDisclosureEnabled?: boolean
@@ -263,6 +264,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffLessonGenerator: false,
   ffPersistentTutor: false,
   ffCalendarFeeds: true,
+  ffMarketingContent: false,
   aiStudyBuddyEnabled: false,
   gdprModuleEnabled: false,
   aiDisclosureEnabled: false,

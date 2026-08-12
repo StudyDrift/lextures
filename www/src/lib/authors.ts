@@ -23,11 +23,13 @@ export type Author = {
   isFounder?: boolean
 }
 
+import { contentSource } from './content-source'
+
 /**
  * Static registry. Prefer adding markdown under content/authors/ later if volume grows;
  * TypeScript keeps consent + status type-safe for the small team at launch.
  */
-export const AUTHORS: readonly Author[] = [
+const FILE_AUTHORS: readonly Author[] = [
   {
     slug: 'chase-willden',
     name: 'Chase Willden',
@@ -46,6 +48,19 @@ export const AUTHORS: readonly Author[] = [
     isFounder: true,
   },
 ] as const
+
+const apiAuthors: Author[] = contentSource.listAuthors().map(author => {
+  const links = Array.isArray(author.links) ? author.links : author.links?.sameAs || []
+  const website = !Array.isArray(author.links) ? author.links?.website : undefined
+  return {
+    slug: author.slug, name: author.name, jobTitle: author.jobTitle || '', bio: author.bio || '',
+    knowsAbout: author.knowsAbout || [], sameAs: [...links, ...(website ? [website] : [])],
+    consentRecordedAt: '', status: author.status || 'active',
+  }
+})
+
+/** The API registry is authoritative for API builds; files remain the rollback source. */
+export const AUTHORS: readonly Author[] = apiAuthors.length ? apiAuthors : FILE_AUTHORS
 
 const bySlug = new Map(AUTHORS.map(a => [a.slug, a]))
 

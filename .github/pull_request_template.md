@@ -5,7 +5,7 @@
 ## Checklist
 
 - [ ] Tests added/updated as appropriate
-- [ ] Changes under `www/src/blog` or `www/src/docs` follow the [answer-first content contract](www/docs/content-contract.md), cite numeric claims, and pass `npm run content:lint`
+- [ ] Blog/help articles were authored in the Marketing Content workspace; this PR does not add file-based articles under `www/src`
 - [ ] Structure: new/changed code follows [ARCHITECTURE_CONVENTIONS.md](docs/ARCHITECTURE_CONVENTIONS.md) (`make lint-structure`)
 - [ ] If moving a plan into `docs/completed/`, added a disposition in `e2e/coverage/completed-feature-manifest.json` and ran `npm run e2e:coverage:check` (E2E.4)
 - [ ] Flagged features link settings-toggle / disabled / enabled / authz / dependency / rollback coverage (or an E2E.1–E2E.3 family)

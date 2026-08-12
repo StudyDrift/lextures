@@ -4,7 +4,9 @@ Marketing URLs are lowercase, use hyphens between words, have no file extension,
 
 ## Renaming a URL
 
-In the same change:
+Database-managed articles create a permanent redirect when a published slug changes. Content redirects are merged into `_redirects` at build time; the versioned static rule wins on a conflict, and the build rejects cycles, external targets, and missing targets.
+
+For versioned static pages, in the same change:
 
 1. Change the path in `src/lib/route-manifest.tsx` and its page-loader key.
 2. Add the old path to `src/lib/redirects.ts` with a permanent status, date, and reason.
@@ -14,3 +16,10 @@ In the same change:
 Query parameters used for attribution (`utm_*`, `coupon`, and `ref`) never change the canonical URL. Existing procurement URLs—`/security`, `/accessibility`, `/privacy`, and `/terms`—are frozen.
 
 `/parents` is intentionally distinct from `/homeschool`: it serves observers of a learner enrolled through an institution, while `/homeschool` serves the purchasing family.
+
+## Locales
+
+English content stays unprefixed (`/blog/{slug}`, `/docs/{category}/{slug}`). Published translations use a path prefix and may localize the slug: `/{locale}/blog/{slug}`, `/{locale}/docs/{category}/{slug}`. There is no `/en/` duplicate. Unsupported locale codes are not generated; locale segments are validated against the allowlist so path traversal is impossible.
+
+Changing a translated slug creates a redirect under that locale prefix only. The English URL is untouched.
+

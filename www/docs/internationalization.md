@@ -10,3 +10,6 @@ Do not redirect by IP or `Accept-Language`. The optional banner suggests an avai
 
 The document `lang` and `dir` come from the route locale. RTL is supported by the locale registry. The switcher uses native-language labels and per-option `lang` attributes.
 
+Database-backed blog posts and help articles follow the same prefix policy. A translation is a separate published article; the build enumerates it from the content API and emits hreflang only when the group has two or more published locales. Site-wide marketing pages (`/pricing`, and so on) stay on the planned-locale gate in `locales.ts` and are not published until those locales are complete.
+
+

@@ -9,13 +9,7 @@
 
 ## The one-paragraph version
 
-Today every marketing page is a markdown file. `www/src/utils/blog.ts` and `www/src/utils/docs.ts`
-load them with `import.meta.glob('../blog/*.md')` at build time, so **publishing an article requires
-a git commit, a code review, and a full CI deploy** — 5 blog posts and 70 help articles in, that is
-already the binding constraint on content velocity, and [SEO.7](../../completed/seo/SEO.7-help-center-expansion.md)
-targets 60+ new help articles while [SEO.8](../../completed/seo/SEO.8-editorial-engine-and-content-calendar.md)
-targets a sustained publishing cadence. Content experts — the people who should be writing this —
-cannot use GitHub. This program moves the content into Postgres on the same database that serves
+This program is complete. Blog and help content lives in Postgres on the same database that serves
 `self.lextures.com`, publishes it through `GET /api/v1/public/content/*` (the same
 build-time-fetch + previous-deploy-fallback pattern `generate-site.mjs` already uses for
 `/courses/*`), and adds an authoring workspace at `/admin/marketing-content` gated by
@@ -30,26 +24,24 @@ SEO.1–SEO.4 foundation that made these pages exist at all.
 1. **Postgres is the source of truth; `www` stays static.** A new `marketing` schema holds articles,
    revisions, categories, authors, media and redirects. `generate-site.mjs` fetches published
    content at build time and writes the same `dist/**/index.html` it writes today. Publishing
-   triggers a rebuild ([MC.8](MC.8-publish-pipeline-and-scheduling.md)); it does not make crawlers
+   triggers a rebuild ([MC.8](../../completed/marketing-content/MC.8-publish-pipeline-and-scheduling.md)); it does not make crawlers
    depend on the app being up.
 2. **One content table for both surfaces.** Blog posts and help articles differ by a `kind`
    discriminator and a few optional columns, not by schema. Everything the current front matter
    carries (`pillar`, `briefRef`, `reviewDue`, `citations`, `roles`, `segments`, `verifiedAgainst`,
    `relatedTo`, `primaryQuestion`, `cluster`, `keywords`) becomes a typed column or array
-   ([MC.1](MC.1-content-data-model-and-migrations.md)).
+   ([MC.1](../../completed/marketing-content/MC.1-content-data-model-and-migrations.md)).
 3. **Markdown stays markdown.** The API stores and serves the same markdown + `:::directive` syntax
    authors write today, so `www/src/lib/markdown.ts` remains the renderer of record and the
    answer-first content contract survives the move. A Go renderer exists only for preview, search
    excerpts and lint scoring, and is pinned to the JS renderer by a shared golden corpus
-   ([MC.4](MC.4-content-rendering-and-validation-service.md)).
+   ([MC.4](../../completed/marketing-content/MC.4-content-rendering-and-validation-service.md)).
 4. **The content contract becomes a publish gate, not a CI gate.** `scripts/content-lint` rules move
    server-side: an article cannot reach `published` with a quality score below the floor, a missing
    citation for a numeric claim, an unknown directive, or a broken internal link
-   ([MC.4](MC.4-content-rendering-and-validation-service.md), [MC.11](MC.11-editorial-workflow-and-governance.md)).
-5. **Cutover is reversible until the last plan.** Files remain the source of truth while
-   `WWW_CONTENT_SOURCE=files`; `api` is proved by a byte-diff parity harness over the generated
-   `dist/` before the markdown directories are deleted ([MC.6](MC.6-markdown-to-database-migration.md),
-   [MC.15](MC.15-rollout-cutover-and-decommission.md)).
+   ([MC.4](../../completed/marketing-content/MC.4-content-rendering-and-validation-service.md), [MC.11](../../completed/marketing-content/MC.11-editorial-workflow-and-governance.md)).
+5. **The cutover is complete.** The API is the sole article source and the removed file corpus is
+   recoverable from the commit recorded in [ARCHIVE](../../completed/marketing-content/ARCHIVE.md).
 
 ---
 
@@ -57,21 +49,21 @@ SEO.1–SEO.4 foundation that made these pages exist at all.
 
 | ID | Plan | Effort | Depends on |
 |---|---|---|---|
-| MC.1 | [Content data model, feature flag & RBAC](MC.1-content-data-model-and-migrations.md) | S | — |
-| MC.2 | [Authoring API, revisions & workflow states](MC.2-authoring-api-and-revisions.md) | M | MC.1 |
-| MC.3 | [Public content read API & caching](MC.3-public-content-read-api.md) | S | MC.1 |
-| MC.4 | [Rendering, sanitization & content-contract validation](MC.4-content-rendering-and-validation-service.md) | M | MC.1 |
-| MC.5 | [Marketing media library & image pipeline](MC.5-marketing-media-library.md) | S | MC.1 |
-| MC.6 | [Markdown → database migration & parity harness](MC.6-markdown-to-database-migration.md) | M | MC.1–MC.5 |
-| MC.7 | [www build-time content integration (SSG from API)](MC.7-www-build-time-content-integration.md) | M | MC.3, MC.6 |
-| MC.8 | [Publish pipeline, scheduling & rebuild dispatch](MC.8-publish-pipeline-and-scheduling.md) | S | MC.2, MC.7 |
-| MC.9 | [Marketing Content workspace: nav, gating & content list](MC.9-marketing-content-workspace-shell.md) | S | MC.2 |
-| MC.10 | [Article editor: authoring, metadata, preview & revisions](MC.10-article-editor.md) | L | MC.4, MC.5, MC.9 |
-| MC.11 | [Editorial workflow, review & governance](MC.11-editorial-workflow-and-governance.md) | M | MC.2, MC.10 |
-| MC.12 | [SEO parity from the database](MC.12-seo-parity-from-database.md) | M | MC.3, MC.7 |
-| MC.13 | [Docs search & in-app help integration](MC.13-docs-search-and-in-app-help.md) | S | MC.3, MC.7 |
-| MC.14 | [Localization & translated content](MC.14-localization-and-translations.md) | M | MC.1, MC.3, MC.10 |
-| MC.15 | [Rollout, cutover & decommission of file-based content](MC.15-rollout-cutover-and-decommission.md) | S | all |
+| MC.1 | [Content data model, feature flag & RBAC](../../completed/marketing-content/MC.1-content-data-model-and-migrations.md) | S | — |
+| MC.2 | [Authoring API, revisions & workflow states](../../completed/marketing-content/MC.2-authoring-api-and-revisions.md) | M | MC.1 |
+| MC.3 | [Public content read API & caching](../../completed/marketing-content/MC.3-public-content-read-api.md) | S | MC.1 |
+| MC.4 | [Rendering, sanitization & content-contract validation](../../completed/marketing-content/MC.4-content-rendering-and-validation-service.md) | M | MC.1 |
+| MC.5 | [Marketing media library & image pipeline](../../completed/marketing-content/MC.5-marketing-media-library.md) | S | MC.1 |
+| MC.6 | [Markdown → database migration & parity harness](../../completed/marketing-content/MC.6-markdown-to-database-migration.md) | M | MC.1–MC.5 |
+| MC.7 | [www build-time content integration (SSG from API)](../../completed/marketing-content/MC.7-www-build-time-content-integration.md) | M | MC.3, MC.6 |
+| MC.8 | [Publish pipeline, scheduling & rebuild dispatch](../../completed/marketing-content/MC.8-publish-pipeline-and-scheduling.md) | S | MC.2, MC.7 |
+| MC.9 | [Marketing Content workspace: nav, gating & content list](../../completed/marketing-content/MC.9-marketing-content-workspace-shell.md) | S | MC.2 |
+| MC.10 | [Article editor: authoring, metadata, preview & revisions](../../completed/marketing-content/MC.10-article-editor.md) | L | MC.4, MC.5, MC.9 |
+| MC.11 | [Editorial workflow, review & governance](../../completed/marketing-content/MC.11-editorial-workflow-and-governance.md) | **Completed** | MC.2, MC.10 |
+| MC.12 | [SEO parity from the database](../../completed/marketing-content/MC.12-seo-parity-from-database.md) | M | MC.3, MC.7 |
+| MC.13 | [Docs search & in-app help integration](../../completed/marketing-content/MC.13-docs-search-and-in-app-help.md) | **Completed** | MC.3, MC.7 |
+| MC.14 | [Localization & translated content](../../completed/marketing-content/MC.14-localization-and-translations.md) | **Completed** | MC.1, MC.3, MC.10 |
+| MC.15 | [Rollout, cutover & decommission of file-based content](../../completed/marketing-content/MC.15-rollout-cutover-and-decommission.md) | **Completed** | all |
 
 ### Suggested delivery order
 
@@ -86,8 +78,7 @@ MC.1 ─┬─ MC.2 ─┬─ MC.9 ── MC.10 ── MC.11 ─┐
 
 Weeks 1–3 are backend only and ship dark. The first user-visible change is MC.9's nav link, which
 appears only when `ff_marketing_content` is on **and** the viewer holds
-`global:app:marketing-content:view`. `www` keeps building from files until MC.15 flips
-`WWW_CONTENT_SOURCE=api` on a green parity run.
+`global:app:marketing-content:view`. `www` now builds marketing articles from the API only.
 
 ---
 
@@ -95,7 +86,7 @@ appears only when `ff_marketing_content` is on **and** the viewer holds
 
 - **No crawlable regression.** Every URL that returns 200 with rendered HTML, a canonical, a unique
   title and a JSON-LD graph today must do the same after cutover. The parity harness in
-  [MC.6](MC.6-markdown-to-database-migration.md) diffs generated HTML, `dist/.seo-manifest.json` and
+  [MC.6](../../completed/marketing-content/MC.6-markdown-to-database-migration.md) diffs generated HTML, `dist/.seo-manifest.json` and
   the sitemap set; the [CI assertions](../../../.github/workflows/pages-www.yml) stay in place and
   gain DB-sourced cases.
 - **A build must never fail because the API is down.** Content fetch inherits the marketplace
@@ -119,7 +110,7 @@ appears only when `ff_marketing_content` is on **and** the viewer holds
   *marketing* content only.
 - It does not add AI content generation. The editor may later reuse
   `server/internal/service/contentpagegeneration`, but nothing in MC.1–MC.15 depends on it, and
-  [MC.11](MC.11-editorial-workflow-and-governance.md) requires human accountability for every
+  [MC.11](../../completed/marketing-content/MC.11-editorial-workflow-and-governance.md) requires human accountability for every
   published byte.
 - It does not change the public URL shape: `/blog/{slug}` and `/docs/{category}/{slug}` stay exactly
   as they are ([www/docs/url-policy.md](../../../www/docs/url-policy.md)).

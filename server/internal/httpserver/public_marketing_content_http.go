@@ -15,6 +15,7 @@ import (
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/objectcache"
 	mcrepo "github.com/lextures/lextures/server/internal/repos/marketingcontent"
+	"github.com/lextures/lextures/server/internal/service/marketingcontent/render"
 )
 
 type publicContentAuthor struct {
@@ -25,36 +26,39 @@ type publicContentAuthor struct {
 	KnowsAbout []string `json:"knowsAbout,omitempty"`
 }
 type publicContentArticle struct {
-	Path               string               `json:"path"`
-	Kind               string               `json:"kind"`
-	Slug               string               `json:"slug"`
-	Locale             string               `json:"locale"`
-	TranslationGroupID string               `json:"translationGroupId"`
-	CategorySlug       *string              `json:"categorySlug"`
-	CategoryTitle      *string              `json:"categoryTitle"`
-	Title              string               `json:"title"`
-	Description        string               `json:"description"`
-	BodyMD             string               `json:"bodyMd,omitempty"`
-	Author             *publicContentAuthor `json:"author"`
-	Reviewer           *publicContentAuthor `json:"reviewer"`
-	PublishedAt        *time.Time           `json:"publishedAt"`
-	UpdatedAt          time.Time            `json:"updatedAt"`
-	ContentUpdatedAt   *time.Time           `json:"contentUpdatedAt"`
-	ReviewedAt         *time.Time           `json:"reviewedAt"`
-	PrimaryQuestion    string               `json:"primaryQuestion"`
-	Cluster            string               `json:"cluster"`
-	Pillar             string               `json:"pillar"`
-	Keywords           []string             `json:"keywords"`
-	RelatedTo          []string             `json:"relatedTo"`
-	Roles              []string             `json:"roles"`
-	Segments           []string             `json:"segments"`
-	Citations          []string             `json:"citations"`
-	Tags               []string             `json:"tags"`
-	HeroImageURL       *string              `json:"heroImageUrl"`
-	Noindex            bool                 `json:"noindex"`
-	CanonicalOverride  *string              `json:"canonicalOverride"`
-	ContentHash        string               `json:"contentHash,omitempty"`
-	Media              []publicContentMedia `json:"media,omitempty"`
+	Path               string                   `json:"path"`
+	Kind               string                   `json:"kind"`
+	Slug               string                   `json:"slug"`
+	Locale             string                   `json:"locale"`
+	TranslationGroupID string                   `json:"translationGroupId"`
+	CategorySlug       *string                  `json:"categorySlug"`
+	CategoryTitle      *string                  `json:"categoryTitle"`
+	Title              string                   `json:"title"`
+	Description        string                   `json:"description"`
+	BodyMD             string                   `json:"bodyMd,omitempty"`
+	BodyHTML           string                   `json:"bodyHtml,omitempty"`
+	Author             *publicContentAuthor     `json:"author"`
+	Reviewer           *publicContentAuthor     `json:"reviewer"`
+	PublishedAt        *time.Time               `json:"publishedAt"`
+	UpdatedAt          time.Time                `json:"updatedAt"`
+	ContentUpdatedAt   *time.Time               `json:"contentUpdatedAt"`
+	ReviewedAt         *time.Time               `json:"reviewedAt"`
+	PrimaryQuestion    string                   `json:"primaryQuestion"`
+	Cluster            string                   `json:"cluster"`
+	Pillar             string                   `json:"pillar"`
+	Keywords           []string                 `json:"keywords"`
+	RelatedTo          []string                 `json:"relatedTo"`
+	Roles              []string                 `json:"roles"`
+	Segments           []string                 `json:"segments"`
+	Citations          []string                 `json:"citations"`
+	Tags               []string                 `json:"tags"`
+	HeroImageURL       *string                  `json:"heroImageUrl"`
+	Noindex            bool                     `json:"noindex"`
+	CanonicalOverride  *string                  `json:"canonicalOverride"`
+	AvailableLocales   []mcrepo.AvailableLocale `json:"availableLocales,omitempty"`
+	IsFallback         bool                     `json:"isFallback,omitempty"`
+	ContentHash        string                   `json:"contentHash,omitempty"`
+	Media              []publicContentMedia     `json:"media,omitempty"`
 }
 type publicContentMedia struct {
 	ID         uuid.UUID               `json:"id"`
@@ -80,11 +84,12 @@ type publicContentRedirect struct {
 	StatusCode int    `json:"statusCode"`
 }
 type publicContentIndex struct {
-	GeneratedAt time.Time               `json:"generatedAt"`
-	Articles    []publicContentArticle  `json:"articles"`
-	Categories  []publicContentCategory `json:"categories"`
-	Authors     []publicContentAuthor   `json:"authors"`
-	Redirects   []publicContentRedirect `json:"redirects"`
+	GeneratedAt       time.Time                 `json:"generatedAt"`
+	Articles          []publicContentArticle    `json:"articles"`
+	Categories        []publicContentCategory   `json:"categories"`
+	Authors           []publicContentAuthor     `json:"authors"`
+	Redirects         []publicContentRedirect   `json:"redirects"`
+	TranslationGroups []mcrepo.TranslationGroup `json:"translationGroups,omitempty"`
 }
 
 func (d Deps) registerPublicMarketingContentRoutes(r chi.Router) {
@@ -118,7 +123,7 @@ func publicAuthor(a *mcrepo.Author) *publicContentAuthor {
 	return &publicContentAuthor{Slug: a.Slug, Name: a.Name, JobTitle: a.JobTitle, Bio: a.Bio, KnowsAbout: a.KnowsAbout}
 }
 func mapPublicArticle(a mcrepo.PublicArticle, body, hash bool) publicContentArticle {
-	p := publicContentArticle{Path: a.Path, Kind: a.Kind, Slug: a.Slug, Locale: a.Locale, TranslationGroupID: a.TranslationGroupID.String(), CategorySlug: a.CategorySlug, CategoryTitle: a.CategoryTitle, Title: a.Title, Description: a.Description, Author: publicAuthor(a.Author), Reviewer: publicAuthor(a.Reviewer), PublishedAt: a.PublishedAt, UpdatedAt: a.UpdatedAt, ContentUpdatedAt: a.ContentUpdatedAt, ReviewedAt: a.ReviewedAt, PrimaryQuestion: a.PrimaryQuestion, Cluster: a.Cluster, Pillar: a.Pillar, Keywords: a.Keywords, RelatedTo: a.RelatedTo, Roles: a.Roles, Segments: a.Segments, Citations: a.Citations, Tags: a.Tags, Noindex: a.Noindex, CanonicalOverride: a.CanonicalOverride}
+	p := publicContentArticle{Path: a.Path, Kind: a.Kind, Slug: a.Slug, Locale: a.Locale, TranslationGroupID: a.TranslationGroupID.String(), CategorySlug: a.CategorySlug, CategoryTitle: a.CategoryTitle, Title: a.Title, Description: a.Description, Author: publicAuthor(a.Author), Reviewer: publicAuthor(a.Reviewer), PublishedAt: a.PublishedAt, UpdatedAt: a.UpdatedAt, ContentUpdatedAt: a.ContentUpdatedAt, ReviewedAt: a.ReviewedAt, PrimaryQuestion: a.PrimaryQuestion, Cluster: a.Cluster, Pillar: a.Pillar, Keywords: a.Keywords, RelatedTo: a.RelatedTo, Roles: a.Roles, Segments: a.Segments, Citations: a.Citations, Tags: a.Tags, Noindex: a.Noindex, CanonicalOverride: a.CanonicalOverride, AvailableLocales: a.AvailableLocales, IsFallback: a.IsFallback}
 	if body {
 		p.BodyMD = a.BodyMD
 	}
@@ -232,6 +237,7 @@ func (d Deps) handlePublicContentIndex() http.HandlerFunc {
 				latest = time.Unix(0, 0).UTC()
 			}
 			res.GeneratedAt = latest
+			res.TranslationGroups = attachTranslationGroups(res.Articles)
 			return e
 		})
 	}
@@ -261,7 +267,11 @@ func (d Deps) handlePublicContentArticles() http.HandlerFunc {
 			return
 		}
 		q := r.URL.Query()
-		f := mcrepo.PublicArticleFilter{Kind: q.Get("kind"), Locale: q.Get("locale"), CategorySlug: q.Get("category"), AuthorSlug: q.Get("author"), Tag: q.Get("tag"), Q: q.Get("q"), Cursor: q.Get("cursor"), Limit: limit}
+		locale, ok := d.publicLocale(w, r)
+		if !ok {
+			return
+		}
+		f := mcrepo.PublicArticleFilter{Kind: q.Get("kind"), Locale: locale, CategorySlug: q.Get("category"), AuthorSlug: q.Get("author"), Tag: q.Get("tag"), Q: q.Get("q"), Cursor: q.Get("cursor"), Limit: limit}
 		res := struct {
 			Articles   []publicContentArticle `json:"articles"`
 			NextCursor string                 `json:"nextCursor"`
@@ -284,10 +294,11 @@ func (d Deps) handlePublicContentDetail(kind string) http.HandlerFunc {
 		if d.publicContentOff(w) {
 			return
 		}
-		path := "/blog/" + chi.URLParam(r, "slug")
-		if kind == "doc" {
-			path = "/docs/" + chi.URLParam(r, "category") + "/" + chi.URLParam(r, "slug")
+		locale, ok := d.publicLocale(w, r)
+		if !ok {
+			return
 		}
+		path := mcrepo.PublicPath(kind, locale, chi.URLParam(r, "category"), chi.URLParam(r, "slug"))
 		token := r.URL.Query().Get("preview_token")
 		var a *mcrepo.PublicArticle
 		var e error
@@ -315,7 +326,16 @@ func (d Deps) handlePublicContentDetail(kind string) http.HandlerFunc {
 			apierr.WriteInternal(w, r, "Failed to load article.", e)
 			return
 		}
-		res := mapPublicArticle(*a, true, false)
+		body := r.URL.Query().Get("render") != "html"
+		if alts, altErr := mcrepo.PublishedLocalesForGroup(r.Context(), d.Pool, a.TranslationGroupID); altErr == nil && len(alts) > 1 {
+			a.AvailableLocales = alts
+		}
+		res := mapPublicArticle(*a, body, false)
+		if !body {
+			if html, renderErr := render.HTML(a.BodyMD); renderErr == nil {
+				res.BodyHTML = html
+			}
+		}
 		media, mediaErr := mcrepo.ListArticleMedia(r.Context(), d.Pool, a.ID)
 		if mediaErr != nil {
 			apierr.WriteInternal(w, r, "Failed to load article media.", mediaErr)
@@ -341,11 +361,15 @@ func (d Deps) handlePublicContentCategories() http.HandlerFunc {
 		if d.publicContentOff(w) {
 			return
 		}
+		locale, ok := d.publicLocale(w, r)
+		if !ok {
+			return
+		}
 		res := struct {
 			Categories []publicContentCategory `json:"categories"`
 		}{[]publicContentCategory{}}
 		d.contentCached(w, r, &res, func() error {
-			cs, e := mcrepo.ListPublicCategories(r.Context(), d.Pool, r.URL.Query().Get("locale"))
+			cs, e := mcrepo.ListPublicCategories(r.Context(), d.Pool, locale)
 			for _, c := range cs {
 				res.Categories = append(res.Categories, publicContentCategory{c.Slug, c.Locale, c.Title, c.Description, c.SortOrder, c.PlatformPath, c.ArticleCount})
 			}
@@ -420,13 +444,59 @@ func (d Deps) handlePublicContentSearch() http.HandlerFunc {
 			apierr.WriteJSON(w, 400, apierr.CodeInvalidInput, "Invalid limit.")
 			return
 		}
+		locale, ok := d.publicLocale(w, r)
+		if !ok {
+			return
+		}
 		res := struct {
 			Results []mcrepo.SearchResult `json:"results"`
 		}{[]mcrepo.SearchResult{}}
 		d.contentCached(w, r, &res, func() error {
 			var e error
-			res.Results, e = mcrepo.SearchPublished(r.Context(), d.Pool, query, r.URL.Query().Get("kind"), limit)
+			res.Results, e = mcrepo.SearchPublished(r.Context(), d.Pool, query, r.URL.Query().Get("kind"), locale, limit)
+			if e != nil || locale == mcrepo.DefaultLocale || len(res.Results) > 0 {
+				return e
+			}
+			res.Results, e = mcrepo.SearchPublished(r.Context(), d.Pool, query, r.URL.Query().Get("kind"), mcrepo.DefaultLocale, limit)
+			for i := range res.Results {
+				res.Results[i].IsFallback = true
+			}
 			return e
 		})
+		surface := r.URL.Query().Get("surface")
+		if surface != "widget" && surface != "workspace" {
+			surface = "www"
+		}
+		_ = mcrepo.LogSearchQuery(r.Context(), d.Pool, time.Now(), query, surface, len(res.Results))
 	}
+}
+
+func attachTranslationGroups(articles []publicContentArticle) []mcrepo.TranslationGroup {
+	byGroup := map[string][]mcrepo.AvailableLocale{}
+	for _, a := range articles {
+		if a.TranslationGroupID == "" {
+			continue
+		}
+		byGroup[a.TranslationGroupID] = append(byGroup[a.TranslationGroupID], mcrepo.AvailableLocale{Locale: a.Locale, Path: a.Path})
+	}
+	groups := make([]mcrepo.TranslationGroup, 0)
+	for id, members := range byGroup {
+		if len(members) < 2 {
+			continue
+		}
+		gid, err := uuid.Parse(id)
+		if err != nil {
+			continue
+		}
+		groups = append(groups, mcrepo.TranslationGroup{ID: gid, Members: members})
+		for i := range articles {
+			if articles[i].TranslationGroupID == id {
+				articles[i].AvailableLocales = members
+			}
+		}
+	}
+	if len(groups) == 0 {
+		return nil
+	}
+	return groups
 }

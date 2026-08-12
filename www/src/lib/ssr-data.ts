@@ -3,10 +3,13 @@
  * via `window.__LEXTURES_SSR__` so the first client render matches the HTML.
  */
 import type { PublicMarketplaceCourse, PublicMarketplaceCourseDetail } from './marketplace-api'
+import type { ContentArticle, ContentSnapshot } from './content-source'
 
 export type SsrData = {
   /** Path this HTML was generated for (e.g. `/pricing`). */
   path?: string
+  article?: ContentArticle | null
+  articleIndex?: ContentSnapshot | null
   courseDetail?: PublicMarketplaceCourseDetail | null
   coursesIndex?: {
     courses: PublicMarketplaceCourse[]

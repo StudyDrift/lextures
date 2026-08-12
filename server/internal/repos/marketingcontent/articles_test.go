@@ -9,16 +9,23 @@ import (
 )
 
 func TestArticlePathBlog(t *testing.T) {
-	got, err := articlePath(context.Background(), nil, "blog", "release-notes", nil)
+	got, err := articlePath(context.Background(), nil, "blog", "en", "release-notes", nil)
 	if err != nil || got != "/blog/release-notes" {
 		t.Fatalf("articlePath() = %q, %v", got, err)
 	}
 }
 
 func TestArticlePathDocRequiresCategory(t *testing.T) {
-	_, err := articlePath(context.Background(), nil, "doc", "getting-started", nil)
+	_, err := articlePath(context.Background(), nil, "doc", "en", "getting-started", nil)
 	if err == nil {
 		t.Fatal("expected doc without category to fail")
+	}
+}
+
+func TestArticlePathPrefixesNonDefaultLocale(t *testing.T) {
+	got, err := articlePath(context.Background(), nil, "blog", "es", "hola", nil)
+	if err != nil || got != "/es/blog/hola" {
+		t.Fatalf("articlePath() = %q, %v", got, err)
 	}
 }
 

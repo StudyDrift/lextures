@@ -8170,6 +8170,86 @@
       "reviewed": true
     },
     {
+      "id": "MC.6",
+      "path": "docs/completed/marketing-content/MC.6-markdown-to-database-migration.md",
+      "markets": ["K12", "HE", "HS"],
+      "risk": "major", "client": "ops", "coverage": "api-contract",
+      "rationale": "Importer parsing, idempotency, reporting, and generated-output parity are deterministic migration/build concerns.",
+      "owner": "Web Platform", "specs": [{"path": "server/internal/service/marketingcontentimport/frontmatter_test.go"}, {"path": "www/scripts/parity-check.mjs"}], "reviewed": true
+    },
+    {
+      "id": "MC.7",
+      "path": "docs/completed/marketing-content/MC.7-www-build-time-content-integration.md",
+      "markets": ["K12", "HE", "HS"],
+      "risk": "major", "client": "web", "coverage": "api-contract",
+      "rationale": "API loading, cache fallback, and build-time content shaping are covered by deterministic Node tests.",
+      "owner": "Web Platform", "specs": [{"path": "www/scripts/content-source.test.mjs"}], "reviewed": true
+    },
+    {
+      "id": "MC.8",
+      "path": "docs/completed/marketing-content/MC.8-publish-pipeline-and-scheduling.md",
+      "markets": ["K12", "HE", "HS"],
+      "risk": "major", "client": "ops", "coverage": "api-contract",
+      "rationale": "Publish dispatch, coalescing, retries, and scheduling are service behavior covered by Go tests.",
+      "owner": "Web Platform", "specs": [{"path": "server/internal/service/marketingpublish/service_test.go"}], "reviewed": true
+    },
+    {
+      "id": "MC.9",
+      "path": "docs/completed/marketing-content/MC.9-marketing-content-workspace-shell.md",
+      "markets": ["K12", "HE", "HS"],
+      "risk": "major", "client": "web", "coverage": "smoke",
+      "rationale": "Workspace routing and permission gating have component/API coverage; a dedicated full Playwright author journey is not present.",
+      "owner": "Web Platform", "specs": [{"path": "server/internal/httpserver/marketing_content_nodb_test.go"}], "reviewed": true
+    },
+    {
+      "id": "MC.10",
+      "path": "docs/completed/marketing-content/MC.10-article-editor.md",
+      "markets": ["K12", "HE", "HS"],
+      "risk": "major", "client": "web", "coverage": "smoke",
+      "rationale": "Editor metadata and transformation utilities have component tests; no full browser publish journey is currently automated.",
+      "owner": "Web Platform", "specs": [{"path": "clients/web/src/components/marketing-content/editor/__tests__/article-metadata-panel.test.tsx"}], "reviewed": true
+    },
+    {
+      "id": "MC.11",
+      "path": "docs/completed/marketing-content/MC.11-editorial-workflow-and-governance.md",
+      "markets": ["K12", "HE", "HS"],
+      "risk": "major", "client": "web", "coverage": "api-contract",
+      "rationale": "Review transitions, governance queues, and freshness rules are covered at the service boundary.",
+      "owner": "Docs / Content", "specs": [{"path": "server/internal/service/marketingeditorial/service_test.go"}], "reviewed": true
+    },
+    {
+      "id": "MC.12",
+      "path": "docs/completed/marketing-content/MC.12-seo-parity-from-database.md",
+      "markets": ["K12", "HE", "HS"],
+      "risk": "major", "client": "web", "coverage": "not-applicable",
+      "rationale": "SEO artifacts and schema parity are static-build outputs covered by golden and Node tests; no signed-in journey applies.",
+      "owner": "Web Platform", "specs": [{"path": "www/src/lib/schema/database-golden.test.mjs"}], "reviewed": true
+    },
+    {
+      "id": "MC.13",
+      "path": "docs/completed/marketing-content/MC.13-docs-search-and-in-app-help.md",
+      "markets": ["K12", "HE", "HS"],
+      "risk": "major", "client": "web", "coverage": "api-contract",
+      "rationale": "Contextual help authorization and database-backed resolution are covered by HTTP/service tests.",
+      "owner": "Web Platform", "specs": [{"path": "server/internal/httpserver/support_widget_nodb_test.go"}], "reviewed": true
+    },
+    {
+      "id": "MC.14",
+      "path": "docs/completed/marketing-content/MC.14-localization-and-translations.md",
+      "markets": ["K12", "HE", "HS"],
+      "risk": "major", "client": "web", "coverage": "api-contract",
+      "rationale": "Locale validation, translation resolution, and locale metrics are covered by Go tests.",
+      "owner": "Web Platform", "specs": [{"path": "server/internal/service/marketingcontent/validate/locale_metrics_test.go"}, {"path": "server/internal/l10n/marketing_test.go"}], "reviewed": true
+    },
+    {
+      "id": "MC.15",
+      "path": "docs/completed/marketing-content/MC.15-rollout-cutover-and-decommission.md",
+      "markets": ["K12", "HE", "HS"],
+      "risk": "major", "client": "ops", "coverage": "not-applicable",
+      "rationale": "Cutover is operational governance plus deterministic CI guardrails; production evidence belongs to the restricted release record.",
+      "owner": "Web Platform + Docs / Content", "specs": [{"path": "scripts/check-no-file-articles.test.sh"}, {"path": ".github/workflows/pages-www.yml"}], "reviewed": true
+    },
+    {
       "id": "MC0",
       "path": "docs/completed/marketplace-courses/MC0-authoring-provisioning-foundation.md",
       "markets": [

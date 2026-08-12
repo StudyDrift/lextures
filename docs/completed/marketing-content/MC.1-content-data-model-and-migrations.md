@@ -42,10 +42,10 @@ stays gated on engineers, which is the business problem this program exists to r
 ## 3. Non-Goals
 
 - No API, no handler, no UI — this plan ships migrations, Go types and repo functions only.
-- No data backfill; the importer is [MC.6](../../plan/marketing-content/MC.6-markdown-to-database-migration.md).
+- No data backfill; the importer is [MC.6](MC.6-markdown-to-database-migration.md).
 - No media/binary storage design beyond the FK stub; that is [MC.5](../../plan/marketing-content/MC.5-marketing-media-library.md).
 - No translation rows; the `translation_group_id` column exists but is unused until
-  [MC.14](../../plan/marketing-content/MC.14-localization-and-translations.md).
+  [MC.14](MC.14-localization-and-translations.md).
 - No change to course content, `course.content_pages`, or the Content Tools model.
 
 ## 4. Personas & User Stories
@@ -323,7 +323,7 @@ ON CONFLICT (permission_string) DO NOTHING;
 -- Grant all five to Global Admin only (pattern: migrations/431_parent_link_assign.sql).
 ```
 
-**Backfill strategy.** None here. The tables ship empty; [MC.6](../../plan/marketing-content/MC.6-markdown-to-database-migration.md)
+**Backfill strategy.** None here. The tables ship empty; [MC.6](MC.6-markdown-to-database-migration.md)
 imports the 5 blog posts, 70 help articles, 16 categories and the author registry. `content_authors`
 is seeded with `chase-willden` by MC.6, not by this migration, so the schema stays data-free.
 
@@ -460,4 +460,4 @@ now; if AI-assisted drafting is added later it will record disclosure through th
   `server/migrations/431_parent_link_assign.sql` (permission seed),
   `server/internal/repos/platformconfig/merge_test.go` (flag default tests).
 - Related plans: [MC.2](../../plan/marketing-content/MC.2-authoring-api-and-revisions.md), [MC.3](../../plan/marketing-content/MC.3-public-content-read-api.md),
-  [MC.6](../../plan/marketing-content/MC.6-markdown-to-database-migration.md), [MC.14](../../plan/marketing-content/MC.14-localization-and-translations.md).
+  [MC.6](MC.6-markdown-to-database-migration.md), [MC.14](MC.14-localization-and-translations.md).

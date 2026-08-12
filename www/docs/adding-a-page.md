@@ -2,6 +2,9 @@
 
 Every public www URL must be in the **route manifest**. If it is not, the static generator will not emit HTML and crawlers will see a 404.
 
+Publish blog and documentation articles through the Marketing Content workspace. The manifest keeps
+one descriptor per route family and enumerates concrete paths from the preloaded public API index.
+
 ## Steps
 
 1. **Create the page component** under `www/src/pages/` (use `MarketingPageShell` for standard layout).
@@ -29,12 +32,12 @@ Every public www URL must be in the **route manifest**. If it is not, the static
    question-style description to `www/src/lib/llms-catalog.ts` (≤200 links total).
 7. Add at least one original diagram, automated product screenshot, or chart to substantive pages. Use `Figure`/`Diagram`, provide a complete text equivalent for complex visuals, and verify the generated raster social card in `dist/og/`. See [social cards](social-cards.md) and [diagram authoring](diagram-authoring.md).
 
-## Dynamic families (`/blog/:slug`, `/docs/:slug`)
+## Dynamic families (`/blog/:slug`, `/docs/:category/:slug`)
 
-- Put markdown under `www/src/blog/` or `www/src/docs/`.
-- Frontmatter: `title`, `date`, `description`, `author` (registry **slug**, not free text), optional `updated`, `reviewedBy`, `citations` (blog).
-- Unknown author slugs fail the build — see [authoring-bylines.md](./authoring-bylines.md).
-- `enumerate()` in the manifest already expands these files — no extra step if you only add a markdown file.
+- Create, review, preview, and publish the article in the in-product Marketing Content workspace.
+- Complete its title, description, author, review, audience, evidence, and category metadata there.
+- Unknown author/category values and content-contract violations block publication.
+- `enumerate()` expands the public API index on the next publish-triggered build.
 - The build emits a `.md` sibling (`/docs/foo.md`) and `<link rel="alternate" type="text/markdown">` on the HTML page.
 - Blog/docs bodies are included in `llms-full.txt` automatically.
 

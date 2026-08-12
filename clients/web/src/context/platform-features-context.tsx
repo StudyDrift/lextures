@@ -136,6 +136,7 @@ export type PlatformFeatures = {
   ffLessonGenerator: boolean
   ffPersistentTutor: boolean
   ffCalendarFeeds: boolean
+  ffMarketingContent: boolean
   aiStudyBuddyEnabled: boolean
   gdprModuleEnabled: boolean
   aiDisclosureEnabled: boolean
@@ -285,6 +286,7 @@ const defaultFeatures: PlatformFeatures = {
   ffLessonGenerator: false,
   ffPersistentTutor: false,
   ffCalendarFeeds: true,
+  ffMarketingContent: false,
   aiStudyBuddyEnabled: false,
   gdprModuleEnabled: false,
   aiDisclosureEnabled: false,
@@ -432,6 +434,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
   ffLessonGenerator: false,
   ffPersistentTutor: false,
   ffCalendarFeeds: true,
+  ffMarketingContent: false,
   aiStudyBuddyEnabled: false,
   gdprModuleEnabled: false,
   aiDisclosureEnabled: false,
@@ -586,6 +589,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffLessonGenerator: data.ffLessonGenerator === true,
           ffPersistentTutor: data.ffPersistentTutor === true,
           ffCalendarFeeds: data.ffCalendarFeeds === true,
+          ffMarketingContent: data.ffMarketingContent === true,
           aiStudyBuddyEnabled: data.aiStudyBuddyEnabled === true,
           gdprModuleEnabled: data.gdprModuleEnabled === true,
           aiDisclosureEnabled: data.aiDisclosureEnabled === true,
@@ -697,6 +701,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffLessonGenerator: next.ffLessonGenerator === true,
           ffPersistentTutor: next.ffPersistentTutor === true,
           ffCalendarFeeds: next.ffCalendarFeeds === true,
+          ffMarketingContent: next.ffMarketingContent === true,
           aiStudyBuddyEnabled: next.aiStudyBuddyEnabled === true,
           gdprModuleEnabled: next.gdprModuleEnabled === true,
           aiDisclosureEnabled: next.aiDisclosureEnabled === true,

@@ -60,11 +60,15 @@ export function normalizeLastmod(value) {
  *   gitDate?: string | null
  *   courseUpdatedAt?: string | null
  *   courseCreatedAt?: string | null
+ *   contentUpdatedAt?: string | null
+ *   publishedAt?: string | null
  * }} sources
  * @returns {string | null}
  */
 export function resolveLastmod(sources = {}) {
   const candidates = [
+    sources.contentUpdatedAt,
+    sources.publishedAt,
     sources.frontmatterUpdated,
     sources.frontmatterDate,
     sources.gitDate,
@@ -492,10 +496,10 @@ export function buildIndexNowBody(opts) {
  * @param {string} path
  */
 export function shouldEmitMarkdownSibling(path) {
-  if (path.startsWith('/blog/') && path !== '/blog') return true
+  if (/^\/(?:[a-z]{2}(?:-[a-z0-9]+)?\/)?blog\/[^/]+$/.test(path)) return true
   // Categorized help articles have two path segments after /docs. Category
   // hubs are HTML indexes and do not have a source Markdown document.
-  if (/^\/docs\/[^/]+\/[^/]+$/.test(path)) return true
+  if (/^\/(?:[a-z]{2}(?:-[a-z0-9]+)?\/)?docs\/[^/]+\/[^/]+$/.test(path)) return true
   return false
 }
 

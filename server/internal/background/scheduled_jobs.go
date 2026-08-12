@@ -13,12 +13,16 @@ import (
 	"github.com/lextures/lextures/server/internal/config"
 	"github.com/lextures/lextures/server/internal/publicapi"
 	"github.com/lextures/lextures/server/internal/repos/apitokens"
+	mcrepo "github.com/lextures/lextures/server/internal/repos/marketingcontent"
 	subrepo "github.com/lextures/lextures/server/internal/repos/moduleassignmentsubmissions"
 	tutorsessionrepo "github.com/lextures/lextures/server/internal/repos/tutorsession"
 	webhooksrepo "github.com/lextures/lextures/server/internal/repos/webhooks"
 	"github.com/lextures/lextures/server/internal/scheduler"
-	learnerprofilesvc "github.com/lextures/lextures/server/internal/service/learnerprofile"
 	introcourseservice "github.com/lextures/lextures/server/internal/service/introcourse"
+	learnerprofilesvc "github.com/lextures/lextures/server/internal/service/learnerprofile"
+	marketingcontentservice "github.com/lextures/lextures/server/internal/service/marketingcontent"
+	marketingeditorialservice "github.com/lextures/lextures/server/internal/service/marketingeditorial"
+	marketingpublishservice "github.com/lextures/lextures/server/internal/service/marketingpublish"
 )
 
 // dueReminderWindow is how far ahead the due_date_reminder job looks for
@@ -158,6 +162,59 @@ func registerScheduledJobs(r *Registry, pool *pgxpool.Pool, cfgSrc ConfigSource)
 		if total > 0 {
 			slog.Info("scheduled.tutor_session_retention", "deleted", total)
 		}
+		return nil
+	}))
+	r.Register(scheduler.JobTypeMarketingContentPublishDue, HandlerFunc(func(ctx context.Context, _ json.RawMessage) error {
+		if !cfgSrc.Config().FFMarketingContent || pool == nil {
+			return nil
+		}
+		n, err := (&marketingcontentservice.Service{Pool: pool}).PublishDue(ctx, 50)
+		if n > 0 {
+			slog.Info("marketing_content_scheduled_publishes_total", "count", n)
+		}
+		return err
+	}))
+	r.Register(scheduler.JobTypeMarketingContentBuildDispatch, HandlerFunc(func(ctx context.Context, _ json.RawMessage) error {
+		if !cfgSrc.Config().FFMarketingContent || pool == nil {
+			return nil
+		}
+		return (&marketingpublishservice.Service{Pool: pool, SecretsKey: cfgSrc.Config().PlatformSecretsKey}).Run(ctx)
+	}))
+	r.Register(scheduler.JobTypeMarketingContentReviewSweep, HandlerFunc(func(ctx context.Context, _ json.RawMessage) error {
+		if !cfgSrc.Config().FFMarketingContent || pool == nil {
+			return nil
+		}
+		h, err := (&marketingeditorialservice.Service{Pool: pool}).ReviewSweep(ctx)
+		if err == nil {
+			slog.Info("marketing_content_overdue_articles", "count", h.Overdue, "percent", h.Percent)
+		}
+		return err
+	}))
+	r.Register(scheduler.JobTypeMarketingContentLinkHealth, HandlerFunc(func(ctx context.Context, _ json.RawMessage) error {
+		if !cfgSrc.Config().FFMarketingContent || pool == nil {
+			return nil
+		}
+		return (&marketingeditorialservice.Service{Pool: pool}).CheckLinks(ctx)
+	}))
+	r.Register(scheduler.JobTypeMarketingContentRevisionPrune, HandlerFunc(func(ctx context.Context, _ json.RawMessage) error {
+		if !cfgSrc.Config().FFMarketingContent || pool == nil {
+			return nil
+		}
+		n, err := (&marketingeditorialservice.Service{Pool: pool}).PruneRevisions(ctx)
+		if n > 0 {
+			slog.Info("marketing_content_revisions_pruned", "count", n)
+		}
+		return err
+	}))
+	r.Register(scheduler.JobTypeMarketingContentSearchGapsReport, HandlerFunc(func(ctx context.Context, _ json.RawMessage) error {
+		if !cfgSrc.Config().FFMarketingContent || pool == nil {
+			return nil
+		}
+		gaps, err := mcrepo.SearchGaps(ctx, pool, time.Now().UTC().AddDate(0, 0, -7))
+		if err != nil {
+			return err
+		}
+		slog.Info("help_zero_result_queries_total", "count", len(gaps))
 		return nil
 	}))
 }

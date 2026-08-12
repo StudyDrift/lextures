@@ -4,5 +4,7 @@
 /www/src/lib/redirects.ts @lextures/web-platform
 /www/src/lib/crawler-policy.ts @lextures/web-platform
 /www/public/robots.txt @lextures/web-platform
+/www/src/blog/ @lextures/web-platform
+/www/src/docs/ @lextures/web-platform
 /.github/workflows/pages-www.yml @lextures/web-platform
 /.github/workflows/seo-weekly.yml @lextures/web-platform

@@ -77,6 +77,7 @@ export type RouteDescriptor = {
     title?: string
     description?: string
     lastmod?: string
+    robots?: 'index,follow' | 'noindex,follow'
     params?: Record<string, string>
   }>
   /** Sitemap priority hint (0.0–1.0). */
@@ -502,6 +503,7 @@ const ENGLISH_ROUTE_MANIFEST: Array<Omit<RouteDescriptor, 'locale'>> = [
         description: truncateMetaDescription(p.description || p.title),
         lastmod: p.updated || p.date || undefined,
         params: { slug: p.slug },
+        robots: p.noindex ? 'noindex,follow' : undefined,
       })),
   },
   {
@@ -548,6 +550,7 @@ const ENGLISH_ROUTE_MANIFEST: Array<Omit<RouteDescriptor, 'locale'>> = [
         description: truncateMetaDescription(a.description || a.title),
         lastmod: a.updated || a.date || undefined,
         params: { category: a.category || '', slug: a.slug },
+        robots: a.noindex ? 'noindex,follow' : undefined,
       })),
   },
   {
@@ -677,6 +680,18 @@ export function resolveRouteDescriptor(
   const clean =
     pathname !== '/' && pathname.endsWith('/') ? pathname.replace(/\/+$/, '') : pathname || '/'
 
+  return matchManifest(clean) ?? matchManifest(stripContentLocalePrefix(clean))
+}
+
+function stripContentLocalePrefix(pathname: string): string {
+  const first = pathname.split('/').filter(Boolean)[0]
+  if (!first || !isValidLocaleCode(first) || first.toLowerCase() === DEFAULT_LOCALE) return pathname
+  const rest = pathname.slice(`/${first}`.length) || '/'
+  if (rest === '/blog' || rest.startsWith('/blog/') || rest === '/docs' || rest.startsWith('/docs/')) return rest
+  return pathname
+}
+
+function matchManifest(clean: string): { descriptor: RouteDescriptor; params: Record<string, string> } | null {
   for (const descriptor of ROUTE_MANIFEST) {
     if (!isPublishable(descriptor)) continue
     if (!descriptor.path.includes(':')) {

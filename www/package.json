@@ -6,21 +6,14 @@
   "scripts": {
     "dev": "vite",
     "optimize-images": "node scripts/optimize-images.mjs",
-    "build": "tsc -b && node scripts/check-offsite-profiles.mjs && node scripts/content-lint/index.mjs && node scripts/check-help-freshness.mjs && node scripts/optimize-images.mjs && vite build && node scripts/generate-site.mjs && node scripts/generate/utility-report.mjs && node scripts/generate-docs-search.mjs && node scripts/content-lint/index.mjs --write-report",
+    "build": "tsc -b && node scripts/check-offsite-profiles.mjs && node scripts/optimize-images.mjs && vite build && node scripts/generate-site.mjs && node scripts/generate/utility-report.mjs && node scripts/generate-docs-search.mjs",
     "generate": "node scripts/generate-site.mjs",
     "prerender": "node scripts/generate-site.mjs",
     "lint": "oxlint .",
     "lint:fix": "oxlint --fix .",
     "preview": "vite preview",
-    "test": "node --test src/lib/markdown-corpus.test.mjs scripts/seo-check/core.test.mjs scripts/seo-check/checks/hreflang.test.mjs scripts/seo-measurement/core.test.mjs scripts/og-card/render.test.mjs scripts/check-offsite-profiles.test.mjs scripts/generate/utility-check.test.mjs scripts/content-lint/core.test.mjs scripts/editorial.test.mjs scripts/help-center.test.mjs scripts/generate-site.test.mjs scripts/marketplace-seo.test.mjs scripts/seo-artifacts.test.mjs scripts/check-perf-budget.test.mjs src/lib/document-head.test.mjs src/lib/schema/schema.test.mjs src/lib/schema/research.test.mjs src/lib/marketplace-api.test.mjs src/lib/school-code.test.mjs src/lib/institution-inquiry-api.test.mjs src/lib/institution-pricing.test.mjs src/lib/markdown-lite.test.mjs",
+    "test": "node --test scripts/feeds.test.mjs src/lib/schema/database-golden.test.mjs src/lib/markdown-corpus.test.mjs scripts/seo-check/core.test.mjs scripts/seo-check/checks/hreflang.test.mjs scripts/seo-measurement/core.test.mjs scripts/og-card/render.test.mjs scripts/check-offsite-profiles.test.mjs scripts/generate/utility-check.test.mjs scripts/content-lint/core.test.mjs scripts/generate-site.test.mjs scripts/marketplace-seo.test.mjs scripts/seo-artifacts.test.mjs scripts/check-perf-budget.test.mjs src/lib/document-head.test.mjs src/lib/schema/schema.test.mjs src/lib/schema/research.test.mjs src/lib/marketplace-api.test.mjs src/lib/school-code.test.mjs src/lib/institution-inquiry-api.test.mjs src/lib/institution-pricing.test.mjs src/lib/markdown-lite.test.mjs",
     "offsite:check": "node scripts/check-offsite-profiles.mjs",
-    "content:lint": "node scripts/content-lint/index.mjs",
-    "content:score": "node scripts/content-lint/index.mjs",
-    "content:report": "node scripts/content-lint/index.mjs --write-report",
-    "content:calendar": "node scripts/editorial.mjs calendar",
-    "content:gaps": "node scripts/editorial.mjs gaps",
-    "content:refresh-due": "node scripts/editorial.mjs refresh-due",
-    "help:freshness": "node scripts/check-help-freshness.mjs",
     "help:screenshots": "node scripts/screenshots/capture-help.mjs",
     "perf-budget": "node scripts/check-perf-budget.mjs",
     "lighthouse:ci": "lhci autorun --config=./lighthouserc.json",
@@ -28,8 +21,7 @@
     "measurement:validate": "node scripts/seo-measurement/cli.mjs validate",
     "measurement:report": "node scripts/seo-measurement/cli.mjs report",
     "seo:check": "node scripts/seo-check/index.mjs",
-    "seo:smoke": "node scripts/seo-smoke/index.mjs",
-    "seo:lifecycle": "node scripts/seo-lifecycle.mjs"
+    "seo:smoke": "node scripts/seo-smoke/index.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.548.0",
@@ -54,6 +46,9 @@
     "vite": "^8.0.16"
   },
   "overrides": {
-    "postcss": "8.5.23"
+    "nanoid": "3.3.17",
+    "postcss": "8.5.23",
+    "tmp": "0.2.7",
+    "uuid": "11.1.1"
   }
 }

@@ -13,6 +13,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  marketing-content-boundary:
+    name: Marketing content (API-only boundary)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reject file-based marketing articles
+        run: bash scripts/check-no-file-articles.sh
+      - name: Self-test the guardrail
+        run: bash scripts/check-no-file-articles.test.sh
+
   server-tests:
     name: Server (tests)
     runs-on: ubuntu-latest

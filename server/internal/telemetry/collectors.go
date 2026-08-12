@@ -43,6 +43,7 @@ type Sources struct {
 	Redis            func() RedisPoolSnapshot
 	JobQueue         func() (JobQueueSnapshot, bool)
 	MarketingContent func() (map[[2]string]int64, bool)
+	MarketingI18n    func() (map[string]int64, int64, bool)
 }
 
 // resourceCollector implements prometheus.Collector and emits DB pool, Redis
@@ -66,7 +67,9 @@ type resourceCollector struct {
 	jobByStatus              *prometheus.Desc
 	jobByType                *prometheus.Desc
 	jobDeadLetters           *prometheus.Desc
-	marketingContentArticles *prometheus.Desc
+	marketingContentArticles     *prometheus.Desc
+	marketingContentByLocale     *prometheus.Desc
+	marketingContentStale        *prometheus.Desc
 }
 
 func newResourceCollector(s Sources) *resourceCollector {
@@ -90,7 +93,9 @@ func newResourceCollector(s Sources) *resourceCollector {
 		jobByStatus:              d("job_queue_jobs", "Job-queue rows by status.", "status"),
 		jobByType:                d("job_queue_depth_by_type", "Job-queue backlog by job type.", "job_type"),
 		jobDeadLetters:           d("job_queue_dead_letters", "Un-redriven dead-letter rows in the job queue."),
-		marketingContentArticles: d("marketing_content_articles", "Live marketing-content articles by kind and status.", "kind", "status"),
+		marketingContentArticles:     d("marketing_content_articles", "Live marketing-content articles by kind and status.", "kind", "status"),
+		marketingContentByLocale:     d("marketing_content_articles_locale", "Live marketing-content articles by locale.", "locale"),
+		marketingContentStale:        d("marketing_content_translations_stale", "Translations whose source is newer than source_synced_at."),
 	}
 }
 
@@ -111,6 +116,8 @@ func (c *resourceCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.jobByType
 	ch <- c.jobDeadLetters
 	ch <- c.marketingContentArticles
+	ch <- c.marketingContentByLocale
+	ch <- c.marketingContentStale
 }
 
 func (c *resourceCollector) Collect(ch chan<- prometheus.Metric) {
@@ -161,6 +168,14 @@ func (c *resourceCollector) Collect(ch chan<- prometheus.Metric) {
 			for labels, n := range counts {
 				g(c.marketingContentArticles, float64(n), labels[0], labels[1])
 			}
+		}
+	}
+	if c.sources.MarketingI18n != nil {
+		if byLocale, stale, ok := c.sources.MarketingI18n(); ok {
+			for locale, n := range byLocale {
+				g(c.marketingContentByLocale, float64(n), locale)
+			}
+			g(c.marketingContentStale, float64(stale))
 		}
 	}
 }
