@@ -26,6 +26,9 @@ CREATE TABLE IF NOT EXISTS marketing.content_search_queries (
 INSERT INTO marketing.content_route_hints (route_prefix, article_id, position)
 SELECT m.prefix, a.id, m.position
 FROM (VALUES
+    ('/', 'finding-your-course', 1),
+    ('/dashboard', 'finding-your-course', 1),
+    ('/dashboard', 'navigating-the-course-interface', 2),
     ('/courses', 'finding-your-course', 1),
     ('/courses', 'navigating-the-course-interface', 2),
     ('/courses', 'creating-a-new-course', 3),

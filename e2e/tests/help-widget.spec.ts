@@ -13,6 +13,7 @@
 import { test, expect } from '../fixtures/test.js'
 import { apiGetContextualArticles, apiLogin, apiSignup } from '../fixtures/api.js'
 import { bootstrapGlobalAdmin, setPlatformFlag } from '../lib/feature-lifecycle-helpers.js'
+import { withPlatformSettingsLock } from '../lib/platform-feature-matrix-helpers.js'
 
 async function enableMarketingContent() {
   const email = `help-widget-ga-${Date.now()}@test.invalid`
@@ -20,7 +21,11 @@ async function enableMarketingContent() {
   await apiSignup({ email, password })
   await bootstrapGlobalAdmin(email)
   const ga = await apiLogin({ email, password })
-  await setPlatformFlag(ga.access_token, 'ffMarketingContent', true)
+  // Take the cross-worker lock so we do not race other platform-settings writers.
+  // Intentionally leave the flag on for the suite (no restore).
+  await withPlatformSettingsLock(async () => {
+    await setPlatformFlag(ga.access_token, 'ffMarketingContent', true)
+  })
 }
 
 test.describe('Help Widget - UI', () => {

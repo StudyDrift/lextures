@@ -48,6 +48,8 @@ ON CONFLICT (article_id,revision_no) DO NOTHING;
 INSERT INTO marketing.content_route_hints (route_prefix,article_id,position)
 SELECT h.prefix,a.id,h.position
 FROM (VALUES
+  ('/','finding-your-course',1),('/dashboard','finding-your-course',1),
+  ('/dashboard','navigating-the-course-interface',2),
   ('/courses','finding-your-course',1),('/courses','navigating-the-course-interface',2),
   ('/courses','creating-a-new-course',3),('/quiz','navigating-the-course-interface',1),
   ('/gradebook','navigating-the-course-interface',1),('/settings','finding-your-course',1),

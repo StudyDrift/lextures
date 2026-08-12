@@ -24,46 +24,104 @@ const helpCenterBase = "https://lextures.com"
 
 // ContextualArticles resolves help articles for an app route using the tiered
 // precedence in FR-4: explicit route hints, then related_to paths, then category
-// platform-path prefixes, then full-text search on route-derived keywords. The
-// first tier that yields any article visible to the viewer's roles wins. A nil,
-// nil result means no tier matched and callers should fall back to a static list.
+// platform-path prefixes, then full-text search on route-derived keywords, then a
+// role-filtered published-doc fallback. The first tier that yields any article
+// visible to the viewer's roles wins.
 func (s *Service) ContextualArticles(ctx context.Context, route string, roles []string, locale string, limit int) ([]ContextualArticle, error) {
 	if limit <= 0 || limit > 8 {
 		limit = 5
 	}
 	route = strings.TrimSpace(route)
-	if route == "" {
-		return nil, nil
-	}
+	roles = NormalizeViewerRoles(roles)
 	if locale == "" {
 		locale = repo.DefaultLocale
 	}
-	keywords := routeKeywords(route)
-	tiers := []struct {
-		tier string
-		load func() ([]repo.PublicArticle, error)
-	}{
-		{"hint", func() ([]repo.PublicArticle, error) { return repo.ArticlesByRouteHint(ctx, s.Pool, route, limit*2) }},
-		{"related", func() ([]repo.PublicArticle, error) { return repo.ArticlesByRelatedRoute(ctx, s.Pool, route, limit*2) }},
-		{"category", func() ([]repo.PublicArticle, error) { return repo.ArticlesByCategoryPath(ctx, s.Pool, route, limit*2) }},
-		{"search", func() ([]repo.PublicArticle, error) {
-			if keywords == "" {
-				return nil, nil
+
+	pick := func(arts []repo.PublicArticle, tier string) []ContextualArticle {
+		filtered := preferLocale(filterByRole(arts, roles), locale)
+		if len(filtered) == 0 {
+			return nil
+		}
+		return toContextual(filtered, tier, limit)
+	}
+
+	if route != "" {
+		keywords := routeKeywords(route)
+		tiers := []struct {
+			tier string
+			load func() ([]repo.PublicArticle, error)
+		}{
+			{"hint", func() ([]repo.PublicArticle, error) { return repo.ArticlesByRouteHint(ctx, s.Pool, route, limit*2) }},
+			{"related", func() ([]repo.PublicArticle, error) { return repo.ArticlesByRelatedRoute(ctx, s.Pool, route, limit*2) }},
+			{"category", func() ([]repo.PublicArticle, error) { return repo.ArticlesByCategoryPath(ctx, s.Pool, route, limit*2) }},
+			{"search", func() ([]repo.PublicArticle, error) {
+				if keywords == "" {
+					return nil, nil
+				}
+				arts, _, err := repo.ListPublishedArticles(ctx, s.Pool, repo.PublicArticleFilter{Q: keywords, Limit: limit * 2})
+				return arts, err
+			}},
+		}
+		for _, t := range tiers {
+			arts, err := t.load()
+			if err != nil {
+				return nil, err
 			}
-			arts, _, err := repo.ListPublishedArticles(ctx, s.Pool, repo.PublicArticleFilter{Q: keywords, Limit: limit * 2})
-			return arts, err
-		}},
-	}
-	for _, t := range tiers {
-		arts, err := t.load()
-		if err != nil {
-			return nil, err
-		}
-		if filtered := preferLocale(filterByRole(arts, roles), locale); len(filtered) > 0 {
-			return toContextual(filtered, t.tier, limit), nil
+			if out := pick(arts, t.tier); len(out) > 0 {
+				return out, nil
+			}
 		}
 	}
-	return nil, nil
+
+	// FR-4 fallback tier: recent published docs visible to this viewer (also covers
+	// empty/unknown routes so the widget is never an empty panel when content exists).
+	arts, _, err := repo.ListPublishedArticles(ctx, s.Pool, repo.PublicArticleFilter{
+		Kind:   "doc",
+		Locale: locale,
+		Limit:  limit * 2,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if out := pick(arts, "fallback"); len(out) > 0 {
+		return out, nil
+	}
+	return []ContextualArticle{}, nil
+}
+
+// NormalizeViewerRoles maps LMS enrollment/app role names onto the vocabulary used
+// in marketing content frontmatter (learner/instructor/admin/parent) and ensures
+// authenticated viewers without enrollments still see learner-facing help (FR-5).
+func NormalizeViewerRoles(roles []string) []string {
+	seen := make(map[string]struct{}, len(roles)+4)
+	out := make([]string, 0, len(roles)+4)
+	add := func(role string) {
+		role = strings.TrimSpace(role)
+		if role == "" {
+			return
+		}
+		key := strings.ToLower(role)
+		if _, ok := seen[key]; ok {
+			return
+		}
+		seen[key] = struct{}{}
+		out = append(out, role)
+	}
+	for _, role := range roles {
+		add(role)
+		switch strings.ToLower(strings.TrimSpace(role)) {
+		case "student":
+			add("learner")
+		case "teacher", "ta":
+			add("instructor")
+		case "global admin", "org admin", "administrator", "platform admin":
+			add("admin")
+		}
+	}
+	if len(out) == 0 {
+		add("learner")
+	}
+	return out
 }
 
 // routeKeywords turns an app route path into search terms, e.g.

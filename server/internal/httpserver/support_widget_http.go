@@ -194,6 +194,7 @@ func (d Deps) handleHelpContextualArticles() http.HandlerFunc {
 			apierr.WriteInternal(w, r, "Failed to resolve viewer roles.", err)
 			return
 		}
+		roles = mcservice.NormalizeViewerRoles(roles)
 
 		key := objectcache.HelpContextualKey(route, roles, r.URL.Query().Get("locale"))
 		var cached []mcservice.ContextualArticle
@@ -208,6 +209,9 @@ func (d Deps) handleHelpContextualArticles() http.HandlerFunc {
 		if err != nil {
 			apierr.WriteInternal(w, r, "Failed to resolve contextual help articles.", err)
 			return
+		}
+		if articles == nil {
+			articles = []mcservice.ContextualArticle{}
 		}
 		tier := "none"
 		if len(articles) > 0 {

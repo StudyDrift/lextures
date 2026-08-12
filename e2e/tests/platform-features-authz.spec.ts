@@ -179,7 +179,10 @@ test.describe.serial('Platform features authz & UI contracts', () => {
     await expect(toggle).toBeVisible({ timeout: 10_000 })
     await toggle.click()
 
-    await expect(page.getByRole('alert')).toBeVisible({ timeout: 10_000 })
+    // Scope past the global assertive a11y announcer (also role=alert).
+    await expect(
+      page.locator('#main-content').getByRole('alert').filter({ hasText: /Simulated platform save failure/i }),
+    ).toBeVisible({ timeout: 10_000 })
     await expect(page.getByRole('status').filter({ hasText: /Saved/i })).toHaveCount(0)
     await page.unroute('**/api/v1/settings/platform')
     })
