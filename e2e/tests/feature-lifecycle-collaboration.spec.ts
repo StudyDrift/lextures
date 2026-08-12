@@ -113,7 +113,7 @@ test.describe.serial('E2E.3 collaboration lifecycle', () => {
       courseCode,
       fn: async () => {
         await setCourseFlag(instructorToken, courseCode, 'interactiveQuizzesEnabled', true)
-        await setPlatformFlag(gaToken, 'ffIqLiveHosting', true)
+        // ffIqLiveHosting is always-on at platform (COLLAPSE); do not toggle it.
         await setPlatformFlag(gaToken, 'ffIqAiGeneration', true)
 
         const kit = await createQuizKit(instructorToken, courseCode, `Lifecycle Kit ${Date.now()}`)
@@ -129,12 +129,17 @@ test.describe.serial('E2E.3 collaboration lifecycle', () => {
           label: 'kits unauth',
         })
 
-        // Course off: kits unavailable (AC-3 course-scoped).
+        // Course off: kits + games unavailable (AC-3 course-scoped; hosting is always-on).
         await setCourseFlag(instructorToken, courseCode, 'interactiveQuizzesEnabled', false)
         await assertProbeDisabled(kitsProbe, {
           token: instructorToken,
           courseCode,
           label: 'kits course-off',
+        })
+        await assertProbeDisabled(gamesProbe, {
+          token: instructorToken,
+          courseCode,
+          label: 'games course-off',
         })
         await injectToken(page, instructorToken)
         await assertCourseWebOffState(page, family, courseCode)
@@ -146,17 +151,6 @@ test.describe.serial('E2E.3 collaboration lifecycle', () => {
           'kit preserved after re-enable',
         ).toBe(true)
         await assertCourseWebOnState(page, family, courseCode)
-
-        // Hosting off with course on: games 404, kits still list.
-        await setPlatformFlag(gaToken, 'ffIqLiveHosting', false)
-        await assertProbeDisabled(gamesProbe, {
-          token: instructorToken,
-          courseCode,
-          label: 'games hosting-off',
-        })
-        const kitsWhileHostingOff = await listQuizKits(instructorToken, courseCode)
-        expect(kitsWhileHostingOff.some((k) => k.id === kit.id)).toBe(true)
-        await setPlatformFlag(gaToken, 'ffIqLiveHosting', true)
 
         // Parent course off / child AI on → parent authoritative (AC-2).
         const courseToAi = family.edges.find(
@@ -170,20 +164,6 @@ test.describe.serial('E2E.3 collaboration lifecycle', () => {
           courseCode,
           childProbe: aiProbe,
           bothOnAllowedStatuses: [400, 404, 503],
-        })
-
-        // Course parent / hosting child (games surface requires both).
-        const courseToHosting = family.edges.find(
-          (e) => e.parent.key === 'interactiveQuizzesEnabled' && e.child.key === 'ffIqLiveHosting',
-        )!
-        await assertDependencyTruthTable({
-          family,
-          edge: courseToHosting,
-          gaToken,
-          instructorToken,
-          courseCode,
-          childProbe: gamesProbe,
-          bothOnAllowedStatuses: [400, 404, 403],
         })
       },
     })

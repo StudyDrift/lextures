@@ -252,7 +252,7 @@ test.describe.serial('Platform features authz & UI contracts', () => {
     const toggle = row.getByRole('switch')
     await expect(toggle).toBeDisabled({ timeout: 10_000 })
     await expect(toggle).toHaveAttribute('aria-checked', 'true')
-    await expect(row.getByText(/Environment/i)).toBeVisible()
+    // Row may mention "Environment" more than once (badge + reason); assert the reason copy.
     await expect(page.getByTestId('feature-toggle-disabled-reason')).toContainText(
       /environment configuration/i,
     )
