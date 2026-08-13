@@ -13,6 +13,34 @@ enum BillingLogic {
     /// iOS always purchases digital goods via StoreKit when the server maps a product.
     static var prefersInAppPurchase: Bool { true }
 
+    /// App Store Connect product identifiers for Homeschool subscriptions.
+    static let appleMonthlyProductID = "com.lextures.ios.sub.monthly"
+    static let appleAnnualProductID = "com.lextures.ios.sub.annual"
+
+    /// Subscription product ids to request from StoreKit. Always includes the
+    /// known Monthly Access / Annual Access ids so a missing server mapping
+    /// cannot hide the plans from App Review.
+    static func appleSubscriptionProductIDs(from infos: [AppleIAPProductInfo]) -> [String] {
+        var seen = Set<String>()
+        var ids: [String] = []
+        for id in infos.filter(\.isSubscription).map(\.productId) + [appleMonthlyProductID, appleAnnualProductID] {
+            let trimmed = id.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !trimmed.isEmpty, seen.insert(trimmed).inserted else { continue }
+            ids.append(trimmed)
+        }
+        return ids
+    }
+
+    static func isMonthlySubscriptionProduct(id: String) -> Bool {
+        let lower = id.lowercased()
+        return lower.contains("monthly") || lower.hasSuffix(".month") || lower.contains(".sub.monthly")
+    }
+
+    static func isAnnualSubscriptionProduct(id: String) -> Bool {
+        let lower = id.lowercased()
+        return lower.contains("annual") || lower.contains("yearly") || lower.hasSuffix(".year")
+    }
+
     /// Prefer a course non-consumable product; fall back to first product id.
     static func preferredAppleProduct(
         from products: [AppleIAPProductInfo],

@@ -29,6 +29,10 @@ const (
 	AppleProductCoursePurchase      = "course_purchase"
 	AppleProductSubscriptionMonthly = "subscription_monthly"
 	AppleProductSubscriptionAnnual  = "subscription_annual"
+
+	// Default App Store product identifiers (bundle com.lextures.ios).
+	DefaultAppleMonthlyProductID = "com.lextures.ios.sub.monthly"
+	DefaultAppleAnnualProductID  = "com.lextures.ios.sub.annual"
 )
 
 // AppleIAPConfig is process configuration for StoreKit verification.
@@ -248,10 +252,18 @@ func AppleIAPConfigFrom(cfg config.Config) AppleIAPConfig {
 	if skip && !strings.EqualFold(strings.TrimSpace(cfg.AppEnv), "local") {
 		skip = false
 	}
+	monthly := strings.TrimSpace(cfg.AppleIAPMonthlyProductID)
+	if monthly == "" {
+		monthly = DefaultAppleMonthlyProductID
+	}
+	annual := strings.TrimSpace(cfg.AppleIAPAnnualProductID)
+	if annual == "" {
+		annual = DefaultAppleAnnualProductID
+	}
 	return AppleIAPConfig{
 		BundleID:            strings.TrimSpace(cfg.AppleIAPBundleID),
-		MonthlyProductID:    strings.TrimSpace(cfg.AppleIAPMonthlyProductID),
-		AnnualProductID:     strings.TrimSpace(cfg.AppleIAPAnnualProductID),
+		MonthlyProductID:    monthly,
+		AnnualProductID:     annual,
 		SkipSignatureVerify: skip,
 		RootCAPEM:           cfg.AppleIAPRootCAPEM,
 	}

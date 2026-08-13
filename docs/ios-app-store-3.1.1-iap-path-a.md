@@ -75,6 +75,29 @@ Billing feature flags (`ffStripeBilling` / `ffPaymentsEnabled`) still gate the b
 
 ---
 
+## App Review reply template (2.1(b) — locating In-App Purchases)
+
+Paste this when Review cannot find **Monthly Access** / **Annual Access**. Use a Homeschool demo account **without** an active subscription.
+
+> In-App Purchases are available in the Homeschool environment (self.lextures.com). They are not sold on school/institution hosts, where access is provisioned by the organization.
+>
+> **How to locate Monthly Access and Annual Access**
+> 1. Launch the app and choose **Homeschool** (not a school code).
+> 2. Sign in with the demo account in Review Notes (no active subscription).
+> 3. After about 5 seconds, the **Continue with Lextures** subscribe screen appears.
+> 4. **Monthly Access** and **Annual Access** are the two plan buttons on that screen. Tap either to complete the App Store sandbox purchase sheet.
+> 5. If you dismiss that screen: **Profile** (person tab) → **Billing** → **Subscribe**. The same two In-App Purchases appear.
+> 6. **Restore purchases** is on the subscribe screen and under Profile → Billing.
+>
+> **Product identifiers (sandbox-enabled auto-renewable subscriptions)**
+> - Monthly Access: `com.lextures.ios.sub.monthly`
+> - Annual Access: `com.lextures.ios.sub.annual`
+> - Subscription group: Lextures Access
+>
+> There is no storefront or device restriction. Products are loaded via StoreKit 2 from the Apple sandbox. Sign in with a sandbox Apple ID when prompted.
+>
+> Paid digital courses (non-consumable IAPs) are also available: open **Catalog** or **Marketplace**, open a paid course, tap **Purchase**.
+
 ## App Review reply template (3.1.1)
 
 > Digital courses and homeschool subscriptions are available for purchase **in the app using In-App Purchase** (StoreKit).  
@@ -121,7 +144,12 @@ SET apple_product_id = 'com.lextures.ios.course.demo'
 WHERE code = 'your-demo-course';
 ```
 
-3. Xcode scheme → **StoreKit Configuration** → `clients/ios/Configuration.storekit`.
+3. Xcode scheme → **StoreKit Configuration** → `clients/ios/Configuration.storekit`
+   (the **Lextures** and **Lextures-Device** Debug schemes already point at this file).
+   A Debug run from Xcode uses the local catalog. TestFlight / App Review use App Store
+   sandbox and need the **same product IDs** in App Store Connect (`com.lextures.ios.sub.monthly`
+   / `com.lextures.ios.sub.annual`). Reference names like “Lextures Monthly” are not product IDs.
+   Open each subscription → copy **Product ID**. If it does not match, StoreKit returns an empty list.
 
 4. Run app, purchase demo product, confirm entitlement in Profile → Billing / My Purchases.
 
