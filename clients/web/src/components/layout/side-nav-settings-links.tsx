@@ -35,6 +35,7 @@ import { oerLibraryEnabled } from '../../lib/oer-api'
 import { xapiEmissionFeatureEnabled } from '../../lib/platform-features'
 import {
   PERM_ACCOMMODATIONS_MANAGE,
+  PERM_MARKETING_CONTENT_VIEW,
   PERM_RBAC_MANAGE,
   PERM_TENANT_ORG_ROLES_MANAGE,
   PERM_TENANT_ORG_ROLES_VIEW,
@@ -66,7 +67,10 @@ export function SideNavSettingsLinks() {
     learnerProfileEnabled,
     ffFeedback,
     emailTemplateEditorEnabled,
+    ffMarketingContent,
   } = usePlatformFeatures()
+  const showMarketingContent =
+    ffMarketingContent && !permLoading && allows(PERM_MARKETING_CONTENT_VIEW)
   const location = useLocation()
   const view = settingsViewFromPathname(location.pathname)
   const aiSectionActive =
@@ -401,9 +405,9 @@ export function SideNavSettingsLinks() {
           )}
         </>
       )}
-      {(canManageRbac || (canManageAccommodations && ffCoCurricularTranscript)) && (
-        <SideNavAdminLinks />
-      )}
+      {(canManageRbac ||
+        (canManageAccommodations && ffCoCurricularTranscript) ||
+        showMarketingContent) && <SideNavAdminLinks />}
     </>
   )
 }

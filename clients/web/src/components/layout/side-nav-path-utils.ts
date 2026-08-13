@@ -114,6 +114,7 @@ export function isSettingsShellRoute(pathname: string): boolean {
     '/admin/evaluations/',
     '/admin/banners',
     '/admin/transcripts',
+    '/admin/marketing-content',
   ]
   return adminSettingsRoutes.some(
     (prefix) => pathname === prefix || pathname.startsWith(prefix),

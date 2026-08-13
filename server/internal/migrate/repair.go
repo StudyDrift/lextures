@@ -61,6 +61,10 @@ var demoChecksumRepairMigrations = []struct {
 	{438, "438_course_grade_levels_array.sql"},
 	// Idempotent ADD COLUMN IF NOT EXISTS + CREATE TABLE IF NOT EXISTS; MB.1 policy refined after first apply.
 	{460, "460_mobile_link_handling.sql"},
+	// Idempotent CREATE TABLE IF NOT EXISTS + INSERT ON CONFLICT DO NOTHING; home/dashboard route hints added after first apply (MC.13).
+	{483, "483_marketing_content_route_hints.sql"},
+	// Idempotent INSERT ON CONFLICT DO NOTHING; same home/dashboard hints added to the content seed after first apply.
+	{485, "485_marketing_content_seed.sql"},
 }
 
 // repairMigration289RenumberCollision fixes dev/demo DBs that applied grading_agent as v289

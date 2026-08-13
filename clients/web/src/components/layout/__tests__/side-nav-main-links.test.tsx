@@ -1,15 +1,18 @@
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { PERM_REPORTS_VIEW } from '../../../lib/rbac-api'
+import { PERM_MARKETING_CONTENT_VIEW, PERM_REPORTS_VIEW } from '../../../lib/rbac-api'
 import { ShellNavProvider } from '../shell-nav-context'
 import { SideNavMainLinks } from '../side-nav-main-links'
+
+const allowsMock = vi.fn((p: string) => p === PERM_REPORTS_VIEW)
 
 const platformFeaturesMock = vi.fn(() => ({
   accommodationsEngineEnabled: false,
   ffEportfolio: false,
   ragNotebookEnabled: true,
   ffCourseMarketplace: false,
+  ffMarketingContent: false,
 }))
 
 vi.mock('../../../context/use-inbox-unread', () => ({
@@ -18,7 +21,7 @@ vi.mock('../../../context/use-inbox-unread', () => ({
 
 vi.mock('../../../context/use-permissions', () => ({
   usePermissions: () => ({
-    allows: (p: string) => p === PERM_REPORTS_VIEW,
+    allows: (p: string) => allowsMock(p),
     loading: false,
   }),
 }))
@@ -29,11 +32,13 @@ vi.mock('../../../context/platform-features-context', () => ({
 
 describe('SideNavMainLinks', () => {
   beforeEach(() => {
+    allowsMock.mockImplementation((p: string) => p === PERM_REPORTS_VIEW)
     platformFeaturesMock.mockReturnValue({
       accommodationsEngineEnabled: false,
       ffEportfolio: false,
       ragNotebookEnabled: true,
       ffCourseMarketplace: false,
+      ffMarketingContent: false,
     })
   })
 
@@ -59,6 +64,7 @@ describe('SideNavMainLinks', () => {
       ffEportfolio: false,
       ragNotebookEnabled: false,
       ffCourseMarketplace: false,
+      ffMarketingContent: false,
     })
 
     render(
@@ -78,6 +84,7 @@ describe('SideNavMainLinks', () => {
       ffEportfolio: true,
       ragNotebookEnabled: true,
       ffCourseMarketplace: false,
+      ffMarketingContent: false,
     })
 
     render(
@@ -97,6 +104,7 @@ describe('SideNavMainLinks', () => {
       ffEportfolio: false,
       ragNotebookEnabled: true,
       ffCourseMarketplace: true,
+      ffMarketingContent: false,
     })
 
     render(
@@ -117,6 +125,7 @@ describe('SideNavMainLinks', () => {
       ffEportfolio: false,
       ragNotebookEnabled: true,
       ffCourseMarketplace: false,
+      ffMarketingContent: false,
     })
 
     render(
@@ -129,5 +138,49 @@ describe('SideNavMainLinks', () => {
 
     expect(screen.queryByRole('link', { name: /^marketplace$/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: /^my purchases$/i })).not.toBeInTheDocument()
+  })
+
+  it('shows Marketing Content when the workspace flag and view permission are on', () => {
+    allowsMock.mockImplementation((p: string) => p === PERM_MARKETING_CONTENT_VIEW)
+    platformFeaturesMock.mockReturnValue({
+      accommodationsEngineEnabled: false,
+      ffEportfolio: false,
+      ragNotebookEnabled: true,
+      ffCourseMarketplace: false,
+      ffMarketingContent: true,
+    })
+
+    render(
+      <MemoryRouter>
+        <ShellNavProvider>
+          <SideNavMainLinks />
+        </ShellNavProvider>
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByRole('link', { name: /^marketing content$/i })).toHaveAttribute(
+      'href',
+      '/admin/marketing-content',
+    )
+  })
+
+  it('hides Marketing Content when the workspace flag is on but the viewer lacks permission', () => {
+    platformFeaturesMock.mockReturnValue({
+      accommodationsEngineEnabled: false,
+      ffEportfolio: false,
+      ragNotebookEnabled: true,
+      ffCourseMarketplace: false,
+      ffMarketingContent: true,
+    })
+
+    render(
+      <MemoryRouter>
+        <ShellNavProvider>
+          <SideNavMainLinks />
+        </ShellNavProvider>
+      </MemoryRouter>,
+    )
+
+    expect(screen.queryByRole('link', { name: /^marketing content$/i })).not.toBeInTheDocument()
   })
 })
