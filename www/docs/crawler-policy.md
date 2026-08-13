@@ -13,6 +13,24 @@ If a future licensing decision requires blocking a job class (e.g. training),
 change `allow: false` on the relevant agents in `src/lib/crawler-policy.ts` and
 ship a PR. The `rationale` field is required so the policy stays auditable.
 
+### Cloudflare edge
+
+`lextures.com` sits behind Cloudflare in front of GitHub Pages. Two controls
+must stay aligned with this file:
+
+1. **Managed robots.txt** — Cloudflare may prepend a `# BEGIN Cloudflare
+   Managed content` block that `Disallow: /`s training agents (`ClaudeBot`,
+   `GPTBot`, …). Turn that managed robots injection / “Block AI bots” robots
+   rewrite **off** (or allow the agents we list here). Otherwise the public
+   `robots.txt` contradicts the origin policy below the marker.
+2. **AI bot / Bot Fight policies** — allow at least `GPTBot`,
+   `OAI-SearchBot`, `ClaudeBot`, `Claude-SearchBot`, `PerplexityBot`, and the
+   `*-User` fetch agents. A `robots.txt` Allow is useless if the CDN returns
+   403 before origin.
+
+Post-deploy `seo:smoke` evaluates the origin policy (stripping the managed
+preamble) and warns when CI IPs are edge-blocked while spoofing bot UAs.
+
 ## Three crawler jobs
 
 | Job | Meaning | Examples |
