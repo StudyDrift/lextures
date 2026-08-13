@@ -28,21 +28,29 @@ async function apiCreateAdaptiveUnit(
   courseCode: string,
   body: Record<string, unknown>,
 ): Promise<{ id: string }> {
-  const res = await fetch(
-    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/adaptive-content/units`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
+  const deadline = Date.now() + 15_000
+  for (;;) {
+    const res = await fetch(
+      `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/adaptive-content/units`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(body),
       },
-      body: JSON.stringify(body),
-    },
-  )
-  if (!res.ok) {
-    throw new Error(`Create ACE unit failed (${res.status}): ${await res.text()}`)
+    )
+    if (res.ok) {
+      return res.json() as Promise<{ id: string }>
+    }
+    const text = await res.text()
+    const killSwitchBusy = res.status === 503 && text.includes('kill-switch engaged')
+    if (!killSwitchBusy || Date.now() >= deadline) {
+      throw new Error(`Create ACE unit failed (${res.status}): ${text}`)
+    }
+    await new Promise((r) => setTimeout(r, 400))
   }
-  return res.json() as Promise<{ id: string }>
 }
 
 function bootstrapGlobalAdmin(email: string) {
