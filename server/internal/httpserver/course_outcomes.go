@@ -12,6 +12,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/courseroles"
+	"github.com/lextures/lextures/server/internal/httpserver/kernel"
 	"github.com/lextures/lextures/server/internal/models/courseoutcomesapi"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/courseoutcomes"
@@ -323,128 +324,65 @@ func (d Deps) handleCourseOutcomePatch() http.HandlerFunc {
 
 // handleCourseOutcomesPost is POST /api/v1/courses/{course_code}/outcomes.
 func (d Deps) handleCourseOutcomesPost() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		courseCode, viewer, ok := d.requireCourseAccess(w, r)
-		if !ok {
-			return
-		}
-		perm := "course:" + courseCode + ":item:create"
-		hasPerm, err := courseroles.UserHasPermission(r.Context(), d.Pool, viewer, perm)
-		if err != nil {
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")
-			return
-		}
-		if !hasPerm {
-			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "You do not have permission to edit outcomes.")
-			return
-		}
-
-		var body struct {
-			Title       string `json:"title"`
-			Description string `json:"description"`
-		}
-		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
-			return
-		}
-		title := strings.TrimSpace(body.Title)
-		if title == "" {
-			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Title is required.")
-			return
-		}
-		desc := strings.TrimSpace(body.Description)
-
-		ctx := r.Context()
-		cid, err := course.GetIDByCourseCode(ctx, d.Pool, courseCode)
-		if err != nil {
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course.")
-			return
-		}
-		if cid == nil {
-			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
-			return
-		}
-
-		row, err := courseoutcomes.InsertOutcome(ctx, d.Pool, *cid, title, desc)
-		if err != nil {
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to create outcome.")
-			return
-		}
-
-		out := learningOutcomeRowToAPI(*row)
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		w.WriteHeader(http.StatusCreated)
-		_ = json.NewEncoder(w).Encode(out)
+	type in struct {
+		Title       string `json:"title"`
+		Description string `json:"description"`
 	}
+	return kernel.POST(d.kernelAccess(),
+		kernel.RequireCoursePermission("item:create", "You do not have permission to edit outcomes."),
+		func(ctx *kernel.Ctx, body in) (courseOutcomeAPI, error) {
+			title := strings.TrimSpace(body.Title)
+			if title == "" {
+				return courseOutcomeAPI{}, kernel.InvalidInput("Title is required.")
+			}
+			row, err := courseoutcomes.InsertOutcome(ctx, d.Pool, ctx.CourseID, title, strings.TrimSpace(body.Description))
+			if err != nil {
+				return courseOutcomeAPI{}, kernel.Internal("Failed to create outcome.", err)
+			}
+			return learningOutcomeRowToAPI(*row), nil
+		},
+		kernel.WithStatus(http.StatusCreated),
+		kernel.WithName("POST /api/v1/courses/{course_code}/outcomes"),
+		// Preserve pre-toolkit decode: no Content-Type check, unknown fields ignored.
+		kernel.WithDecodeOptions(kernel.DecodeOptions{
+			MaxBytes:               kernel.DefaultMaxBody,
+			InvalidJSONMessage:     "Invalid JSON body.",
+			RequireJSONContentType: false,
+		}),
+	)
 }
 
 // handleCourseOutcomesList is GET /api/v1/courses/{course_code}/outcomes.
 func (d Deps) handleCourseOutcomesList() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		courseCode, viewer, ok := d.requireCourseAccess(w, r)
-		if !ok {
-			return
-		}
-		perm := "course:" + courseCode + ":item:create"
-		hasPerm, err := courseroles.UserHasPermission(r.Context(), d.Pool, viewer, perm)
-		if err != nil {
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")
-			return
-		}
-		if !hasPerm {
-			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "You do not have permission to view outcomes.")
-			return
-		}
-
-		ctx := r.Context()
-		cid, err := course.GetIDByCourseCode(ctx, d.Pool, courseCode)
-		if err != nil {
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course.")
-			return
-		}
-		if cid == nil {
-			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
-			return
-		}
-
-		rows, err := courseoutcomes.ListOutcomes(ctx, d.Pool, *cid)
-		if err != nil {
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load outcomes.")
-			return
-		}
-
-		students, err := enrollment.ListStudentUsersForCourseCode(ctx, d.Pool, courseCode, nil)
-		if err != nil {
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load enrollments.")
-			return
-		}
-		enrolled := int32(len(students))
-
-		allLinks, err := courseoutcomes.ListLinksForCourse(ctx, d.Pool, *cid)
-		if err != nil {
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load outcome links.")
-			return
-		}
-		byOutcome := groupOutcomeLinksByOutcome(allLinks)
-
-		outcomes := make([]courseOutcomeAPI, 0, len(rows))
-		for i := range rows {
-			linksForO := byOutcome[rows[i].ID]
-			apiO, err := buildCourseOutcomeAPI(ctx, d.Pool, *cid, rows[i], linksForO, enrolled)
+	return kernel.GET(d.kernelAccess(),
+		kernel.RequireCoursePermission("item:create", "You do not have permission to view outcomes."),
+		func(ctx *kernel.Ctx) (courseOutcomesListResponse, error) {
+			rows, err := courseoutcomes.ListOutcomes(ctx, d.Pool, ctx.CourseID)
 			if err != nil {
-				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to build outcomes response.")
-				return
+				return courseOutcomesListResponse{}, kernel.Internal("Failed to load outcomes.", err)
 			}
-			outcomes = append(outcomes, apiO)
-		}
-
-		out := courseOutcomesListResponse{
-			EnrolledLearners: len(students),
-			Outcomes:         outcomes,
-		}
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		_ = json.NewEncoder(w).Encode(out)
-	}
+			students, err := enrollment.ListStudentUsersForCourseCode(ctx, d.Pool, ctx.CourseCode, nil)
+			if err != nil {
+				return courseOutcomesListResponse{}, kernel.Internal("Failed to load enrollments.", err)
+			}
+			enrolled := int32(len(students))
+			allLinks, err := courseoutcomes.ListLinksForCourse(ctx, d.Pool, ctx.CourseID)
+			if err != nil {
+				return courseOutcomesListResponse{}, kernel.Internal("Failed to load outcome links.", err)
+			}
+			byOutcome := groupOutcomeLinksByOutcome(allLinks)
+			outcomes := make([]courseOutcomeAPI, 0, len(rows))
+			for i := range rows {
+				apiO, err := buildCourseOutcomeAPI(ctx, d.Pool, ctx.CourseID, rows[i], byOutcome[rows[i].ID], enrolled)
+				if err != nil {
+					return courseOutcomesListResponse{}, kernel.Internal("Failed to build outcomes response.", err)
+				}
+				outcomes = append(outcomes, apiO)
+			}
+			return courseOutcomesListResponse{EnrolledLearners: len(students), Outcomes: outcomes}, nil
+		},
+		kernel.WithName("GET /api/v1/courses/{course_code}/outcomes"),
+	)
 }
 
 // handleCourseOutcomeSubOutcomesPost is POST /api/v1/courses/{course_code}/outcomes/{outcome_id}/sub-outcomes.

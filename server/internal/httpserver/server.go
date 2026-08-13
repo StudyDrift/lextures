@@ -18,6 +18,7 @@ import (
 	"github.com/lextures/lextures/server/internal/config"
 	"github.com/lextures/lextures/server/internal/feedevents"
 	"github.com/lextures/lextures/server/internal/gradingagentqueue"
+	"github.com/lextures/lextures/server/internal/httpserver/kernel"
 	"github.com/lextures/lextures/server/internal/logging"
 	"github.com/lextures/lextures/server/internal/lti"
 	"github.com/lextures/lextures/server/internal/notifevents"
@@ -166,6 +167,9 @@ func NewHandler(d Deps) http.Handler {
 	if d.Telemetry != nil {
 		metrics = d.Telemetry.Metrics
 	}
+	kernel.SetErrorObserver(func(code, routeClass string, status int) {
+		telemetry.RecordMappedAPIError(code, routeClass, status)
+	})
 	if health.metrics == nil && metrics != nil {
 		health.metrics = metrics
 	}

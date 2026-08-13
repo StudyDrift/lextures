@@ -1,0 +1,3 @@
+# TD.7 FR-11 — toolkit routes declared kernel.Public(). Shrink only.
+# One repo-relative path or path:line per line.
+# Empty means no public toolkit routes (fail-closed default).

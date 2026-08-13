@@ -1,6 +1,6 @@
 # TD.7 — Handler Toolkit: Typed I/O, Guards & Error Mapping
 
-> Implementation plan. Source: technical-debt static analysis, 2026-07-25. Folder overview: [README](README.md).
+> Implementation plan — **completed 2026-08-12**. Source: technical-debt static analysis, 2026-07-25. Programme overview: [tech_debt README](../../plan/tech_debt/README.md).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Technical Debt Remediation |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / HS (internal) |
-| **Status (today)** | THIN |
+| **Status (today)** | DONE (2026-08-12). Toolkit shipped in `server/internal/httpserver/kernel`; adoption is incremental. Dogfood: course outcomes GET/POST. |
 | **Estimated effort** | M (2–4w) for the toolkit; adoption is continuous |
 | **Owner (proposed)** | Backend platform team |
 | **Depends on** | TD.1, TD.5 |
@@ -206,7 +206,10 @@ grep -rho 'requireCourseAccess' internal/httpserver/*.go | wc -l   # 329
 ## 19. References
 
 - `server/internal/apierr/apierr.go` — existing error writer
-- `server/internal/httpserver/course_outcomes.go:334` — representative hand-rolled handler
+- `server/internal/httpserver/course_outcomes.go` — dogfood conversion (GET/POST outcomes)
 - `server/internal/courseroles` — permission checks wrapped by guards
 - `clients/web/src/lib/errors.ts` — client-side envelope parsing
-- Related plans: [TD.1](../../completed/tech_debt/TD.1-refactoring-safety-net.md), [TD.5](TD.5-remove-unreachable-method-dispatch.md), [TD.6](TD.6-decompose-httpserver-package.md), [TD.3](../../completed/tech_debt/TD.3-repair-and-verify-openapi-contract.md)
+- Related plans: [TD.1](TD.1-refactoring-safety-net.md), [TD.5](TD.5-remove-unreachable-method-dispatch.md), [TD.6](../../plan/tech_debt/TD.6-decompose-httpserver-package.md), [TD.3](TD.3-repair-and-verify-openapi-contract.md)
+- Toolkit: `server/internal/httpserver/kernel`
+- Conventions: [ARCHITECTURE_CONVENTIONS.md §6c](../../ARCHITECTURE_CONVENTIONS.md)
+- Unguarded-route ratchet: `scripts/check-unguarded-routes.sh`

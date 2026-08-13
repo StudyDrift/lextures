@@ -161,6 +161,13 @@ func RecordPinnedSettingsReject(reason string) {
 	}
 }
 
+// RecordMappedAPIError records a toolkit-mapped API error (TD.7).
+func RecordMappedAPIError(code, routeClass string, status int) {
+	if m := defaultMetrics.Load(); m != nil {
+		m.RecordMappedAPIError(code, routeClass, status)
+	}
+}
+
 // RecordAIProvider records an AI provider call on the default instance
 // (plan 16.7 / 17.7 §11). No-op when telemetry is not initialised.
 func RecordAIProvider(provider, model, outcome string, seconds, costDollars float64) {
