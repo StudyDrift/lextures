@@ -42,6 +42,8 @@ describe('isSettingsShellRoute', () => {
     expect(isSettingsShellRoute('/library/org-1')).toBe(true)
     expect(isSettingsShellRoute('/admin/banners')).toBe(true)
     expect(isSettingsShellRoute('/admin/transcripts')).toBe(true)
+    expect(isSettingsShellRoute('/admin/marketing-content')).toBe(true)
+    expect(isSettingsShellRoute('/admin/marketing-content/new')).toBe(true)
   })
 
   it('does not match main-shell learner routes', () => {

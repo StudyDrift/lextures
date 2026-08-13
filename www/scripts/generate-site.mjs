@@ -957,7 +957,8 @@ async function main() {
     }
   }
 
-  const previousContentPaths = CONTENT_SOURCE === 'api' && contentSnapshot.fallbackUsed
+  const apiContentMissing = CONTENT_SOURCE === 'api' && !(contentSnapshot.articles || []).length
+  const previousContentPaths = CONTENT_SOURCE === 'api' && (contentSnapshot.fallbackUsed || apiContentMissing)
     ? await discoverPreviousContentPaths() : []
   const extraContentPaths = (contentSnapshot.articles || [])
     .filter(article => article.path && article.locale && article.locale !== 'en')
@@ -976,6 +977,7 @@ async function main() {
   REDIRECTS = flattenAndValidateRedirects(
     [...concrete.filter(route => route.path !== '/404').map(route => route.path), ...previousContentPaths],
     REDIRECTS,
+    { onMissingTarget: apiContentMissing ? 'omit' : 'throw' },
   )
   // Attach priority from manifest where present
   for (const route of concrete) {

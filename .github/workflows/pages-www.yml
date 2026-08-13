@@ -29,7 +29,10 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages-www
+  # Production deploys share one group so a new main/cron/dispatch run
+  # replaces an in-flight publish. PR builds must not share that group —
+  # the hourly catalog cron was cancelling pull_request "build" checks.
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'production' }}
   cancel-in-progress: true
 
 jobs:

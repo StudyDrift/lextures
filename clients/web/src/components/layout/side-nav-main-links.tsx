@@ -15,6 +15,7 @@ import {
   LayoutDashboard,
   Library,
   ListTodo,
+  Newspaper,
   Route,
   RotateCcw,
   Settings,
@@ -30,6 +31,7 @@ import { usePlatformFeatures } from '../../context/platform-features-context'
 import { usePermissions } from '../../context/use-permissions'
 import {
   PERM_ACCOMMODATIONS_MANAGE,
+  PERM_MARKETING_CONTENT_VIEW,
   PERM_PARENT_DASHBOARD,
   PERM_PARENT_LINKS_MANAGE,
   PERM_RBAC_MANAGE,
@@ -63,6 +65,7 @@ export function SideNavMainLinks() {
     ffConferenceScheduling,
     ragNotebookEnabled,
     ffParentPortal,
+    ffMarketingContent,
   } = usePlatformFeatures()
 
   const canViewReports = !permLoading && allows(PERM_REPORTS_VIEW)
@@ -72,6 +75,8 @@ export function SideNavMainLinks() {
     !permLoading &&
     ffParentPortal &&
     (allows(PERM_PARENT_LINKS_MANAGE) || allows(PERM_RBAC_MANAGE))
+  const canViewMarketingContent =
+    !permLoading && ffMarketingContent && allows(PERM_MARKETING_CONTENT_VIEW)
 
   const unreadBadge = unreadInboxCount > 0 && (
     <span
@@ -237,7 +242,7 @@ export function SideNavMainLinks() {
         </>
       ) : null}
 
-      {(canViewReports || canManageAccommodations || canAssignParents) ? (
+      {(canViewReports || canManageAccommodations || canAssignParents || canViewMarketingContent) ? (
         <>
           <SideNavSectionLabel>Administration</SideNavSectionLabel>
           {canAssignParents ? (
@@ -253,6 +258,11 @@ export function SideNavMainLinks() {
           {canManageAccommodations ? (
             <SideNavLink to="/admin/accommodations" icon={<Accessibility className="h-5 w-5" />}>
               Accommodations
+            </SideNavLink>
+          ) : null}
+          {canViewMarketingContent ? (
+            <SideNavLink to="/admin/marketing-content" icon={<Newspaper className="h-5 w-5" />}>
+              Marketing Content
             </SideNavLink>
           ) : null}
           {canViewReports ? (
