@@ -16,6 +16,7 @@ struct HomeschoolSubscribePaywallView: View {
     @State private var loading = true
     @State private var purchasing = false
     @State private var errorMessage: String?
+    @State private var requestedProductIDs: [String] = []
 
     var body: some View {
         ZStack {
@@ -81,6 +82,19 @@ struct HomeschoolSubscribePaywallView: View {
                                     .font(.subheadline)
                                     .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
                                     .multilineTextAlignment(.center)
+                                #if DEBUG
+                                if !requestedProductIDs.isEmpty {
+                                    Text(requestedProductIDs.joined(separator: "\n"))
+                                        .font(.caption.monospaced())
+                                        .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                                        .multilineTextAlignment(.center)
+                                }
+                                #endif
+                                Button(L.text("mobile.billing.paywall.retry")) {
+                                    Task { await loadProducts() }
+                                }
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(LexturesTheme.primary)
                             }
                         }
                     }
@@ -175,16 +189,21 @@ struct HomeschoolSubscribePaywallView: View {
         do {
             let response = try await LMSAPI.fetchAppleIAPProducts(courseId: nil, accessToken: token)
             let infos = response.products ?? []
-            let ids = infos.filter(\.isSubscription).map(\.productId)
-            let loaded = try await StoreKitPurchaseService.loadProducts(ids: ids.isEmpty
-                ? [
-                    "com.lextures.ios.sub.monthly",
-                    "com.lextures.ios.sub.annual",
-                ]
-                : ids)
+            let ids = BillingLogic.appleSubscriptionProductIDs(from: infos)
+            requestedProductIDs = ids
+            let loaded = try await StoreKitPurchaseService.loadProducts(ids: ids)
+            #if DEBUG
+            print("IAP requested \(ids) loaded \(loaded.map(\.id))")
+            #endif
             products = loaded
-            monthly = loaded.first { $0.id.contains("monthly") || $0.subscription?.subscriptionPeriod.unit == .month }
-            annual = loaded.first { $0.id.contains("annual") || $0.subscription?.subscriptionPeriod.unit == .year }
+            monthly = loaded.first {
+                BillingLogic.isMonthlySubscriptionProduct(id: $0.id)
+                    || $0.subscription?.subscriptionPeriod.unit == .month
+            }
+            annual = loaded.first {
+                BillingLogic.isAnnualSubscriptionProduct(id: $0.id)
+                    || $0.subscription?.subscriptionPeriod.unit == .year
+            }
             if monthly == nil { monthly = loaded.first }
             if annual == nil, loaded.count > 1 { annual = loaded.dropFirst().first }
         } catch {

@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/lextures/lextures/server/internal/config"
 )
 
 func TestDecodeAppleTransactionJWS_SkipVerify(t *testing.T) {
@@ -98,5 +100,22 @@ func TestAppleIAPConfigured(t *testing.T) {
 	}
 	if !AppleIAPConfigured(AppleIAPConfig{BundleID: "com.lextures.ios"}) {
 		t.Fatal("bundle only should be true")
+	}
+}
+
+func TestListAppleProductsForCourse_EmptyEnvUsesDefaultsWhenMapped(t *testing.T) {
+	cfg := AppleIAPConfigFrom(config.Config{})
+	if cfg.MonthlyProductID != DefaultAppleMonthlyProductID {
+		t.Fatalf("monthly default: %q", cfg.MonthlyProductID)
+	}
+	if cfg.AnnualProductID != DefaultAppleAnnualProductID {
+		t.Fatalf("annual default: %q", cfg.AnnualProductID)
+	}
+	list, err := ListAppleProductsForCourse(t.Context(), nil, cfg, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(list) != 2 {
+		t.Fatalf("len=%d want 2", len(list))
 	}
 }

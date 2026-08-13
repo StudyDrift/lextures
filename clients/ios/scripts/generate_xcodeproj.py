@@ -567,6 +567,9 @@ def main() -> None:
             ReferencedContainer = "container:{APP_NAME}.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <StoreKitConfigurationFileReference
+         identifier = "../../Configuration.storekit">
+      </StoreKitConfigurationFileReference>
    </LaunchAction>
    <TestAction
       buildConfiguration = "Debug"
