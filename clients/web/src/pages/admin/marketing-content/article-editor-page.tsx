@@ -6,13 +6,13 @@ import { MarkdownBodyEditor } from '../../../components/editor/block-editor'
 import { ArticleMetadataPanel } from '../../../components/marketing-content/editor/article-metadata-panel'
 import { ArticlePreview } from '../../../components/marketing-content/editor/article-preview'
 import { TranslationSourcePane } from '../../../components/marketing-content/editor/translation-source-pane'
-import { directives, slugify } from '../../../components/marketing-content/editor/article-editor-utils'
+import { directives, formatQualityScore, isBlockingFinding, lintMetadata, scoreBarClass, scoreMeterPercent, scoreToneClass, slugify } from '../../../components/marketing-content/editor/article-editor-utils'
 import { BuildArticleWithAiModal } from '../../../components/marketing-content/editor/build-article-with-ai-modal'
 import { RevisionDrawer } from '../../../components/marketing-content/editor/revision-drawer'
 import { Badge, Button, Checkbox, Dialog, EmptyState, InlineAlert, Input, Menu, SegmentedControl, Skeleton, Textarea, type MenuItem } from '../../../components/ui'
 import { usePermissions } from '../../../context/use-permissions'
 import { generateMarketingArticle, type MarketingArticleAIDraft } from '../../../lib/marketing-content-ai-api'
-import { createMarketingArticle, createMarketingPreviewToken, getMarketingArticle, lintMarketingArticle, listMarketingAuthors, listMarketingCategories, listMarketingKnownPaths, MarketingConflictError, restoreMarketingRevision, transitionMarketingArticle, updateMarketingArticle, type MarketingArticle, type MarketingArticleWrite, type MarketingFinding } from '../../../lib/marketing-content-api'
+import { createMarketingArticle, createMarketingPreviewToken, getMarketingArticle, lintMarketingArticle, listMarketingAuthors, listMarketingCategories, listMarketingKnownPaths, MarketingConflictError, MarketingValidationError, restoreMarketingRevision, transitionMarketingArticle, updateMarketingArticle, type MarketingArticle, type MarketingArticleWrite, type MarketingFinding } from '../../../lib/marketing-content-api'
 import { createMarketingTranslation, listMarketingLocales, listMarketingTranslations, markMarketingTranslationSynced, type MarketingLocale, type MarketingTranslationLink } from '../../../lib/marketing-content-i18n-api'
 import { PERM_MARKETING_CONTENT_AUTHOR, PERM_MARKETING_CONTENT_PUBLISH, PERM_MARKETING_CONTENT_REVIEW } from '../../../lib/rbac-api'
 import { resolveMarketingPreviewUrl } from '../../../lib/marketing-site'
@@ -155,7 +155,25 @@ export default function ArticleEditorPage() {
   useEffect(() => {
     if (isNew) return
     const controller = new AbortController()
-    void getMarketingArticle(articleId, controller.signal).then((value) => { setArticle(value); setLoading(false); const cached = sessionStorage.getItem(`mc:draft:${articleId}`); if (cached) { try { const cachedArticle = JSON.parse(cached) as MarketingArticle; if (cachedArticle.revisionNo === value.revisionNo) setRecovery(cachedArticle) } catch { /* ignore invalid recovery */ } } }).catch((e) => { setSaveError(String(e)); setLoading(false) })
+    void getMarketingArticle(articleId, controller.signal).then((value) => {
+      setArticle(value)
+      setLoading(false)
+      const report = value.qualityReport
+      if (report) {
+        setFindings(report.findings ?? [])
+        if (typeof report.score === 'number') setScore(report.score)
+        else if (typeof value.qualityScore === 'number') setScore(value.qualityScore)
+      } else if (typeof value.qualityScore === 'number') {
+        setScore(value.qualityScore)
+      }
+      const cached = sessionStorage.getItem(`mc:draft:${articleId}`)
+      if (cached) {
+        try {
+          const cachedArticle = JSON.parse(cached) as MarketingArticle
+          if (cachedArticle.revisionNo === value.revisionNo) setRecovery(cachedArticle)
+        } catch { /* ignore invalid recovery */ }
+      }
+    }).catch((e) => { setSaveError(String(e)); setLoading(false) })
     return () => controller.abort()
   }, [articleId, isNew])
   useEffect(() => {
@@ -174,12 +192,16 @@ export default function ArticleEditorPage() {
   }, [article.sourceArticleId])
 
   useEffect(() => {
-    if (!dirty || !article.bodyMd) return
-    if (!isNew) sessionStorage.setItem(`mc:draft:${articleId}`, JSON.stringify(article))
+    // Lint on load and while editing so Publish sees blocking findings before the API rejects.
+    if (!article.bodyMd && isNew) return
+    if (dirty && !isNew) sessionStorage.setItem(`mc:draft:${articleId}`, JSON.stringify(article))
     const timer = window.setTimeout(() => {
       setValidating(true)
-      void lintMarketingArticle({ kind: article.kind, bodyMd: article.bodyMd, metadata: writePayload(article) }).then((report) => { setFindings(report.findings ?? []); setScore(report.score) }).catch(() => undefined).finally(() => setValidating(false))
-    }, 800)
+      void lintMarketingArticle({ kind: article.kind, bodyMd: article.bodyMd, metadata: lintMetadata(article) })
+        .then((report) => { setFindings(report.findings ?? []); setScore(report.score) })
+        .catch(() => undefined)
+        .finally(() => setValidating(false))
+    }, dirty ? 800 : 0)
     return () => window.clearTimeout(timer)
   }, [article, articleId, dirty, isNew])
 
@@ -210,13 +232,34 @@ export default function ArticleEditorPage() {
     window.addEventListener('keydown', keys); return () => window.removeEventListener('keydown', keys)
   }, [saveArticle])
 
-  const blocking = findings.filter((v) => v.severity === 'error')
-  const warnings = findings.filter((v) => v.severity !== 'error')
+  const blocking = findings.filter((v) => isBlockingFinding(v.severity))
+  const warnings = findings.filter((v) => !isBlockingFinding(v.severity))
   const doTransition = async () => {
     if (!transition) return
     const saved = dirty ? await saveArticle() : article
     if (!saved?.id) return
-    try { const next = await transitionMarketingArticle(saved.id, transition, saved.revisionNo, { note: actionNote, lintOverride, ...(transition === 'schedule' && scheduledFor ? { scheduledFor: new Date(scheduledFor).toISOString() } : {}) }); setArticle((old) => ({ ...old, ...next })); setTransition(null); setActionNote(''); setLintOverride(false); setScheduledFor('') } catch (e) { setSaveError(String(e)); setTransition(null) }
+    try {
+      const next = await transitionMarketingArticle(saved.id, transition, saved.revisionNo, {
+        note: actionNote,
+        lintOverride,
+        ...(transition === 'schedule' && scheduledFor ? { scheduledFor: new Date(scheduledFor).toISOString() } : {}),
+      })
+      setArticle((old) => ({ ...old, ...next }))
+      setTransition(null)
+      setActionNote('')
+      setLintOverride(false)
+      setScheduledFor('')
+    } catch (e) {
+      if (e instanceof MarketingValidationError) {
+        setFindings(e.findings)
+        if (e.score != null) setScore(e.score)
+        setFindingsOpen(true)
+        setSaveError(`${e.message} Open Quality below for the blocking findings.`)
+      } else {
+        setSaveError(e instanceof Error ? e.message : String(e))
+      }
+      setTransition(null)
+    }
   }
   const openPreview = async () => {
     const saved = dirty ? await saveArticle() : article
@@ -243,7 +286,10 @@ export default function ArticleEditorPage() {
   }
   const insertDirective = (markdown: string) => {
     if (simple || !editorRef.current) patch({ bodyMd: `${article.bodyMd}${article.bodyMd.endsWith('\n') || !article.bodyMd ? '' : '\n\n'}${markdown}` })
-    else editorRef.current.commands.insertContent(markdown)
+    else {
+      // TipTap defaults to HTML insertion; markdown contentType keeps ::: directives intact.
+      editorRef.current.commands.insertContent(markdown, { contentType: 'markdown' })
+    }
   }
   const restore = async (no: number) => { const next = await restoreMarketingRevision(article.id, no, article.revisionNo); setArticle(next); setDirty(false); setRevisionsOpen(false) }
   const addTranslation = async (locale: string) => {
@@ -273,8 +319,8 @@ export default function ArticleEditorPage() {
   const status = article.liveStatus || article.status
   const statusTone = status === 'published' ? 'success' : status === 'scheduled' ? 'info' : status === 'in_review' ? 'warning' : 'neutral'
   const saveState = saving ? 'Saving…' : dirty ? 'Unsaved changes' : lastSaved ? `Saved ${lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : article.updatedAt ? `Saved ${new Date(article.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 'Not saved'
-  const scoreTone = score == null ? 'text-fg-muted' : score >= 80 ? 'text-success-fg' : score >= 50 ? 'text-warning-fg' : 'text-danger-fg'
-  const scoreBar = score == null ? 'bg-border-strong' : score >= 80 ? 'bg-success-fg' : score >= 50 ? 'bg-warning-fg' : 'bg-danger-fg'
+  const scoreTone = scoreToneClass(score)
+  const scoreBar = scoreBarClass(score)
   // The 'details' view is mobile-only, and 'split' is desktop-only; map each to
   // the nearest equivalent so a viewport change never leaves an empty canvas.
   const desktopSplit = view === 'split' || view === 'preview'
@@ -341,7 +387,7 @@ export default function ArticleEditorPage() {
     </div>
 
     <div className="px-4 pt-4 sm:px-6">
-      {saveError ? <InlineAlert tone="danger" className="mb-3"><span className="flex flex-wrap items-center gap-2"><strong>Could not save.</strong> {saveError}<Button size="sm" variant="secondary" onClick={() => void saveArticle()}>Retry</Button></span></InlineAlert> : null}
+      {saveError ? <InlineAlert tone="danger" className="mb-3"><span className="flex flex-wrap items-center gap-2"><strong>Action failed.</strong> {saveError}{dirty ? <Button size="sm" variant="secondary" onClick={() => void saveArticle()}>Retry save</Button> : null}</span></InlineAlert> : null}
       {recovery ? <InlineAlert tone="warning" className="mb-3"><span className="flex flex-wrap items-center gap-2"><strong>Unsaved browser draft found.</strong><Button size="sm" onClick={() => { setArticle(recovery); setRecovery(null); setDirty(true) }}>Recover</Button><Button size="sm" variant="secondary" onClick={() => { sessionStorage.removeItem(`mc:draft:${articleId}`); setRecovery(null) }}>Discard</Button></span></InlineAlert> : null}
     </div>
 
@@ -363,9 +409,9 @@ export default function ArticleEditorPage() {
     <section id="article-findings" aria-live="polite" className="sticky bottom-0 z-20 border-t border-border-default bg-surface-raised/95 backdrop-blur supports-[backdrop-filter]:bg-surface-raised/80">
       <Button type="button" variant="ghost" aria-expanded={findingsOpen} onClick={() => setFindingsOpen((v) => !v)} className="flex h-auto min-h-6 w-full items-center justify-start gap-3 rounded-none px-4 py-2.5 text-start sm:px-6">
         <span className="text-xs font-medium text-fg-muted">Quality</span>
-        <span aria-hidden className="h-1.5 w-24 overflow-hidden rounded-full bg-surface-sunken sm:w-40"><span className={`block h-full rounded-full motion-safe:transition-[width] ${scoreBar}`} style={{ width: `${Math.max(0, Math.min(100, score ?? 0))}%` }} /></span>
-        <span className={`text-sm font-semibold tabular-nums ${scoreTone}`}>{validating ? 'checking…' : score == null ? '—' : Math.round(score)}</span>
-        <span className="hidden text-xs text-fg-muted sm:inline">/ 100 · publish floor 80</span>
+        <span aria-hidden className="h-1.5 w-24 overflow-hidden rounded-full bg-surface-sunken sm:w-40"><span className={`block h-full rounded-full motion-safe:transition-[width] ${scoreBar}`} style={{ width: `${scoreMeterPercent(score)}%` }} /></span>
+        <span className={`text-sm font-semibold tabular-nums ${scoreTone}`}>{validating ? 'checking…' : formatQualityScore(score)}</span>
+        <span className="hidden text-xs text-fg-muted sm:inline">/ 8.0 floor</span>
         <span className="ms-auto flex items-center gap-2">
           {blocking.length ? <Badge tone="danger">{blocking.length} blocking</Badge> : null}
           {warnings.length ? <Badge tone="warning">{warnings.length} warning{warnings.length === 1 ? '' : 's'}</Badge> : null}
@@ -397,6 +443,31 @@ export default function ArticleEditorPage() {
     />
     <Dialog open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} title={'Keyboard shortcuts'} closeLabel="Close shortcuts"><dl className="grid grid-cols-[1fr_auto] gap-2 text-sm"><dt>Save</dt><dd>Ctrl/Cmd+S</dd><dt>Toggle preview</dt><dd>Ctrl/Cmd+Shift+P</dd><dt>Insert a block</dt><dd>Type / in the editor</dd><dt>Bold, italic and link</dt><dd>Use the shared editor toolbar</dd><dt>Move focus</dt><dd>Tab</dd></dl></Dialog>
     <Dialog open={Boolean(conflict)} onClose={() => undefined} hideClose closeOnBackdrop={false} closeOnEscape={false} title={'Someone else saved this article'} description={`A newer revision was saved${conflict?.updatedAt ? ` at ${new Date(conflict.updatedAt).toLocaleString()}` : ''}. Your local work is still safe.`} footer={<><Button variant="secondary" onClick={() => void navigator.clipboard.writeText(article.bodyMd)}>Keep mine (copy to clipboard)</Button><Button variant="secondary" onClick={() => window.open(`/admin/marketing-content/${article.id}`, '_blank', 'noopener')}>View their version</Button><Button onClick={() => window.location.reload()}>Reload</Button></>}></Dialog>
-    <Dialog open={Boolean(transition)} onClose={() => setTransition(null)} title={`${transition?.replaceAll('_', ' ') ?? ''} article`} description={blocking.length && (transition === 'publish' || transition === 'schedule') ? `${blocking.length} blocking finding(s) must be resolved before publishing.` : 'This action is recorded in the article history.'} footer={<><Button variant="secondary" onClick={() => setTransition(null)}>Cancel</Button><Button disabled={Boolean((transition === 'schedule' && !scheduledFor) || (blocking.length && (transition === 'publish' || transition === 'schedule') && (!lintOverride || actionNote.trim().length < 20)))} onClick={() => void doTransition()}>Confirm</Button></>}><div className="space-y-3">{transition === 'schedule' ? <label className="block text-sm font-medium">Publish date and time<Input className="mt-1" type="datetime-local" value={scheduledFor} onChange={(e) => setScheduledFor(e.target.value)} /></label> : null}<label className="block text-sm font-medium">Change note<Textarea className="mt-1" value={actionNote} onChange={(e) => setActionNote(e.target.value)} /></label>{blocking.length && (transition === 'publish' || transition === 'schedule') && canPublish ? <Checkbox checked={lintOverride} onChange={(e) => setLintOverride(e.target.checked)} label="Override validation" description="Requires a justification of at least 20 characters in the change note." /> : null}</div></Dialog>
+    <Dialog
+      open={Boolean(transition)}
+      onClose={() => setTransition(null)}
+      title={`${transition?.replaceAll('_', ' ') ?? ''} article`}
+      description={blocking.length && (transition === 'publish' || transition === 'schedule')
+        ? `${blocking.length} blocking finding(s) must be resolved before publishing.`
+        : 'This action is recorded in the article history.'}
+      footer={<><Button variant="secondary" onClick={() => setTransition(null)}>Cancel</Button><Button disabled={Boolean((transition === 'schedule' && !scheduledFor) || (blocking.length && (transition === 'publish' || transition === 'schedule') && (!lintOverride || actionNote.trim().length < 20)))} onClick={() => void doTransition()}>Confirm</Button></>}
+    >
+      <div className="space-y-3">
+        {blocking.length && (transition === 'publish' || transition === 'schedule') ? (
+          <ul className="max-h-40 space-y-1.5 overflow-y-auto rounded-lg border border-danger-border bg-danger-surface px-3 py-2 text-sm">
+            {blocking.slice(0, 8).map((finding, index) => (
+              <li key={`${finding.rule}-${index}`} className="text-danger-fg">
+                {finding.message}
+                <span className="ms-2 font-mono text-xs opacity-70">{finding.rule}</span>
+              </li>
+            ))}
+            {blocking.length > 8 ? <li className="text-danger-fg">+{blocking.length - 8} more in Quality</li> : null}
+          </ul>
+        ) : null}
+        {transition === 'schedule' ? <label className="block text-sm font-medium">Publish date and time<Input className="mt-1" type="datetime-local" value={scheduledFor} onChange={(e) => setScheduledFor(e.target.value)} /></label> : null}
+        <label className="block text-sm font-medium">Change note<Textarea className="mt-1" value={actionNote} onChange={(e) => setActionNote(e.target.value)} /></label>
+        {blocking.length && (transition === 'publish' || transition === 'schedule') && canPublish ? <Checkbox checked={lintOverride} onChange={(e) => setLintOverride(e.target.checked)} label="Override validation" description="Requires a justification of at least 20 characters in the change note." /> : null}
+      </div>
+    </Dialog>
   </main>
 }

@@ -403,7 +403,7 @@ export default function MarketingContentPage() {
                         }).format(Math.round((new Date(article.updatedAt).getTime() - Date.now()) / 86400000), "day")}
                       </time>
                     </TableCell>
-                    <TableCell>{article.qualityScore == null ? "—" : Math.round(article.qualityScore)}</TableCell>
+                    <TableCell>{article.qualityScore == null ? "—" : Number.isInteger(article.qualityScore) ? String(article.qualityScore) : article.qualityScore.toFixed(1)}</TableCell>
                     <TableCell>
                       <ArticleActionsMenu article={article} canAuthor={canAuthor} canPublish={canPublish} onAction={(a, row) => void act(a, row)} />
                     </TableCell>

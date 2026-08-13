@@ -63,22 +63,22 @@ export function ArticleMetadataPanel({ article, onChange, categories, authors, k
       {article.kind === 'doc' ? <Field label="Category" required>
         <Select value={article.categoryId ?? ''} required onChange={(e) => onChange({ categoryId: e.target.value || null })}><option value="">Choose a category</option>{categoryOptions.map((v) => <option key={v.id} value={v.id}>{v.title}</option>)}</Select>
       </Field> : null}
-      <Field label="Description" description="Shown in search results and social cards." warning={description.length > 155 ? 'Close to the 160-character limit.' : undefined}>
-        <Textarea rows={3} maxLength={160} value={description} onChange={(e) => onChange({ description: e.target.value })} placeholder="One or two sentences that summarise the article." />
+      <Field label="Description" required description="Shown in search results and social cards. Required to publish." warning={description.length > 155 ? 'Close to the 160-character limit.' : undefined}>
+        <Textarea rows={3} maxLength={160} value={description} required onChange={(e) => onChange({ description: e.target.value })} placeholder="One or two sentences that summarise the article." />
       </Field>
       <p className="-mt-2 text-end text-xs tabular-nums text-fg-muted">{description.length}/160</p>
     </Group>
 
     <Group title={'Search & audience'}>
-      <Field label="Primary question" description="The question this article answers.">
-        <Input value={article.primaryQuestion ?? ''} onChange={(e) => onChange({ primaryQuestion: e.target.value })} placeholder="How do I…?" />
+      <Field label="Primary question" required description="The question this article answers. Required to publish.">
+        <Input value={article.primaryQuestion ?? ''} required onChange={(e) => onChange({ primaryQuestion: e.target.value })} placeholder="How do I…?" />
       </Field>
-      <Field label="Keywords" description="Comma separated.">
-        <Input {...list('keywords')} placeholder="courses, navigation" />
+      <Field label="Keywords" required description="Comma separated. At least one is required to publish.">
+        <Input {...list('keywords')} required placeholder="courses, navigation" />
       </Field>
       {chips('keywords')}
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-        <Field label="Cluster"><Input value={article.cluster} onChange={(e) => onChange({ cluster: e.target.value })} /></Field>
+        <Field label="Cluster" required description="Required to publish."><Input value={article.cluster} required onChange={(e) => onChange({ cluster: e.target.value })} /></Field>
         <Field label="Pillar"><Input value={article.pillar} onChange={(e) => onChange({ pillar: e.target.value })} /></Field>
       </div>
       <Field label="Related paths" description="Comma separated site paths.">

@@ -4,14 +4,73 @@ export type Directive = {
   markdown: string
 }
 
+/** Extractability score is 0–10 with publish floor 8.0 (MC.4). */
+export const MARKETING_SCORE_MAX = 10
+export const MARKETING_PUBLISH_SCORE_FLOOR = 8
+
+export type LintMetadataInput = {
+  title: string
+  description: string
+  authorSlug: string
+  cluster: string
+  primaryQuestion: string
+  keywords?: string[] | null
+  locale?: string
+  contentUpdatedAt?: string | null
+}
+
+/** Shape expected by POST /admin/marketing/lint metadata. */
+export function lintMetadata(article: LintMetadataInput) {
+  return {
+    title: article.title,
+    description: article.description,
+    author: article.authorSlug,
+    authorSlug: article.authorSlug,
+    cluster: article.cluster,
+    primaryQuestion: article.primaryQuestion,
+    keywords: article.keywords ?? [],
+    locale: article.locale || 'en',
+    updated: article.contentUpdatedAt?.slice(0, 10) || new Date().toISOString().slice(0, 10),
+  }
+}
+
+export function scoreMeterPercent(score: number | null | undefined): number {
+  if (score == null || Number.isNaN(score)) return 0
+  return Math.max(0, Math.min(100, (score / MARKETING_SCORE_MAX) * 100))
+}
+
+export function scoreToneClass(score: number | null | undefined): string {
+  if (score == null) return 'text-fg-muted'
+  if (score >= MARKETING_PUBLISH_SCORE_FLOOR) return 'text-success-fg'
+  if (score >= 6) return 'text-warning-fg'
+  return 'text-danger-fg'
+}
+
+export function scoreBarClass(score: number | null | undefined): string {
+  if (score == null) return 'bg-border-strong'
+  if (score >= MARKETING_PUBLISH_SCORE_FLOOR) return 'bg-success-fg'
+  if (score >= 6) return 'bg-warning-fg'
+  return 'bg-danger-fg'
+}
+
+export function isBlockingFinding(severity: string | undefined): boolean {
+  return severity === 'error'
+}
+
+export function formatQualityScore(score: number | null | undefined): string {
+  if (score == null || Number.isNaN(score)) return '—'
+  return Number.isInteger(score) ? String(score) : score.toFixed(1)
+}
+
 export const directives: Directive[] = [
-  ['key-takeaways', 'Key takeaways', ':::key-takeaways\n<!-- Add 3–5 concise bullets. -->\n- First takeaway\n- Second takeaway\n- Third takeaway\n:::\n'],
-  ['answer', 'Direct answer', ':::answer\n<!-- Answer the primary question in 40–60 words. -->\nWrite the direct answer here.\n:::\n'],
-  ['definition', 'Definition', ':::definition\n**Term:** Write a concise, self-contained definition.\n:::\n'],
+  // Guidance must stay markdown-only: HTML comments trip safety.raw-html and block publish.
+  ['key-takeaways', 'Key takeaways', ':::key-takeaways\n- First takeaway\n- Second takeaway\n- Third takeaway\n:::\n'],
+  ['answer', 'Direct answer', ':::answer\nWrite a 40–60 word answer to the primary question here.\n:::\n'],
+  ['definition', 'Definition', ':::definition term="Term"\nWrite a concise, self-contained definition.\n:::\n'],
   ['comparison-table', 'Comparison table', ':::comparison-table\n| Option | Best for | Considerations |\n| --- | --- | --- |\n| A | … | … |\n| B | … | … |\n:::\n'],
   ['steps', 'Steps', ':::steps\n1. First step\n2. Second step\n3. Third step\n:::\n'],
   ['faq', 'FAQ', ':::faq\n### Question one?\nAnswer one.\n\n### Question two?\nAnswer two.\n\n### Question three?\nAnswer three.\n:::\n'],
-  ['callout', 'Callout', ':::callout{type="note"}\nImportant context belongs here.\n:::\n'],
+  ['callout', 'Callout', ':::callout note\nImportant context belongs here.\n:::\n'],
   ['stat', 'Statistic', ':::stat\n**00%** — Explain the statistic and cite its source.\n:::\n'],
   ['sources', 'Sources', ':::sources\n- [Source title](https://example.com)\n:::\n'],
 ].map(([id, label, markdown]) => ({ id, label, markdown }))

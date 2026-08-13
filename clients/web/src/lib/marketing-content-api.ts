@@ -1,117 +1,38 @@
 import { authorizedFetch } from "./api";
 import { readApiErrorMessage } from "./errors";
 import type { paths } from "./generated/openapi-types";
+import {
+  MarketingConflictError,
+  MarketingValidationError,
+  type MarketingArticle,
+  type MarketingArticleListQuery,
+  type MarketingArticleRow,
+  type MarketingArticleWrite,
+  type MarketingBuild,
+  type MarketingContentKind,
+  type MarketingFinding,
+  type MarketingRevision,
+} from "./marketing-content-types";
+
+// Keep type + value re-exports in one `export { … }` so api-surface.golden
+// (AST-free heuristic) continues to see the public module surface.
+export {
+  MarketingConflictError,
+  MarketingValidationError,
+  type MarketingArticle,
+  type MarketingArticleListQuery,
+  type MarketingArticleRow,
+  type MarketingArticleWrite,
+  type MarketingBuild,
+  type MarketingContentKind,
+  type MarketingContentSort,
+  type MarketingContentStatus,
+  type MarketingFinding,
+  type MarketingRevision,
+} from "./marketing-content-types";
 
 type ArticleListOperation = paths["/api/v1/admin/marketing/articles"]["get"];
 void (0 as unknown as ArticleListOperation);
-
-export type MarketingContentKind = "blog" | "doc";
-export type MarketingContentStatus =
-  | "draft"
-  | "in_review"
-  | "changes_requested"
-  | "scheduled"
-  | "published"
-  | "archived";
-export type MarketingContentSort = "updated" | "published" | "title";
-
-export type MarketingArticleRow = {
-  id: string;
-  kind: MarketingContentKind;
-  slug: string;
-  path: string;
-  title: string;
-  status: MarketingContentStatus;
-  liveStatus?: string;
-  authorSlug: string;
-  authorName?: string;
-  reviewerSlug?: string | null;
-  reviewerName?: string | null;
-  categorySlug?: string | null;
-  categoryTitle?: string | null;
-  reviewDueOn?: string | null;
-  qualityScore?: number | null;
-  publishedAt?: string | null;
-  updatedAt: string;
-  revisionNo: number;
-  locale?: string;
-  groupLocales?: string[];
-  stale?: boolean;
-};
-
-export type MarketingArticleListQuery = {
-  kind?: MarketingContentKind;
-  status?: MarketingContentStatus;
-  category?: string;
-  author?: string;
-  q?: string;
-  overdue?: boolean;
-  locale?: string;
-  sort?: MarketingContentSort;
-  cursor?: string;
-  limit?: number;
-};
-
-export type MarketingBuild = {
-  id: string;
-  status: string;
-  createdAt: string;
-  completedAt?: string | null;
-  runUrl?: string | null;
-};
-
-export type MarketingArticle = MarketingArticleRow & {
-  locale: string;
-  bodyMd: string;
-  description: string;
-  categoryId?: string | null;
-  primaryQuestion: string;
-  cluster: string;
-  pillar: string;
-  verifiedAgainst: string;
-  keywords: string[];
-  relatedTo: string[];
-  roles: string[];
-  segments: string[];
-  citations: string[];
-  heroMediaId?: string | null;
-  noindex: boolean;
-  canonicalOverride?: string | null;
-  translationGroupId?: string;
-  sourceArticleId?: string | null;
-  sourceSyncedRevision?: number | null;
-  sourceSyncedAt?: string | null;
-  stale?: boolean;
-};
-
-export type MarketingFinding = {
-  rule: string;
-  severity: "error" | "warning" | "info";
-  message: string;
-  line?: number;
-};
-
-export type MarketingRevision = {
-  revisionNo: number;
-  bodyMd?: string;
-  metadata?: MarketingArticle;
-  changeNote: string;
-  statusAfter: string;
-  actorId?: string | null;
-  createdAt: string;
-};
-
-export class MarketingConflictError extends Error {
-  detail: { currentRevisionNo: number; updatedBy?: string; updatedAt?: string };
-  constructor(detail: {
-    currentRevisionNo: number;
-    updatedBy?: string;
-    updatedAt?: string;
-  }) {
-    super("A newer revision has already been saved.");
-    this.detail = detail;
-  }
-}
 
 async function json<T>(res: Response): Promise<T> {
   const body = await res.json().catch(() => ({}));
@@ -137,29 +58,6 @@ export async function getMarketingArticle(id: string, signal?: AbortSignal) {
     ),
   );
 }
-
-export type MarketingArticleWrite = Omit<
-  MarketingArticle,
-  | "id"
-  | "path"
-  | "status"
-  | "liveStatus"
-  | "createdAt"
-  | "updatedAt"
-  | "revisionNo"
-  | "publishedAt"
-  | "authorName"
-  | "reviewerName"
-  | "categorySlug"
-  | "categoryTitle"
-  | "qualityScore"
-  | "translationGroupId"
-  | "sourceArticleId"
-  | "sourceSyncedRevision"
-  | "sourceSyncedAt"
-  | "stale"
-  | "groupLocales"
->;
 
 export async function createMarketingArticle(article: MarketingArticleWrite) {
   return json<MarketingArticle>(
@@ -303,20 +201,49 @@ export async function transitionMarketingArticle(
     scheduledFor?: string;
   } = {},
 ) {
-  return json<MarketingArticleRow>(
-    await authorizedFetch(
-      `/api/v1/admin/marketing/articles/${encodeURIComponent(id)}/transition`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action,
-          expectedRevisionNo: revisionNo,
-          ...options,
-        }),
-      },
-    ),
+  const res = await authorizedFetch(
+    `/api/v1/admin/marketing/articles/${encodeURIComponent(id)}/transition`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action,
+        expectedRevisionNo: revisionNo,
+        ...options,
+      }),
+    },
   );
+  const body = await res.json().catch(() => ({}));
+  if (
+    res.status === 422 &&
+    body &&
+    typeof body === "object" &&
+    (body as { error?: { code?: string } }).error?.code ===
+      "content_validation_failed"
+  ) {
+    const value = body as {
+      error?: { message?: string };
+      findings?: MarketingFinding[];
+      score?: number;
+    };
+    throw new MarketingValidationError(
+      value.error?.message ||
+        "Publishing is blocked by content validation errors.",
+      { findings: value.findings, score: value.score },
+    );
+  }
+  if (res.status === 409 && typeof body === "object" && body) {
+    const value = body as Record<string, unknown>;
+    throw new MarketingConflictError({
+      currentRevisionNo: Number(value.currentRevisionNo ?? 0),
+      updatedBy:
+        typeof value.updatedBy === "string" ? value.updatedBy : undefined,
+      updatedAt:
+        typeof value.updatedAt === "string" ? value.updatedAt : undefined,
+    });
+  }
+  if (!res.ok) throw new Error(readApiErrorMessage(body));
+  return body as MarketingArticleRow;
 }
 
 export async function listMarketingBuilds(signal?: AbortSignal) {
