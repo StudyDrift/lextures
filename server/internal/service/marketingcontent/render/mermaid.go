@@ -201,9 +201,10 @@ func parseFlowLine(line string) ([]string, []string, bool) {
 			opener := s[i]
 			if opener == '[' || opener == '(' || opener == '{' {
 				closer := byte(']')
-				if opener == '(' {
+				switch opener {
+				case '(':
 					closer = ')'
-				} else if opener == '{' {
+				case '{':
 					closer = '}'
 				}
 				i++
