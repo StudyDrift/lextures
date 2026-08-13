@@ -33,10 +33,11 @@ export const REDIRECTS: RedirectRule[] = [
 export function flattenAndValidateRedirects(
   validTargets: Iterable<string>,
   rules: RedirectRule[] = REDIRECTS,
+  opts: { onMissingTarget?: 'throw' | 'omit' } = {},
 ): RedirectRule[] {
   const valid = new Set(validTargets)
   const byFrom = new Map(rules.map(rule => [rule.from, rule]))
-  const flattened = rules.map(rule => {
+  const flattened = rules.flatMap(rule => {
     const seen = new Set([rule.from])
     let target = rule.to
     while (byFrom.has(target)) {
@@ -45,8 +46,11 @@ export function flattenAndValidateRedirects(
       target = byFrom.get(target)!.to
     }
     if (!target.startsWith('/')) throw new Error(`External redirect target is prohibited: ${target}`)
-    if (!valid.has(target)) throw new Error(`Redirect target does not exist: ${rule.from} -> ${target}`)
-    return { ...rule, to: target }
+    if (!valid.has(target)) {
+      if (opts.onMissingTarget === 'omit') return []
+      throw new Error(`Redirect target does not exist: ${rule.from} -> ${target}`)
+    }
+    return [{ ...rule, to: target }]
   })
   if (new Set(flattened.map(rule => rule.from)).size !== flattened.length) {
     throw new Error('Duplicate redirect source')
