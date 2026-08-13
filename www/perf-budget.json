@@ -14,7 +14,7 @@
       "cls": 0.05
     },
     "interactive": {
-      "description": "Hydrated pages (/pricing/calculator, /courses, /courses/*, /request-information, home with motion)",
+      "description": "Hydrated pages (/pricing/calculator, /courses, /courses/*, /request-information, /get-started)",
       "jsGzipKb": 150,
       "cssGzipKb": 25,
       "totalGzipKb": 600,
@@ -25,7 +25,6 @@
     }
   },
   "routeClass": {
-    "/": "interactive",
     "/pricing/calculator": "interactive",
     "/courses": "interactive",
     "/courses/*": "interactive",
