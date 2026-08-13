@@ -11,6 +11,7 @@ const FEATURE_KEYS = [
   { key: 'rag_notebook', label: 'Notebook AI' },
   { key: 'syllabus_generation', label: 'Syllabus generation' },
   { key: 'content_page_generation', label: 'Content page generation' },
+  { key: 'marketing_article_generation', label: 'Marketing article generation' },
   { key: 'outcomes_extraction', label: 'Learning outcomes extraction' },
   { key: 'badges_extraction', label: 'Badge extraction' },
   { key: 'translation', label: 'Translation' },

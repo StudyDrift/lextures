@@ -27,19 +27,21 @@ const (
 	ProviderVertex      = "vertex"
 	ReadPermission      = "compliance:ai:read:*"
 
-	FeatureAITutor                    = "ai_tutor"
-	FeatureModulesAIAssistant         = "modules_ai_assistant"
+	FeatureAITutor            = "ai_tutor"
+	FeatureModulesAIAssistant = "modules_ai_assistant"
 	// FeatureDatesAIAdjust is bulk due-date AI proposals from the Modules Adjust Dates modal.
-	FeatureDatesAIAdjust = "dates_ai_adjust"
-	FeatureRAGNotebook                = "rag_notebook"
-	FeatureSyllabusGeneration         = "syllabus_generation"
-	FeatureContentPageGeneration      = "content_page_generation"
+	FeatureDatesAIAdjust         = "dates_ai_adjust"
+	FeatureRAGNotebook           = "rag_notebook"
+	FeatureSyllabusGeneration    = "syllabus_generation"
+	FeatureContentPageGeneration = "content_page_generation"
+	// FeatureMarketingArticleGeneration drafts marketing blog/help articles from an author prompt.
+	FeatureMarketingArticleGeneration = "marketing_article_generation"
 	FeatureOutcomesExtraction         = "outcomes_extraction"
 	FeatureQuizOutcomeMapping         = "quiz_outcome_mapping"
 	// FeatureAssessmentOutcomeMapping is course-level assessment→outcome proposals (CC.10 FR-6).
 	FeatureAssessmentOutcomeMapping = "assessment_outcome_mapping"
 	// FeatureWelcomeDraft is a draft welcome announcement body only (CC.10 FR-8).
-	FeatureWelcomeDraft = "welcome_draft"
+	FeatureWelcomeDraft               = "welcome_draft"
 	FeatureBadgesExtraction           = "badges_extraction"
 	FeatureTranslation                = "translation"
 	FeatureQuizGeneration             = "quiz_generation"

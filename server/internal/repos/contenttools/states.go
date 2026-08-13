@@ -18,6 +18,15 @@ first_interacted_at, last_interacted_at, completed_at,
 reset_count, last_reset_at, last_reset_by, created_at, updated_at
 `
 
+// stateColsAliased qualifies stateCols with st. for join queries
+// (instances and states both have id, status, created_at, updated_at).
+const stateColsAliased = `
+st.id, st.instance_id, st.enrollment_id, st.user_id, st.scope, st.state_json, st.state_schema_version,
+st.revision, st.status, st.score_raw, st.score_max, st.interaction_count,
+st.first_interacted_at, st.last_interacted_at, st.completed_at,
+st.reset_count, st.last_reset_at, st.last_reset_by, st.created_at, st.updated_at
+`
+
 type stateScanner interface {
 	Scan(dest ...any) error
 }

@@ -4,6 +4,7 @@
  * import this module (those pages use interactive:false + static-island).
  */
 import MarkdownIt from 'markdown-it'
+import { extractMermaidFences } from './mermaid-diagram.ts'
 
 export { renderMarkdownLite } from './markdown-lite.ts'
 
@@ -85,8 +86,10 @@ export function slugifyHeading(text: string): string {
 export function renderMarkdown(source: string, opts?: { headingIds?: boolean }): string {
   const raw = String(source || '')
   if (!raw.trim()) return ''
-  const directives = renderDirectives(raw)
+  const mermaid = extractMermaidFences(raw)
+  const directives = renderDirectives(mermaid.markdown)
   let html = md.render(directives.markdown)
+  for (const [token, replacement] of mermaid.replacements) html = html.replace(token, replacement)
   for (const [token, replacement] of directives.replacements) html = html.replace(token, replacement)
   html = html.replace(/\[\^(\d+)\]/g, '<sup class="content-citation"><a href="#source-$1" aria-label="Source $1">$1</a></sup>')
   html = html.replace(/<p>\[\^(\d+)\]:\s*<a href="([^"]+)"[^>]*>(.*?)<\/a>(.*?)<\/p>/g, '<p id="source-$1"><span aria-hidden="true">$1. </span><a href="$2" target="_blank" rel="noopener noreferrer">$3</a>$4</p>')

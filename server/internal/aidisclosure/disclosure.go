@@ -69,6 +69,7 @@ var disclosureFeatures = []FeatureCard{
 	{Key: "rag_notebook", Label: "Notebook AI", Description: "Answers questions using your course notebook content."},
 	{Key: "syllabus_generation", Label: "Syllabus generation", Description: "Instructor tool to draft syllabus sections."},
 	{Key: "content_page_generation", Label: "Content page generation", Description: "Instructor tool to draft module content-page sections from a topic description."},
+	{Key: "marketing_article_generation", Label: "Marketing article generation", Description: "Author tool to draft marketing blog posts and help articles from a topic description."},
 	{Key: "outcomes_extraction", Label: "Learning outcomes extraction", Description: "Instructor tool to draft learning outcomes from the course syllabus."},
 	{Key: "quiz_outcome_mapping", Label: "Quiz outcome mapping", Description: "Instructor tool to suggest linking a quiz and its questions to course learning outcomes."},
 	{Key: "assessment_outcome_mapping", Label: "Assessment outcome mapping", Description: "Instructor checklist assist to propose linking unmapped assignments and quizzes to course learning outcomes."},
@@ -95,7 +96,7 @@ var platformModelBindings = []modelBinding{
 		modelID: user.DefaultCourseSetupModelID,
 		alias:   aiprovider.AliasCourseSetup,
 		purposes: []string{
-			"ai_tutor", "modules_ai_assistant", "dates_ai_adjust", "rag_notebook", "syllabus_generation", "content_page_generation", "outcomes_extraction", "quiz_outcome_mapping", "assessment_outcome_mapping", "welcome_draft", "badges_extraction", "quiz_generation", "inline_questions_generation", "live_quiz_kit_generation", "lesson_generation", "ai_study_buddy", "adaptive_content",
+			"ai_tutor", "modules_ai_assistant", "dates_ai_adjust", "rag_notebook", "syllabus_generation", "content_page_generation", "marketing_article_generation", "outcomes_extraction", "quiz_outcome_mapping", "assessment_outcome_mapping", "welcome_draft", "badges_extraction", "quiz_generation", "inline_questions_generation", "live_quiz_kit_generation", "lesson_generation", "ai_study_buddy", "adaptive_content",
 		},
 		dataSent: "Course context, prompts, and user questions necessary for the feature; PII is redacted where configured.",
 	},

@@ -1,9 +1,9 @@
 # Marketing content dialect
 
 Marketing articles use CommonMark with GFM tables, strikethrough, autolinks, lists, blockquotes,
-code blocks, images, and headings. Raw HTML, JSX, imports, scripts, and executable URLs are never
-accepted. The public TypeScript renderer and the API's sanitized Go renderer are pinned to the
-shared corpus in `tests/fixtures/content-render`.
+code blocks, images, headings, and mermaid flowcharts. Raw HTML, JSX, imports, scripts, and
+executable URLs are never accepted. The public TypeScript renderer and the API's sanitized Go
+renderer are pinned to the shared corpus in `tests/fixtures/content-render`.
 
 ## Content contract
 
@@ -41,6 +41,14 @@ Directives start and end on their own lines. They cannot be nested.
 | `sources` | Source-definition section | none |
 
 Unknown or malformed directives remain escaped text in rendered output and block publication.
+
+## Mermaid diagrams
+
+A fenced `mermaid` block whose first line is `graph` or `flowchart` (TD, TB, BT, LR, or RL) renders
+as an accessible HTML diagram: subgraphs become labeled groups, nodes keep their labels, and
+`style … fill:` hints map to cool, warm, or hot tones. Include a complete text equivalent in the
+surrounding prose; the renderer also emits a “Diagram description” disclosure. Other mermaid
+dialects (sequence, class, pie, and so on) stay as a `language-mermaid` code block.
 
 ## Citations, links, headings, and images
 
