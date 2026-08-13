@@ -1,15 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Editor } from '@tiptap/core'
-import { ArrowLeft, Braces, ChevronDown, Eye, FileText, History, Keyboard, PanelRight, Save } from 'lucide-react'
+import { ArrowLeft, Braces, ChevronDown, Eye, FileText, History, Keyboard, PanelRight, Save, Sparkles } from 'lucide-react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { MarkdownBodyEditor } from '../../../components/editor/block-editor'
 import { ArticleMetadataPanel } from '../../../components/marketing-content/editor/article-metadata-panel'
 import { ArticlePreview } from '../../../components/marketing-content/editor/article-preview'
 import { TranslationSourcePane } from '../../../components/marketing-content/editor/translation-source-pane'
 import { directives, formatQualityScore, isBlockingFinding, lintMetadata, scoreBarClass, scoreMeterPercent, scoreToneClass, slugify } from '../../../components/marketing-content/editor/article-editor-utils'
+import { BuildArticleWithAiModal } from '../../../components/marketing-content/editor/build-article-with-ai-modal'
 import { RevisionDrawer } from '../../../components/marketing-content/editor/revision-drawer'
 import { Badge, Button, Checkbox, Dialog, EmptyState, InlineAlert, Input, Menu, SegmentedControl, Skeleton, Textarea, type MenuItem } from '../../../components/ui'
 import { usePermissions } from '../../../context/use-permissions'
+import { generateMarketingArticle, type MarketingArticleAIDraft } from '../../../lib/marketing-content-ai-api'
 import { createMarketingArticle, createMarketingPreviewToken, getMarketingArticle, lintMarketingArticle, listMarketingAuthors, listMarketingCategories, listMarketingKnownPaths, MarketingConflictError, MarketingValidationError, restoreMarketingRevision, transitionMarketingArticle, updateMarketingArticle, type MarketingArticle, type MarketingArticleWrite, type MarketingFinding } from '../../../lib/marketing-content-api'
 import { createMarketingTranslation, listMarketingLocales, listMarketingTranslations, markMarketingTranslationSynced, type MarketingLocale, type MarketingTranslationLink } from '../../../lib/marketing-content-i18n-api'
 import { PERM_MARKETING_CONTENT_AUTHOR, PERM_MARKETING_CONTENT_PUBLISH, PERM_MARKETING_CONTENT_REVIEW } from '../../../lib/rbac-api'
@@ -108,6 +110,7 @@ export default function ArticleEditorPage() {
   const [findingsOpen, setFindingsOpen] = useState(false)
   const [revisionsOpen, setRevisionsOpen] = useState(false)
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
+  const [buildAiOpen, setBuildAiOpen] = useState(false)
   const [conflict, setConflict] = useState<MarketingConflictError['detail'] | null>(null)
   const [recovery, setRecovery] = useState<MarketingArticle | null>(null)
   const [transition, setTransition] = useState<string | null>(null)
@@ -263,6 +266,24 @@ export default function ArticleEditorPage() {
     if (!saved?.id) return
     try { const preview = await createMarketingPreviewToken(saved.id); window.open(resolveMarketingPreviewUrl(preview.url, saved.path), '_blank', 'noopener') } catch { setView('preview') }
   }
+  const applyAIDraft = (draft: MarketingArticleAIDraft) => {
+    setArticle((old) => {
+      const autoSlug = !old.slug || old.slug === slugify(old.title)
+      return {
+        ...old,
+        title: draft.title || old.title,
+        description: draft.description,
+        bodyMd: draft.bodyMd,
+        primaryQuestion: draft.primaryQuestion,
+        cluster: draft.cluster,
+        pillar: draft.pillar,
+        keywords: draft.keywords,
+        ...(autoSlug && draft.title ? { slug: slugify(draft.title) } : {}),
+      }
+    })
+    setDirty(true)
+    setSaveError('')
+  }
   const insertDirective = (markdown: string) => {
     if (simple || !editorRef.current) patch({ bodyMd: `${article.bodyMd}${article.bodyMd.endsWith('\n') || !article.bodyMd ? '' : '\n\n'}${markdown}` })
     else {
@@ -354,6 +375,7 @@ export default function ArticleEditorPage() {
           options={[{ value: 'write', label: 'Write' }, { value: 'preview', label: 'Preview' }, { value: 'details', label: 'Details' }]}
         />
         <span aria-hidden className="mx-1 hidden h-5 w-px bg-border-default sm:block" />
+        {canAuthor ? <Button size="sm" variant="ghost" className="min-h-6" onClick={() => setBuildAiOpen(true)}><Sparkles className="h-4 w-4" /> Build with AI</Button> : null}
         <EditorMenu label="Insert block" items={directives.map((v) => ({ id: v.id, label: v.label, onSelect: () => insertDirective(v.markdown) }))} />
         <Button size="sm" variant="ghost" className="min-h-6" aria-pressed={simple} onClick={() => setSimple((v) => !v)}><Braces className="h-4 w-4" /> <span className="hidden lg:inline">{simple ? 'Visual editor' : 'Markdown source'}</span></Button>
         <Button size="sm" variant="ghost" className="min-h-6" disabled={isNew} onClick={() => setRevisionsOpen(true)}><History className="h-4 w-4" /> <span className="hidden lg:inline">Revisions</span></Button>
@@ -410,6 +432,15 @@ export default function ArticleEditorPage() {
     </section>
 
     <RevisionDrawer open={revisionsOpen} articleId={article.id} currentBody={article.bodyMd} onClose={() => setRevisionsOpen(false)} onRestore={restore} />
+    <BuildArticleWithAiModal
+      open={buildAiOpen}
+      kind={article.kind}
+      existingTitle={article.title}
+      existingBodyMd={article.bodyMd}
+      onClose={() => setBuildAiOpen(false)}
+      onBuild={(prompt) => generateMarketingArticle({ prompt, kind: article.kind, existingTitle: article.title, existingBodyMd: article.bodyMd })}
+      onBuilt={applyAIDraft}
+    />
     <Dialog open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} title={'Keyboard shortcuts'} closeLabel="Close shortcuts"><dl className="grid grid-cols-[1fr_auto] gap-2 text-sm"><dt>Save</dt><dd>Ctrl/Cmd+S</dd><dt>Toggle preview</dt><dd>Ctrl/Cmd+Shift+P</dd><dt>Insert a block</dt><dd>Type / in the editor</dd><dt>Bold, italic and link</dt><dd>Use the shared editor toolbar</dd><dt>Move focus</dt><dd>Tab</dd></dl></Dialog>
     <Dialog open={Boolean(conflict)} onClose={() => undefined} hideClose closeOnBackdrop={false} closeOnEscape={false} title={'Someone else saved this article'} description={`A newer revision was saved${conflict?.updatedAt ? ` at ${new Date(conflict.updatedAt).toLocaleString()}` : ''}. Your local work is still safe.`} footer={<><Button variant="secondary" onClick={() => void navigator.clipboard.writeText(article.bodyMd)}>Keep mine (copy to clipboard)</Button><Button variant="secondary" onClick={() => window.open(`/admin/marketing-content/${article.id}`, '_blank', 'noopener')}>View their version</Button><Button onClick={() => window.location.reload()}>Reload</Button></>}></Dialog>
     <Dialog

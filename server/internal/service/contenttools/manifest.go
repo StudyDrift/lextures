@@ -10,8 +10,8 @@ import (
 )
 
 var (
-	toolIDPattern   = regexp.MustCompile(`^[a-z][a-z0-9_]{1,62}$`)
-	semverPattern   = regexp.MustCompile(`^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$`)
+	toolIDPattern = regexp.MustCompile(`^[a-z][a-z0-9_]{1,62}$`)
+	semverPattern = regexp.MustCompile(`^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$`)
 )
 
 // AllowedCategories is the closed set of manifest categories.
@@ -88,13 +88,13 @@ type Manifest struct {
 	RespectsDueDate bool            `json:"respectsDueDate,omitempty"`
 	AllowsSelfReset bool            `json:"allowsSelfReset,omitempty"`
 	// CT.5 fields
-	Sandbox              string `json:"sandbox,omitempty"` // inprocess | iframe
-	Deprecated           bool   `json:"deprecated,omitempty"`
-	SunsetAt             string `json:"sunsetAt,omitempty"` // RFC3339 date
-	Contract             int    `json:"contract,omitempty"`
-	StateSchemaVersion   int    `json:"stateSchemaVersion,omitempty"`
-	ConfigSchemaVersion  int    `json:"configSchemaVersion,omitempty"`
-	MaxBundleBytesGzip   int    `json:"maxBundleBytesGzip,omitempty"`
+	Sandbox             string `json:"sandbox,omitempty"` // inprocess | iframe
+	Deprecated          bool   `json:"deprecated,omitempty"`
+	SunsetAt            string `json:"sunsetAt,omitempty"` // RFC3339 date
+	Contract            int    `json:"contract,omitempty"`
+	StateSchemaVersion  int    `json:"stateSchemaVersion,omitempty"`
+	ConfigSchemaVersion int    `json:"configSchemaVersion,omitempty"`
+	MaxBundleBytesGzip  int    `json:"maxBundleBytesGzip,omitempty"`
 	// CT.8 — Tool Data Sheet (FR-1); required for registration.
 	DataSheet *DataSheetDecl `json:"dataSheet,omitempty"`
 }
@@ -129,10 +129,10 @@ type AITransparencyDecl struct {
 
 // ActionDecl declares a server-side action a tool may invoke (CT.3).
 type ActionDecl struct {
-	Name             string `json:"name"`
-	RateLimitPerMin  int    `json:"rateLimitPerMin,omitempty"`
-	RequiresAI       bool   `json:"requiresAi,omitempty"`
-	Description      string `json:"description,omitempty"`
+	Name            string `json:"name"`
+	RateLimitPerMin int    `json:"rateLimitPerMin,omitempty"`
+	RequiresAI      bool   `json:"requiresAi,omitempty"`
+	Description     string `json:"description,omitempty"`
 }
 
 // ScoringDecl is the scoring block of a manifest.
@@ -189,34 +189,35 @@ type CompiledManifest struct {
 // Kept here to avoid an import cycle with aigateway; must stay in sync with Feature* consts.
 func KnownAIFeatureIDs() map[string]struct{} {
 	return map[string]struct{}{
-		"ai_tutor":                       {},
-		"modules_ai_assistant":           {},
-		"dates_ai_adjust":                {},
-		"rag_notebook":                   {},
-		"syllabus_generation":            {},
-		"content_page_generation":        {},
-		"outcomes_extraction":            {},
-		"quiz_outcome_mapping":           {},
-		"assessment_outcome_mapping":     {},
-		"welcome_draft":                  {},
-		"badges_extraction":              {},
-		"translation":                    {},
-		"quiz_generation":                {},
-		"assignment_rubric_generation":   {},
-		"inline_questions_generation":    {},
-		"live_quiz_kit_generation":       {},
-		"reading_level_simplification":   {},
-		"content_translation":            {},
-		"alt_text_suggestion":            {},
-		"vibe_generation":                {},
-		"grader_agent":                   {},
-		"lesson_generation":              {},
-		"ai_study_buddy":                 {},
-		"report_card_comment":            {},
-		"adaptive_content":               {},
-		"content_tool":                   {},
-		"content_tool_ask":               {},
-		"content_tool_explain_back":      {},
+		"ai_tutor":                     {},
+		"modules_ai_assistant":         {},
+		"dates_ai_adjust":              {},
+		"rag_notebook":                 {},
+		"syllabus_generation":          {},
+		"content_page_generation":      {},
+		"marketing_article_generation": {},
+		"outcomes_extraction":          {},
+		"quiz_outcome_mapping":         {},
+		"assessment_outcome_mapping":   {},
+		"welcome_draft":                {},
+		"badges_extraction":            {},
+		"translation":                  {},
+		"quiz_generation":              {},
+		"assignment_rubric_generation": {},
+		"inline_questions_generation":  {},
+		"live_quiz_kit_generation":     {},
+		"reading_level_simplification": {},
+		"content_translation":          {},
+		"alt_text_suggestion":          {},
+		"vibe_generation":              {},
+		"grader_agent":                 {},
+		"lesson_generation":            {},
+		"ai_study_buddy":               {},
+		"report_card_comment":          {},
+		"adaptive_content":             {},
+		"content_tool":                 {},
+		"content_tool_ask":             {},
+		"content_tool_explain_back":    {},
 	}
 }
 

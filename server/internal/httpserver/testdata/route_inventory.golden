@@ -167,6 +167,7 @@ DELETE	/api/v1/admin/lti/registrations/{id}	session
 PUT	/api/v1/admin/lti/registrations/{id}	session
 GET	/api/v1/admin/marketing/articles	anonymous
 POST	/api/v1/admin/marketing/articles	anonymous
+POST	/api/v1/admin/marketing/articles/generate	anonymous
 DELETE	/api/v1/admin/marketing/articles/{id}	anonymous
 GET	/api/v1/admin/marketing/articles/{id}	anonymous
 PATCH	/api/v1/admin/marketing/articles/{id}	anonymous

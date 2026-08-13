@@ -136,7 +136,7 @@ func renderFAQ(content string, sequence int) string {
 func policy() *bluemonday.Policy {
 	p := bluemonday.NewPolicy()
 	p.AllowElements("p", "br", "hr", "em", "strong", "del", "blockquote", "pre", "code", "ul", "ol", "li", "table", "thead", "tbody", "tr", "th", "td", "h1", "h2", "h3", "h4", "h5", "h6", "a", "img", "picture", "source", "aside", "section", "div", "dfn", "figure", "figcaption", "details", "summary", "sup", "span")
-	p.AllowAttrs("class", "id", "tabindex", "aria-label", "aria-labelledby", "aria-hidden", "open", "data-faq", "data-how-to", "data-definition-term").Globally()
+	p.AllowAttrs("class", "id", "tabindex", "role", "aria-label", "aria-labelledby", "aria-hidden", "open", "data-faq", "data-how-to", "data-definition-term").Globally()
 	p.AllowAttrs("href", "target", "rel").OnElements("a")
 	p.AllowAttrs("src", "srcset", "type", "alt", "width", "height", "loading", "decoding").OnElements("img", "source")
 	p.AllowURLSchemes("http", "https", "mailto")
@@ -148,8 +148,13 @@ func HTML(source string) (string, error) {
 	if len(source) > MaxInputBytes {
 		return "", errors.New("marketing content exceeds 1 MB")
 	}
-	prepared, replacements := renderDirectives(source)
+	withMermaid, mermaidReplacements := extractMermaidFences(source)
+	prepared, replacements := renderDirectives(withMermaid)
 	output := renderFragment(prepared)
+	for token, replacement := range mermaidReplacements {
+		output = strings.ReplaceAll(output, "<p>"+token+"</p>\n", replacement)
+		output = strings.ReplaceAll(output, token, replacement)
+	}
 	for token, replacement := range replacements {
 		output = strings.ReplaceAll(output, "<p>"+token+"</p>\n", replacement)
 		output = strings.ReplaceAll(output, token, replacement)

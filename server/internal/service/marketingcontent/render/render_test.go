@@ -59,6 +59,48 @@ func TestHTMLSanitizesAndAddsAccessibilityMarkup(t *testing.T) {
 		}
 	}
 }
+func TestBloomArticleRendersMermaidDiagram(t *testing.T) {
+	root := filepath.Join("..", "..", "..", "..", "..", "tests", "fixtures", "content-render")
+	source, err := os.ReadFile(filepath.Join(root, "005-blooms-taxonomy-in-the-age-of-ai.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := HTML(string(source))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(got, `class="content-figure content-diagram content-mermaid"`) {
+		t.Fatal("expected mermaid flowchart HTML")
+	}
+	if strings.Contains(got, `class="language-mermaid"`) {
+		t.Fatal("mermaid flowchart should not remain a code fence")
+	}
+	if !strings.Contains(got, "AI-Inverted Approach") || !strings.Contains(got, "6. Create - Co-Generation") {
+		t.Fatalf("diagram missing inverted path labels: %s", got)
+	}
+}
+
+func TestMermaidCorpus(t *testing.T) {
+	root := filepath.Join("..", "..", "..", "..", "..", "tests", "fixtures", "content-render")
+	for _, name := range []string{"009-mermaid-flowchart.md"} {
+		source, err := os.ReadFile(filepath.Join(root, name))
+		if err != nil {
+			t.Fatal(err)
+		}
+		expected, err := os.ReadFile(filepath.Join(root, strings.TrimSuffix(name, ".md")+".expected.html"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		got, err := HTML(string(source))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if canonicalHTML(got) != canonicalHTML(string(expected)) {
+			t.Errorf("%s drifted\nGOT %s\nWANT %s", name, got, expected)
+		}
+	}
+}
+
 func TestHTMLRejectsOversizeInput(t *testing.T) {
 	if _, err := HTML(strings.Repeat("x", MaxInputBytes+1)); err == nil {
 		t.Fatal("expected size error")
