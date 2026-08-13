@@ -40,6 +40,7 @@ func TestMap_Table(t *testing.T) {
 		{"too_large", &http.MaxBytesError{Limit: 12}, 413, apierr.CodeInvalidInput, "Request body too large.", false},
 		{"explicit_forbidden", Forbidden("You do not have permission to edit outcomes."), 403, apierr.CodeForbidden, "You do not have permission to edit outcomes.", false},
 		{"internal_wrap", Internal("Failed to create outcome.", sqlLeak), 500, apierr.CodeInternal, "Failed to create outcome.", true},
+		{"leaked_explicit", &Error{Status: 500, Code: apierr.CodeInternal, Message: "SQLSTATE 23505 boom"}, 500, apierr.CodeInternal, "Something went wrong.", true},
 		{"unmapped", sqlLeak, 500, apierr.CodeInternal, "Something went wrong.", true},
 		{"ai_unconfigured", ErrAINotConfigured, 503, apierr.CodeAiNotConfigured, "AI is not configured.", true},
 		{"ai_rate", ErrAIRateLimited, 503, apierr.CodeServiceUnavailable, "AI provider is temporarily unavailable.", true},

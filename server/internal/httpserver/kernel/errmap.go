@@ -136,6 +136,10 @@ func UnsupportedMediaType() error {
 // Map translates err to an HTTP status and safe apierr code/message.
 // Unmapped errors become 500 INTERNAL with a generic message.
 func Map(err error) Mapped {
+	return sanitizeMapped(mapErr(err))
+}
+
+func mapErr(err error) Mapped {
 	if err == nil {
 		return Mapped{}
 	}
@@ -231,6 +235,14 @@ func Map(err error) Mapped {
 		LogInternal: true,
 		Cause:       err,
 	}
+}
+
+func sanitizeMapped(m Mapped) Mapped {
+	if looksInternal(m.Message) {
+		m.Message = "Something went wrong."
+		m.LogInternal = true
+	}
+	return m
 }
 
 func isIntegrityConstraint(code string) bool {
