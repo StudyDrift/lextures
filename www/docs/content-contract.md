@@ -50,4 +50,5 @@ Write a 40–80-word answer.
 :::
 ```
 
-Run `npm run content:lint`, `npm run content:score -- src/blog/example.mdx`, or `npm run content:report` from `www/`.
+The Marketing Content workspace runs this contract on every save and again on publish. Resolve all
+errors and reach the configured score floor before requesting review.

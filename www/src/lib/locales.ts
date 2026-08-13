@@ -20,6 +20,8 @@ export const DEFAULT_LOCALE = 'en'
 export const LOCALES = [
   { code: 'en', name: 'English', dir: 'ltr', currency: 'USD', status: 'published' },
   { code: 'es', name: 'Español', dir: 'ltr', currency: 'USD', status: 'planned' },
+  { code: 'fr', name: 'Français', dir: 'ltr', currency: 'EUR', status: 'planned' },
+  { code: 'ar', name: 'العربية', dir: 'rtl', currency: 'USD', status: 'planned' },
   { code: 'fr-CA', name: 'Français (Canada)', dir: 'ltr', currency: 'CAD', status: 'planned' },
   { code: 'en-GB', name: 'English (UK)', dir: 'ltr', currency: 'GBP', status: 'planned' },
 ] as const satisfies readonly LocaleDefinition[]

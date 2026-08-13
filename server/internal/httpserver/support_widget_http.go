@@ -2,6 +2,7 @@ package httpserver
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"strings"
 	"time"
@@ -9,7 +10,10 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
+	"github.com/lextures/lextures/server/internal/objectcache"
+	mcrepo "github.com/lextures/lextures/server/internal/repos/marketingcontent"
 	"github.com/lextures/lextures/server/internal/repos/supportwidget"
+	mcservice "github.com/lextures/lextures/server/internal/service/marketingcontent"
 )
 
 // GET /api/v1/orgs/{orgId}/settings/support-widget
@@ -166,117 +170,57 @@ func toWidgetJSON(orgID uuid.UUID, row *supportwidget.Row) map[string]any {
 
 // GET /api/v1/help/contextual-articles?route=<path>
 //
-// Returns help article stubs relevant to the current route. Since the help center
-// (plan 20.3) is not yet built, this serves a static mapping keyed by route prefix.
+// Returns help articles relevant to the current route (MC.13 FR-3). When
+// ff_marketing_content is enabled, results come from a tiered resolution over the
+// published help center (route hints → related articles → category → search),
+// filtered by the viewer's roles and cached for 5 minutes (FR-4/FR-5/FR-11).
 func (d Deps) handleHelpContextualArticles() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if _, ok := d.meUserID(w, r); !ok {
+		actor, ok := d.meUserID(w, r)
+		if !ok {
 			return
 		}
 		route := strings.TrimSpace(r.URL.Query().Get("route"))
-		articles := contextualArticlesForRoute(route)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
+		if !d.effectiveConfig().FFMarketingContent || d.Pool == nil {
+			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeServiceUnavailable, "Marketing content is unavailable.")
+			return
+		}
+
+		ctx := r.Context()
+		roles, err := mcrepo.ViewerRoles(ctx, d.Pool, actor)
+		if err != nil {
+			apierr.WriteInternal(w, r, "Failed to resolve viewer roles.", err)
+			return
+		}
+		roles = mcservice.NormalizeViewerRoles(roles)
+
+		key := objectcache.HelpContextualKey(route, roles, r.URL.Query().Get("locale"))
+		var cached []mcservice.ContextualArticle
+		if c := d.objectCache(); c != nil {
+			if hit, _ := c.GetJSON(ctx, key, objectcache.ResourceHelpContextual, &cached); hit {
+				_ = json.NewEncoder(w).Encode(map[string]any{"articles": cached})
+				return
+			}
+		}
+
+		articles, err := d.marketingService().ContextualArticles(ctx, route, roles, r.URL.Query().Get("locale"), 5)
+		if err != nil {
+			apierr.WriteInternal(w, r, "Failed to resolve contextual help articles.", err)
+			return
+		}
+		if articles == nil {
+			articles = []mcservice.ContextualArticle{}
+		}
+		tier := "none"
+		if len(articles) > 0 {
+			tier = articles[0].Tier
+		}
+		slog.Info("help_contextual_requests_total", "tier", tier)
+		if c := d.objectCache(); c != nil {
+			_ = c.SetJSON(ctx, key, articles, 5*time.Minute)
+		}
 		_ = json.NewEncoder(w).Encode(map[string]any{"articles": articles})
 	}
-}
-
-type helpArticle struct {
-	Title string `json:"title"`
-	URL   string `json:"url"`
-	Slug  string `json:"slug"`
-}
-
-// contextualArticlesForRoute returns a small list of relevant articles by
-// matching the route prefix against a static mapping.
-func contextualArticlesForRoute(route string) []helpArticle {
-	for _, entry := range articleMapping {
-		if strings.HasPrefix(route, entry.prefix) {
-			return entry.articles
-		}
-	}
-	return defaultArticles
-}
-
-var defaultArticles = []helpArticle{
-	{
-		Title: "Finding Your Course for the First Time",
-		Slug:  "finding-your-course",
-		URL:   "https://lextures.com/docs/finding-your-course",
-	},
-	{
-		Title: "Navigating the Course Interface",
-		Slug:  "navigating-the-course-interface",
-		URL:   "https://lextures.com/docs/navigating-the-course-interface",
-	},
-	{
-		Title: "Creating a New Course",
-		Slug:  "creating-a-new-course",
-		URL:   "https://lextures.com/docs/creating-a-new-course",
-	},
-}
-
-var articleMapping = []struct {
-	prefix   string
-	articles []helpArticle
-}{
-	{
-		prefix: "/courses",
-		articles: []helpArticle{
-			{
-				Title: "Finding Your Course for the First Time",
-				Slug:  "finding-your-course",
-				URL:   "https://lextures.com/docs/finding-your-course",
-			},
-			{
-				Title: "Navigating the Course Interface",
-				Slug:  "navigating-the-course-interface",
-				URL:   "https://lextures.com/docs/navigating-the-course-interface",
-			},
-			{
-				Title: "Creating a New Course",
-				Slug:  "creating-a-new-course",
-				URL:   "https://lextures.com/docs/creating-a-new-course",
-			},
-		},
-	},
-	{
-		prefix: "/quiz",
-		articles: []helpArticle{
-			{
-				Title: "Navigating the Course Interface",
-				Slug:  "navigating-the-course-interface",
-				URL:   "https://lextures.com/docs/navigating-the-course-interface",
-			},
-		},
-	},
-	{
-		prefix: "/gradebook",
-		articles: []helpArticle{
-			{
-				Title: "Navigating the Course Interface",
-				Slug:  "navigating-the-course-interface",
-				URL:   "https://lextures.com/docs/navigating-the-course-interface",
-			},
-		},
-	},
-	{
-		prefix: "/settings",
-		articles: []helpArticle{
-			{
-				Title: "Finding Your Course for the First Time",
-				Slug:  "finding-your-course",
-				URL:   "https://lextures.com/docs/finding-your-course",
-			},
-		},
-	},
-	{
-		prefix: "/inbox",
-		articles: []helpArticle{
-			{
-				Title: "Navigating the Course Interface",
-				Slug:  "navigating-the-course-interface",
-				URL:   "https://lextures.com/docs/navigating-the-course-interface",
-			},
-		},
-	},
 }

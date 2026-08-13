@@ -8,7 +8,7 @@ Lextures is an LMS (Learning Management System) with two main services:
 
 - **Go API** (`server/`): Go 1.25, Chi router, pgx for PostgreSQL, JWT auth. Runs on port 8080.
 - **React SPA** (`clients/web/`): React 19, Vite 8, TypeScript 6, Tailwind CSS v4. Runs on port 5173.
-- **Marketing site** (`www/`): Vite + React static site. Routes and SEO metadata live in `www/src/lib/route-manifest.tsx` only — **no route without a manifest entry**. `npm run build` runs `scripts/generate-site.mjs` (SSG via `renderToString`). Docs: [www/docs/site-generation.md](www/docs/site-generation.md), [www/docs/adding-a-page.md](www/docs/adding-a-page.md).
+- **Marketing site** (`www/`): Vite + React static site. Routes and SEO metadata live in `www/src/lib/route-manifest.tsx` only — **no route without a manifest entry**. Blog/help articles come only from the public Marketing Content API and are authored in the in-product workspace; never add article Markdown under `www/src`. `npm run build` runs `scripts/generate-site.mjs` (SSG via `renderToString`). Docs: [www/docs/site-generation.md](www/docs/site-generation.md), [www/docs/adding-a-page.md](www/docs/adding-a-page.md).
 - **PostgreSQL 16**: Primary data store (Docker container, port 5432). Credentials: `studydrift/studydrift`, database `studydrift`.
 
 **Conventions:** [docs/ARCHITECTURE_CONVENTIONS.md](docs/ARCHITECTURE_CONVENTIONS.md) — package layout, layering, file/package budgets, naming, and automated ratchets (`make lint-structure`).

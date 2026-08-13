@@ -7,10 +7,8 @@ import { describe, it } from 'node:test'
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
-import { createRequire } from 'node:module'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const require = createRequire(import.meta.url)
 
 // Import compiled-free pure helpers by re-implementing critical paths via generate-site
 // and reading source constants from TS is awkward; test the JS validators in generate-site
@@ -137,14 +135,10 @@ describe('author registry (FR-20)', () => {
     assert.match(src, /export type AuthorStatus = 'active' \| 'retired'/)
   })
 
-  it('blog posts use author slugs not Team', () => {
-    const blogDir = path.join(__dirname, '../../blog')
-    const { readdirSync } = require('node:fs')
-    for (const f of readdirSync(blogDir).filter(n => n.endsWith('.md'))) {
-      const raw = readFileSync(path.join(blogDir, f), 'utf8')
-      assert.doesNotMatch(raw, /author:\s*["']?Lextures Team/)
-      assert.match(raw, /author:\s*chase-willden/)
-    }
+  it('database articles resolve author registry slugs', () => {
+    const src = readFileSync(path.join(__dirname, '../content-source.ts'), 'utf8')
+    assert.match(src, /value\.author\?\.slug/)
+    assert.doesNotMatch(src, /Lextures Team/)
   })
 })
 

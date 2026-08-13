@@ -11,6 +11,7 @@ const (
 	ResourceCatalogPage       ResourceType = "catalog_page"
 	ResourceUserCalendar      ResourceType = "user_calendar"
 	ResourceMarketingContent  ResourceType = "marketing_content"
+	ResourceHelpContextual    ResourceType = "help_contextual"
 )
 
 // RecordHit logs a cache hit for observability (Prometheus-compatible structured field names).

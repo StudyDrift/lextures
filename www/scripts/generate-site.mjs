@@ -21,6 +21,9 @@
  *   COURSE_CACHE_URL — optional URL of previous deploy course HTML base
  *   GENERATE_CONCURRENCY — bounded pool size (default 8)
  *   ROBOTS_DISALLOW_ALL — if "1", emit staging robots (Disallow: /)
+ *
+ * Marketing articles are always loaded from the public content API. The
+ * previous-deploy cache is the only availability fallback after MC.15.
  */
 
 import { createServer as createViteServer } from 'vite'
@@ -31,6 +34,8 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createRequire } from 'node:module'
 import sharp from 'sharp'
+import { fetchWithRetry, loadApiContent, mergeRedirects, contentHreflangAlternates } from './content-source.mjs'
+import { buildFeeds } from './feeds.mjs'
 import { renderOgCard } from './og-card/render.mjs'
 import {
   assertSitemapManifestParity,
@@ -40,7 +45,6 @@ import {
   buildUrlset,
   markdownSiblingPath,
   normalizeLastmod,
-  parseFrontmatter,
   resolveLastmod,
   shouldEmitMarkdownSibling,
   sitemapSectionForPath,
@@ -71,6 +75,9 @@ const ROBOTS_DISALLOW_ALL =
   process.env.ROBOTS_DISALLOW_ALL === 'true' ||
   (SITE_ORIGIN !== 'https://lextures.com' && process.env.ROBOTS_DISALLOW_ALL !== '0')
 const PRERENDER_UA = `lextures-www-prerender/${PACKAGE_VERSION}`
+const CONTENT_SOURCE = 'api'
+const CONTENT_API_BASE = (process.env.CONTENT_API_BASE || API_BASE).replace(/\/$/, '')
+const CONTENT_CACHE_DIR = path.resolve(ROOT, process.env.CONTENT_CACHE_DIR || '.content-cache')
 const FORCE_COURSE_REBUILD = process.env.FORCE_COURSE_REBUILD === '1'
 const MAX_RETRIES = 3
 const MAX_DESC = 160
@@ -124,6 +131,57 @@ export function truncateMeta(text, maxLen = 160) {
   const cut = cleaned.slice(0, maxLen - 1)
   const lastSpace = cut.lastIndexOf(' ')
   return `${(lastSpace > 40 ? cut.slice(0, lastSpace) : cut).trimEnd()}…`
+}
+
+/** Soft cap for SEO titles — keep in sync with `document-head.ts`. */
+export function truncateTitle(text, maxLen = 60) {
+  const cleaned = String(text || '')
+    .replace(/\s+/g, ' ')
+    .trim()
+  if (cleaned.length <= maxLen) return cleaned
+  const cut = cleaned.slice(0, maxLen - 1)
+  const lastSpace = cut.lastIndexOf(' ')
+  return `${(lastSpace > 20 ? cut.slice(0, lastSpace) : cut).trimEnd()}…`
+}
+
+function decodeBasicEntities(value) {
+  return String(value || '')
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+}
+
+/**
+ * Normalize HTML copied from a previous deploy during content-API fallback:
+ * enforce the 60-char title budget and expose the og:image URL so the build
+ * can materialize the raster into `dist/`.
+ */
+export function normalizeFallbackContentHtml(html) {
+  const source = String(html || '')
+  const titleRaw = source.match(/<title>([^<]+)<\/title>/i)?.[1] || ''
+  const title = truncateTitle(decodeBasicEntities(titleRaw))
+  const escapedTitle = escapeHtml(title)
+  let next = source.replace(/<title>[^<]*<\/title>/i, `<title>${escapedTitle}</title>`)
+  for (const property of ['og:title', 'twitter:title']) {
+    const reAttrFirst = new RegExp(
+      `(<meta\\b[^>]*property=["']${property}["'][^>]*content=["'])[^"']*(["'])`,
+      'i',
+    )
+    const reContentFirst = new RegExp(
+      `(<meta\\b[^>]*content=["'])[^"']*(["'][^>]*property=["']${property}["'])`,
+      'i',
+    )
+    if (reAttrFirst.test(next)) next = next.replace(reAttrFirst, `$1${escapedTitle}$2`)
+    else if (reContentFirst.test(next)) next = next.replace(reContentFirst, `$1${escapedTitle}$2`)
+  }
+  const image =
+    decodeBasicEntities(
+      next.match(/<meta\b[^>]*property=["']og:image["'][^>]*content=["']([^"']+)/i)?.[1] ||
+        next.match(/<meta\b[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i)?.[1] ||
+        '',
+    )
+  return { html: next, title, image }
 }
 
 /** Always emit @graph envelope (SEO.3 FR-1) with script-safe escaping (FR-3). */
@@ -234,7 +292,7 @@ export function collectSchemaTypes(jsonLd) {
   return types
 }
 
-export function buildHeadTags({ title, description, canonical, image, imageAlt, jsonLd, robots, markdownAlternate, alternates = [] }) {
+export function buildHeadTags({ title, description, canonical, image, imageAlt, jsonLd, robots, markdownAlternate, alternates = [], feeds = false }) {
   const t = escapeHtml(title)
   const d = escapeHtml(description)
   const c = escapeHtml(canonical)
@@ -264,6 +322,10 @@ export function buildHeadTags({ title, description, canonical, image, imageAlt, 
     lines.push(
       `<link rel="alternate" type="text/markdown" href="${escapeHtml(markdownAlternate)}" />`,
     )
+  }
+  if (feeds) {
+    lines.push(`<link rel="alternate" type="application/rss+xml" title="Lextures Blog" href="${SITE_ORIGIN}/blog/feed.xml" />`)
+    lines.push(`<link rel="alternate" type="application/feed+json" title="Lextures Blog" href="${SITE_ORIGIN}/blog/feed.json" />`)
   }
   for (const alternate of alternates) {
     lines.push(`<link rel="alternate" hreflang="${escapeHtml(alternate.hreflang)}" href="${escapeHtml(alternate.href)}" />`)
@@ -515,14 +577,8 @@ export async function resolveRouteLastmod(route, extra = {}) {
   let gitDate = null
   const p = route.path
 
-  if (p.startsWith('/blog/') && p !== '/blog') {
-    const slug = p.slice('/blog/'.length)
-    gitDate = await gitLastmod(`src/blog/${slug}.md`)
-  } else if (p.startsWith('/docs/') && p !== '/docs') {
-    const slug = p.slice('/docs/'.length)
-    gitDate = await gitLastmod(`src/docs/${slug}.md`)
-  } else if (p.startsWith('/courses/') && p !== '/courses') {
-    // courses use API timestamps only
+  if ((p.startsWith('/blog/') && p !== '/blog') || (p.startsWith('/docs/') && p !== '/docs') || (p.startsWith('/courses/') && p !== '/courses')) {
+    // Database/API content uses API timestamps only.
     gitDate = null
   } else {
     const files = STATIC_SOURCE_FILES[p] || ['src/lib/route-manifest.tsx']
@@ -530,6 +586,8 @@ export async function resolveRouteLastmod(route, extra = {}) {
   }
 
   return resolveLastmod({
+    contentUpdatedAt: extra.contentUpdatedAt,
+    publishedAt: extra.publishedAt,
     frontmatterUpdated: contentMeta.updated || contentMeta.updatedAt,
     frontmatterDate: contentMeta.date || route.lastmod,
     gitDate,
@@ -745,6 +803,22 @@ function extractCourseSlugsFromSitemap(xml, liveOrigin) {
   return slugs
 }
 
+async function discoverPreviousContentPaths() {
+  const paths = []
+  for (const section of ['blog', 'docs']) {
+    try {
+      const response = await fetch(`${LIVE_ORIGIN}/sitemaps/${section}.xml`, { headers: { 'User-Agent': PRERENDER_UA } })
+      if (!response.ok) continue
+      const xml = await response.text()
+      for (const match of xml.matchAll(/<loc>([^<]+)<\/loc>/g)) {
+        const pathname = new URL(match[1]).pathname.replace(/\/$/, '') || '/'
+        if ((section === 'blog' && /^\/blog\/[^/]+$/.test(pathname)) || (section === 'docs' && /^\/docs\/[^/]+\/[^/]+$/.test(pathname))) paths.push(pathname)
+      }
+    } catch { /* previous deploy is best effort */ }
+  }
+  return [...new Set(paths)]
+}
+
 // ── main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -766,6 +840,10 @@ async function main() {
     // Don't re-write dist during SSR
     build: { emptyOutDir: false },
   })
+
+  const contentSnapshot = await loadApiContent({ apiBase: CONTENT_API_BASE, cacheDir: CONTENT_CACHE_DIR, concurrency: CONCURRENCY, userAgent: PRERENDER_UA })
+  await localizeContentMedia(contentSnapshot.articles)
+  globalThis.__LEXTURES_BUILD_CONTENT__ = contentSnapshot
 
   let renderPath
   let enumerateConcreteRoutes
@@ -796,6 +874,8 @@ async function main() {
     await vite.close()
     process.exit(1)
   }
+  REDIRECTS = mergeRedirects(REDIRECTS, contentSnapshot.redirects || [])
+  console.log(`[generate-site] Content: source=${CONTENT_SOURCE} articles=${contentSnapshot.articles.length} fetched=${contentSnapshot.fetched || 0} cacheHits=${contentSnapshot.cacheHits || 0} fallbackUsed=${Boolean(contentSnapshot.fallbackUsed)}`)
 
   // Courses: fetch listing; degrade on failure (FR-7)
   let courses = []
@@ -877,7 +957,16 @@ async function main() {
     }
   }
 
-  const concrete = enumerateConcreteRoutes(coursePaths)
+  const previousContentPaths = CONTENT_SOURCE === 'api' && contentSnapshot.fallbackUsed
+    ? await discoverPreviousContentPaths() : []
+  const extraContentPaths = (contentSnapshot.articles || [])
+    .filter(article => article.path && article.locale && article.locale !== 'en')
+    .map(article => ({
+      path: article.path,
+      title: article.title ? `${article.title} — Lextures` : undefined,
+      description: article.description,
+    }))
+  const concrete = enumerateConcreteRoutes([...coursePaths, ...extraContentPaths])
   const localeManifestErrors = validateLocaleManifest()
   if (localeManifestErrors.length) {
     for (const error of localeManifestErrors) console.error(`[generate-site] ${error}`)
@@ -885,7 +974,7 @@ async function main() {
     process.exit(1)
   }
   REDIRECTS = flattenAndValidateRedirects(
-    concrete.filter(route => route.path !== '/404').map(route => route.path),
+    [...concrete.filter(route => route.path !== '/404').map(route => route.path), ...previousContentPaths],
     REDIRECTS,
   )
   // Attach priority from manifest where present
@@ -919,29 +1008,18 @@ async function main() {
   const imageSitemapEntries = []
 
   async function loadContentMeta(routePath) {
-    if (routePath.startsWith('/blog/') && routePath !== '/blog') {
-      const slug = routePath.slice('/blog/'.length)
-      const file = path.join(ROOT, 'src/blog', `${slug}.md`)
-      try {
-        const raw = await readFile(file, 'utf8')
-        const { meta, body } = parseFrontmatter(raw)
-        return { meta, body, sourceFile: file, sourceRoot: 'blog' }
-      } catch {
-        return null
-      }
+    const article = contentSnapshot.articles.find(item => item.path === routePath)
+    if (!article) return null
+    return {
+      meta: {
+        title: article.title, description: article.description,
+        author: article.author?.slug || 'chase-willden',
+        updated: article.contentUpdatedAt || article.updatedAt,
+        date: article.publishedAt,
+      },
+      body: article.bodyMd || '', sourceFile: null,
+      sourceRoot: article.kind === 'blog' ? 'blog' : 'docs', article,
     }
-    if (routePath.startsWith('/docs/') && routePath !== '/docs') {
-      const slug = routePath.slice('/docs/'.length)
-      const file = path.join(ROOT, 'src/docs', `${slug}.md`)
-      try {
-        const raw = await readFile(file, 'utf8')
-        const { meta, body } = parseFrontmatter(raw)
-        return { meta, body, sourceFile: file, sourceRoot: 'docs' }
-      } catch {
-        return null
-      }
-    }
-    return null
   }
 
   const staticIslandSrc = await findStaticIslandSrc(shell, DIST)
@@ -952,6 +1030,8 @@ async function main() {
     const course = ssrData.courseDetail?.course
     const lastmod = await resolveRouteLastmod(route, {
       contentMeta: content?.meta,
+      contentUpdatedAt: content?.article?.contentUpdatedAt,
+      publishedAt: content?.article?.publishedAt,
       courseUpdatedAt: course?.updatedAt || route.courseUpdatedAt,
       courseCreatedAt: course?.createdAt || route.courseCreatedAt || route.lastmod,
     })
@@ -971,7 +1051,16 @@ async function main() {
       robots: route.robots || result.head.robots,
       canonical: route.canonical || result.head.canonical,
       markdownAlternate: markdownAlternate || undefined,
+      feeds: route.path === '/blog' || /^\/(?:[a-z]{2}(?:-[a-z0-9]+)?\/)?blog\/[^/]+$/.test(route.path),
     }
+    if (content?.article?.canonicalOverride) head.canonical = content.article.canonicalOverride
+    if (content?.article?.noindex) head.robots = 'noindex,follow'
+    if (content?.article?.locale) {
+      head.locale = content.article.locale
+      head.dir = /^(ar)(-|$)/i.test(content.article.locale) ? 'rtl' : 'ltr'
+    }
+    const contentAlts = contentHreflangAlternates(content?.article, SITE_ORIGIN)
+    if (contentAlts.length) head.alternates = contentAlts
     // Prefer course-resolved head from renderPath when present
     if (ssrData.courseDetail) {
       Object.assign(head, result.head, {
@@ -984,7 +1073,9 @@ async function main() {
     // SEO.14: an explicit hand-made raster image wins; otherwise generate a
     // deterministic, content-addressed social card. Generation failures are
     // non-fatal and use the checked-in raster default.
-    const cardOverride = route.descriptor?.ogImage
+    const hero = content?.article?.media?.find(media => media.id === content.article.heroMediaId || media.usage === 'hero')
+    const heroRendition = hero?.renditions?.find(item => Number(item.width) === 1200 && Number(item.height) === 630) || hero?.renditions?.find(item => item.name === 'social')
+    const cardOverride = heroRendition ? `${SITE_ORIGIN}${localizedMediaPath(hero, heroRendition)}` : route.descriptor?.ogImage
     if (cardOverride && !/\.(png|jpe?g)(?:[?#]|$)/i.test(cardOverride)) {
       allErrors.push(`${route.path}: ogImage override must be a raster PNG or JPEG`)
     }
@@ -996,6 +1087,8 @@ async function main() {
         console.warn(`[generate-site] WARN: OG card failed for ${route.path}: ${error.message || error}`)
         head.image = `${SITE_ORIGIN}/assets/og-default.png`
       }
+    } else {
+      head.image = cardOverride.startsWith('http') ? cardOverride : `${SITE_ORIGIN}${cardOverride}`
     }
     head.imageAlt = `${head.title} — Lextures social preview`
 
@@ -1004,7 +1097,7 @@ async function main() {
       head,
       bodyHtml: result.bodyHtml,
     })
-    if (/^\/blog\/[^/]+$/.test(route.path) || /^\/docs\/[^/]+\/[^/]+$/.test(route.path)) {
+    if (/^\/(?:[a-z]{2}(?:-[a-z0-9]+)?\/)?blog\/[^/]+$/.test(route.path) || /^\/(?:[a-z]{2}(?:-[a-z0-9]+)?\/)?docs\/[^/]+\/[^/]+$/.test(route.path)) {
       const contextual = result.bodyHtml.match(/data-contextual-links[\s\S]*?<\/p>/)?.[0] || ''
       const contextualCount = (contextual.match(/<a\b/g) || []).length
       if (contextualCount < 3) errors.push(`${route.path}: needs at least 3 contextual internal links`)
@@ -1114,7 +1207,10 @@ async function main() {
   const courseRoutes = concrete.filter(r => r.path.startsWith('/courses/') && r.path !== '/courses')
 
   await mapPool(staticRoutes, CONCURRENCY, async route => {
-    const ssrData = {}
+    const ssrData = CONTENT_SOURCE === 'api' ? { articleIndex: contentSnapshot } : {}
+    if (CONTENT_SOURCE === 'api' && (/^\/blog\/[^/]+$/.test(route.path) || /^\/docs\/[^/]+\/[^/]+$/.test(route.path))) {
+      ssrData.article = contentSnapshot.articles.find(article => article.path === route.path) || null
+    }
     if (route.path === '/courses' && courses.length > 0) {
       ssrData.coursesIndex = {
         courses: courses.slice(0, 12),
@@ -1125,6 +1221,60 @@ async function main() {
     }
     await writeRoute(route, ssrData)
   })
+
+  if (previousContentPaths.length) {
+    await mapPool(previousContentPaths, CONCURRENCY, async routePath => {
+      try {
+        const response = await fetch(`${LIVE_ORIGIN}${routePath}`, { headers: { 'User-Agent': PRERENDER_UA } })
+        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        const normalized = normalizeFallbackContentHtml(await response.text())
+        const html = normalized.html
+        const outFile = outputPathForRoute(routePath)
+        await mkdir(path.dirname(outFile), { recursive: true }); await writeFile(outFile, html, 'utf8')
+        const read = pattern => html.match(pattern)?.[1]?.replace(/&quot;/g, '"').replace(/&amp;/g, '&') || ''
+        const title = normalized.title || read(/<title>([^<]+)<\/title>/i)
+        const description = read(/<meta\s+name=["']description["']\s+content=["']([^"']*)/i)
+        const canonical = read(/<link\s+rel=["']canonical["']\s+href=["']([^"']*)/i) || `${SITE_ORIGIN}${routePath}`
+        const robots = read(/<meta\s+name=["']robots["']\s+content=["']([^"']*)/i) || 'index,follow'
+        if (normalized.image) {
+          try {
+            const imageUrl = new URL(normalized.image, SITE_ORIGIN)
+            if ((imageUrl.origin === SITE_ORIGIN || imageUrl.origin === LIVE_ORIGIN) && imageUrl.pathname.startsWith('/og/')) {
+              const imageFile = path.join(DIST, imageUrl.pathname.slice(1))
+              try {
+                await access(imageFile)
+              } catch {
+                const imageResponse = await fetch(`${LIVE_ORIGIN}${imageUrl.pathname}`, { headers: { 'User-Agent': PRERENDER_UA } })
+                if (imageResponse.ok) {
+                  await mkdir(path.dirname(imageFile), { recursive: true })
+                  await writeFile(imageFile, Buffer.from(await imageResponse.arrayBuffer()))
+                } else {
+                  console.warn(`[generate-site] WARN: previous OG image unavailable for ${routePath}: HTTP ${imageResponse.status}`)
+                }
+              }
+              if (!robots.includes('noindex')) {
+                imageSitemapEntries.push({
+                  path: routePath,
+                  image: `${SITE_ORIGIN}${imageUrl.pathname}`,
+                  title,
+                  caption: `${title} — Lextures social preview`,
+                })
+              }
+            }
+          } catch (error) {
+            console.warn(`[generate-site] WARN: previous OG image unavailable for ${routePath}: ${error.message || error}`)
+          }
+        }
+        generatedPages.push({ path: routePath, html, noindex: robots.includes('noindex'), fallback: true })
+        seoUrls.push({ path: routePath, title, description, canonical, lastmod: null, robots, sitemap: !robots.includes('noindex'), section: sitemapSectionForPath(routePath), priority: '0.6', schemaTypes: [], bytes: Buffer.byteLength(html) })
+        generated++; contentSnapshot.fallbackUsed = true
+        try {
+          const md = await fetch(`${LIVE_ORIGIN}${routePath}.md`, { headers: { 'User-Agent': PRERENDER_UA } })
+          if (md.ok) { const mdPath = markdownSiblingPath(routePath, DIST); await mkdir(path.dirname(mdPath), { recursive: true }); await writeFile(mdPath, await md.text(), 'utf8'); markdownSiblings++ }
+        } catch { /* optional sibling */ }
+      } catch (error) { console.warn(`[generate-site] WARN: previous content unavailable for ${routePath}: ${error.message || error}`) }
+    })
+  }
 
   if (courseRoutes.length > 0) {
     await mapPool(courseRoutes, CONCURRENCY, async route => {
@@ -1335,14 +1485,42 @@ async function main() {
   await writeFile(path.join(DIST, 'robots.txt'), robotsTxt, 'utf8')
 
   // llms.txt + llms-full.txt (SEO.2 FR-12…FR-14)
-  const llmsTxt = renderLlmsTxt(SITE_ORIGIN)
+  let llmsTxt = renderLlmsTxt(SITE_ORIGIN)
+  let previousLlmsFull = null
+  if (CONTENT_SOURCE === 'api' && contentSnapshot.fallbackUsed) {
+    try {
+      const [curated, full] = await Promise.all([fetch(`${LIVE_ORIGIN}/llms.txt`), fetch(`${LIVE_ORIGIN}/llms-full.txt`)])
+      if (curated.ok && full.ok) { llmsTxt = await curated.text(); previousLlmsFull = await full.text() }
+    } catch { /* retain locally generated artifacts when previous deploy is unavailable */ }
+  }
   await writeFile(path.join(DIST, 'llms.txt'), llmsTxt, 'utf8')
-  const llmsFull = buildLlmsFullTxt(contentForLlmsFull, SITE_ORIGIN)
+  const llmsFull = previousLlmsFull || buildLlmsFullTxt(contentForLlmsFull, SITE_ORIGIN)
   await writeFile(path.join(DIST, 'llms-full.txt'), llmsFull, 'utf8')
   const llmsFullBytes = Buffer.byteLength(llmsFull, 'utf8')
   if (llmsFullBytes > 5 * 1024 * 1024) {
     allErrors.push(`llms-full.txt exceeds 5 MB (${llmsFullBytes} bytes)`)
   }
+
+  const feedPosts = contentSnapshot.articles.filter(article => article.kind === 'blog' && (!article.locale || article.locale === 'en')).map(article => ({
+    ...article,
+    content: article.bodyMd || article.content || '',
+    date: String(article.publishedAt || article.date || '').slice(0, 10),
+    author: article.author?.name || article.author?.slug || article.author || '',
+    authorName: article.author?.name,
+  }))
+  let feeds = buildFeeds(feedPosts, SITE_ORIGIN)
+  if (CONTENT_SOURCE === 'api' && contentSnapshot.fallbackUsed) {
+    try {
+      const [rss, json] = await Promise.all([fetch(`${LIVE_ORIGIN}/blog/feed.xml`), fetch(`${LIVE_ORIGIN}/blog/feed.json`)])
+      if (rss.ok && json.ok) {
+        const rssText = await rss.text(); const jsonText = await json.text()
+        feeds = { rss: rssText, json: jsonText, itemCount: JSON.parse(jsonText).items?.length || 0 }
+      }
+    } catch { /* retain locally generated feeds when previous deploy is unavailable */ }
+  }
+  await mkdir(path.join(DIST, 'blog'), { recursive: true })
+  await writeFile(path.join(DIST, 'blog/feed.xml'), feeds.rss, 'utf8')
+  await writeFile(path.join(DIST, 'blog/feed.json'), feeds.json, 'utf8')
 
   // IndexNow key file (SEO.2 FR-17) — public by design
   await writeFile(path.join(DIST, INDEXNOW_KEY_FILENAME), `${INDEXNOW_KEY}\n`, 'utf8')
@@ -1386,6 +1564,11 @@ async function main() {
   // SEO manifest (SEO.2 / SEO.16)
   const seoManifest = {
     generatedAt: new Date().toISOString(),
+    contentSource: CONTENT_SOURCE,
+    contentGeneratedAt: contentSnapshot.generatedAt || null,
+    fallbackUsed: Boolean(contentSnapshot.fallbackUsed),
+    articleCount: contentSnapshot.articles.length,
+    feedItemCount: feeds.itemCount,
     origin: SITE_ORIGIN,
     indexNowKey: INDEXNOW_KEY,
     sitemaps: sitemapFiles.map(f => ({
@@ -1402,7 +1585,7 @@ async function main() {
   )
 
   // Internal/noindex references are intentionally not linked from the public IA.
-  const graphPages = generatedPages.filter(page => page.path !== '/404' && !page.noindex)
+  const graphPages = generatedPages.filter(page => page.path !== '/404' && !page.noindex && !page.fallback)
   const linkGraph = buildLinkGraph(graphPages)
   allErrors.push(...validateLinkGraph(linkGraph))
   await writeFile(path.join(DIST, '.link-graph.json'), JSON.stringify(linkGraph, null, 2), 'utf8')
@@ -1452,6 +1635,47 @@ async function main() {
   if (ROBOTS_DISALLOW_ALL) {
     console.warn('[generate-site] WARN: robots.txt disallows all (staging / non-production origin)')
   }
+}
+
+async function localizeContentMedia(articles) {
+  const seen = new Map()
+  await mapPool(articles, CONCURRENCY, async article => {
+    for (const media of article.media || []) {
+      const checksum = String(media.checksum || media.id).replace(/[^a-zA-Z0-9_-]/g, '')
+      if (!seen.has(checksum)) seen.set(checksum, localizeOneMedia(media, checksum))
+      const replacements = await seen.get(checksum)
+      for (const [remote, local] of replacements) article.bodyMd = String(article.bodyMd || '').split(remote).join(local)
+    }
+  })
+}
+
+function localizedMediaPath(media, rendition) {
+  const checksum = String(media.checksum || media.id).replace(/[^a-zA-Z0-9_-]/g, '')
+  return `/assets/content/${checksum}/${rendition.name}.${rendition.ext}`
+}
+
+async function localizeOneMedia(media, checksum) {
+  const dir = path.join(DIST, 'assets', 'content', checksum)
+  await mkdir(dir, { recursive: true })
+  const replacements = []
+  let sourceBuffer = null
+  for (const rendition of media.renditions || []) {
+    const remote = resolveApiAssetUrl(rendition.url, CONTENT_API_BASE)
+    if (!remote) continue
+    const response = await fetchWithRetry(remote, { userAgent: PRERENDER_UA })
+    const buffer = Buffer.from(await response.arrayBuffer())
+    const filename = `${rendition.name}.${rendition.ext}`
+    await writeFile(path.join(dir, filename), buffer)
+    if (!sourceBuffer || rendition.name === 'original') sourceBuffer = buffer
+    replacements.push([rendition.url, `/assets/content/${checksum}/${filename}`])
+    replacements.push([remote, `/assets/content/${checksum}/${filename}`])
+  }
+  if (sourceBuffer) {
+    const names = new Set((media.renditions || []).map(r => `${r.name}.${r.ext}`))
+    if (![...names].some(name => name.endsWith('.webp'))) await sharp(sourceBuffer).webp().toFile(path.join(dir, 'generated.webp'))
+    if (![...names].some(name => name.endsWith('.avif'))) await sharp(sourceBuffer).avif().toFile(path.join(dir, 'generated.avif'))
+  }
+  return replacements
 }
 
 // Back-compat exports matching prerender-courses.test.mjs names

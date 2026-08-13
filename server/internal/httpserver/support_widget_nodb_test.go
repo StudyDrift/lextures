@@ -1,7 +1,6 @@
 package httpserver
 
 import (
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -30,43 +29,6 @@ func TestHelpContextualArticles_MethodNotAllowed(t *testing.T) {
 	h.ServeHTTP(rr, r)
 	if rr.Code != http.StatusMethodNotAllowed {
 		t.Fatalf("expected 405, got %d", rr.Code)
-	}
-}
-
-func TestContextualArticlesForRoute_CourseRoute(t *testing.T) {
-	t.Parallel()
-	articles := contextualArticlesForRoute("/courses/abc123/modules")
-	if len(articles) == 0 {
-		t.Fatal("expected articles for course route")
-	}
-	for _, a := range articles {
-		if a.Title == "" || a.URL == "" || a.Slug == "" {
-			t.Fatalf("article missing field: %+v", a)
-		}
-	}
-}
-
-func TestContextualArticlesForRoute_QuizRoute(t *testing.T) {
-	t.Parallel()
-	articles := contextualArticlesForRoute("/quiz/abc")
-	if len(articles) == 0 {
-		t.Fatal("expected articles for quiz route")
-	}
-}
-
-func TestContextualArticlesForRoute_DefaultFallback(t *testing.T) {
-	t.Parallel()
-	articles := contextualArticlesForRoute("/unknown/path")
-	if len(articles) == 0 {
-		t.Fatal("expected default fallback articles")
-	}
-}
-
-func TestContextualArticlesForRoute_EmptyRoute(t *testing.T) {
-	t.Parallel()
-	articles := contextualArticlesForRoute("")
-	if len(articles) == 0 {
-		t.Fatal("expected default articles for empty route")
 	}
 }
 
@@ -136,21 +98,5 @@ func TestHelpContextualArticles_RouteRegistered(t *testing.T) {
 	// Without a valid token we get 401; 404 means the route was not registered.
 	if rr.Code == http.StatusNotFound {
 		t.Fatalf("route not registered (404)")
-	}
-}
-
-func TestSupportWidgetArticlesJSON_Shape(t *testing.T) {
-	t.Parallel()
-	articles := contextualArticlesForRoute("/courses/abc/quiz/1")
-	data, err := json.Marshal(map[string]any{"articles": articles})
-	if err != nil {
-		t.Fatal(err)
-	}
-	var body map[string]any
-	if err := json.Unmarshal(data, &body); err != nil {
-		t.Fatalf("invalid json: %v", err)
-	}
-	if body["articles"] == nil {
-		t.Fatal("expected articles key")
 	}
 }

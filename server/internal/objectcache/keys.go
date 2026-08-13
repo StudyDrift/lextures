@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"sort"
 	"strings"
 
 	repoCourse "github.com/lextures/lextures/server/internal/repos/course"
@@ -54,6 +55,16 @@ func MarketplacePageKey(f repoCourse.MarketplaceFilter) string {
 func MarketingContentKey(route, query, version string) string {
 	sum := sha256.Sum256([]byte(route + "?" + query + "@" + version))
 	return prefix + "marketing-content:" + hex.EncodeToString(sum[:8])
+}
+
+// HelpContextualKey caches a tiered contextual-help resolution by route and the
+// viewer's role set (role-filtered results differ per viewer, so roles are part
+// of the key rather than filtered post-cache).
+func HelpContextualKey(route string, roles []string, locale string) string {
+	sorted := append([]string(nil), roles...)
+	sort.Strings(sorted)
+	sum := sha256.Sum256([]byte(route + "@" + strings.Join(sorted, ",") + "@" + locale))
+	return prefix + "help-contextual:" + hex.EncodeToString(sum[:8])
 }
 
 // UserCalendarKey caches a generated iCal body for a user (all courses or scoped).

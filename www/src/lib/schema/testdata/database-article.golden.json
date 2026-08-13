@@ -1,0 +1,4 @@
+[
+  { "type": "Person", "id": "https://lextures.com/authors/ada#person", "name": "Ada Example", "sameAs": ["https://example.com/ada"] },
+  { "type": "Article", "id": "https://lextures.com/blog/golden#article", "headline": "Golden article", "datePublished": "2026-01-01", "dateModified": "2026-02-02", "authorId": "https://lextures.com/authors/ada#person", "citations": ["https://example.com/source"] }
+]

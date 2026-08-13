@@ -259,6 +259,10 @@ export default function App() {
             <Route path="/admin/accessibility" element={<Pages.AccessibilityServicesPage />} />
             <Route path="/admin/evaluations/templates" element={<Pages.EvaluationTemplates />} />
             <Route path="/admin/email-templates" element={<Pages.AdminEmailTemplates />} />
+            <Route path="/admin/marketing-content" element={<Pages.MarketingContentPage />} />
+            <Route path="/admin/marketing-content/editorial" element={<Pages.MarketingContentEditorialPage />} />
+            <Route path="/admin/marketing-content/:articleId" element={<Pages.MarketingContentArticleEditorPage />} />
+            <Route path="/admin/marketing-content/*" element={<Pages.MarketingContentPage />} />
             <Route path="/admin/licenses" element={<Pages.SuperAdminLicenses />} />
             <Route path="/admin/evaluations/report" element={<Pages.EvaluationReport />} />
             <Route path="/admin/reviews" element={<Pages.CourseReviewsModerationPage />} />

@@ -64,6 +64,7 @@ export function SplitButton({
         onOpenChange={setOpen}
         items={items}
         anchorRef={triggerRef}
+        placement="bottom-end"
       />
     </div>
   )

@@ -4,32 +4,38 @@ package scheduler
 // jobs.queue row with one of these as job_type; a handler registered in the
 // background worker performs the actual work.
 const (
-	JobTypeLateSubmissionSweep        = "scheduled.late_submission_sweep"
-	JobTypeExpiredTokenCleanup        = "scheduled.expired_token_cleanup"
-	JobTypeRequestLogRetention        = "scheduled.request_log_retention"
-	JobTypeDueDateReminder            = "scheduled.due_date_reminder"
-	JobTypeInactiveIntegration        = "scheduled.inactive_integration_alert"
-	JobTypeTutorSessionRetention      = "scheduled.tutor_session_retention"
-	JobTypeLearnerProfileFull         = "scheduled.learner_profile_full_recompute"
-	JobTypeLearnerProfileRetention    = "scheduled.learner_profile_retention"
-	JobTypeIntroCourseBackfill        = "scheduled.intro_course_backfill"
-	JobTypeIntroCourseCompletionSweep = "scheduled.intro_course_completion_sweep"
-	JobTypeBoardAnalyticsRollup       = "scheduled.board_analytics_rollup"
-	JobTypeBoardExportRetention       = "scheduled.board_export_retention"
-	JobTypeBoardContentRetention      = "scheduled.board_content_retention"
-	JobTypeQuizgameUsageRollup        = "scheduled.quizgame_usage_rollup"
-	JobTypeQuizgameRetention          = "scheduled.quizgame_retention"
-	JobTypeTranscriptAnalyticsRollup       = "scheduled.transcript_analytics_rollup"
-	JobTypeAdaptiveContentEffectiveness    = "scheduled.adaptive_content_effectiveness"
-	JobTypeAdaptiveContentFairness         = "scheduled.adaptive_content_fairness"
-	JobTypeContentToolPreviewPurge         = "scheduled.content_tool_preview_purge"
-	JobTypeContentToolResetPurge           = "scheduled.content_tool_reset_purge"
-	JobTypeContentToolDailyRollups         = "scheduled.content_tool_daily_rollups"
-	JobTypeContentToolSummaryRebuild       = "scheduled.content_tool_summary_rebuild"
+	JobTypeLateSubmissionSweep                = "scheduled.late_submission_sweep"
+	JobTypeExpiredTokenCleanup                = "scheduled.expired_token_cleanup"
+	JobTypeRequestLogRetention                = "scheduled.request_log_retention"
+	JobTypeDueDateReminder                    = "scheduled.due_date_reminder"
+	JobTypeInactiveIntegration                = "scheduled.inactive_integration_alert"
+	JobTypeTutorSessionRetention              = "scheduled.tutor_session_retention"
+	JobTypeLearnerProfileFull                 = "scheduled.learner_profile_full_recompute"
+	JobTypeLearnerProfileRetention            = "scheduled.learner_profile_retention"
+	JobTypeIntroCourseBackfill                = "scheduled.intro_course_backfill"
+	JobTypeIntroCourseCompletionSweep         = "scheduled.intro_course_completion_sweep"
+	JobTypeBoardAnalyticsRollup               = "scheduled.board_analytics_rollup"
+	JobTypeBoardExportRetention               = "scheduled.board_export_retention"
+	JobTypeBoardContentRetention              = "scheduled.board_content_retention"
+	JobTypeQuizgameUsageRollup                = "scheduled.quizgame_usage_rollup"
+	JobTypeQuizgameRetention                  = "scheduled.quizgame_retention"
+	JobTypeTranscriptAnalyticsRollup          = "scheduled.transcript_analytics_rollup"
+	JobTypeAdaptiveContentEffectiveness       = "scheduled.adaptive_content_effectiveness"
+	JobTypeAdaptiveContentFairness            = "scheduled.adaptive_content_fairness"
+	JobTypeContentToolPreviewPurge            = "scheduled.content_tool_preview_purge"
+	JobTypeContentToolResetPurge              = "scheduled.content_tool_reset_purge"
+	JobTypeContentToolDailyRollups            = "scheduled.content_tool_daily_rollups"
+	JobTypeContentToolSummaryRebuild          = "scheduled.content_tool_summary_rebuild"
 	JobTypeCourseChecklistRetention           = "scheduled.course_checklist_retention"
 	JobTypeCourseChecklistLinkHealthRetention = "scheduled.course_checklist_link_health_retention"
 	JobTypeCouponReservationSweep             = "scheduled.coupon_reservation_sweep"
 	JobTypeCouponAttemptsRetention            = "scheduled.coupon_attempts_retention"
+	JobTypeMarketingContentPublishDue         = "scheduled.marketing_content_publish_due"
+	JobTypeMarketingContentBuildDispatch      = "scheduled.marketing_content_build_dispatch"
+	JobTypeMarketingContentReviewSweep        = "scheduled.marketing_content_review_sweep"
+	JobTypeMarketingContentLinkHealth         = "scheduled.marketing_content_link_health"
+	JobTypeMarketingContentRevisionPrune      = "scheduled.marketing_content_revision_prune"
+	JobTypeMarketingContentSearchGapsReport   = "scheduled.marketing_content_search_gaps_report"
 )
 
 // ScheduledJob is one configuration-driven entry in the schedule list. New
@@ -243,6 +249,12 @@ func BuiltinJobs() []ScheduledJob {
 			Description:    "Purge coupon apply attempt rows older than 30 days (MKTC.7).",
 			DefaultEnabled: true,
 		},
+		{Name: "marketing_content_publish_due", Spec: "* * * * *", JobType: JobTypeMarketingContentPublishDue, Description: "Publish due scheduled marketing articles.", DefaultEnabled: true},
+		{Name: "marketing_content_build_dispatch", Spec: "* * * * *", JobType: JobTypeMarketingContentBuildDispatch, Description: "Dispatch and monitor marketing site builds.", DefaultEnabled: true},
+		{Name: "marketing_content_review_sweep", Spec: "0 7 * * *", JobType: JobTypeMarketingContentReviewSweep, Description: "Refresh content health and notify owners of due reviews.", DefaultEnabled: true},
+		{Name: "marketing_content_link_health", Spec: "0 5 * * 1", JobType: JobTypeMarketingContentLinkHealth, Description: "Check external links in published marketing content.", DefaultEnabled: true},
+		{Name: "marketing_content_search_gaps_report", Spec: "0 6 * * 1", JobType: JobTypeMarketingContentSearchGapsReport, Description: "Log the weekly zero-result help/docs search queries for content planning.", DefaultEnabled: true},
+		{Name: "marketing_content_revision_prune", Spec: "30 3 * * 0", JobType: JobTypeMarketingContentRevisionPrune, Description: "Prune old unpublished marketing content revisions.", DefaultEnabled: true},
 	}
 	for i := range jobs {
 		jobs[i].schedule = MustParse(jobs[i].Spec)

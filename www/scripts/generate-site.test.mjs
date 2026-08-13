@@ -15,6 +15,8 @@ import {
   serializeJsonLd,
   STATIC_ROUTES,
   truncateMeta,
+  truncateTitle,
+  normalizeFallbackContentHtml,
   validateGeneratedPage,
   outputPathForRoute,
   buildLinkGraph,
@@ -42,6 +44,22 @@ describe('truncateMeta', () => {
     const out = truncateMeta(long, 40)
     assert.ok(out.length <= 41)
     assert.ok(out.endsWith('…'))
+  })
+})
+
+describe('normalizeFallbackContentHtml', () => {
+  it('truncates overlong titles and preserves og:image', () => {
+    const longTitle = 'How Adaptive AI Is Changing What Personalized Learning Means — Lextures'
+    assert.ok(longTitle.length > 60)
+    const { html, title, image } = normalizeFallbackContentHtml(`<!doctype html><html><head>
+      <title>${longTitle}</title>
+      <meta property="og:title" content="${longTitle}" />
+      <meta property="og:image" content="https://lextures.com/og/1d7eaa8ac29fabee.png" />
+    </head><body>ok</body></html>`)
+    assert.equal(title, truncateTitle(longTitle))
+    assert.ok(title.length <= 60)
+    assert.match(html, new RegExp(`<title>${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}<\\/title>`))
+    assert.equal(image, 'https://lextures.com/og/1d7eaa8ac29fabee.png')
   })
 })
 

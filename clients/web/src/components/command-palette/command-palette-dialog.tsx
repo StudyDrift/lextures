@@ -18,7 +18,7 @@ import { useCourseNavFeatures } from '../../context/course-nav-features-context'
 import { usePermissions } from '../../context/use-permissions'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { usePlatformScimEnabled } from '../../hooks/use-platform-scim-enabled'
-import { PERM_RBAC_MANAGE } from '../../lib/rbac-api'
+import { PERM_MARKETING_CONTENT_VIEW, PERM_RBAC_MANAGE } from '../../lib/rbac-api'
 import {
   capSearchResults,
   filterSearchItems,
@@ -86,7 +86,12 @@ export function CommandPaletteDialog({
   const location = useLocation()
   const { allows } = usePermissions()
   const canManageRbac = allows(PERM_RBAC_MANAGE)
-  const { ragNotebookEnabled } = usePlatformFeatures()
+  const { ragNotebookEnabled, ffMarketingContent } = usePlatformFeatures()
+  const marketingContentItem = useMemo(() => ffMarketingContent && allows(PERM_MARKETING_CONTENT_VIEW) ? {
+    id: 'global:marketing-content', group: 'page' as const, title: 'Marketing Content',
+    subtitle: 'Manage blog and help-center articles', path: '/admin/marketing-content',
+    haystack: 'marketing content blog help center articles admin', exemptFromCap: true,
+  } : null, [allows, ffMarketingContent])
   const motion = overlayClassNames({
     kind: 'menu',
     phase: presence.phase,
@@ -233,7 +238,7 @@ export function CommandPaletteDialog({
   const filtered = useMemo(() => {
     if (isHubMode) {
       return capSearchResults(
-        buildSearchHubItems(coursesForSearch, allows, currentCourseCode, globalSearchOptions),
+        [...(marketingContentItem ? [marketingContentItem] : []), ...buildSearchHubItems(coursesForSearch, allows, currentCourseCode, globalSearchOptions)],
         {
           hubMode: true,
           pinnedCourseCode,
@@ -254,7 +259,7 @@ export function CommandPaletteDialog({
 
     const seen = new Set<string>()
     const merged: SearchListItem[] = []
-    for (const it of [...go, ...activeServerItems, ...localFiltered]) {
+    for (const it of [...(marketingContentItem ? [marketingContentItem] : []), ...go, ...activeServerItems, ...localFiltered]) {
       if (seen.has(it.id)) continue
       seen.add(it.id)
       merged.push(it)
@@ -271,6 +276,7 @@ export function CommandPaletteDialog({
     activeServerItems,
     pinnedCourseCode,
     globalSearchOptions,
+    marketingContentItem,
   ])
 
   const listLength = coursePicker.active ? pickerCourses.length : filtered.length

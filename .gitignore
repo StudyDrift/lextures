@@ -86,6 +86,7 @@ data/
 !www/src/data/
 !www/src/data/*.ts
 test-results/
+www/.content-cache/
 
 # Local dev / IDE tooling (machine-specific)
 .antigravitycli/

@@ -24,11 +24,3 @@ jobs:
       - run: npm ci
       - name: Exhaustive live verification
         run: npm run seo:smoke -- --origin=https://lextures.com --exhaustive
-      - name: Generate lifecycle report
-        run: npm run seo:lifecycle
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: seo-lifecycle-${{ github.run_id }}
-          path: www/dist/seo-lifecycle.md
-          retention-days: 90

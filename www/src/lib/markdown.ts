@@ -58,31 +58,13 @@ function renderDirectives(source: string): { markdown: string; replacements: Map
   return { markdown, replacements }
 }
 
-const LOCAL_IMAGE_DIMENSIONS: Record<string, [number, number]> = {
-  '/docs-course-interface.png': [1280, 720],
-  '/docs-create-course-dashboard.png': [1280, 800],
-  '/docs-create-course-step1.png': [1280, 800],
-  '/docs-create-course-step2.png': [1280, 800],
-  '/docs-create-course-step3.png': [1280, 800],
-  '/docs-create-course-success.png': [1280, 800],
-  '/docs-dashboard.png': [1280, 800],
-  '/docs-login.png': [1280, 720],
-}
-
 // SEO.4 FR-12/FR-13: build-time markdown output uses generated AVIF/WebP,
 // reserves dimensions, and never eagerly transfers below-the-fold docs media.
 md.renderer.rules.image = (tokens, idx) => {
   const token = tokens[idx]
   const src = String(token.attrGet('src') || '')
   const alt = md.utils.escapeHtml(token.content || '')
-  const dimensions = LOCAL_IMAGE_DIMENSIONS[src]
-  if (!dimensions || !src.endsWith('.png')) {
-    const width = dimensions ? ` width="${dimensions[0]}" height="${dimensions[1]}"` : ''
-    return `<img src="${md.utils.escapeHtml(src)}" alt="${alt}"${width} loading="lazy" decoding="async">`
-  }
-  const base = md.utils.escapeHtml(src.slice(0, -4))
-  const [width, height] = dimensions
-  return `<picture><source srcset="${base}.avif" type="image/avif"><source srcset="${base}.webp" type="image/webp"><img src="${base}.png" alt="${alt}" width="${width}" height="${height}" loading="lazy" decoding="async"></picture>`
+  return `<img src="${md.utils.escapeHtml(src)}" alt="${alt}" loading="lazy" decoding="async">`
 }
 
 try {

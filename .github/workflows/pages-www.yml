@@ -1,6 +1,8 @@
 name: Deploy marketing site (www)
 
 on:
+  repository_dispatch:
+    types: [marketing-content-publish]
   workflow_dispatch:
     inputs:
       full_catalog_rebuild:
@@ -51,11 +53,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Restore marketing content cache
+        uses: actions/cache@v4
+        with:
+          path: www/.content-cache
+          key: www-content-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            www-content-${{ runner.os }}-
+
       - name: Lint (oxlint)
         run: npm run lint
 
       - name: Unit tests
         run: npm test
+
+      - name: Reject file-based marketing articles
+        working-directory: .
+        run: bash scripts/check-no-file-articles.sh
 
       - name: Build
         env:
@@ -63,6 +77,7 @@ jobs:
           # generator reuses previous-deploy course HTML and continues (exit 0).
           SITE_ORIGIN: https://lextures.com
           API_BASE: https://self.lextures.com
+          CONTENT_API_BASE: https://self.lextures.com
           FORCE_COURSE_REBUILD: ${{ inputs.full_catalog_rebuild && '1' || '0' }}
         run: npm run build
 
@@ -71,11 +86,6 @@ jobs:
 
       - name: SEO governance checks
         run: npm run seo:check
-
-      - name: Content lifecycle policy
-        env:
-          SEO_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
-        run: npm run seo:lifecycle
 
       - name: Upload SEO governance report
         uses: actions/upload-artifact@v4
@@ -108,6 +118,8 @@ jobs:
           test -f dist/robots.txt
           test -f dist/llms.txt
           test -f dist/llms-full.txt
+          test -f dist/blog/feed.xml
+          test -f dist/blog/feed.json
           test -f dist/404.html
           # Sitemap must be an index (SEO.2)
           grep -q '<sitemapindex' dist/sitemap.xml
@@ -120,6 +132,8 @@ jobs:
           ! grep -q 'Allow: /courses' dist/robots.txt
           # llms.txt curated
           grep -q '# Lextures' dist/llms.txt
+          grep -q '<rss version="2.0">' dist/blog/feed.xml
+          node -e "const f=require('./dist/blog/feed.json'); if(f.version!=='https://jsonfeed.org/version/1.1'||!Array.isArray(f.items)) process.exit(1)"
           # IndexNow key file present
           KEY=$(node --input-type=module -e "import {readFileSync} from 'node:fs'; const m=JSON.parse(readFileSync('./dist/.seo-manifest.json','utf8')); process.stdout.write(m.indexNowKey||'')")
           test -n "$KEY"
@@ -159,6 +173,7 @@ jobs:
           node --input-type=module -e "
             import { readFileSync } from 'node:fs';
             const m = JSON.parse(readFileSync('./dist/.seo-manifest.json', 'utf8'));
+            if (m.contentSource !== 'api') { console.error('marketing content must build from api'); process.exit(1); }
             const titles = m.urls.map(u => u.title);
             const dups = titles.filter((t,i) => titles.indexOf(t) !== i);
             if (dups.length) { console.error('duplicate titles', dups); process.exit(1); }
@@ -189,7 +204,7 @@ jobs:
           retention-days: 30
 
   deploy:
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' || github.event_name == 'repository_dispatch' || github.event_name == 'workflow_dispatch'
     needs: build
     runs-on: ubuntu-latest
     environment:
@@ -202,7 +217,7 @@ jobs:
   # SEO.2 FR-16…FR-19: IndexNow + Google sitemap ping after successful deploy.
   # Failures warn only (exit 0) so deploys are never blocked.
   index-submit:
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' || github.event_name == 'repository_dispatch' || github.event_name == 'workflow_dispatch'
     needs: deploy
     runs-on: ubuntu-latest
     defaults:
@@ -240,7 +255,17 @@ jobs:
           SITE_ORIGIN: https://lextures.com
           SEO_MANIFEST_PATH: dist/.seo-manifest.json
           SEO_MANIFEST_PREV_PATH: seo-manifest-prev.json
-        run: node scripts/submit-indexnow.mjs
+        run: |
+          node --input-type=module -e "import fs from 'node:fs'; const next=JSON.parse(fs.readFileSync('dist/.seo-manifest.json')); if(fs.existsSync('seo-manifest-prev.json')&&!next.fallbackUsed){const prev=JSON.parse(fs.readFileSync('seo-manifest-prev.json')); const a=(prev.urls||[]).filter(x=>x.sitemap!==false&&!String(x.robots).includes('noindex')).length; const b=(next.urls||[]).filter(x=>x.sitemap!==false&&!String(x.robots).includes('noindex')).length; if(a&&b<a*.9) throw new Error('Sitemap URL count dropped more than 10%: '+a+' -> '+b); console.log('Sitemap URL count: '+b)}"
+          node scripts/submit-indexnow.mjs
+        continue-on-error: true
+
+      - name: Sync generated marketing paths
+        env:
+          API_BASE: https://self.lextures.com
+          CONTENT_KNOWN_PATHS_TOKEN: ${{ secrets.CONTENT_KNOWN_PATHS_TOKEN }}
+          SEO_MANIFEST_PATH: dist/.seo-manifest.json
+        run: node scripts/sync-known-paths.mjs
         continue-on-error: true
 
       - name: Save manifest as previous for next deploy
@@ -253,7 +278,7 @@ jobs:
           key: seo-manifest-prev-${{ github.run_id }}
 
   seo-smoke:
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' || github.event_name == 'repository_dispatch' || github.event_name == 'workflow_dispatch'
     needs: deploy
     runs-on: ubuntu-latest
     defaults:

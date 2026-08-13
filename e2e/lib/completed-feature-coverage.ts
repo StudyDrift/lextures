@@ -110,6 +110,11 @@ export const EXCLUSION_RULES: ReadonlyArray<{
     match: (p) => path.basename(p).toLowerCase() === 'readme.md',
   },
   {
+    id: 'archive-notes',
+    description: 'Section ARCHIVE.md operational notes (not feature stories)',
+    match: (p) => path.basename(p).toLowerCase() === 'archive.md',
+  },
+  {
     id: 'assets-dir',
     description: 'Static assets under docs/completed/assets',
     match: (p) => p.startsWith('docs/completed/assets/') || p === 'docs/completed/assets',

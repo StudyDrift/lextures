@@ -295,6 +295,8 @@ describe('frontmatter + markdown siblings', () => {
   it('shouldEmitMarkdownSibling only for content detail paths', () => {
     assert.equal(shouldEmitMarkdownSibling('/docs/self-hosting'), false)
     assert.equal(shouldEmitMarkdownSibling('/docs/self-hosting/install'), true)
+    assert.equal(shouldEmitMarkdownSibling('/es/docs/cursos/encontrar-tu-curso'), true)
+    assert.equal(shouldEmitMarkdownSibling('/es/blog/hola'), true)
     assert.equal(shouldEmitMarkdownSibling('/blog/x'), true)
     assert.equal(shouldEmitMarkdownSibling('/docs'), false)
     assert.equal(shouldEmitMarkdownSibling('/pricing'), false)

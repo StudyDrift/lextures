@@ -62,6 +62,7 @@ function escapeRegExp(value: string): string {
 export function databaseUrl(): string {
   return (
     process.env.DATABASE_URL ??
+    process.env.E2E_DATABASE_URL ??
     'postgres://studydrift:studydrift@localhost:5432/studydrift?sslmode=disable'
   )
 }

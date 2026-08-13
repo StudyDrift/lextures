@@ -15,22 +15,22 @@ func UpsertCategory(ctx context.Context, tx pgx.Tx, c Category, actor uuid.UUID)
 	if c.Locale == "" {
 		c.Locale = "en"
 	}
-	err := tx.QueryRow(ctx, `INSERT INTO marketing.content_categories (id,slug,locale,title,description,sort_order,platform_path,created_by,updated_by)
-	 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$8) ON CONFLICT (locale,slug) DO UPDATE SET title=EXCLUDED.title,description=EXCLUDED.description,sort_order=EXCLUDED.sort_order,platform_path=EXCLUDED.platform_path,updated_by=EXCLUDED.updated_by
-	 RETURNING id,slug,locale,title,description,sort_order,platform_path,created_by,updated_by,created_at,updated_at`, c.ID, c.Slug, c.Locale, c.Title, c.Description, c.SortOrder, c.PlatformPath, actor).Scan(&c.ID, &c.Slug, &c.Locale, &c.Title, &c.Description, &c.SortOrder, &c.PlatformPath, &c.CreatedBy, &c.UpdatedBy, &c.CreatedAt, &c.UpdatedAt)
+	err := tx.QueryRow(ctx, `INSERT INTO marketing.content_categories (id,slug,locale,title,description,sort_order,platform_path,category_group_id,created_by,updated_by)
+	 VALUES ($1,$2,$3,$4,$5,$6,$7,COALESCE(NULLIF($8,'00000000-0000-0000-0000-000000000000'::uuid),gen_random_uuid()),$9,$9) ON CONFLICT (locale,slug) DO UPDATE SET title=EXCLUDED.title,description=EXCLUDED.description,sort_order=EXCLUDED.sort_order,platform_path=EXCLUDED.platform_path,updated_by=EXCLUDED.updated_by
+	 RETURNING id,slug,locale,title,description,sort_order,platform_path,category_group_id,created_by,updated_by,created_at,updated_at`, c.ID, c.Slug, c.Locale, c.Title, c.Description, c.SortOrder, c.PlatformPath, c.CategoryGroupID, nullUUID(actor)).Scan(&c.ID, &c.Slug, &c.Locale, &c.Title, &c.Description, &c.SortOrder, &c.PlatformPath, &c.CategoryGroupID, &c.CreatedBy, &c.UpdatedBy, &c.CreatedAt, &c.UpdatedAt)
 	return &c, err
 }
 
 func ListCategories(ctx context.Context, q querier, locale string) ([]Category, error) {
-	rows, err := q.Query(ctx, `SELECT id,slug,locale,title,description,sort_order,platform_path,created_by,updated_by,created_at,updated_at FROM marketing.content_categories WHERE ($1='' OR locale=$1) ORDER BY sort_order,slug`, locale)
+	rows, err := q.Query(ctx, `SELECT id,slug,locale,title,description,sort_order,platform_path,category_group_id,created_by,updated_by,created_at,updated_at FROM marketing.content_categories WHERE ($1='' OR locale=$1) ORDER BY sort_order,slug`, locale)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var out []Category
+	out := make([]Category, 0)
 	for rows.Next() {
 		var c Category
-		if err := rows.Scan(&c.ID, &c.Slug, &c.Locale, &c.Title, &c.Description, &c.SortOrder, &c.PlatformPath, &c.CreatedBy, &c.UpdatedBy, &c.CreatedAt, &c.UpdatedAt); err != nil {
+		if err := rows.Scan(&c.ID, &c.Slug, &c.Locale, &c.Title, &c.Description, &c.SortOrder, &c.PlatformPath, &c.CategoryGroupID, &c.CreatedBy, &c.UpdatedBy, &c.CreatedAt, &c.UpdatedAt); err != nil {
 			return nil, err
 		}
 		out = append(out, c)
@@ -50,7 +50,7 @@ func UpsertAuthor(ctx context.Context, tx pgx.Tx, a Author, actor uuid.UUID) (*A
 	}
 	err := tx.QueryRow(ctx, `INSERT INTO marketing.content_authors (slug,name,job_title,bio,knows_about,image_media_id,links,user_id,status,created_by,updated_by)
 	 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$10) ON CONFLICT (slug) DO UPDATE SET name=EXCLUDED.name,job_title=EXCLUDED.job_title,bio=EXCLUDED.bio,knows_about=EXCLUDED.knows_about,image_media_id=EXCLUDED.image_media_id,links=EXCLUDED.links,user_id=EXCLUDED.user_id,status=EXCLUDED.status,updated_by=EXCLUDED.updated_by
-	 RETURNING slug,name,job_title,bio,knows_about,image_media_id,links,user_id,status,created_by,updated_by,created_at,updated_at`, a.Slug, a.Name, a.JobTitle, a.Bio, a.KnowsAbout, a.ImageMediaID, a.Links, a.UserID, a.Status, actor).Scan(&a.Slug, &a.Name, &a.JobTitle, &a.Bio, &a.KnowsAbout, &a.ImageMediaID, &a.Links, &a.UserID, &a.Status, &a.CreatedBy, &a.UpdatedBy, &a.CreatedAt, &a.UpdatedAt)
+	 RETURNING slug,name,job_title,bio,knows_about,image_media_id,links,user_id,status,created_by,updated_by,created_at,updated_at`, a.Slug, a.Name, a.JobTitle, a.Bio, a.KnowsAbout, a.ImageMediaID, a.Links, a.UserID, a.Status, nullUUID(actor)).Scan(&a.Slug, &a.Name, &a.JobTitle, &a.Bio, &a.KnowsAbout, &a.ImageMediaID, &a.Links, &a.UserID, &a.Status, &a.CreatedBy, &a.UpdatedBy, &a.CreatedAt, &a.UpdatedAt)
 	return &a, err
 }
 
@@ -60,7 +60,7 @@ func ListAuthors(ctx context.Context, q querier) ([]Author, error) {
 		return nil, err
 	}
 	defer rows.Close()
-	var out []Author
+	out := make([]Author, 0)
 	for rows.Next() {
 		var a Author
 		if err := rows.Scan(&a.Slug, &a.Name, &a.JobTitle, &a.Bio, &a.KnowsAbout, &a.ImageMediaID, &a.Links, &a.UserID, &a.Status, &a.CreatedBy, &a.UpdatedBy, &a.CreatedAt, &a.UpdatedAt); err != nil {

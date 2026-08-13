@@ -23,12 +23,14 @@ import {
   Clock,
   LayoutGrid,
   Gamepad2,
+  Newspaper,
 } from 'lucide-react'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { usePermissions } from '../../context/use-permissions'
 import {
   PERM_ACCOMMODATIONS_MANAGE,
   PERM_RBAC_MANAGE,
+  PERM_MARKETING_CONTENT_VIEW,
 } from '../../lib/rbac-api'
 import { sideNavActiveClass } from './side-nav-styles'
 import { SideNavLink } from './side-nav-link'
@@ -74,7 +76,10 @@ export function SideNavAdminLinks() {
     maintenanceBannerEnabled,
     ffTranscripts,
     ffDiplomas,
+    ffMarketingContent,
   } = usePlatformFeatures()
+
+  const showMarketingContent = ffMarketingContent && !permLoading && allows(PERM_MARKETING_CONTENT_VIEW)
 
   const captionsEnabled = videoCaptionsEnabled || autoCaptioningEnabled
   const broadcastsPath = orgId ? `/admin/broadcasts/${encodeURIComponent(orgId)}` : '/admin/broadcasts'
@@ -99,7 +104,7 @@ export function SideNavAdminLinks() {
     (ffLibrary && !!orgId) ||
     ffLearningPaths
 
-  if (!canManageRbac && !showCcrAdmin && !adminConsoleEnabled) {
+  if (!canManageRbac && !showCcrAdmin && !adminConsoleEnabled && !showMarketingContent) {
     return null
   }
 
@@ -109,6 +114,18 @@ export function SideNavAdminLinks() {
         <Suspense fallback={null}>
           <SideNavAdminConsoleLink orgId={orgId} />
         </Suspense>
+      ) : null}
+      {showMarketingContent ? (
+        <>
+          {!canManageRbac && !showCcrAdmin ? <SideNavSectionLabel first>Administration</SideNavSectionLabel> : null}
+          <SideNavLink
+            to="/admin/marketing-content"
+            className={() => (active('/admin/marketing-content') ? sideNavActiveClass : '')}
+            icon={<Newspaper className="h-5 w-5" />}
+          >
+            Marketing Content
+          </SideNavLink>
+        </>
       ) : null}
       {showCcrAdmin && !canManageRbac ? (
         <>

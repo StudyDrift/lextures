@@ -18,6 +18,7 @@ import (
 	repo "github.com/lextures/lextures/server/internal/repos/marketingcontent"
 	"github.com/lextures/lextures/server/internal/service/marketingcontent/render"
 	validator "github.com/lextures/lextures/server/internal/service/marketingcontent/validate"
+	publish "github.com/lextures/lextures/server/internal/service/marketingpublish"
 )
 
 type Service struct {
@@ -31,16 +32,20 @@ type TransitionInput struct {
 	Note               string
 	ExpectedRevisionNo int
 	LintOverride       bool
+	ReviewerID         *uuid.UUID
 }
 
 var ErrLintBlocked = errors.New("marketingcontent: publish blocked by content validation")
+var ErrReviewNoteTooShort = errors.New("marketingcontent: request-changes note must be at least 10 characters")
+var ErrReviewerRequired = errors.New("marketingcontent: reviewer assignment is required")
+var ErrOverrideJustification = errors.New("marketingcontent: publish override justification must be at least 10 characters")
 
 func metadataFor(in repo.NewArticle) validator.Metadata {
 	updated := ""
 	if in.ContentUpdatedAt != nil {
 		updated = in.ContentUpdatedAt.Format("2006-01-02")
 	}
-	return validator.Metadata{Title: in.Title, Description: in.Description, Updated: updated, Author: in.AuthorSlug, Cluster: in.Cluster, PrimaryQuestion: in.PrimaryQuestion, Keywords: in.Keywords}
+	return validator.Metadata{Title: in.Title, Description: in.Description, Updated: updated, Author: in.AuthorSlug, Cluster: in.Cluster, PrimaryQuestion: in.PrimaryQuestion, Keywords: in.Keywords, Locale: in.Locale}
 }
 
 func (s *Service) Lint(ctx context.Context, kind, body string, metadata validator.Metadata) validator.Report {
@@ -48,7 +53,7 @@ func (s *Service) Lint(ctx context.Context, kind, body string, metadata validato
 	if err != nil {
 		return validator.Report{Findings: []validator.Finding{{Rule: "validator_error", Severity: "warn", Message: "Known paths could not be loaded."}}, Stats: renderStats(body), ValidatorError: true}
 	}
-	report := validator.Article(validator.Input{Kind: kind, BodyMD: body, Metadata: metadata, KnownPaths: paths})
+	report := validator.Article(validator.Input{Kind: kind, BodyMD: body, Metadata: metadata, KnownPaths: paths, Locale: metadata.Locale})
 	// MC.4 preview/search surfaces: keep HTML + PlainText on the live lint path so the
 	// sanitizing renderer stays reachable from cmd/server (not test-only).
 	if html, renderErr := render.HTML(body); renderErr != nil {
@@ -140,6 +145,12 @@ func (s *Service) Update(ctx context.Context, in repo.ArticleUpdate) (*repo.Arti
 		if before.Path != out.Path && (before.Status == "published" || out.Status == "published") {
 			redirect = &repo.Redirect{FromPath: before.Path, ToPath: out.Path, StatusCode: 301, Source: "slug_change", ArticleID: &out.ID}
 		}
+		if before.Status == "published" || out.Status == "published" {
+			actor := in.Article.ActorID
+			if _, err = publish.RecordChange(ctx, tx, out.ID, out.Path, "update", &actor, false, s.now()); err != nil {
+				return err
+			}
+		}
 		return nil
 	})
 	return out, redirect, err
@@ -161,8 +172,15 @@ func (s *Service) Transition(ctx context.Context, id, actor uuid.UUID, in Transi
 		}
 		copy := articleAsInput(current, actor)
 		report := s.applyQuality(ctx, &copy)
-		if (in.Action == ActionPublish || in.Action == ActionSchedule) && blocksPublish(report) && !in.LintOverride {
+		blocked := (in.Action == ActionPublish || in.Action == ActionSchedule) && blocksPublish(report)
+		if blocked && !in.LintOverride {
 			return ErrLintBlocked
+		}
+		if blocked && in.LintOverride && len(strings.TrimSpace(in.Note)) < 10 {
+			return ErrOverrideJustification
+		}
+		if in.Action == ActionRequestChanges && len(strings.TrimSpace(in.Note)) < 10 {
+			return ErrReviewNoteTooShort
 		}
 		copy.Status = string(next)
 		copy.ChangeNote = in.Note
@@ -174,6 +192,18 @@ func (s *Service) Transition(ctx context.Context, id, actor uuid.UUID, in Transi
 				copy.FirstPublishedAt = &now
 			}
 			copy.ScheduledFor = nil
+			if copy.ReviewDueOn == nil {
+				settings, settingsErr := repo.GetEditorialSettings(ctx, tx)
+				if settingsErr != nil {
+					return settingsErr
+				}
+				days := settings.ReviewIntervalBlogDays
+				if copy.Kind == "doc" {
+					days = settings.ReviewIntervalDocDays
+				}
+				due := now.AddDate(0, 0, days)
+				copy.ReviewDueOn = &due
+			}
 		case ActionSchedule:
 			copy.ScheduledFor = in.ScheduledFor
 			copy.PublishedAt = nil
@@ -183,7 +213,96 @@ func (s *Service) Transition(ctx context.Context, id, actor uuid.UUID, in Transi
 		case ActionApprove:
 			copy.ReviewedAt = &now
 		}
+		var reviewerID *uuid.UUID
+		if in.ReviewerID != nil {
+			var exists bool
+			if e := tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM "user".users WHERE id=$1)`, *in.ReviewerID).Scan(&exists); e != nil {
+				return e
+			} else if exists {
+				reviewerID = in.ReviewerID
+			}
+		}
+		if reviewerID == nil && current.ReviewerSlug != nil {
+			var id uuid.UUID
+			if e := tx.QueryRow(ctx, `SELECT user_id FROM marketing.content_authors WHERE slug=$1 AND status='active'`, *current.ReviewerSlug).Scan(&id); e == nil {
+				reviewerID = &id
+			}
+		}
+		if in.Action == ActionSubmit && reviewerID == nil {
+			return ErrReviewerRequired
+		}
+		if in.Action == ActionSubmit {
+			_, err = tx.Exec(ctx, `UPDATE marketing.content_articles SET reviewer_id=$2,review_submitted_at=$3 WHERE id=$1`, id, reviewerID, now)
+			if err != nil {
+				return err
+			}
+		}
 		out, err = repo.UpdateArticle(ctx, tx, repo.ArticleUpdate{ID: id, ExpectedRevisionNo: in.ExpectedRevisionNo, Article: copy})
+		if err != nil {
+			return err
+		}
+		reviewAction := ""
+		switch in.Action {
+		case ActionSubmit:
+			reviewAction = "submitted"
+		case ActionApprove:
+			reviewAction = "approved"
+		case ActionRequestChanges:
+			reviewAction = "changes_requested"
+		}
+		if reviewAction != "" {
+			if err = repo.InsertReview(ctx, tx, id, out.RevisionNo, reviewAction, reviewerID, &actor, strings.TrimSpace(in.Note)); err != nil {
+				return err
+			}
+			var recipient *uuid.UUID
+			if in.Action == ActionSubmit {
+				recipient = reviewerID
+			} else {
+				var authorID uuid.UUID
+				if e := tx.QueryRow(ctx, `SELECT user_id FROM marketing.content_authors WHERE slug=$1`, current.AuthorSlug).Scan(&authorID); e == nil {
+					recipient = &authorID
+				}
+			}
+			if recipient != nil {
+				key := fmt.Sprintf("%s:%s:%d", reviewAction, id, out.RevisionNo)
+				if err = repo.NotifyOnce(ctx, tx, key, id, *recipient, "marketing_content_"+reviewAction, "Marketing content: "+out.Title, "Review status: "+strings.ReplaceAll(reviewAction, "_", " "), "/admin/marketing-content/"+id.String()); err != nil {
+					return err
+				}
+			}
+		}
+		if blocked && in.LintOverride {
+			rules := []string{}
+			for _, finding := range report.Findings {
+				if finding.Severity == "error" {
+					rules = append(rules, finding.Rule)
+				}
+			}
+			_, err = tx.Exec(ctx, `INSERT INTO marketing.content_overrides(article_id,revision_no,actor_id,rules,justification) VALUES($1,$2,$3,$4,$5)`, id, out.RevisionNo, actor, rules, strings.TrimSpace(in.Note))
+			if err != nil {
+				return err
+			}
+		}
+		eventAction := ""
+		switch in.Action {
+		case ActionPublish:
+			eventAction = "publish"
+		case ActionSchedule:
+			eventAction = "schedule"
+		case ActionUnpublish:
+			eventAction = "unpublish"
+		case ActionArchive:
+			if current.Status == string(StatusPublished) {
+				eventAction = "archive"
+			}
+		}
+		if eventAction != "" {
+			if in.Action == ActionSchedule {
+				err = publish.RecordEvent(ctx, tx, out.ID, out.Path, eventAction, &actor, nil)
+			} else {
+				urgent := in.Action == ActionUnpublish || in.Action == ActionArchive
+				_, err = publish.RecordChange(ctx, tx, out.ID, out.Path, eventAction, &actor, urgent, now)
+			}
+		}
 		return err
 	})
 	return out, err
@@ -214,9 +333,90 @@ func (s *Service) Restore(ctx context.Context, id, actor uuid.UUID, revisionNo, 
 		in.ScheduledFor = current.ScheduledFor
 		in.ChangeNote = note
 		out, err = repo.UpdateArticle(ctx, tx, repo.ArticleUpdate{ID: id, ExpectedRevisionNo: expected, Article: in})
+		if err == nil && current.Status == string(StatusPublished) {
+			_, err = publish.RecordChange(ctx, tx, out.ID, out.Path, "restore", &actor, false, s.now())
+		}
 		return err
 	})
 	return out, err
+}
+
+// PublishDue claims and publishes scheduled articles in one transaction. Locked
+// rows are skipped so multiple workers can safely run this method concurrently.
+func (s *Service) PublishDue(ctx context.Context, limit int) (int, error) {
+	if limit <= 0 {
+		limit = 50
+	}
+	now := s.now()
+	count := 0
+	err := s.transaction(ctx, func(tx pgx.Tx) error {
+		rows, err := tx.Query(ctx, `SELECT id FROM marketing.content_articles WHERE status='scheduled' AND scheduled_for<= $1 AND deleted_at IS NULL ORDER BY scheduled_for FOR UPDATE SKIP LOCKED LIMIT $2`, now, limit)
+		if err != nil {
+			return err
+		}
+		var ids []uuid.UUID
+		for rows.Next() {
+			var id uuid.UUID
+			if err = rows.Scan(&id); err != nil {
+				return err
+			}
+			ids = append(ids, id)
+		}
+		rows.Close()
+		if err = rows.Err(); err != nil {
+			return err
+		}
+		for _, id := range ids {
+			a, err := repo.GetArticleByID(ctx, tx, id)
+			if err != nil {
+				return err
+			}
+			in := articleAsInput(a, uuid.Nil)
+			report := s.applyQuality(ctx, &in)
+			if blocksPublish(report) {
+				_, err = tx.Exec(ctx, `INSERT INTO marketing.content_publish_events(article_id,path,action,error) VALUES($1,$2,'scheduled_publish',$3)`, a.ID, a.Path, "Scheduled publish failed content validation")
+				if err != nil {
+					return err
+				}
+				var authorID uuid.UUID
+				if e := tx.QueryRow(ctx, `SELECT user_id FROM marketing.content_authors WHERE slug=$1`, a.AuthorSlug).Scan(&authorID); e == nil {
+					if err = repo.NotifyOnce(ctx, tx, "scheduled_publish_failed:"+a.ID.String()+":"+now.Format("2006-01-02"), a.ID, authorID, "marketing_content_scheduled_publish_failed", "Scheduled publish failed", a.Title, "/admin/marketing-content/"+a.ID.String()); err != nil {
+						return err
+					}
+				}
+				continue
+			}
+			in.Status = string(StatusPublished)
+			in.ScheduledFor = nil
+			in.PublishedAt = &now
+			if in.FirstPublishedAt == nil {
+				in.FirstPublishedAt = &now
+			}
+			if in.ReviewDueOn == nil {
+				settings, settingsErr := repo.GetEditorialSettings(ctx, tx)
+				if settingsErr != nil {
+					return settingsErr
+				}
+				days := settings.ReviewIntervalBlogDays
+				if in.Kind == "doc" {
+					days = settings.ReviewIntervalDocDays
+				}
+				due := now.AddDate(0, 0, days)
+				in.ReviewDueOn = &due
+			}
+			in.ChangeNote = "Scheduled publish"
+			out, err := repo.UpdateArticle(ctx, tx, repo.ArticleUpdate{ID: id, ExpectedRevisionNo: a.RevisionNo, Article: in})
+			if err != nil {
+				return err
+			}
+			if _, err = publish.RecordChange(ctx, tx, out.ID, out.Path, "scheduled_publish", nil, false, now); err != nil {
+				return err
+			}
+			count++
+		}
+		return nil
+	})
+	return count, err
 }
 
 func (s *Service) Delete(ctx context.Context, id, actor uuid.UUID, redirectTo string) error {
@@ -230,6 +430,11 @@ func (s *Service) Delete(ctx context.Context, id, actor uuid.UUID, redirectTo st
 		}
 		if err := repo.SoftDeleteArticle(ctx, tx, id, actor); err != nil {
 			return err
+		}
+		if a.Status == string(StatusPublished) {
+			if _, err := publish.RecordChange(ctx, tx, a.ID, a.Path, "unpublish", &actor, true, s.now()); err != nil {
+				return err
+			}
 		}
 		if redirectTo != "" {
 			_, err = repo.InsertRedirect(ctx, tx, repo.Redirect{FromPath: a.Path, ToPath: redirectTo, StatusCode: 301, Source: "manual", ArticleID: &id}, actor)

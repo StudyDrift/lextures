@@ -11,27 +11,28 @@ import (
 func UpdateArticle(ctx context.Context, tx pgx.Tx, u ArticleUpdate) (*Article, error) {
 	in := u.Article
 	in = normalizeArticleInput(in)
-	path, err := articlePath(ctx, tx, in.Kind, in.Slug, in.CategoryID)
+	var oldPath, oldStatus, oldLocale string
+	if err := tx.QueryRow(ctx, `SELECT path,status,locale FROM marketing.content_articles WHERE id=$1 AND deleted_at IS NULL`, u.ID).Scan(&oldPath, &oldStatus, &oldLocale); err != nil {
+		return nil, err
+	}
+	if oldLocale == "" {
+		oldLocale = "en"
+	}
+	in.Locale = oldLocale
+	path, err := articlePath(ctx, tx, in.Kind, in.Locale, in.Slug, in.CategoryID)
 	if err != nil {
 		return nil, err
 	}
-	if in.Locale == "" {
-		in.Locale = "en"
-	}
-	var oldPath, oldStatus string
-	if err := tx.QueryRow(ctx, `SELECT path,status FROM marketing.content_articles WHERE id=$1 AND deleted_at IS NULL`, u.ID).Scan(&oldPath, &oldStatus); err != nil {
-		return nil, err
-	}
 	a, err := scanArticle(tx.QueryRow(ctx, `UPDATE marketing.content_articles SET
-	 kind=$3,slug=$4,locale=$5,translation_group_id=$6,category_id=$7,path=$8,title=$9,description=$10,
-	 body_md=$11,status=$12,author_slug=$13,reviewer_slug=$14,published_at=$15,
-	 first_published_at=COALESCE(first_published_at,$16),scheduled_for=$17,content_updated_at=$18,
-	 reviewed_at=$19,review_due_on=$20,primary_question=$21,cluster=$22,pillar=$23,brief_ref=$24,
-	 verified_against=$25,keywords=$26,related_to=$27,roles=$28,segments=$29,citations=$30,
-	 hero_media_id=$31,quality_score=$32,quality_report=$33,noindex=$34,canonical_override=$35,
-	 extra=$36,revision_no=revision_no+1,updated_by=$37
+	 kind=$3,slug=$4,category_id=$5,path=$6,title=$7,description=$8,
+	 body_md=$9,status=$10,author_slug=$11,reviewer_slug=$12,published_at=$13,
+	 first_published_at=COALESCE(first_published_at,$14),scheduled_for=$15,content_updated_at=$16,
+	 reviewed_at=$17,review_due_on=$18,primary_question=$19,cluster=$20,pillar=$21,brief_ref=$22,
+	 verified_against=$23,keywords=$24,related_to=$25,roles=$26,segments=$27,citations=$28,
+	 hero_media_id=$29,quality_score=$30,quality_report=$31,noindex=$32,canonical_override=$33,
+	 extra=$34,source_article_id=COALESCE($35,source_article_id),source_synced_revision=COALESCE($36,source_synced_revision),source_synced_at=COALESCE($37,source_synced_at),revision_no=revision_no+1,updated_by=$38
 	 WHERE id=$1 AND revision_no=$2 AND deleted_at IS NULL RETURNING `+articleColumns,
-		u.ID, u.ExpectedRevisionNo, in.Kind, in.Slug, in.Locale, in.TranslationGroupID, in.CategoryID, path, in.Title, in.Description, in.BodyMD, in.Status, in.AuthorSlug, in.ReviewerSlug, in.PublishedAt, in.FirstPublishedAt, in.ScheduledFor, in.ContentUpdatedAt, in.ReviewedAt, in.ReviewDueOn, in.PrimaryQuestion, in.Cluster, in.Pillar, in.BriefRef, in.VerifiedAgainst, in.Keywords, in.RelatedTo, in.Roles, in.Segments, in.Citations, in.HeroMediaID, in.QualityScore, in.QualityReport, in.Noindex, in.CanonicalOverride, in.Extra, in.ActorID))
+		u.ID, u.ExpectedRevisionNo, in.Kind, in.Slug, in.CategoryID, path, in.Title, in.Description, in.BodyMD, in.Status, in.AuthorSlug, in.ReviewerSlug, in.PublishedAt, in.FirstPublishedAt, in.ScheduledFor, in.ContentUpdatedAt, in.ReviewedAt, in.ReviewDueOn, in.PrimaryQuestion, in.Cluster, in.Pillar, in.BriefRef, in.VerifiedAgainst, in.Keywords, in.RelatedTo, in.Roles, in.Segments, in.Citations, in.HeroMediaID, in.QualityScore, in.QualityReport, in.Noindex, in.CanonicalOverride, in.Extra, in.SourceArticleID, in.SourceSyncedRevision, in.SourceSyncedAt, nullUUID(in.ActorID)))
 	if err == pgx.ErrNoRows {
 		return nil, ErrRevisionConflict
 	}
@@ -72,7 +73,7 @@ func insertRevision(ctx context.Context, tx pgx.Tx, a *Article, note string, act
 	if err != nil {
 		return err
 	}
-	_, err = tx.Exec(ctx, `INSERT INTO marketing.content_revisions (article_id,revision_no,body_md,metadata,change_note,status_after,actor_id) VALUES ($1,$2,$3,$4,$5,$6,$7)`, a.ID, a.RevisionNo, a.BodyMD, metadata, note, a.Status, actor)
+	_, err = tx.Exec(ctx, `INSERT INTO marketing.content_revisions (article_id,revision_no,body_md,metadata,change_note,status_after,actor_id) VALUES ($1,$2,$3,$4,$5,$6,$7)`, a.ID, a.RevisionNo, a.BodyMD, metadata, note, a.Status, nullUUID(actor))
 	return err
 }
 

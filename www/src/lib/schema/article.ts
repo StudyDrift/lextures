@@ -9,6 +9,8 @@ export type ArticleInput = {
   datePublished: string
   dateModified?: string
   authorSlug: string
+  authorName?: string
+  authorLinkable?: boolean
   reviewedBySlug?: string
   image?: string
   wordCount?: number
@@ -29,7 +31,9 @@ export function buildArticle(input: ArticleInput): JsonLdNode {
     description: input.description,
     datePublished: input.datePublished,
     dateModified: input.dateModified || input.datePublished,
-    author: personRef(input.authorSlug, input.siteOrigin),
+    author: input.authorLinkable === false
+      ? { '@type': 'Person', name: input.authorName || input.authorSlug }
+      : personRef(input.authorSlug, input.siteOrigin),
     publisher: { '@id': organizationId(input.siteOrigin) },
     mainEntityOfPage: {
       '@type': 'WebPage',

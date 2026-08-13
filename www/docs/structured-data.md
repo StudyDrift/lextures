@@ -7,7 +7,7 @@ The marketing site emits a single JSON-LD `@graph` on every page. Nodes share st
 1. **Never assert what is not visible and true on the page.** Schema that disagrees with on-page copy is a spam policy risk and fails AI-surface trust.
 2. **All `@id`s are absolute URLs** and are spelled only in `www/src/lib/schema/ids.ts`.
 3. **No schema string literals outside `www/src/lib/schema/`.**
-4. **`sameAs` is a fixed allowlist** in `entity.ts` — only verified, owned/claimed profiles (coordinate new profiles with SEO.13).
+4. **`sameAs` is consented author data** from the content author registry; organization profiles remain the fixed allowlist in `entity.ts`.
 5. **Build validates** missing `@id`, non-absolute `@id`, dangling refs, and a **12 KB** payload budget (`generate-site.mjs`).
 
 ## Envelope
@@ -47,6 +47,22 @@ Emitted as one `<script type="application/ld+json" id="site-json-ld">`. Serializ
 | `/privacy`, `/terms` | `DigitalDocument` |
 
 Every path except `/` also gets `BreadcrumbList` (visible UI breadcrumbs land with SEO.5).
+
+Translated content pages emit reciprocal `<link rel="alternate" hreflang>` tags (including `x-default` on the English URL) only when two or more locales in the translation group are published. English-only builds emit no hreflang. Sitemap urlsets for non-English locales include matching `xhtml:link` alternates.
+
+
+## Node data sources
+
+| Node | Source |
+|---|---|
+| `Organization`, `WebSite`, `SoftwareApplication` | Versioned `www` configuration |
+| `Person` | Public database author registry for API builds; file registry for rollback builds |
+| `Article`, `TechArticle` | Published content API article, including publication/update dates and citations |
+| `FAQPage`, `HowTo` | Directives parsed from the published article body |
+| `Course`, course `ItemList` | Public marketplace API |
+| `BreadcrumbList` | Route manifest and the article's database path |
+
+Retired authors keep a plain-text byline and embedded author name on the article node, but do not get a standalone `Person` node or author route.
 
 ## Adding a node type
 

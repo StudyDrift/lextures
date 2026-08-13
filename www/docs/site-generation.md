@@ -13,7 +13,7 @@ tsc -b && node scripts/optimize-images.mjs && vite build && node scripts/generat
 `generate-site.mjs`:
 
 1. Starts a Vite SSR server and loads `src/entry-server.tsx` + `src/lib/route-manifest.tsx`.
-2. Expands the **route manifest** into concrete paths (static pages, `/blog/*`, `/docs/*`, `/courses/*`).
+2. Expands the **route manifest** into concrete paths (static pages, `/blog/*`, `/docs/*`, `/courses/*`, plus published translations at `/{locale}/blog/*` and `/{locale}/docs/*`).
 3. For each path, calls `renderToString` so `#root` contains headings and body copy **without executing client JS**.
 4. Injects per-page `<title>`, meta description, canonical, robots, OG/Twitter, JSON-LD `@graph`, and optional markdown alternate into `<head>`.
 5. Validates JSON-LD graphs (absolute `@id`, no dangling refs, ≤12 KB) and fails the build on errors (SEO.3).
@@ -38,6 +38,7 @@ See [adding-a-page.md](./adding-a-page.md).
 | `COURSE_CACHE_URL` | same as `SITE_ORIGIN` | Origin used to reuse previous course HTML on API failure |
 | `GENERATE_CONCURRENCY` | `8` | Bounded pool for course detail fetches / renders |
 | `ROBOTS_DISALLOW_ALL` | auto | `1` forces staging robots; also auto when `SITE_ORIGIN` ≠ production |
+| `CONTENT_API_BASE` | — | Public content API origin used by API-sourced builds and parity checks |
 
 ## Course pages & API failure
 
@@ -83,6 +84,16 @@ Build date is never used. Two consecutive deploys with no content change must no
 
 The build fails if any sitemap URL is missing from the indexable set in `.seo-manifest.json`, or vice versa. `robots: noindex` URLs never appear in sitemaps.
 
+To compare file- and API-sourced builds after importing content, run:
+
+```bash
+npm run content:parity -- --api-base https://staging.self.lextures.com
+```
+
+The command compares generated article HTML, `.seo-manifest.json`, section sitemaps,
+LLM catalogues, and markdown siblings. Unexpected byte differences exit `1`; build failures
+exit `2`. Intentional differences must be listed in `scripts/parity-allowlist.json` with a reason.
+
 ## Crawler policy & IndexNow
 
 See [crawler-policy.md](./crawler-policy.md) for:
@@ -120,6 +131,17 @@ Performance budgets: [performance-budget.md](./performance-budget.md).
 | Marketplace API down | WARN + previous-deploy course reuse; site still deploys |
 
 ## Public content API
+
+Blog and docs content is always prerendered from the public API. `CONTENT_API_BASE` falls back to `API_BASE`, and `CONTENT_CACHE_DIR` defaults
+to `.content-cache`. The API loader retries three times, honors `GENERATE_CONCURRENCY`, fetches only
+hashes absent from the cache, and logs source/fetch/cache/fallback counts. On failure it uses the
+cached index and bodies, or an empty content set when no cache exists. Media is localized under
+`dist/assets/content`, and API redirects are merged with static redirects (static wins).
+
+After deployment, `scripts/sync-known-paths.mjs` best-effort posts generated paths using
+`CONTENT_KNOWN_PATHS_TOKEN`; missing credentials or request failures do not fail deployment.
+
+Published, indexable blog articles also generate RSS 2.0 at `/blog/feed.xml` and JSON Feed 1.1 at `/blog/feed.json` (20 newest entries). Blog pages advertise both feeds. The SEO manifest records `contentSource`, `articleCount`, `feedItemCount`, and `fallbackUsed`; deployment fails when the indexable sitemap count drops by more than 10% without a recorded fallback.
 
 Database-backed marketing content is available anonymously under
 `/api/v1/public/content` when `ff_marketing_content` is enabled. Builds should fetch

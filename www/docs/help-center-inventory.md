@@ -1,6 +1,8 @@
 # Help center inventory
 
-This inventory maps every published help article to the shipped product area used to verify it. A code reference is a review starting point, not a claim that one package alone implements the feature. Re-run `node scripts/generate-help-center.mjs` after changing the launch inventory.
+This historical launch inventory maps the initial imported help corpus to shipped product areas. The
+Marketing Content workspace and public API are authoritative for the current article inventory. A
+code reference is a review starting point, not a claim that one package alone implements the feature.
 
 | Article | Category | Tier | Capability reference | Status | Verified |
 |---|---|---:|---|---|---|

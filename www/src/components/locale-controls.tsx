@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSsrData } from '../lib/ssr-context'
-import { DEFAULT_LOCALE, getLocale, localeFromPath } from '../lib/locales'
+import { DEFAULT_LOCALE, getLocale, localeFromPath, type LocaleCode } from '../lib/locales'
 import { localeTargetsForPath, resolveRouteDescriptor } from '../lib/route-manifest'
 import { trackEvent } from '../lib/analytics'
 
@@ -10,11 +10,20 @@ function currentPath(ssrPath?: string): string {
   return ssrPath || (typeof window === 'undefined' ? '/' : window.location.pathname)
 }
 
+function contentLocaleTargets(article: { availableLocales?: Array<{ locale: string; path: string }> } | null | undefined) {
+  const alts = article?.availableLocales
+  if (!alts || alts.length < 2) return null
+  return alts.map(alt => {
+    const locale = getLocale(alt.locale)
+    return { locale: locale.code as LocaleCode, name: locale.name, href: alt.path, exact: true }
+  })
+}
+
 export function LocaleSwitcher({ compact = false }: { compact?: boolean }) {
-  const { path: ssrPath } = useSsrData()
+  const { path: ssrPath, article } = useSsrData()
   const pathname = currentPath(ssrPath)
   const active = localeFromPath(pathname)
-  const targets = localeTargetsForPath(pathname)
+  const targets = contentLocaleTargets(article) ?? localeTargetsForPath(pathname)
   if (targets.length < 2) return null
 
   return (
@@ -44,9 +53,9 @@ export function LocaleSwitcher({ compact = false }: { compact?: boolean }) {
 }
 
 export function LocaleSuggestion() {
-  const { path: ssrPath } = useSsrData()
+  const { path: ssrPath, article } = useSsrData()
   const pathname = currentPath(ssrPath)
-  const targets = useMemo(() => localeTargetsForPath(pathname), [pathname])
+  const targets = useMemo(() => contentLocaleTargets(article) ?? localeTargetsForPath(pathname), [article, pathname])
   const [suggested, setSuggested] = useState<(typeof targets)[number] | null>(null)
 
   useEffect(() => {

@@ -74,85 +74,86 @@ type platformFeaturesJSON struct {
 	FFMobileBoardsAdvanced             bool `json:"ffMobileBoardsAdvanced"`
 	// FFMobileContentTools gates the CT.M3 native content tool host on iOS/Android.
 	// Always on (platform master removed); JSON key kept for client kill-switch parity.
-	FFMobileContentTools bool `json:"ffMobileContentTools"`
-	FFParentPortal       bool `json:"ffParentPortal"`
-	FFParentPortalV2                   bool `json:"ffParentPortalV2"`
-	FFReportCards                      bool `json:"ffReportCards"`
-	FFLibrary                          bool `json:"ffLibrary"`
-	FFBroadcasts                       bool `json:"ffBroadcasts"`
-	FFClassroomSignals                 bool `json:"ffClassroomSignals"`
-	FFConferenceScheduling             bool `json:"ffConferenceScheduling"`
-	FFDemographics                     bool `json:"ffDemographics"`
-	FFContentFilterIntegration         bool `json:"ffContentFilterIntegration"`
-	FFSISIntegration                   bool `json:"ffSisIntegration"`
-	FFCatalogIntegration               bool `json:"ffCatalogIntegration"`
-	FFEnrollmentStateMachine           bool `json:"ffEnrollmentStateMachine"`
-	FFIncompleteGradeWorkflow          bool `json:"ffIncompleteGradeWorkflow"`
-	FFUiMode                           bool `json:"ffUiMode"`
-	FFGradeSubmission                  bool `json:"ffGradeSubmission"`
-	FFWhatifGrades                     bool `json:"ffWhatifGrades"`
-	FFGradeCurving                     bool `json:"ffGradeCurving"`
-	FFAcademicCalendar                 bool `json:"ffAcademicCalendar"`
-	FFPlagiarismChecks                 bool `json:"ffPlagiarismChecks"`
-	FFCourseEvaluations                bool `json:"ffCourseEvaluations"`
-	FFProctoringIntegration            bool `json:"ffProctoringIntegration"`
-	FFCoCurricularTranscript           bool `json:"ffCoCurricularTranscript"`
-	FFLibraryIntegration               bool `json:"ffLibraryIntegration"`
-	FFBookstoreIntegration             bool `json:"ffBookstoreIntegration"`
-	FFEportfolio                       bool `json:"ffEportfolio"`
-	FFTranscripts                      bool `json:"ffTranscripts"`
-	FFTranscriptInbound                bool `json:"ffTranscriptInbound"`
-	FFDiplomas                         bool `json:"ffDiplomas"`
-	FFWebhooks                         bool `json:"ffWebhooks"`
-	FFZapierConnector                  bool `json:"ffZapierConnector"`
-	FFAdvisingIntegration              bool `json:"ffAdvisingIntegration"`
-	FFResearchConsent                  bool `json:"ffResearchConsent"`
-	FFAccessibilityIntake              bool `json:"ffAccessibilityIntake"`
-	FFCEUTracking                      bool `json:"ffCeuTracking"`
-	FFConsortiumSharing                bool `json:"ffConsortiumSharing"`
-	FFSelfPacedMode                    bool `json:"ffSelfPacedMode"`
-	FFPublicCatalog                    bool `json:"ffPublicCatalog"`
-	FFCourseMarketplace                bool `json:"ffCourseMarketplace"`
-	FFCourseCoupons                    bool `json:"ffCourseCoupons"`
-	FFContentToolMarketplace           bool `json:"ffContentToolMarketplace"`
-	FFFeedback                         bool `json:"ffFeedback"`
-	FFVisualBoards                     bool `json:"ffVisualBoards"`
-	FFBoardsRealtime                   bool `json:"ffBoardsRealtime"`
-	FFBoardsExternalSharing            bool `json:"ffBoardsExternalSharing"`
-	FFInteractiveQuizzes               bool `json:"ffInteractiveQuizzes"`
-	ScreenShareEnabled                 bool `json:"screenShareEnabled"`
-	FFIqLiveHosting                    bool `json:"ffIqLiveHosting"`
-	FFIqTeamMode                       bool `json:"ffIqTeamMode"`
-	FFIqStudentPaced                   bool `json:"ffIqStudentPaced"`
-	FFIqHomework                       bool `json:"ffIqHomework"`
-	FFIqGradebookPush                  bool `json:"ffIqGradebookPush"`
-	FFIqPublicKitCatalog               bool `json:"ffIqPublicKitCatalog"`
-	FFIqGuestJoin                      bool `json:"ffIqGuestJoin"`
-	FFIqAiGeneration                   bool `json:"ffIqAiGeneration"`
-	FFEmailSES                         bool `json:"ffEmailSes"`
-	FFPublicAPI                        bool `json:"ffPublicApi"`
-	FFStripeBilling                    bool `json:"ffStripeBilling"`
-	FFPaymentsEnabled                  bool `json:"ffPaymentsEnabled"`
-	FFRevenueShare                     bool `json:"ffRevenueShare"`
-	FFTaxCollection                    bool `json:"ffTaxCollection"`
-	FFLearningPaths                    bool `json:"ffLearningPaths"`
-	FFConditionalRelease               bool `json:"ffConditionalRelease"`
-	FFPeerReview                       bool `json:"ffPeerReview"`
-	FFCompletionCredentials            bool `json:"ffCompletionCredentials"`
-	FFCourseReviews                    bool `json:"ffCourseReviews"`
-	FFGamification                     bool `json:"ffGamification"`
-	FFCompetencyBadges                 bool `json:"ffCompetencyBadges"`
-	BadgesDefaultPublic                bool `json:"badgesDefaultPublic"`
-	FFOnboardingFlow                   bool `json:"ffOnboardingFlow"`
-	FFStudyReminders                   bool `json:"ffStudyReminders"`
-	FFAIStudyBuddy                     bool `json:"ffAiStudyBuddy"`
-	FFLessonGenerator                  bool `json:"ffLessonGenerator"`
-	FFPersistentTutor                  bool `json:"ffPersistentTutor"`
-	FFAPITokens                        bool `json:"ffApiTokens"`
-	FFBotSlack                         bool `json:"ffBotSlack"`
-	FFBotTeams                         bool `json:"ffBotTeams"`
-	FFBotDiscord                       bool `json:"ffBotDiscord"`
-	FFCalendarFeeds                    bool `json:"ffCalendarFeeds"`
+	FFMobileContentTools       bool `json:"ffMobileContentTools"`
+	FFParentPortal             bool `json:"ffParentPortal"`
+	FFParentPortalV2           bool `json:"ffParentPortalV2"`
+	FFReportCards              bool `json:"ffReportCards"`
+	FFLibrary                  bool `json:"ffLibrary"`
+	FFBroadcasts               bool `json:"ffBroadcasts"`
+	FFClassroomSignals         bool `json:"ffClassroomSignals"`
+	FFConferenceScheduling     bool `json:"ffConferenceScheduling"`
+	FFDemographics             bool `json:"ffDemographics"`
+	FFContentFilterIntegration bool `json:"ffContentFilterIntegration"`
+	FFSISIntegration           bool `json:"ffSisIntegration"`
+	FFCatalogIntegration       bool `json:"ffCatalogIntegration"`
+	FFEnrollmentStateMachine   bool `json:"ffEnrollmentStateMachine"`
+	FFIncompleteGradeWorkflow  bool `json:"ffIncompleteGradeWorkflow"`
+	FFUiMode                   bool `json:"ffUiMode"`
+	FFGradeSubmission          bool `json:"ffGradeSubmission"`
+	FFWhatifGrades             bool `json:"ffWhatifGrades"`
+	FFGradeCurving             bool `json:"ffGradeCurving"`
+	FFAcademicCalendar         bool `json:"ffAcademicCalendar"`
+	FFPlagiarismChecks         bool `json:"ffPlagiarismChecks"`
+	FFCourseEvaluations        bool `json:"ffCourseEvaluations"`
+	FFProctoringIntegration    bool `json:"ffProctoringIntegration"`
+	FFCoCurricularTranscript   bool `json:"ffCoCurricularTranscript"`
+	FFLibraryIntegration       bool `json:"ffLibraryIntegration"`
+	FFBookstoreIntegration     bool `json:"ffBookstoreIntegration"`
+	FFEportfolio               bool `json:"ffEportfolio"`
+	FFTranscripts              bool `json:"ffTranscripts"`
+	FFTranscriptInbound        bool `json:"ffTranscriptInbound"`
+	FFDiplomas                 bool `json:"ffDiplomas"`
+	FFWebhooks                 bool `json:"ffWebhooks"`
+	FFZapierConnector          bool `json:"ffZapierConnector"`
+	FFAdvisingIntegration      bool `json:"ffAdvisingIntegration"`
+	FFResearchConsent          bool `json:"ffResearchConsent"`
+	FFAccessibilityIntake      bool `json:"ffAccessibilityIntake"`
+	FFCEUTracking              bool `json:"ffCeuTracking"`
+	FFConsortiumSharing        bool `json:"ffConsortiumSharing"`
+	FFSelfPacedMode            bool `json:"ffSelfPacedMode"`
+	FFPublicCatalog            bool `json:"ffPublicCatalog"`
+	FFCourseMarketplace        bool `json:"ffCourseMarketplace"`
+	FFCourseCoupons            bool `json:"ffCourseCoupons"`
+	FFContentToolMarketplace   bool `json:"ffContentToolMarketplace"`
+	FFFeedback                 bool `json:"ffFeedback"`
+	FFVisualBoards             bool `json:"ffVisualBoards"`
+	FFBoardsRealtime           bool `json:"ffBoardsRealtime"`
+	FFBoardsExternalSharing    bool `json:"ffBoardsExternalSharing"`
+	FFInteractiveQuizzes       bool `json:"ffInteractiveQuizzes"`
+	ScreenShareEnabled         bool `json:"screenShareEnabled"`
+	FFIqLiveHosting            bool `json:"ffIqLiveHosting"`
+	FFIqTeamMode               bool `json:"ffIqTeamMode"`
+	FFIqStudentPaced           bool `json:"ffIqStudentPaced"`
+	FFIqHomework               bool `json:"ffIqHomework"`
+	FFIqGradebookPush          bool `json:"ffIqGradebookPush"`
+	FFIqPublicKitCatalog       bool `json:"ffIqPublicKitCatalog"`
+	FFIqGuestJoin              bool `json:"ffIqGuestJoin"`
+	FFIqAiGeneration           bool `json:"ffIqAiGeneration"`
+	FFEmailSES                 bool `json:"ffEmailSes"`
+	FFPublicAPI                bool `json:"ffPublicApi"`
+	FFStripeBilling            bool `json:"ffStripeBilling"`
+	FFPaymentsEnabled          bool `json:"ffPaymentsEnabled"`
+	FFRevenueShare             bool `json:"ffRevenueShare"`
+	FFTaxCollection            bool `json:"ffTaxCollection"`
+	FFLearningPaths            bool `json:"ffLearningPaths"`
+	FFConditionalRelease       bool `json:"ffConditionalRelease"`
+	FFPeerReview               bool `json:"ffPeerReview"`
+	FFCompletionCredentials    bool `json:"ffCompletionCredentials"`
+	FFCourseReviews            bool `json:"ffCourseReviews"`
+	FFGamification             bool `json:"ffGamification"`
+	FFCompetencyBadges         bool `json:"ffCompetencyBadges"`
+	BadgesDefaultPublic        bool `json:"badgesDefaultPublic"`
+	FFOnboardingFlow           bool `json:"ffOnboardingFlow"`
+	FFStudyReminders           bool `json:"ffStudyReminders"`
+	FFAIStudyBuddy             bool `json:"ffAiStudyBuddy"`
+	FFLessonGenerator          bool `json:"ffLessonGenerator"`
+	FFPersistentTutor          bool `json:"ffPersistentTutor"`
+	FFAPITokens                bool `json:"ffApiTokens"`
+	FFBotSlack                 bool `json:"ffBotSlack"`
+	FFBotTeams                 bool `json:"ffBotTeams"`
+	FFBotDiscord               bool `json:"ffBotDiscord"`
+	FFCalendarFeeds            bool `json:"ffCalendarFeeds"`
+	FFMarketingContent         bool `json:"ffMarketingContent"`
 
 	AiDisclosureEnabled        bool `json:"aiDisclosureEnabled"`
 	AdminConsoleEnabled        bool `json:"adminConsoleEnabled"`
@@ -250,85 +251,86 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFMobileMarketplacePurchase:        cfg.FFMobileMarketplacePurchase,
 		FFMobileBoardsAdvanced:             cfg.FFMobileBoardsAdvanced,
 		// Always on: native content tool packs ship with the app; course contentToolsEnabled still gates host.
-		FFMobileContentTools: true,
-		FFParentPortal:       cfg.FFParentPortal,
-		FFParentPortalV2:                   cfg.FFParentPortalV2,
-		FFReportCards:                      cfg.FFReportCards,
-		FFLibrary:                          cfg.FFLibrary,
-		FFBroadcasts:                       cfg.FFBroadcasts,
-		FFClassroomSignals:                 cfg.FFClassroomSignals,
-		FFConferenceScheduling:             cfg.FFConferenceScheduling,
-		FFDemographics:                     cfg.FFDemographics,
-		FFContentFilterIntegration:         cfg.FFContentFilterIntegration,
-		FFSISIntegration:                   cfg.FFSISIntegration,
-		FFCatalogIntegration:               cfg.FFCatalogIntegration,
-		FFEnrollmentStateMachine:           cfg.FFEnrollmentStateMachine,
-		FFIncompleteGradeWorkflow:          cfg.FFIncompleteGradeWorkflow,
-		FFUiMode:                           cfg.FFUiMode,
-		FFGradeSubmission:                  cfg.FFGradeSubmission,
-		FFWhatifGrades:                     cfg.FFWhatifGrades,
-		FFGradeCurving:                     cfg.FFGradeCurving,
-		FFAcademicCalendar:                 cfg.FFAcademicCalendar,
-		FFPlagiarismChecks:                 cfg.FFPlagiarismChecks,
-		FFCourseEvaluations:                cfg.FFCourseEvaluations,
-		FFProctoringIntegration:            cfg.FFProctoringIntegration,
-		FFCoCurricularTranscript:           cfg.FFCoCurricularTranscript,
-		FFLibraryIntegration:               cfg.FFLibraryIntegration,
-		FFBookstoreIntegration:             cfg.FFBookstoreIntegration,
-		FFEportfolio:                       cfg.FFEportfolio,
-		FFTranscripts:                      cfg.FFTranscripts,
-		FFTranscriptInbound:                cfg.FFTranscriptInbound,
-		FFDiplomas:                         cfg.FFDiplomas,
-		FFWebhooks:                         cfg.FFWebhooks,
-		FFZapierConnector:                  cfg.FFZapierConnector,
-		FFAdvisingIntegration:              cfg.FFAdvisingIntegration,
-		FFResearchConsent:                  cfg.FFResearchConsent,
-		FFAccessibilityIntake:              cfg.FFAccessibilityIntake,
-		FFCEUTracking:                      cfg.FFCEUTracking,
-		FFConsortiumSharing:                cfg.FFConsortiumSharing,
-		FFSelfPacedMode:                    cfg.FFSelfPacedMode,
-		FFPublicCatalog:                    cfg.FFPublicCatalog,
-		FFCourseMarketplace:                cfg.FFCourseMarketplace,
-		FFCourseCoupons:                    cfg.FFCourseCoupons,
-		FFContentToolMarketplace:           cfg.FFContentToolMarketplace,
-		FFFeedback:                         cfg.FFFeedback,
-		FFVisualBoards:                     cfg.FFVisualBoards,
-		FFBoardsRealtime:                   cfg.FFBoardsRealtime,
-		FFBoardsExternalSharing:            cfg.FFBoardsExternalSharing,
-		FFInteractiveQuizzes:               cfg.FFInteractiveQuizzes,
-		ScreenShareEnabled:                 cfg.ScreenShareEnabled,
-		FFIqLiveHosting:                    cfg.FFIqLiveHosting,
-		FFIqTeamMode:                       cfg.FFIqTeamMode,
-		FFIqStudentPaced:                   cfg.FFIqStudentPaced,
-		FFIqHomework:                       cfg.FFIqHomework,
-		FFIqGradebookPush:                  cfg.FFIqGradebookPush,
-		FFIqPublicKitCatalog:               cfg.FFIqPublicKitCatalog,
-		FFIqGuestJoin:                      cfg.FFIqGuestJoin,
-		FFIqAiGeneration:                   cfg.FFIqAiGeneration,
-		FFEmailSES:                         cfg.FFEmailSES,
-		FFPublicAPI:                        cfg.FFPublicAPI,
-		FFStripeBilling:                    cfg.FFStripeBilling,
-		FFPaymentsEnabled:                  cfg.FFPaymentsEnabled,
-		FFRevenueShare:                     cfg.FFRevenueShare,
-		FFTaxCollection:                    cfg.FFTaxCollection,
-		FFLearningPaths:                    cfg.FFLearningPaths,
-		FFConditionalRelease:               cfg.FFConditionalRelease,
-		FFPeerReview:                       cfg.FFPeerReview,
-		FFCompletionCredentials:            cfg.FFCompletionCredentials,
-		FFCourseReviews:                    cfg.FFCourseReviews,
-		FFGamification:                     cfg.FFGamification,
-		FFCompetencyBadges:                 cfg.FFCompetencyBadges,
-		BadgesDefaultPublic:                cfg.BadgesDefaultPublic,
-		FFOnboardingFlow:                   cfg.FFOnboardingFlow,
-		FFStudyReminders:                   cfg.FFStudyReminders,
-		FFAIStudyBuddy:                     cfg.FFAIStudyBuddy,
-		FFLessonGenerator:                  cfg.FFLessonGenerator,
-		FFPersistentTutor:                  cfg.FFPersistentTutor,
-		FFAPITokens:                        cfg.FFAPITokens,
-		FFBotSlack:                         cfg.FFBotSlack,
-		FFBotTeams:                         cfg.FFBotTeams,
-		FFBotDiscord:                       cfg.FFBotDiscord,
-		FFCalendarFeeds:                    cfg.FFCalendarFeeds,
+		FFMobileContentTools:       true,
+		FFParentPortal:             cfg.FFParentPortal,
+		FFParentPortalV2:           cfg.FFParentPortalV2,
+		FFReportCards:              cfg.FFReportCards,
+		FFLibrary:                  cfg.FFLibrary,
+		FFBroadcasts:               cfg.FFBroadcasts,
+		FFClassroomSignals:         cfg.FFClassroomSignals,
+		FFConferenceScheduling:     cfg.FFConferenceScheduling,
+		FFDemographics:             cfg.FFDemographics,
+		FFContentFilterIntegration: cfg.FFContentFilterIntegration,
+		FFSISIntegration:           cfg.FFSISIntegration,
+		FFCatalogIntegration:       cfg.FFCatalogIntegration,
+		FFEnrollmentStateMachine:   cfg.FFEnrollmentStateMachine,
+		FFIncompleteGradeWorkflow:  cfg.FFIncompleteGradeWorkflow,
+		FFUiMode:                   cfg.FFUiMode,
+		FFGradeSubmission:          cfg.FFGradeSubmission,
+		FFWhatifGrades:             cfg.FFWhatifGrades,
+		FFGradeCurving:             cfg.FFGradeCurving,
+		FFAcademicCalendar:         cfg.FFAcademicCalendar,
+		FFPlagiarismChecks:         cfg.FFPlagiarismChecks,
+		FFCourseEvaluations:        cfg.FFCourseEvaluations,
+		FFProctoringIntegration:    cfg.FFProctoringIntegration,
+		FFCoCurricularTranscript:   cfg.FFCoCurricularTranscript,
+		FFLibraryIntegration:       cfg.FFLibraryIntegration,
+		FFBookstoreIntegration:     cfg.FFBookstoreIntegration,
+		FFEportfolio:               cfg.FFEportfolio,
+		FFTranscripts:              cfg.FFTranscripts,
+		FFTranscriptInbound:        cfg.FFTranscriptInbound,
+		FFDiplomas:                 cfg.FFDiplomas,
+		FFWebhooks:                 cfg.FFWebhooks,
+		FFZapierConnector:          cfg.FFZapierConnector,
+		FFAdvisingIntegration:      cfg.FFAdvisingIntegration,
+		FFResearchConsent:          cfg.FFResearchConsent,
+		FFAccessibilityIntake:      cfg.FFAccessibilityIntake,
+		FFCEUTracking:              cfg.FFCEUTracking,
+		FFConsortiumSharing:        cfg.FFConsortiumSharing,
+		FFSelfPacedMode:            cfg.FFSelfPacedMode,
+		FFPublicCatalog:            cfg.FFPublicCatalog,
+		FFCourseMarketplace:        cfg.FFCourseMarketplace,
+		FFCourseCoupons:            cfg.FFCourseCoupons,
+		FFContentToolMarketplace:   cfg.FFContentToolMarketplace,
+		FFFeedback:                 cfg.FFFeedback,
+		FFVisualBoards:             cfg.FFVisualBoards,
+		FFBoardsRealtime:           cfg.FFBoardsRealtime,
+		FFBoardsExternalSharing:    cfg.FFBoardsExternalSharing,
+		FFInteractiveQuizzes:       cfg.FFInteractiveQuizzes,
+		ScreenShareEnabled:         cfg.ScreenShareEnabled,
+		FFIqLiveHosting:            cfg.FFIqLiveHosting,
+		FFIqTeamMode:               cfg.FFIqTeamMode,
+		FFIqStudentPaced:           cfg.FFIqStudentPaced,
+		FFIqHomework:               cfg.FFIqHomework,
+		FFIqGradebookPush:          cfg.FFIqGradebookPush,
+		FFIqPublicKitCatalog:       cfg.FFIqPublicKitCatalog,
+		FFIqGuestJoin:              cfg.FFIqGuestJoin,
+		FFIqAiGeneration:           cfg.FFIqAiGeneration,
+		FFEmailSES:                 cfg.FFEmailSES,
+		FFPublicAPI:                cfg.FFPublicAPI,
+		FFStripeBilling:            cfg.FFStripeBilling,
+		FFPaymentsEnabled:          cfg.FFPaymentsEnabled,
+		FFRevenueShare:             cfg.FFRevenueShare,
+		FFTaxCollection:            cfg.FFTaxCollection,
+		FFLearningPaths:            cfg.FFLearningPaths,
+		FFConditionalRelease:       cfg.FFConditionalRelease,
+		FFPeerReview:               cfg.FFPeerReview,
+		FFCompletionCredentials:    cfg.FFCompletionCredentials,
+		FFCourseReviews:            cfg.FFCourseReviews,
+		FFGamification:             cfg.FFGamification,
+		FFCompetencyBadges:         cfg.FFCompetencyBadges,
+		BadgesDefaultPublic:        cfg.BadgesDefaultPublic,
+		FFOnboardingFlow:           cfg.FFOnboardingFlow,
+		FFStudyReminders:           cfg.FFStudyReminders,
+		FFAIStudyBuddy:             cfg.FFAIStudyBuddy,
+		FFLessonGenerator:          cfg.FFLessonGenerator,
+		FFPersistentTutor:          cfg.FFPersistentTutor,
+		FFAPITokens:                cfg.FFAPITokens,
+		FFBotSlack:                 cfg.FFBotSlack,
+		FFBotTeams:                 cfg.FFBotTeams,
+		FFBotDiscord:               cfg.FFBotDiscord,
+		FFCalendarFeeds:            cfg.FFCalendarFeeds,
+		FFMarketingContent:         cfg.FFMarketingContent,
 
 		LRSAnonymizeActors:           cfg.LRSAnonymizeActors,
 		FERPAWorkflowEnabled:         cfg.FERPAWorkflowEnabled,

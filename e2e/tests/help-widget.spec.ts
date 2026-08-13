@@ -1,19 +1,38 @@
 /**
- * Help widget (plan 6.8): floating launcher + contextual articles panel.
+ * Help widget (plan 6.8 / MC.13): floating launcher + contextual articles panel.
  *
  * Checklist coverage:
  *   [x] Help button is visible on authenticated pages
  *   [x] Clicking the button opens the help panel
- *   [x] Panel shows contextual article links
+ *   [x] Panel shows contextual article options
  *   [x] Search filters article list
  *   [x] Close button dismisses the panel
  *   [x] Escape key dismisses the panel
  *   [x] Contextual articles API returns articles for a route
  */
 import { test, expect } from '../fixtures/test.js'
-import { apiGetContextualArticles } from '../fixtures/api.js'
+import { apiGetContextualArticles, apiLogin, apiSignup } from '../fixtures/api.js'
+import { bootstrapGlobalAdmin, setPlatformFlag } from '../lib/feature-lifecycle-helpers.js'
+import { withPlatformSettingsLock } from '../lib/platform-feature-matrix-helpers.js'
+
+async function enableMarketingContent() {
+  const email = `help-widget-ga-${Date.now()}@test.invalid`
+  const password = 'E2eTestPass1!help-widget'
+  await apiSignup({ email, password })
+  await bootstrapGlobalAdmin(email)
+  const ga = await apiLogin({ email, password })
+  // Take the cross-worker lock so we do not race other platform-settings writers.
+  // Intentionally leave the flag on for the suite (no restore).
+  await withPlatformSettingsLock(async () => {
+    await setPlatformFlag(ga.access_token, 'ffMarketingContent', true)
+  })
+}
 
 test.describe('Help Widget - UI', () => {
+  test.beforeAll(async () => {
+    await enableMarketingContent()
+  })
+
   test('help launcher button is visible on authenticated pages', async ({ authedPage: page }) => {
     await page.goto('/dashboard')
     await expect(page.getByRole('button', { name: 'Get help' })).toBeVisible({ timeout: 8000 })
@@ -26,13 +45,13 @@ test.describe('Help Widget - UI', () => {
     await expect(page.getByRole('dialog', { name: 'Help' })).toBeVisible({ timeout: 8000 })
   })
 
-  test('help panel shows article links', async ({ authedPage: page }) => {
+  test('help panel shows article options', async ({ authedPage: page }) => {
     await page.goto('/dashboard')
     await page.getByRole('button', { name: 'Get help' }).click()
     const dialog = page.getByRole('dialog', { name: 'Help' })
     await expect(dialog).toBeVisible({ timeout: 8000 })
-    // Panel should show at least one article link once articles load
-    await expect(dialog.getByRole('link').first()).toBeVisible({ timeout: 8000 })
+    // Results are listbox options (buttons); Visit Help Center is a separate Button.
+    await expect(dialog.getByRole('option').first()).toBeVisible({ timeout: 8000 })
   })
 
   test('search box filters articles', async ({ authedPage: page }) => {
@@ -40,11 +59,10 @@ test.describe('Help Widget - UI', () => {
     await page.getByRole('button', { name: 'Get help' }).click()
     const dialog = page.getByRole('dialog', { name: 'Help' })
     await expect(dialog).toBeVisible({ timeout: 8000 })
-    // Wait for articles to load
-    await expect(dialog.getByRole('link').first()).toBeVisible({ timeout: 8000 })
-    const searchBox = dialog.getByRole('textbox', { name: /search help articles/i })
+    await expect(dialog.getByRole('option').first()).toBeVisible({ timeout: 8000 })
+    const searchBox = dialog.getByRole('searchbox', { name: /search help articles/i })
     await searchBox.fill('xxxxxxxx-no-match')
-    await expect(dialog.getByText(/no articles matched/i)).toBeVisible({ timeout: 4000 })
+    await expect(dialog.getByText(/no results for/i)).toBeVisible({ timeout: 4000 })
   })
 
   test('close button dismisses the help panel', async ({ authedPage: page }) => {
@@ -79,12 +97,15 @@ test.describe('Help Widget - UI', () => {
     await page.getByRole('button', { name: 'Get help' }).click()
     const dialog = page.getByRole('dialog', { name: 'Help' })
     await expect(dialog).toBeVisible({ timeout: 8000 })
-    // Course routes should return course-specific articles
-    await expect(dialog.getByRole('link').first()).toBeVisible({ timeout: 8000 })
+    await expect(dialog.getByRole('option').first()).toBeVisible({ timeout: 8000 })
   })
 })
 
 test.describe('Help Widget - Contextual Articles API', () => {
+  test.beforeAll(async () => {
+    await enableMarketingContent()
+  })
+
   test('returns articles for a course route', async ({ authedToken }) => {
     const articles = await apiGetContextualArticles(authedToken, '/courses/abc123/modules')
     expect(articles.length).toBeGreaterThan(0)

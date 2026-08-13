@@ -444,6 +444,16 @@ func telemetrySources(pool *pgxpool.Pool, rc *redisclient.Client) telemetry.Sour
 			counts, err := marketingcontent.ArticleCounts(ctx, pool)
 			return counts, err == nil
 		}
+		s.MarketingI18n = func() (map[string]int64, int64, bool) {
+			ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+			defer cancel()
+			byLocale, err := marketingcontent.ArticleCountsByLocale(ctx, pool)
+			if err != nil {
+				return nil, 0, false
+			}
+			stale, err := marketingcontent.StaleTranslationCount(ctx, pool)
+			return byLocale, stale, err == nil
+		}
 	}
 	if rc != nil {
 		s.Redis = func() telemetry.RedisPoolSnapshot {

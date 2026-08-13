@@ -153,6 +153,14 @@ cross 40 files without an allowlist entry (which is shrink-only).
 
 A PR that only moves files must leave TD.1 inventories unchanged.
 
+### Marketing content boundary
+
+Blog and help-center articles are rows in the `marketing` schema, exposed by the public content API
+and statically rendered by `www`. Article Markdown must not be added under `www/src/blog` or
+`www/src/docs`; `scripts/check-no-file-articles.sh` enforces this boundary. TypeScript-backed
+non-article pages (legal, comparisons, integrations, standards, templates, glossary, and utility
+pages) remain repository-native.
+
 ---
 
 ## 7b. OpenAPI contract (TD.3)

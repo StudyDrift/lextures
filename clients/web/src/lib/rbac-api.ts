@@ -4,6 +4,12 @@ import { readApiErrorMessage } from './errors'
 /** Server-side guard for Settings → Roles & Permissions APIs; use with `RequirePermission` on the client. */
 export const PERM_RBAC_MANAGE = 'global:app:rbac:manage' as const
 
+export const PERM_MARKETING_CONTENT_VIEW = 'global:app:marketing-content:view' as const
+export const PERM_MARKETING_CONTENT_AUTHOR = 'global:app:marketing-content:author' as const
+export const PERM_MARKETING_CONTENT_REVIEW = 'global:app:marketing-content:review' as const
+export const PERM_MARKETING_CONTENT_PUBLISH = 'global:app:marketing-content:publish' as const
+export const PERM_MARKETING_CONTENT_ADMIN = 'global:app:marketing-content:admin' as const
+
 /** Caller should see the parent dashboard and "Family" nav entry (replaces getAccountType() === 'parent'). */
 export const PERM_PARENT_DASHBOARD = 'app:user:account-parent-dashboard' as const
 /** Create new courses (Courses page + POST /api/v1/courses). */

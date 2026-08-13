@@ -10,13 +10,13 @@ import (
 )
 
 type Metadata struct {
-	Title, Description, Updated, Author, Cluster, PrimaryQuestion string
-	Keywords                                                      []string
+	Title, Description, Updated, Author, Cluster, PrimaryQuestion, Locale string
+	Keywords                                                              []string
 }
 type Input struct {
-	Kind, BodyMD string
-	Metadata     Metadata
-	KnownPaths   map[string]struct{}
+	Kind, BodyMD, Locale string
+	Metadata             Metadata
+	KnownPaths           map[string]struct{}
 }
 type Finding struct {
 	Rule, Severity, Message string
@@ -68,6 +68,9 @@ func Article(in Input) (out Report) {
 			out = Report{Score: 0, Findings: []Finding{{Rule: "validator_error", Severity: "warn", Message: "Validation could not be completed."}}, Stats: render.Stats(in.BodyMD), ValidatorError: true}
 		}
 	}()
+	if in.Locale == "" {
+		in.Locale = in.Metadata.Locale
+	}
 	a := inspect(in.BodyMD)
 	out.Stats = render.Stats(in.BodyMD)
 	out.Score = score(in, a)
@@ -147,17 +150,18 @@ func checkDirectives(in Input, _ *analysis) []Finding {
 	}
 	return out
 }
-func checkStructure(_ Input, a *analysis) []Finding {
+func checkStructure(in Input, a *analysis) []Finding {
 	out := []Finding{}
 	n := bulletCount(a.takeaways.content)
 	if n < 3 || n > 5 {
 		out = append(out, finding("struct.key-takeaways", "error", fmt.Sprintf("Key takeaways must contain 3–5 bullets; found %d.", n), max(1, a.takeaways.line), 1))
 	}
-	aw := wordCount(a.answer.content)
+	m := metricsFor(in.Locale)
+	aw := textLen(a.answer.content, m.chars)
 	if aw == 0 {
 		out = append(out, finding("struct.answer-block", "error", "A direct answer block is required.", 1, 1))
-	} else if aw < 40 || aw > 60 {
-		out = append(out, finding("passage.length", "warn", fmt.Sprintf("Direct answer is %d words; target is 40–60.", aw), a.answer.line, 1))
+	} else if aw < m.answerMin || aw > m.answerMax {
+		out = append(out, finding("passage.length", "warn", fmt.Sprintf("Direct answer is %d %s; target is %d–%d.", aw, m.unit, m.answerMin, m.answerMax), a.answer.line, 1))
 	}
 	fq := len(regexp.MustCompile(`(?m)^###\s+.+\?\s*$`).FindAllString(a.faq.content, -1))
 	if fq < 3 || fq > 6 {
@@ -174,9 +178,13 @@ func checkStructure(_ Input, a *analysis) []Finding {
 	}
 	return out
 }
-func checkPassages(_ Input, a *analysis) []Finding {
-	if a.meanPassage > 0 && (a.meanPassage < 120 || a.meanPassage > 180) {
-		return []Finding{finding("passage.self-contained", "warn", fmt.Sprintf("Mean passage length is %.0f words; target is 120–180.", a.meanPassage), 1, 1)}
+func checkPassages(in Input, a *analysis) []Finding {
+	m := metricsFor(in.Locale)
+	if m.chars {
+		return nil
+	}
+	if a.meanPassage > 0 && (a.meanPassage < float64(m.passageMin) || a.meanPassage > float64(m.passageMax)) {
+		return []Finding{finding("passage.self-contained", "warn", fmt.Sprintf("Mean passage length is %.0f %s; target is %d–%d.", a.meanPassage, m.unit, m.passageMin, m.passageMax), 1, 1)}
 	}
 	return nil
 }
@@ -285,7 +293,7 @@ func score(in Input, a *analysis) float64 {
 	if n := bulletCount(a.takeaways.content); n >= 3 && n <= 5 {
 		s += 1
 	}
-	if n := wordCount(a.answer.content); n >= 40 && n <= 60 {
+	if n := textLen(a.answer.content, metricsFor(in.Locale).chars); n >= metricsFor(in.Locale).answerMin && n <= metricsFor(in.Locale).answerMax {
 		s += 1.5
 	}
 	q := 0
@@ -297,7 +305,7 @@ func score(in Input, a *analysis) float64 {
 	if len(a.headings) > 0 && float64(q)/float64(len(a.headings)) >= .6 {
 		s += 1.5
 	}
-	if a.meanPassage >= 120 && a.meanPassage <= 180 {
+	if m := metricsFor(in.Locale); !m.chars && a.meanPassage >= float64(m.passageMin) && a.meanPassage <= float64(m.passageMax) {
 		s += 1.5
 	}
 	if a.citations >= max(1, (render.Stats(in.BodyMD).WordCount+399)/400) {
@@ -316,6 +324,30 @@ func score(in Input, a *analysis) float64 {
 }
 func wordCount(s string) int {
 	return len(strings.Fields(regexp.MustCompile(`[#>*_`+"`"+`\[\](){}|:-]`).ReplaceAllString(s, " ")))
+}
+
+type localeMetrics struct {
+	answerMin, answerMax, passageMin, passageMax int
+	chars                                        bool
+	unit                                         string
+}
+
+func metricsFor(locale string) localeMetrics {
+	lang := strings.ToLower(strings.Split(locale, "-")[0])
+	switch lang {
+	case "zh", "ja", "ko":
+		return localeMetrics{80, 160, 240, 400, true, "characters"}
+	default:
+		return localeMetrics{40, 60, 120, 180, false, "words"}
+	}
+}
+
+func textLen(s string, chars bool) int {
+	if !chars {
+		return wordCount(s)
+	}
+	stripped := regexp.MustCompile(`[#>*_` + "`" + `\[\](){}|:\-\s]`).ReplaceAllString(s, "")
+	return len([]rune(stripped))
 }
 func bulletCount(s string) int {
 	return len(regexp.MustCompile(`(?m)^\s*[-*]\s+`).FindAllString(s, -1))

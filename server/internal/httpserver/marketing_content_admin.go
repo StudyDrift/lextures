@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -40,9 +41,33 @@ func (d Deps) registerMarketingContentAdminRoutes(r chi.Router) {
 	r.Post("/api/v1/admin/marketing/articles/{id}/revisions/{no}/restore", d.handleMarketingRevisionRestore())
 	r.Post("/api/v1/admin/marketing/articles/{id}/preview-token", d.handleMarketingPreviewToken())
 	r.Post("/api/v1/admin/marketing/lint", d.handleMarketingLint())
+	r.Get("/api/v1/admin/marketing/known-paths", d.handleMarketingKnownPathsList())
 	r.Post("/api/v1/admin/marketing/known-paths", d.handleMarketingKnownPaths())
 	d.registerMarketingTaxonomyRoutes(r)
 	d.registerMarketingMediaRoutes(r)
+	d.registerMarketingBuildRoutes(r)
+	d.registerMarketingEditorialRoutes(r)
+	d.registerMarketingRouteHintsRoutes(r)
+	d.registerMarketingI18nRoutes(r)
+}
+
+func (d Deps) handleMarketingKnownPathsList() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if _, ok := d.marketingAccess(w, r, marketingView); !ok {
+			return
+		}
+		paths, err := mcrepo.KnownPaths(r.Context(), d.Pool)
+		if err != nil {
+			apierr.WriteInternal(w, r, "Failed to load known marketing paths.", err)
+			return
+		}
+		items := make([]string, 0, len(paths))
+		for path := range paths {
+			items = append(items, path)
+		}
+		slices.Sort(items)
+		writeJSON(w, 200, map[string]any{"items": items})
+	}
 }
 
 func (d Deps) handleMarketingLint() http.HandlerFunc {
@@ -134,7 +159,7 @@ func (d Deps) handleMarketingArticlesList() http.HandlerFunc {
 			return
 		}
 		limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
-		items, next, err := mcrepo.ListArticles(r.Context(), d.Pool, mcrepo.ArticleFilter{Kind: r.URL.Query().Get("kind"), Status: r.URL.Query().Get("status"), Locale: r.URL.Query().Get("locale"), CategorySlug: r.URL.Query().Get("category"), Q: r.URL.Query().Get("q"), Cursor: r.URL.Query().Get("cursor"), Limit: limit})
+		items, next, err := mcrepo.ListArticles(r.Context(), d.Pool, mcrepo.ArticleFilter{Kind: r.URL.Query().Get("kind"), Status: r.URL.Query().Get("status"), Locale: r.URL.Query().Get("locale"), CategorySlug: r.URL.Query().Get("category"), AuthorSlug: r.URL.Query().Get("author"), Q: r.URL.Query().Get("q"), Sort: r.URL.Query().Get("sort"), Overdue: r.URL.Query().Get("overdue") == "true", Cursor: r.URL.Query().Get("cursor"), Limit: limit})
 		if err != nil {
 			apierr.WriteInternal(w, r, "Failed to list articles.", err)
 			return
@@ -156,6 +181,32 @@ func (d Deps) handleMarketingArticleGet() http.HandlerFunc {
 			writeMarketingError(w, r, err)
 			return
 		}
+		latest, err := d.marketingPublishService().LatestForArticle(r.Context(), id)
+		if err != nil {
+			apierr.WriteInternal(w, r, "Failed to load publish status.", err)
+			return
+		}
+		live := "draft"
+		switch a.Status {
+		case "scheduled":
+			live = "scheduled"
+		case "published":
+			live = "live"
+		}
+		if latest != nil {
+			switch latest.Status {
+			case "pending", "dispatched", "running":
+				live = "publishing"
+			case "failed", "timed_out":
+				live = "publish_failed"
+			}
+		}
+		settings, _ := d.marketingPublishService().Settings(r.Context())
+		if a.Status == "published" && settings.Provider == "none" {
+			live = "rebuild_not_configured"
+		}
+		a.LiveStatus = live
+		a.LatestBuild = latest
 		writeJSON(w, 200, a)
 	}
 }
@@ -175,6 +226,7 @@ type marketingArticleBody struct {
 	Pillar             string     `json:"pillar"`
 	BriefRef           string     `json:"briefRef"`
 	VerifiedAgainst    string     `json:"verifiedAgainst"`
+	ReviewDueOn        *time.Time `json:"reviewDueOn"`
 	Keywords           []string   `json:"keywords"`
 	RelatedTo          []string   `json:"relatedTo"`
 	Roles              []string   `json:"roles"`
@@ -188,7 +240,7 @@ type marketingArticleBody struct {
 }
 
 func (b marketingArticleBody) input(actor uuid.UUID) mcrepo.NewArticle {
-	return mcrepo.NewArticle{Kind: b.Kind, Slug: b.Slug, Locale: b.Locale, CategoryID: b.CategoryID, Title: b.Title, Description: b.Description, BodyMD: b.BodyMD, AuthorSlug: b.AuthorSlug, ReviewerSlug: b.ReviewerSlug, PrimaryQuestion: b.PrimaryQuestion, Cluster: b.Cluster, Pillar: b.Pillar, BriefRef: b.BriefRef, VerifiedAgainst: b.VerifiedAgainst, Keywords: b.Keywords, RelatedTo: b.RelatedTo, Roles: b.Roles, Segments: b.Segments, Citations: b.Citations, HeroMediaID: b.HeroMediaID, Noindex: b.Noindex, CanonicalOverride: b.CanonicalOverride, ActorID: actor, ChangeNote: b.ChangeNote}
+	return mcrepo.NewArticle{Kind: b.Kind, Slug: b.Slug, Locale: b.Locale, CategoryID: b.CategoryID, Title: b.Title, Description: b.Description, BodyMD: b.BodyMD, AuthorSlug: b.AuthorSlug, ReviewerSlug: b.ReviewerSlug, ReviewDueOn: b.ReviewDueOn, PrimaryQuestion: b.PrimaryQuestion, Cluster: b.Cluster, Pillar: b.Pillar, BriefRef: b.BriefRef, VerifiedAgainst: b.VerifiedAgainst, Keywords: b.Keywords, RelatedTo: b.RelatedTo, Roles: b.Roles, Segments: b.Segments, Citations: b.Citations, HeroMediaID: b.HeroMediaID, Noindex: b.Noindex, CanonicalOverride: b.CanonicalOverride, ActorID: actor, ChangeNote: b.ChangeNote}
 }
 func validateArticleBody(b marketingArticleBody) error {
 	if b.Kind != "blog" && b.Kind != "doc" {
@@ -254,6 +306,9 @@ func mergeMarketingArticle(a *mcrepo.Article, b marketingArticleBody, raw map[st
 	}
 	if _, ok := raw["reviewerSlug"]; ok {
 		in.ReviewerSlug = b.ReviewerSlug
+	}
+	if _, ok := raw["reviewDueOn"]; ok {
+		in.ReviewDueOn = b.ReviewDueOn
 	}
 	if _, ok := raw["keywords"]; ok {
 		in.Keywords = b.Keywords
@@ -337,6 +392,7 @@ type marketingTransitionBody struct {
 	Note               string           `json:"note"`
 	ExpectedRevisionNo int              `json:"expectedRevisionNo"`
 	LintOverride       bool             `json:"lintOverride"`
+	ReviewerID         *uuid.UUID       `json:"reviewerId"`
 }
 
 func transitionPermission(a mcservice.Action) string {
@@ -367,7 +423,7 @@ func (d Deps) handleMarketingArticleTransition() http.HandlerFunc {
 		if !ok {
 			return
 		}
-		a, err := d.marketingService().Transition(r.Context(), id, actor, mcservice.TransitionInput{Action: b.Action, ScheduledFor: b.ScheduledFor, Note: b.Note, ExpectedRevisionNo: b.ExpectedRevisionNo, LintOverride: b.LintOverride})
+		a, err := d.marketingService().Transition(r.Context(), id, actor, mcservice.TransitionInput{Action: b.Action, ScheduledFor: b.ScheduledFor, Note: b.Note, ExpectedRevisionNo: b.ExpectedRevisionNo, LintOverride: b.LintOverride, ReviewerID: b.ReviewerID})
 		if err != nil {
 			d.writeMarketingConflict(w, r, id, err)
 			return
@@ -383,7 +439,7 @@ func writeMarketingError(w http.ResponseWriter, r *http.Request, err error) {
 		apierr.WriteJSON(w, 404, apierr.CodeNotFound, "Marketing content resource not found.")
 	case errors.Is(err, mcrepo.ErrDuplicateSlug):
 		apierr.WriteJSON(w, 409, "duplicate_slug", "An article or redirect already uses that path.")
-	case errors.Is(err, mcservice.ErrInvalidTransition), errors.Is(err, mcservice.ErrScheduledInPast):
+	case errors.Is(err, mcservice.ErrInvalidTransition), errors.Is(err, mcservice.ErrScheduledInPast), errors.Is(err, mcservice.ErrReviewNoteTooShort), errors.Is(err, mcservice.ErrReviewerRequired), errors.Is(err, mcservice.ErrOverrideJustification):
 		apierr.WriteJSON(w, 422, apierr.CodeUnprocessableEntity, err.Error())
 	case errors.Is(err, mcservice.ErrLintBlocked):
 		apierr.WriteJSON(w, 422, "content_validation_failed", "Publishing is blocked by content validation errors.")
