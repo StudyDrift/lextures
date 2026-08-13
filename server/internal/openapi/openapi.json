@@ -76,6 +76,7 @@
       "get": {"operationId":"listMarketingArticles","tags":["admin"],"responses":{"200":{"description":"Article summaries"}}},
       "post": {"operationId":"createMarketingArticle","tags":["admin"],"requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/MarketingArticleWrite"}}}},"responses":{"201":{"description":"Article created"},"409":{"description":"Duplicate path"}}}
     },
+    "/api/v1/admin/marketing/articles/generate":{"post":{"operationId":"generateMarketingArticle","tags":["admin"],"requestBody":{"required":true,"content":{"application/json":{"schema":{"type":"object","required":["prompt"],"properties":{"prompt":{"type":"string","maxLength":8000},"kind":{"type":"string","enum":["blog","doc"]},"existingTitle":{"type":"string"},"existingBodyMd":{"type":"string","maxLength":80000}}}}}},"responses":{"200":{"description":"Draft article fields; not persisted"},"400":{"description":"Prompt missing or too long"},"403":{"description":"Forbidden"},"503":{"description":"AI is not configured"}}}},
     "/api/v1/admin/marketing/articles/{id}": {
       "parameters":[{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}],
       "get":{"operationId":"getMarketingArticle","tags":["admin"],"responses":{"200":{"description":"Article"}}},

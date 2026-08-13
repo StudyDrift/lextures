@@ -354,3 +354,37 @@ func TestDB_StateRevisionConflictAndIdempotency(t *testing.T) {
 		t.Fatalf("idempotency overwritten: %s vs %s", got2.ResultJSON, raw)
 	}
 }
+
+func TestDB_ListStatesNeedingSummaryJoin(t *testing.T) {
+	pool := testPool(t)
+	ctx := context.Background()
+	courseID := seedCourse(t, pool)
+	userID, enrollmentID := seedEnrollment(t, pool, courseID)
+
+	inst, err := CreateInstance(ctx, pool, InstanceRow{
+		CourseID: courseID, HostKind: "syllabus", ToolID: "noop_probe", ToolVersion: "1.0.0",
+		ConfigJSON: json.RawMessage(`{"prompt":"q"}`),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	st, err := UpsertState(ctx, pool, inst.ID, enrollmentID, userID, json.RawMessage(`{"response":"a"}`), 0)
+	if err != nil || st == nil {
+		t.Fatalf("upsert: %v %#v", err, st)
+	}
+
+	got, err := ListStatesNeedingSummary(ctx, pool, "", 1, 50)
+	if err != nil {
+		t.Fatalf("list needing summary: %v", err)
+	}
+	found := false
+	for i := range got {
+		if got[i].ID == st.ID {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Fatalf("expected state %s in rebuild list, got %d rows", st.ID, len(got))
+	}
+}

@@ -174,7 +174,7 @@ func ListStatesNeedingSummary(ctx context.Context, pool *pgxpool.Pool, toolID st
 		limit = 500
 	}
 	q := `
-SELECT ` + stateCols + `
+SELECT ` + stateColsAliased + `
 FROM course.content_tool_states st
 INNER JOIN course.content_tool_instances i ON i.id = st.instance_id
 LEFT JOIN analytics.content_tool_state_summaries s ON s.state_id = st.id

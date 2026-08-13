@@ -1722,6 +1722,10 @@
     "testAdminLRSEndpoint",
     "updateAdminLRSEndpoint"
   ],
+  "marketing-content-ai-api.ts": [
+    "MarketingArticleAIDraft",
+    "generateMarketingArticle"
+  ],
   "marketing-content-api.ts": [
     "MarketingArticle",
     "MarketingArticleListQuery",
