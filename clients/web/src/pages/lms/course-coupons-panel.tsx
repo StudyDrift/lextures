@@ -229,7 +229,7 @@ export function CourseCouponsPanel({
 
   return (
     <section
-      className="mt-6 space-y-4 rounded-2xl border border-border-default bg-surface-raised p-5 shadow-sm"
+      className="flex min-h-0 flex-1 flex-col space-y-4 rounded-2xl border border-border-default bg-surface-raised p-5 shadow-sm"
       aria-labelledby="course-coupons-heading"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">

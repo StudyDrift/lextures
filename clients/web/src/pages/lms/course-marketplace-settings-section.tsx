@@ -168,10 +168,11 @@ export function CourseMarketplaceSettingsSection({
   }
 
   return (
-    <>
+    <div className="flex min-h-0 flex-1 flex-col gap-6">
       <form
         onSubmit={(e) => void onSubmit(e)}
         className="space-y-6 rounded-2xl border border-border-default bg-surface-raised p-5 shadow-sm shadow-slate-900/5 dark:border-border-subtle dark:bg-surface-raised"
+        data-focus-anchor="course.marketplace.listing"
       >
         <div>
           <h2 className="text-sm font-semibold text-fg-default">
@@ -326,6 +327,6 @@ export function CourseMarketplaceSettingsSection({
         />
       ) : null}
       {ConfirmDialogHost}
-    </>
+    </div>
   )
 }

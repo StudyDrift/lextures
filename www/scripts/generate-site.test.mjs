@@ -17,6 +17,8 @@ import {
   truncateMeta,
   truncateTitle,
   normalizeFallbackContentHtml,
+  articleSummaryFromHtml,
+  categoriesFromArticleSummaries,
   validateGeneratedPage,
   outputPathForRoute,
   buildLinkGraph,
@@ -44,6 +46,36 @@ describe('truncateMeta', () => {
     const out = truncateMeta(long, 40)
     assert.ok(out.length <= 41)
     assert.ok(out.endsWith('…'))
+  })
+})
+
+describe('articleSummaryFromHtml', () => {
+  it('reconstructs blog and docs listing metadata from deployed HTML', () => {
+    const blog = articleSummaryFromHtml(
+      '/blog/the-synthetic-renaissance/',
+      '<title>The Synthetic Renaissance: How AI is Reshaping the… — Lextures</title><meta name="description" content="Understand how accountable AI can support feedback." />',
+    )
+    assert.deepEqual(blog, {
+      path: '/blog/the-synthetic-renaissance',
+      kind: 'blog',
+      slug: 'the-synthetic-renaissance',
+      locale: 'en',
+      categorySlug: undefined,
+      title: 'The Synthetic Renaissance: How AI is Reshaping the…',
+      description: 'Understand how accountable AI can support feedback.',
+      publishedAt: null,
+      bodyMd: '',
+    })
+    const doc = articleSummaryFromHtml(
+      '/docs/integrations/using-lextures-with-make',
+      '<title>Using Lextures with Make — Lextures</title><meta name="description" content="Build a Make scenario." />',
+    )
+    assert.equal(doc.kind, 'doc')
+    assert.equal(doc.categorySlug, 'integrations')
+    assert.deepEqual(
+      categoriesFromArticleSummaries([doc]),
+      [{ slug: 'integrations', locale: 'en', title: 'Integrations', description: '', sortOrder: 0 }],
+    )
   })
 })
 

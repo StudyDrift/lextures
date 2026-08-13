@@ -1,9 +1,38 @@
 import assert from 'node:assert/strict'
-import { mkdtemp } from 'node:fs/promises'
+import { mkdtemp, writeFile, readFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
 import { loadApiContent, mergeRedirects } from './content-source.mjs'
+
+test('empty live index is retried and not written to cache', async t => {
+  const originalFetch = globalThis.fetch
+  const cacheDir = await mkdtemp(path.join(tmpdir(), 'lextures-content-empty-'))
+  let indexCalls = 0
+  globalThis.fetch = async url => {
+    if (String(url).endsWith('/index')) {
+      indexCalls++
+      return new Response(JSON.stringify({ generatedAt: '1970-01-01T00:00:00Z', articles: [] }), { status: 200 })
+    }
+    return new Response('missing', { status: 404 })
+  }
+  t.after(() => { globalThis.fetch = originalFetch })
+  const snapshot = await loadApiContent({ apiBase: 'https://example.test', cacheDir, userAgent: 'test', concurrency: 2 })
+  assert.equal(snapshot.articles.length, 0)
+  assert.ok(indexCalls >= 2)
+  await assert.rejects(readFile(path.join(cacheDir, 'index.json')))
+})
+
+test('empty cache is ignored when the live index is unreachable', async t => {
+  const originalFetch = globalThis.fetch
+  const cacheDir = await mkdtemp(path.join(tmpdir(), 'lextures-content-stale-'))
+  await writeFile(path.join(cacheDir, 'index.json'), JSON.stringify({ generatedAt: '1970-01-01T00:00:00Z', articles: [] }))
+  globalThis.fetch = async () => { throw new Error('offline') }
+  t.after(() => { globalThis.fetch = originalFetch })
+  const snapshot = await loadApiContent({ apiBase: 'https://example.test', cacheDir, userAgent: 'test', concurrency: 2 })
+  assert.equal(snapshot.articles.length, 0)
+  assert.equal(snapshot.fallbackUsed, true)
+})
 
 test('API source fetches uncached bodies then reuses the hash cache', async t => {
   const originalFetch = globalThis.fetch

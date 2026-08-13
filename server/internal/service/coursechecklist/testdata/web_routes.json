@@ -6,6 +6,7 @@
     "/courses/{courseCode}/settings/grading",
     "/courses/{courseCode}/settings/outcomes",
     "/courses/{courseCode}/settings/features",
+    "/courses/{courseCode}/settings/marketplace",
     "/courses/{courseCode}/settings/sections",
     "/courses/{courseCode}/settings/accessibility",
     "/courses/{courseCode}/settings/import-export",

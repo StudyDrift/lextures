@@ -404,11 +404,13 @@ html.reduced-motion .tooltip-in {
 
 /* AN.2 — route / section transitions (transform + opacity only). */
 .lx-route-transition {
-  /* Grow with page content so <main overflow-y-auto> can scroll.
-     Avoid min-height:0 + flex:1 here — that shrinks to the viewport and
-     clips tall routes when a descendant uses overflow:clip. */
+  /* Fill the main pane when the route is short; grow with content when tall.
+     flex-shrink:0 so overflow:clip descendants on long pages are not crushed. */
   min-width: 0;
   width: 100%;
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
 }
 
 @keyframes lx-route-fade-in {

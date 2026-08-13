@@ -28,6 +28,7 @@ const COURSE_SETTINGS_LABEL: Record<CourseSettingsSection, string> = {
   outcomes: 'Outcomes',
   badges: 'Badges',
   features: 'Features',
+  marketplace: 'Marketplace',
   'adaptive-content': 'Adaptive Content',
   accessibility: 'Accessibility',
   translations: 'Translations',

@@ -819,6 +819,70 @@ async function discoverPreviousContentPaths() {
   return [...new Set(paths)]
 }
 
+export function decodeHtmlEntities(value) {
+  return String(value || '')
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCharCode(parseInt(code, 16)))
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&#39;/g, "'")
+}
+
+/** Build a listing-only article summary from previously deployed HTML. */
+export function articleSummaryFromHtml(routePath, html) {
+  const pathname = String(routePath || '').replace(/\/+$/, '') || '/'
+  const parts = pathname.split('/').filter(Boolean)
+  const isBlog = parts[0] === 'blog'
+  const title = decodeHtmlEntities(String(html).match(/<title>([^<]*)<\/title>/i)?.[1] || '')
+    .replace(/\s+[—–-]\s+Lextures\s*$/u, '')
+    .trim()
+  const description = decodeHtmlEntities(
+    String(html).match(/<meta\s+name=["']description["']\s+content=["']([^"']*)/i)?.[1] || '',
+  )
+  return {
+    path: pathname,
+    kind: isBlog ? 'blog' : 'doc',
+    slug: parts.at(-1) || '',
+    locale: 'en',
+    categorySlug: !isBlog && parts.length >= 3 ? parts[1] : undefined,
+    title,
+    description,
+    publishedAt: null,
+    bodyMd: '',
+  }
+}
+
+export function categoriesFromArticleSummaries(articles) {
+  const seen = new Map()
+  for (const article of articles || []) {
+    if (article.kind !== 'doc' || !article.categorySlug || seen.has(article.categorySlug)) continue
+    const title = article.categoryTitle || article.categorySlug.replace(/-/g, ' ').replace(/\b\w/g, char => char.toUpperCase())
+    seen.set(article.categorySlug, {
+      slug: article.categorySlug,
+      locale: 'en',
+      title,
+      description: '',
+      sortOrder: seen.size,
+    })
+  }
+  return [...seen.values()]
+}
+
+async function loadPreviousArticleSummaries(paths) {
+  const summaries = []
+  await mapPool(paths, CONCURRENCY, async routePath => {
+    try {
+      const response = await fetch(`${LIVE_ORIGIN}${routePath}`, { headers: { 'User-Agent': PRERENDER_UA } })
+      if (!response.ok) return
+      summaries.push(articleSummaryFromHtml(routePath, await response.text()))
+    } catch { /* previous deploy is best effort */ }
+  })
+  return summaries.filter(article => article.slug && article.title)
+}
+
 // ── main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -841,7 +905,22 @@ async function main() {
     build: { emptyOutDir: false },
   })
 
-  const contentSnapshot = await loadApiContent({ apiBase: CONTENT_API_BASE, cacheDir: CONTENT_CACHE_DIR, concurrency: CONCURRENCY, userAgent: PRERENDER_UA })
+  let contentSnapshot = await loadApiContent({ apiBase: CONTENT_API_BASE, cacheDir: CONTENT_CACHE_DIR, concurrency: CONCURRENCY, userAgent: PRERENDER_UA })
+  if (!(contentSnapshot.articles || []).length) {
+    const previousPaths = await discoverPreviousContentPaths()
+    const summaries = previousPaths.length ? await loadPreviousArticleSummaries(previousPaths) : []
+    if (summaries.length) {
+      contentSnapshot = {
+        ...contentSnapshot,
+        articles: summaries,
+        categories: (contentSnapshot.categories || []).length
+          ? contentSnapshot.categories
+          : categoriesFromArticleSummaries(summaries),
+        fallbackUsed: true,
+      }
+      console.warn(`[generate-site] WARN: content API returned no articles; reconstructed ${summaries.length} listings from the previous deploy`)
+    }
+  }
   await localizeContentMedia(contentSnapshot.articles)
   globalThis.__LEXTURES_BUILD_CONTENT__ = contentSnapshot
 
@@ -961,7 +1040,7 @@ async function main() {
   const previousContentPaths = CONTENT_SOURCE === 'api' && (contentSnapshot.fallbackUsed || apiContentMissing)
     ? await discoverPreviousContentPaths() : []
   const extraContentPaths = (contentSnapshot.articles || [])
-    .filter(article => article.path && article.locale && article.locale !== 'en')
+    .filter(article => article.path)
     .map(article => ({
       path: article.path,
       title: article.title ? `${article.title} — Lextures` : undefined,

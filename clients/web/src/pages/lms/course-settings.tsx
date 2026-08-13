@@ -133,6 +133,7 @@ type SettingsSection =
   | 'outcomes'
   | 'badges'
   | 'features'
+  | 'marketplace'
   | 'adaptive-content'
   | 'accessibility'
   | 'translations'
@@ -176,6 +177,7 @@ function parseSettingsSection(courseCode: string, pathname: string): SettingsSec
   if (seg === 'outcomes') return 'outcomes'
   if (seg === 'badges') return 'badges'
   if (seg === 'features') return 'features'
+  if (seg === 'marketplace') return 'marketplace'
   if (seg === 'adaptive-content' || seg === 'adaptive') return 'adaptive-content'
   if (seg === 'accessibility') return 'accessibility'
   if (seg === 'translations') return 'translations'
@@ -798,7 +800,8 @@ export default function CourseSettings() {
     (section === 'translations' && !isTranslationMemoryEnabled()) ||
     (section === 'accessibility' && !featuresLoading && !altTextEnforcementEnabled) ||
     (section === 'plagiarism' && !featuresLoading && !ffPlagiarismChecks) ||
-    (section === 'grading-agents' && !featuresLoading && !graderAgentEnabled)
+    (section === 'grading-agents' && !featuresLoading && !graderAgentEnabled) ||
+    (section === 'marketplace' && !featuresLoading && !ffCourseMarketplace)
   ) {
     return <Navigate to={`${settingsBase}/general`} replace />
   }
@@ -832,6 +835,10 @@ export default function CourseSettings() {
             ? course?.title
               ? `${course.title} — features`
               : 'Features'
+            : section === 'marketplace'
+              ? course?.title
+                ? `${course.title} — marketplace`
+                : 'Marketplace'
             : section === 'adaptive-content'
               ? course?.title
                 ? `${course.title} — Adaptive Content`
@@ -879,6 +886,8 @@ export default function CourseSettings() {
             ? 'Define competency micro-badges tied to outcomes and award signed Open Badges to students who demonstrate mastery.'
           : section === 'features'
             ? 'Choose which course tools appear in the menu and are available to instructors and learners.'
+            : section === 'marketplace'
+              ? 'List this course in the in-app storefront, set a fee for new enrollments, and manage coupon codes.'
             : section === 'adaptive-content'
               ? 'Configure adaptive units, preview learner archetypes, and approve or reject generated variants.'
             : section === 'accessibility'
@@ -908,7 +917,12 @@ export default function CourseSettings() {
     ) : undefined
 
   return (
-    <LmsPage title={pageTitle} description={pageDescription} actions={pageActions}>
+    <LmsPage
+      title={pageTitle}
+      description={pageDescription}
+      actions={pageActions}
+      fillHeight={section === 'marketplace'}
+    >
       <p className="mt-2">
         <Link
           to={`/courses/${encodeURIComponent(courseCode)}`}
@@ -927,7 +941,11 @@ export default function CourseSettings() {
 
       {course && !loading && (
         <div
-          className={`mt-8 space-y-6 ${section === 'grading-agents' || section === 'adaptive-content' ? 'w-full' : 'max-w-4xl'}`}
+          className={`mt-8 ${
+            section === 'marketplace'
+              ? 'flex min-h-0 flex-1 flex-col gap-6 max-w-4xl'
+              : `space-y-6 ${section === 'grading-agents' || section === 'adaptive-content' ? 'w-full' : 'max-w-4xl'}`
+          }`}
         >
           {section === 'general' && (
             <form
@@ -1484,15 +1502,19 @@ export default function CourseSettings() {
               {ffConsortiumSharing ? (
                 <CourseConsortiumSettingsSection courseCode={courseCode} />
               ) : null}
-              {ffCourseMarketplace ? (
-                <CourseMarketplaceSettingsSection
-                  courseCode={courseCode}
-                  courseTitle={course.title}
-                  heroImageUrl={course.heroImageUrl}
-                />
-              ) : null}
             </>
           )}
+          {section === 'marketplace' && (featuresLoading || ffCourseMarketplace) ? (
+            featuresLoading ? (
+              <p className="text-sm text-fg-muted">Loading marketplace settings…</p>
+            ) : (
+              <CourseMarketplaceSettingsSection
+                courseCode={courseCode}
+                courseTitle={course.title}
+                heroImageUrl={course.heroImageUrl}
+              />
+            )
+          ) : null}
           {section === 'adaptive-content' && (
             <AdaptiveContentWorkspace
               courseCode={courseCode}

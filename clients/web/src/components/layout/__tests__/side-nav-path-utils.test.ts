@@ -72,6 +72,9 @@ describe('courseSettingsSectionFromPathname', () => {
     expect(courseSettingsSectionFromPathname('/courses/C-1/settings/features-tools')).toBe(
       'features',
     )
+    expect(courseSettingsSectionFromPathname('/courses/C-1/settings/marketplace')).toBe(
+      'marketplace',
+    )
     expect(courseSettingsSectionFromPathname('/courses/C-1/settings/adaptive-content')).toBe(
       'adaptive-content',
     )

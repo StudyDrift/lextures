@@ -61,7 +61,7 @@ export function CourseCouponsList({
       <div className="hidden sm:block">
         <Table>
           <caption className="sr-only">{title}</caption>
-          <TableHeader>
+          <TableHeader className="bg-transparent">
             <TableRow>
               <TableHead scope="col">{labels.code}</TableHead>
               <TableHead scope="col">{labels.discount}</TableHead>

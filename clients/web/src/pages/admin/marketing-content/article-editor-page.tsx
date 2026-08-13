@@ -13,6 +13,7 @@ import { usePermissions } from '../../../context/use-permissions'
 import { createMarketingArticle, createMarketingPreviewToken, getMarketingArticle, lintMarketingArticle, listMarketingAuthors, listMarketingCategories, listMarketingKnownPaths, MarketingConflictError, restoreMarketingRevision, transitionMarketingArticle, updateMarketingArticle, type MarketingArticle, type MarketingArticleWrite, type MarketingFinding } from '../../../lib/marketing-content-api'
 import { createMarketingTranslation, listMarketingLocales, listMarketingTranslations, markMarketingTranslationSynced, type MarketingLocale, type MarketingTranslationLink } from '../../../lib/marketing-content-i18n-api'
 import { PERM_MARKETING_CONTENT_AUTHOR, PERM_MARKETING_CONTENT_PUBLISH, PERM_MARKETING_CONTENT_REVIEW } from '../../../lib/rbac-api'
+import { resolveMarketingPreviewUrl } from '../../../lib/marketing-site'
 
 const emptyArticle = (kind: 'blog' | 'doc'): MarketingArticle => ({
   id: '', kind, slug: '', path: '', locale: 'en', title: '', description: '', bodyMd: '', status: 'draft', authorSlug: '', reviewerSlug: null,
@@ -22,10 +23,10 @@ const emptyArticle = (kind: 'blog' | 'doc'): MarketingArticle => ({
 
 type View = 'write' | 'split' | 'preview' | 'details'
 
-function EditorMenu({ label, items, variant = 'ghost', icon }: { label: string; items: MenuItem[]; variant?: 'secondary' | 'ghost'; icon?: React.ReactNode }) {
+function EditorMenu({ label, items, variant = 'ghost', icon, placement = 'bottom-start' }: { label: string; items: MenuItem[]; variant?: 'secondary' | 'ghost'; icon?: React.ReactNode; placement?: 'bottom-start' | 'bottom-end' }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLButtonElement>(null)
-  return <><Button ref={ref} size="sm" variant={variant} className="min-h-6" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((value) => !value)}>{icon}{label}<ChevronDown aria-hidden className="h-3.5 w-3.5 opacity-70" /></Button><Menu open={open} onOpenChange={setOpen} anchorRef={ref} items={items} /></>
+  return <><Button ref={ref} size="sm" variant={variant} className="min-h-6" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((value) => !value)}>{icon}{label}<ChevronDown aria-hidden className="h-3.5 w-3.5 opacity-70" /></Button><Menu open={open} onOpenChange={setOpen} anchorRef={ref} items={items} placement={placement} /></>
 }
 
 function writePayload(article: MarketingArticle): MarketingArticleWrite {
@@ -217,7 +218,7 @@ export default function ArticleEditorPage() {
   const openPreview = async () => {
     const saved = dirty ? await saveArticle() : article
     if (!saved?.id) return
-    try { const preview = await createMarketingPreviewToken(saved.id); window.open(preview.url, '_blank', 'noopener') } catch { setView('preview') }
+    try { const preview = await createMarketingPreviewToken(saved.id); window.open(resolveMarketingPreviewUrl(preview.url, saved.path), '_blank', 'noopener') } catch { setView('preview') }
   }
   const insertDirective = (markdown: string) => {
     if (simple || !editorRef.current) patch({ bodyMd: `${article.bodyMd}${article.bodyMd.endsWith('\n') || !article.bodyMd ? '' : '\n\n'}${markdown}` })
@@ -283,12 +284,12 @@ export default function ArticleEditorPage() {
         <div className="flex items-center gap-2">
           <Button size="sm" variant="secondary" className="min-h-6" onClick={() => void openPreview()}><Eye className="h-4 w-4" /> <span className="hidden sm:inline">Preview</span></Button>
           <Button size="sm" className="min-h-6" loading={saving} disabled={!dirty} onClick={() => void saveArticle()}><Save className="h-4 w-4" /> Save</Button>
-          {!isNew ? <EditorMenu label="Actions" variant="secondary" items={[
+          {!isNew ? <EditorMenu label="Actions" variant="secondary" placement="bottom-end" items={[
             ...(canAuthor ? [{ id: 'submit', label: 'Submit for review', onSelect: () => setTransition('submit') }] : []),
             ...(canReview ? [{ id: 'approve', label: 'Approve', onSelect: () => setTransition('approve') }, { id: 'request_changes', label: 'Request changes', onSelect: () => setTransition('request_changes') }] : []),
             ...(canPublish ? [{ id: 'publish', label: 'Publish', onSelect: () => setTransition('publish') }, { id: 'schedule', label: 'Schedule', onSelect: () => setTransition('schedule') }, { id: 'unpublish', label: 'Unpublish', onSelect: () => setTransition('unpublish') }, { id: 'archive', label: 'Archive', onSelect: () => setTransition('archive') }] : []),
           ]} /> : null}
-          {!isNew && localesEnabled ? <EditorMenu label="Translations" variant="ghost" items={translationItems.length ? translationItems : [{ id: 'none', label: 'This article is only available in this locale', disabled: true }]} /> : null}
+          {!isNew && localesEnabled ? <EditorMenu label="Translations" variant="ghost" placement="bottom-end" items={translationItems.length ? translationItems : [{ id: 'none', label: 'This article is only available in this locale', disabled: true }]} /> : null}
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-2 border-t border-border-subtle px-4 py-2 sm:px-6" role="toolbar" aria-label="Article editor tools">

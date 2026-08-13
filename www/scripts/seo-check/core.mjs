@@ -122,5 +122,15 @@ export async function runChecks(dist, selected = null, previousManifest = null) 
   const removed = []
   if (previousManifest) for (const page of previousManifest.urls || []) if (!all.has(page.path) && !redirects.has(page.path)) removed.push(finding(page.path, 'Published URL was removed without a redirect.'))
   add('published-urls', removed)
+
+  const blogIndexHtml = htmlByPath.get('/blog') || ''
+  const publishedBlog = manifest.urls.filter(page =>
+    /^\/blog\/[^/]+$/.test(page.path) && page.sitemap !== false && !String(page.robots || '').includes('noindex'),
+  )
+  const blogListingFindings = []
+  if (publishedBlog.length && !publishedBlog.some(page => blogIndexHtml.includes(page.path))) {
+    blogListingFindings.push(finding('/blog', `Blog index does not link to published posts (${publishedBlog.length} in the manifest).`))
+  }
+  add('blog-listing', blogListingFindings)
   return results
 }

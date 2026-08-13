@@ -139,7 +139,7 @@ test.describe('MKTC.4 creator coupon manager', () => {
     await publishCourse(token, code, title)
     await putListing(token, code, 4000)
     await loginAsAdmin(page, token)
-    await page.goto(`${WEB_BASE}/courses/${encodeURIComponent(code)}/settings/features`)
+    await page.goto(`${WEB_BASE}/courses/${encodeURIComponent(code)}/settings/marketplace`)
     await dismissLegalBanner(page)
     await expect(page.getByRole('heading', { name: 'Marketplace', exact: true })).toBeVisible({
       timeout: 30_000,
@@ -157,7 +157,7 @@ test.describe('MKTC.4 creator coupon manager', () => {
     await publishCourse(token, courseCode, title)
     await putListing(token, courseCode, 4000)
     await loginAsAdmin(page, token)
-    await page.goto(`${WEB_BASE}/courses/${encodeURIComponent(courseCode)}/settings/features`)
+    await page.goto(`${WEB_BASE}/courses/${encodeURIComponent(courseCode)}/settings/marketplace`)
     await dismissLegalBanner(page)
 
     const coupons = page.getByRole('region', { name: 'Coupon codes' })

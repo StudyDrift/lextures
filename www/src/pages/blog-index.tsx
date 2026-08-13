@@ -94,13 +94,19 @@ export function BlogIndex() {
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             {filteredPosts.length === 0 ? (
               <div className="py-20 text-center">
-                <p className="text-lg text-slate-500">No posts found matching your search.</p>
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="mt-4 text-sm font-semibold text-accent hover:underline"
-                >
-                  Clear search
-                </button>
+                <p className="text-lg text-slate-500">
+                  {allPosts.length === 0
+                    ? 'No published posts are available yet.'
+                    : 'No posts found matching your search.'}
+                </p>
+                {allPosts.length > 0 && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="mt-4 text-sm font-semibold text-accent hover:underline"
+                  >
+                    Clear search
+                  </button>
+                )}
               </div>
             ) : (
               <>

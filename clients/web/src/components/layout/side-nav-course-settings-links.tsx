@@ -9,6 +9,7 @@ import {
   Scale,
   Languages,
   Bot,
+  Store,
   SlidersHorizontal,
   Target,
   Award,
@@ -30,8 +31,13 @@ type SideNavCourseSettingsLinksProps = {
 
 export function SideNavCourseSettingsLinks({ courseCode }: SideNavCourseSettingsLinksProps) {
   const location = useLocation()
-  const { altTextEnforcementEnabled, ffPlagiarismChecks, graderAgentEnabled, loading: featuresLoading } =
-    usePlatformFeatures()
+  const {
+    altTextEnforcementEnabled,
+    ffCourseMarketplace,
+    ffPlagiarismChecks,
+    graderAgentEnabled,
+    loading: featuresLoading,
+  } = usePlatformFeatures()
   const { sectionsEnabled, loading: courseFeaturesLoading } = useCourseNavFeatures()
   const section = courseSettingsSectionFromPathname(location.pathname)
   const base = `/courses/${encodeURIComponent(courseCode)}/settings`
@@ -56,6 +62,15 @@ export function SideNavCourseSettingsLinks({ courseCode }: SideNavCourseSettings
       >
         Features
       </SideNavLink>
+      {!featuresLoading && ffCourseMarketplace ? (
+        <SideNavLink
+          to={`${base}/marketplace`}
+          className={() => (section === 'marketplace' ? sideNavActiveClass : '')}
+          icon={<Store className="h-5 w-5" />}
+        >
+          Marketplace
+        </SideNavLink>
+      ) : null}
       <SideNavLink
         to={`${base}/adaptive-content`}
         className={() => (section === 'adaptive-content' ? sideNavActiveClass : '')}

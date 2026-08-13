@@ -16,3 +16,25 @@ test('reports duplicate titles and removed URLs without redirects', async () => 
   assert.equal(results.find(r => r.check === 'titles').findings.length, 1)
   assert.equal(results.find(r => r.check === 'published-urls').findings[0].page, '/gone')
 })
+
+test('fails when the blog index does not link published posts', async () => {
+  const dist = await mkdtemp(path.join(tmpdir(), 'seo-blog-'))
+  await mkdir(path.join(dist, 'blog', 'hello'), { recursive: true })
+  await mkdir(path.join(dist, 'sitemaps'))
+  const page = p => `<!doctype html><body><h1>${p}</h1><link rel="canonical" href="https://lextures.com${p}"><meta property="og:image" content="https://lextures.com/og.png"></body>`
+  await Promise.all([
+    writeFile(path.join(dist, 'blog/index.html'), page('/blog')),
+    writeFile(path.join(dist, 'blog/hello/index.html'), page('/blog/hello')),
+    writeFile(path.join(dist, 'og.png'), 'x'),
+    writeFile(path.join(dist, '_redirects'), ''),
+    writeFile(path.join(dist, '.link-graph.json'), JSON.stringify({ nodes: [{ path: '/blog', depth: 1, inbound: 1 }, { path: '/blog/hello', depth: 2, inbound: 1 }], edges: [] })),
+    writeFile(path.join(dist, 'sitemaps/blog.xml'), '<urlset><url><loc>https://lextures.com/blog</loc></url><url><loc>https://lextures.com/blog/hello</loc></url></urlset>'),
+  ])
+  const urls = [
+    { path: '/blog', title: 'Blog — Lextures', description: `${'useful description '.repeat(9)}`, canonical: 'https://lextures.com/blog', robots: 'index,follow', sitemap: true },
+    { path: '/blog/hello', title: 'Hello — Lextures', description: `${'another description '.repeat(9)}`, canonical: 'https://lextures.com/blog/hello', robots: 'index,follow', sitemap: true },
+  ]
+  await writeFile(path.join(dist, '.seo-manifest.json'), JSON.stringify({ origin: 'https://lextures.com', urls }))
+  const results = await runChecks(dist, new Set(['blog-listing']))
+  assert.equal(results.find(r => r.check === 'blog-listing').findings[0].page, '/blog')
+})
