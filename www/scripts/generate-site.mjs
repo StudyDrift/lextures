@@ -871,6 +871,18 @@ export function categoriesFromArticleSummaries(articles) {
   return [...seen.values()]
 }
 
+/** Coerce content-API author/reviewer objects to slug strings for bylines. */
+export function normalizeSsrArticle(article) {
+  if (!article) return null
+  return {
+    ...article,
+    author: typeof article.author === 'string' ? article.author : article.author?.slug || 'chase-willden',
+    reviewedBy: typeof article.reviewedBy === 'string'
+      ? article.reviewedBy
+      : article.reviewer?.slug || article.reviewedBy?.slug,
+  }
+}
+
 async function loadPreviousArticleSummaries(paths) {
   const summaries = []
   await mapPool(paths, CONCURRENCY, async routePath => {
@@ -1290,7 +1302,9 @@ async function main() {
   await mapPool(staticRoutes, CONCURRENCY, async route => {
     const ssrData = CONTENT_SOURCE === 'api' ? { articleIndex: contentSnapshot } : {}
     if (CONTENT_SOURCE === 'api' && (/^\/blog\/[^/]+$/.test(route.path) || /^\/docs\/[^/]+\/[^/]+$/.test(route.path))) {
-      ssrData.article = contentSnapshot.articles.find(article => article.path === route.path) || null
+      ssrData.article = normalizeSsrArticle(
+        contentSnapshot.articles.find(article => article.path === route.path) || null,
+      )
     }
     if (route.path === '/courses' && courses.length > 0) {
       ssrData.coursesIndex = {

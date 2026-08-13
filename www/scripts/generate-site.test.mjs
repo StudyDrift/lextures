@@ -19,6 +19,7 @@ import {
   normalizeFallbackContentHtml,
   articleSummaryFromHtml,
   categoriesFromArticleSummaries,
+  normalizeSsrArticle,
   validateGeneratedPage,
   outputPathForRoute,
   buildLinkGraph,
@@ -46,6 +47,26 @@ describe('truncateMeta', () => {
     const out = truncateMeta(long, 40)
     assert.ok(out.length <= 41)
     assert.ok(out.endsWith('…'))
+  })
+})
+
+describe('normalizeSsrArticle', () => {
+  it('coerces embedded author/reviewer objects to slug strings', () => {
+    assert.deepEqual(
+      normalizeSsrArticle({
+        path: '/blog/example',
+        author: { slug: 'chase-willden', name: 'Chase Willden' },
+        reviewer: { slug: 'chase-willden', name: 'Chase Willden' },
+      }),
+      {
+        path: '/blog/example',
+        author: 'chase-willden',
+        reviewer: { slug: 'chase-willden', name: 'Chase Willden' },
+        reviewedBy: 'chase-willden',
+      },
+    )
+    assert.equal(normalizeSsrArticle(null), null)
+    assert.equal(normalizeSsrArticle({ author: 'ada' }).author, 'ada')
   })
 })
 

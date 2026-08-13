@@ -83,18 +83,33 @@ export function requireAuthor(slug: string, context?: string): Author {
   return a
 }
 
-/** Display name for bylines; works for retired authors (plain text, no link). */
-export function authorDisplayName(slug: string): string {
-  return getAuthor(slug)?.name ?? slug
+/** Accept slug strings or API author objects embedded on content payloads. */
+export type AuthorRef = string | { slug?: string; name?: string } | null | undefined
+
+/** Normalize content-API author objects to a registry slug. */
+export function authorSlugFrom(ref: AuthorRef): string {
+  if (typeof ref === 'string') return ref
+  if (ref && typeof ref === 'object' && typeof ref.slug === 'string') return ref.slug
+  return ''
 }
 
-export function isAuthorLinkable(slug: string): boolean {
-  const a = getAuthor(slug)
+/** Display name for bylines; works for retired authors (plain text, no link). */
+export function authorDisplayName(ref: AuthorRef): string {
+  const slug = authorSlugFrom(ref)
+  const registered = slug ? getAuthor(slug)?.name : undefined
+  if (typeof registered === 'string' && registered) return registered
+  if (ref && typeof ref === 'object' && typeof ref.name === 'string' && ref.name) return ref.name
+  return slug
+}
+
+export function isAuthorLinkable(ref: AuthorRef): boolean {
+  const a = getAuthor(authorSlugFrom(ref))
   return Boolean(a && a.status === 'active')
 }
 
-export function authorPath(slug: string): string | null {
-  return isAuthorLinkable(slug) ? `/authors/${slug}` : null
+export function authorPath(ref: AuthorRef): string | null {
+  const slug = authorSlugFrom(ref)
+  return slug && isAuthorLinkable(slug) ? `/authors/${slug}` : null
 }
 
 /** Validate all content author slugs; throws listing offenders. */
