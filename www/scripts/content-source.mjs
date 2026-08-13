@@ -33,23 +33,52 @@ async function mapPool(items, concurrency, fn) {
   return output
 }
 
+function emptyContentIndex() {
+  return { generatedAt: new Date(0).toISOString(), articles: [], categories: [], authors: [], redirects: [] }
+}
+
+function indexHasArticles(index) {
+  return Array.isArray(index?.articles) && index.articles.length > 0
+}
+
+/** Fetch the public content index, retrying empty 200s that happen during API cutover. */
+async function fetchContentIndex(apiBase, userAgent, attempts = 3) {
+  let lastError
+  let lastIndex
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    try {
+      const response = await fetchWithRetry(`${apiBase}/api/v1/public/content/index`, { userAgent })
+      const index = await response.json()
+      lastIndex = index
+      if (indexHasArticles(index)) return index
+      lastError = new Error(`GET ${apiBase}/api/v1/public/content/index → empty article index`)
+    } catch (error) {
+      lastError = error
+    }
+    if (attempt < attempts) await sleep(250 * 2 ** (attempt - 1))
+  }
+  if (lastIndex) return lastIndex
+  throw lastError
+}
+
 export async function loadApiContent({ apiBase, cacheDir, concurrency = 8, userAgent }) {
   await mkdir(cacheDir, { recursive: true })
   const indexFile = path.join(cacheDir, 'index.json')
   let index
   let fallbackUsed = false
   try {
-    const response = await fetchWithRetry(`${apiBase}/api/v1/public/content/index`, { userAgent })
-    index = await response.json()
-    await writeFile(indexFile, JSON.stringify(index), 'utf8')
+    index = await fetchContentIndex(apiBase, userAgent)
+    // An empty live index is a cutover/race, not a cacheable snapshot.
+    if (indexHasArticles(index)) await writeFile(indexFile, JSON.stringify(index), 'utf8')
   } catch (error) {
     fallbackUsed = true
     try {
       index = JSON.parse(await readFile(indexFile, 'utf8'))
+      if (!indexHasArticles(index)) throw new Error('cached content index is empty')
       console.warn(`[generate-site] WARN: content API unreachable (${error.message || error}); using cached content index`)
     } catch {
       console.warn(`[generate-site] WARN: content API unreachable (${error.message || error}); no content cache is available`)
-      index = { generatedAt: new Date(0).toISOString(), articles: [], categories: [], authors: [], redirects: [] }
+      index = emptyContentIndex()
     }
   }
 

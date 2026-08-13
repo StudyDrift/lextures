@@ -724,6 +724,13 @@ const courseSettingsSectionDefs: {
     requiredPermission: courseItemCreatePermission,
   },
   {
+    suffix: '/settings/marketplace',
+    title: 'Marketplace',
+    hint: 'marketplace listing storefront price fee coupon codes enroll purchase',
+    requiredPermission: courseItemCreatePermission,
+    whenPlatform: () => getPlatformFeatures().ffCourseMarketplace !== false,
+  },
+  {
     suffix: '/settings/import-export',
     title: 'Import / export',
     hint: 'export import backup canvas migrate course package',

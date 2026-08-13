@@ -5,23 +5,25 @@
 import {
   authorDisplayName,
   authorPath,
+  authorSlugFrom,
   getAuthor,
   isAuthorLinkable,
+  type AuthorRef,
 } from '../lib/authors'
 import { formatDate } from '../utils/blog'
 
 export type BylineProps = {
-  authorSlug: string
+  authorSlug: AuthorRef
   datePublished?: string
   dateModified?: string
-  reviewedBySlug?: string
+  reviewedBySlug?: AuthorRef
   reviewedOn?: string
   /** Compact single-line layout under 640px is CSS-driven. */
   className?: string
 }
 
 function InitialsAvatar({ name }: { name: string }) {
-  const initials = name
+  const initials = String(name || '')
     .split(/\s+/)
     .filter(Boolean)
     .slice(0, 2)
@@ -46,9 +48,10 @@ export function Byline({
   reviewedOn,
   className = '',
 }: BylineProps) {
-  const author = getAuthor(authorSlug)
+  const slug = authorSlugFrom(authorSlug)
+  const author = getAuthor(slug)
   const name = authorDisplayName(authorSlug)
-  const href = authorPath(authorSlug)
+  const href = authorPath(slug)
   const jobTitle = author?.jobTitle
   const bio = author?.bio
   const image = author?.image
@@ -72,7 +75,7 @@ export function Byline({
         <div className="min-w-0">
           <p className="text-sm text-slate-500">
             <span className="sr-only">Written by </span>
-            {href && isAuthorLinkable(authorSlug) ? (
+            {href && isAuthorLinkable(slug) ? (
               <a
                 href={href}
                 className="font-medium text-slate-900 no-underline hover:underline"

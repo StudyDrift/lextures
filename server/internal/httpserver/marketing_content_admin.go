@@ -3,7 +3,6 @@ package httpserver
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"slices"
 	"strconv"
@@ -536,6 +535,7 @@ func (d Deps) handleMarketingRevisionRestore() http.HandlerFunc {
 		writeJSON(w, 200, a)
 	}
 }
+
 func (d Deps) handleMarketingPreviewToken() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if _, ok := d.marketingAccess(w, r, marketingView); !ok {
@@ -555,7 +555,7 @@ func (d Deps) handleMarketingPreviewToken() http.HandlerFunc {
 			writeMarketingError(w, r, err)
 			return
 		}
-		writeJSON(w, 200, map[string]any{"token": token, "expiresAt": exp, "url": fmt.Sprintf("/preview/%s?token=%s", id, token)})
+		writeJSON(w, 200, map[string]any{"token": token, "expiresAt": exp, "url": marketingPreviewURL(d.effectiveConfig().MarketingSiteOrigin, a.Path, token)})
 	}
 }
 func (d Deps) handleMarketingArticleDelete() http.HandlerFunc {

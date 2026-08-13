@@ -6,7 +6,8 @@ import { usePlatformFeatures } from "../../../context/platform-features-context"
 import { usePermissions } from "../../../context/use-permissions";
 import { PERM_MARKETING_CONTENT_AUTHOR, PERM_MARKETING_CONTENT_PUBLISH, PERM_MARKETING_CONTENT_VIEW } from "../../../lib/rbac-api";
 import { emitMarketingContentEvent } from "../../../lib/marketing-content-telemetry";
-import { listMarketingArticles, listMarketingBuilds, requestMarketingBuild, transitionMarketingArticle, type MarketingArticleRow, type MarketingContentKind, type MarketingContentSort, type MarketingContentStatus } from "../../../lib/marketing-content-api";
+import { createMarketingPreviewToken, listMarketingArticles, listMarketingBuilds, requestMarketingBuild, transitionMarketingArticle, type MarketingArticleRow, type MarketingContentKind, type MarketingContentSort, type MarketingContentStatus } from "../../../lib/marketing-content-api";
+import { publicMarketingArticleUrl, resolveMarketingPreviewUrl } from "../../../lib/marketing-site";
 import { listMarketingLocales } from "../../../lib/marketing-content-i18n-api";
 import { ArticleActionsMenu } from "../../../components/marketing-content/article-actions-menu";
 import { SiteStatusStrip } from "../../../components/marketing-content/site-status-strip";
@@ -110,8 +111,16 @@ export default function MarketingContentPage() {
       action,
     });
     if (action === "open") return navigate(`/admin/marketing-content/${article.id}`);
-    if (action === "preview") return window.open(`${article.path}?preview=1`, "_blank", "noopener");
-    if (action === "copy_url") return void navigator.clipboard.writeText(new URL(article.path, window.location.origin).href);
+    if (action === "preview") {
+      try {
+        const preview = await createMarketingPreviewToken(article.id);
+        window.open(resolveMarketingPreviewUrl(preview.url, article.path), "_blank", "noopener");
+      } catch {
+        window.open(publicMarketingArticleUrl(article.path), "_blank", "noopener");
+      }
+      return;
+    }
+    if (action === "copy_url") return void navigator.clipboard.writeText(publicMarketingArticleUrl(article.path));
     try {
       await transitionMarketingArticle(article.id, action, article.revisionNo);
       await load(false);

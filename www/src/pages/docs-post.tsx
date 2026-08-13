@@ -11,7 +11,9 @@ import { useSsrData } from '../lib/ssr-context'
 
 export function DocsPost({ category: categoryId, slug }: { category: string; slug: string }) {
   const ssr = useSsrData()
-  const article = (ssr.article?.kind === 'doc' ? ssr.article : undefined) ?? getCategorizedArticle(categoryId, slug)
+  // Prefer the normalized content-source article (string author, html, dates).
+  // Raw SSR payloads embed API author objects and bodyMd only.
+  const article = getCategorizedArticle(categoryId, slug) ?? (ssr.article?.kind === 'doc' ? ssr.article : undefined)
   const category = getHelpCategory(categoryId)
 
   if (!article) {

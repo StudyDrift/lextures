@@ -165,7 +165,7 @@ export function CourseCouponRowActions({
               },
             ]}
             anchorRef={copyMenuTriggerRef}
-            placement="bottom-end"
+            placement="top-end"
           />
         </div>
       ) : (
@@ -202,7 +202,7 @@ export function CourseCouponRowActions({
         onOpenChange={setMenuOpen}
         items={menuItems}
         anchorRef={menuTriggerRef}
-        placement="bottom-end"
+        placement="top-end"
         aria-label={t('course.settings.coupons.rowActions', { code: coupon.code })}
       />
 

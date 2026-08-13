@@ -10,7 +10,10 @@ import {
   type RefObject,
 } from 'react'
 import { createPortal } from 'react-dom'
+import { menuPositionStyle, type MenuPlacement } from './menu-position'
 import { cx, focusRingClass } from './utils'
+
+export type { MenuPlacement }
 
 export type MenuItem = {
   id: string
@@ -31,8 +34,8 @@ export type MenuProps = {
   className?: string
   /** Called after an item is chosen (menu already closing). */
   onAction?: (id: string) => void
-  /** Placement relative to anchor. Default bottom-start. */
-  placement?: 'bottom-start' | 'bottom-end' | 'top-start' | 'top-end'
+  /** Placement relative to anchor. Default bottom-start. Flips/clamps to stay on screen. */
+  placement?: MenuPlacement
   /** Accessible name when no visible label. */
   'aria-label'?: string
   'aria-labelledby'?: string
@@ -68,21 +71,48 @@ export function Menu({
 
   useLayoutEffect(() => {
     if (!open || !anchorRef.current) return
-    const r = anchorRef.current.getBoundingClientRect()
-    const style: CSSProperties = {
-      position: 'fixed',
-      zIndex: 460,
-      minWidth: Math.max(r.width, 160),
+    const apply = () => {
+      if (!anchorRef.current) return
+      const r = anchorRef.current.getBoundingClientRect()
+      const menuEl = listRef.current
+      setPos(
+        menuPositionStyle(
+          r,
+          { width: menuEl?.offsetWidth ?? 0, height: menuEl?.offsetHeight ?? 0 },
+          placement,
+        ),
+      )
     }
-    if (placement.startsWith('bottom')) style.top = r.bottom + 4
-    else style.bottom = window.innerHeight - r.top + 4
-    if (placement.endsWith('start')) style.left = r.left
-    else style.right = window.innerWidth - r.right
-    setPos(style)
+    apply()
+    // First paint can report height 0; remasure so top placement sits above the trigger.
+    const raf = requestAnimationFrame(apply)
     setActiveIndex(enabledIndexes[0] ?? 0)
+    return () => cancelAnimationFrame(raf)
     // enabledIndexes identity changes each render; open + items drive re-position.
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional
   }, [open, anchorRef, items, placement])
+
+  useEffect(() => {
+    if (!open) return
+    function reposition() {
+      if (!anchorRef.current) return
+      const r = anchorRef.current.getBoundingClientRect()
+      const menuEl = listRef.current
+      setPos(
+        menuPositionStyle(
+          r,
+          { width: menuEl?.offsetWidth ?? 0, height: menuEl?.offsetHeight ?? 0 },
+          placement,
+        ),
+      )
+    }
+    window.addEventListener('resize', reposition)
+    window.addEventListener('scroll', reposition, true)
+    return () => {
+      window.removeEventListener('resize', reposition)
+      window.removeEventListener('scroll', reposition, true)
+    }
+  }, [open, anchorRef, placement])
 
   useEffect(() => {
     if (!open || !listRef.current) return
@@ -173,7 +203,7 @@ export function Menu({
       aria-labelledby={ariaLabelledby}
       style={pos}
       className={cx(
-        'rounded-xl border border-border-default bg-surface-raised py-1 shadow-lg outline-none',
+        'w-max rounded-xl border border-border-default bg-surface-raised py-1 shadow-lg outline-none',
         className,
       )}
       onKeyDown={onKeyDown}
@@ -187,7 +217,7 @@ export function Menu({
           tabIndex={i === activeIndex ? 0 : -1}
           disabled={item.disabled}
           className={cx(
-            'flex w-full min-h-9 items-center px-3 py-2 text-start text-sm font-medium outline-none',
+            'flex w-full min-h-9 items-center whitespace-nowrap px-3 py-2 text-start text-sm font-medium outline-none',
             focusRingClass,
             i === activeIndex && 'bg-accent-surface text-accent-fg',
             item.danger ? 'text-danger-fg' : 'text-fg-default',

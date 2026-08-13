@@ -11,7 +11,9 @@ import { useSsrData } from '../lib/ssr-context'
 
 export function BlogPost({ slug }: { slug: string }) {
   const ssr = useSsrData()
-  const post = (ssr.article?.kind === 'blog' ? ssr.article : undefined) ?? getPost(slug)
+  // Prefer the normalized content-source article (string author, html, dates).
+  // Raw SSR payloads embed API author objects and bodyMd only.
+  const post = getPost(slug) ?? (ssr.article?.kind === 'blog' ? ssr.article : undefined)
 
   if (!post) {
     return (
