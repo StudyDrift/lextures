@@ -77,4 +77,22 @@ final class BillingLogicTests: XCTestCase {
             "https://apps.apple.com/account/subscriptions"
         )
     }
+
+    func testAppleSubscriptionProductIDsAlwaysIncludeStoreKitDefaults() {
+        XCTAssertEqual(
+            BillingLogic.appleSubscriptionProductIDs(from: []),
+            [BillingLogic.appleMonthlyProductID, BillingLogic.appleAnnualProductID]
+        )
+        let fromAPI = BillingLogic.appleSubscriptionProductIDs(from: [
+            AppleIAPProductInfo(productId: "com.lextures.ios.sub.monthly", kind: "subscription_monthly"),
+            AppleIAPProductInfo(productId: "course.x", kind: "course_purchase"),
+        ])
+        XCTAssertEqual(fromAPI, [
+            "com.lextures.ios.sub.monthly",
+            BillingLogic.appleAnnualProductID,
+        ])
+        XCTAssertTrue(BillingLogic.isMonthlySubscriptionProduct(id: "com.lextures.ios.sub.monthly"))
+        XCTAssertTrue(BillingLogic.isAnnualSubscriptionProduct(id: "com.lextures.ios.sub.annual"))
+        XCTAssertFalse(BillingLogic.isMonthlySubscriptionProduct(id: "com.lextures.ios.sub.annual"))
+    }
 }

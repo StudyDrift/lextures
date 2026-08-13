@@ -54,13 +54,13 @@
           "localizations" : [
             {
               "description" : "Monthly Lextures Homeschool access.",
-              "displayName" : "Monthly",
+              "displayName" : "Monthly Access",
               "locale" : "en_US"
             }
           ],
           "productID" : "com.lextures.ios.sub.monthly",
           "recurringSubscriptionPeriod" : "P1M",
-          "referenceName" : "Monthly",
+          "referenceName" : "Monthly Access",
           "subscriptionGroupID" : "21482000",
           "type" : "RecurringSubscription",
           "winbackOffers" : [
@@ -82,13 +82,13 @@
           "localizations" : [
             {
               "description" : "Annual Lextures Homeschool access.",
-              "displayName" : "Annual",
+              "displayName" : "Annual Access",
               "locale" : "en_US"
             }
           ],
           "productID" : "com.lextures.ios.sub.annual",
           "recurringSubscriptionPeriod" : "P1Y",
-          "referenceName" : "Annual",
+          "referenceName" : "Annual Access",
           "subscriptionGroupID" : "21482000",
           "type" : "RecurringSubscription",
           "winbackOffers" : [

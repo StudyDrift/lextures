@@ -190,10 +190,10 @@ Email / Product Interaction / User ID are not marked Used to Track You. No ATT p
 because we do not track.
 
 BUSINESS MODEL
-Institutional LMS: schools provision access outside the app. Individual digital courses
-and hosted plans are purchased on the website (Stripe browser checkout), not via IAP.
-The iOS app reads existing entitlements and course access. Live features are classroom-
-scale, not paid public broadcasts.
+Institutional LMS: schools provision access outside the app. Individual Homeschool
+plans (Monthly Access / Annual Access) and digital courses are purchased in-app via
+StoreKit. After sign-in on Homeschool, the subscribe screen lists both IAPs; or
+Profile → Billing → Subscribe. Live features are classroom-scale, not paid broadcasts.
 
 METADATA
 App description revised to remove Android references.
