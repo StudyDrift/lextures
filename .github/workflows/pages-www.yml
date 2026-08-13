@@ -201,11 +201,14 @@ jobs:
         with:
           path: www/dist
 
-      # Persist manifest for IndexNow URL diff on next deploy
+      # Persist manifest for IndexNow URL diff on next deploy.
+      # Dotfiles need include-hidden-files (upload-artifact@v4 defaults to false).
       - uses: actions/upload-artifact@v4
         with:
           name: seo-manifest
           path: www/dist/.seo-manifest.json
+          include-hidden-files: true
+          if-no-files-found: error
           retention-days: 30
 
   deploy:
