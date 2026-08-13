@@ -14,21 +14,21 @@ import {
   type MarketingRevision,
 } from "./marketing-content-types";
 
-export type {
-  MarketingArticle,
-  MarketingArticleListQuery,
-  MarketingArticleRow,
-  MarketingArticleWrite,
-  MarketingBuild,
-  MarketingContentKind,
-  MarketingContentSort,
-  MarketingContentStatus,
-  MarketingFinding,
-  MarketingRevision,
-} from "./marketing-content-types";
+// Keep type + value re-exports in one `export { … }` so api-surface.golden
+// (AST-free heuristic) continues to see the public module surface.
 export {
   MarketingConflictError,
   MarketingValidationError,
+  type MarketingArticle,
+  type MarketingArticleListQuery,
+  type MarketingArticleRow,
+  type MarketingArticleWrite,
+  type MarketingBuild,
+  type MarketingContentKind,
+  type MarketingContentSort,
+  type MarketingContentStatus,
+  type MarketingFinding,
+  type MarketingRevision,
 } from "./marketing-content-types";
 
 type ArticleListOperation = paths["/api/v1/admin/marketing/articles"]["get"];
