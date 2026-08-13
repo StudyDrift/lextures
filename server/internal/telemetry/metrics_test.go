@@ -13,6 +13,7 @@ func TestMetricsHandler_Exposition(t *testing.T) {
 	m.ObserveHTTP(http.MethodGet, "/api/v1/courses", "2xx", 0.012)
 	m.ObserveAIProvider("openai", "gpt-4", "ok", 1.5, 0.002)
 	m.IncBusinessEvent("enrollment_created")
+	m.RecordMappedAPIError("NOT_FOUND", "/api/v1/courses/{course_code}/outcomes", 404)
 
 	rr := httptest.NewRecorder()
 	m.Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/metrics", nil))
@@ -28,6 +29,7 @@ func TestMetricsHandler_Exposition(t *testing.T) {
 		"lextures_ai_provider_calls_total",
 		"lextures_ai_estimated_cost_dollars_total",
 		`lextures_business_events_total{event="enrollment_created"} 1`,
+		"lextures_mapped_api_errors_total",
 		// Standard Go runtime collector is registered.
 		"go_goroutines",
 	} {

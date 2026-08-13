@@ -57,7 +57,7 @@ Phases are ordered by dependency, not by appeal. **Phase 0 is not optional** —
 | ID | Plan | Effort | Depends on |
 |---|---|---|---|
 | TD.6 | [Decompose `internal/httpserver` into domain packages](TD.6-decompose-httpserver-package.md) | XL | TD.1, TD.2, TD.5 |
-| TD.7 | [Handler toolkit: typed I/O, guards, error mapping](TD.7-handler-toolkit.md) | M | TD.1, TD.5 |
+| TD.7 | [Handler toolkit: typed I/O, guards, error mapping](../../completed/tech_debt/TD.7-handler-toolkit.md) → **done** | M | TD.1, TD.5 |
 | TD.8 | [`Querier` abstraction for the repo layer](TD.8-querier-abstraction-for-repos.md) | L | TD.2 |
 | TD.9 | [Enforce layering: no raw DB access in the HTTP layer](TD.9-enforce-repo-layering.md) | M | TD.6, TD.8 |
 | TD.10 | [Composition root: decompose `Deps` and `Config`](TD.10-composition-root-decomposition.md) | L | TD.6 |

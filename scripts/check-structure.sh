@@ -39,6 +39,7 @@ if [[ "$SELF_TEST" -eq 1 ]]; then
   node scripts/check-file-naming.mjs --self-test || fail=1
   bash scripts/check-deadcode-baseline.sh --self-test || fail=1
   bash scripts/check-allowlist-shrink.sh --self-test || fail=1
+  bash scripts/check-unguarded-routes.sh --self-test || fail=1
   if [[ "$fail" -ne 0 ]]; then
     echo "structure self-tests FAILED"
     exit 1
@@ -67,6 +68,9 @@ node scripts/check-file-naming.mjs "${args[@]+"${args[@]}"}" || status=1
 
 echo "==> structure: handler-method-dispatch (TD.5)"
 bash scripts/check-handler-method-dispatch.sh "${args[@]+"${args[@]}"}" || status=1
+
+echo "==> structure: unguarded-kernel-routes (TD.7)"
+bash scripts/check-unguarded-routes.sh "${args[@]+"${args[@]}"}" || status=1
 
 if [[ "$FAST" -eq 1 || "${STRUCTURE_SKIP_DEADCODE:-0}" == "1" ]]; then
   echo "==> structure: deadcode (skipped: --fast / STRUCTURE_SKIP_DEADCODE=1)"

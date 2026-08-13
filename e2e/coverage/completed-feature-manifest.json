@@ -10711,6 +10711,27 @@
       "reviewed": true
     },
     {
+      "id": "TD.7",
+      "path": "docs/completed/tech_debt/TD.7-handler-toolkit.md",
+      "markets": [
+        "ALL"
+      ],
+      "risk": "none",
+      "client": "docs",
+      "coverage": "api-contract",
+      "rationale": "Internal handler toolkit (typed I/O, fail-closed guards, error mapping). Course outcomes GET/POST stay contract-identical; guarded by kernel unit tests, course-outcomes tests, mapped-error metrics, and scripts/check-unguarded-routes.sh.",
+      "owner": "Platform",
+      "specs": [
+        {
+          "path": "e2e/tests/auth.spec.ts"
+        },
+        {
+          "path": "e2e/tests/public-api.spec.ts"
+        }
+      ],
+      "reviewed": true
+    },
+    {
       "id": "UX.1",
       "path": "docs/completed/ui-ux/UX.1-semantic-design-token-system.md",
       "markets": [

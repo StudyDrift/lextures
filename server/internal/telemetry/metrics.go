@@ -75,6 +75,7 @@ type Metrics struct {
 	couponClampedToFreeTotal      prometheus.Counter
 	couponApplyCooldownTotal      prometheus.Counter
 	couponWebRedirectTotal        *prometheus.CounterVec
+	mappedAPIErrorsTotal          *prometheus.CounterVec
 }
 
 // NewMetrics builds a self-contained registry (not the global default, so tests
@@ -278,6 +279,7 @@ func NewMetrics(deployColor ...string) *Metrics {
 		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
 	)
 	m.registerCouponMetrics(reg)
+	m.registerAPIErrorMetrics(reg)
 	return m
 }
 

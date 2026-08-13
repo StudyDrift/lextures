@@ -134,6 +134,52 @@ cross 40 files without an allowlist entry (which is shrink-only).
 - Log with `log/slog` at the boundary; include request/correlation ids where available.
 - Never swallow errors with `_ =` without a comment justifying why.
 
+## 6c. Handler toolkit (TD.7)
+
+New handlers in `internal/httpserver` use `internal/httpserver/kernel` for
+decode, authorisation, validation, and error mapping. Hand-rolled handlers may
+remain; do not introduce a new decode/WriteJSON style.
+
+```go
+func (d Deps) handleCourseOutcomesPost() http.HandlerFunc {
+    type in struct {
+        Title       string `json:"title"`
+        Description string `json:"description"`
+    }
+    return kernel.POST(d.kernelAccess(),
+        kernel.RequireCoursePermission("item:create", "You do not have permission to edit outcomes."),
+        func(ctx *kernel.Ctx, body in) (courseOutcomeAPI, error) {
+            title := strings.TrimSpace(body.Title)
+            if title == "" {
+                return courseOutcomeAPI{}, kernel.InvalidInput("Title is required.")
+            }
+            row, err := courseoutcomes.InsertOutcome(ctx, d.Pool, ctx.CourseID, title, strings.TrimSpace(body.Description))
+            if err != nil {
+                return courseOutcomeAPI{}, kernel.Internal("Failed to create outcome.", err)
+            }
+            return learningOutcomeRowToAPI(*row), nil
+        },
+        kernel.WithStatus(http.StatusCreated),
+        kernel.WithDecodeOptions(kernel.DecodeOptions{
+            InvalidJSONMessage:     "Invalid JSON body.",
+            RequireJSONContentType: false, // match this endpoint's pre-toolkit clients
+        }),
+    )
+}
+```
+
+Rules:
+
+- **Guards fail closed.** A zero `kernel.Guard` is replaced with `Authenticated()`
+  and counted as unguarded. Public routes must pass `kernel.Public()` and be
+  listed in `scripts/allowlists/unguarded-kernel-routes.txt`.
+- **Converted endpoints stay contract-identical.** Keep the previous deny
+  message, JSON error text, and (unless tightening) Content-Type policy.
+- **Do not leak internals.** Return `kernel.Internal(safeMessage, err)` — the
+  mapper logs `err` with the request id and writes a safe envelope.
+- Guard: `scripts/check-unguarded-routes.sh` (via `make lint-structure`).
+- Package docs: `server/internal/httpserver/kernel`.
+
 ### TypeScript
 
 - Surface API failures to the user; do not empty-catch.
