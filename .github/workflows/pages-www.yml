@@ -162,9 +162,11 @@ jobs:
           done
           # SEO.4 AC-3 — no Google Fonts
           ! grep -R -l 'fonts.googleapis.com\|fonts.gstatic.com' dist --include='*.html' | head -1 | grep -q .
-          # SEO.4 FR-4 — content page uses static-island, not full React entry
+          # SEO.4 FR-4 — content pages use static-island, not full React entry
           grep -q 'static-island' dist/privacy/index.html
           grep -q 'data-interactive="false"' dist/privacy/index.html
+          grep -q 'static-island' dist/index.html
+          grep -q 'data-interactive="false"' dist/index.html
           grep -q 'data-interactive="true"' dist/pricing/calculator/index.html
           # Content articles advertise markdown alternate + sibling file.
           # Category hubs (e.g. /docs/self-hosting) are HTML indexes without source Markdown.

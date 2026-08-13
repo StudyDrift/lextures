@@ -223,7 +223,8 @@
     }
 
     /* SEO.4 FR-14 — wind-lines and bob stay on a static frame */
-    .lx-motion {
+    .lx-motion,
+    .lx-motion .lx-wind-path {
       animation: none !important;
     }
   }

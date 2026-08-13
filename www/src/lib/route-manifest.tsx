@@ -141,7 +141,8 @@ const ENGLISH_ROUTE_MANIFEST: Array<Omit<RouteDescriptor, 'locale'>> = [
     sitemap: true,
     priority: '1.0',
     lastmodSource: 'build',
-    interactive: true,
+    // CSS-only hero motion — skip React hydration so lab TBT stays in the content budget.
+    interactive: false,
     jsonLd: homePageGraph,
     hub: true,
   },

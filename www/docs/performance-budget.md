@@ -30,7 +30,8 @@ Lighthouse CI config lives in [`www/lighthouserc.json`](../lighthouserc.json); i
 On each `RouteDescriptor` in `route-manifest.tsx`:
 
 - **`interactive: false`** (legal, blog, docs, about, authors, static marketing shells): generate-site strips the React module script and injects only `static-island-*.js` (nav + deferred GA + web-vitals). The page is fully readable with JS disabled.
-- **`interactive: true`** (home, calculator, courses, request-information, get-started): full React hydration with per-route dynamic `import()`.
+- **`interactive: true`** (calculator, courses, request-information, get-started): full React hydration with per-route dynamic `import()`.
+- Homepage (`/`) is `interactive: false`: hero wind-lines are CSS-only so lab TBT stays in the content budget.
 
 When adding a page, ask: does this route need client state, forms, or marketplace API? If not, set `interactive: false`.
 

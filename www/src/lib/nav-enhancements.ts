@@ -12,6 +12,12 @@
 export function initNavEnhancements(): void {
   if (typeof document === 'undefined') return
 
+  // Hash deep-links on content pages (no React hydration).
+  const hash = window.location.hash
+  if (hash && !hash.startsWith('#/')) {
+    document.querySelector(hash)?.scrollIntoView({ behavior: 'smooth' })
+  }
+
   const openBtn = document.querySelector<HTMLElement>('[data-nav-menu-open]')
   const closeBtn = document.querySelector<HTMLElement>('[data-nav-menu-close]')
   const panel = document.querySelector<HTMLElement>('[data-nav-menu]')
