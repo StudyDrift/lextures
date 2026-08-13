@@ -40,6 +40,14 @@ var ErrReviewNoteTooShort = errors.New("marketingcontent: request-changes note m
 var ErrReviewerRequired = errors.New("marketingcontent: reviewer assignment is required")
 var ErrOverrideJustification = errors.New("marketingcontent: publish override justification must be at least 10 characters")
 
+// LintBlockedError carries the quality report that blocked publish/schedule.
+type LintBlockedError struct {
+	Report validator.Report
+}
+
+func (e *LintBlockedError) Error() string { return ErrLintBlocked.Error() }
+func (e *LintBlockedError) Unwrap() error { return ErrLintBlocked }
+
 func metadataFor(in repo.NewArticle) validator.Metadata {
 	updated := ""
 	if in.ContentUpdatedAt != nil {
@@ -48,7 +56,20 @@ func metadataFor(in repo.NewArticle) validator.Metadata {
 	return validator.Metadata{Title: in.Title, Description: in.Description, Updated: updated, Author: in.AuthorSlug, Cluster: in.Cluster, PrimaryQuestion: in.PrimaryQuestion, Keywords: in.Keywords, Locale: in.Locale}
 }
 
+func normalizeLintMetadata(metadata validator.Metadata, now time.Time) validator.Metadata {
+	if strings.TrimSpace(metadata.Author) == "" {
+		metadata.Author = metadata.AuthorSlug
+	}
+	// contentUpdatedAt is server-managed on write; default it for live lint so the editor
+	// does not show a false fm.updated error for a field authors cannot edit.
+	if strings.TrimSpace(metadata.Updated) == "" {
+		metadata.Updated = now.UTC().Format("2006-01-02")
+	}
+	return metadata
+}
+
 func (s *Service) Lint(ctx context.Context, kind, body string, metadata validator.Metadata) validator.Report {
+	metadata = normalizeLintMetadata(metadata, s.now())
 	paths, err := repo.KnownPaths(ctx, s.Pool)
 	if err != nil {
 		return validator.Report{Findings: []validator.Finding{{Rule: "validator_error", Severity: "warn", Message: "Known paths could not be loaded."}}, Stats: renderStats(body), ValidatorError: true}
@@ -174,7 +195,7 @@ func (s *Service) Transition(ctx context.Context, id, actor uuid.UUID, in Transi
 		report := s.applyQuality(ctx, &copy)
 		blocked := (in.Action == ActionPublish || in.Action == ActionSchedule) && blocksPublish(report)
 		if blocked && !in.LintOverride {
-			return ErrLintBlocked
+			return &LintBlockedError{Report: report}
 		}
 		if blocked && in.LintOverride && len(strings.TrimSpace(in.Note)) < 10 {
 			return ErrOverrideJustification

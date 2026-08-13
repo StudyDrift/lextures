@@ -10,8 +10,15 @@ import (
 )
 
 type Metadata struct {
-	Title, Description, Updated, Author, Cluster, PrimaryQuestion, Locale string
-	Keywords                                                              []string
+	Title           string   `json:"title"`
+	Description     string   `json:"description"`
+	Updated         string   `json:"updated"`
+	Author          string   `json:"author"`
+	AuthorSlug      string   `json:"authorSlug,omitempty"` // lint alias for Author
+	Cluster         string   `json:"cluster"`
+	PrimaryQuestion string   `json:"primaryQuestion"`
+	Locale          string   `json:"locale"`
+	Keywords        []string `json:"keywords"`
 }
 type Input struct {
 	Kind, BodyMD, Locale string
@@ -188,23 +195,43 @@ func checkPassages(in Input, a *analysis) []Finding {
 	}
 	return nil
 }
+var (
+	footnoteDefRE  = regexp.MustCompile(`(?m)^\[\^(\d+)\]:\s+https?://\S+`)
+	tiptapCiteRE   = regexp.MustCompile(`\[\^(\d+)\]\(https?://[^)\s]+\)`)
+	footnoteRefRE  = regexp.MustCompile(`\[\^(\d+)\]`)
+)
+
+func citationCount(body string) int {
+	// Classic markdown footnotes plus TipTap's serialized form [^1](https://…).
+	seen := map[string]bool{}
+	for _, m := range footnoteDefRE.FindAllStringSubmatch(body, -1) {
+		seen[m[1]] = true
+	}
+	for _, m := range tiptapCiteRE.FindAllStringSubmatch(body, -1) {
+		seen[m[1]] = true
+	}
+	return len(seen)
+}
+
 func checkCitations(in Input, _ *analysis) []Finding {
 	out := []Finding{}
 	lines := strings.Split(in.BodyMD, "\n")
 	defs := map[string]bool{}
-	defRE := regexp.MustCompile(`^\[\^(\d+)\]:\s+https?://`)
-	for _, line := range lines {
-		if m := defRE.FindStringSubmatch(line); m != nil {
-			defs[m[1]] = true
-		}
+	for _, m := range footnoteDefRE.FindAllStringSubmatch(in.BodyMD, -1) {
+		defs[m[1]] = true
 	}
-	refRE := regexp.MustCompile(`\[\^(\d+)\]`)
+	for _, m := range tiptapCiteRE.FindAllStringSubmatch(in.BodyMD, -1) {
+		defs[m[1]] = true
+	}
 	for i, line := range lines {
-		if numericClaim.MatchString(line) && !refRE.MatchString(line) {
+		if numericClaim.MatchString(line) && !footnoteRefRE.MatchString(line) {
 			out = append(out, finding("cite.numeric-claim", "warn", "Numeric claim needs an inline citation.", i+1, 1))
 		}
-		for _, m := range refRE.FindAllStringSubmatch(line, -1) {
-			if !strings.HasPrefix(line, "[^"+m[1]+"]:") && !defs[m[1]] {
+		for _, m := range footnoteRefRE.FindAllStringSubmatch(line, -1) {
+			if strings.HasPrefix(strings.TrimSpace(line), "[^"+m[1]+"]:") {
+				continue
+			}
+			if !defs[m[1]] {
 				out = append(out, finding("cite.source-resolvable", "warn", "Citation has no resolvable source definition.", i+1, 1))
 			}
 		}
@@ -276,7 +303,7 @@ func inspect(body string) *analysis {
 			a.headings = append(a.headings, heading{text: m[1], line: i + 1})
 		}
 	}
-	a.citations = len(regexp.MustCompile(`(?m)^\[\^\d+\]:\s+https?://`).FindAllString(body, -1))
+	a.citations = citationCount(body)
 	a.internalLinks = len(regexp.MustCompile(`\[[^\]]+\]\(/`).FindAllString(body, -1))
 	a.structured = regexp.MustCompile(`(?m)^(?:[-*]|\d+\.)\s+`).MatchString(body) || strings.Contains(body, ":::steps") || strings.Contains(body, ":::comparison-table")
 	s := render.Stats(body)

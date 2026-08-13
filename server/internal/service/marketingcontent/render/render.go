@@ -195,8 +195,12 @@ func PlainText(source string) string {
 }
 func Stats(source string) StatsResult {
 	plain := func(s string) int { return len(strings.Fields(markupRE.ReplaceAllString(s, " "))) }
+	// Match www/scripts/content-lint/core.mjs: strip directive blocks and headings before
+	// measuring self-contained passages so answer/takeaway/faq blocks do not skew the score.
+	passageSource := directiveRE.ReplaceAllString(source, "")
+	passageSource = regexp.MustCompile(`(?m)^#{1,6}.+$`).ReplaceAllString(passageSource, "")
 	lengths := []int{}
-	for _, p := range paragraphRE.Split(source, -1) {
+	for _, p := range paragraphRE.Split(passageSource, -1) {
 		if n := plain(p); n >= 20 {
 			lengths = append(lengths, n)
 		}

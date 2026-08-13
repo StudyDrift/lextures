@@ -15,11 +15,13 @@ describe('ArticleMetadataPanel', () => {
 
     render(<ArticleMetadataPanel article={article} onChange={vi.fn()} categories={null} authors={null} knownPaths={null} isNew={false} />)
 
-    expect(screen.getByLabelText('Keywords')).toHaveValue('')
+    // Field marks required controls with a trailing asterisk in the label text.
+    expect(screen.getByLabelText(/^Keywords/)).toHaveValue('')
     expect(screen.getByLabelText('Citations')).toHaveValue('')
     expect(screen.getByLabelText(/^Locale/)).toHaveValue('en')
     expect(screen.getByLabelText(/^Locale/)).toBeDisabled()
-    // Field marks required controls with a trailing asterisk in the label text.
     expect(screen.getByLabelText(/^Author/)).toBeInTheDocument()
+    expect(screen.getByLabelText(/^Primary question/)).toBeInTheDocument()
+    expect(screen.getByLabelText(/^Cluster/)).toBeInTheDocument()
   })
 })
