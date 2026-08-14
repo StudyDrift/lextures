@@ -1,6 +1,10 @@
 import { authorizedFetch } from "./api";
 import { readApiErrorMessage } from "./errors";
 import type { paths } from "./generated/openapi-types";
+import { normalizeMarketingFinding } from "./marketing-finding";
+
+export type { MarketingFinding } from "./marketing-finding";
+export { lintMetadataFromArticle, normalizeMarketingFinding } from "./marketing-finding";
 
 type ArticleListOperation = paths["/api/v1/admin/marketing/articles"]["get"];
 void (0 as unknown as ArticleListOperation);
@@ -82,13 +86,6 @@ export type MarketingArticle = MarketingArticleRow & {
   sourceSyncedRevision?: number | null;
   sourceSyncedAt?: string | null;
   stale?: boolean;
-};
-
-export type MarketingFinding = {
-  rule: string;
-  severity: "error" | "warning" | "info";
-  message: string;
-  line?: number;
 };
 
 export type MarketingRevision = {
@@ -194,9 +191,9 @@ export async function lintMarketingArticle(
     metadata: Record<string, unknown>;
   },
 ) {
-  return json<{
+  const report = await json<{
     score: number;
-    findings: MarketingFinding[];
+    findings: unknown[];
     blocking?: boolean;
   }>(
     await authorizedFetch("/api/v1/admin/marketing/lint", {
@@ -205,6 +202,10 @@ export async function lintMarketingArticle(
       body: JSON.stringify(article),
     }),
   );
+  return {
+    ...report,
+    findings: (report.findings ?? []).map(normalizeMarketingFinding),
+  };
 }
 
 export async function listMarketingRevisions(id: string) {

@@ -7,12 +7,14 @@ import { ArticleMetadataPanel } from '../../../components/marketing-content/edit
 import { ArticlePreview } from '../../../components/marketing-content/editor/article-preview'
 import { TranslationSourcePane } from '../../../components/marketing-content/editor/translation-source-pane'
 import { directives, slugify } from '../../../components/marketing-content/editor/article-editor-utils'
+import { METADATA_FINDING_PATHS, findingKey, jumpEditorToMarkdownLine, selectTextareaLine, solveFindingsSequentially } from '../../../components/marketing-content/editor/article-finding-nav'
+import { ArticleFindingsBar } from '../../../components/marketing-content/editor/article-findings-bar'
 import { BuildArticleWithAiModal } from '../../../components/marketing-content/editor/build-article-with-ai-modal'
 import { RevisionDrawer } from '../../../components/marketing-content/editor/revision-drawer'
 import { Badge, Button, Checkbox, Dialog, EmptyState, InlineAlert, Input, Menu, SegmentedControl, Skeleton, Textarea, type MenuItem } from '../../../components/ui'
 import { usePermissions } from '../../../context/use-permissions'
-import { generateMarketingArticle, type MarketingArticleAIDraft } from '../../../lib/marketing-content-ai-api'
-import { createMarketingArticle, createMarketingPreviewToken, getMarketingArticle, lintMarketingArticle, listMarketingAuthors, listMarketingCategories, listMarketingKnownPaths, MarketingConflictError, restoreMarketingRevision, transitionMarketingArticle, updateMarketingArticle, type MarketingArticle, type MarketingArticleWrite, type MarketingFinding } from '../../../lib/marketing-content-api'
+import { generateMarketingArticle, repairMarketingArticle, type MarketingArticleAIDraft } from '../../../lib/marketing-content-ai-api'
+import { createMarketingArticle, createMarketingPreviewToken, getMarketingArticle, lintMarketingArticle, lintMetadataFromArticle, listMarketingAuthors, listMarketingCategories, listMarketingKnownPaths, MarketingConflictError, restoreMarketingRevision, transitionMarketingArticle, updateMarketingArticle, type MarketingArticle, type MarketingArticleWrite, type MarketingFinding } from '../../../lib/marketing-content-api'
 import { createMarketingTranslation, listMarketingLocales, listMarketingTranslations, markMarketingTranslationSynced, type MarketingLocale, type MarketingTranslationLink } from '../../../lib/marketing-content-i18n-api'
 import { PERM_MARKETING_CONTENT_AUTHOR, PERM_MARKETING_CONTENT_PUBLISH, PERM_MARKETING_CONTENT_REVIEW } from '../../../lib/rbac-api'
 import { resolveMarketingPreviewUrl } from '../../../lib/marketing-site'
@@ -46,6 +48,8 @@ type EditorPaneProps = {
   article: MarketingArticle
   canAuthor: boolean
   simple: boolean
+  titleHighlight?: boolean
+  titleError?: string
   onTitleChange: (title: string) => void
   onBodyChange: (bodyMd: string) => void
   onBlur: () => void
@@ -59,6 +63,8 @@ function EditorPane({
   article,
   canAuthor,
   simple,
+  titleHighlight,
+  titleError,
   onTitleChange,
   onBodyChange,
   onBlur,
@@ -68,14 +74,17 @@ function EditorPane({
   return <section className="min-w-0 overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-sm" aria-label="Article body editor">
     <div className="border-b border-border-subtle px-5 pb-4 pt-6 sm:px-9">
       <Input
+        id="article-title"
         value={article.title}
         onChange={(event) => onTitleChange(event.target.value)}
         onBlur={onBlur}
         disabled={!canAuthor}
         aria-label="Article title"
+        aria-invalid={titleError ? true : undefined}
         placeholder="Untitled article"
-        className="w-full border-0 bg-transparent p-0 text-2xl font-semibold tracking-tight text-fg-default shadow-none placeholder:text-fg-subtle disabled:opacity-60 sm:text-3xl"
+        className={`w-full border-0 bg-transparent p-0 text-2xl font-semibold tracking-tight text-fg-default shadow-none placeholder:text-fg-subtle disabled:opacity-60 sm:text-3xl ${titleHighlight ? 'rounded-lg ring-2 ring-accent-solid ring-offset-2 ring-offset-surface-raised' : ''}`}
       />
+      {titleError ? <p className="mt-2 text-xs font-medium text-danger-fg">{titleError}</p> : null}
       <p className="mt-2 font-mono text-xs text-fg-muted">{path}</p>
     </div>
     <div className="px-5 py-5 sm:px-9">
@@ -108,9 +117,14 @@ export default function ArticleEditorPage() {
   const [simple, setSimple] = useState(false)
   const [metadataOpen, setMetadataOpen] = useState(true)
   const [findingsOpen, setFindingsOpen] = useState(false)
+  const [highlightField, setHighlightField] = useState<string | null>(null)
   const [revisionsOpen, setRevisionsOpen] = useState(false)
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const [buildAiOpen, setBuildAiOpen] = useState(false)
+  const [solvingFindings, setSolvingFindings] = useState(false)
+  const [solvingFindingKey, setSolvingFindingKey] = useState<string | null>(null)
+  const [solveProgress, setSolveProgress] = useState('')
+  const [solveError, setSolveError] = useState('')
   const [conflict, setConflict] = useState<MarketingConflictError['detail'] | null>(null)
   const [recovery, setRecovery] = useState<MarketingArticle | null>(null)
   const [transition, setTransition] = useState<string | null>(null)
@@ -128,6 +142,7 @@ export default function ArticleEditorPage() {
   const editorRef = useRef<Editor | null>(null)
   const articleRef = useRef(article)
   const dirtyRef = useRef(dirty)
+  const openedFindingsRef = useRef(false)
   useEffect(() => { articleRef.current = article }, [article])
   useEffect(() => { dirtyRef.current = dirty }, [dirty])
 
@@ -174,14 +189,22 @@ export default function ArticleEditorPage() {
   }, [article.sourceArticleId])
 
   useEffect(() => {
-    if (!dirty || !article.bodyMd) return
-    if (!isNew) sessionStorage.setItem(`mc:draft:${articleId}`, JSON.stringify(article))
+    if (loading || solvingFindings) return
+    if (!isNew && dirty) sessionStorage.setItem(`mc:draft:${articleId}`, JSON.stringify(article))
     const timer = window.setTimeout(() => {
       setValidating(true)
-      void lintMarketingArticle({ kind: article.kind, bodyMd: article.bodyMd, metadata: writePayload(article) }).then((report) => { setFindings(report.findings ?? []); setScore(report.score) }).catch(() => undefined).finally(() => setValidating(false))
-    }, 800)
+      void lintMarketingArticle({ kind: article.kind, bodyMd: article.bodyMd, metadata: lintMetadataFromArticle(article) }).then((report) => {
+        const next = report.findings ?? []
+        setFindings(next)
+        setScore(report.score)
+        if (next.length && !openedFindingsRef.current) {
+          openedFindingsRef.current = true
+          setFindingsOpen(true)
+        }
+      }).catch(() => undefined).finally(() => setValidating(false))
+    }, dirty ? 800 : 0)
     return () => window.clearTimeout(timer)
-  }, [article, articleId, dirty, isNew])
+  }, [article, articleId, dirty, isNew, loading, solvingFindings])
 
   const saveArticle = useCallback(async () => {
     if (!dirtyRef.current || saving) return articleRef.current
@@ -211,7 +234,6 @@ export default function ArticleEditorPage() {
   }, [saveArticle])
 
   const blocking = findings.filter((v) => v.severity === 'error')
-  const warnings = findings.filter((v) => v.severity !== 'error')
   const doTransition = async () => {
     if (!transition) return
     const saved = dirty ? await saveArticle() : article
@@ -223,6 +245,53 @@ export default function ArticleEditorPage() {
     if (!saved?.id) return
     try { const preview = await createMarketingPreviewToken(saved.id); window.open(resolveMarketingPreviewUrl(preview.url, saved.path), '_blank', 'noopener') } catch { setView('preview') }
   }
+  const solveFindingsWithAI = useCallback(async () => {
+    const snapshot = findings
+    if (!snapshot.length || solvingFindings) return
+    setSolvingFindings(true)
+    setSolveError('')
+    setSolveProgress('')
+    setFindingsOpen(true)
+    try {
+      const result = await solveFindingsSequentially({
+        article: articleRef.current,
+        findings: snapshot,
+        onProgress: (index, total, finding) => {
+          setSolvingFindingKey(findingKey(finding, index))
+          setSolveProgress(`Solving ${index + 1} of ${total}: ${finding.message || finding.rule}`)
+        },
+        repair: (current, finding) => repairMarketingArticle({
+          kind: current.kind,
+          existingTitle: current.title,
+          existingBodyMd: current.bodyMd,
+          description: current.description,
+          primaryQuestion: current.primaryQuestion,
+          cluster: current.cluster,
+          pillar: current.pillar,
+          keywords: current.keywords,
+          knownPaths,
+          findings: [{
+            rule: finding.rule,
+            severity: finding.severity,
+            message: finding.message,
+            line: finding.line,
+            path: finding.path,
+          }],
+        }),
+      })
+      articleRef.current = { ...articleRef.current, ...result.article }
+      setArticle((old) => ({ ...old, ...result.article }))
+      if (result.applied) {
+        setDirty(true)
+        setSaveError('')
+      }
+      if (result.error) setSolveError(result.error)
+    } finally {
+      setSolvingFindings(false)
+      setSolvingFindingKey(null)
+      setSolveProgress('')
+    }
+  }, [findings, knownPaths, solvingFindings])
   const applyAIDraft = (draft: MarketingArticleAIDraft) => {
     setArticle((old) => {
       const autoSlug = !old.slug || old.slug === slugify(old.title)
@@ -235,7 +304,7 @@ export default function ArticleEditorPage() {
         cluster: draft.cluster,
         pillar: draft.pillar,
         keywords: draft.keywords,
-        ...(autoSlug && draft.title ? { slug: slugify(draft.title) } : {}),
+        ...(autoSlug && (draft.slug || draft.title) ? { slug: slugify(draft.slug || draft.title) } : {}),
       }
     })
     setDirty(true)
@@ -244,6 +313,31 @@ export default function ArticleEditorPage() {
   const insertDirective = (markdown: string) => {
     if (simple || !editorRef.current) patch({ bodyMd: `${article.bodyMd}${article.bodyMd.endsWith('\n') || !article.bodyMd ? '' : '\n\n'}${markdown}` })
     else editorRef.current.commands.insertContent(markdown)
+  }
+  const revealFinding = (finding: MarketingFinding) => {
+    const path = finding.path
+    if (path && METADATA_FINDING_PATHS.has(path)) {
+      setHighlightField(path)
+      window.setTimeout(() => setHighlightField((current) => (current === path ? null : current)), 2500)
+      if (path === 'title') {
+        setView((current) => (current === 'preview' || current === 'details' ? 'write' : current))
+        window.setTimeout(() => document.getElementById('article-title')?.focus(), 50)
+        return
+      }
+      setMetadataOpen(true)
+      if (window.matchMedia('(max-width: 767px)').matches) setView('details')
+      return
+    }
+    setView((current) => (current === 'preview' || current === 'details' ? 'write' : current))
+    const line = finding.line && finding.line > 0 ? finding.line : 1
+    window.setTimeout(() => {
+      if (simple) {
+        const textarea = document.getElementById('article-markdown') as HTMLTextAreaElement | null
+        if (textarea) selectTextareaLine(textarea, line)
+        return
+      }
+      if (editorRef.current) jumpEditorToMarkdownLine(editorRef.current, articleRef.current.bodyMd, line)
+    }, 50)
   }
   const restore = async (no: number) => { const next = await restoreMarketingRevision(article.id, no, article.revisionNo); setArticle(next); setDirty(false); setRevisionsOpen(false) }
   const addTranslation = async (locale: string) => {
@@ -273,16 +367,15 @@ export default function ArticleEditorPage() {
   const status = article.liveStatus || article.status
   const statusTone = status === 'published' ? 'success' : status === 'scheduled' ? 'info' : status === 'in_review' ? 'warning' : 'neutral'
   const saveState = saving ? 'Saving…' : dirty ? 'Unsaved changes' : lastSaved ? `Saved ${lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : article.updatedAt ? `Saved ${new Date(article.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 'Not saved'
-  const scoreTone = score == null ? 'text-fg-muted' : score >= 80 ? 'text-success-fg' : score >= 50 ? 'text-warning-fg' : 'text-danger-fg'
-  const scoreBar = score == null ? 'bg-border-strong' : score >= 80 ? 'bg-success-fg' : score >= 50 ? 'bg-warning-fg' : 'bg-danger-fg'
+  const titleFinding = findings.find((finding) => finding.path === 'title')
   // The 'details' view is mobile-only, and 'split' is desktop-only; map each to
   // the nearest equivalent so a viewport change never leaves an empty canvas.
   const desktopSplit = view === 'split' || view === 'preview'
   const showDesktopEditor = view !== 'preview'
   const railOpen = metadataOpen || view === 'details'
-  const editorPane = <EditorPane article={article} canAuthor={canAuthor} simple={simple} onTitleChange={changeTitle} onBodyChange={changeBody} onBlur={() => void saveArticle()} onEditorChange={registerEditor} />
+  const editorPane = <EditorPane article={article} canAuthor={canAuthor} simple={simple} titleHighlight={highlightField === 'title'} titleError={titleFinding?.severity === 'error' ? titleFinding.message : undefined} onTitleChange={changeTitle} onBodyChange={changeBody} onBlur={() => void saveArticle()} onEditorChange={registerEditor} />
   const previewPane = <div className="min-w-0 overflow-auto rounded-2xl border border-border-default bg-surface-raised shadow-sm"><ArticlePreview title={article.title} body={article.bodyMd} dir={article.locale.startsWith('ar') ? 'rtl' : 'ltr'} /></div>
-  const metadataPane = <ArticleMetadataPanel article={article} onChange={patchMetadata} categories={categories} authors={authors} knownPaths={knownPaths} isNew={isNew} />
+  const metadataPane = <ArticleMetadataPanel article={article} onChange={patchMetadata} categories={categories} authors={authors} knownPaths={knownPaths} isNew={isNew} findings={findings} highlightField={highlightField} canFillWithAI={canAuthor} />
   const missingLocales = locales.filter((loc) => loc.enabled && loc.code !== article.locale && !translations.some((row) => row.locale === loc.code))
   const translationItems: MenuItem[] = [
     ...translations.filter((row) => row.id !== article.id).map((row) => ({ id: row.id, label: `${row.locale.toUpperCase()} · ${row.status}${row.stale ? ' · stale' : ''}`, onSelect: () => navigate(`/admin/marketing-content/${row.id}`) })),
@@ -360,30 +453,22 @@ export default function ArticleEditorPage() {
       {railOpen ? <aside aria-label="Article metadata" className="min-w-0"><div className="sticky top-[7rem] max-h-[calc(100dvh-9.5rem)] overflow-y-auto pb-2">{metadataPane}</div></aside> : null}
     </div>
 
-    <section id="article-findings" aria-live="polite" className="sticky bottom-0 z-20 border-t border-border-default bg-surface-raised/95 backdrop-blur supports-[backdrop-filter]:bg-surface-raised/80">
-      <Button type="button" variant="ghost" aria-expanded={findingsOpen} onClick={() => setFindingsOpen((v) => !v)} className="flex h-auto min-h-6 w-full items-center justify-start gap-3 rounded-none px-4 py-2.5 text-start sm:px-6">
-        <span className="text-xs font-medium text-fg-muted">Quality</span>
-        <span aria-hidden className="h-1.5 w-24 overflow-hidden rounded-full bg-surface-sunken sm:w-40"><span className={`block h-full rounded-full motion-safe:transition-[width] ${scoreBar}`} style={{ width: `${Math.max(0, Math.min(100, score ?? 0))}%` }} /></span>
-        <span className={`text-sm font-semibold tabular-nums ${scoreTone}`}>{validating ? 'checking…' : score == null ? '—' : Math.round(score)}</span>
-        <span className="hidden text-xs text-fg-muted sm:inline">/ 100 · publish floor 80</span>
-        <span className="ms-auto flex items-center gap-2">
-          {blocking.length ? <Badge tone="danger">{blocking.length} blocking</Badge> : null}
-          {warnings.length ? <Badge tone="warning">{warnings.length} warning{warnings.length === 1 ? '' : 's'}</Badge> : null}
-          {!findings.length ? <span className="text-xs text-fg-muted">{score == null ? 'Not checked yet' : 'No findings'}</span> : null}
-          <ChevronDown aria-hidden className={`h-4 w-4 text-fg-muted motion-safe:transition-transform ${findingsOpen ? '' : 'rotate-180'}`} />
-        </span>
-      </Button>
-      {findingsOpen ? <div className="max-h-64 overflow-y-auto border-t border-border-subtle px-4 py-3 sm:px-6">
-        {findings.length
-          ? <ul className="space-y-1.5 text-sm">{findings.map((finding, index) => <li key={`${finding.rule}-${index}`} className="flex flex-wrap items-baseline gap-x-2">
-            <Badge tone={finding.severity === 'error' ? 'danger' : 'warning'}>{finding.severity === 'error' ? 'Error' : 'Warning'}</Badge>
-            {finding.line ? <span className="font-mono text-xs text-fg-muted">line {finding.line}</span> : null}
-            <span className="text-fg-default">{finding.message}</span>
-            <span className="font-mono text-xs text-fg-subtle">{finding.rule}</span>
-          </li>)}</ul>
-          : <p className="text-sm text-fg-muted">Nothing to fix. Findings appear here as you write.</p>}
-      </div> : null}
-    </section>
+    <ArticleFindingsBar
+      findings={findings}
+      score={score}
+      validating={validating}
+      open={findingsOpen}
+      onOpenChange={setFindingsOpen}
+      bodyMd={article.bodyMd}
+      onSelectFinding={revealFinding}
+      onInsertTemplate={insertDirective}
+      canSolve={canAuthor}
+      solving={solvingFindings}
+      solvingFindingKey={solvingFindingKey}
+      solveProgress={solveProgress}
+      solveError={solveError}
+      onSolveWithAI={() => void solveFindingsWithAI()}
+    />
 
     <RevisionDrawer open={revisionsOpen} articleId={article.id} currentBody={article.bodyMd} onClose={() => setRevisionsOpen(false)} onRestore={restore} />
     <BuildArticleWithAiModal

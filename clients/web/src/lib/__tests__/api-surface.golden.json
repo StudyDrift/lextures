@@ -1724,7 +1724,9 @@
   ],
   "marketing-content-ai-api.ts": [
     "MarketingArticleAIDraft",
-    "generateMarketingArticle"
+    "generateMarketingArticle",
+    "generateMarketingArticleMetadata",
+    "repairMarketingArticle"
   ],
   "marketing-content-api.ts": [
     "MarketingArticle",
@@ -1765,7 +1767,9 @@
     "listMarketingRevisions",
     "listMarketingRouteHints",
     "listMarketingSearchGaps",
+    "lintMetadataFromArticle",
     "markMarketingArticleReviewed",
+    "normalizeMarketingFinding",
     "previewMarketingRouteHints",
     "requestMarketingBuild",
     "restoreMarketingRevision",

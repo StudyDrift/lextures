@@ -19,11 +19,13 @@ const (
 	MaxFieldRunes       = 200
 	MaxBodyRunes        = 80_000
 	MaxKeywords         = 12
+	MaxSlugRunes        = 100
 )
 
 // Draft is a proposed article (not persisted).
 type Draft struct {
 	Title           string   `json:"title"`
+	Slug            string   `json:"slug,omitempty"`
 	Description     string   `json:"description"`
 	BodyMD          string   `json:"bodyMd"`
 	PrimaryQuestion string   `json:"primaryQuestion"`
@@ -60,7 +62,7 @@ Body structure (required):
 1. Open with a :::key-takeaways block containing 3–5 Markdown bullets.
 2. Then a :::answer block: 40–60 words that directly answer primaryQuestion.
 3. Then 4–7 level-two headings that are questions (end with ?). Each section is a self-contained passage of 80–160 words.
-4. Use at least one internal link to a real Lextures path such as /platform, /pricing, /docs, or /blog.
+4. Use at least one internal link to a real Lextures path. /blog, /docs, /platform, and /pricing always resolve.
 5. Close with a :::faq block containing 3–5 entries, each a ### Question? heading plus a short paragraph.
 6. Cite numeric claims with [^1] and define them at the end as [^1]: https://….
 7. Optional :::callout tip or :::stat blocks are fine; never invent unknown directives.
@@ -70,6 +72,30 @@ Tone:
 - For kind=doc: practical how-to. Lead with what to click and what happens next.
 - Do not invent product features, statistics, or customer quotes you cannot support.
 - If the prompt has no usable topic, return empty strings and an empty keywords array.`
+
+// MetadataSystemPrompt instructs the model to return essentials metadata only.
+const MetadataSystemPrompt = `You write marketing metadata for Lextures, a learning management system.
+Respond with ONLY valid JSON (no markdown fences, no commentary).
+
+The JSON must be an object:
+{
+  "slug": "...",
+  "description": "...",
+  "primaryQuestion": "...",
+  "cluster": "...",
+  "pillar": "...",
+  "keywords": ["..."]
+}
+
+Rules:
+- slug: lowercase kebab-case ASCII, 3–8 words, no leading or trailing hyphens.
+- description: 1–2 sentences, at most 160 characters, suitable for search and social cards.
+- primaryQuestion: the search-style question this article answers, ending with ?.
+- cluster: short topic cluster label (2–4 words).
+- pillar: short editorial pillar (2–4 words).
+- keywords: 3–8 lowercase phrases, no hashtags.
+- Do not invent product features, statistics, or customer quotes.
+- If there is no usable topic, return empty strings and an empty keywords array.`
 
 // GenerateFromPrompt asks the model for a draft marketing article.
 func GenerateFromPrompt(
@@ -123,6 +149,55 @@ func GenerateFromPrompt(
 	return draft, meta, nil
 }
 
+// GenerateMetadataFromContent asks the model for essentials metadata only (no body).
+func GenerateMetadataFromContent(
+	ctx context.Context,
+	client aiprovider.ScopedCompleter,
+	model, kind, title, body string,
+) (Draft, aiprovider.CallMeta, error) {
+	if client == nil {
+		return Draft{}, aiprovider.CallMeta{}, fmt.Errorf("marketingarticleai: nil completer")
+	}
+	title = strings.TrimSpace(title)
+	body = strings.TrimSpace(body)
+	if title == "" && body == "" {
+		return Draft{}, aiprovider.CallMeta{}, fmt.Errorf("title or body is required")
+	}
+	if utf8.RuneCountInString(body) > MaxExistingRunes {
+		return Draft{}, aiprovider.CallMeta{}, fmt.Errorf("existing markdown is too long (max %d characters)", MaxExistingRunes)
+	}
+	if kind != "doc" {
+		kind = "blog"
+	}
+
+	var user strings.Builder
+	fmt.Fprintf(&user, "Article kind: %s\nFill the essentials metadata from this article.", kind)
+	if title != "" {
+		fmt.Fprintf(&user, "\n\nTitle:\n%s", title)
+	}
+	if body != "" {
+		fmt.Fprintf(&user, "\n\nBody:\n%s", body)
+	}
+
+	res, meta, err := client.Complete(ctx, model, []aiprovider.Message{
+		{Role: "system", Content: MetadataSystemPrompt},
+		{Role: "user", Content: user.String()},
+	}, aiprovider.ChatOptions{JSONMode: true, MaxTokens: 800})
+	if err != nil {
+		return Draft{}, meta, err
+	}
+	draft, err := ParseDraftJSON(res.Text)
+	if err != nil {
+		return Draft{}, meta, err
+	}
+	draft.Title = ""
+	draft.BodyMD = ""
+	if draft.Slug == "" && title != "" {
+		draft.Slug = slugifySlug(title)
+	}
+	return draft, meta, nil
+}
+
 // ParseDraftJSON parses and normalizes model JSON into a draft article.
 func ParseDraftJSON(raw string) (Draft, error) {
 	text := stripJSONFences(raw)
@@ -136,6 +211,7 @@ func ParseDraftJSON(raw string) (Draft, error) {
 func normalizeDraft(in Draft) Draft {
 	out := Draft{
 		Title:           clipRunes(strings.TrimSpace(in.Title), MaxTitleRunes),
+		Slug:            slugifySlug(in.Slug),
 		Description:     clipRunes(strings.TrimSpace(in.Description), MaxDescriptionRunes),
 		BodyMD:          clipRunes(strings.TrimSpace(in.BodyMD), MaxBodyRunes),
 		PrimaryQuestion: clipRunes(strings.TrimSpace(in.PrimaryQuestion), MaxFieldRunes),
@@ -164,6 +240,26 @@ func normalizeDraft(in Draft) Draft {
 		out.Keywords = []string{}
 	}
 	return out
+}
+
+func slugifySlug(s string) string {
+	s = strings.ToLower(strings.TrimSpace(s))
+	var b strings.Builder
+	dash := false
+	for _, r := range s {
+		switch {
+		case r >= 'a' && r <= 'z', r >= '0' && r <= '9':
+			b.WriteRune(r)
+			dash = false
+		default:
+			if b.Len() > 0 && !dash {
+				b.WriteByte('-')
+				dash = true
+			}
+		}
+	}
+	out := strings.Trim(b.String(), "-")
+	return clipRunes(out, MaxSlugRunes)
 }
 
 func clipRunes(s string, max int) string {

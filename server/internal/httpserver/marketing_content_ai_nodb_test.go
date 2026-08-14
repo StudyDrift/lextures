@@ -35,3 +35,27 @@ func TestGenerateMarketingArticle_Unauthenticated(t *testing.T) {
 		t.Fatalf("expected 401 without auth, got %d: %s", rr.Code, rr.Body.String())
 	}
 }
+
+func TestGenerateMarketingArticleRepair_Unauthenticated(t *testing.T) {
+	signer := auth.NewJWTSigner("01234567890123456789012345678901")
+	h := NewHandler(Deps{JWTSigner: signer, Config: config.Config{FFMarketingContent: true}})
+	rr := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/admin/marketing/articles/generate", strings.NewReader(`{"mode":"repair","existingTitle":"Hello","findings":[{"rule":"passage.length","severity":"warning","message":"too long"}]}`))
+	req.Header.Set("Content-Type", "application/json")
+	h.ServeHTTP(rr, req)
+	if rr.Code != http.StatusUnauthorized {
+		t.Fatalf("expected 401 without auth, got %d: %s", rr.Code, rr.Body.String())
+	}
+}
+
+func TestGenerateMarketingArticleMetadata_Unauthenticated(t *testing.T) {
+	signer := auth.NewJWTSigner("01234567890123456789012345678901")
+	h := NewHandler(Deps{JWTSigner: signer, Config: config.Config{FFMarketingContent: true}})
+	rr := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/admin/marketing/articles/generate", strings.NewReader(`{"mode":"metadata","existingTitle":"Hello"}`))
+	req.Header.Set("Content-Type", "application/json")
+	h.ServeHTTP(rr, req)
+	if rr.Code != http.StatusUnauthorized {
+		t.Fatalf("expected 401 without auth, got %d: %s", rr.Code, rr.Body.String())
+	}
+}

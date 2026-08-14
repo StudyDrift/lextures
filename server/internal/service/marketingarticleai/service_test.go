@@ -103,6 +103,128 @@ func TestGenerateFromPrompt_NilCompleter(t *testing.T) {
 	}
 }
 
+func TestGenerateMetadataFromContent(t *testing.T) {
+	ai := mockCompleter{fn: func(ctx context.Context, model string, messages []aiprovider.Message, opts ...aiprovider.ChatOptions) (aiprovider.ChatResult, aiprovider.CallMeta, error) {
+		if model != "test-model" {
+			t.Fatalf("model=%q", model)
+		}
+		if len(messages) != 2 || messages[0].Content != MetadataSystemPrompt {
+			t.Fatalf("messages=%#v", messages)
+		}
+		if !strings.Contains(messages[1].Content, "Title:\nHomeschool advice") {
+			t.Fatalf("user=%q", messages[1].Content)
+		}
+		if strings.Contains(messages[1].Content, "bodyMd") {
+			t.Fatalf("metadata prompt should not ask for a body")
+		}
+		if len(opts) == 0 || !opts[0].JSONMode || opts[0].MaxTokens != 800 {
+			t.Fatalf("opts=%#v", opts)
+		}
+		return aiprovider.ChatResult{Text: `{"slug":"Homeschool Student Advice!","description":"Practical advice for homeschool families.","primaryQuestion":"How do I support a homeschool student?","cluster":"Homeschool","pillar":"Advice","keywords":["homeschool"],"title":"Ignore","bodyMd":"Ignore"}`}, aiprovider.CallMeta{ModelID: model}, nil
+	}}
+	got, meta, err := GenerateMetadataFromContent(context.Background(), ai, "test-model", "blog", "Homeschool advice", "A draft body")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.Slug != "homeschool-student-advice" || got.Description != "Practical advice for homeschool families." {
+		t.Fatalf("got %#v", got)
+	}
+	if got.Title != "" || got.BodyMD != "" {
+		t.Fatalf("metadata draft should clear title/body: %#v", got)
+	}
+	if got.PrimaryQuestion == "" || meta.ModelID != "test-model" {
+		t.Fatalf("got %#v meta=%#v", got, meta)
+	}
+}
+
+func TestRepairFromFindings(t *testing.T) {
+	ai := mockCompleter{fn: func(ctx context.Context, model string, messages []aiprovider.Message, opts ...aiprovider.ChatOptions) (aiprovider.ChatResult, aiprovider.CallMeta, error) {
+		if model != "test-model" {
+			t.Fatalf("model=%q", model)
+		}
+		if len(messages) != 2 || messages[0].Content != RepairSystemPrompt {
+			t.Fatalf("messages=%#v", messages)
+		}
+		user := messages[1].Content
+		if !strings.Contains(user, "Article kind: blog") {
+			t.Fatalf("user=%q", user)
+		}
+		if !strings.Contains(user, "[warning] passage.length — Direct answer is 69 words") {
+			t.Fatalf("expected warning finding in prompt: %q", user)
+		}
+		if !strings.Contains(user, "(line 10)") {
+			t.Fatalf("expected line in prompt: %q", user)
+		}
+		if !strings.Contains(user, "[error] fm.cluster — Required metadata field is missing. (path: cluster)") {
+			t.Fatalf("expected error finding in prompt: %q", user)
+		}
+		if !strings.Contains(user, "Current draft:\n:::answer") {
+			t.Fatalf("expected body in prompt: %q", user)
+		}
+		if !strings.Contains(user, "/blog") || !strings.Contains(user, "always resolve") {
+			t.Fatalf("expected hub paths to be treated as valid: %q", user)
+		}
+		if len(opts) == 0 || !opts[0].JSONMode || opts[0].MaxTokens != 8_000 {
+			t.Fatalf("opts=%#v", opts)
+		}
+		return aiprovider.ChatResult{Text: `{"title":"Fixed","description":"D","primaryQuestion":"Q?","cluster":"C","pillar":"P","keywords":["k"],"bodyMd":":::answer\nYes.\n:::"}`}, aiprovider.CallMeta{ModelID: model}, nil
+	}}
+	got, meta, err := RepairFromFindings(context.Background(), ai, "test-model", RepairInput{
+		Kind:    "blog",
+		Title:   "Old",
+		BodyMD:  ":::answer\nToo long answer text.\n:::",
+		Cluster: "",
+		Findings: []Finding{
+			{Rule: "passage.length", Severity: "warning", Message: "Direct answer is 69 words; target is 40-60.", Line: 10},
+			{Rule: "fm.cluster", Severity: "error", Message: "Required metadata field is missing.", Path: "cluster"},
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.Title != "Fixed" || got.BodyMD == "" || meta.ModelID != "test-model" {
+		t.Fatalf("got %#v meta=%#v", got, meta)
+	}
+}
+
+func TestRepairFromFindings_EmptyFindings(t *testing.T) {
+	ai := mockCompleter{fn: func(ctx context.Context, model string, messages []aiprovider.Message, opts ...aiprovider.ChatOptions) (aiprovider.ChatResult, aiprovider.CallMeta, error) {
+		t.Fatal("should not call Complete")
+		return aiprovider.ChatResult{}, aiprovider.CallMeta{}, nil
+	}}
+	if _, _, err := RepairFromFindings(context.Background(), ai, "m", RepairInput{Title: "T", Findings: nil}); err == nil {
+		t.Fatal("expected error")
+	}
+}
+
+func TestRepairFromFindings_EmptySource(t *testing.T) {
+	ai := mockCompleter{fn: func(ctx context.Context, model string, messages []aiprovider.Message, opts ...aiprovider.ChatOptions) (aiprovider.ChatResult, aiprovider.CallMeta, error) {
+		t.Fatal("should not call Complete")
+		return aiprovider.ChatResult{}, aiprovider.CallMeta{}, nil
+	}}
+	if _, _, err := RepairFromFindings(context.Background(), ai, "m", RepairInput{
+		Findings: []Finding{{Rule: "x", Message: "y"}},
+	}); err == nil {
+		t.Fatal("expected error")
+	}
+}
+
+func TestGenerateMetadataFromContent_EmptySource(t *testing.T) {
+	ai := mockCompleter{fn: func(ctx context.Context, model string, messages []aiprovider.Message, opts ...aiprovider.ChatOptions) (aiprovider.ChatResult, aiprovider.CallMeta, error) {
+		t.Fatal("should not call Complete")
+		return aiprovider.ChatResult{}, aiprovider.CallMeta{}, nil
+	}}
+	if _, _, err := GenerateMetadataFromContent(context.Background(), ai, "m", "blog", "  ", ""); err == nil {
+		t.Fatal("expected error")
+	}
+}
+
+func TestSlugifySlug(t *testing.T) {
+	if got := slugifySlug("  Homeschooling Student Advice!  "); got != "homeschooling-student-advice" {
+		t.Fatalf("got %q", got)
+	}
+}
+
 func utf8Count(s string) int {
 	return len([]rune(s))
 }
