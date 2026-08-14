@@ -13,6 +13,7 @@ import {
   type MarketingFinding,
   type MarketingRevision,
 } from "./marketing-content-types";
+import { normalizeMarketingFinding } from "./marketing-finding";
 
 // Keep type + value re-exports in one `export { … }` so api-surface.golden
 // (AST-free heuristic) continues to see the public module surface.
@@ -30,6 +31,7 @@ export {
   type MarketingFinding,
   type MarketingRevision,
 } from "./marketing-content-types";
+export { lintMetadataFromArticle, normalizeMarketingFinding } from "./marketing-finding";
 
 type ArticleListOperation = paths["/api/v1/admin/marketing/articles"]["get"];
 void (0 as unknown as ArticleListOperation);
@@ -92,9 +94,9 @@ export async function lintMarketingArticle(
     metadata: Record<string, unknown>;
   },
 ) {
-  return json<{
+  const report = await json<{
     score: number;
-    findings: MarketingFinding[];
+    findings: unknown[];
     blocking?: boolean;
   }>(
     await authorizedFetch("/api/v1/admin/marketing/lint", {
@@ -103,6 +105,10 @@ export async function lintMarketingArticle(
       body: JSON.stringify(article),
     }),
   );
+  return {
+    ...report,
+    findings: (report.findings ?? []).map(normalizeMarketingFinding),
+  };
 }
 
 export async function listMarketingRevisions(id: string) {

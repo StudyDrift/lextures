@@ -1,9 +1,10 @@
 import { authorizedFetch } from './api'
 import { readApiErrorMessage } from './errors'
-import type { MarketingContentKind } from './marketing-content-api'
+import type { MarketingContentKind, MarketingFinding } from './marketing-content-api'
 
 export type MarketingArticleAIDraft = {
   title: string
+  slug: string
   description: string
   bodyMd: string
   primaryQuestion: string
@@ -14,10 +15,18 @@ export type MarketingArticleAIDraft = {
 
 /** POST `/api/v1/admin/marketing/articles/generate` — draft fields only (not persisted). */
 export async function generateMarketingArticle(input: {
-  prompt: string
+  prompt?: string
   kind: MarketingContentKind
   existingTitle?: string
   existingBodyMd?: string
+  mode?: 'article' | 'metadata' | 'repair'
+  description?: string
+  primaryQuestion?: string
+  cluster?: string
+  pillar?: string
+  keywords?: string[]
+  knownPaths?: string[]
+  findings?: Array<Pick<MarketingFinding, 'rule' | 'severity' | 'message' | 'line' | 'path'>>
 }): Promise<MarketingArticleAIDraft> {
   const res = await authorizedFetch('/api/v1/admin/marketing/articles/generate', {
     method: 'POST',
@@ -29,6 +38,7 @@ export async function generateMarketingArticle(input: {
   const value = body as Partial<MarketingArticleAIDraft>
   return {
     title: value.title ?? '',
+    slug: value.slug ?? '',
     description: value.description ?? '',
     bodyMd: value.bodyMd ?? '',
     primaryQuestion: value.primaryQuestion ?? '',
@@ -36,4 +46,29 @@ export async function generateMarketingArticle(input: {
     pillar: value.pillar ?? '',
     keywords: Array.isArray(value.keywords) ? value.keywords.filter(Boolean) : [],
   }
+}
+
+/** Fill slug, description, and search metadata from the current title/body. */
+export async function generateMarketingArticleMetadata(input: {
+  kind: MarketingContentKind
+  existingTitle?: string
+  existingBodyMd?: string
+}): Promise<MarketingArticleAIDraft> {
+  return generateMarketingArticle({ ...input, mode: 'metadata' })
+}
+
+/** Revise the current article so every listed finding, including warnings, is resolved. */
+export async function repairMarketingArticle(input: {
+  kind: MarketingContentKind
+  existingTitle?: string
+  existingBodyMd?: string
+  description?: string
+  primaryQuestion?: string
+  cluster?: string
+  pillar?: string
+  keywords?: string[]
+  knownPaths?: string[]
+  findings: Array<Pick<MarketingFinding, 'rule' | 'severity' | 'message' | 'line' | 'path'>>
+}): Promise<MarketingArticleAIDraft> {
+  return generateMarketingArticle({ ...input, mode: 'repair' })
 }

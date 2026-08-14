@@ -1,3 +1,5 @@
+import type { MarketingArticle, MarketingArticleWrite } from '../../../lib/marketing-content-api'
+
 export type Directive = {
   id: string
   label: string
@@ -78,6 +80,17 @@ export const directives: Directive[] = [
 export function slugify(value: string): string {
   return value.toLowerCase().trim().normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 100)
+}
+
+export function writePayload(article: MarketingArticle): MarketingArticleWrite {
+  return {
+    kind: article.kind, slug: article.slug, locale: article.locale, categoryId: article.categoryId, title: article.title,
+    description: article.description, bodyMd: article.bodyMd, authorSlug: article.authorSlug, reviewerSlug: article.reviewerSlug,
+    reviewDueOn: article.reviewDueOn,
+    primaryQuestion: article.primaryQuestion, cluster: article.cluster, pillar: article.pillar, verifiedAgainst: article.verifiedAgainst,
+    keywords: article.keywords, relatedTo: article.relatedTo, roles: article.roles, segments: article.segments, citations: article.citations,
+    heroMediaId: article.heroMediaId, noindex: article.noindex, canonicalOverride: article.canonicalOverride,
+  }
 }
 
 export function commaList(value: string): string[] {

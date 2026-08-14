@@ -1,6 +1,7 @@
 package validate
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 )
@@ -24,6 +25,40 @@ func TestArticleReportsContractAndSafetyErrors(t *testing.T) {
 		}
 	}
 }
+func TestArticleAllowsStaticHubsWithoutCatalog(t *testing.T) {
+	report := Article(Input{
+		Kind:     "blog",
+		BodyMD:   "See the [blog](/blog), [docs](/docs/), and [platform](/platform#overview).",
+		Metadata: validMetadata(),
+	})
+	for _, f := range report.Findings {
+		if f.Rule == "link.internal-resolves" {
+			t.Fatalf("static hub should resolve: %+v", f)
+		}
+	}
+}
+
+func TestArticleStillRejectsUnknownDeepLinks(t *testing.T) {
+	report := Article(Input{
+		Kind:       "blog",
+		BodyMD:     "See the [blog](/blog) and a [missing doc](/docs/nope).",
+		Metadata:   validMetadata(),
+		KnownPaths: map[string]struct{}{},
+	})
+	count := 0
+	for _, f := range report.Findings {
+		if f.Rule == "link.internal-resolves" {
+			count++
+			if !strings.Contains(f.Message, `/docs/nope`) {
+				t.Fatalf("expected unknown deep link, got %+v", f)
+			}
+		}
+	}
+	if count != 1 {
+		t.Fatalf("wanted one unknown deep link, got %d: %+v", count, report.Findings)
+	}
+}
+
 func TestArticleAllowsKnownInternalPathAndLocatesFinding(t *testing.T) {
 	report := Article(Input{Kind: "blog", BodyMD: "first\n[known](/docs/known)\n[bad](/docs/bad)", Metadata: validMetadata(), KnownPaths: map[string]struct{}{`/docs/known`: {}}})
 	count := 0
@@ -39,6 +74,27 @@ func TestArticleAllowsKnownInternalPathAndLocatesFinding(t *testing.T) {
 		t.Fatalf("wanted one link finding, got %d", count)
 	}
 }
+func TestFindingJSONUsesCamelCase(t *testing.T) {
+	raw, err := json.Marshal(Finding{Rule: "fm.cluster", Severity: "error", Message: "Required metadata field is missing.", Path: "cluster", Line: 0, Column: 0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var keys map[string]any
+	if err := json.Unmarshal(raw, &keys); err != nil {
+		t.Fatal(err)
+	}
+	for _, key := range []string{"rule", "severity", "message", "path"} {
+		if _, ok := keys[key]; !ok {
+			t.Errorf("missing %q in %s", key, raw)
+		}
+	}
+	for _, key := range []string{"Rule", "Severity", "Message"} {
+		if _, ok := keys[key]; ok {
+			t.Errorf("PascalCase %q leaked in %s", key, raw)
+		}
+	}
+}
+
 func TestScoreMatchesPublishedFormula(t *testing.T) {
 	answer := strings.Repeat("complete answer words ", 15)
 	passage := strings.Repeat("clear passage words ", 45)

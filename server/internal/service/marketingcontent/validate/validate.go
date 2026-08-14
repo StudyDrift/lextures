@@ -26,9 +26,12 @@ type Input struct {
 	KnownPaths           map[string]struct{}
 }
 type Finding struct {
-	Rule, Severity, Message string
-	Line, Column            int
-	Path                    string `json:"path,omitempty"`
+	Rule     string `json:"rule"`
+	Severity string `json:"severity"`
+	Message  string `json:"message"`
+	Line     int    `json:"line,omitempty"`
+	Column   int    `json:"column,omitempty"`
+	Path     string `json:"path,omitempty"`
 }
 type Report struct {
 	Score          float64            `json:"score"`
@@ -78,6 +81,7 @@ func Article(in Input) (out Report) {
 	if in.Locale == "" {
 		in.Locale = in.Metadata.Locale
 	}
+	in.KnownPaths = WithStaticSitePaths(in.KnownPaths)
 	a := inspect(in.BodyMD)
 	out.Stats = render.Stats(in.BodyMD)
 	out.Score = score(in, a)
@@ -195,10 +199,11 @@ func checkPassages(in Input, a *analysis) []Finding {
 	}
 	return nil
 }
+
 var (
-	footnoteDefRE  = regexp.MustCompile(`(?m)^\[\^(\d+)\]:\s+https?://\S+`)
-	tiptapCiteRE   = regexp.MustCompile(`\[\^(\d+)\]\(https?://[^)\s]+\)`)
-	footnoteRefRE  = regexp.MustCompile(`\[\^(\d+)\]`)
+	footnoteDefRE = regexp.MustCompile(`(?m)^\[\^(\d+)\]:\s+https?://\S+`)
+	tiptapCiteRE  = regexp.MustCompile(`\[\^(\d+)\]\(https?://[^)\s]+\)`)
+	footnoteRefRE = regexp.MustCompile(`\[\^(\d+)\]`)
 )
 
 func citationCount(body string) int {
@@ -245,8 +250,8 @@ func checkLinks(in Input, _ *analysis) []Finding {
 			anchor := line[m[2]:m[3]]
 			target := line[m[4]:m[5]]
 			if strings.HasPrefix(target, "/") {
-				path := strings.SplitN(strings.SplitN(target, "#", 2)[0], "?", 2)[0]
-				if _, ok := in.KnownPaths[path]; !ok {
+				path := normalizeInternalPath(strings.SplitN(strings.SplitN(target, "#", 2)[0], "?", 2)[0])
+				if path != "" && !pathIsKnown(in.KnownPaths, path) {
 					out = append(out, finding("link.internal-resolves", "error", fmt.Sprintf("Internal link %q does not resolve.", path), i+1, m[4]+1))
 				}
 				if regexp.MustCompile(`(?i)^(here|read more|click here)$`).MatchString(strings.TrimSpace(anchor)) {
@@ -373,7 +378,7 @@ func textLen(s string, chars bool) int {
 	if !chars {
 		return wordCount(s)
 	}
-	stripped := regexp.MustCompile(`[#>*_` + "`" + `\[\](){}|:\-\s]`).ReplaceAllString(s, "")
+	stripped := regexp.MustCompile(`[#>*_`+"`"+`\[\](){}|:\-\s]`).ReplaceAllString(s, "")
 	return len([]rune(stripped))
 }
 func bulletCount(s string) int {

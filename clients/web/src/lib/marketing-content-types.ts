@@ -58,6 +58,7 @@ export type MarketingFinding = {
   severity: "error" | "warn" | "warning" | "info";
   message: string;
   line?: number;
+  column?: number;
   path?: string;
 };
 
