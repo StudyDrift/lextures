@@ -131,22 +131,22 @@ export function ArticleMetadataPanel({ article, onChange, categories, authors, k
       {article.kind === 'doc' ? <Field label="Category" required>
         <Select value={article.categoryId ?? ''} required onChange={(e) => onChange({ categoryId: e.target.value || null })}><option value="">Choose a category</option>{categoryOptions.map((v) => <option key={v.id} value={v.id}>{v.title}</option>)}</Select>
       </Field> : null}
-      <Field data-metadata-field="description" htmlFor="article-meta-description" className={fieldHighlight('description', highlightField)} label="Description" description="Shown in search results and social cards." warning={fieldNotice(findings, 'description').warning ?? (description.length > 155 ? 'Close to the 160-character limit.' : undefined)} error={fieldNotice(findings, 'description').error}>
-        <Textarea rows={3} maxLength={160} value={description} onChange={(e) => onChange({ description: e.target.value })} placeholder="One or two sentences that summarise the article." />
+      <Field data-metadata-field="description" htmlFor="article-meta-description" className={fieldHighlight('description', highlightField)} label="Description" required description="Shown in search results and social cards. Required to publish." warning={fieldNotice(findings, 'description').warning ?? (description.length > 155 ? 'Close to the 160-character limit.' : undefined)} error={fieldNotice(findings, 'description').error}>
+        <Textarea rows={3} maxLength={160} value={description} required onChange={(e) => onChange({ description: e.target.value })} placeholder="One or two sentences that summarise the article." />
       </Field>
       <p className="-mt-2 text-end text-xs tabular-nums text-fg-muted">{description.length}/160</p>
     </Group>
 
     <Group title={'Search & audience'}>
-      <Field data-metadata-field="primaryQuestion" htmlFor="article-meta-primaryQuestion" className={fieldHighlight('primaryQuestion', highlightField)} label="Primary question" description="The question this article answers." {...fieldNotice(findings, 'primaryQuestion')}>
-        <Input value={article.primaryQuestion ?? ''} onChange={(e) => onChange({ primaryQuestion: e.target.value })} placeholder="How do I…?" />
+      <Field data-metadata-field="primaryQuestion" htmlFor="article-meta-primaryQuestion" className={fieldHighlight('primaryQuestion', highlightField)} label="Primary question" required description="The question this article answers. Required to publish." {...fieldNotice(findings, 'primaryQuestion')}>
+        <Input value={article.primaryQuestion ?? ''} required onChange={(e) => onChange({ primaryQuestion: e.target.value })} placeholder="How do I…?" />
       </Field>
-      <Field data-metadata-field="keywords" htmlFor="article-meta-keywords" className={fieldHighlight('keywords', highlightField)} label="Keywords" description="Comma separated." {...fieldNotice(findings, 'keywords')}>
-        <Input {...list('keywords')} placeholder="courses, navigation" />
+      <Field data-metadata-field="keywords" htmlFor="article-meta-keywords" className={fieldHighlight('keywords', highlightField)} label="Keywords" required description="Comma separated. At least one is required to publish." {...fieldNotice(findings, 'keywords')}>
+        <Input {...list('keywords')} required placeholder="courses, navigation" />
       </Field>
       {chips('keywords')}
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-        <Field data-metadata-field="cluster" htmlFor="article-meta-cluster" className={fieldHighlight('cluster', highlightField)} label="Cluster" {...fieldNotice(findings, 'cluster')}><Input value={article.cluster} onChange={(e) => onChange({ cluster: e.target.value })} /></Field>
+        <Field data-metadata-field="cluster" htmlFor="article-meta-cluster" className={fieldHighlight('cluster', highlightField)} label="Cluster" required description="Required to publish." {...fieldNotice(findings, 'cluster')}><Input value={article.cluster} required onChange={(e) => onChange({ cluster: e.target.value })} /></Field>
         <Field label="Pillar"><Input value={article.pillar} onChange={(e) => onChange({ pillar: e.target.value })} /></Field>
       </div>
       <Field label="Related paths" description="Comma separated site paths.">

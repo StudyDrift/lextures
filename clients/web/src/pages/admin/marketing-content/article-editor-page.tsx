@@ -2,11 +2,11 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Editor } from '@tiptap/core'
 import { ArrowLeft, Braces, ChevronDown, Eye, FileText, History, Keyboard, PanelRight, Save, Sparkles } from 'lucide-react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { MarkdownBodyEditor } from '../../../components/editor/block-editor'
 import { ArticleMetadataPanel } from '../../../components/marketing-content/editor/article-metadata-panel'
 import { ArticlePreview } from '../../../components/marketing-content/editor/article-preview'
+import { EditorPane } from '../../../components/marketing-content/editor/article-editor-pane'
 import { TranslationSourcePane } from '../../../components/marketing-content/editor/translation-source-pane'
-import { directives, slugify } from '../../../components/marketing-content/editor/article-editor-utils'
+import { directives, isBlockingFinding, lintMetadata, slugify, writePayload } from '../../../components/marketing-content/editor/article-editor-utils'
 import { METADATA_FINDING_PATHS, findingKey, jumpEditorToMarkdownLine, selectTextareaLine, solveFindingsSequentially } from '../../../components/marketing-content/editor/article-finding-nav'
 import { ArticleFindingsBar } from '../../../components/marketing-content/editor/article-findings-bar'
 import { BuildArticleWithAiModal } from '../../../components/marketing-content/editor/build-article-with-ai-modal'
@@ -14,7 +14,7 @@ import { RevisionDrawer } from '../../../components/marketing-content/editor/rev
 import { Badge, Button, Checkbox, Dialog, EmptyState, InlineAlert, Input, Menu, SegmentedControl, Skeleton, Textarea, type MenuItem } from '../../../components/ui'
 import { usePermissions } from '../../../context/use-permissions'
 import { generateMarketingArticle, repairMarketingArticle, type MarketingArticleAIDraft } from '../../../lib/marketing-content-ai-api'
-import { createMarketingArticle, createMarketingPreviewToken, getMarketingArticle, lintMarketingArticle, lintMetadataFromArticle, listMarketingAuthors, listMarketingCategories, listMarketingKnownPaths, MarketingConflictError, restoreMarketingRevision, transitionMarketingArticle, updateMarketingArticle, type MarketingArticle, type MarketingArticleWrite, type MarketingFinding } from '../../../lib/marketing-content-api'
+import { createMarketingArticle, createMarketingPreviewToken, getMarketingArticle, lintMarketingArticle, listMarketingAuthors, listMarketingCategories, listMarketingKnownPaths, MarketingConflictError, MarketingValidationError, restoreMarketingRevision, transitionMarketingArticle, updateMarketingArticle, type MarketingArticle, type MarketingFinding } from '../../../lib/marketing-content-api'
 import { createMarketingTranslation, listMarketingLocales, listMarketingTranslations, markMarketingTranslationSynced, type MarketingLocale, type MarketingTranslationLink } from '../../../lib/marketing-content-i18n-api'
 import { PERM_MARKETING_CONTENT_AUTHOR, PERM_MARKETING_CONTENT_PUBLISH, PERM_MARKETING_CONTENT_REVIEW } from '../../../lib/rbac-api'
 import { resolveMarketingPreviewUrl } from '../../../lib/marketing-site'
@@ -31,68 +31,6 @@ function EditorMenu({ label, items, variant = 'ghost', icon, placement = 'bottom
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLButtonElement>(null)
   return <><Button ref={ref} size="sm" variant={variant} className="min-h-6" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((value) => !value)}>{icon}{label}<ChevronDown aria-hidden className="h-3.5 w-3.5 opacity-70" /></Button><Menu open={open} onOpenChange={setOpen} anchorRef={ref} items={items} placement={placement} /></>
-}
-
-function writePayload(article: MarketingArticle): MarketingArticleWrite {
-  return {
-    kind: article.kind, slug: article.slug, locale: article.locale, categoryId: article.categoryId, title: article.title,
-    description: article.description, bodyMd: article.bodyMd, authorSlug: article.authorSlug, reviewerSlug: article.reviewerSlug,
-    reviewDueOn: article.reviewDueOn,
-    primaryQuestion: article.primaryQuestion, cluster: article.cluster, pillar: article.pillar, verifiedAgainst: article.verifiedAgainst,
-    keywords: article.keywords, relatedTo: article.relatedTo, roles: article.roles, segments: article.segments, citations: article.citations,
-    heroMediaId: article.heroMediaId, noindex: article.noindex, canonicalOverride: article.canonicalOverride,
-  }
-}
-
-type EditorPaneProps = {
-  article: MarketingArticle
-  canAuthor: boolean
-  simple: boolean
-  titleHighlight?: boolean
-  titleError?: string
-  onTitleChange: (title: string) => void
-  onBodyChange: (bodyMd: string) => void
-  onBlur: () => void
-  onEditorChange: (sectionId: string, editor: Editor | null) => void
-}
-
-// Keep this component at module scope. Defining it inside ArticleEditorPage gives
-// it a new component identity on every keystroke, which remounts TipTap while
-// PureEditorContent is completing its own mount update.
-function EditorPane({
-  article,
-  canAuthor,
-  simple,
-  titleHighlight,
-  titleError,
-  onTitleChange,
-  onBodyChange,
-  onBlur,
-  onEditorChange,
-}: EditorPaneProps) {
-  const path = article.path || `${article.locale && article.locale !== 'en' ? `/${article.locale}` : ''}${article.kind === 'blog' ? '/blog/' : '/docs/…/'}${article.slug || '…'}`
-  return <section className="min-w-0 overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-sm" aria-label="Article body editor">
-    <div className="border-b border-border-subtle px-5 pb-4 pt-6 sm:px-9">
-      <Input
-        id="article-title"
-        value={article.title}
-        onChange={(event) => onTitleChange(event.target.value)}
-        onBlur={onBlur}
-        disabled={!canAuthor}
-        aria-label="Article title"
-        aria-invalid={titleError ? true : undefined}
-        placeholder="Untitled article"
-        className={`w-full border-0 bg-transparent p-0 text-2xl font-semibold tracking-tight text-fg-default shadow-none placeholder:text-fg-subtle disabled:opacity-60 sm:text-3xl ${titleHighlight ? 'rounded-lg ring-2 ring-accent-solid ring-offset-2 ring-offset-surface-raised' : ''}`}
-      />
-      {titleError ? <p className="mt-2 text-xs font-medium text-danger-fg">{titleError}</p> : null}
-      <p className="mt-2 font-mono text-xs text-fg-muted">{path}</p>
-    </div>
-    <div className="px-5 py-5 sm:px-9">
-      {simple
-        ? <><label className="sr-only" htmlFor="article-markdown">Article body, markdown</label><Textarea id="article-markdown" dir="ltr" aria-describedby="article-findings" className="min-h-[52vh] resize-y border-0 bg-transparent p-0 font-mono text-sm shadow-none" value={article.bodyMd} onChange={(e) => onBodyChange(e.target.value)} onBlur={onBlur} /></>
-        : <div className="min-h-[52vh]"><MarkdownBodyEditor sectionId="marketing-article" value={article.bodyMd} onChange={onBodyChange} onBlur={onBlur} disabled={!canAuthor} placeholder="Write the article… type / for blocks" onEditorChange={onEditorChange} /></div>}
-    </div>
-  </section>
 }
 
 export default function ArticleEditorPage() {
@@ -170,7 +108,25 @@ export default function ArticleEditorPage() {
   useEffect(() => {
     if (isNew) return
     const controller = new AbortController()
-    void getMarketingArticle(articleId, controller.signal).then((value) => { setArticle(value); setLoading(false); const cached = sessionStorage.getItem(`mc:draft:${articleId}`); if (cached) { try { const cachedArticle = JSON.parse(cached) as MarketingArticle; if (cachedArticle.revisionNo === value.revisionNo) setRecovery(cachedArticle) } catch { /* ignore invalid recovery */ } } }).catch((e) => { setSaveError(String(e)); setLoading(false) })
+    void getMarketingArticle(articleId, controller.signal).then((value) => {
+      setArticle(value)
+      setLoading(false)
+      const report = value.qualityReport
+      if (report) {
+        setFindings(report.findings ?? [])
+        if (typeof report.score === 'number') setScore(report.score)
+        else if (typeof value.qualityScore === 'number') setScore(value.qualityScore)
+      } else if (typeof value.qualityScore === 'number') {
+        setScore(value.qualityScore)
+      }
+      const cached = sessionStorage.getItem(`mc:draft:${articleId}`)
+      if (cached) {
+        try {
+          const cachedArticle = JSON.parse(cached) as MarketingArticle
+          if (cachedArticle.revisionNo === value.revisionNo) setRecovery(cachedArticle)
+        } catch { /* ignore invalid recovery */ }
+      }
+    }).catch((e) => { setSaveError(String(e)); setLoading(false) })
     return () => controller.abort()
   }, [articleId, isNew])
   useEffect(() => {
@@ -189,11 +145,13 @@ export default function ArticleEditorPage() {
   }, [article.sourceArticleId])
 
   useEffect(() => {
+    // Lint on load and while editing so Publish sees blocking findings before the API rejects.
     if (loading || solvingFindings) return
-    if (!isNew && dirty) sessionStorage.setItem(`mc:draft:${articleId}`, JSON.stringify(article))
+    if (!article.bodyMd && isNew) return
+    if (dirty && !isNew) sessionStorage.setItem(`mc:draft:${articleId}`, JSON.stringify(article))
     const timer = window.setTimeout(() => {
       setValidating(true)
-      void lintMarketingArticle({ kind: article.kind, bodyMd: article.bodyMd, metadata: lintMetadataFromArticle(article) }).then((report) => {
+      void lintMarketingArticle({ kind: article.kind, bodyMd: article.bodyMd, metadata: lintMetadata(article) }).then((report) => {
         const next = report.findings ?? []
         setFindings(next)
         setScore(report.score)
@@ -233,12 +191,33 @@ export default function ArticleEditorPage() {
     window.addEventListener('keydown', keys); return () => window.removeEventListener('keydown', keys)
   }, [saveArticle])
 
-  const blocking = findings.filter((v) => v.severity === 'error')
+  const blocking = findings.filter((v) => isBlockingFinding(v.severity))
   const doTransition = async () => {
     if (!transition) return
     const saved = dirty ? await saveArticle() : article
     if (!saved?.id) return
-    try { const next = await transitionMarketingArticle(saved.id, transition, saved.revisionNo, { note: actionNote, lintOverride, ...(transition === 'schedule' && scheduledFor ? { scheduledFor: new Date(scheduledFor).toISOString() } : {}) }); setArticle((old) => ({ ...old, ...next })); setTransition(null); setActionNote(''); setLintOverride(false); setScheduledFor('') } catch (e) { setSaveError(String(e)); setTransition(null) }
+    try {
+      const next = await transitionMarketingArticle(saved.id, transition, saved.revisionNo, {
+        note: actionNote,
+        lintOverride,
+        ...(transition === 'schedule' && scheduledFor ? { scheduledFor: new Date(scheduledFor).toISOString() } : {}),
+      })
+      setArticle((old) => ({ ...old, ...next }))
+      setTransition(null)
+      setActionNote('')
+      setLintOverride(false)
+      setScheduledFor('')
+    } catch (e) {
+      if (e instanceof MarketingValidationError) {
+        setFindings(e.findings)
+        if (e.score != null) setScore(e.score)
+        setFindingsOpen(true)
+        setSaveError(`${e.message} Open Quality below for the blocking findings.`)
+      } else {
+        setSaveError(e instanceof Error ? e.message : String(e))
+      }
+      setTransition(null)
+    }
   }
   const openPreview = async () => {
     const saved = dirty ? await saveArticle() : article
@@ -312,7 +291,10 @@ export default function ArticleEditorPage() {
   }
   const insertDirective = (markdown: string) => {
     if (simple || !editorRef.current) patch({ bodyMd: `${article.bodyMd}${article.bodyMd.endsWith('\n') || !article.bodyMd ? '' : '\n\n'}${markdown}` })
-    else editorRef.current.commands.insertContent(markdown)
+    else {
+      // TipTap defaults to HTML insertion; markdown contentType keeps ::: directives intact.
+      editorRef.current.commands.insertContent(markdown, { contentType: 'markdown' })
+    }
   }
   const revealFinding = (finding: MarketingFinding) => {
     const path = finding.path
@@ -434,7 +416,7 @@ export default function ArticleEditorPage() {
     </div>
 
     <div className="px-4 pt-4 sm:px-6">
-      {saveError ? <InlineAlert tone="danger" className="mb-3"><span className="flex flex-wrap items-center gap-2"><strong>Could not save.</strong> {saveError}<Button size="sm" variant="secondary" onClick={() => void saveArticle()}>Retry</Button></span></InlineAlert> : null}
+      {saveError ? <InlineAlert tone="danger" className="mb-3"><span className="flex flex-wrap items-center gap-2"><strong>Action failed.</strong> {saveError}{dirty ? <Button size="sm" variant="secondary" onClick={() => void saveArticle()}>Retry save</Button> : null}</span></InlineAlert> : null}
       {recovery ? <InlineAlert tone="warning" className="mb-3"><span className="flex flex-wrap items-center gap-2"><strong>Unsaved browser draft found.</strong><Button size="sm" onClick={() => { setArticle(recovery); setRecovery(null); setDirty(true) }}>Recover</Button><Button size="sm" variant="secondary" onClick={() => { sessionStorage.removeItem(`mc:draft:${articleId}`); setRecovery(null) }}>Discard</Button></span></InlineAlert> : null}
     </div>
 
@@ -482,6 +464,31 @@ export default function ArticleEditorPage() {
     />
     <Dialog open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} title={'Keyboard shortcuts'} closeLabel="Close shortcuts"><dl className="grid grid-cols-[1fr_auto] gap-2 text-sm"><dt>Save</dt><dd>Ctrl/Cmd+S</dd><dt>Toggle preview</dt><dd>Ctrl/Cmd+Shift+P</dd><dt>Insert a block</dt><dd>Type / in the editor</dd><dt>Bold, italic and link</dt><dd>Use the shared editor toolbar</dd><dt>Move focus</dt><dd>Tab</dd></dl></Dialog>
     <Dialog open={Boolean(conflict)} onClose={() => undefined} hideClose closeOnBackdrop={false} closeOnEscape={false} title={'Someone else saved this article'} description={`A newer revision was saved${conflict?.updatedAt ? ` at ${new Date(conflict.updatedAt).toLocaleString()}` : ''}. Your local work is still safe.`} footer={<><Button variant="secondary" onClick={() => void navigator.clipboard.writeText(article.bodyMd)}>Keep mine (copy to clipboard)</Button><Button variant="secondary" onClick={() => window.open(`/admin/marketing-content/${article.id}`, '_blank', 'noopener')}>View their version</Button><Button onClick={() => window.location.reload()}>Reload</Button></>}></Dialog>
-    <Dialog open={Boolean(transition)} onClose={() => setTransition(null)} title={`${transition?.replaceAll('_', ' ') ?? ''} article`} description={blocking.length && (transition === 'publish' || transition === 'schedule') ? `${blocking.length} blocking finding(s) must be resolved before publishing.` : 'This action is recorded in the article history.'} footer={<><Button variant="secondary" onClick={() => setTransition(null)}>Cancel</Button><Button disabled={Boolean((transition === 'schedule' && !scheduledFor) || (blocking.length && (transition === 'publish' || transition === 'schedule') && (!lintOverride || actionNote.trim().length < 20)))} onClick={() => void doTransition()}>Confirm</Button></>}><div className="space-y-3">{transition === 'schedule' ? <label className="block text-sm font-medium">Publish date and time<Input className="mt-1" type="datetime-local" value={scheduledFor} onChange={(e) => setScheduledFor(e.target.value)} /></label> : null}<label className="block text-sm font-medium">Change note<Textarea className="mt-1" value={actionNote} onChange={(e) => setActionNote(e.target.value)} /></label>{blocking.length && (transition === 'publish' || transition === 'schedule') && canPublish ? <Checkbox checked={lintOverride} onChange={(e) => setLintOverride(e.target.checked)} label="Override validation" description="Requires a justification of at least 20 characters in the change note." /> : null}</div></Dialog>
+    <Dialog
+      open={Boolean(transition)}
+      onClose={() => setTransition(null)}
+      title={`${transition?.replaceAll('_', ' ') ?? ''} article`}
+      description={blocking.length && (transition === 'publish' || transition === 'schedule')
+        ? `${blocking.length} blocking finding(s) must be resolved before publishing.`
+        : 'This action is recorded in the article history.'}
+      footer={<><Button variant="secondary" onClick={() => setTransition(null)}>Cancel</Button><Button disabled={Boolean((transition === 'schedule' && !scheduledFor) || (blocking.length && (transition === 'publish' || transition === 'schedule') && (!lintOverride || actionNote.trim().length < 20)))} onClick={() => void doTransition()}>Confirm</Button></>}
+    >
+      <div className="space-y-3">
+        {blocking.length && (transition === 'publish' || transition === 'schedule') ? (
+          <ul className="max-h-40 space-y-1.5 overflow-y-auto rounded-lg border border-danger-border bg-danger-surface px-3 py-2 text-sm">
+            {blocking.slice(0, 8).map((finding, index) => (
+              <li key={`${finding.rule}-${index}`} className="text-danger-fg">
+                {finding.message}
+                <span className="ms-2 font-mono text-xs opacity-70">{finding.rule}</span>
+              </li>
+            ))}
+            {blocking.length > 8 ? <li className="text-danger-fg">+{blocking.length - 8} more in Quality</li> : null}
+          </ul>
+        ) : null}
+        {transition === 'schedule' ? <label className="block text-sm font-medium">Publish date and time<Input className="mt-1" type="datetime-local" value={scheduledFor} onChange={(e) => setScheduledFor(e.target.value)} /></label> : null}
+        <label className="block text-sm font-medium">Change note<Textarea className="mt-1" value={actionNote} onChange={(e) => setActionNote(e.target.value)} /></label>
+        {blocking.length && (transition === 'publish' || transition === 'schedule') && canPublish ? <Checkbox checked={lintOverride} onChange={(e) => setLintOverride(e.target.checked)} label="Override validation" description="Requires a justification of at least 20 characters in the change note." /> : null}
+      </div>
+    </Dialog>
   </main>
 }

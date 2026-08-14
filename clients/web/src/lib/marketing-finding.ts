@@ -1,11 +1,6 @@
-export type MarketingFinding = {
-  rule: string;
-  severity: "error" | "warning" | "info";
-  message: string;
-  line?: number;
-  column?: number;
-  path?: string;
-};
+import type { MarketingFinding } from "./marketing-content-types";
+
+export type { MarketingFinding };
 
 function pickFindingValue(raw: Record<string, unknown>, camel: string, pascal: string): unknown {
   return raw[camel] ?? raw[pascal];
