@@ -51,7 +51,7 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.25.12"
+          go-version: "1.25.13"
           cache-dependency-path: server/go.sum
 
       - name: go mod download
@@ -111,7 +111,7 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.25.12"
+          go-version: "1.25.13"
           cache-dependency-path: server/go.sum
 
       - name: Migration lint (plan 17.10)
@@ -150,7 +150,7 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.25.12"
+          go-version: "1.25.13"
           cache-dependency-path: server/go.sum
 
       - uses: actions/setup-node@v4
@@ -194,7 +194,7 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.25.12"
+          go-version: "1.25.13"
           cache-dependency-path: server/go.sum
 
       - name: golangci-lint
@@ -236,7 +236,7 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.26.5"
+          go-version: "1.26.6"
           cache-dependency-path: clients/cli/go.sum
 
       - name: go mod download
@@ -468,7 +468,7 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.25.12"
+          go-version: "1.25.13"
           cache-dependency-path: server/go.sum
 
       - uses: actions/setup-node@v4
