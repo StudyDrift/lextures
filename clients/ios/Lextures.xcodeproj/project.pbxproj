@@ -739,6 +739,8 @@
 		HSG02C2D3E4F5061728394A /* HomeschoolSubscribeGateStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = HSG02D3E4F5061728394A5 /* HomeschoolSubscribeGateStore.swift */; };
 		HSG03C2D3E4F5061728394A /* HomeschoolSubscribePaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = HSG03D3E4F5061728394A5 /* HomeschoolSubscribePaywallView.swift */; };
 		HSG04C2D3E4F5061728394A /* HomeschoolSubscribeGateLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = HSG04D3E4F5061728394A5 /* HomeschoolSubscribeGateLogicTests.swift */; };
+		HSG05C2D3E4F5061728394A /* HomeschoolPaywallLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = HSG05D3E4F5061728394A5 /* HomeschoolPaywallLogic.swift */; };
+		HSG06C2D3E4F5061728394A /* HomeschoolPaywallLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = HSG06D3E4F5061728394A5 /* HomeschoolPaywallLogicTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1489,6 +1491,8 @@
 		HSG02D3E4F5061728394A5 /* HomeschoolSubscribeGateStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeschoolSubscribeGateStore.swift; sourceTree = "<group>"; };
 		HSG03D3E4F5061728394A5 /* HomeschoolSubscribePaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeschoolSubscribePaywallView.swift; sourceTree = "<group>"; };
 		HSG04D3E4F5061728394A5 /* HomeschoolSubscribeGateLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeschoolSubscribeGateLogicTests.swift; sourceTree = "<group>"; };
+		HSG05D3E4F5061728394A5 /* HomeschoolPaywallLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeschoolPaywallLogic.swift; sourceTree = "<group>"; };
+		HSG06D3E4F5061728394A5 /* HomeschoolPaywallLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeschoolPaywallLogicTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2104,6 +2108,7 @@
 		8EFB3B79723747198F9CA7D8 /* LMS */ = {
 			isa = PBXGroup;
 			children = (
+				HSG05D3E4F5061728394A5 /* HomeschoolPaywallLogic.swift */,
 				HSG02D3E4F5061728394A5 /* HomeschoolSubscribeGateStore.swift */,
 				HSG01D3E4F5061728394A5 /* HomeschoolSubscribeGateLogic.swift */,
 				AIAP03D3E4F5061728394A5 /* StoreKitPurchaseService.swift */,
@@ -2386,6 +2391,7 @@
 		A0B1C0F30DDC4E829D8DEC9A /* LexturesTests */ = {
 			isa = PBXGroup;
 			children = (
+				HSG06D3E4F5061728394A5 /* HomeschoolPaywallLogicTests.swift */,
 				HSG04D3E4F5061728394A5 /* HomeschoolSubscribeGateLogicTests.swift */,
 				1EA186DDA996493088EED33A /* AccessibilitySupportTests.swift */,
 				E36C834458F2461B928F77B3 /* AccountIntegrationsLogicTests.swift */,
@@ -3007,6 +3013,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				HSG06C2D3E4F5061728394A /* HomeschoolPaywallLogicTests.swift in Sources */,
 				HSG04C2D3E4F5061728394A /* HomeschoolSubscribeGateLogicTests.swift in Sources */,
 				5883AC7D3D414673A0157681 /* AccessibilitySupportTests.swift in Sources */,
 				B8DF1178908D4FC7B456A84F /* AccountIntegrationsLogicTests.swift in Sources */,
@@ -3115,6 +3122,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				HSG05C2D3E4F5061728394A /* HomeschoolPaywallLogic.swift in Sources */,
 				HSG03C2D3E4F5061728394A /* HomeschoolSubscribePaywallView.swift in Sources */,
 				HSG02C2D3E4F5061728394A /* HomeschoolSubscribeGateStore.swift in Sources */,
 				HSG01C2D3E4F5061728394A /* HomeschoolSubscribeGateLogic.swift in Sources */,

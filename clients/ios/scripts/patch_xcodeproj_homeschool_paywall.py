@@ -20,6 +20,8 @@ ENTRIES: list[tuple[str, str, str, str, bool]] = [
     ("HomeschoolSubscribeGateStore.swift", "HSG02C2D3E4F5061728394A", "HSG02D3E4F5061728394A5", LMS_GROUP, False),
     ("HomeschoolSubscribePaywallView.swift", "HSG03C2D3E4F5061728394A", "HSG03D3E4F5061728394A5", BILLING_GROUP, False),
     ("HomeschoolSubscribeGateLogicTests.swift", "HSG04C2D3E4F5061728394A", "HSG04D3E4F5061728394A5", "D177268EB0164406B86F0376", True),
+    ("HomeschoolPaywallLogic.swift", "HSG05C2D3E4F5061728394A", "HSG05D3E4F5061728394A5", LMS_GROUP, False),
+    ("HomeschoolPaywallLogicTests.swift", "HSG06C2D3E4F5061728394A", "HSG06D3E4F5061728394A5", "D177268EB0164406B86F0376", True),
 ]
 
 

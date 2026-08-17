@@ -1,7 +1,7 @@
 # App Store Guideline 3.1.1 — Path A (In-App Purchase)
 
 **Status:** Implemented in codebase (StoreKit 2 + server verify).  
-**Companion rejection notes:** [ios-app-store-review-rejection-2026-08-04.md](./ios-app-store-review-rejection-2026-08-04.md)
+**Companion rejection notes:** [ios-app-store-review-rejection-2026-08-04.md](./ios-app-store-review-rejection-2026-08-04.md), [ios-app-store-review-3.1.2c-subscriptions.md](./ios-app-store-review-3.1.2c-subscriptions.md)
 
 This document is the operator + engineer guide for selling **digital courses and subscriptions** on iOS via **Apple In-App Purchase**, so multiplatform access satisfies **3.1.3(b)** (content bought outside iOS may unlock in the app **because the same items are also available via IAP**).
 
@@ -97,6 +97,51 @@ Paste this when Review cannot find **Monthly Access** / **Annual Access**. Use a
 > There is no storefront or device restriction. Products are loaded via StoreKit 2 from the Apple sandbox. Sign in with a sandbox Apple ID when prompted.
 >
 > Paid digital courses (non-consumable IAPs) are also available: open **Catalog** or **Marketplace**, open a paid course, tap **Purchase**.
+
+## App Review reply template (3.1.2(c) — subscription disclosures)
+
+Guideline 3.1.2(c) requires the **in-app purchase flow** to show:
+
+- Title of the auto-renewing subscription
+- Length of the subscription
+- Price (and price per unit)
+- Functional links to the **Privacy Policy** and **Terms of Use (EULA)**
+
+The Homeschool subscribe screen (`HomeschoolSubscribePaywallView`) now includes all of these on the purchase screen, with Privacy Policy and Terms of Use (EULA) in a sticky footer:
+
+| Required item | Where it appears |
+|---------------|------------------|
+| Title | StoreKit `displayName` on each plan card (Monthly Access / Annual Access) |
+| Length | Subscription period under the price (“Every 1 year(s)” / “Every 1 month(s)”) |
+| Price | StoreKit `displayPrice` plus **price per week** |
+| Privacy Policy | Footer link → https://lextures.com/privacy (opens Safari) |
+| Terms of Use (EULA) | Footer link → https://lextures.com/terms (opens Safari) |
+| Auto-renew | Footer names the selected title, price, and period; cancel in Settings → Subscriptions |
+
+Accessibility IDs for a screen recording: `paywall.privacyPolicy`, `paywall.termsOfUse`, `paywall.renewalDisclosure`, `paywall.plan.annual`, `paywall.plan.monthly`, `paywall.subscribe`.
+
+**App Store Connect metadata** (still required, not in the binary):
+
+- Privacy Policy field: `https://lextures.com/privacy`
+- Terms of Use (EULA) field or App Description: `https://lextures.com/terms`
+
+### Reply template
+
+> The subscribe screen now includes the auto-renewing subscription title, length, price, and price per week from StoreKit, plus functional links to our Privacy Policy (https://lextures.com/privacy) and Terms of Use / EULA (https://lextures.com/terms). Those links stay visible in the paywall footer and open in Safari. Auto-renew terms name the selected plan and tell users they can cancel in Settings → Subscriptions. A screen recording is attached in Review Notes.
+
+### Screen recording path
+
+```
+1. Launch the app → Homeschool → sign in with the demo account (no active subscription).
+2. After about 5 seconds the subscribe paywall appears (or Profile → Billing → Subscribe).
+3. Confirm the footer shows Privacy Policy and Terms of Use (EULA).
+4. Tap Privacy Policy — Safari opens https://lextures.com/privacy.
+5. Return to the app, tap Terms of Use (EULA) — Safari opens https://lextures.com/terms.
+6. Confirm Monthly Access and Annual Access show title, period, price, and weekly equivalent.
+7. (Optional) Complete a sandbox purchase of Annual Access.
+```
+
+Paste the same path in **App Review Information → Notes** for future submissions.
 
 ## App Review reply template (3.1.1)
 
