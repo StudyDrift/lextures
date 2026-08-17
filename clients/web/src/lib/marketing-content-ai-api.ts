@@ -13,6 +13,27 @@ export type MarketingArticleAIDraft = {
   keywords: string[]
 }
 
+function draftFromBody(body: Partial<MarketingArticleAIDraft>): MarketingArticleAIDraft {
+  return {
+    title: body.title ?? '',
+    slug: body.slug ?? '',
+    description: body.description ?? '',
+    bodyMd: body.bodyMd ?? '',
+    primaryQuestion: body.primaryQuestion ?? '',
+    cluster: body.cluster ?? '',
+    pillar: body.pillar ?? '',
+    keywords: Array.isArray(body.keywords) ? body.keywords.filter(Boolean) : [],
+  }
+}
+
+function generateErrorMessage(status: number, body: unknown): string {
+  const message = readApiErrorMessage(body)
+  if (message !== 'Request failed') return message
+  if (status === 503 || status === 502) return 'AI is temporarily unavailable. Try Solve with AI again.'
+  if (status === 429) return 'Too many AI requests. Wait a moment and try again.'
+  return `Request failed (${status}). Try Solve with AI again.`
+}
+
 /** POST `/api/v1/admin/marketing/articles/generate` — draft fields only (not persisted). */
 export async function generateMarketingArticle(input: {
   prompt?: string
@@ -28,24 +49,20 @@ export async function generateMarketingArticle(input: {
   knownPaths?: string[]
   findings?: Array<Pick<MarketingFinding, 'rule' | 'severity' | 'message' | 'line' | 'path'>>
 }): Promise<MarketingArticleAIDraft> {
-  const res = await authorizedFetch('/api/v1/admin/marketing/articles/generate', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(input),
-  })
-  const body = await res.json().catch(() => ({}))
-  if (!res.ok) throw new Error(readApiErrorMessage(body))
-  const value = body as Partial<MarketingArticleAIDraft>
-  return {
-    title: value.title ?? '',
-    slug: value.slug ?? '',
-    description: value.description ?? '',
-    bodyMd: value.bodyMd ?? '',
-    primaryQuestion: value.primaryQuestion ?? '',
-    cluster: value.cluster ?? '',
-    pillar: value.pillar ?? '',
-    keywords: Array.isArray(value.keywords) ? value.keywords.filter(Boolean) : [],
+  const attempts = input.mode === 'repair' ? 2 : 1
+  let lastError: Error | null = null
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    const res = await authorizedFetch('/api/v1/admin/marketing/articles/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
+    })
+    const body = await res.json().catch(() => ({}))
+    if (res.ok) return draftFromBody(body as Partial<MarketingArticleAIDraft>)
+    lastError = new Error(generateErrorMessage(res.status, body))
+    if (res.status !== 502 && res.status !== 503) break
   }
+  throw lastError ?? new Error('Request failed')
 }
 
 /** Fill slug, description, and search metadata from the current title/body. */

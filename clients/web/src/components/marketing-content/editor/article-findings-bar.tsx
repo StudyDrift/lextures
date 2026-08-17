@@ -57,7 +57,7 @@ export function ArticleFindingsBar({
           <span className="hidden text-xs text-fg-muted sm:inline">/ 8.0 floor</span>
           <span className="ms-auto flex items-center gap-2">
             {blocking.length ? <Badge tone="danger">{blocking.length} blocking</Badge> : null}
-            {warnings.length ? <Badge tone="warning">{warnings.length} warning{warnings.length === 1 ? '' : 's'}</Badge> : null}
+            {warnings.length ? <Badge tone="warning">{warnings.length} suggestion{warnings.length === 1 ? '' : 's'}</Badge> : null}
             {!findings.length ? <span className="text-xs text-fg-muted">{score == null ? 'Not checked yet' : 'No findings'}</span> : null}
             <ChevronDown aria-hidden className={`h-4 w-4 text-fg-muted motion-safe:transition-transform ${open ? '' : 'rotate-180'}`} />
           </span>
@@ -72,7 +72,7 @@ export function ArticleFindingsBar({
       {open ? (
         <div className="max-h-64 overflow-y-auto border-t border-border-subtle px-4 py-3 sm:px-6">
           {solveError ? <InlineAlert tone="danger" className="mb-3">{solveError}</InlineAlert> : null}
-          {solving ? <p role="status" className="mb-2 text-xs text-fg-muted">{solveProgress || `Solving ${findings.length} finding${findings.length === 1 ? '' : 's'} with AI, including warnings…`}</p> : null}
+          {solving ? <p role="status" className="mb-2 text-xs text-fg-muted">{solveProgress || `Solving ${findings.length} finding${findings.length === 1 ? '' : 's'} with AI…`}</p> : null}
           {findings.length ? (
             <ul className="space-y-1.5">
               {findings.map((finding, index) => {
@@ -80,7 +80,7 @@ export function ArticleFindingsBar({
                 const location = findingLocationLabel(finding)
                 const template = directiveTemplateForFinding(finding.rule)
                 const canInsert = Boolean(template && !bodyHasDirective(bodyMd, finding.rule))
-                const label = [isBlockingFinding(finding.severity) ? 'Error' : 'Warning', finding.message, location].filter(Boolean).join('. ')
+                const label = [isBlockingFinding(finding.severity) ? 'Error' : 'Suggestion', finding.message, location].filter(Boolean).join('. ')
                 const active = solving && solvingFindingKey === key
                 return (
                   <li key={key} className={`flex flex-wrap items-start gap-2 ${active ? 'rounded-lg bg-accent-surface' : ''}`}>
@@ -91,7 +91,7 @@ export function ArticleFindingsBar({
                       onClick={() => onSelectFinding(finding)}
                       aria-label={`${label}. Jump to this finding.`}
                     >
-                      <Badge tone={isBlockingFinding(finding.severity) ? 'danger' : 'warning'}>{isBlockingFinding(finding.severity) ? 'Error' : 'Warning'}</Badge>
+                      <Badge tone={isBlockingFinding(finding.severity) ? 'danger' : 'warning'}>{isBlockingFinding(finding.severity) ? 'Error' : 'Suggestion'}</Badge>
                       <span className="min-w-0 flex-1">
                         <span className="block text-sm text-fg-default">{finding.message || finding.rule}</span>
                         <span className="mt-0.5 block font-mono text-xs text-fg-muted">

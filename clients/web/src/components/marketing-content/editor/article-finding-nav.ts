@@ -113,6 +113,28 @@ function draftLooksEmpty(draft: MarketingArticleAIDraft): boolean {
   return !draft.bodyMd.trim() && !draft.title.trim() && !draft.description.trim() && !draft.cluster.trim() && !draft.primaryQuestion.trim()
 }
 
+/** Send every finding in one repair request so a single model pass can fix them together. */
+export async function solveAllFindings(input: {
+  article: RepairableArticle
+  findings: MarketingFinding[]
+  repair: (article: RepairableArticle, findings: MarketingFinding[]) => Promise<MarketingArticleAIDraft>
+  onProgress?: (total: number) => void
+}): Promise<{ article: RepairableArticle; applied: number; error?: string }> {
+  if (!input.findings.length) return { article: input.article, applied: 0 }
+  input.onProgress?.(input.findings.length)
+  let draft: MarketingArticleAIDraft
+  try {
+    draft = await input.repair(input.article, input.findings)
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : 'Could not solve findings with AI.'
+    return { article: input.article, applied: 0, error: detail }
+  }
+  if (draftLooksEmpty(draft)) {
+    return { article: input.article, applied: 0, error: 'AI did not return a usable revision.' }
+  }
+  return { article: { ...input.article, ...mergeRepairDraft(input.article, draft) }, applied: input.findings.length }
+}
+
 /** Walk each finding in order, apply the returned draft, and continue with the updated article. */
 export async function solveFindingsSequentially(input: {
   article: RepairableArticle

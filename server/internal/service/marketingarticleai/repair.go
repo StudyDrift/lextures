@@ -137,19 +137,31 @@ func RepairFromFindings(
 		fmt.Fprintf(&user, "\nCurrent draft:\n%s", in.BodyMD)
 	}
 
-	res, meta, err := client.Complete(ctx, model, []aiprovider.Message{
+	messages := []aiprovider.Message{
 		{Role: "system", Content: RepairSystemPrompt},
 		{Role: "user", Content: user.String()},
-	}, aiprovider.ChatOptions{JSONMode: true, MaxTokens: 8_000})
+	}
+	opts := aiprovider.ChatOptions{JSONMode: true, MaxTokens: repairMaxTokens}
+	res, meta, err := client.Complete(ctx, model, messages, opts)
 	if err != nil {
 		return Draft{}, meta, err
 	}
 	draft, err := ParseDraftJSON(res.Text)
 	if err != nil {
-		return Draft{}, meta, err
+		// One retry: models intermittently return truncated or non-JSON text.
+		res, meta, err = client.Complete(ctx, model, messages, opts)
+		if err != nil {
+			return Draft{}, meta, err
+		}
+		draft, err = ParseDraftJSON(res.Text)
+		if err != nil {
+			return Draft{}, meta, err
+		}
 	}
 	return draft, meta, nil
 }
+
+const repairMaxTokens = 12_000
 
 const maxRepairKnownPaths = 80
 

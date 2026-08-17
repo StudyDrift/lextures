@@ -62,4 +62,36 @@ describe('repairMarketingArticle', () => {
       }),
     )
   })
+
+  it('retries a transient 503 once for repair', async () => {
+    authorizedFetch
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 503,
+        json: async () => ({}),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          title: 'Fixed',
+          slug: 'fixed',
+          description: 'Desc',
+          bodyMd: ':::answer\nYes.\n:::',
+          primaryQuestion: 'Q?',
+          cluster: 'C',
+          pillar: 'P',
+          keywords: ['k'],
+        }),
+      })
+
+    const draft = await repairMarketingArticle({
+      kind: 'blog',
+      existingTitle: 'Old',
+      existingBodyMd: 'Body',
+      findings: [{ rule: 'extractability.score', severity: 'warning', message: 'low' }],
+    })
+
+    expect(draft.title).toBe('Fixed')
+    expect(authorizedFetch).toHaveBeenCalledTimes(2)
+  })
 })

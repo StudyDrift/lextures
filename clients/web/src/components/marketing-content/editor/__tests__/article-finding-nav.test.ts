@@ -5,6 +5,7 @@ import {
   findingLocationLabel,
   markdownLineRange,
   mergeRepairDraft,
+  solveAllFindings,
   solveFindingsSequentially,
   visibleLineSnippet,
 } from '../article-finding-nav'
@@ -70,6 +71,39 @@ describe('article finding navigation', () => {
       pillar: 'Old pillar',
       keywords: ['attention', 'classroom'],
     })
+  })
+
+  it('repairs every finding in a single pass', async () => {
+    const result = await solveAllFindings({
+      article: {
+        kind: 'blog',
+        title: 'Old title',
+        slug: 'old-title',
+        description: 'Old description',
+        bodyMd: 'Old body',
+        primaryQuestion: '',
+        cluster: '',
+        pillar: '',
+        keywords: [],
+      },
+      findings: [
+        { rule: 'passage.length', severity: 'warning', message: 'Direct answer is 69 words; target is 40-60.', line: 10 },
+        { rule: 'extractability.score', severity: 'warning', message: 'Extractability score 3.5 is below 8.0.', line: 1 },
+      ],
+      repair: async (article, findings) => ({
+        title: article.title,
+        slug: article.slug,
+        description: article.description,
+        bodyMd: `fixed:${findings.map((finding) => finding.rule).join(',')}`,
+        primaryQuestion: article.primaryQuestion,
+        cluster: article.cluster,
+        pillar: article.pillar,
+        keywords: article.keywords,
+      }),
+    })
+    expect(result.applied).toBe(2)
+    expect(result.error).toBeUndefined()
+    expect(result.article.bodyMd).toBe('fixed:passage.length,extractability.score')
   })
 
   it('walks every finding, including warnings, and applies each repair', async () => {

@@ -164,7 +164,7 @@ func TestRepairFromFindings(t *testing.T) {
 		if !strings.Contains(user, "/blog") || !strings.Contains(user, "always resolve") {
 			t.Fatalf("expected hub paths to be treated as valid: %q", user)
 		}
-		if len(opts) == 0 || !opts[0].JSONMode || opts[0].MaxTokens != 8_000 {
+		if len(opts) == 0 || !opts[0].JSONMode || opts[0].MaxTokens != 12_000 {
 			t.Fatalf("opts=%#v", opts)
 		}
 		return aiprovider.ChatResult{Text: `{"title":"Fixed","description":"D","primaryQuestion":"Q?","cluster":"C","pillar":"P","keywords":["k"],"bodyMd":":::answer\nYes.\n:::"}`}, aiprovider.CallMeta{ModelID: model}, nil
@@ -184,6 +184,28 @@ func TestRepairFromFindings(t *testing.T) {
 	}
 	if got.Title != "Fixed" || got.BodyMD == "" || meta.ModelID != "test-model" {
 		t.Fatalf("got %#v meta=%#v", got, meta)
+	}
+}
+
+func TestRepairFromFindings_RetriesInvalidJSON(t *testing.T) {
+	calls := 0
+	ai := mockCompleter{fn: func(ctx context.Context, model string, messages []aiprovider.Message, opts ...aiprovider.ChatOptions) (aiprovider.ChatResult, aiprovider.CallMeta, error) {
+		calls++
+		if calls == 1 {
+			return aiprovider.ChatResult{Text: "not json"}, aiprovider.CallMeta{ModelID: model}, nil
+		}
+		return aiprovider.ChatResult{Text: `{"title":"Fixed","description":"D","primaryQuestion":"Q?","cluster":"C","pillar":"P","keywords":["k"],"bodyMd":":::answer\nYes.\n:::"}`}, aiprovider.CallMeta{ModelID: model}, nil
+	}}
+	got, _, err := RepairFromFindings(context.Background(), ai, "test-model", RepairInput{
+		Title:    "Old",
+		BodyMD:   ":::answer\nToo long.\n:::",
+		Findings: []Finding{{Rule: "passage.length", Message: "too long"}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if calls != 2 || got.Title != "Fixed" {
+		t.Fatalf("calls=%d got=%#v", calls, got)
 	}
 }
 

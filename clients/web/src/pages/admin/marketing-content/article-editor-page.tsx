@@ -7,7 +7,7 @@ import { ArticlePreview } from '../../../components/marketing-content/editor/art
 import { EditorPane } from '../../../components/marketing-content/editor/article-editor-pane'
 import { TranslationSourcePane } from '../../../components/marketing-content/editor/translation-source-pane'
 import { directives, isBlockingFinding, lintMetadata, slugify, writePayload } from '../../../components/marketing-content/editor/article-editor-utils'
-import { METADATA_FINDING_PATHS, findingKey, jumpEditorToMarkdownLine, selectTextareaLine, solveFindingsSequentially } from '../../../components/marketing-content/editor/article-finding-nav'
+import { METADATA_FINDING_PATHS, findingKey, jumpEditorToMarkdownLine, selectTextareaLine, solveAllFindings } from '../../../components/marketing-content/editor/article-finding-nav'
 import { ArticleFindingsBar } from '../../../components/marketing-content/editor/article-findings-bar'
 import { BuildArticleWithAiModal } from '../../../components/marketing-content/editor/build-article-with-ai-modal'
 import { RevisionDrawer } from '../../../components/marketing-content/editor/revision-drawer'
@@ -232,14 +232,14 @@ export default function ArticleEditorPage() {
     setSolveProgress('')
     setFindingsOpen(true)
     try {
-      const result = await solveFindingsSequentially({
+      const result = await solveAllFindings({
         article: articleRef.current,
         findings: snapshot,
-        onProgress: (index, total, finding) => {
-          setSolvingFindingKey(findingKey(finding, index))
-          setSolveProgress(`Solving ${index + 1} of ${total}: ${finding.message || finding.rule}`)
+        onProgress: (total) => {
+          setSolvingFindingKey(findingKey(snapshot[0], 0))
+          setSolveProgress(`Solving ${total} finding${total === 1 ? '' : 's'} with AI…`)
         },
-        repair: (current, finding) => repairMarketingArticle({
+        repair: (current, findings) => repairMarketingArticle({
           kind: current.kind,
           existingTitle: current.title,
           existingBodyMd: current.bodyMd,
@@ -249,13 +249,13 @@ export default function ArticleEditorPage() {
           pillar: current.pillar,
           keywords: current.keywords,
           knownPaths,
-          findings: [{
+          findings: findings.map((finding) => ({
             rule: finding.rule,
             severity: finding.severity,
             message: finding.message,
             line: finding.line,
             path: finding.path,
-          }],
+          })),
         }),
       })
       articleRef.current = { ...articleRef.current, ...result.article }
@@ -469,9 +469,9 @@ export default function ArticleEditorPage() {
       onClose={() => setTransition(null)}
       title={`${transition?.replaceAll('_', ' ') ?? ''} article`}
       description={blocking.length && (transition === 'publish' || transition === 'schedule')
-        ? `${blocking.length} blocking finding(s) must be resolved before publishing.`
+        ? `${blocking.length} finding(s) would normally block publishing. Override to continue, or resolve them in Quality.`
         : 'This action is recorded in the article history.'}
-      footer={<><Button variant="secondary" onClick={() => setTransition(null)}>Cancel</Button><Button disabled={Boolean((transition === 'schedule' && !scheduledFor) || (blocking.length && (transition === 'publish' || transition === 'schedule') && (!lintOverride || actionNote.trim().length < 20)))} onClick={() => void doTransition()}>Confirm</Button></>}
+      footer={<><Button variant="secondary" onClick={() => setTransition(null)}>Cancel</Button><Button disabled={Boolean((transition === 'schedule' && !scheduledFor) || (blocking.length && (transition === 'publish' || transition === 'schedule') && !lintOverride))} onClick={() => void doTransition()}>Confirm</Button></>}
     >
       <div className="space-y-3">
         {blocking.length && (transition === 'publish' || transition === 'schedule') ? (
@@ -487,7 +487,7 @@ export default function ArticleEditorPage() {
         ) : null}
         {transition === 'schedule' ? <label className="block text-sm font-medium">Publish date and time<Input className="mt-1" type="datetime-local" value={scheduledFor} onChange={(e) => setScheduledFor(e.target.value)} /></label> : null}
         <label className="block text-sm font-medium">Change note<Textarea className="mt-1" value={actionNote} onChange={(e) => setActionNote(e.target.value)} /></label>
-        {blocking.length && (transition === 'publish' || transition === 'schedule') && canPublish ? <Checkbox checked={lintOverride} onChange={(e) => setLintOverride(e.target.checked)} label="Override validation" description="Requires a justification of at least 20 characters in the change note." /> : null}
+        {blocking.length && (transition === 'publish' || transition === 'schedule') && canPublish ? <Checkbox checked={lintOverride} onChange={(e) => setLintOverride(e.target.checked)} label="Override validation" description="Publish despite remaining validation findings. A change note is optional." /> : null}
       </div>
     </Dialog>
   </main>
