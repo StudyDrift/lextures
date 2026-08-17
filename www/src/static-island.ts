@@ -3,9 +3,11 @@
  * No React — only nav progressive enhancement, deferred analytics, and web-vitals.
  */
 import { initNavEnhancements } from './lib/nav-enhancements'
+import { initBlogIndexFilters } from './lib/blog-index-filters'
 import { loadAnalytics } from './lib/analytics'
 import { initWebVitals } from './lib/web-vitals'
 
 initNavEnhancements()
+initBlogIndexFilters()
 loadAnalytics()
 initWebVitals()

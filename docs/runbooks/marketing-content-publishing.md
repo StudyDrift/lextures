@@ -2,6 +2,8 @@
 
 Publishing an article commits the database change immediately and queues a static-site rebuild. Normal publishes are coalesced for the configured quiet period (three minutes by default); unpublishes and manual rebuilds dispatch immediately. The database remains authoritative if GitHub Actions is unavailable—the currently deployed site remains online and the workspace reports the failed or timed-out build.
 
+The marketing Pages workflow also deploys on its hourly cron. That is the SEO.11 freshness path and the backstop when GitHub dispatch is set to `none` or the token cannot create a `repository_dispatch`. Articles then appear on the next successful scheduled deploy (about an hour) rather than within the quiet period.
+
 ## Configure GitHub dispatch
 
 In the marketing build settings API, set:
