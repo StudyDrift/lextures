@@ -35,7 +35,7 @@ describe('ArticleFindingsBar', () => {
     expect(screen.getByText('FAQ must contain 3–6 questions; found 0.')).toBeInTheDocument()
     expect(screen.queryByText('5 blocking')).not.toBeInTheDocument()
     expect(screen.getByText('1 blocking')).toBeInTheDocument()
-    expect(screen.getByText('1 warning')).toBeInTheDocument()
+    expect(screen.getByText('1 suggestion')).toBeInTheDocument()
     expect(screen.getByText('/ 8.0 floor')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: /Required metadata field is missing/i }))

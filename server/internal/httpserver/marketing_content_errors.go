@@ -18,7 +18,7 @@ func writeMarketingError(w http.ResponseWriter, r *http.Request, err error) {
 		apierr.WriteJSON(w, 404, apierr.CodeNotFound, "Marketing content resource not found.")
 	case errors.Is(err, mcrepo.ErrDuplicateSlug):
 		apierr.WriteJSON(w, 409, "duplicate_slug", "An article or redirect already uses that path.")
-	case errors.Is(err, mcservice.ErrInvalidTransition), errors.Is(err, mcservice.ErrScheduledInPast), errors.Is(err, mcservice.ErrReviewNoteTooShort), errors.Is(err, mcservice.ErrReviewerRequired), errors.Is(err, mcservice.ErrOverrideJustification):
+	case errors.Is(err, mcservice.ErrInvalidTransition), errors.Is(err, mcservice.ErrScheduledInPast), errors.Is(err, mcservice.ErrReviewNoteTooShort), errors.Is(err, mcservice.ErrReviewerRequired):
 		apierr.WriteJSON(w, 422, apierr.CodeUnprocessableEntity, err.Error())
 	case errors.Is(err, mcservice.ErrLintBlocked):
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")

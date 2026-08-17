@@ -38,7 +38,6 @@ type TransitionInput struct {
 var ErrLintBlocked = errors.New("marketingcontent: publish blocked by content validation")
 var ErrReviewNoteTooShort = errors.New("marketingcontent: request-changes note must be at least 10 characters")
 var ErrReviewerRequired = errors.New("marketingcontent: reviewer assignment is required")
-var ErrOverrideJustification = errors.New("marketingcontent: publish override justification must be at least 10 characters")
 
 // LintBlockedError carries the quality report that blocked publish/schedule.
 type LintBlockedError struct {
@@ -196,9 +195,6 @@ func (s *Service) Transition(ctx context.Context, id, actor uuid.UUID, in Transi
 		blocked := (in.Action == ActionPublish || in.Action == ActionSchedule) && blocksPublish(report)
 		if blocked && !in.LintOverride {
 			return &LintBlockedError{Report: report}
-		}
-		if blocked && in.LintOverride && len(strings.TrimSpace(in.Note)) < 10 {
-			return ErrOverrideJustification
 		}
 		if in.Action == ActionRequestChanges && len(strings.TrimSpace(in.Note)) < 10 {
 			return ErrReviewNoteTooShort

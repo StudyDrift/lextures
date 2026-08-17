@@ -95,6 +95,19 @@ func TestFindingJSONUsesCamelCase(t *testing.T) {
 	}
 }
 
+func TestExtractabilityScoreIsAdvisory(t *testing.T) {
+	report := Article(Input{Kind: "blog", BodyMD: "short draft", Metadata: validMetadata()})
+	if report.Score >= 8 {
+		t.Fatalf("expected a score below the floor, got %.1f", report.Score)
+	}
+	if !has(report, "extractability.score", "warn") {
+		t.Fatalf("expected extractability to be a suggestion, got %+v", report.Findings)
+	}
+	if has(report, "extractability.score", "error") {
+		t.Fatalf("extractability must not block publish: %+v", report.Findings)
+	}
+}
+
 func TestScoreMatchesPublishedFormula(t *testing.T) {
 	answer := strings.Repeat("complete answer words ", 15)
 	passage := strings.Repeat("clear passage words ", 45)

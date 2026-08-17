@@ -88,12 +88,9 @@ func Article(in Input) (out Report) {
 	for _, r := range rules {
 		out.Findings = append(out.Findings, r.check(in, a)...)
 	}
-	sev := "warn"
-	if out.Score < 6 {
-		sev = "error"
-	}
+	// Extractability is advisory and never blocks publish.
 	if out.Score < 8 {
-		out.Findings = append(out.Findings, Finding{Rule: "extractability.score", Severity: sev, Message: fmt.Sprintf("Extractability score %.1f is below 8.0.", out.Score), Line: 1, Column: 1})
+		out.Findings = append(out.Findings, Finding{Rule: "extractability.score", Severity: "warn", Message: fmt.Sprintf("Extractability score %.1f is below 8.0.", out.Score), Line: 1, Column: 1})
 	}
 	return
 }
