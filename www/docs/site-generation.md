@@ -10,6 +10,8 @@ The www marketing site is a Vite + React SPA. For search engines and AI crawlers
 tsc -b && node scripts/optimize-images.mjs && vite build && node scripts/generate-site.mjs
 ```
 
+Hourly cron, `repository_dispatch` (`marketing-content-publish`), `workflow_dispatch`, and pushes to `www/**` all build **and deploy**. Pull requests build only. If a publish does not trigger GitHub dispatch, the next hourly run still ships the public content index.
+
 `generate-site.mjs`:
 
 1. Starts a Vite SSR server and loads `src/entry-server.tsx` + `src/lib/route-manifest.tsx`.

@@ -1,48 +1,14 @@
 import { ArrowLeft, ArrowRight, BookOpen, Search } from 'lucide-react'
-import { useState, useMemo, useEffect, type ChangeEvent } from 'react'
 import { Header } from '../components/header'
 import { SiteFooter } from '../components/site-footer'
+import { BLOG_PAGE_SIZE, blogPostSearchText } from '../lib/blog-index-filters'
 import { authorDisplayName } from '../lib/authors'
 import { allPosts, formatDate } from '../utils/blog'
 import { EDITORIAL_PILLARS, editorialPillar } from '../lib/editorial-pillars'
 
-const POSTS_PER_PAGE = 10
-
 export function BlogIndex() {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [pillarFilter, setPillarFilter] = useState(() => typeof window === 'undefined' ? '' : new URLSearchParams(window.location.search).get('pillar') || '')
-  const [authorFilter, setAuthorFilter] = useState('')
-  const [currentPage, setCurrentPage] = useState(1)
-
-  useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [currentPage])
-
-  const filteredPosts = useMemo(() => {
-    const query = searchQuery.toLowerCase().trim()
-    return allPosts.filter(
-      (post) => (!pillarFilter || post.pillar === pillarFilter) && (!authorFilter || post.author === authorFilter) && (!query ||
-        post.title.toLowerCase().includes(query) ||
-        post.description.toLowerCase().includes(query) ||
-        post.author.toLowerCase().includes(query) ||
-        post.content.toLowerCase().includes(query))
-    )
-  }, [searchQuery, pillarFilter, authorFilter])
-
-  const totalPages = Math.ceil(filteredPosts.length / POSTS_PER_PAGE)
-  const paginatedPosts = useMemo(() => {
-    const start = (currentPage - 1) * POSTS_PER_PAGE
-    return filteredPosts.slice(start, start + POSTS_PER_PAGE)
-  }, [filteredPosts, currentPage])
-
-  // Reset to first page when search query changes
-  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value)
-    setCurrentPage(1)
-  }
-
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-white text-slate-900">
+    <div className="relative min-h-screen overflow-x-hidden bg-white text-slate-900" data-blog-index data-page-size={BLOG_PAGE_SIZE}>
       <Header />
 
       <main>
@@ -63,175 +29,120 @@ export function BlogIndex() {
               Thoughts on adaptive learning, educational technology, and building software for institutions that run at scale.
             </p>
 
-            <div className="mt-10 grid max-w-3xl gap-3 sm:grid-cols-3">
+            <form data-blog-filters role="search" className="mt-10 grid max-w-3xl gap-3 sm:grid-cols-3">
               <div className="relative">
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                   <Search className="h-4 w-4 text-slate-400" aria-hidden />
                 </div>
+                <label className="sr-only" htmlFor="blog-search">Search articles</label>
                 <input
-                  type="text"
+                  id="blog-search"
+                  data-blog-search
+                  type="search"
+                  name="q"
                   placeholder="Search articles..."
+                  autoComplete="off"
                   className="block w-full rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-3 text-sm placeholder-stone-400 outline-none transition-colors focus:border-indigo-500 focus:ring-1 focus:ring-accent"
-                  value={searchQuery}
-                  onChange={handleSearchChange}
                 />
               </div>
               <label className="sr-only" htmlFor="pillar-filter">Filter by guide</label>
-              <select id="pillar-filter" className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm" value={pillarFilter} onChange={event => { setPillarFilter(event.target.value); setCurrentPage(1) }}>
+              <select id="pillar-filter" name="pillar" data-blog-pillar defaultValue="" className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm">
                 <option value="">All guides</option>
                 {EDITORIAL_PILLARS.map(pillar => <option key={pillar.id} value={pillar.id}>{pillar.title}</option>)}
               </select>
               <label className="sr-only" htmlFor="author-filter">Filter by author</label>
-              <select id="author-filter" className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm" value={authorFilter} onChange={event => { setAuthorFilter(event.target.value); setCurrentPage(1) }}>
+              <select id="author-filter" name="author" data-blog-author defaultValue="" className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm">
                 <option value="">All authors</option>
                 {[...new Set(allPosts.map(post => post.author))].map(author => <option key={author} value={author}>{authorDisplayName(author)}</option>)}
               </select>
-            </div>
+            </form>
+            <p className="sr-only" aria-live="polite" data-blog-status></p>
           </div>
         </section>
 
         <section className="py-16 sm:py-20">
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            {filteredPosts.length === 0 ? (
-              <div className="py-20 text-center">
-                <p className="text-lg text-slate-500">
-                  {allPosts.length === 0
-                    ? 'No published posts are available yet.'
-                    : 'No posts found matching your search.'}
-                </p>
-                {allPosts.length > 0 && (
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="mt-4 text-sm font-semibold text-accent hover:underline"
-                  >
-                    Clear search
-                  </button>
-                )}
-              </div>
-            ) : (
-              <>
-                <div className="divide-y divide-stone-200/80">
-                  {paginatedPosts.map((post) => (
-                    <article key={post.slug} className="group py-10 first:pt-0">
-                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-8">
-                        <div className="flex-1">
-                          <time
-                            dateTime={post.date}
-                            className="text-xs font-medium uppercase tracking-widest text-slate-400"
-                          >
-                            {formatDate(post.date)}
-                          </time>
-                          <h2 className="mt-2 text-xl font-semibold leading-snug text-slate-900 sm:text-2xl">
-                            <a
-                              href={`/blog/${post.slug}`}
-                              className="no-underline transition-colors hover:text-accent"
-                            >
-                              {post.title}
-                            </a>
-                          </h2>
-                          <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-600">
-                            {post.description}
-                          </p>
-                          <p className="mt-2 text-sm text-slate-400">
-                            By {authorDisplayName(post.author)} · {editorialPillar(post.pillar)?.title}
-                          </p>
-                        </div>
+            <div className="py-20 text-center" data-blog-empty hidden={allPosts.length > 0}>
+              <p className="text-lg text-slate-500">
+                {allPosts.length === 0
+                  ? 'No published posts are available yet.'
+                  : 'No posts found matching your search.'}
+              </p>
+              {allPosts.length > 0 && (
+                <button
+                  type="button"
+                  data-blog-clear
+                  className="mt-4 text-sm font-semibold text-accent hover:underline"
+                >
+                  Clear search
+                </button>
+              )}
+            </div>
+            <div className="divide-y divide-stone-200/80" data-blog-list hidden={allPosts.length === 0}>
+              {allPosts.map((post) => (
+                <article
+                  key={post.slug}
+                  data-blog-post
+                  data-search={blogPostSearchText([
+                    post.title,
+                    post.description,
+                    post.slug,
+                    post.author,
+                    authorDisplayName(post.author),
+                    editorialPillar(post.pillar)?.title,
+                    post.pillar ? `pillar:${post.pillar}` : '',
+                    post.author ? `author:${post.author}` : '',
+                  ])}
+                  className="group py-10 first:pt-0"
+                >
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-8">
+                    <div className="flex-1">
+                      <time
+                        dateTime={post.date}
+                        className="text-xs font-medium uppercase tracking-widest text-slate-400"
+                      >
+                        {formatDate(post.date)}
+                      </time>
+                      <h2 className="mt-2 text-xl font-semibold leading-snug text-slate-900 sm:text-2xl">
                         <a
                           href={`/blog/${post.slug}`}
-                          className="btn-primary shrink-0 gap-2 self-start"
-                          aria-label={`Read ${post.title}`}
+                          className="no-underline transition-colors hover:text-accent"
                         >
-                          Read
-                          <ArrowRight className="h-4 w-4" aria-hidden />
+                          {post.title}
                         </a>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-
-                {totalPages > 1 && (
-                  <nav className="mt-16 flex items-center justify-between border-t border-slate-200 pt-8" aria-label="Pagination">
-                    <div className="flex flex-1 justify-between sm:hidden">
-                      <button
-                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                        disabled={currentPage === 1}
-                        className="btn-secondary px-4 py-2 disabled:opacity-50"
-                      >
-                        Previous
-                      </button>
-                      <button
-                        onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                        disabled={currentPage === totalPages}
-                        className="btn-secondary px-4 py-2 disabled:opacity-50"
-                      >
-                        Next
-                      </button>
+                      </h2>
+                      <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-600">
+                        {post.description}
+                      </p>
+                      <p className="mt-2 text-sm text-slate-400">
+                        By {authorDisplayName(post.author)} · {editorialPillar(post.pillar)?.title}
+                      </p>
                     </div>
-                    <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-                      <div>
-                        <p className="text-sm text-slate-500">
-                          Showing <span className="font-medium">{(currentPage - 1) * POSTS_PER_PAGE + 1}</span> to{' '}
-                          <span className="font-medium">
-                            {Math.min(currentPage * POSTS_PER_PAGE, filteredPosts.length)}
-                          </span>{' '}
-                          of <span className="font-medium">{filteredPosts.length}</span> results
-                        </p>
-                      </div>
-                      <div>
-                        <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
-                          <button
-                            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                            disabled={currentPage === 1}
-                            className="relative inline-flex items-center rounded-l-md px-2 py-2 text-slate-400 ring-1 ring-inset ring-stone-200 hover:bg-slate-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
-                          >
-                            <span className="sr-only">Previous</span>
-                            <ArrowLeft className="h-5 w-5" aria-hidden />
-                          </button>
-                          {[...Array(totalPages)].map((_, i) => {
-                            const pageNumber = i + 1
-                            // Simple logic to show current, first, last, and neighbors
-                            if (
-                              totalPages > 7 &&
-                              pageNumber !== 1 &&
-                              pageNumber !== totalPages &&
-                              Math.abs(pageNumber - currentPage) > 1
-                            ) {
-                              if (Math.abs(pageNumber - currentPage) === 2) {
-                                return <span key={pageNumber} className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-slate-400 ring-1 ring-inset ring-stone-200 focus:outline-offset-0">...</span>
-                              }
-                              return null
-                            }
-
-                            return (
-                              <button
-                                key={pageNumber}
-                                onClick={() => setCurrentPage(pageNumber)}
-                                aria-current={currentPage === pageNumber ? 'page' : undefined}
-                                className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 ${
-                                  currentPage === pageNumber
-                                    ? 'z-10 bg-accent text-white focus-visible:outline-indigo-500'
-                                    : 'text-slate-900 ring-1 ring-inset ring-stone-200 hover:bg-slate-50 focus:outline-offset-0'
-                                }`}
-                              >
-                                {pageNumber}
-                              </button>
-                            )
-                          })}
-                          <button
-                            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                            disabled={currentPage === totalPages}
-                            className="relative inline-flex items-center rounded-r-md px-2 py-2 text-slate-400 ring-1 ring-inset ring-stone-200 hover:bg-slate-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
-                          >
-                            <span className="sr-only">Next</span>
-                            <ArrowRight className="h-5 w-5" aria-hidden />
-                          </button>
-                        </nav>
-                      </div>
-                    </div>
-                  </nav>
-                )}
-              </>
-            )}
+                    <a
+                      href={`/blog/${post.slug}`}
+                      className="btn-primary shrink-0 gap-2 self-start"
+                      aria-label={`Read ${post.title}`}
+                    >
+                      Read
+                      <ArrowRight className="h-4 w-4" aria-hidden />
+                    </a>
+                  </div>
+                </article>
+              ))}
+            </div>
+            <nav className="mt-16 flex items-center justify-between border-t border-slate-200 pt-8" aria-label="Pagination" data-blog-pagination hidden>
+              <p className="text-sm text-slate-500" data-blog-page-label>Page 1</p>
+              <div className="flex gap-2">
+                <button type="button" data-blog-prev className="btn-secondary px-4 py-2 disabled:opacity-50">
+                  <ArrowLeft className="h-4 w-4" aria-hidden />
+                  Previous
+                </button>
+                <button type="button" data-blog-next className="btn-secondary px-4 py-2 disabled:opacity-50">
+                  Next
+                  <ArrowRight className="h-4 w-4" aria-hidden />
+                </button>
+              </div>
+            </nav>
           </div>
         </section>
       </main>

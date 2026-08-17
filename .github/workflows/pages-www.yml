@@ -213,7 +213,10 @@ jobs:
           retention-days: 30
 
   deploy:
-    if: github.event_name == 'push' || github.event_name == 'repository_dispatch' || github.event_name == 'workflow_dispatch'
+    # Every production trigger must publish dist/. Hourly cron is the SEO.11
+    # freshness path and the backstop when publish dispatch is not configured.
+    # Pull requests build only.
+    if: github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
     environment:
@@ -226,7 +229,7 @@ jobs:
   # SEO.2 FR-16…FR-19: IndexNow + Google sitemap ping after successful deploy.
   # Failures warn only (exit 0) so deploys are never blocked.
   index-submit:
-    if: github.event_name == 'push' || github.event_name == 'repository_dispatch' || github.event_name == 'workflow_dispatch'
+    if: github.event_name != 'pull_request'
     needs: deploy
     runs-on: ubuntu-latest
     defaults:
@@ -287,7 +290,7 @@ jobs:
           key: seo-manifest-prev-${{ github.run_id }}
 
   seo-smoke:
-    if: github.event_name == 'push' || github.event_name == 'repository_dispatch' || github.event_name == 'workflow_dispatch'
+    if: github.event_name != 'pull_request'
     needs: deploy
     runs-on: ubuntu-latest
     defaults:
