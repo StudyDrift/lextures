@@ -28,6 +28,7 @@ func TestMergeSocialIntoExtraPreservesOtherKeys(t *testing.T) {
 		t.Fatalf("got %#v", payload)
 	}
 	got = MergeSocialIntoExtra(got, "", "")
+	payload = map[string]any{}
 	if err := json.Unmarshal(got, &payload); err != nil {
 		t.Fatal(err)
 	}
