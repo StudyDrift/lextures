@@ -1,8 +1,8 @@
 # Marketing content publishing
 
-Publishing an article commits the database change immediately and queues a static-site rebuild. Normal publishes are coalesced for the configured quiet period (three minutes by default); unpublishes and manual rebuilds dispatch immediately. The database remains authoritative if GitHub Actions is unavailable—the currently deployed site remains online and the workspace reports the failed or timed-out build.
+Publishing an article commits the database change immediately. The public content API is authoritative: `/blog/:slug` and `/docs/:category/:slug` on lextures.com load a published article as soon as the API returns it. A static-site rebuild is only for prerendered HTML, sitemaps, and feeds—not for making the article visible.
 
-The marketing Pages workflow also deploys on its hourly cron. That is the SEO.11 freshness path and the backstop when GitHub dispatch is set to `none` or the token cannot create a `repository_dispatch`. Articles then appear on the next successful scheduled deploy (about an hour) rather than within the quiet period.
+The marketing Pages workflow still deploys on its hourly cron (and on optional GitHub dispatch) so crawlers get prerendered HTML. That snapshot is an SEO freshness path, not the publish switch.
 
 ## Configure GitHub dispatch
 
