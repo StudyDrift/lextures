@@ -35,6 +35,9 @@ describe('ArticleMetadataPanel', () => {
     expect(screen.getByLabelText(/^Locale/)).toHaveValue('en')
     expect(screen.getByLabelText(/^Locale/)).toBeDisabled()
     expect(screen.getByLabelText(/^Author/)).toBeInTheDocument()
+    expect(screen.getByLabelText(/^Social title/)).toBeInTheDocument()
+    expect(screen.getByLabelText(/^Social description/)).toBeInTheDocument()
+    expect(screen.getByLabelText(/^Social image/)).toBeInTheDocument()
     expect(screen.getByLabelText(/^Primary question/)).toBeInTheDocument()
     expect(screen.getByLabelText(/^Cluster/)).toBeInTheDocument()
   })
@@ -85,6 +88,8 @@ describe('ArticleMetadataPanel', () => {
       title: '',
       slug: 'Homeschooling Student Advice',
       description: 'Practical advice for homeschool families.',
+      socialTitle: 'Homeschool advice that actually helps',
+      socialDescription: 'Practical advice families can share.',
       bodyMd: '',
       primaryQuestion: '',
       cluster: '',
@@ -120,6 +125,8 @@ describe('ArticleMetadataPanel', () => {
     })
     expect(onChange).toHaveBeenCalledWith({
       description: 'Practical advice for homeschool families.',
+      socialTitle: 'Homeschool advice that actually helps',
+      socialDescription: 'Practical advice families can share.',
       slug: 'homeschooling-student-advice',
     })
   })

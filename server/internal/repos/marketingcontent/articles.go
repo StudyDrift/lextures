@@ -39,6 +39,7 @@ func scanArticle(row pgx.Row) (*Article, error) {
 		&a.CreatedBy, &a.UpdatedBy, &a.CreatedAt, &a.UpdatedAt, &a.DeletedAt)
 	if err == nil {
 		normalizeArticleCollections(&a)
+		applySocialFromExtra(&a)
 	}
 	return &a, err
 }
@@ -252,6 +253,7 @@ func normalizeArticleInput(in NewArticle) NewArticle {
 	if len(in.Extra) == 0 {
 		in.Extra = json.RawMessage(`{}`)
 	}
+	in.Extra = MergeSocialIntoExtra(in.Extra, in.SocialTitle, in.SocialDescription)
 	return in
 }
 

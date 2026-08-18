@@ -68,6 +68,7 @@ func scanPublic(row pgx.Row) (*PublicArticle, error) {
 	if err != nil {
 		return nil, err
 	}
+	applySocialFromExtra(&p.Article)
 	p.Author = &au
 	if rs != nil {
 		p.Reviewer = &Author{Slug: *rs, Name: value(rn), JobTitle: value(rj), Bio: value(rb), Status: value(rst), KnowsAbout: rk, ImageMediaID: ri, UserID: ru, Links: rl, CreatedBy: rcb, UpdatedBy: rub}

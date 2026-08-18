@@ -5,6 +5,10 @@ export type JsonLdNode = Record<string, unknown>
 export type DocumentHeadOptions = {
   title: string
   description: string
+  /** Open Graph / Twitter title. Falls back to `title`. */
+  ogTitle?: string
+  /** Open Graph / Twitter description. Falls back to `description`. */
+  ogDescription?: string
   canonical: string
   image?: string
   imageAlt?: string
@@ -149,8 +153,10 @@ function normalizeJsonLd(
 export function applyDocumentHead(opts: DocumentHeadOptions): void {
   const title = opts.title
   const description = opts.description
+  const ogTitle = opts.ogTitle || title
+  const ogDescription = opts.ogDescription || description
   const image = opts.image || socialCardUrl(opts.title, opts.canonical)
-  const imageAlt = opts.imageAlt || `${opts.title} — Lextures`
+  const imageAlt = opts.imageAlt || `${ogTitle} — Lextures`
   const robots = opts.robots || 'index,follow'
 
   document.title = title
@@ -185,8 +191,8 @@ export function applyDocumentHead(opts: DocumentHeadOptions): void {
   } else if (existingMd) {
     existingMd.remove()
   }
-  upsertMeta('property', 'og:title', title)
-  upsertMeta('property', 'og:description', description)
+  upsertMeta('property', 'og:title', ogTitle)
+  upsertMeta('property', 'og:description', ogDescription)
   upsertMeta('property', 'og:image', image)
   upsertMeta('property', 'og:image:width', '1200')
   upsertMeta('property', 'og:image:height', '630')
@@ -195,8 +201,8 @@ export function applyDocumentHead(opts: DocumentHeadOptions): void {
   upsertMeta('property', 'og:url', opts.canonical)
 
   upsertMeta('name', 'twitter:card', 'summary_large_image')
-  upsertMeta('name', 'twitter:title', title)
-  upsertMeta('name', 'twitter:description', description)
+  upsertMeta('name', 'twitter:title', ogTitle)
+  upsertMeta('name', 'twitter:description', ogDescription)
   upsertMeta('name', 'twitter:image', image)
   upsertMeta('name', 'twitter:image:alt', imageAlt)
 
@@ -226,17 +232,19 @@ export function clearJsonLd(): void {
 export function buildPrerenderHeadTags(opts: DocumentHeadOptions): string {
   const title = escapeHtml(opts.title)
   const description = escapeHtml(opts.description)
+  const ogTitle = escapeHtml(opts.ogTitle || opts.title)
+  const ogDescription = escapeHtml(opts.ogDescription || opts.description)
   const canonical = escapeHtml(opts.canonical)
   const image = escapeHtml(opts.image || DEFAULT_OG_IMAGE)
-  const imageAlt = escapeHtml(opts.imageAlt || `${opts.title} — Lextures`)
+  const imageAlt = escapeHtml(opts.imageAlt || `${opts.ogTitle || opts.title} — Lextures`)
   const robots = escapeHtml(opts.robots || 'index,follow')
   const lines = [
     `<title>${title}</title>`,
     `<meta name="description" content="${description}" />`,
     `<meta name="robots" content="${robots}" />`,
     `<link rel="canonical" href="${canonical}" />`,
-    `<meta property="og:title" content="${title}" />`,
-    `<meta property="og:description" content="${description}" />`,
+    `<meta property="og:title" content="${ogTitle}" />`,
+    `<meta property="og:description" content="${ogDescription}" />`,
     `<meta property="og:image" content="${image}" />`,
     `<meta property="og:image:width" content="1200" />`,
     `<meta property="og:image:height" content="630" />`,
@@ -244,8 +252,8 @@ export function buildPrerenderHeadTags(opts: DocumentHeadOptions): string {
     `<meta property="og:type" content="website" />`,
     `<meta property="og:url" content="${canonical}" />`,
     `<meta name="twitter:card" content="summary_large_image" />`,
-    `<meta name="twitter:title" content="${title}" />`,
-    `<meta name="twitter:description" content="${description}" />`,
+    `<meta name="twitter:title" content="${ogTitle}" />`,
+    `<meta name="twitter:description" content="${ogDescription}" />`,
     `<meta name="twitter:image" content="${image}" />`,
     `<meta name="twitter:image:alt" content="${imageAlt}" />`,
   ]

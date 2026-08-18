@@ -50,6 +50,25 @@ func TestMergeMarketingArticleAppliesSearchMetadata(t *testing.T) {
 	}
 }
 
+func TestMergeMarketingArticleAppliesSocialMetadata(t *testing.T) {
+	t.Parallel()
+	old := &mcrepo.Article{Title: "Advice", Extra: []byte(`{"socialTitle":"Old"}`)}
+	old.SocialTitle = "Old"
+	rawJSON := []byte(`{"socialTitle":"Share this","socialDescription":"A short social blurb.","expectedRevisionNo":1}`)
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(rawJSON, &raw); err != nil {
+		t.Fatal(err)
+	}
+	var body marketingArticleBody
+	if err := json.Unmarshal(rawJSON, &body); err != nil {
+		t.Fatal(err)
+	}
+	got := mergeMarketingArticle(old, body, raw, uuid.New())
+	if got.SocialTitle != "Share this" || got.SocialDescription != "A short social blurb." {
+		t.Fatalf("got socialTitle=%q socialDescription=%q", got.SocialTitle, got.SocialDescription)
+	}
+}
+
 func TestMergeMarketingArticleLeavesOmittedSearchMetadata(t *testing.T) {
 	t.Parallel()
 	old := &mcrepo.Article{Title: "Advice", Cluster: "learning", PrimaryQuestion: "How?", Pillar: "home", VerifiedAgainst: "1.0"}

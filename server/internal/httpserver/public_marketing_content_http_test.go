@@ -28,6 +28,16 @@ func TestPublicContentHashIgnoresUpdatedAtButTracksBody(t *testing.T) {
 	}
 }
 
+func TestPickSocialRenditionURLPrefersSocialCard(t *testing.T) {
+	url := pickSocialRenditionURL([]mcrepo.MediaRendition{
+		{Name: "original", Ext: "png", URL: "/orig.png", Width: 2400, Height: 1600},
+		{Name: "social", Ext: "png", URL: "/social.png", Width: 1200, Height: 630},
+	})
+	if url != "/social.png" {
+		t.Fatalf("got %q", url)
+	}
+}
+
 func TestPublicContentStrongETagReturns304(t *testing.T) {
 	payload := map[string]string{"title": "stable"}
 	first := httptest.NewRecorder()

@@ -10,7 +10,7 @@ export type ContentArticle = {
   citations: string[]; pillar: string; briefRef: string; reviewDue: string; content: string; html: string
   faq?: Array<{ question: string; answer: string }>
   noindex?: boolean; canonicalOverride?: string; contentHash?: string
-  publishedAt?: string; contentUpdatedAt?: string; heroMediaId?: string; media?: Array<{ id?: string; usage?: string; checksum?: string; renditions?: Array<{ name: string; ext: string; url: string; width?: number; height?: number }> }>
+  publishedAt?: string; contentUpdatedAt?: string; heroMediaId?: string; socialTitle?: string; socialDescription?: string; media?: Array<{ id?: string; usage?: string; checksum?: string; renditions?: Array<{ name: string; ext: string; url: string; width?: number; height?: number }> }>
   availableLocales?: Array<{ locale: string; path: string }>
 }
 export type ContentSnapshot = {
@@ -40,7 +40,7 @@ export function apiArticle(raw: ApiArticle): ContentArticle {
     verifiedAgainst: value.verifiedAgainst || '', relatedTo: value.relatedTo || [], citations: value.citations || [], pillar: value.pillar || '',
     briefRef: value.briefRef || '', reviewDue: value.reviewDueOn || '', content: body, html: renderMarkdown(body), noindex: Boolean(value.noindex),
     canonicalOverride: value.canonicalOverride || undefined, contentHash: value.contentHash,
-    publishedAt: value.publishedAt, contentUpdatedAt: value.contentUpdatedAt, heroMediaId: value.heroMediaId, media: value.media || [],
+    publishedAt: value.publishedAt, contentUpdatedAt: value.contentUpdatedAt, heroMediaId: value.heroMediaId, socialTitle: value.socialTitle, socialDescription: value.socialDescription, media: value.media || [],
     availableLocales: Array.isArray(value.availableLocales) ? value.availableLocales : undefined,
   }
 }

@@ -120,6 +120,15 @@ func (s *Service) Create(ctx context.Context, in Upload) (*repo.MediaAsset, bool
 			_ = s.Storage.DeleteObject(context.Background(), k)
 		}
 	}
+	if social, encErr := encodeSocialPNG(img); encErr == nil {
+		socialKey := fmt.Sprintf("marketing/media/%s/social.png", id)
+		if e = s.Storage.PutObject(ctx, socialKey, bytes.NewReader(social), int64(len(social)), "image/png"); e != nil {
+			cleanup()
+			return nil, false, e
+		}
+		written = append(written, socialKey)
+		rends = append(rends, repo.MediaRendition{Name: "social", Ext: "png", MIME: "image/png", Width: socialCardWidth, Height: socialCardHeight, Key: socialKey, URL: publicURL(id, "social", "png"), Bytes: int64(len(social))})
+	}
 	for _, target := range []int{1600, 800, 400} {
 		if cfg.Width <= target {
 			continue
@@ -199,6 +208,50 @@ func mimeForExt(e string) string {
 func publicURL(id uuid.UUID, name, ext string) string {
 	return "/api/v1/public/content/media/" + id.String() + "/" + name + "." + ext
 }
+
+const (
+	socialCardWidth  = 1200
+	socialCardHeight = 630
+)
+
+func encodeSocialPNG(src image.Image) ([]byte, error) {
+	var buf bytes.Buffer
+	if err := png.Encode(&buf, coverCrop(src, socialCardWidth, socialCardHeight)); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
+func coverCrop(src image.Image, tw, th int) *image.RGBA {
+	sb := src.Bounds()
+	sw, sh := sb.Dx(), sb.Dy()
+	if sw < 1 || sh < 1 || tw < 1 || th < 1 {
+		return image.NewRGBA(image.Rect(0, 0, tw, th))
+	}
+	scale := float64(tw) / float64(sw)
+	if float64(sh)*scale < float64(th) {
+		scale = float64(th) / float64(sh)
+	}
+	nw := int(float64(sw)*scale + 0.5)
+	nh := int(float64(sh)*scale + 0.5)
+	if nw < tw {
+		nw = tw
+	}
+	if nh < th {
+		nh = th
+	}
+	scaled := resize(src, nw, nh)
+	x0 := (nw - tw) / 2
+	y0 := (nh - th) / 2
+	dst := image.NewRGBA(image.Rect(0, 0, tw, th))
+	for y := 0; y < th; y++ {
+		for x := 0; x < tw; x++ {
+			dst.Set(x, y, scaled.At(x0+x, y0+y))
+		}
+	}
+	return dst
+}
+
 func resize(src image.Image, w, h int) *image.RGBA {
 	dst := image.NewRGBA(image.Rect(0, 0, w, h))
 	sb := src.Bounds()

@@ -52,7 +52,10 @@ type publicContentArticle struct {
 	Segments           []string                 `json:"segments"`
 	Citations          []string                 `json:"citations"`
 	Tags               []string                 `json:"tags"`
+	HeroMediaID        *uuid.UUID               `json:"heroMediaId,omitempty"`
 	HeroImageURL       *string                  `json:"heroImageUrl"`
+	SocialTitle        string                   `json:"socialTitle,omitempty"`
+	SocialDescription  string                   `json:"socialDescription,omitempty"`
 	Noindex            bool                     `json:"noindex"`
 	CanonicalOverride  *string                  `json:"canonicalOverride"`
 	AvailableLocales   []mcrepo.AvailableLocale `json:"availableLocales,omitempty"`
@@ -123,7 +126,7 @@ func publicAuthor(a *mcrepo.Author) *publicContentAuthor {
 	return &publicContentAuthor{Slug: a.Slug, Name: a.Name, JobTitle: a.JobTitle, Bio: a.Bio, KnowsAbout: a.KnowsAbout}
 }
 func mapPublicArticle(a mcrepo.PublicArticle, body, hash bool) publicContentArticle {
-	p := publicContentArticle{Path: a.Path, Kind: a.Kind, Slug: a.Slug, Locale: a.Locale, TranslationGroupID: a.TranslationGroupID.String(), CategorySlug: a.CategorySlug, CategoryTitle: a.CategoryTitle, Title: a.Title, Description: a.Description, Author: publicAuthor(a.Author), Reviewer: publicAuthor(a.Reviewer), PublishedAt: a.PublishedAt, UpdatedAt: a.UpdatedAt, ContentUpdatedAt: a.ContentUpdatedAt, ReviewedAt: a.ReviewedAt, PrimaryQuestion: a.PrimaryQuestion, Cluster: a.Cluster, Pillar: a.Pillar, Keywords: a.Keywords, RelatedTo: a.RelatedTo, Roles: a.Roles, Segments: a.Segments, Citations: a.Citations, Tags: a.Tags, Noindex: a.Noindex, CanonicalOverride: a.CanonicalOverride, AvailableLocales: a.AvailableLocales, IsFallback: a.IsFallback}
+	p := publicContentArticle{Path: a.Path, Kind: a.Kind, Slug: a.Slug, Locale: a.Locale, TranslationGroupID: a.TranslationGroupID.String(), CategorySlug: a.CategorySlug, CategoryTitle: a.CategoryTitle, Title: a.Title, Description: a.Description, Author: publicAuthor(a.Author), Reviewer: publicAuthor(a.Reviewer), PublishedAt: a.PublishedAt, UpdatedAt: a.UpdatedAt, ContentUpdatedAt: a.ContentUpdatedAt, ReviewedAt: a.ReviewedAt, PrimaryQuestion: a.PrimaryQuestion, Cluster: a.Cluster, Pillar: a.Pillar, Keywords: a.Keywords, RelatedTo: a.RelatedTo, Roles: a.Roles, Segments: a.Segments, Citations: a.Citations, Tags: a.Tags, HeroMediaID: a.HeroMediaID, SocialTitle: a.SocialTitle, SocialDescription: a.SocialDescription, Noindex: a.Noindex, CanonicalOverride: a.CanonicalOverride, AvailableLocales: a.AvailableLocales, IsFallback: a.IsFallback}
 	if body {
 		p.BodyMD = a.BodyMD
 	}
@@ -135,7 +138,7 @@ func mapPublicArticle(a mcrepo.PublicArticle, body, hash bool) publicContentArti
 			instantDigest(a.ContentUpdatedAt), instantDigest(a.ReviewedAt), a.PrimaryQuestion, a.Cluster,
 			a.Pillar, strings.Join(a.Keywords, "\x00"), strings.Join(a.RelatedTo, "\x00"),
 			strings.Join(a.Roles, "\x00"), strings.Join(a.Segments, "\x00"), strings.Join(a.Citations, "\x00"),
-			strings.Join(a.Tags, "\x00"), uuidDigest(a.HeroMediaID), strconv.FormatBool(a.Noindex),
+			strings.Join(a.Tags, "\x00"), uuidDigest(a.HeroMediaID), a.SocialTitle, a.SocialDescription, strconv.FormatBool(a.Noindex),
 			valueString(a.CanonicalOverride),
 		}, "\x1f")))
 		p.ContentHash = hex.EncodeToString(sum[:])[:16]
@@ -160,6 +163,45 @@ func uuidDigest(v *uuid.UUID) string {
 	}
 	return v.String()
 }
+func publicHeroImageURL(hero *uuid.UUID, media []mcrepo.MediaAsset) *string {
+	if hero == nil {
+		return nil
+	}
+	for _, asset := range media {
+		if asset.ID != *hero {
+			continue
+		}
+		if url := pickSocialRenditionURL(asset.Renditions); url != "" {
+			return &url
+		}
+	}
+	return nil
+}
+
+func pickSocialRenditionURL(rends []mcrepo.MediaRendition) string {
+	for _, rend := range rends {
+		if rend.Name == "social" || (rend.Width == 1200 && rend.Height == 630) {
+			if isRasterSocialExt(rend.Ext) {
+				return rend.URL
+			}
+		}
+	}
+	for _, rend := range rends {
+		if isRasterSocialExt(rend.Ext) {
+			return rend.URL
+		}
+	}
+	return ""
+}
+
+func isRasterSocialExt(ext string) bool {
+	switch strings.ToLower(ext) {
+	case "png", "jpg", "jpeg":
+		return true
+	}
+	return false
+}
+
 func valueString(v *string) string {
 	if v == nil {
 		return ""
@@ -345,6 +387,7 @@ func (d Deps) handlePublicContentDetail(kind string) http.HandlerFunc {
 		for _, m := range media {
 			res.Media = append(res.Media, publicContentMedia{ID: m.ID, Alt: m.AltText, Decorative: m.Decorative, Width: m.Width, Height: m.Height, Checksum: m.Checksum, Renditions: m.Renditions})
 		}
+		res.HeroImageURL = publicHeroImageURL(a.HeroMediaID, media)
 		w.Header().Set("Content-Language", a.Locale)
 		if token != "" {
 			w.Header().Set("Cache-Control", "no-store")
