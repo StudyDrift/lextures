@@ -3,7 +3,6 @@ package httpserver
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -230,10 +229,20 @@ func (d Deps) handlePublicMarketingMedia() http.HandlerFunc {
 			return
 		}
 		defer func() { _ = obj.Close() }()
-		w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
-		w.Header().Set("Content-Type", rend.MIME)
-		w.Header().Set("X-Content-Type-Options", "nosniff")
-		w.Header().Set("Content-Length", fmt.Sprint(rend.Bytes))
-		_, _ = io.Copy(w, obj)
+		data, e := io.ReadAll(obj)
+		if e != nil {
+			slog.Error("read public marketing media", "media_id", id, "key", rend.Key, "err", e)
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not read media.")
+			return
+		}
+		writePublicMarketingMedia(w, rend.MIME, data)
 	}
+}
+
+func writePublicMarketingMedia(w http.ResponseWriter, mime string, data []byte) {
+	w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+	w.Header().Set("Content-Type", mime)
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.Header().Set("Content-Length", strconv.Itoa(len(data)))
+	_, _ = w.Write(data)
 }

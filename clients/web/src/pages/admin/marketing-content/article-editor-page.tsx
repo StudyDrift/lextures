@@ -1,17 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Editor } from '@tiptap/core'
-import { ArrowLeft, Braces, ChevronDown, Eye, FileText, History, Keyboard, PanelRight, Save, Sparkles } from 'lucide-react'
+import { ArrowLeft, Braces, Eye, FileText, History, Keyboard, PanelRight, Save, Sparkles } from 'lucide-react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ArticleMetadataPanel } from '../../../components/marketing-content/editor/article-metadata-panel'
 import { ArticlePreview } from '../../../components/marketing-content/editor/article-preview'
 import { EditorPane } from '../../../components/marketing-content/editor/article-editor-pane'
 import { TranslationSourcePane } from '../../../components/marketing-content/editor/translation-source-pane'
-import { directives, isBlockingFinding, lintMetadata, slugify, writePayload } from '../../../components/marketing-content/editor/article-editor-utils'
+import { directives, isBlockingFinding, lintMetadata, reconcileConcurrentSave, slugify, writePayload } from '../../../components/marketing-content/editor/article-editor-utils'
 import { METADATA_FINDING_PATHS, findingKey, jumpEditorToMarkdownLine, selectTextareaLine, solveAllFindings } from '../../../components/marketing-content/editor/article-finding-nav'
 import { ArticleFindingsBar } from '../../../components/marketing-content/editor/article-findings-bar'
+import { ArticleEditorMenu } from '../../../components/marketing-content/editor/article-editor-menu'
 import { BuildArticleWithAiModal } from '../../../components/marketing-content/editor/build-article-with-ai-modal'
 import { RevisionDrawer } from '../../../components/marketing-content/editor/revision-drawer'
-import { Badge, Button, Checkbox, Dialog, EmptyState, InlineAlert, Input, Menu, SegmentedControl, Skeleton, Textarea, type MenuItem } from '../../../components/ui'
+import { Badge, Button, Checkbox, Dialog, EmptyState, InlineAlert, Input, SegmentedControl, Skeleton, Tab, TabList, TabPanel, Tabs, Textarea, type MenuItem } from '../../../components/ui'
 import { usePermissions } from '../../../context/use-permissions'
 import { generateMarketingArticle, repairMarketingArticle, type MarketingArticleAIDraft } from '../../../lib/marketing-content-ai-api'
 import { createMarketingArticle, createMarketingPreviewToken, getMarketingArticle, lintMarketingArticle, listMarketingAuthors, listMarketingCategories, listMarketingKnownPaths, MarketingConflictError, MarketingValidationError, restoreMarketingRevision, transitionMarketingArticle, updateMarketingArticle, type MarketingArticle, type MarketingFinding } from '../../../lib/marketing-content-api'
@@ -26,12 +27,6 @@ const emptyArticle = (kind: 'blog' | 'doc'): MarketingArticle => ({
 })
 
 type View = 'write' | 'split' | 'preview' | 'details'
-
-function EditorMenu({ label, items, variant = 'ghost', icon, placement = 'bottom-start' }: { label: string; items: MenuItem[]; variant?: 'secondary' | 'ghost'; icon?: React.ReactNode; placement?: 'bottom-start' | 'bottom-end' }) {
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLButtonElement>(null)
-  return <><Button ref={ref} size="sm" variant={variant} className="min-h-6" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((value) => !value)}>{icon}{label}<ChevronDown aria-hidden className="h-3.5 w-3.5 opacity-70" /></Button><Menu open={open} onOpenChange={setOpen} anchorRef={ref} items={items} placement={placement} /></>
-}
 
 export default function ArticleEditorPage() {
   const { articleId = '' } = useParams()
@@ -54,7 +49,7 @@ export default function ArticleEditorPage() {
   const [view, setView] = useState<View>('write')
   const [simple, setSimple] = useState(false)
   const [metadataOpen, setMetadataOpen] = useState(true)
-  const [findingsOpen, setFindingsOpen] = useState(false)
+  const [panelTab, setPanelTab] = useState<'details' | 'quality'>('details')
   const [highlightField, setHighlightField] = useState<string | null>(null)
   const [revisionsOpen, setRevisionsOpen] = useState(false)
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
@@ -80,16 +75,18 @@ export default function ArticleEditorPage() {
   const editorRef = useRef<Editor | null>(null)
   const articleRef = useRef(article)
   const dirtyRef = useRef(dirty)
-  const openedFindingsRef = useRef(false)
+  const editVersionRef = useRef(0)
   useEffect(() => { articleRef.current = article }, [article])
   useEffect(() => { dirtyRef.current = dirty }, [dirty])
 
   const patch = useCallback((value: Partial<MarketingArticle>) => {
+    editVersionRef.current += 1
     setArticle((old) => ({ ...old, ...value }))
     setDirty(true)
     setSaveError('')
   }, [])
   const patchMetadata = useCallback((value: Partial<MarketingArticle>) => {
+    editVersionRef.current += 1
     setArticle((old) => {
       const autoSlug = !old.slug || old.slug === slugify(old.title)
       return { ...old, ...value, ...(value.title !== undefined && autoSlug ? { slug: slugify(value.title) } : {}) }
@@ -155,10 +152,6 @@ export default function ArticleEditorPage() {
         const next = report.findings ?? []
         setFindings(next)
         setScore(report.score)
-        if (next.length && !openedFindingsRef.current) {
-          openedFindingsRef.current = true
-          setFindingsOpen(true)
-        }
       }).catch(() => undefined).finally(() => setValidating(false))
     }, dirty ? 800 : 0)
     return () => window.clearTimeout(timer)
@@ -167,13 +160,30 @@ export default function ArticleEditorPage() {
   const saveArticle = useCallback(async () => {
     if (!dirtyRef.current || saving) return articleRef.current
     const current = articleRef.current
+    const savingEditVersion = editVersionRef.current
     if (!current.title.trim() || !current.slug.trim() || !current.authorSlug || (current.kind === 'doc' && !current.categoryId)) { setSaveError('Title, slug, author, and help-article category are required.'); return null }
     setSaving(true); setSaveError('')
     try {
       const saved = isNew ? await createMarketingArticle(writePayload(current)) : await updateMarketingArticle(articleId, current.revisionNo, writePayload(current))
-      setArticle(saved); setDirty(false); setLastSaved(new Date()); sessionStorage.removeItem(`mc:draft:${saved.id}`)
+      const hasConcurrentEdits = editVersionRef.current !== savingEditVersion
+      if (hasConcurrentEdits) {
+        setArticle((latest) => {
+          const reconciled = reconcileConcurrentSave(latest, saved)
+          articleRef.current = reconciled
+          return reconciled
+        })
+        dirtyRef.current = true
+        setDirty(true)
+      } else {
+        articleRef.current = saved
+        dirtyRef.current = false
+        setArticle(saved)
+        setDirty(false)
+        sessionStorage.removeItem(`mc:draft:${saved.id}`)
+      }
+      setLastSaved(new Date())
       if (isNew) navigate(`/admin/marketing-content/${saved.id}`, { replace: true })
-      return saved
+      return hasConcurrentEdits ? null : saved
     } catch (e) {
       if (e instanceof MarketingConflictError) setConflict(e.detail)
       else setSaveError(e instanceof Error ? e.message : 'Save failed.')
@@ -211,7 +221,9 @@ export default function ArticleEditorPage() {
       if (e instanceof MarketingValidationError) {
         setFindings(e.findings)
         if (e.score != null) setScore(e.score)
-        setFindingsOpen(true)
+        setPanelTab('quality')
+        setMetadataOpen(true)
+        setView('details')
         setSaveError(`${e.message} Open Quality below for the blocking findings.`)
       } else {
         setSaveError(e instanceof Error ? e.message : String(e))
@@ -230,7 +242,7 @@ export default function ArticleEditorPage() {
     setSolvingFindings(true)
     setSolveError('')
     setSolveProgress('')
-    setFindingsOpen(true)
+    setPanelTab('quality')
     try {
       const result = await solveAllFindings({
         article: articleRef.current,
@@ -261,6 +273,7 @@ export default function ArticleEditorPage() {
       articleRef.current = { ...articleRef.current, ...result.article }
       setArticle((old) => ({ ...old, ...result.article }))
       if (result.applied) {
+        editVersionRef.current += 1
         setDirty(true)
         setSaveError('')
       }
@@ -272,6 +285,7 @@ export default function ArticleEditorPage() {
     }
   }, [findings, knownPaths, solvingFindings])
   const applyAIDraft = (draft: MarketingArticleAIDraft) => {
+    editVersionRef.current += 1
     setArticle((old) => {
       const autoSlug = !old.slug || old.slug === slugify(old.title)
       return {
@@ -301,6 +315,7 @@ export default function ArticleEditorPage() {
   const revealFinding = (finding: MarketingFinding) => {
     const path = finding.path
     if (path && METADATA_FINDING_PATHS.has(path)) {
+      setPanelTab('details')
       setHighlightField(path)
       window.setTimeout(() => setHighlightField((current) => (current === path ? null : current)), 2500)
       if (path === 'title') {
@@ -360,13 +375,15 @@ export default function ArticleEditorPage() {
   const editorPane = <EditorPane article={article} canAuthor={canAuthor} simple={simple} titleHighlight={highlightField === 'title'} titleError={titleFinding?.severity === 'error' ? titleFinding.message : undefined} onTitleChange={changeTitle} onBodyChange={changeBody} onBlur={() => void saveArticle()} onEditorChange={registerEditor} />
   const previewPane = <div className="min-w-0 overflow-auto rounded-2xl border border-border-default bg-surface-raised shadow-sm"><ArticlePreview title={article.title} body={article.bodyMd} dir={article.locale.startsWith('ar') ? 'rtl' : 'ltr'} /></div>
   const metadataPane = <ArticleMetadataPanel article={article} onChange={patchMetadata} categories={categories} authors={authors} knownPaths={knownPaths} isNew={isNew} findings={findings} highlightField={highlightField} canFillWithAI={canAuthor} />
+  const qualityPane = <ArticleFindingsBar findings={findings} score={score} validating={validating} bodyMd={article.bodyMd} onSelectFinding={revealFinding} onInsertTemplate={insertDirective} canSolve={canAuthor} solving={solvingFindings} solvingFindingKey={solvingFindingKey} solveProgress={solveProgress} solveError={solveError} onSolveWithAI={() => void solveFindingsWithAI()} />
+  const sidePanelPane = <Tabs value={panelTab} onValueChange={(value) => setPanelTab(value as 'details' | 'quality')}><TabList aria-label="Article panel"><Tab value="details">Details</Tab><Tab value="quality">Quality{findings.length ? ` (${findings.length})` : ''}</Tab></TabList><TabPanel value="details">{metadataPane}</TabPanel><TabPanel value="quality">{qualityPane}</TabPanel></Tabs>
   const missingLocales = locales.filter((loc) => loc.enabled && loc.code !== article.locale && !translations.some((row) => row.locale === loc.code))
   const translationItems: MenuItem[] = [
     ...translations.filter((row) => row.id !== article.id).map((row) => ({ id: row.id, label: `${row.locale.toUpperCase()} · ${row.status}${row.stale ? ' · stale' : ''}`, onSelect: () => navigate(`/admin/marketing-content/${row.id}`) })),
     ...(canAuthor && localesEnabled ? missingLocales.map((loc) => ({ id: `add-${loc.code}`, label: `Add ${loc.label} translation`, onSelect: () => void addTranslation(loc.code) })) : []),
   ]
 
-  return <main className="min-w-0 pb-16">
+  return <main className="min-w-0 pb-4">
     <div className="sticky top-0 z-20 border-b border-border-default bg-surface-raised/95 backdrop-blur supports-[backdrop-filter]:bg-surface-raised/80">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2.5 sm:px-6">
         <Link to="/admin/marketing-content" aria-label="Back to Marketing Content" className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-fg-muted hover:bg-surface-sunken hover:text-fg-default"><ArrowLeft className="h-4 w-4" /></Link>
@@ -382,12 +399,12 @@ export default function ArticleEditorPage() {
         <div className="flex items-center gap-2">
           <Button size="sm" variant="secondary" className="min-h-6" onClick={() => void openPreview()}><Eye className="h-4 w-4" /> <span className="hidden sm:inline">Preview</span></Button>
           <Button size="sm" className="min-h-6" loading={saving} disabled={!dirty} onClick={() => void saveArticle()}><Save className="h-4 w-4" /> Save</Button>
-          {!isNew ? <EditorMenu label="Actions" variant="secondary" placement="bottom-end" items={[
+          {!isNew ? <ArticleEditorMenu label="Actions" variant="secondary" placement="bottom-end" items={[
             ...(canAuthor ? [{ id: 'submit', label: 'Submit for review', onSelect: () => setTransition('submit') }] : []),
             ...(canReview ? [{ id: 'approve', label: 'Approve', onSelect: () => setTransition('approve') }, { id: 'request_changes', label: 'Request changes', onSelect: () => setTransition('request_changes') }] : []),
             ...(canPublish ? [{ id: 'publish', label: 'Publish', onSelect: () => setTransition('publish') }, { id: 'schedule', label: 'Schedule', onSelect: () => setTransition('schedule') }, { id: 'unpublish', label: 'Unpublish', onSelect: () => setTransition('unpublish') }, { id: 'archive', label: 'Archive', onSelect: () => setTransition('archive') }] : []),
           ]} /> : null}
-          {!isNew && localesEnabled ? <EditorMenu label="Translations" variant="ghost" placement="bottom-end" items={translationItems.length ? translationItems : [{ id: 'none', label: 'This article is only available in this locale', disabled: true }]} /> : null}
+          {!isNew && localesEnabled ? <ArticleEditorMenu label="Translations" variant="ghost" placement="bottom-end" items={translationItems.length ? translationItems : [{ id: 'none', label: 'This article is only available in this locale', disabled: true }]} /> : null}
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-2 border-t border-border-subtle px-4 py-2 sm:px-6" role="toolbar" aria-label="Article editor tools">
@@ -407,7 +424,7 @@ export default function ArticleEditorPage() {
         />
         <span aria-hidden className="mx-1 hidden h-5 w-px bg-border-default sm:block" />
         {canAuthor ? <Button size="sm" variant="ghost" className="min-h-6" onClick={() => setBuildAiOpen(true)}><Sparkles className="h-4 w-4" /> Build with AI</Button> : null}
-        <EditorMenu label="Insert block" items={directives.map((v) => ({ id: v.id, label: v.label, onSelect: () => insertDirective(v.markdown) }))} />
+        <ArticleEditorMenu label="Insert block" items={directives.map((v) => ({ id: v.id, label: v.label, onSelect: () => insertDirective(v.markdown) }))} />
         <Button size="sm" variant="ghost" className="min-h-6" aria-pressed={simple} onClick={() => setSimple((v) => !v)}><Braces className="h-4 w-4" /> <span className="hidden lg:inline">{simple ? 'Visual editor' : 'Markdown source'}</span></Button>
         <Button size="sm" variant="ghost" className="min-h-6" disabled={isNew} onClick={() => setRevisionsOpen(true)}><History className="h-4 w-4" /> <span className="hidden lg:inline">Revisions</span></Button>
         <Button size="sm" variant="ghost" className="min-h-6" onClick={() => setShortcutsOpen(true)}><Keyboard className="h-4 w-4" /> <span className="hidden lg:inline">Shortcuts</span></Button>
@@ -419,12 +436,12 @@ export default function ArticleEditorPage() {
 
     <div className="px-4 pt-4 sm:px-6">
       {saveError ? <InlineAlert tone="danger" className="mb-3"><span className="flex flex-wrap items-center gap-2"><strong>Action failed.</strong> {saveError}{dirty ? <Button size="sm" variant="secondary" onClick={() => void saveArticle()}>Retry save</Button> : null}</span></InlineAlert> : null}
-      {recovery ? <InlineAlert tone="warning" className="mb-3"><span className="flex flex-wrap items-center gap-2"><strong>Unsaved browser draft found.</strong><Button size="sm" onClick={() => { setArticle(recovery); setRecovery(null); setDirty(true) }}>Recover</Button><Button size="sm" variant="secondary" onClick={() => { sessionStorage.removeItem(`mc:draft:${articleId}`); setRecovery(null) }}>Discard</Button></span></InlineAlert> : null}
+      {recovery ? <InlineAlert tone="warning" className="mb-3"><span className="flex flex-wrap items-center gap-2"><strong>Unsaved browser draft found.</strong><Button size="sm" onClick={() => { editVersionRef.current += 1; setArticle(recovery); setRecovery(null); setDirty(true) }}>Recover</Button><Button size="sm" variant="secondary" onClick={() => { sessionStorage.removeItem(`mc:draft:${articleId}`); setRecovery(null) }}>Discard</Button></span></InlineAlert> : null}
     </div>
 
     {/* Mobile: one pane at a time. */}
     <div className="px-4 pb-4 md:hidden">
-      {view === 'details' ? <div className="rounded-2xl border border-border-default bg-surface-raised p-3">{metadataPane}</div> : view === 'preview' ? previewPane : editorPane}
+      {view === 'details' ? <div className="rounded-2xl border border-border-default bg-surface-raised p-3">{sidePanelPane}</div> : view === 'preview' ? previewPane : editorPane}
     </div>
 
     {/* Desktop: canvas + metadata rail. */}
@@ -434,25 +451,8 @@ export default function ArticleEditorPage() {
         {showDesktopEditor ? editorPane : null}
         {desktopSplit ? previewPane : null}
       </div>
-      {railOpen ? <aside aria-label="Article metadata" className="min-w-0"><div className="sticky top-[7rem] max-h-[calc(100dvh-9.5rem)] overflow-y-auto pb-2">{metadataPane}</div></aside> : null}
+      {railOpen ? <aside aria-label="Article panel" className="min-w-0"><div className="sticky top-[7rem] max-h-[calc(100dvh-9.5rem)] overflow-y-auto pb-2">{sidePanelPane}</div></aside> : null}
     </div>
-
-    <ArticleFindingsBar
-      findings={findings}
-      score={score}
-      validating={validating}
-      open={findingsOpen}
-      onOpenChange={setFindingsOpen}
-      bodyMd={article.bodyMd}
-      onSelectFinding={revealFinding}
-      onInsertTemplate={insertDirective}
-      canSolve={canAuthor}
-      solving={solvingFindings}
-      solvingFindingKey={solvingFindingKey}
-      solveProgress={solveProgress}
-      solveError={solveError}
-      onSolveWithAI={() => void solveFindingsWithAI()}
-    />
 
     <RevisionDrawer open={revisionsOpen} articleId={article.id} currentBody={article.bodyMd} onClose={() => setRevisionsOpen(false)} onRestore={restore} />
     <BuildArticleWithAiModal
