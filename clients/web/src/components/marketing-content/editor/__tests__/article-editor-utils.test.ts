@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
+import type { MarketingArticle } from '../../../../lib/marketing-content-api'
 import {
   directives,
   formatQualityScore,
+  reconcileConcurrentSave,
   isBlockingFinding,
   lintMetadata,
   scoreMeterPercent,
@@ -51,5 +53,22 @@ describe('article editor helpers', () => {
     expect(formatQualityScore(8.5)).toBe('8.5')
     expect(isBlockingFinding('error')).toBe(true)
     expect(isBlockingFinding('warn')).toBe(false)
+  })
+  it('keeps edits made while an older save was in flight', () => {
+    const current = {
+      id: 'article-1', heroMediaId: 'new-image', path: '/blog/old-path', status: 'draft',
+      revisionNo: 4, updatedAt: '2026-08-17T04:00:00Z',
+    } as MarketingArticle
+    const saved = {
+      ...current, heroMediaId: null, path: '/blog/saved-path', revisionNo: 5,
+      updatedAt: '2026-08-17T04:01:00Z',
+    }
+
+    expect(reconcileConcurrentSave(current, saved)).toMatchObject({
+      heroMediaId: 'new-image',
+      path: '/blog/saved-path',
+      revisionNo: 5,
+      updatedAt: '2026-08-17T04:01:00Z',
+    })
   })
 })

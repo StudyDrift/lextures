@@ -94,6 +94,17 @@ export function writePayload(article: MarketingArticle): MarketingArticleWrite {
   }
 }
 
+export function reconcileConcurrentSave(current: MarketingArticle, saved: MarketingArticle): MarketingArticle {
+  return {
+    ...current,
+    path: saved.path,
+    status: saved.status,
+    liveStatus: saved.liveStatus,
+    revisionNo: saved.revisionNo,
+    updatedAt: saved.updatedAt,
+  }
+}
+
 export function commaList(value: string): string[] {
   return value.split(',').map((item) => item.trim()).filter(Boolean)
 }

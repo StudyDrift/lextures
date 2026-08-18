@@ -23,8 +23,6 @@ describe('ArticleFindingsBar', () => {
         findings={findings}
         score={1}
         validating={false}
-        open
-        onOpenChange={vi.fn()}
         bodyMd="# Title"
         onSelectFinding={onSelectFinding}
         onInsertTemplate={onInsertTemplate}
@@ -53,8 +51,6 @@ describe('ArticleFindingsBar', () => {
         findings={findings}
         score={1}
         validating={false}
-        open
-        onOpenChange={vi.fn()}
         bodyMd="# Title"
         onSelectFinding={vi.fn()}
         onInsertTemplate={vi.fn()}
@@ -73,8 +69,6 @@ describe('ArticleFindingsBar', () => {
         findings={findings}
         score={1}
         validating={false}
-        open
-        onOpenChange={vi.fn()}
         bodyMd="# Title"
         onSelectFinding={vi.fn()}
         onInsertTemplate={vi.fn()}
@@ -95,8 +89,6 @@ describe('ArticleFindingsBar', () => {
         findings={findings}
         score={1}
         validating={false}
-        open
-        onOpenChange={vi.fn()}
         bodyMd="# Title"
         onSelectFinding={vi.fn()}
         onInsertTemplate={vi.fn()}

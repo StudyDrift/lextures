@@ -8,6 +8,7 @@ import {
   buildRedirectsFile,
   buildSitemap,
   escapeHtml,
+  fetchMediaRendition,
   injectDocument,
   injectHead,
   parseMarkdownDate,
@@ -26,6 +27,19 @@ import {
   buildLinkGraph,
   validateLinkGraph,
 } from './generate-site.mjs'
+
+describe('fetchMediaRendition', () => {
+  it('leaves unavailable content media remote instead of failing the build', async () => {
+    const warnings = []
+    const result = await fetchMediaRendition(
+      'https://self.lextures.com/missing.png',
+      async () => { throw new Error('404 Media not found') },
+      warning => warnings.push(warning),
+    )
+    assert.equal(result, null)
+    assert.match(warnings[0], /content media unavailable.*404 Media not found/)
+  })
+})
 
 describe('escapeHtml', () => {
   it('escapes script payloads', () => {
