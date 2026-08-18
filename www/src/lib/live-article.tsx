@@ -1,4 +1,4 @@
-import { createElement, StrictMode } from 'react'
+import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BlogPost } from '../pages/blog-post'
 import { DocsPost } from '../pages/docs-post'
@@ -35,15 +35,15 @@ export async function renderLiveArticle(ref: ContentPath, root: HTMLElement): Pr
   if (!article) return false
   applyArticleHead(article)
   const page =
-    ref.kind === 'blog'
-      ? createElement(BlogPost, { slug: article.slug })
-      : createElement(DocsPost, { category: article.category || ref.category || '', slug: article.slug })
+    ref.kind === 'blog' ? (
+      <BlogPost slug={article.slug} />
+    ) : (
+      <DocsPost category={article.category || ref.category || ''} slug={article.slug} />
+    )
   createRoot(root).render(
-    createElement(
-      StrictMode,
-      null,
-      createElement(SsrDataProvider, { data: { article, path: article.path }, children: page }),
-    ),
+    <StrictMode>
+      <SsrDataProvider data={{ article, path: article.path }}>{page}</SsrDataProvider>
+    </StrictMode>,
   )
   return true
 }
