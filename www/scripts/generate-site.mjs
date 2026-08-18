@@ -1180,7 +1180,7 @@ async function main() {
     if (content?.article?.socialDescription) head.ogDescription = content.article.socialDescription
     const hero = content?.article?.media?.find(media => media.id === content.article.heroMediaId || media.usage === 'hero')
     const heroRendition = pickSocialRendition(hero)
-    const cardOverride = heroRendition ? `${SITE_ORIGIN}${localizedMediaPath(hero, heroRendition)}` : route.descriptor?.ogImage
+    const cardOverride = heroRendition?.localizedPath ? `${SITE_ORIGIN}${heroRendition.localizedPath}` : route.descriptor?.ogImage
     if (cardOverride && !/\.(png|jpe?g)(?:[?#]|$)/i.test(cardOverride)) {
       allErrors.push(`${route.path}: ogImage override must be a raster PNG or JPEG`)
     }
@@ -1756,11 +1756,6 @@ async function localizeContentMedia(articles) {
   })
 }
 
-function localizedMediaPath(media, rendition) {
-  const checksum = String(media.checksum || media.id).replace(/[^a-zA-Z0-9_-]/g, '')
-  return `/assets/content/${checksum}/${rendition.name}.${rendition.ext}`
-}
-
 async function localizeOneMedia(media, checksum) {
   const dir = path.join(DIST, 'assets', 'content', checksum)
   await mkdir(dir, { recursive: true })
@@ -1773,9 +1768,10 @@ async function localizeOneMedia(media, checksum) {
     if (!buffer) continue
     const filename = `${rendition.name}.${rendition.ext}`
     await writeFile(path.join(dir, filename), buffer)
+    rendition.localizedPath = `/assets/content/${checksum}/${filename}`
     if (!sourceBuffer || rendition.name === 'original') sourceBuffer = buffer
-    replacements.push([rendition.url, `/assets/content/${checksum}/${filename}`])
-    replacements.push([remote, `/assets/content/${checksum}/${filename}`])
+    replacements.push([rendition.url, rendition.localizedPath])
+    replacements.push([remote, rendition.localizedPath])
   }
   if (sourceBuffer) {
     const names = new Set((media.renditions || []).map(r => `${r.name}.${r.ext}`))
