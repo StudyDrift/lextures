@@ -21,7 +21,7 @@ import { resolveMarketingPreviewUrl } from '../../../lib/marketing-site'
 
 const emptyArticle = (kind: 'blog' | 'doc'): MarketingArticle => ({
   id: '', kind, slug: '', path: '', locale: 'en', title: '', description: '', bodyMd: '', status: 'draft', authorSlug: '', reviewerSlug: null,
-  primaryQuestion: '', cluster: '', pillar: '', verifiedAgainst: '', keywords: [], relatedTo: [], roles: [], segments: [], citations: [], heroMediaId: null,
+  primaryQuestion: '', cluster: '', pillar: '', verifiedAgainst: '', keywords: [], relatedTo: [], roles: [], segments: [], citations: [], heroMediaId: null, socialTitle: '', socialDescription: '',
   noindex: false, canonicalOverride: null, updatedAt: '', revisionNo: 0,
 })
 
@@ -278,6 +278,8 @@ export default function ArticleEditorPage() {
         ...old,
         title: draft.title || old.title,
         description: draft.description,
+        socialTitle: draft.socialTitle || old.socialTitle,
+        socialDescription: draft.socialDescription || old.socialDescription,
         bodyMd: draft.bodyMd,
         primaryQuestion: draft.primaryQuestion,
         cluster: draft.cluster,

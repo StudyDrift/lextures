@@ -129,6 +129,9 @@ func TestGenerateMetadataFromContent(t *testing.T) {
 	if got.Slug != "homeschool-student-advice" || got.Description != "Practical advice for homeschool families." {
 		t.Fatalf("got %#v", got)
 	}
+	if got.SocialTitle != "Homeschool advice" || got.SocialDescription != got.Description {
+		t.Fatalf("social fallback %#v", got)
+	}
 	if got.Title != "" || got.BodyMD != "" {
 		t.Fatalf("metadata draft should clear title/body: %#v", got)
 	}

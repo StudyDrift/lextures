@@ -6,6 +6,8 @@ export type MarketingArticleAIDraft = {
   title: string
   slug: string
   description: string
+  socialTitle: string
+  socialDescription: string
   bodyMd: string
   primaryQuestion: string
   cluster: string
@@ -18,6 +20,8 @@ function draftFromBody(body: Partial<MarketingArticleAIDraft>): MarketingArticle
     title: body.title ?? '',
     slug: body.slug ?? '',
     description: body.description ?? '',
+    socialTitle: body.socialTitle ?? '',
+    socialDescription: body.socialDescription ?? '',
     bodyMd: body.bodyMd ?? '',
     primaryQuestion: body.primaryQuestion ?? '',
     cluster: body.cluster ?? '',

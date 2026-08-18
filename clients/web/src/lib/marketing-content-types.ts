@@ -77,6 +77,8 @@ export type MarketingArticle = MarketingArticleRow & {
   segments: string[];
   citations: string[];
   heroMediaId?: string | null;
+  socialTitle?: string;
+  socialDescription?: string;
   noindex: boolean;
   canonicalOverride?: string | null;
   contentUpdatedAt?: string | null;

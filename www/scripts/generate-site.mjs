@@ -292,20 +292,30 @@ export function collectSchemaTypes(jsonLd) {
   return types
 }
 
-export function buildHeadTags({ title, description, canonical, image, imageAlt, jsonLd, robots, markdownAlternate, alternates = [], feeds = false }) {
+export function pickSocialRendition(hero) {
+  const renditions = hero?.renditions || []
+  const exact = renditions.find(item => Number(item.width) === 1200 && Number(item.height) === 630)
+    || renditions.find(item => item.name === 'social')
+  if (exact && /\.(png|jpe?g)$/i.test(`${exact.name}.${exact.ext}`)) return exact
+  return renditions.find(item => /\.(png|jpe?g)$/i.test(`${item.name}.${item.ext}`)) || null
+}
+
+export function buildHeadTags({ title, description, ogTitle, ogDescription, canonical, image, imageAlt, jsonLd, robots, markdownAlternate, alternates = [], feeds = false }) {
   const t = escapeHtml(title)
   const d = escapeHtml(description)
+  const shareTitle = escapeHtml(ogTitle || title)
+  const shareDescription = escapeHtml(ogDescription || description)
   const c = escapeHtml(canonical)
   const img = escapeHtml(image || `${SITE_ORIGIN}/assets/og-default.png`)
-  const imgAlt = escapeHtml(imageAlt || `${title} — Lextures`)
+  const imgAlt = escapeHtml(imageAlt || `${ogTitle || title} — Lextures`)
   const r = escapeHtml(robots || 'index,follow')
   const lines = [
     `<title>${t}</title>`,
     `<meta name="description" content="${d}" />`,
     `<meta name="robots" content="${r}" />`,
     `<link rel="canonical" href="${c}" />`,
-    `<meta property="og:title" content="${t}" />`,
-    `<meta property="og:description" content="${d}" />`,
+    `<meta property="og:title" content="${shareTitle}" />`,
+    `<meta property="og:description" content="${shareDescription}" />`,
     `<meta property="og:image" content="${img}" />`,
     `<meta property="og:image:width" content="1200" />`,
     `<meta property="og:image:height" content="630" />`,
@@ -313,8 +323,8 @@ export function buildHeadTags({ title, description, canonical, image, imageAlt, 
     `<meta property="og:type" content="website" />`,
     `<meta property="og:url" content="${c}" />`,
     `<meta name="twitter:card" content="summary_large_image" />`,
-    `<meta name="twitter:title" content="${t}" />`,
-    `<meta name="twitter:description" content="${d}" />`,
+    `<meta name="twitter:title" content="${shareTitle}" />`,
+    `<meta name="twitter:description" content="${shareDescription}" />`,
     `<meta name="twitter:image" content="${img}" />`,
     `<meta name="twitter:image:alt" content="${imgAlt}" />`,
   ]
@@ -1166,8 +1176,10 @@ async function main() {
     // SEO.14: an explicit hand-made raster image wins; otherwise generate a
     // deterministic, content-addressed social card. Generation failures are
     // non-fatal and use the checked-in raster default.
+    if (content?.article?.socialTitle) head.ogTitle = content.article.socialTitle
+    if (content?.article?.socialDescription) head.ogDescription = content.article.socialDescription
     const hero = content?.article?.media?.find(media => media.id === content.article.heroMediaId || media.usage === 'hero')
-    const heroRendition = hero?.renditions?.find(item => Number(item.width) === 1200 && Number(item.height) === 630) || hero?.renditions?.find(item => item.name === 'social')
+    const heroRendition = pickSocialRendition(hero)
     const cardOverride = heroRendition ? `${SITE_ORIGIN}${localizedMediaPath(hero, heroRendition)}` : route.descriptor?.ogImage
     if (cardOverride && !/\.(png|jpe?g)(?:[?#]|$)/i.test(cardOverride)) {
       allErrors.push(`${route.path}: ogImage override must be a raster PNG or JPEG`)

@@ -11,6 +11,7 @@ import {
   injectDocument,
   injectHead,
   parseMarkdownDate,
+  pickSocialRendition,
   resolveApiAssetUrl,
   serializeJsonLd,
   STATIC_ROUTES,
@@ -146,6 +147,44 @@ describe('buildHeadTags', () => {
     assert.match(html, /application\/ld\+json/)
     assert.match(html, /"@type":"Course"/)
     assert.doesNotMatch(html, /<script>alert/)
+  })
+
+  it('uses social title and description for Open Graph and Twitter tags', () => {
+    const html = buildHeadTags({
+      title: 'Page Title — Lextures',
+      description: 'Search description',
+      ogTitle: 'Share this post',
+      ogDescription: 'A short social blurb.',
+      canonical: 'https://lextures.com/blog/example',
+    })
+    assert.match(html, /<title>Page Title — Lextures<\/title>/)
+    assert.match(html, /name="description" content="Search description"/)
+    assert.match(html, /og:title" content="Share this post"/)
+    assert.match(html, /og:description" content="A short social blurb."/)
+    assert.match(html, /twitter:title" content="Share this post"/)
+    assert.match(html, /twitter:description" content="A short social blurb."/)
+  })
+})
+
+describe('pickSocialRendition', () => {
+  it('prefers the 1200x630 social card', () => {
+    const rendition = pickSocialRendition({
+      renditions: [
+        { name: 'original', ext: 'png', width: 2400, height: 1600 },
+        { name: 'social', ext: 'png', width: 1200, height: 630 },
+      ],
+    })
+    assert.equal(rendition.name, 'social')
+  })
+
+  it('falls back to the first PNG or JPEG', () => {
+    const rendition = pickSocialRendition({
+      renditions: [
+        { name: 'original', ext: 'webp', width: 800, height: 600 },
+        { name: '800w', ext: 'jpg', width: 800, height: 450 },
+      ],
+    })
+    assert.equal(rendition.ext, 'jpg')
   })
 })
 

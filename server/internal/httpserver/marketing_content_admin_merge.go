@@ -32,6 +32,8 @@ type marketingArticleBody struct {
 	Segments           []string   `json:"segments"`
 	Citations          []string   `json:"citations"`
 	HeroMediaID        *uuid.UUID `json:"heroMediaId"`
+	SocialTitle        string     `json:"socialTitle"`
+	SocialDescription  string     `json:"socialDescription"`
 	Noindex            bool       `json:"noindex"`
 	CanonicalOverride  *string    `json:"canonicalOverride"`
 	ExpectedRevisionNo int        `json:"expectedRevisionNo"`
@@ -39,7 +41,7 @@ type marketingArticleBody struct {
 }
 
 func (b marketingArticleBody) input(actor uuid.UUID) mcrepo.NewArticle {
-	return mcrepo.NewArticle{Kind: b.Kind, Slug: b.Slug, Locale: b.Locale, CategoryID: b.CategoryID, Title: b.Title, Description: b.Description, BodyMD: b.BodyMD, AuthorSlug: b.AuthorSlug, ReviewerSlug: b.ReviewerSlug, ReviewDueOn: b.ReviewDueOn, PrimaryQuestion: b.PrimaryQuestion, Cluster: b.Cluster, Pillar: b.Pillar, BriefRef: b.BriefRef, VerifiedAgainst: b.VerifiedAgainst, Keywords: b.Keywords, RelatedTo: b.RelatedTo, Roles: b.Roles, Segments: b.Segments, Citations: b.Citations, HeroMediaID: b.HeroMediaID, Noindex: b.Noindex, CanonicalOverride: b.CanonicalOverride, ActorID: actor, ChangeNote: b.ChangeNote}
+	return mcrepo.NewArticle{Kind: b.Kind, Slug: b.Slug, Locale: b.Locale, CategoryID: b.CategoryID, Title: b.Title, Description: b.Description, BodyMD: b.BodyMD, AuthorSlug: b.AuthorSlug, ReviewerSlug: b.ReviewerSlug, ReviewDueOn: b.ReviewDueOn, PrimaryQuestion: b.PrimaryQuestion, Cluster: b.Cluster, Pillar: b.Pillar, BriefRef: b.BriefRef, VerifiedAgainst: b.VerifiedAgainst, Keywords: b.Keywords, RelatedTo: b.RelatedTo, Roles: b.Roles, Segments: b.Segments, Citations: b.Citations, HeroMediaID: b.HeroMediaID, SocialTitle: b.SocialTitle, SocialDescription: b.SocialDescription, Noindex: b.Noindex, CanonicalOverride: b.CanonicalOverride, ActorID: actor, ChangeNote: b.ChangeNote}
 }
 
 func validateArticleBody(b marketingArticleBody) error {
@@ -108,6 +110,12 @@ func mergeMarketingArticle(a *mcrepo.Article, b marketingArticleBody, raw map[st
 	if _, ok := raw["heroMediaId"]; ok {
 		in.HeroMediaID = b.HeroMediaID
 	}
+	if _, ok := raw["socialTitle"]; ok {
+		in.SocialTitle = b.SocialTitle
+	}
+	if _, ok := raw["socialDescription"]; ok {
+		in.SocialDescription = b.SocialDescription
+	}
 	if _, ok := raw["keywords"]; ok {
 		in.Keywords = b.Keywords
 	}
@@ -134,5 +142,5 @@ func mergeMarketingArticle(a *mcrepo.Article, b marketingArticleBody, raw map[st
 }
 
 func mcArticleInput(a *mcrepo.Article, actor uuid.UUID) mcrepo.NewArticle {
-	return mcrepo.NewArticle{Kind: a.Kind, Slug: a.Slug, Locale: a.Locale, TranslationGroupID: a.TranslationGroupID, CategoryID: a.CategoryID, Title: a.Title, Description: a.Description, BodyMD: a.BodyMD, Status: a.Status, AuthorSlug: a.AuthorSlug, ReviewerSlug: a.ReviewerSlug, PublishedAt: a.PublishedAt, FirstPublishedAt: a.FirstPublishedAt, ScheduledFor: a.ScheduledFor, ContentUpdatedAt: a.ContentUpdatedAt, ReviewedAt: a.ReviewedAt, ReviewDueOn: a.ReviewDueOn, PrimaryQuestion: a.PrimaryQuestion, Cluster: a.Cluster, Pillar: a.Pillar, BriefRef: a.BriefRef, VerifiedAgainst: a.VerifiedAgainst, Keywords: a.Keywords, RelatedTo: a.RelatedTo, Roles: a.Roles, Segments: a.Segments, Citations: a.Citations, HeroMediaID: a.HeroMediaID, QualityScore: a.QualityScore, QualityReport: a.QualityReport, Noindex: a.Noindex, CanonicalOverride: a.CanonicalOverride, Extra: a.Extra, ActorID: actor}
+	return mcrepo.NewArticle{Kind: a.Kind, Slug: a.Slug, Locale: a.Locale, TranslationGroupID: a.TranslationGroupID, CategoryID: a.CategoryID, Title: a.Title, Description: a.Description, BodyMD: a.BodyMD, Status: a.Status, AuthorSlug: a.AuthorSlug, ReviewerSlug: a.ReviewerSlug, PublishedAt: a.PublishedAt, FirstPublishedAt: a.FirstPublishedAt, ScheduledFor: a.ScheduledFor, ContentUpdatedAt: a.ContentUpdatedAt, ReviewedAt: a.ReviewedAt, ReviewDueOn: a.ReviewDueOn, PrimaryQuestion: a.PrimaryQuestion, Cluster: a.Cluster, Pillar: a.Pillar, BriefRef: a.BriefRef, VerifiedAgainst: a.VerifiedAgainst, Keywords: a.Keywords, RelatedTo: a.RelatedTo, Roles: a.Roles, Segments: a.Segments, Citations: a.Citations, HeroMediaID: a.HeroMediaID, SocialTitle: a.SocialTitle, SocialDescription: a.SocialDescription, QualityScore: a.QualityScore, QualityReport: a.QualityReport, Noindex: a.Noindex, CanonicalOverride: a.CanonicalOverride, Extra: a.Extra, ActorID: actor}
 }

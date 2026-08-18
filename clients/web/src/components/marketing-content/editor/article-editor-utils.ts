@@ -89,7 +89,8 @@ export function writePayload(article: MarketingArticle): MarketingArticleWrite {
     reviewDueOn: article.reviewDueOn,
     primaryQuestion: article.primaryQuestion, cluster: article.cluster, pillar: article.pillar, verifiedAgainst: article.verifiedAgainst,
     keywords: article.keywords, relatedTo: article.relatedTo, roles: article.roles, segments: article.segments, citations: article.citations,
-    heroMediaId: article.heroMediaId, noindex: article.noindex, canonicalOverride: article.canonicalOverride,
+    heroMediaId: article.heroMediaId, socialTitle: article.socialTitle ?? '', socialDescription: article.socialDescription ?? '',
+    noindex: article.noindex, canonicalOverride: article.canonicalOverride,
   }
 }
 

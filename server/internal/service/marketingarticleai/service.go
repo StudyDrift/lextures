@@ -16,6 +16,7 @@ const (
 	MaxExistingRunes    = 80_000
 	MaxTitleRunes       = 200
 	MaxDescriptionRunes = 160
+	MaxSocialTitleRunes = 70
 	MaxFieldRunes       = 200
 	MaxBodyRunes        = 80_000
 	MaxKeywords         = 12
@@ -24,14 +25,16 @@ const (
 
 // Draft is a proposed article (not persisted).
 type Draft struct {
-	Title           string   `json:"title"`
-	Slug            string   `json:"slug,omitempty"`
-	Description     string   `json:"description"`
-	BodyMD          string   `json:"bodyMd"`
-	PrimaryQuestion string   `json:"primaryQuestion"`
-	Cluster         string   `json:"cluster"`
-	Pillar          string   `json:"pillar"`
-	Keywords        []string `json:"keywords"`
+	Title             string   `json:"title"`
+	Slug              string   `json:"slug,omitempty"`
+	Description       string   `json:"description"`
+	SocialTitle       string   `json:"socialTitle,omitempty"`
+	SocialDescription string   `json:"socialDescription,omitempty"`
+	BodyMD            string   `json:"bodyMd"`
+	PrimaryQuestion   string   `json:"primaryQuestion"`
+	Cluster           string   `json:"cluster"`
+	Pillar            string   `json:"pillar"`
+	Keywords          []string `json:"keywords"`
 }
 
 // DefaultSystemPrompt instructs the model to return structured marketing-dialect JSON only.
@@ -42,6 +45,8 @@ The JSON must be an object:
 {
   "title": "...",
   "description": "...",
+  "socialTitle": "...",
+  "socialDescription": "...",
   "primaryQuestion": "...",
   "cluster": "...",
   "pillar": "...",
@@ -52,6 +57,8 @@ The JSON must be an object:
 Rules:
 - title: specific, human, no clickbait. No trailing period.
 - description: 1–2 sentences, at most 160 characters, suitable for search and social cards.
+- socialTitle: punchy Open Graph / social share title, at most 70 characters. May differ from title.
+- socialDescription: 1–2 sentences, at most 160 characters, written for Facebook, LinkedIn, and X cards.
 - primaryQuestion: the search-style question this article answers, ending with ?.
 - cluster: short topic cluster label (2–4 words).
 - pillar: short editorial pillar (2–4 words).
@@ -81,6 +88,8 @@ The JSON must be an object:
 {
   "slug": "...",
   "description": "...",
+  "socialTitle": "...",
+  "socialDescription": "...",
   "primaryQuestion": "...",
   "cluster": "...",
   "pillar": "...",
@@ -90,6 +99,8 @@ The JSON must be an object:
 Rules:
 - slug: lowercase kebab-case ASCII, 3–8 words, no leading or trailing hyphens.
 - description: 1–2 sentences, at most 160 characters, suitable for search and social cards.
+- socialTitle: punchy Open Graph / social share title, at most 70 characters. May differ from the page title.
+- socialDescription: 1–2 sentences, at most 160 characters, written for Facebook, LinkedIn, and X cards.
 - primaryQuestion: the search-style question this article answers, ending with ?.
 - cluster: short topic cluster label (2–4 words).
 - pillar: short editorial pillar (2–4 words).
@@ -195,6 +206,12 @@ func GenerateMetadataFromContent(
 	if draft.Slug == "" && title != "" {
 		draft.Slug = slugifySlug(title)
 	}
+	if draft.SocialTitle == "" && title != "" {
+		draft.SocialTitle = clipRunes(title, MaxSocialTitleRunes)
+	}
+	if draft.SocialDescription == "" {
+		draft.SocialDescription = draft.Description
+	}
 	return draft, meta, nil
 }
 
@@ -210,13 +227,15 @@ func ParseDraftJSON(raw string) (Draft, error) {
 
 func normalizeDraft(in Draft) Draft {
 	out := Draft{
-		Title:           clipRunes(strings.TrimSpace(in.Title), MaxTitleRunes),
-		Slug:            slugifySlug(in.Slug),
-		Description:     clipRunes(strings.TrimSpace(in.Description), MaxDescriptionRunes),
-		BodyMD:          clipRunes(strings.TrimSpace(in.BodyMD), MaxBodyRunes),
-		PrimaryQuestion: clipRunes(strings.TrimSpace(in.PrimaryQuestion), MaxFieldRunes),
-		Cluster:         clipRunes(strings.TrimSpace(in.Cluster), MaxFieldRunes),
-		Pillar:          clipRunes(strings.TrimSpace(in.Pillar), MaxFieldRunes),
+		Title:             clipRunes(strings.TrimSpace(in.Title), MaxTitleRunes),
+		Slug:              slugifySlug(in.Slug),
+		Description:       clipRunes(strings.TrimSpace(in.Description), MaxDescriptionRunes),
+		SocialTitle:       clipRunes(strings.TrimSpace(in.SocialTitle), MaxSocialTitleRunes),
+		SocialDescription: clipRunes(strings.TrimSpace(in.SocialDescription), MaxDescriptionRunes),
+		BodyMD:            clipRunes(strings.TrimSpace(in.BodyMD), MaxBodyRunes),
+		PrimaryQuestion:   clipRunes(strings.TrimSpace(in.PrimaryQuestion), MaxFieldRunes),
+		Cluster:           clipRunes(strings.TrimSpace(in.Cluster), MaxFieldRunes),
+		Pillar:            clipRunes(strings.TrimSpace(in.Pillar), MaxFieldRunes),
 	}
 	seen := map[string]struct{}{}
 	for _, kw := range in.Keywords {

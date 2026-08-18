@@ -15,41 +15,43 @@ var (
 )
 
 type Article struct {
-	ID                 uuid.UUID       `json:"id"`
-	Kind               string          `json:"kind"`
-	Slug               string          `json:"slug"`
-	Locale             string          `json:"locale"`
-	Path               string          `json:"path"`
-	Title              string          `json:"title"`
-	Description        string          `json:"description"`
-	BodyMD             string          `json:"bodyMd"`
-	Status             string          `json:"status"`
-	TranslationGroupID uuid.UUID       `json:"translationGroupId"`
-	CategoryID         *uuid.UUID      `json:"categoryId"`
-	AuthorSlug         string          `json:"authorSlug"`
-	ReviewerSlug       *string         `json:"reviewerSlug"`
-	PublishedAt        *time.Time      `json:"publishedAt"`
-	FirstPublishedAt   *time.Time      `json:"firstPublishedAt"`
-	ScheduledFor       *time.Time      `json:"scheduledFor"`
-	ContentUpdatedAt   *time.Time      `json:"contentUpdatedAt"`
-	ReviewedAt         *time.Time      `json:"reviewedAt"`
-	ReviewDueOn        *time.Time      `json:"reviewDueOn"`
-	PrimaryQuestion    string          `json:"primaryQuestion"`
-	Cluster            string          `json:"cluster"`
-	Pillar             string          `json:"pillar"`
-	BriefRef           string          `json:"briefRef"`
-	VerifiedAgainst    string          `json:"verifiedAgainst"`
-	Keywords           []string        `json:"keywords"`
-	RelatedTo          []string        `json:"relatedTo"`
-	Roles              []string        `json:"roles"`
-	Segments           []string        `json:"segments"`
-	Citations          []string        `json:"citations"`
-	HeroMediaID        *uuid.UUID      `json:"heroMediaId"`
-	QualityScore       *float64        `json:"qualityScore"`
-	QualityReport      json.RawMessage `json:"qualityReport"`
-	Noindex            bool            `json:"noindex"`
-	CanonicalOverride  *string         `json:"canonicalOverride"`
-	Extra              json.RawMessage `json:"extra"`
+	ID                   uuid.UUID       `json:"id"`
+	Kind                 string          `json:"kind"`
+	Slug                 string          `json:"slug"`
+	Locale               string          `json:"locale"`
+	Path                 string          `json:"path"`
+	Title                string          `json:"title"`
+	Description          string          `json:"description"`
+	BodyMD               string          `json:"bodyMd"`
+	Status               string          `json:"status"`
+	TranslationGroupID   uuid.UUID       `json:"translationGroupId"`
+	CategoryID           *uuid.UUID      `json:"categoryId"`
+	AuthorSlug           string          `json:"authorSlug"`
+	ReviewerSlug         *string         `json:"reviewerSlug"`
+	PublishedAt          *time.Time      `json:"publishedAt"`
+	FirstPublishedAt     *time.Time      `json:"firstPublishedAt"`
+	ScheduledFor         *time.Time      `json:"scheduledFor"`
+	ContentUpdatedAt     *time.Time      `json:"contentUpdatedAt"`
+	ReviewedAt           *time.Time      `json:"reviewedAt"`
+	ReviewDueOn          *time.Time      `json:"reviewDueOn"`
+	PrimaryQuestion      string          `json:"primaryQuestion"`
+	Cluster              string          `json:"cluster"`
+	Pillar               string          `json:"pillar"`
+	BriefRef             string          `json:"briefRef"`
+	VerifiedAgainst      string          `json:"verifiedAgainst"`
+	Keywords             []string        `json:"keywords"`
+	RelatedTo            []string        `json:"relatedTo"`
+	Roles                []string        `json:"roles"`
+	Segments             []string        `json:"segments"`
+	Citations            []string        `json:"citations"`
+	HeroMediaID          *uuid.UUID      `json:"heroMediaId"`
+	SocialTitle          string          `json:"socialTitle"`
+	SocialDescription    string          `json:"socialDescription"`
+	QualityScore         *float64        `json:"qualityScore"`
+	QualityReport        json.RawMessage `json:"qualityReport"`
+	Noindex              bool            `json:"noindex"`
+	CanonicalOverride    *string         `json:"canonicalOverride"`
+	Extra                json.RawMessage `json:"extra"`
 	RevisionNo           int             `json:"revisionNo"`
 	SourceArticleID      *uuid.UUID      `json:"sourceArticleId,omitempty"`
 	SourceSyncedRevision *int            `json:"sourceSyncedRevision,omitempty"`
@@ -65,29 +67,29 @@ type Article struct {
 }
 
 type ArticleSummary struct {
-	ID            uuid.UUID  `json:"id"`
-	Kind          string     `json:"kind"`
-	Slug          string     `json:"slug"`
-	Locale        string     `json:"locale"`
-	Path          string     `json:"path"`
-	Title         string     `json:"title"`
-	Description   string     `json:"description"`
-	Status        string     `json:"status"`
-	AuthorSlug    string     `json:"authorSlug"`
-	AuthorName    string     `json:"authorName"`
-	ReviewerSlug  *string    `json:"reviewerSlug"`
-	ReviewerName  *string    `json:"reviewerName"`
-	CategoryID    *uuid.UUID `json:"categoryId"`
-	CategorySlug  *string    `json:"categorySlug"`
-	CategoryTitle *string    `json:"categoryTitle"`
-	ReviewDueOn   *time.Time `json:"reviewDueOn"`
-	QualityScore     *float64  `json:"qualityScore"`
-	PublishedAt      *time.Time `json:"publishedAt"`
-	RevisionNo       int       `json:"revisionNo"`
-	UpdatedAt        time.Time `json:"updatedAt"`
-	TranslationGroupID uuid.UUID `json:"translationGroupId,omitempty"`
-	GroupLocales     []string  `json:"groupLocales,omitempty"`
-	Stale            bool      `json:"stale,omitempty"`
+	ID                 uuid.UUID  `json:"id"`
+	Kind               string     `json:"kind"`
+	Slug               string     `json:"slug"`
+	Locale             string     `json:"locale"`
+	Path               string     `json:"path"`
+	Title              string     `json:"title"`
+	Description        string     `json:"description"`
+	Status             string     `json:"status"`
+	AuthorSlug         string     `json:"authorSlug"`
+	AuthorName         string     `json:"authorName"`
+	ReviewerSlug       *string    `json:"reviewerSlug"`
+	ReviewerName       *string    `json:"reviewerName"`
+	CategoryID         *uuid.UUID `json:"categoryId"`
+	CategorySlug       *string    `json:"categorySlug"`
+	CategoryTitle      *string    `json:"categoryTitle"`
+	ReviewDueOn        *time.Time `json:"reviewDueOn"`
+	QualityScore       *float64   `json:"qualityScore"`
+	PublishedAt        *time.Time `json:"publishedAt"`
+	RevisionNo         int        `json:"revisionNo"`
+	UpdatedAt          time.Time  `json:"updatedAt"`
+	TranslationGroupID uuid.UUID  `json:"translationGroupId,omitempty"`
+	GroupLocales       []string   `json:"groupLocales,omitempty"`
+	Stale              bool       `json:"stale,omitempty"`
 }
 
 type ArticleFilter struct {
@@ -114,6 +116,7 @@ type NewArticle struct {
 	PrimaryQuestion, Cluster, Pillar, BriefRef, VerifiedAgainst   string
 	Keywords, RelatedTo, Roles, Segments, Citations               []string
 	HeroMediaID                                                   *uuid.UUID
+	SocialTitle, SocialDescription                                string
 	QualityScore                                                  *float64
 	QualityReport                                                 json.RawMessage
 	Noindex                                                       bool

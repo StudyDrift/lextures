@@ -1786,6 +1786,13 @@
     "listMarketingTranslations",
     "markMarketingTranslationSynced"
   ],
+  "marketing-content-media-api.ts": [
+    "MarketingMediaAsset",
+    "MarketingMediaRendition",
+    "getMarketingMedia",
+    "marketingMediaPreviewUrl",
+    "uploadMarketingMedia"
+  ],
   "marketing-content-route-hints-api.ts": [
     "MarketingContextualArticle",
     "MarketingRouteHint",

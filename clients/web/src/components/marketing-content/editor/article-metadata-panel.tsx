@@ -4,6 +4,7 @@ import { generateMarketingArticleMetadata } from '../../../lib/marketing-content
 import type { MarketingArticle, MarketingFinding } from '../../../lib/marketing-content-api'
 import { Badge, Button, Checkbox, Disclosure, Field, InlineAlert, Input, Select, Textarea } from '../../ui'
 import { commaList, slugify } from './article-editor-utils'
+import { ArticleSocialImageField } from './article-social-image-field'
 
 type Option = { id?: string; slug?: string; title?: string; name?: string }
 type Props = {
@@ -96,12 +97,14 @@ export function ArticleMetadataPanel({ article, onChange, categories, authors, k
       })
       const nextSlug = slugify(draft.slug)
       const autoSlug = !article.publishedAt && (!article.slug || article.slug === slugify(article.title))
-      if (!draft.description.trim() && !(autoSlug && nextSlug)) {
+      if (!draft.description.trim() && !draft.socialTitle.trim() && !draft.socialDescription.trim() && !(autoSlug && nextSlug)) {
         setFillError('No metadata was generated. Add more article content and try again.')
         return
       }
       onChange({
         ...(draft.description.trim() ? { description: draft.description } : {}),
+        ...(draft.socialTitle.trim() ? { socialTitle: draft.socialTitle } : {}),
+        ...(draft.socialDescription.trim() ? { socialDescription: draft.socialDescription } : {}),
         ...(autoSlug && nextSlug ? { slug: nextSlug } : {}),
       })
     } catch (error) {
@@ -175,12 +178,19 @@ export function ArticleMetadataPanel({ article, onChange, categories, authors, k
       </Field>
     </Group>
 
+    <Group title={'Social preview'}>
+      <Field label="Social title" description="Custom title for Facebook, LinkedIn, and X. Leave blank to use the article title.">
+        <Input value={article.socialTitle ?? ''} maxLength={70} onChange={(e) => onChange({ socialTitle: e.target.value })} placeholder={article.title || 'Your custom title for social media'} />
+      </Field>
+      <Field label="Social description" description="Custom description for social cards. Leave blank to use the article description.">
+        <Textarea rows={3} maxLength={160} value={article.socialDescription ?? ''} onChange={(e) => onChange({ socialDescription: e.target.value })} placeholder={article.description || 'A short, compelling description of the page.'} />
+      </Field>
+      <ArticleSocialImageField heroMediaId={article.heroMediaId} title={article.title} onChange={(heroMediaId) => onChange({ heroMediaId })} />
+    </Group>
+
     <Group title={'Sources & media'}>
       <Field label="Citations" description="Comma separated URLs or references.">
         <Textarea rows={3} {...list('citations')} />
-      </Field>
-      <Field label="Hero media ID">
-        <Input value={article.heroMediaId ?? ''} onChange={(e) => onChange({ heroMediaId: e.target.value || null })} />
       </Field>
     </Group>
 
