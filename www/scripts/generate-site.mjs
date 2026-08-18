@@ -1769,8 +1769,8 @@ async function localizeOneMedia(media, checksum) {
   for (const rendition of media.renditions || []) {
     const remote = resolveApiAssetUrl(rendition.url, CONTENT_API_BASE)
     if (!remote) continue
-    const response = await fetchWithRetry(remote, { userAgent: PRERENDER_UA })
-    const buffer = Buffer.from(await response.arrayBuffer())
+    const buffer = await fetchMediaRendition(remote)
+    if (!buffer) continue
     const filename = `${rendition.name}.${rendition.ext}`
     await writeFile(path.join(dir, filename), buffer)
     if (!sourceBuffer || rendition.name === 'original') sourceBuffer = buffer
@@ -1783,6 +1783,16 @@ async function localizeOneMedia(media, checksum) {
     if (![...names].some(name => name.endsWith('.avif'))) await sharp(sourceBuffer).avif().toFile(path.join(dir, 'generated.avif'))
   }
   return replacements
+}
+
+export async function fetchMediaRendition(remote, fetcher = fetchWithRetry, warn = console.warn) {
+  try {
+    const response = await fetcher(remote, { userAgent: PRERENDER_UA })
+    return Buffer.from(await response.arrayBuffer())
+  } catch (error) {
+    warn(`[generate-site] WARN: content media unavailable at ${remote}: ${error.message || error}`)
+    return null
+  }
 }
 
 // Back-compat exports matching prerender-courses.test.mjs names
