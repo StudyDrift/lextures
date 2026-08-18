@@ -27,10 +27,10 @@ export interface ContentSource {
   listRedirects(locale?: string): ContentRedirect[]
 }
 
-type ApiArticle = Record<string, unknown> & { bodyMd?: string }
+export type ApiArticle = Record<string, unknown> & { bodyMd?: string }
 declare global { var __LEXTURES_BUILD_CONTENT__: ({ source: 'api'; articles: ApiArticle[]; categories?: ContentCategory[]; authors?: ContentAuthor[]; redirects?: ContentRedirect[]; generatedAt?: string; fetched?: number; cacheHits?: number; fallbackUsed?: boolean }) | undefined }
 
-function apiArticle(raw: ApiArticle): ContentArticle {
+export function apiArticle(raw: ApiArticle): ContentArticle {
   const value = raw as Record<string, any>; const body = String(value.bodyMd || '')
   const date = String(value.publishedAt || '').slice(0, 10); const updated = String(value.contentUpdatedAt || value.updatedAt || '').slice(0, 10) || undefined
   return {

@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import { Header } from '../components/header'
 import { SiteFooter } from '../components/site-footer'
@@ -8,12 +9,35 @@ import { RelatedContent } from '../components/related-content'
 import { ContextualLinks } from '../components/contextual-links'
 import { editorialPillar, pillarHref } from '../lib/editorial-pillars'
 import { useSsrData } from '../lib/ssr-context'
+import { fetchPublishedArticle, parseContentPath, previewTokenFromSearch } from '../lib/public-content'
+import type { ContentArticle } from '../lib/content-source'
 
 export function BlogPost({ slug }: { slug: string }) {
   const ssr = useSsrData()
   // Prefer the normalized content-source article (string author, html, dates).
   // Raw SSR payloads embed API author objects and bodyMd only.
-  const post = getPost(slug) ?? (ssr.article?.kind === 'blog' ? ssr.article : undefined)
+  const baked = getPost(slug) ?? (ssr.article?.kind === 'blog' ? ssr.article : undefined)
+  const [live, setLive] = useState<ContentArticle | undefined>()
+
+  useEffect(() => {
+    if (baked) return
+    let cancelled = false
+    const token = typeof window === 'undefined' ? undefined : previewTokenFromSearch(window.location.search)
+    const ref = (typeof window === 'undefined' ? null : parseContentPath(window.location.pathname)) ?? {
+      kind: 'blog' as const,
+      slug,
+      locale: 'en',
+      path: `/blog/${slug}`,
+    }
+    void fetchPublishedArticle(ref, token).then(article => {
+      if (!cancelled && article) setLive(article)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [baked, slug])
+
+  const post = baked ?? live
 
   if (!post) {
     return (
@@ -32,7 +56,7 @@ export function BlogPost({ slug }: { slug: string }) {
   const pillar = editorialPillar(post.pillar)
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-white text-slate-900">
+    <div className="relative min-h-screen overflow-x-hidden bg-white text-slate-900" data-blog-post-page data-article-slug={slug}>
       <Header />
 
       <main>
