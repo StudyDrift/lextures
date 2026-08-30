@@ -69,4 +69,25 @@ describe('RequireAuth', () => {
     expect(screen.getByText('Login page')).toBeInTheDocument()
     expect(loginState?.from).toBe('/marketplace/demo?coupon=LAUNCH25&ref=www')
   })
+
+  it('puts the return path on the login URL so a refresh still has it', () => {
+    vi.mocked(getBearerToken).mockReturnValue(null)
+    let loginPath = ''
+    function LoginProbe() {
+      const loc = useLocation()
+      loginPath = `${loc.pathname}${loc.search}`
+      return <div>Login page</div>
+    }
+    render(
+      <MemoryRouter initialEntries={['/marketplace/ai-essentials-c-hupcnf']}>
+        <Routes>
+          <Route element={<RequireAuth />}>
+            <Route path="/marketplace/:slug" element={<div>Detail</div>} />
+          </Route>
+          <Route path="/login" element={<LoginProbe />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+    expect(loginPath).toBe('/login?next=%2Fmarketplace%2Fai-essentials-c-hupcnf')
+  })
 })

@@ -3,31 +3,17 @@ import { type FormEvent, useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { BrandLogo } from '../components/brand-logo'
 import { applyAuthTokenResponse } from '../lib/session-tokens'
-import { pickPostAuthPath } from '../lib/post-auth-redirect'
+import { pickPostAuthPath, returnPathFromAuthLocation } from '../lib/post-auth-redirect'
 import { apiUrl } from '../lib/api'
 import { readApiErrorMessage } from '../lib/errors'
 import { applyUiTheme, parseUiTheme } from '../lib/ui-theme'
 import { markPostLoginShortcutTip } from '../lib/post-login-shortcut-tip'
 import { clearMfaFlow, getMfaFlow, type MfaFlowMode } from '../lib/mfa-flow-storage'
 
-type LocationState = { from?: string }
-
 export default function MfaLogin() {
   const navigate = useNavigate()
   const location = useLocation()
-  const state = location.state as LocationState | undefined
-  let from = state?.from ?? '/'
-  if (
-    from === '/login' ||
-    from === '/signup' ||
-    from === '/forgot-password' ||
-    from === '/reset-password' ||
-    from === '/activate-parent' ||
-    from.startsWith('/login/mfa') ||
-    from.startsWith('/login/magic-link')
-  ) {
-    from = '/'
-  }
+  const from = returnPathFromAuthLocation(location)
 
   const [flow] = useState<{ token: string; mode: MfaFlowMode } | null>(() => getMfaFlow())
   const [totpCredId, setTotpCredId] = useState<string | null>(null)

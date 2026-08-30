@@ -1,13 +1,18 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
 import App from '../../app'
 import { PermissionsProvider } from '../../context/permissions-provider'
 import { server } from '../../test/mocks/server'
 import { renderWithRouter } from '../../test/render'
 import Signup from '../signup'
+
+function PathProbe() {
+  const loc = useLocation()
+  return <div data-testid="path">{`${loc.pathname}${loc.search}`}</div>
+}
 
 describe('Signup', () => {
   it('renders create account heading', () => {
@@ -56,6 +61,28 @@ describe('Signup', () => {
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: /^dashboard$/i })).toBeInTheDocument()
     })
+  })
+
+  it('returns to the original marketplace path after creating an account', async () => {
+    const dest = '/marketplace/ai-essentials-c-hupcnf'
+    const user = userEvent.setup()
+    render(
+      <MemoryRouter
+        initialEntries={[{ pathname: '/signup', search: `?next=${encodeURIComponent(dest)}`, state: { from: dest } }]}
+      >
+        <Routes>
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/marketplace/:slug" element={<PathProbe />} />
+          <Route path="/" element={<PathProbe />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    await user.type(screen.getByLabelText(/^email$/i), 'new@example.com')
+    await user.type(screen.getByLabelText(/^password$/i), 'password12')
+    await user.click(screen.getByRole('button', { name: /create account/i }))
+
+    expect(await screen.findByTestId('path')).toHaveTextContent(dest)
   })
 
   it('shows a friendly error when signup fails at the network layer', async () => {

@@ -1,11 +1,11 @@
 import { type FormEvent, useEffect, useState } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { BrandLogo } from '../components/brand-logo'
 import { OidcSignInButtons } from '../components/oidc-sign-in-buttons'
 import { getAccessToken } from '../lib/auth'
 import { applyAuthTokenResponse } from '../lib/session-tokens'
-import { pickPostAuthPath } from '../lib/post-auth-redirect'
+import { authHandoffHref, pickPostAuthPath, returnPathFromAuthLocation } from '../lib/post-auth-redirect'
 import { apiUrl } from '../lib/api'
 import { readApiErrorMessage } from '../lib/errors'
 import { passwordStrengthEnglish, passwordStrengthKey, type PasswordStrengthKey } from '../lib/password-strength'
@@ -25,6 +25,8 @@ import { detectBrowserTimezone } from '../lib/format'
 export default function Signup() {
   const { t } = useTranslation('auth')
   const navigate = useNavigate()
+  const location = useLocation()
+  const from = returnPathFromAuthLocation(location)
   const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -78,7 +80,7 @@ export default function Signup() {
   const strengthLabel = passwordStrengthEnglish(strengthKey)
 
   if (getAccessToken()) {
-    return <Navigate to="/" replace />
+    return <Navigate to={pickPostAuthPath(from)} replace />
   }
 
   async function onSubmit(e: FormEvent) {
@@ -116,7 +118,7 @@ export default function Signup() {
       applyUiTheme(parseUiTheme(data.user?.uiTheme))
       await syncUserLocale(data.user?.locale)
       markPostLoginShortcutTip()
-      navigate(pickPostAuthPath('/'), { replace: true })
+      navigate(pickPostAuthPath(from), { replace: true })
     } catch {
       setStatus('error')
       setMessage(t('auth.login.serverUnreachable'))
@@ -138,7 +140,7 @@ export default function Signup() {
       </header>
 
       <div className={authCardClass}>
-        <OidcSignInButtons nextPath="/" />
+        <OidcSignInButtons nextPath={from} />
         <form className="mt-4 space-y-5" onSubmit={onSubmit}>
             <div>
               <label
@@ -258,7 +260,7 @@ export default function Signup() {
 
           <p className="mt-6 text-center text-sm text-stone-600 dark:text-fg-muted">
             {t('auth.signup.alreadyHave')}{' '}
-            <Link to="/login" className={authMutedLinkClass}>
+            <Link to={authHandoffHref('/login', from)} state={{ from }} className={authMutedLinkClass}>
               {t('auth.signup.signIn')}
             </Link>
           </p>

@@ -1,13 +1,33 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
 import App from '../../app'
 import { PermissionsProvider } from '../../context/permissions-provider'
 import { server } from '../../test/mocks/server'
 import { renderWithRouter } from '../../test/render'
 import Login from '../login'
+
+function PathProbe() {
+  const loc = useLocation()
+  return <div data-testid="path">{`${loc.pathname}${loc.search}`}</div>
+}
+
+function renderWithAuthPages(entry: { pathname: string; search?: string; state?: { from: string } }) {
+  const user = userEvent.setup()
+  render(
+    <MemoryRouter initialEntries={[entry]}>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<div>Signup page</div>} />
+        <Route path="/marketplace/:slug" element={<PathProbe />} />
+        <Route path="/" element={<PathProbe />} />
+      </Routes>
+    </MemoryRouter>,
+  )
+  return { user }
+}
 
 describe('Login', () => {
   it('renders sign in heading and Lextures branding', () => {
@@ -161,6 +181,33 @@ describe('Login', () => {
         org_slug: 'chase',
       })
     })
+  })
+
+  it('returns to the original marketplace path after sign-in', async () => {
+    const dest = '/marketplace/ai-essentials-c-hupcnf'
+    const { user } = renderWithAuthPages({
+      pathname: '/login',
+      search: `?next=${encodeURIComponent(dest)}`,
+      state: { from: dest },
+    })
+
+    await user.type(screen.getByLabelText(/^email$/i), 'learner@example.com')
+    await user.type(screen.getByLabelText(/^password$/i), 'hunter2correct')
+    await user.click(screen.getByRole('button', { name: /^sign in$/i }))
+
+    expect(await screen.findByTestId('path')).toHaveTextContent(dest)
+  })
+
+  it('passes the return path to create-account', async () => {
+    renderWithAuthPages({
+      pathname: '/login',
+      state: { from: '/marketplace/ai-essentials-c-hupcnf' },
+    })
+    const link = screen.getByRole('link', { name: /create an account|create account/i })
+    expect(link).toHaveAttribute(
+      'href',
+      '/signup?next=%2Fmarketplace%2Fai-essentials-c-hupcnf',
+    )
   })
 
   it('shows a friendly error when the request fails at the network layer', async () => {
