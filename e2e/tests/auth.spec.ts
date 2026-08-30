@@ -5,7 +5,7 @@
  *   [x] Sign up with email and password → redirected to dashboard
  *   [x] Log in with valid credentials → redirected to dashboard
  *   [x] Log in with wrong password → error message shown
- *   [x] Redirect to /login when visiting protected route unauthenticated
+ *   [x] Redirect to /login?next=… when visiting protected route unauthenticated
  *   [x] Log out → session cleared, redirected to /login
  */
 import { test, expect, type Page } from '@playwright/test'
@@ -74,7 +74,7 @@ test.describe('Unauthenticated access', () => {
   test('redirects to /login for protected routes', async ({ page }) => {
     // Visit a protected route with no token in storage.
     await page.goto('/courses')
-    await expect(page).toHaveURL('/login')
+    await expect(page).toHaveURL('/login?next=%2Fcourses')
   })
 })
 
