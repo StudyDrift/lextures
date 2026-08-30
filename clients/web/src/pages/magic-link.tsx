@@ -3,7 +3,7 @@ import { Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { BrandLogo } from '../components/brand-logo'
 import { getAccessToken } from '../lib/auth'
 import { applyAuthTokenResponse } from '../lib/session-tokens'
-import { pickPostAuthPath } from '../lib/post-auth-redirect'
+import { pickPostAuthPath, sanitizeReturnPath } from '../lib/post-auth-redirect'
 import { apiUrl } from '../lib/api'
 import { readApiErrorMessage } from '../lib/errors'
 import { applyUiTheme, parseUiTheme } from '../lib/ui-theme'
@@ -61,12 +61,18 @@ export default function MagicLinkPage() {
         }
         if (data.requires_mfa && data.mfa_pending_token) {
           setMfaFlow({ token: data.mfa_pending_token, mode: 'challenge' })
-          navigate('/login/mfa', { replace: true, state: { from: redirectTo || '/' } })
+          navigate('/login/mfa', {
+            replace: true,
+            state: { from: sanitizeReturnPath(redirectTo) },
+          })
           return
         }
         if (data.mfa_setup_required && data.mfa_pending_token) {
           setMfaFlow({ token: data.mfa_pending_token, mode: 'setup' })
-          navigate('/login/mfa', { replace: true, state: { from: redirectTo || '/' } })
+          navigate('/login/mfa', {
+            replace: true,
+            state: { from: sanitizeReturnPath(redirectTo) },
+          })
           return
         }
         if (!data.access_token) {
@@ -77,9 +83,7 @@ export default function MagicLinkPage() {
         applyAuthTokenResponse(data)
         applyUiTheme(parseUiTheme(data.user?.uiTheme))
         markPostLoginShortcutTip()
-        const rawDest =
-          redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//') ? redirectTo : '/'
-        navigate(pickPostAuthPath(rawDest), { replace: true })
+        navigate(pickPostAuthPath(sanitizeReturnPath(redirectTo)), { replace: true })
       } catch {
         if (!cancelled) {
           setStatus('error')
@@ -93,7 +97,7 @@ export default function MagicLinkPage() {
   }, [navigate, redirectTo, token])
 
   if (getAccessToken()) {
-    return <Navigate to="/" replace />
+    return <Navigate to={pickPostAuthPath(sanitizeReturnPath(redirectTo))} replace />
   }
 
   return (

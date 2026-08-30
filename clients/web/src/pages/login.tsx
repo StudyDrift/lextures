@@ -5,7 +5,7 @@ import { BrandLogo } from '../components/brand-logo'
 import { OidcSignInButtons } from '../components/oidc-sign-in-buttons'
 import { getAccessToken } from '../lib/auth'
 import { applyAuthTokenResponse } from '../lib/session-tokens'
-import { pickPostAuthPath } from '../lib/post-auth-redirect'
+import { authHandoffHref, pickPostAuthPath, returnPathFromAuthLocation } from '../lib/post-auth-redirect'
 import { apiUrl } from '../lib/api'
 import { readApiErrorMessage } from '../lib/errors'
 import { applyUiTheme, parseUiTheme } from '../lib/ui-theme'
@@ -31,18 +31,7 @@ export default function Login() {
   const location = useLocation()
   const params = useParams()
   const state = location.state as LocationState | undefined
-  let from = state?.from ?? '/'
-  if (
-    from === '/login' ||
-    from === '/signup' ||
-    from === '/forgot-password' ||
-    from === '/reset-password' ||
-    from === '/activate-parent' ||
-    from.startsWith('/login/mfa') ||
-    from.startsWith('/login/magic-link')
-  ) {
-    from = '/'
-  }
+  const from = returnPathFromAuthLocation(location)
 
   const orgSlug = normalizeOrgSlug(params.orgSlug ?? state?.orgSlug ?? '')
   const [orgName, setOrgName] = useState<string | null>(null)
@@ -129,7 +118,7 @@ export default function Login() {
   }, [retryAfter])
 
   if (getAccessToken()) {
-    return <Navigate to="/" replace />
+    return <Navigate to={pickPostAuthPath(from)} replace />
   }
 
   async function onSubmit(e: FormEvent) {
@@ -179,12 +168,12 @@ export default function Login() {
       const mfaState: LocationState = { from, orgSlug: orgSlug || undefined }
       if (data.requires_mfa && data.mfa_pending_token) {
         setMfaFlow({ token: data.mfa_pending_token, mode: 'challenge' })
-        navigate('/login/mfa', { replace: true, state: mfaState })
+        navigate(authHandoffHref('/login/mfa', from), { replace: true, state: mfaState })
         return
       }
       if (data.mfa_setup_required && data.mfa_pending_token) {
         setMfaFlow({ token: data.mfa_pending_token, mode: 'setup' })
-        navigate('/login/mfa', { replace: true, state: mfaState })
+        navigate(authHandoffHref('/login/mfa', from), { replace: true, state: mfaState })
         return
       }
       if (!data.access_token) {
@@ -289,7 +278,11 @@ export default function Login() {
                     placeholder="••••••••"
                   />
                   <div className="mt-2 text-end">
-                    <Link to="/forgot-password" className={`text-sm ${authMutedLinkClass}`}>
+                    <Link
+                      to={authHandoffHref('/forgot-password', from)}
+                      state={{ from }}
+                      className={`text-sm ${authMutedLinkClass}`}
+                    >
                       {t('auth.login.forgotPassword')}
                     </Link>
                   </div>
@@ -320,7 +313,7 @@ export default function Login() {
             {!saml?.idp?.forceSaml && (
               <p className="mt-6 text-center text-sm text-stone-600 dark:text-fg-muted">
                 {t('auth.login.newHere')}{' '}
-                <Link to="/signup" className={authMutedLinkClass}>
+                <Link to={authHandoffHref('/signup', from)} state={{ from }} className={authMutedLinkClass}>
                   {t('auth.login.createAccount')}
                 </Link>
               </p>

@@ -1,5 +1,5 @@
 import { type FormEvent, useState } from 'react'
-import { Link, Navigate } from 'react-router-dom'
+import { Link, Navigate, useLocation } from 'react-router-dom'
 import {
   authCardClass,
   authFieldClass,
@@ -9,16 +9,19 @@ import {
 import { PublicAuthShell } from '../components/auth/public-auth-shell'
 import { BrandLogo } from '../components/brand-logo'
 import { getAccessToken } from '../lib/auth'
+import { authHandoffHref, pickPostAuthPath, returnPathFromAuthLocation } from '../lib/post-auth-redirect'
 import { apiUrl } from '../lib/api'
 import { readApiErrorMessage } from '../lib/errors'
 
 export default function ForgotPassword() {
+  const location = useLocation()
+  const from = returnPathFromAuthLocation(location)
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'error' | 'sent'>('idle')
   const [message, setMessage] = useState<string | null>(null)
 
   if (getAccessToken()) {
-    return <Navigate to="/" replace />
+    return <Navigate to={pickPostAuthPath(from)} replace />
   }
 
   async function onSubmit(e: FormEvent) {
@@ -71,7 +74,11 @@ export default function ForgotPassword() {
             <p className="text-sm text-stone-700 dark:text-fg-muted" role="status">
               {message}
             </p>
-            <Link to="/login" className={`inline-block text-sm ${authMutedLinkClass}`}>
+            <Link
+              to={authHandoffHref('/login', from)}
+              state={{ from }}
+              className={`inline-block text-sm ${authMutedLinkClass}`}
+            >
               Back to sign in
             </Link>
           </div>
@@ -108,7 +115,7 @@ export default function ForgotPassword() {
 
         {status !== 'sent' && (
           <p className="mt-6 text-center text-sm text-stone-600 dark:text-fg-muted">
-            <Link to="/login" className={authMutedLinkClass}>
+            <Link to={authHandoffHref('/login', from)} state={{ from }} className={authMutedLinkClass}>
               Back to sign in
             </Link>
           </p>

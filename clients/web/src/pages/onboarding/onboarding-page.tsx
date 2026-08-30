@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { Trans, useTranslation } from 'react-i18next'
 import { ArrowRight, Sparkles } from 'lucide-react'
 import { getAccountType } from '../../lib/auth'
@@ -15,6 +15,7 @@ import {
   type LearnerGoals,
   type PriorKnowledgeLevel,
 } from '../../lib/onboarding-api'
+import { pickPostAuthPath, returnPathFromAuthLocation } from '../../lib/post-auth-redirect'
 import { OnboardingShell } from './onboarding-shell'
 
 type WizardStep = 0 | 1 | 2 | 3 | 4 | 5 | 6
@@ -24,6 +25,8 @@ const EXPERIENCE_LEVELS = ['beginner', 'intermediate', 'advanced'] as const sati
 export default function OnboardingPage() {
   const { t } = useTranslation('onboarding')
   const navigate = useNavigate()
+  const location = useLocation()
+  const afterOnboarding = pickPostAuthPath(returnPathFromAuthLocation(location))
   const { ffOnboardingFlow, gdprModuleEnabled, loading: featuresLoading } = usePlatformFeatures()
   const [step, setStep] = useState<WizardStep>(0)
   const [loading, setLoading] = useState(true)
@@ -50,7 +53,7 @@ export default function OnboardingPage() {
     try {
       const status = await fetchOnboardingStatus()
       if (status?.completed) {
-        navigate('/', { replace: true })
+        navigate(afterOnboarding, { replace: true })
         return
       }
       if (status && status.step > 0) {
@@ -61,7 +64,7 @@ export default function OnboardingPage() {
     } finally {
       setLoading(false)
     }
-  }, [navigate])
+  }, [afterOnboarding, navigate])
 
   useEffect(() => {
     if (featuresLoading) return
@@ -96,7 +99,7 @@ export default function OnboardingPage() {
   }
 
   if (!featuresLoading && !ffOnboardingFlow) {
-    return <Navigate to="/" replace />
+    return <Navigate to={afterOnboarding} replace />
   }
 
   if (loading || featuresLoading) {
@@ -151,7 +154,7 @@ export default function OnboardingPage() {
     setError(null)
     try {
       await postOnboarding({ skipAll: true })
-      navigate('/', { replace: true })
+      navigate(afterOnboarding, { replace: true })
     } catch (err) {
       setError(err instanceof Error ? err.message : t('onboarding.errors.skip'))
     } finally {
@@ -497,7 +500,7 @@ export default function OnboardingPage() {
         <p className="mt-4 text-sm text-fg-muted">{t('onboarding.done.browseCatalog')}</p>
       )}
       <Link
-        to="/"
+        to={afterOnboarding}
         className="mt-6 inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500"
       >
         {t('onboarding.done.goToDashboard')}

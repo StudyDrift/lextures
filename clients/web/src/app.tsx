@@ -6,6 +6,7 @@ import { AppShell } from './components/layout/app-shell'
 import { RouteFallback } from './components/route-fallback'
 import * as Pages from './lazy-pages'
 import { OnboardingRedirect } from './components/onboarding/onboarding-redirect'
+import { authHandoffHref } from './lib/post-auth-redirect'
 import { applyDocumentScrollMode, isStandalonePublicRoute } from './lib/standalone-public-routes'
 
 export default function App() {
@@ -22,7 +23,7 @@ export default function App() {
       if (isStandalonePublicRoute(location.pathname)) {
         return
       }
-      navigate('/login', { replace: true, state: { from } })
+      navigate(authHandoffHref('/login', from), { replace: true, state: { from } })
     }
     window.addEventListener('studydrift-auth-required', onAuthRequired)
     return () => {
