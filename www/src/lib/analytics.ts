@@ -1,6 +1,7 @@
 /**
- * Deferred analytics loader (SEO.4 FR-7, FR-16).
- * GA4 is never on the critical path; loads via requestIdleCallback.
+ * GA4 helpers. The official gtag snippet lives in `index.html` (async, not
+ * parser-blocking). This module captures first-touch attribution and is a
+ * fallback injector when the HTML snippet is missing (SEO.4 FR-7, FR-16).
  */
 
 const GA_ID = 'G-JX182Q6KKX'
@@ -68,13 +69,26 @@ export function trackEvent(name: string, parameters: Record<string, string | num
   window.gtag?.('event', name, parameters)
 }
 
+function hasInstalledTag(): boolean {
+  if (typeof window.gtag === 'function') return true
+  return Boolean(document.querySelector('script[src*="googletagmanager.com/gtag/js"]'))
+}
+
 export function loadAnalytics(): void {
   if (typeof window === 'undefined' || loaded) return
   captureFirstTouch()
   if (document.documentElement.dataset.analytics === 'off') return
+  // Official snippet is already in the document head — do not config twice.
+  if (hasInstalledTag()) {
+    loaded = true
+    return
+  }
 
   const boot = () => {
-    if (loaded) return
+    if (loaded || hasInstalledTag()) {
+      loaded = true
+      return
+    }
     loaded = true
 
     window.dataLayer = window.dataLayer || []

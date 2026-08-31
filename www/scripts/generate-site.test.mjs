@@ -256,6 +256,44 @@ describe('injectDocument', () => {
     assert.doesNotMatch(out, /fonts\.googleapis/)
   })
 
+  it('preserves the GA4 gtag snippet from the Vite shell', () => {
+    const shell = `<!doctype html><html><head>
+    <title>Old Title</title>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JX182Q6KKX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-JX182Q6KKX');
+    </script>
+  </head><body><div id="root"></div>
+  <script type="module" src="/assets/main-abc.js"></script>
+  </body></html>`
+    const tags = buildHeadTags({
+      title: 'Home — Lextures',
+      description: 'Marketing home.',
+      canonical: 'https://lextures.com/',
+    })
+    const interactive = injectDocument(shell, {
+      headTags: tags,
+      bodyHtml: '<h1>Home</h1>',
+      ssrData: { path: '/' },
+      interactive: true,
+    })
+    const staticPage = injectDocument(shell, {
+      headTags: tags,
+      bodyHtml: '<h1>Privacy</h1>',
+      ssrData: { path: '/privacy' },
+      interactive: false,
+      staticIslandSrc: '/assets/static-island-xyz.js',
+    })
+    for (const out of [interactive, staticPage]) {
+      assert.match(out, /googletagmanager\.com\/gtag\/js\?id=G-JX182Q6KKX/)
+      assert.match(out, /gtag\('config', 'G-JX182Q6KKX'\)/)
+    }
+  })
+
   it('inserts meta name=description when the shell has none', () => {
     const shell = `<!doctype html><html><head>
     <title>Old Title</title>

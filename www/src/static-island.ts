@@ -1,6 +1,6 @@
 /**
  * Minimal client entry for interactive:false routes (SEO.4 FR-4).
- * No React — only nav progressive enhancement, deferred analytics, and web-vitals.
+ * No React — only nav progressive enhancement, analytics helpers, and web-vitals.
  */
 import { initNavEnhancements } from './lib/nav-enhancements'
 import { initBlogIndexFilters } from './lib/blog-index-filters'

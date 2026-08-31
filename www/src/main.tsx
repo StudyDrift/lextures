@@ -19,7 +19,7 @@ const path =
     ? window.location.pathname.replace(/\/+$/, '') || '/'
     : '/'
 
-// SEO.4 FR-7 / FR-16 / FR-17 — analytics + vitals after idle, never on critical path.
+// First-touch cookie + fallback gtag inject if the HTML snippet is absent.
 loadAnalytics()
 initWebVitals()
 

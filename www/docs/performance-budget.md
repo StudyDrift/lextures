@@ -55,7 +55,7 @@ If a legitimate feature needs more budget:
 ## Fonts & third parties
 
 - All fonts are self-hosted under `public/fonts/` (Lextures, Spectral, IBM Plex Mono). **No** `fonts.googleapis.com` / `fonts.gstatic.com`.
-- GA4 loads via `requestIdleCallback` (`src/lib/analytics.ts`); never on the critical path.
+- GA4 is the official async `gtag.js` snippet in `index.html` (`G-JX182Q6KKX`); `src/lib/analytics.ts` is a fallback injector only.
 - Images: run `npm run optimize-images` (part of build) to emit AVIF/WebP next to PNG sources.
 
 ## Related docs

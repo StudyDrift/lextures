@@ -9,7 +9,15 @@
     <!-- SEO.4 FR-8…FR-10: self-hosted fonts only; preload above-the-fold weights. -->
     <link rel="preload" href="/fonts/lextures-400.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/spectral-600.woff2" as="font" type="font/woff2" crossorigin />
-    <!-- GA4 is loaded deferred via requestIdleCallback (SEO.4 FR-7); not on critical path. -->
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JX182Q6KKX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-JX182Q6KKX');
+    </script>
   </head>
   <body>
     <div id="root"></div>
