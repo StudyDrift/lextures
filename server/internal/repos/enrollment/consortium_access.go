@@ -16,4 +16,18 @@ OR (
 )
 `
 
-const userCourseOrgMatch = `(c.org_id = u.org_id` + consortiumGuestAccessOr + `)`
+// globalAdminAccessOr lets Global Admins (global:app:rbac:manage) use an enrollment
+// even when the course lives in another organization. Regular users stay org-scoped
+// (see TestEnrollment_OrgIsolation_Pg).
+const globalAdminAccessOr = `
+OR EXISTS (
+  SELECT 1
+  FROM "user".user_app_roles uar
+  INNER JOIN "user".rbac_role_permissions rp ON rp.role_id = uar.role_id
+  INNER JOIN "user".permissions p ON p.id = rp.permission_id
+  WHERE uar.user_id = u.id
+    AND p.permission_string = 'global:app:rbac:manage'
+)
+`
+
+const userCourseOrgMatch = `(c.org_id = u.org_id` + consortiumGuestAccessOr + globalAdminAccessOr + `)`

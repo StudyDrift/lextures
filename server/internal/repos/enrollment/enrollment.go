@@ -214,7 +214,7 @@ FROM course.course_enrollments ce
 INNER JOIN course.courses c ON c.id = ce.course_id
 INNER JOIN "user".users u ON u.id = ce.user_id
 INNER JOIN course.enrollment_roles er ON er.role_key = ce.role AND er.is_staff = true
-WHERE ce.user_id = $1 AND ce.active AND c.org_id = u.org_id
+WHERE ce.user_id = $1 AND ce.active AND (c.org_id = u.org_id`+globalAdminAccessOr+`)
 ORDER BY c.course_code ASC
 `, userID)
 	if err != nil {
