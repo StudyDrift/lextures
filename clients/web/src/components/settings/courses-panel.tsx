@@ -1,5 +1,5 @@
-import { type FormEvent, useCallback, useEffect, useId, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { type FormEvent, type ReactNode, useCallback, useEffect, useId, useRef, useState } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Archive,
   ArrowLeft,
@@ -283,6 +283,38 @@ function CoursesDashboardCards({
   )
 }
 
+function courseLaunchPath(courseCode: string): string {
+  return `/courses/${encodeURIComponent(courseCode)}`
+}
+
+function CourseLaunchLink({
+  course,
+  launching,
+  onLaunch,
+  className,
+  children,
+}: {
+  course: PlatformCourseRow
+  launching: boolean
+  onLaunch: (course: PlatformCourseRow) => void
+  className?: string
+  children: ReactNode
+}) {
+  return (
+    <Link
+      to={courseLaunchPath(course.courseCode)}
+      className={`inline-flex min-h-6 min-w-6 items-center ${className ?? ''}`}
+      aria-busy={launching || undefined}
+      onClick={(e) => {
+        e.preventDefault()
+        onLaunch(course)
+      }}
+    >
+      {children}
+    </Link>
+  )
+}
+
 function statusLabel(status: string): string {
   switch (status) {
     case 'active':
@@ -446,14 +478,16 @@ function CoursesResultsTable({
   emptyTitle,
   emptyHint,
   loadingLabel,
-  onOpen,
+  launchingId,
+  onLaunch,
 }: {
   data: PaginatedPlatformCourses | null
   loading: boolean
   emptyTitle: string
   emptyHint: string
   loadingLabel: string
-  onOpen: (courseId: string) => void
+  launchingId: string | null
+  onLaunch: (course: PlatformCourseRow) => void
 }) {
   return (
     <div className="overflow-x-auto">
@@ -508,16 +542,24 @@ function CoursesResultsTable({
                 className="transition-colors hover:bg-slate-50/80 dark:hover:bg-neutral-800/40"
               >
                 <td className="px-5 py-3">
-                  <button
-                    type="button"
-                    onClick={() => onOpen(course.id)}
-                    className="font-medium text-fg-default hover:text-accent-fg dark:text-fg-default dark:hover:text-indigo-400"
+                  <CourseLaunchLink
+                    course={course}
+                    launching={launchingId === course.id}
+                    onLaunch={onLaunch}
+                    className="font-medium text-accent-fg hover:underline"
                   >
                     {course.title}
-                  </button>
+                  </CourseLaunchLink>
                 </td>
-                <td className="px-5 py-3 font-mono text-xs text-fg-muted">
-                  {course.courseCode}
+                <td className="px-5 py-3 font-mono text-xs">
+                  <CourseLaunchLink
+                    course={course}
+                    launching={launchingId === course.id}
+                    onLaunch={onLaunch}
+                    className="text-accent-fg hover:underline"
+                  >
+                    {course.courseCode}
+                  </CourseLaunchLink>
                 </td>
                 <td className="px-5 py-3 text-fg-muted">{course.orgName}</td>
                 <td className="px-5 py-3 text-fg-muted">
@@ -595,6 +637,8 @@ export function CoursesPanel() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [accessBusy, setAccessBusy] = useState(false)
+  const [launchingId, setLaunchingId] = useState<string | null>(null)
+  const launchingRef = useRef(false)
 
   const [selectedFilter, setSelectedFilter] = useState<CoursesListFilter | null>(null)
   const [filterPage, setFilterPage] = useState(1)
@@ -717,16 +761,24 @@ export function CoursesPanel() {
     setFilterPage(1)
   }
 
-  function openCourse(courseId: string) {
-    const next = new URLSearchParams(searchParams)
-    next.set('courseId', courseId)
-    setSearchParams(next, { replace: false })
-  }
-
   function closeCourse() {
     const next = new URLSearchParams(searchParams)
     next.delete('courseId')
     setSearchParams(next, { replace: false })
+  }
+
+  async function launchCourse(course: PlatformCourseRow) {
+    if (launchingRef.current) return
+    launchingRef.current = true
+    setLaunchingId(course.id)
+    try {
+      await ensurePlatformCourseAdminAccess(course.id)
+      navigate(courseLaunchPath(course.courseCode))
+    } catch (e) {
+      toastMutationError(e instanceof Error ? e.message : 'Could not grant course access.')
+      launchingRef.current = false
+      setLaunchingId(null)
+    }
   }
 
   async function openWithAccess(path: string) {
@@ -839,7 +891,8 @@ export function CoursesPanel() {
             emptyTitle="No courses in this segment"
             emptyHint="Try another metric or search by code or title."
             loadingLabel="Loading courses…"
-            onOpen={openCourse}
+            launchingId={launchingId}
+            onLaunch={(course) => void launchCourse(course)}
           />
 
           {filterData ? (
@@ -992,7 +1045,8 @@ export function CoursesPanel() {
               emptyTitle="No courses matched your search"
               emptyHint="Try a different code, title, or status filter."
               loadingLabel="Searching…"
-              onOpen={openCourse}
+              launchingId={launchingId}
+              onLaunch={(course) => void launchCourse(course)}
             />
           </div>
         )}
