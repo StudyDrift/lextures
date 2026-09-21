@@ -135,7 +135,7 @@ jobs:
         run: go run ./cmd/marketplace-courses-validate
 
       - name: govulncheck
-        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+        run: bash ../scripts/govulncheck.sh
 
   # TD.2 — architecture convention ratchets (file/package budgets, layering, naming, deadcode).
   # Charter: docs/ARCHITECTURE_CONVENTIONS.md. Override allowlist growth with label
