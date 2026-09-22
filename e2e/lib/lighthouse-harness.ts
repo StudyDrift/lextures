@@ -126,7 +126,13 @@ export async function clearIndexedDb(page: Page): Promise<void> {
 export async function waitForDashboardReady(page: Page): Promise<void> {
   const mainNav = page.getByRole('navigation', { name: 'Main' })
   await mainNav.waitFor({ state: 'visible', timeout: 30_000 })
-  await page.getByText('Loading your dashboard.').waitFor({ state: 'hidden', timeout: 30_000 })
+  // The shell stays mounted while the lazy dashboard chunk loads. During that
+  // gap the "Loading your dashboard." skeleton is not in the document, so a
+  // hidden-wait would resolve before any heading exists.
+  const loading = page.getByText('Loading your dashboard.')
+  const title = page.getByRole('heading', { level: 1, name: 'Dashboard' })
+  await title.waitFor({ state: 'visible', timeout: 30_000 })
+  await loading.waitFor({ state: 'hidden', timeout: 30_000 })
 }
 
 export async function assertDocumentTheme(page: Page, theme: UiTheme): Promise<void> {

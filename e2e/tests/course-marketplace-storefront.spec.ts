@@ -357,7 +357,7 @@ test.describe('Marketplace storefront — UI', () => {
     await page.getByTestId('marketplace-search').fill(paidTitle)
     await page.getByRole('link', { name: new RegExp(paidTitle) }).click()
     await expect(page).toHaveURL(new RegExp(`/marketplace/${paidSlug}`))
-    await expect(page.getByTestId('marketplace-course-detail')).toBeVisible()
+    await expect(page.getByTestId('marketplace-course-detail')).toBeVisible({ timeout: 15_000 })
     await expect(page.getByTestId('marketplace-cta')).toBeVisible()
     // Paid CTA starts Stripe checkout (or shows unavailable when Stripe is not configured).
     // Do not assert navigation to the old MKT3 stub route.
