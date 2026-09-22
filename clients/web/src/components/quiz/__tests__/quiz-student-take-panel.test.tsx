@@ -53,6 +53,7 @@ function minimalQuiz(overrides: Partial<ModuleQuizPayload> = {}): ModuleQuizPayl
         correctChoiceIndex: 0,
         multipleAnswer: false,
         answerWithImage: false,
+        allowAnyAnswer: false,
         required: true,
         points: 1,
         estimatedMinutes: 2,
@@ -109,6 +110,9 @@ describe('QuizStudentTakePanel', () => {
     })
     expect(screen.getByRole('heading', { name: /begin quiz/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Begin' })).toBeInTheDocument()
+    const scroll = document.querySelector('[data-quiz-take-scroll]')
+    expect(scroll).toHaveClass('px-4', 'py-6', 'sm:px-8', 'md:px-10')
+    expect(scroll?.firstElementChild).toHaveClass('mx-auto', 'max-w-3xl')
   })
 
   it('starts a standard attempt and shows the first question', async () => {
@@ -177,6 +181,7 @@ describe('QuizStudentTakePanel', () => {
               correctChoiceIndex: null,
               multipleAnswer: false,
               answerWithImage: false,
+              allowAnyAnswer: false,
               required: true,
               points: 1,
               estimatedMinutes: 2,

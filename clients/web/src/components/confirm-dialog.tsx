@@ -20,6 +20,8 @@ export type ConfirmDialogProps = {
   onClose: () => void
   /** Fired when exit animation finishes and the dialog unmounts. */
   onExited?: () => void
+  /** Stacking utility forwarded to the overlay. */
+  zClassName?: string
 }
 
 /**
@@ -41,6 +43,7 @@ export function ConfirmDialog({
   onConfirm,
   onClose,
   onExited,
+  zClassName,
 }: ConfirmDialogProps) {
   return (
     <AlertDialog
@@ -58,6 +61,7 @@ export function ConfirmDialog({
       onConfirm={onConfirm}
       onClose={onClose}
       onExited={onExited}
+      zClassName={zClassName}
     />
   )
 }

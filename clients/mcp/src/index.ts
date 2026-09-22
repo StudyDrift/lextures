@@ -778,7 +778,7 @@ server.tool(
       .array(z.record(z.unknown()))
       .optional()
       .describe(
-        'Full replacement question list. Each: { id, prompt, questionType, choices?, correctChoiceIndex?, points, multipleAnswer?, required? }',
+        'Full replacement question list. Each: { id, prompt, questionType, choices?, correctChoiceIndex?, points, multipleAnswer?, allowAnyAnswer?, required? }',
       ),
     pointsWorth: z.number().int().min(0).nullable().optional(),
     dueAt: z.string().nullable().optional(),

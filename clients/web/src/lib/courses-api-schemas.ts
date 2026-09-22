@@ -536,6 +536,7 @@ export const quizQuestionSchema = z.object({
   correctChoiceIndex: z.number().nullable(),
   multipleAnswer: z.boolean(),
   answerWithImage: z.boolean(),
+  allowAnyAnswer: z.boolean().optional().default(false),
   required: z.boolean(),
   points: z.number(),
   estimatedMinutes: z.number(),

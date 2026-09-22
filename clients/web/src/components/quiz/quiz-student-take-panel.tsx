@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom'
 import { ChevronDown, ChevronUp, Clock, X } from 'lucide-react'
 import { useOptionalQuizShellFocus } from '../layout/quiz-shell-focus-context'
 import type { QuizShellFocusMode, QuizShellLockdownAccent } from '../layout/quiz-shell-focus-context'
+import { Button, Callout } from '../ui'
 import { formatDateTime } from '../../lib/format'
 import { MathPlainText } from '../math/math-plain-text'
 import { BookLoader } from './book-loader'
@@ -886,6 +887,7 @@ export function QuizStudentTakePanel({
   const reducedTake = Boolean(startMeta?.reducedDistractionMode)
   const immersiveChrome = pageLayout || open
   const showPanelHeader = !pageLayout || !shellFocusSession
+  const pageBegin = pageLayout && uiPhase.kind === 'idle' && !reducedTake
 
   const timeLabel =
     timeLeftSec != null
@@ -926,7 +928,7 @@ export function QuizStudentTakePanel({
               : `h-[90vh] rounded-2xl ${reducedTake ? 'lex-quiz-reduced-distract max-w-2xl' : 'max-w-3xl'}`
         } ${highContrastQuiz && reducedTake ? 'ring-2 ring-slate-900 dark:ring-neutral-100' : ''}`}
       >
-        {showPanelHeader ? (
+        {pageBegin ? null : showPanelHeader ? (
           <div
             className={`flex shrink-0 items-start justify-between gap-3 border-b border-border-default px-4 py-3 dark:border-border-default ${ immersiveChrome ? 'py-2' : '' }`}
           >
@@ -977,7 +979,15 @@ export function QuizStudentTakePanel({
           </h2>
         )}
 
-        <div className="min-h-0 flex-1 overflow-y-auto bg-slate-50/60 p-4/80">
+        <div
+          className={
+            pageLayout
+              ? 'min-h-0 flex-1 overflow-y-auto bg-surface-base px-4 py-6 sm:px-8 sm:py-8 md:px-10 md:py-10'
+              : 'min-h-0 flex-1 overflow-y-auto bg-surface-base px-4 py-5 sm:px-6 sm:py-6'
+          }
+          data-quiz-take-scroll
+        >
+          <div className="mx-auto w-full max-w-3xl">
           {lockdownModalOpen && (
             <div
               className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-100"
@@ -1099,16 +1109,24 @@ export function QuizStudentTakePanel({
           ) : null}
 
           {uiPhase.kind === 'idle' && (
-            <div className="space-y-4">
-              <p className="text-sm text-fg-muted">
+            <div className={pageBegin ? 'mx-auto w-full max-w-2xl space-y-6' : 'space-y-4'}>
+              {pageBegin ? (
+                <div>
+                  <h2 id="quiz-take-title" className="text-title-lg font-semibold tracking-tight text-fg-default">
+                    Begin quiz
+                  </h2>
+                  <p className="mt-2 text-body-sm leading-relaxed text-fg-muted">{quiz.title || 'Quiz'}</p>
+                </div>
+              ) : null}
+              <p className="text-body-sm leading-relaxed text-fg-muted">
                 {quiz.isAdaptive
                   ? 'You will answer up to the configured number of AI-generated questions. Your attempt is saved when you finish.'
                   : 'Answer each question, then submit. Your score is recorded for this course.'}
               </p>
-              <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-100">
+              <Callout tone="warning">
                 Leaving this tab or switching apps during the quiz is logged for your instructor. If you
                 navigate away, your attempt will be submitted automatically.
-              </p>
+              </Callout>
               {advanced.requiresQuizAccessCode ? (
                 <div>
                   <label className="mb-1 block text-xs font-medium text-fg-muted">
@@ -1118,21 +1136,19 @@ export function QuizStudentTakePanel({
                     type="password"
                     value={accessCode}
                     onChange={(e) => setAccessCode(e.target.value)}
-                    className="w-full max-w-sm rounded-lg border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-raised"
+                    className="w-full max-w-sm rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm dark:border-border-default"
                     placeholder="Enter code"
                   />
                 </div>
               ) : null}
-              <button
-                type="button"
+              <Button
                 onClick={() => {
                   if (needsLockdownWarning) setLockdownModalOpen(true)
                   else void beginAttempt()
                 }}
-                className="rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
               >
                 Begin
-              </button>
+              </Button>
             </div>
           )}
 
@@ -1352,6 +1368,7 @@ export function QuizStudentTakePanel({
               </button>
             </div>
           )}
+          </div>
         </div>
       </div>
 

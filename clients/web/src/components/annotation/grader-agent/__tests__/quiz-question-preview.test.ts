@@ -16,6 +16,7 @@ function question(overrides: Partial<QuizQuestion> = {}): QuizQuestion {
     correctChoiceIndex: 0,
     multipleAnswer: false,
     answerWithImage: false,
+    allowAnyAnswer: false,
     required: true,
     points: 5,
     estimatedMinutes: 0,

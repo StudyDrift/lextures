@@ -97,9 +97,23 @@ export function makeQuestion(): QuizQuestion {
     correctChoiceIndex: null,
     multipleAnswer: false,
     answerWithImage: false,
+    allowAnyAnswer: false,
     required: true,
     points: 1,
     estimatedMinutes: 2,
+  }
+}
+
+/** Participation scoring: any selected choice earns the question's full points. */
+export function setQuestionAllowAnyAnswer(q: QuizQuestion, allow: boolean): QuizQuestion {
+  if (!allow) return { ...q, allowAnyAnswer: false }
+  const typeConfig = { ...(q.typeConfig ?? {}) }
+  delete typeConfig.correctChoiceIndices
+  return {
+    ...q,
+    allowAnyAnswer: true,
+    correctChoiceIndex: null,
+    typeConfig,
   }
 }
 

@@ -201,6 +201,8 @@ export function ImportWorkflowMenu({
   useEffect(() => {
     if (!open) return
     function onDoc(e: MouseEvent) {
+      // The confirm dialog is portaled outside this menu. Clicks on it must not dismiss the panel.
+      if (confirmOpen) return
       if (!rootRef.current?.contains(e.target as Node)) setOpen(false)
     }
     function onKey(e: KeyboardEvent) {
@@ -391,6 +393,9 @@ export function ImportWorkflowMenu({
         description={t('gradingAgent.import.confirmDescription', { name: pendingImportLabel })}
         confirmLabel={t('gradingAgent.import.confirmButton')}
         cancelLabel={t('gradingAgent.save.templateCancel')}
+        // Above the grading canvas (z-[520]). The shared confirm overlay defaults to z-[400]
+        // and otherwise opens behind that full-screen layer.
+        zClassName="z-[530]"
         busy={importing}
         onConfirm={() => void performImport()}
         onClose={() => {

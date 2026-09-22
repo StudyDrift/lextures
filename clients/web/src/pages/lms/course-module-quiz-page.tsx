@@ -58,6 +58,7 @@ import { expandQuizPromptWithRefs } from '../../lib/course-item-ref-tokens'
 import { QuizPageSettingsPanel } from '../../components/quiz/quiz-page-settings-panel'
 import { QuizStudentPreviewModal } from '../../components/quiz/quiz-student-preview-modal'
 import { AuthoringSaveFootprint } from '../../components/authoring-save-footprint'
+import { Switch } from '../../components/ui'
 import { FeatureHelpTrigger } from '../../components/feature-help/feature-help-trigger'
 import {
   assignmentGroupDisplayName,
@@ -71,6 +72,7 @@ import {
   isoToDatetimeLocalValue,
   makeQuestion,
   newLocalId,
+  setQuestionAllowAnyAnswer,
   QUESTION_TYPE_OPTIONS,
   quizDateTimeIsSet,
   structureKindLabel,
@@ -2353,7 +2355,9 @@ export default function CourseModuleQuizPage() {
                         <div className="space-y-1">
                           <p className="text-sm font-medium text-fg-default">Choices</p>
                           <p className="text-xs text-fg-muted">
-                            Use the circle to mark the correct answer (optional).
+                            {q.allowAnyAnswer
+                              ? 'Any choice earns the full points for this question. Learners are graded on participation.'
+                              : 'Use the circle to mark the correct answer (optional).'}
                           </p>
                         </div>
                         <div className="flex flex-wrap items-center gap-x-5 gap-y-2 rounded-lg bg-slate-50/90 px-3 py-2.5 text-xs text-fg-muted">
@@ -2397,6 +2401,19 @@ export default function CourseModuleQuizPage() {
                             </button>
                             Answer with image
                           </label>
+                          <label className="inline-flex cursor-pointer items-center gap-2">
+                            <Switch
+                              checked={q.allowAnyAnswer}
+                              onCheckedChange={(next) =>
+                                setQuestionsDraft((prev) =>
+                                  prev.map((it) =>
+                                    it.id === q.id ? setQuestionAllowAnyAnswer(it, next) : it,
+                                  ),
+                                )
+                              }
+                            />
+                            Allow any answer
+                          </label>
                         </div>
                         <div className="space-y-2">
                           {q.choices.map((choice, choiceIdx) => (
@@ -2406,25 +2423,29 @@ export default function CourseModuleQuizPage() {
                             >
                               <button
                                 type="button"
-                                aria-label={`Mark option ${choiceIdx + 1} as correct`}
-                                aria-pressed={q.correctChoiceIndex === choiceIdx}
+                                aria-label={
+                                  q.allowAnyAnswer
+                                    ? `Option ${choiceIdx + 1} is not a keyed answer`
+                                    : `Mark option ${choiceIdx + 1} as correct`
+                                }
+                                aria-pressed={!q.allowAnyAnswer && q.correctChoiceIndex === choiceIdx}
+                                disabled={q.allowAnyAnswer}
                                 onClick={() =>
                                   setQuestionsDraft((prev) =>
-                                    prev.map((it) =>
-                                      it.id === q.id
-                                        ? {
-                                            ...it,
-                                            correctChoiceIndex:
-                                              it.correctChoiceIndex === choiceIdx ? null : choiceIdx,
-                                          }
-                                        : it,
-                                    ),
+                                    prev.map((it) => {
+                                      if (it.id !== q.id || it.allowAnyAnswer) return it
+                                      return {
+                                        ...it,
+                                        correctChoiceIndex:
+                                          it.correctChoiceIndex === choiceIdx ? null : choiceIdx,
+                                      }
+                                    }),
                                   )
                                 }
-                                className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border-default bg-surface-raised text-fg-muted transition-[background-color,color,border-color] hover:border-border-strong"
+                                className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border-default bg-surface-raised text-fg-muted transition-[background-color,color,border-color] hover:border-border-strong disabled:cursor-not-allowed disabled:opacity-40"
                               >
                                 <span
-                                  className={`h-3 w-3 rounded-full ${ q.correctChoiceIndex === choiceIdx ? 'bg-accent-solid' : 'bg-transparent' }`}
+                                  className={`h-3 w-3 rounded-full ${ !q.allowAnyAnswer && q.correctChoiceIndex === choiceIdx ? 'bg-accent-solid' : 'bg-transparent' }`}
                                 />
                               </button>
                               <input
