@@ -22,6 +22,8 @@ export type AlertDialogProps = {
   /** Accessible name for the scrim (must differ from cancelLabel when both are visible to AT). */
   dismissLabel?: string
   onExited?: () => void
+  /** Stacking utility forwarded to Dialog. */
+  zClassName?: string
 }
 
 /**
@@ -44,6 +46,7 @@ export function AlertDialog({
   phraseFieldLabel,
   dismissLabel,
   onExited,
+  zClassName,
 }: AlertDialogProps) {
   const cancelRef = useRef<HTMLButtonElement>(null)
   const phraseOk =
@@ -68,6 +71,7 @@ export function AlertDialog({
       onExited={onExited}
       initialFocusRef={cancelRef}
       rootTestId="confirm-dialog-root"
+      zClassName={zClassName}
       footer={
         <>
           <Button ref={cancelRef} variant="secondary" disabled={busy} onClick={onClose}>

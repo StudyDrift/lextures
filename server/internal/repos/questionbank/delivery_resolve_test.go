@@ -54,6 +54,19 @@ func TestQuizQuestionFromEntity(t *testing.T) {
 	if q.CorrectChoiceIndex == nil || *q.CorrectChoiceIndex != 0 {
 		t.Fatalf("correct idx: %+v", q.CorrectChoiceIndex)
 	}
+	if q.AllowAnyAnswer {
+		t.Fatal("allow any should be off")
+	}
+
+	anyCorr, _ := json.Marshal(map[string]any{"allowAnyAnswer": true})
+	e.CorrectAnswer = anyCorr
+	anyQ, err := QuizQuestionFromEntity(e)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !anyQ.AllowAnyAnswer {
+		t.Fatal("expected allowAnyAnswer from correct_answer JSON")
+	}
 }
 
 func TestCloneQuestions(t *testing.T) {

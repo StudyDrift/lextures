@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { ImportWorkflowMenu } from '../import-workflow-menu'
 
 vi.mock('react-i18next', () => ({
@@ -82,5 +82,80 @@ describe('ImportWorkflowMenu', () => {
     const itemPicker = screen.getByRole('button', { name: /gradingAgent.import.templateLabel/i })
     fireEvent.click(itemPicker)
     expect(await screen.findByRole('menuitemradio', { name: 'Essay template' })).toBeInTheDocument()
+  })
+
+  it('opens the replace confirmation above the grading canvas before fetching', async () => {
+    const onImport = vi.fn()
+    const { authorizedFetch } = await import('../../../../lib/api')
+    const { fetchCourseGradingAgentTemplates, fetchGraderAgentTemplate } = await import(
+      '../../../../lib/courses-api'
+    )
+
+    vi.mocked(authorizedFetch).mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        courses: [
+          {
+            id: 'course-1',
+            courseCode: 'demo',
+            title: 'Demo course',
+            description: '',
+            heroImageUrl: null,
+            heroImageObjectPosition: null,
+            startsAt: null,
+            endsAt: null,
+            visibleFrom: null,
+            hiddenAt: null,
+            published: true,
+            archived: false,
+            markdownThemePreset: 'default',
+            markdownThemeCustom: null,
+            gradingScale: 'letter',
+          },
+        ],
+      }),
+    } as Response)
+
+    vi.mocked(fetchCourseGradingAgentTemplates).mockResolvedValue({
+      templates: [{ id: 'template-1', name: 'Essay template', updatedAt: '2026-01-01T00:00:00.000Z' }],
+    })
+    vi.mocked(fetchGraderAgentTemplate).mockResolvedValue({
+      template: {
+        id: 'template-1',
+        name: 'Essay template',
+        prompt: 'Grade the essay',
+        includeAssignmentContent: true,
+        includeRubric: false,
+        workflowGraph: { version: 1, nodes: [], edges: [] },
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      },
+    })
+
+    render(
+      <ImportWorkflowMenu
+        courseCode="demo"
+        itemId="assignment-1"
+        itemKind="assignment"
+        onImport={onImport}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: /gradingAgent.import.button/i }))
+    const importButton = await screen.findByRole('button', { name: 'gradingAgent.import.confirmButton' })
+    await waitFor(() => expect(importButton).toBeEnabled())
+    fireEvent.click(importButton)
+
+    const confirm = await screen.findByTestId('confirm-dialog-root')
+    expect(confirm.className).toContain('z-[530]')
+    expect(fetchGraderAgentTemplate).not.toHaveBeenCalled()
+
+    fireEvent.click(within(confirm).getByRole('button', { name: 'gradingAgent.import.confirmButton' }))
+    await waitFor(() => {
+      expect(fetchGraderAgentTemplate).toHaveBeenCalledWith('demo', 'template-1')
+    })
+    expect(onImport).toHaveBeenCalledWith(
+      expect.objectContaining({ prompt: 'Grade the essay' }),
+    )
   })
 })

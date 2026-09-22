@@ -24,6 +24,7 @@ type quizQuestion struct {
 	TypeConfig         json.RawMessage `json:"typeConfig,omitempty"`
 	CorrectChoiceIndex *uint           `json:"correctChoiceIndex,omitempty"`
 	MultipleAnswer     bool            `json:"multipleAnswer,omitempty"`
+	AllowAnyAnswer     bool            `json:"allowAnyAnswer,omitempty"`
 	Required           bool            `json:"required,omitempty"`
 	Points             int32           `json:"points"`
 }

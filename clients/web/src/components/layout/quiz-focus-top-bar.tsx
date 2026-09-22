@@ -14,7 +14,7 @@ export function QuizFocusTopBar({ model }: { model: QuizShellFocusMode }) {
 
   return (
     <header
-      className={`lms-chrome flex min-h-14 shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b px-3 py-2 shadow-md print:hidden sm:px-4 md:px-6 ${barTint}`}
+      className={`lms-chrome flex min-h-16 shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-b px-4 py-3 shadow-md print:hidden sm:px-6 md:px-8 ${barTint}`}
       role="banner"
       aria-label="Quiz session"
       data-quiz-focus-bar
@@ -43,7 +43,7 @@ export function QuizFocusTopBar({ model }: { model: QuizShellFocusMode }) {
           </p>
         ) : null}
 
-        <p className="max-w-[14rem] truncate text-xs opacity-90 sm:text-sm" title={saveStatusText}>
+        <p className="max-w-[11rem] truncate text-xs opacity-90 sm:max-w-md sm:text-sm lg:max-w-2xl" title={saveStatusText}>
           {saveStatusText}
         </p>
 

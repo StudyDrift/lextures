@@ -30,6 +30,39 @@ func TestGradeResponseItem_multipleChoice(t *testing.T) {
 	}
 }
 
+func TestGradeResponseItem_allowAnyAnswer(t *testing.T) {
+	q := coursemodulequiz.QuizQuestion{
+		ID:                 "q-any",
+		QuestionType:       "multiple_choice",
+		Points:             4,
+		CorrectChoiceIndex: uintPtr(0),
+		AllowAnyAnswer:     true,
+		Choices:            []string{"None at all", "Seen the alphabet", "Sound out words"},
+	}
+	first := GradeResponseItem(q, coursemodulequiz.QuizQuestionResponseItem{
+		QuestionID:          "q-any",
+		SelectedChoiceIndex: uintPtr(0),
+	})
+	other := GradeResponseItem(q, coursemodulequiz.QuizQuestionResponseItem{
+		QuestionID:          "q-any",
+		SelectedChoiceIndex: uintPtr(2),
+	})
+	blank := GradeResponseItem(q, coursemodulequiz.QuizQuestionResponseItem{QuestionID: "q-any"})
+	multi := GradeResponseItem(q, coursemodulequiz.QuizQuestionResponseItem{
+		QuestionID:            "q-any",
+		SelectedChoiceIndices: []uint{1, 2},
+	})
+	if first.PointsAwarded != 4 || other.PointsAwarded != 4 || multi.PointsAwarded != 4 {
+		t.Fatalf("every selection should earn full points, got %v %v %v", first.PointsAwarded, other.PointsAwarded, multi.PointsAwarded)
+	}
+	if first.IsCorrect == nil || !*first.IsCorrect || other.IsCorrect == nil || !*other.IsCorrect {
+		t.Fatal("any selected choice should be marked correct")
+	}
+	if blank.PointsAwarded != 0 || blank.IsCorrect != nil {
+		t.Fatalf("unanswered participation item should earn 0, got %+v", blank)
+	}
+}
+
 func TestGradeResponseItem_numeric(t *testing.T) {
 	cfg, _ := json.Marshal(map[string]any{"correct": 42.0, "toleranceAbs": 0.5})
 	q := coursemodulequiz.QuizQuestion{

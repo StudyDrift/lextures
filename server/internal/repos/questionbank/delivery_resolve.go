@@ -191,12 +191,15 @@ func QuizQuestionFromEntity(e *QuestionEntity) (coursemodulequiz.QuizQuestion, e
 		choiceIDs = nil
 	}
 	var correctIdx *uint
+	var allowAny bool
 	if len(e.CorrectAnswer) > 0 {
 		var corr struct {
 			CorrectChoiceIndex *uint `json:"correctChoiceIndex"`
+			AllowAnyAnswer     bool  `json:"allowAnyAnswer"`
 		}
 		_ = json.Unmarshal(e.CorrectAnswer, &corr)
 		correctIdx = corr.CorrectChoiceIndex
+		allowAny = corr.AllowAnyAnswer
 	}
 	pts := int32(math.Round(e.Points))
 	q := coursemodulequiz.QuizQuestion{
@@ -209,6 +212,7 @@ func QuizQuestionFromEntity(e *QuestionEntity) (coursemodulequiz.QuizQuestion, e
 		CorrectChoiceIndex: correctIdx,
 		MultipleAnswer:     e.QuestionType == "mc_multiple",
 		AnswerWithImage:    false,
+		AllowAnyAnswer:     allowAny,
 		Required:           true,
 		Points:             pts,
 		EstimatedMinutes:   2,

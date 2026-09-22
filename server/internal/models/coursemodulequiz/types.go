@@ -33,6 +33,7 @@ type QuizQuestion struct {
 	CorrectChoiceIndex *uint           `json:"correctChoiceIndex"`
 	MultipleAnswer     bool            `json:"multipleAnswer"`
 	AnswerWithImage    bool            `json:"answerWithImage"`
+	AllowAnyAnswer     bool            `json:"allowAnyAnswer"`
 	Required           bool            `json:"required"`
 	Points             int32           `json:"points"`
 	EstimatedMinutes   int32           `json:"estimatedMinutes"`

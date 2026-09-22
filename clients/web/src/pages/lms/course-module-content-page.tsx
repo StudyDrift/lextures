@@ -71,6 +71,7 @@ import {
   altTextHardBlockEnabled,
 } from '../../lib/platform-features'
 import { SeatTimeProgressBar } from '../../components/seat-time/seat-time-progress-bar'
+import { CourseActivityPager } from '../../components/lms/course-activity-pager'
 import { useSeatTimeHeartbeat } from '../../hooks/use-seat-time-heartbeat'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { StudyBuddyWidget } from '../../components/notebook/study-buddy-widget'
@@ -269,6 +270,10 @@ export default function CourseModuleContentPage() {
   useEffect(() => {
     void load()
   }, [load])
+
+  useEffect(() => {
+    document.getElementById('main-content')?.scrollTo({ top: 0 })
+  }, [itemId])
 
   useCoursePageTitle(!loading && title ? title : null)
 
@@ -826,6 +831,10 @@ export default function CourseModuleContentPage() {
             ) : null}
           </div>
         )}
+
+        {!editing && !loading ? (
+          <CourseActivityPager courseCode={courseCode} itemId={itemId} />
+        ) : null}
       </div>
 
       {!loading && !loadError && editing && (

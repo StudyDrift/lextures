@@ -7,6 +7,7 @@ import {
   isoToDatetimeLocalValue,
   makeQuestion,
   quizDateTimeIsSet,
+  setQuestionAllowAnyAnswer,
 } from '../course-module-quiz-utils'
 
 describe('course-module-quiz-utils', () => {
@@ -44,6 +45,21 @@ describe('course-module-quiz-utils', () => {
     const q = makeQuestion()
     expect(q.questionType).toBe('multiple_choice')
     expect(q.choices.length).toBe(4)
+    expect(q.allowAnyAnswer).toBe(false)
     expect(q.id.length).toBeGreaterThan(0)
+  })
+
+  it('setQuestionAllowAnyAnswer clears the marked choice and keeps other config', () => {
+    const q = makeQuestion()
+    q.correctChoiceIndex = 1
+    q.typeConfig = { correctChoiceIndices: [1], unit: 'pts' }
+    const on = setQuestionAllowAnyAnswer(q, true)
+    expect(on.allowAnyAnswer).toBe(true)
+    expect(on.correctChoiceIndex).toBeNull()
+    expect(on.typeConfig).toEqual({ unit: 'pts' })
+    expect(q.correctChoiceIndex).toBe(1)
+    const off = setQuestionAllowAnyAnswer(on, false)
+    expect(off.allowAnyAnswer).toBe(false)
+    expect(off.correctChoiceIndex).toBeNull()
   })
 })

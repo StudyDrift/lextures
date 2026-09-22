@@ -91,6 +91,7 @@ describe('InspectorPanel', () => {
             correctChoiceIndex: 1,
             multipleAnswer: false,
             answerWithImage: false,
+            allowAnyAnswer: false,
             required: true,
             points: 10,
             estimatedMinutes: 0,

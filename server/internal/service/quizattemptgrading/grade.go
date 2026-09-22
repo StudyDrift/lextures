@@ -52,6 +52,14 @@ func GradeResponseItem(q coursemodulequiz.QuizQuestion, item coursemodulequiz.Qu
 
 	switch q.QuestionType {
 	case "multiple_choice", "true_false":
+		if q.AllowAnyAnswer {
+			if choiceResponsePresent(item) {
+				correct := true
+				gr.IsCorrect = &correct
+				gr.PointsAwarded = maxPts
+			}
+			break
+		}
 		if q.MultipleAnswer && len(item.SelectedChoiceIndices) > 0 {
 			correct := gradeMultipleAnswerIndices(q, item.SelectedChoiceIndices)
 			gr.IsCorrect = &correct
@@ -107,6 +115,15 @@ func GradeResponseItem(q coursemodulequiz.QuizQuestion, item coursemodulequiz.Qu
 }
 
 func boolPtr(v bool) *bool { return &v }
+
+// choiceResponsePresent is true when the learner selected at least one choice.
+// Allow-any questions award the question's full points for any such selection.
+func choiceResponsePresent(item coursemodulequiz.QuizQuestionResponseItem) bool {
+	if item.SelectedChoiceIndex != nil {
+		return true
+	}
+	return len(item.SelectedChoiceIndices) > 0
+}
 
 func gradeMultipleAnswerIndices(q coursemodulequiz.QuizQuestion, selected []uint) bool {
 	expected := correctChoiceIndicesFromConfig(q)

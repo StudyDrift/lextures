@@ -460,8 +460,12 @@ export function learnerCourseItemHref(courseCode: string, item: { kind: string; 
       return `/courses/${cc}/modules/lti/${id}`
     case 'h5p':
       return `/courses/${cc}/modules/h5p/${id}`
+    case 'scorm':
+      return `/courses/${cc}/modules/scorm/${id}`
     case 'vibe_activity':
       return `/courses/${cc}/modules/vibe-activity/${id}`
+    case 'textbook_resource':
+      return `/courses/${cc}/modules/textbook-resource/${id}`
     default:
       return `/courses/${cc}/modules`
   }
@@ -5371,6 +5375,8 @@ export type QuizQuestion = {
   correctChoiceIndex: number | null
   multipleAnswer: boolean
   answerWithImage: boolean
+  /** When true, any selected choice earns the question's full points. */
+  allowAnyAnswer: boolean
   required: boolean
   points: number
   estimatedMinutes: number
@@ -5532,6 +5538,7 @@ export function normalizeQuizQuestion(raw: unknown): QuizQuestion {
     correctChoiceIndex: typeof q.correctChoiceIndex === 'number' ? q.correctChoiceIndex : null,
     multipleAnswer: Boolean(q.multipleAnswer),
     answerWithImage: Boolean(q.answerWithImage),
+    allowAnyAnswer: Boolean(q.allowAnyAnswer),
     required: q.required !== false,
     points: typeof q.points === 'number' ? q.points : 0,
     estimatedMinutes: typeof q.estimatedMinutes === 'number' ? q.estimatedMinutes : 0,

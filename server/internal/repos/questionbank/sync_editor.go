@@ -103,10 +103,17 @@ func dbQuestionTypeFromEditor(q *coursemodulequiz.QuizQuestion) string {
 }
 
 func correctAnswerJSONFromQuizQuestion(q *coursemodulequiz.QuizQuestion) []byte {
-	if q.CorrectChoiceIndex == nil {
+	if q.CorrectChoiceIndex == nil && !q.AllowAnyAnswer {
 		return nil
 	}
-	b, _ := json.Marshal(map[string]any{"correctChoiceIndex": *q.CorrectChoiceIndex})
+	payload := map[string]any{}
+	if q.CorrectChoiceIndex != nil {
+		payload["correctChoiceIndex"] = *q.CorrectChoiceIndex
+	}
+	if q.AllowAnyAnswer {
+		payload["allowAnyAnswer"] = true
+	}
+	b, _ := json.Marshal(payload)
 	return b
 }
 

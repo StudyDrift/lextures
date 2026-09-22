@@ -37,6 +37,8 @@ export type DialogProps = {
   initialFocusRef?: React.RefObject<HTMLElement | null>
   /** Optional test id for the overlay root (e.g. confirm-dialog-root). */
   rootTestId?: string
+  /** Stacking utility for the overlay root. Use when opening above a higher app layer. */
+  zClassName?: string
 }
 
 const sizeClass: Record<NonNullable<DialogProps['size']>, string> = {
@@ -65,6 +67,7 @@ export function Dialog({
   onExited,
   initialFocusRef,
   rootTestId,
+  zClassName,
 }: DialogProps) {
   const titleId = useId()
   const descId = useId()
@@ -118,6 +121,7 @@ export function Dialog({
       wrapPanel={false}
       onExited={onExited}
       rootTestId={rootTestId}
+      zClassName={zClassName}
     >
       <div
         ref={panelRef}
