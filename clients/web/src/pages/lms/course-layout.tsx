@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { Suspense, useEffect, useMemo, useState } from 'react'
 import { Link, Outlet, useLocation, useParams } from 'react-router-dom'
 import { CourseDocumentTitleProvider } from '../../context/course-document-title-context'
 import { CourseLiveContext } from '../../context/course-live-context'
@@ -10,6 +10,7 @@ import { fetchCourse, type CoursePublic } from '../../lib/courses-api'
 import { ConsortiumHomeBrandingBanner } from '../../components/consortium/consortium-home-branding-banner'
 import { StudentPreviewBanner } from '../../components/student-preview-banner'
 import { useFocusAnchorRuntime } from '../../lib/use-focus-anchor'
+import { RouteFallback } from '../../components/route-fallback'
 import { CourseSyllabusAcceptanceOverlay } from './course-syllabus-acceptance-overlay'
 
 function EvaluationReminderBanner({ courseCode }: { courseCode: string }) {
@@ -62,6 +63,7 @@ export default function CourseLayout() {
     () => ({ structureRevision }),
     [structureRevision],
   )
+  const outletContext = useMemo(() => ({ course }), [course])
   const defaultPageTitle = courseCode ? coursePageTitleFromPath(location.pathname) : null
 
   // CC.8 — deep-link highlight when `?focus=` is present (no-op otherwise).
@@ -97,7 +99,11 @@ export default function CourseLayout() {
         courseTitle={course?.title ?? null}
         defaultPageTitle={defaultPageTitle}
       >
-        <Outlet context={{ course }} />
+        {/* Remount when the activity path changes so the previous page's state
+            and in-flight fetch cannot stay on screen after the URL moves. */}
+        <Suspense fallback={<RouteFallback />}>
+          <Outlet key={location.pathname} context={outletContext} />
+        </Suspense>
       </CourseDocumentTitleProvider>
     </CourseLiveContext.Provider>
   )

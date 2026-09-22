@@ -139,7 +139,7 @@ export default function AdminLayout() {
         ) : (
           <>
             <AdminSearchBar />
-            <Outlet />
+            <Outlet key={location.pathname} />
           </>
         )}
       </div>

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { Pencil, FastForward, Download, CheckCircle, Loader2, Sparkles } from 'lucide-react'
 import { useCoursePageTitle } from '../../context/course-document-title-context'
@@ -136,6 +136,9 @@ export default function CourseModuleContentPage() {
 
   const contentLeaveSentRef = useRef(false)
   const contentOpenSentForRef = useRef<string | null>(null)
+  /** Bumped when a newer load starts or this page unmounts, so a slow response cannot overwrite the activity the URL now shows. */
+  const loadGen = useRef(0)
+  const countdownFired = useRef(false)
   const contentToolsFlushRef = useRef<ContentToolsFlushHandle | null>(null)
   const [courseProfile, setCourseProfile] = useState<CoursePublic | null>(null)
   const [nextNav, setNextNav] = useState<{ href: string; title: string; live: string } | null>(null)
@@ -177,9 +180,16 @@ export default function CourseModuleContentPage() {
   }, [autoAdvance, nextNav, countdown])
 
   useEffect(() => {
-    if (countdown === null) return
+    if (countdown === null) {
+      countdownFired.current = false
+      return
+    }
     if (countdown <= 0) {
-      if (nextNav) navigate(nextNav.href)
+      if (!countdownFired.current) {
+        countdownFired.current = true
+        setCountdown(null)
+        if (nextNav) navigate(nextNav.href)
+      }
       return
     }
 
@@ -208,6 +218,8 @@ export default function CourseModuleContentPage() {
 
   const load = useCallback(async () => {
     if (!courseCode || !itemId) return
+    const gen = ++loadGen.current
+    const stillCurrent = () => gen === loadGen.current
     setLoading(true)
     setLoadError(null)
     try {
@@ -215,6 +227,7 @@ export default function CourseModuleContentPage() {
         fetchModuleContentPage(courseCode, itemId),
         fetchCourse(courseCode),
       ])
+      if (!stillCurrent()) return
       setCourseProfile(courseRow)
       setTitle(data.title)
       setMarkdown(data.markdown)
@@ -230,6 +243,7 @@ export default function CourseModuleContentPage() {
       // AC.6 entry-ticket gate: route to pre-assessment when required and not yet profiled.
       // Server only attaches `adaptive` for student viewers.
       if (data.adaptive?.requiresPreAssessment && data.adaptive.preAssessmentItemId) {
+        if (!stillCurrent()) return
         navigate(
           `/courses/${encodeURIComponent(courseCode)}/modules/quiz/${encodeURIComponent(data.adaptive.preAssessmentItemId)}`,
           { replace: true },
@@ -238,8 +252,12 @@ export default function CourseModuleContentPage() {
       }
       if (readingLevelOn && courseCode && itemId) {
         void fetchItemReadingLevel(courseCode, itemId)
-          .then(setReadingLevel)
-          .catch(() => setReadingLevel(null))
+          .then((level) => {
+            if (stillCurrent()) setReadingLevel(level)
+          })
+          .catch(() => {
+            if (stillCurrent()) setReadingLevel(null)
+          })
       }
       setMdPreset(courseRow.markdownThemePreset)
       setMdCustom(courseRow.markdownThemeCustom)
@@ -248,7 +266,13 @@ export default function CourseModuleContentPage() {
         kind: 'content_page',
         title: data.title,
       })
-      void loadMarkups()
+      void fetchContentPageMarkups(courseCode, itemId)
+        .then((list) => {
+          if (stillCurrent()) setMarkups(list)
+        })
+        .catch(() => {
+          if (stillCurrent()) setMarkups([])
+        })
       const openKey = `${courseCode}:${itemId}`
       if (contentOpenSentForRef.current !== openKey) {
         contentOpenSentForRef.current = openKey
@@ -258,17 +282,27 @@ export default function CourseModuleContentPage() {
         }).catch(() => {})
       }
     } catch (e) {
+      if (!stillCurrent()) return
       setLoadError(e instanceof Error ? e.message : 'Could not load this page.')
       setTitle('')
       setMarkdown('')
       setUpdatedAt(null)
     } finally {
-      setLoading(false)
+      if (stillCurrent()) setLoading(false)
     }
-  }, [courseCode, itemId, loadMarkups, readingLevelOn, navigate])
+  }, [courseCode, itemId, readingLevelOn, navigate])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    setEditing(false)
+    setDraft([])
+    setBuildAiOpen(false)
+    setSaveError(null)
     void load()
+    // Invalidate before passive effects so an in-flight response cannot
+    // navigate or write state after this activity has been left.
+    return () => {
+      loadGen.current += 1
+    }
   }, [load])
 
   useEffect(() => {
