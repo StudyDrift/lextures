@@ -355,8 +355,13 @@ test.describe('Marketplace storefront — UI', () => {
 
     await page.getByTestId('marketplace-filter-price').selectOption('any')
     await page.getByTestId('marketplace-search').fill(paidTitle)
-    await page.getByRole('link', { name: new RegExp(paidTitle) }).click()
-    await expect(page).toHaveURL(new RegExp(`/marketplace/${paidSlug}`))
+    // The search box writes `?q=` after a short delay. Click only once that
+    // write has landed, so it cannot replace the detail navigation.
+    await expect.poll(() => new URL(page.url()).searchParams.get('q'), { timeout: 15_000 }).toBe(paidTitle)
+    const card = page.getByTestId('marketplace-course-card').filter({ hasText: paidTitle })
+    await expect(card).toBeVisible()
+    await card.click()
+    await expect(page).toHaveURL(new RegExp(`/marketplace/${paidSlug}`), { timeout: 15_000 })
     await expect(page.getByTestId('marketplace-course-detail')).toBeVisible({ timeout: 15_000 })
     await expect(page.getByTestId('marketplace-cta')).toBeVisible()
     // Paid CTA starts Stripe checkout (or shows unavailable when Stripe is not configured).
