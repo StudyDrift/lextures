@@ -103,9 +103,11 @@ export function StaggerReveal({
 
   useEffect(() => {
     if (!ready || !enabled || didEnter.current) return
+    // Set the entered flag in the effect, not a cancellable animation frame.
+    // Strict Mode runs the effect, cancels the frame, then skips the replay
+    // once didEnter is set, which leaves the item at opacity 0.
     didEnter.current = true
-    const id = requestAnimationFrame(() => setEntered(true))
-    return () => cancelAnimationFrame(id)
+    setEntered(true)
   }, [ready, enabled])
 
   if (!enabled) {
