@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Search, Star, Store } from 'lucide-react'
@@ -139,9 +139,13 @@ export default function MarketplacePage() {
   const sort = params.get('sort') ?? 'popular'
 
   const debounceRef = useRef<number | undefined>(undefined)
-  useEffect(() => {
+  // Layout cleanup so a course click unmounts this page and cancels the pending
+  // query write before it can replace the detail URL.
+  useLayoutEffect(() => {
+    let active = true
     window.clearTimeout(debounceRef.current)
     debounceRef.current = window.setTimeout(() => {
+      if (!active || window.location.pathname !== '/marketplace') return
       setParams(
         (prev) => {
           const next = new URLSearchParams(prev)
@@ -152,7 +156,10 @@ export default function MarketplacePage() {
         { replace: true },
       )
     }, 300)
-    return () => window.clearTimeout(debounceRef.current)
+    return () => {
+      active = false
+      window.clearTimeout(debounceRef.current)
+    }
   }, [queryText, setParams])
 
   useEffect(() => {

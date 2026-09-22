@@ -52,6 +52,10 @@ import {
 } from './submission-navigator-utils'
 import { ResizableSplitPane } from '../layout/resizable-split-pane'
 import { SubmissionPreviewSidebar } from './submission-preview-sidebar'
+import {
+  preferredSubmissionPanel,
+  submissionDocumentTabLabel,
+} from './submission-workbench-panel'
 import type { RubricDefinition } from '../../lib/courses-api'
 import { QuizSpeedGraderBranch } from '../quiz/quiz-speed-grader-branch'
 import { FullScreenModalShell } from '../ui/fullscreen-modal-shell'
@@ -151,6 +155,7 @@ function AssignmentAnnotationWorkbenchInner({
   const { confirm, ConfirmDialogHost } = useConfirm()
   const annotationsActive = annotationsActiveProp ?? submissionAllowsFile
   const [panel, setPanel] = useState<'document' | 'media'>('document')
+  const panelDefaulted = useRef(false)
   const [mediaItems, setMediaItems] = useState<SubmissionFeedbackMediaApi[]>([])
   const [gradedFilter, setGradedFilter] = useState<GradedFilter>('all')
   const [submissions, setSubmissions] = useState<ModuleAssignmentSubmissionApi[]>([])
@@ -460,9 +465,29 @@ function AssignmentAnnotationWorkbenchInner({
   }, [current?.id, originalityActive, reloadOriginality])
 
   useEffect(() => {
-    if (annotationsActive && !feedbackMediaEnabled) setPanel('document')
-    if (!annotationsActive && feedbackMediaEnabled) setPanel('media')
-  }, [annotationsActive, feedbackMediaEnabled])
+    const next = preferredSubmissionPanel({
+      annotationsActive,
+      feedbackMediaEnabled,
+      submissionAllowsFile,
+      submissionAllowsText,
+      submissionAllowsUrl,
+    })
+    const documentSurface =
+      annotationsActive || submissionAllowsFile || submissionAllowsText || submissionAllowsUrl
+    if (!panelDefaulted.current) {
+      panelDefaulted.current = true
+      setPanel(next)
+      return
+    }
+    if (!documentSurface && feedbackMediaEnabled) setPanel('media')
+    if (documentSurface && !feedbackMediaEnabled) setPanel('document')
+  }, [
+    annotationsActive,
+    feedbackMediaEnabled,
+    submissionAllowsFile,
+    submissionAllowsText,
+    submissionAllowsUrl,
+  ])
 
   async function persistAnnotation(
     payload: PostSubmissionAnnotationInput,
@@ -716,6 +741,7 @@ function AssignmentAnnotationWorkbenchInner({
   const showDocPanel = annotationsActive || submissionReviewActive || (mode === 'student' && filePreviewActive)
   const showMediaPanel = feedbackMediaEnabled
   const both = showDocPanel && showMediaPanel
+  const documentTabLabel = submissionDocumentTabLabel({ mode, annotationsActive })
   const staffPreviewOnly = mode === 'staff' && filePreviewActive && !annotationsActive
   const staffGradingSidebarActive = mode === 'staff' && submissionReviewActive
 
@@ -1284,7 +1310,7 @@ function AssignmentAnnotationWorkbenchInner({
             className={`rounded-t-md px-3 py-1.5 text-sm font-medium ${ panel === 'document' ? 'bg-surface-sunken text-fg-default dark:bg-surface-overlay' : 'text-fg-muted hover:bg-surface-base dark:text-fg-muted dark:hover:bg-neutral-800/60' }`}
             onClick={() => setPanel('document')}
           >
-            Annotations
+            {documentTabLabel}
           </button>
           <button
             type="button"

@@ -24,6 +24,7 @@ import { queueCanvasGradeSync, type CanvasGradePushPayload } from '../canvas/can
 import { RubricGradePicker } from '../grading/rubric-grade-picker'
 import { formatPointsCell, rubricScoresComplete, rubricTotal } from '../../lib/rubric-utils'
 import { altKeyHint } from './speed-grader-shortcuts'
+import { studentGradeIsHidden } from './submission-workbench-panel'
 
 type GradeMode = 'rubric' | 'points'
 
@@ -216,6 +217,7 @@ export function SubmissionGradingPanel({
         if (!cancelled) applyGrade(grade)
       } catch (e) {
         if (!cancelled) {
+          const message = e instanceof Error ? e.message : 'Could not load grade.'
           setComment('')
           setThreadComments([])
           setPointsInput('')
@@ -223,7 +225,8 @@ export function SubmissionGradingPanel({
           setPosted(false)
           setHasGrade(false)
           setGradeMode(hasRubric ? 'rubric' : 'points')
-          setLoadError(e instanceof Error ? e.message : 'Could not load grade.')
+          // An unposted grade is hidden from the student on purpose. Show the empty score, not an error.
+          setLoadError(mode === 'student' && studentGradeIsHidden(message) ? null : message)
         }
       } finally {
         if (!cancelled) setLoading(false)
@@ -232,7 +235,7 @@ export function SubmissionGradingPanel({
     return () => {
       cancelled = true
     }
-  }, [applyGrade, courseCode, gradeRefreshKey, agentApplyKey, hasRubric, itemId, studentUserId, submissionId])
+  }, [applyGrade, courseCode, gradeRefreshKey, agentApplyKey, hasRubric, itemId, mode, studentUserId, submissionId])
 
   useEffect(() => {
     if (!autoFocusScore || !focusTarget) {
@@ -533,6 +536,7 @@ export function SubmissionGradingPanel({
   }
 
   const formDisabled = disabled || saving || loading
+  const studentView = mode === 'student'
 
   return (
     <section
@@ -575,7 +579,7 @@ export function SubmissionGradingPanel({
                 <span className="rounded-full border border-transparent bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800 dark:border-emerald-800/60 dark:bg-emerald-950/80 dark:text-emerald-100">
                   Posted
                 </span>
-              ) : (
+              ) : studentView ? null : (
                 <span className="rounded-full border border-transparent bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-900 dark:border-amber-800/60 dark:bg-amber-950/80 dark:text-amber-100">
                   Draft
                 </span>
@@ -608,7 +612,7 @@ export function SubmissionGradingPanel({
           </p>
         ) : null}
 
-        {hasRubric && rubric ? (
+        {studentView ? null : hasRubric && rubric ? (
           <>
             <div
               className="inline-flex w-full rounded-xl border border-border-default bg-surface-sunken p-1 dark:border-border-default dark:bg-surface-raised"
@@ -724,6 +728,7 @@ export function SubmissionGradingPanel({
         </div>
       </div>
 
+      {studentView ? null : (
       <div className="shrink-0 space-y-2 border-t border-border-default bg-surface-base p-4 dark:border-border-default/80">
         {saveError ? (
           <p className="text-sm text-rose-700 dark:text-rose-300" role="alert">
@@ -760,6 +765,7 @@ export function SubmissionGradingPanel({
           </button>
         </div>
       </div>
+      )}
       <GraderAgentWorkflowModal
         open={agentOpen}
         onClose={() => setAgentOpen(false)}

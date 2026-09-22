@@ -1,6 +1,6 @@
 import Mark from 'mark.js'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { Highlighter, StickyNote, Trash2, X } from 'lucide-react'
+import { BookOpen, Copy, Highlighter, StickyNote, Trash2, X } from 'lucide-react'
 import { MarkdownArticleView } from '../syllabus/syllabus-markdown-view'
 import type { ContentPageMarkup, ReaderMarkupTarget } from '../../lib/courses-api'
 import { deleteReaderMarkup, postReaderMarkup } from '../../lib/courses-api'
@@ -8,7 +8,9 @@ import { sortedChildren, type CourseNotebookPage } from '../../lib/course-notebo
 import { appendContentQuoteToNotebookPage, loadCourseNotebook } from '../../lib/student-notebook-storage'
 import type { ResolvedMarkdownTheme } from '../../lib/markdown-theme'
 import { plainTextFromRange } from './selection-plain-text'
+import { definitionLookupTerm, fetchWordDefinition, type WordDefinition } from './word-definition'
 import { useCourseNavFeatures } from '../../context/course-nav-features-context'
+import { Button, Spinner } from '../ui'
 
 type SelectionOverlayRect = { left: number; top: number; width: number; height: number }
 
@@ -213,6 +215,36 @@ type ReaderToolbar =
   | { kind: 'selection'; x: number; y: number; text: string }
   | { kind: 'highlight'; x: number; y: number; markupId: string; quoteText: string }
 
+type DefinitionLookup =
+  | { status: 'loading'; word: string }
+  | { status: 'ready'; result: WordDefinition }
+  | { status: 'error'; message: string }
+
+/** Place the grabber just outside the glyph so the word stays readable. */
+const selectionHandleTransform = {
+  start: 'translate(calc(-100% + 8px), -50%)',
+  end: 'translate(-8px, -50%)',
+} as const
+
+async function copyPlainText(text: string): Promise<void> {
+  try {
+    await navigator.clipboard.writeText(text)
+    return
+  } catch {
+    /* fall through to a hidden textarea */
+  }
+  const ta = document.createElement('textarea')
+  ta.value = text
+  ta.setAttribute('readonly', '')
+  ta.style.position = 'fixed'
+  ta.style.left = '-9999px'
+  document.body.appendChild(ta)
+  ta.select()
+  const ok = document.execCommand('copy')
+  document.body.removeChild(ta)
+  if (!ok) throw new Error('Could not copy.')
+}
+
 type ContentPageReaderProps = {
   markdown: string
   theme: ResolvedMarkdownTheme
@@ -269,6 +301,9 @@ export function ContentPageReader({
   const [noteComment, setNoteComment] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [definitionLookup, setDefinitionLookup] = useState<DefinitionLookup | null>(null)
+  const [copied, setCopied] = useState(false)
+  const defineRequestRef = useRef(0)
 
   const highlightMarkups = useMemo(
     () => markups.filter((m) => m.kind === 'highlight'),
@@ -311,8 +346,11 @@ export function ContentPageReader({
 
   const closePopover = useCallback(() => {
     dragHandleRef.current = null
+    defineRequestRef.current += 1
     clearPendingSelectionVisual()
     setPopover(null)
+    setDefinitionLookup(null)
+    setCopied(false)
   }, [clearPendingSelectionVisual])
 
   const syncSelectionOverlayFromRef = useCallback(() => {
@@ -363,6 +401,8 @@ export function ContentPageReader({
       if (selected.length < 2) return
       pendingSelectionRangeRef.current = snapped
       pendingSelectionTextRef.current = selected
+      setDefinitionLookup(null)
+      setCopied(false)
       const snap = buildSelectionOverlaySnapshot(snapped, root)
       if (!snap) return
       setSelectionOverlay(snap)
@@ -397,20 +437,8 @@ export function ContentPageReader({
             : popover.quoteText
         if (!text) return
         e.preventDefault()
-        void navigator.clipboard.writeText(text).catch(() => {
-          try {
-            const ta = document.createElement('textarea')
-            ta.value = text
-            ta.setAttribute('readonly', '')
-            ta.style.position = 'fixed'
-            ta.style.left = '-9999px'
-            document.body.appendChild(ta)
-            ta.select()
-            document.execCommand('copy')
-            document.body.removeChild(ta)
-          } catch {
-            /* ignore */
-          }
+        void copyPlainText(text).catch(() => {
+          /* ignore */
         })
       }
     }
@@ -463,6 +491,8 @@ export function ContentPageReader({
       const textSnapped = plainTextFromRange(snapped)
       pendingSelectionRangeRef.current = snapped
       pendingSelectionTextRef.current = textSnapped
+      setDefinitionLookup(null)
+      setCopied(false)
       window.getSelection()?.removeAllRanges()
       if (textSnapped.length < 2) {
         closePopover()
@@ -512,6 +542,8 @@ export function ContentPageReader({
       const rect = markEl.getBoundingClientRect()
       e.stopPropagation()
       clearPendingSelectionVisual()
+      setDefinitionLookup(null)
+      setCopied(false)
       setPopover({
         kind: 'highlight',
         x: rect.left + rect.width / 2,
@@ -574,6 +606,47 @@ export function ContentPageReader({
     if (!popover || popover.kind !== 'highlight') return
     openNoteWithQuote(popover.quoteText)
   }, [popover, openNoteWithQuote])
+
+  const quoteForActions = useCallback((): string => {
+    if (!popover) return ''
+    if (popover.kind === 'selection') return pendingSelectionTextRef.current || popover.text
+    return popover.quoteText
+  }, [popover])
+
+  const onCopySelection = useCallback(async () => {
+    const text = quoteForActions()
+    if (!text) return
+    setError(null)
+    try {
+      await copyPlainText(text)
+      setCopied(true)
+    } catch (e) {
+      setCopied(false)
+      setError(e instanceof Error ? e.message : 'Could not copy.')
+    }
+  }, [quoteForActions])
+
+  const onDefine = useCallback(async () => {
+    const term = definitionLookupTerm(quoteForActions())
+    const requestId = ++defineRequestRef.current
+    if (!term) {
+      setDefinitionLookup({ status: 'error', message: 'Select a word to define.' })
+      return
+    }
+    setDefinitionLookup({ status: 'loading', word: term })
+    setError(null)
+    try {
+      const result = await fetchWordDefinition(term)
+      if (defineRequestRef.current !== requestId) return
+      setDefinitionLookup({ status: 'ready', result })
+    } catch (e) {
+      if (defineRequestRef.current !== requestId) return
+      setDefinitionLookup({
+        status: 'error',
+        message: e instanceof Error ? e.message : 'Could not look up that word.',
+      })
+    }
+  }, [quoteForActions])
 
   const removeCurrentHighlight = useCallback(async () => {
     if (!popover || popover.kind !== 'highlight') return
@@ -669,12 +742,12 @@ export function ContentPageReader({
 
       {selectionOverlay && popover?.kind === 'selection' && !disabled && (
         <>
-          {/* Above article so rects are not fully covered by the markdown block; blend reads softer on type. */}
+          {/* Translucent bar behind the glyphs; handles sit outside the word. */}
           <div className="pointer-events-none fixed inset-0 z-[15]" aria-hidden>
             {selectionOverlay.rects.map((r, i) => (
               <div
                 key={`reader-sel-${i}`}
-                className="pointer-events-none fixed rounded-sm bg-amber-200/55 mix-blend-multiply ring-1 ring-amber-400/25 dark:bg-amber-400/40 dark:mix-blend-plus-lighter dark:ring-amber-500/30"
+                className="pointer-events-none fixed rounded-[3px] bg-accent-solid/35 dark:bg-accent-solid/45"
                 style={{
                   left: `${r.left}px`,
                   top: `${r.top}px`,
@@ -688,11 +761,11 @@ export function ContentPageReader({
             <button
               type="button"
               aria-label="Adjust selection start"
-              className="pointer-events-auto fixed h-4 w-4 cursor-grab touch-none rounded-full border-2 border-indigo-600 bg-surface-raised shadow-md active:cursor-grabbing dark:border-indigo-400 dark:bg-surface-raised"
+              className="pointer-events-auto fixed flex h-6 w-6 cursor-grab touch-none items-center justify-center active:cursor-grabbing"
               style={{
                 left: `${selectionOverlay.start.left}px`,
                 top: `${selectionOverlay.start.top}px`,
-                transform: 'translate(-50%, -50%)',
+                transform: selectionHandleTransform.start,
               }}
               onPointerDown={(e) => {
                 e.preventDefault()
@@ -717,15 +790,17 @@ export function ContentPageReader({
               onLostPointerCapture={() => {
                 dragHandleRef.current = null
               }}
-            />
+            >
+              <span className="h-3.5 w-3.5 rounded-full bg-accent-solid shadow-md ring-2 ring-surface-raised" />
+            </button>
             <button
               type="button"
               aria-label="Adjust selection end"
-              className="pointer-events-auto fixed h-4 w-4 cursor-grab touch-none rounded-full border-2 border-indigo-600 bg-surface-raised shadow-md active:cursor-grabbing dark:border-indigo-400 dark:bg-surface-raised"
+              className="pointer-events-auto fixed flex h-6 w-6 cursor-grab touch-none items-center justify-center active:cursor-grabbing"
               style={{
                 left: `${selectionOverlay.end.left}px`,
                 top: `${selectionOverlay.end.top}px`,
-                transform: 'translate(-50%, -50%)',
+                transform: selectionHandleTransform.end,
               }}
               onPointerDown={(e) => {
                 e.preventDefault()
@@ -750,7 +825,9 @@ export function ContentPageReader({
               onLostPointerCapture={() => {
                 dragHandleRef.current = null
               }}
-            />
+            >
+              <span className="h-3.5 w-3.5 rounded-full bg-accent-solid shadow-md ring-2 ring-surface-raised" />
+            </button>
           </div>
         </>
       )}
@@ -764,7 +841,7 @@ export function ContentPageReader({
           role="dialog"
           aria-label={popover.kind === 'selection' ? 'Selection actions' : 'Highlight actions'}
         >
-          <div className="flex gap-1">
+          <div className="flex max-w-[min(100vw-2rem,36rem)] flex-wrap gap-1">
             {popover.kind === 'selection' ? (
               <>
                 <button
@@ -808,6 +885,25 @@ export function ContentPageReader({
                 </button>
               </>
             )}
+            <Button
+              variant="ghost"
+              size="sm"
+              static
+              disabled={definitionLookup?.status === 'loading'}
+              onClick={() => void onDefine()}
+            >
+              <BookOpen className="h-3.5 w-3.5" aria-hidden />
+              Define
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              static
+              onClick={() => void onCopySelection()}
+            >
+              <Copy className="h-3.5 w-3.5" aria-hidden />
+              {copied ? 'Copied' : 'Copy'}
+            </Button>
             <button
               type="button"
               onClick={closePopover}
@@ -817,6 +913,41 @@ export function ContentPageReader({
               <X className="h-3.5 w-3.5" />
             </button>
           </div>
+          {definitionLookup && definitionLookup.status !== 'loading' && (
+            <div
+              className="max-h-40 max-w-sm overflow-y-auto border-t border-border-subtle px-2.5 py-2"
+              aria-live="polite"
+            >
+              {definitionLookup.status === 'error' ? (
+                <p className="text-xs text-fg-muted">{definitionLookup.message}</p>
+              ) : (
+                <div className="text-xs text-fg-default">
+                  <p>
+                    <span className="font-semibold">{definitionLookup.result.word}</span>
+                    {definitionLookup.result.phonetic && (
+                      <span className="ms-1.5 text-fg-muted">{definitionLookup.result.phonetic}</span>
+                    )}
+                  </p>
+                  <ul className="mt-1 flex flex-col gap-1.5">
+                    {definitionLookup.result.senses.map((sense) => (
+                      <li key={`${sense.partOfSpeech ?? 'word'}-${sense.definition}`}>
+                        {sense.partOfSpeech && (
+                          <span className="me-1 italic text-fg-muted">{sense.partOfSpeech}</span>
+                        )}
+                        {sense.definition}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+          {definitionLookup?.status === 'loading' && (
+            <p className="flex items-center gap-2 px-2.5 py-1.5 text-xs text-fg-muted" role="status">
+              <Spinner size="sm" />
+              Looking up “{definitionLookup.word}”…
+            </p>
+          )}
         </div>
       )}
 

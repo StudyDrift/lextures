@@ -14,7 +14,7 @@ void registerServiceWorker()
 
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
+import { AppRouter } from './app-router'
 import './index.css'
 import App from './app'
 import { LmsToaster } from './components/lms-toaster'
@@ -26,7 +26,7 @@ import { PermissionsProvider } from './context/permissions-provider'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter>
+    <AppRouter>
       <I18nProvider>
         <LocaleFormatProvider>
           <OrgBrandingProvider>
@@ -38,6 +38,6 @@ createRoot(document.getElementById('root')!).render(
           </OrgBrandingProvider>
         </LocaleFormatProvider>
       </I18nProvider>
-    </BrowserRouter>
+    </AppRouter>
   </StrictMode>,
 )
