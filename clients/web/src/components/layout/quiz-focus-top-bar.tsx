@@ -43,7 +43,7 @@ export function QuizFocusTopBar({ model }: { model: QuizShellFocusMode }) {
           </p>
         ) : null}
 
-        <p className="min-w-0 max-w-[11rem] truncate text-xs opacity-90 sm:max-w-md sm:text-sm lg:max-w-2xl" title={saveStatusText}>
+        <p className="max-w-[11rem] truncate text-xs opacity-90 sm:max-w-md sm:text-sm lg:max-w-2xl" title={saveStatusText}>
           {saveStatusText}
         </p>
 
