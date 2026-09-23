@@ -5371,6 +5371,8 @@ export type QuizQuestion = {
   choices: string[]
   /** Stable UUID strings per choice (authored order), when the bank normalized options JSON. */
   choiceIds?: string[]
+  /** Delivery-only map from displayed choice position to the authored index. */
+  choiceSourceIndices?: number[]
   typeConfig?: Record<string, unknown>
   correctChoiceIndex: number | null
   multipleAnswer: boolean

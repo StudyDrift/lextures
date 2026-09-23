@@ -44,10 +44,10 @@ import {
   buildMatchingPairsPayload,
   matchingPairsForQuestion,
   orderingItemsForQuestion,
+  displayChoiceOptions,
   prepareStaticQuestions,
   sortedRightOptionsForMatching,
   starterAnswersForCodeQuestions,
-  visibleChoices,
 } from './quiz-take-utils'
 
 function isBankQuestionId(id: string): boolean {
@@ -1554,7 +1554,7 @@ function StaticTakeBody({
   }
 
   function renderQuestion(q: QuizQuestion, index: number) {
-    const choices = visibleChoices(q)
+    const choices = displayChoiceOptions(q)
     const showChoices = q.questionType === 'multiple_choice' || q.questionType === 'true_false'
     const a = answers[q.id] ?? {}
     const configuredUnit = typeof q.typeConfig?.unit === 'string' ? q.typeConfig.unit : null
@@ -1574,25 +1574,25 @@ function StaticTakeBody({
         </p>
         {showChoices && (
           <div className="mt-4 space-y-2">
-            {choices.map((label, i) => (
+            {choices.map((option) => (
               <label
-                key={`${q.id}-c-${i}`}
+                key={`${q.id}-c-${option.index}`}
                 className="flex cursor-pointer items-start gap-3 rounded-lg border border-border-default bg-slate-50/50 px-3 py-2.5 text-sm dark:border-border-default/50"
               >
                 <input
                   type="radio"
                   name={`take-${q.id}`}
-                  checked={a.choice === i}
+                  checked={a.choice === option.index}
                   onChange={() =>
                     setAnswers((prev) => ({
                       ...prev,
-                      [q.id]: { ...prev[q.id], choice: i },
+                      [q.id]: { ...prev[q.id], choice: option.index },
                     }))
                   }
                   className="mt-0.5 border-border-strong text-accent-fg"
                 />
                 <span className="min-w-0 flex-1">
-                  <MathPlainText text={label} />
+                  <MathPlainText text={option.label} />
                 </span>
               </label>
             ))}

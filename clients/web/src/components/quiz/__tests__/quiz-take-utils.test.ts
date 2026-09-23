@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { type QuizQuestion } from '../../../lib/courses-api'
-import { prepareStaticQuestions, visibleChoices } from '../quiz-take-utils'
+import { displayChoiceOptions, prepareStaticQuestions, visibleChoices } from '../quiz-take-utils'
 import { defaultQuizAdvancedSettings } from '../../../lib/courses-api'
 
 function baseQuestion(overrides: Partial<QuizQuestion> = {}): QuizQuestion {
@@ -35,5 +35,25 @@ describe('prepareStaticQuestions', () => {
     const advanced = { ...defaultQuizAdvancedSettings(), shuffleChoices: true }
     const questions = [baseQuestion({ choices: null as unknown as string[] })]
     expect(() => prepareStaticQuestions(questions, advanced)).not.toThrow()
+  })
+
+  it('keeps the authored choice index after shuffling', () => {
+    const advanced = { ...defaultQuizAdvancedSettings(), shuffleChoices: true }
+    const original = baseQuestion({
+      choices: ['A', ' ', 'B', 'C'],
+      choiceIds: ['a', 'blank', 'b', 'c'],
+      correctChoiceIndex: 3,
+    })
+    for (let n = 0; n < 20; n++) {
+      const [shuffled] = prepareStaticQuestions([structuredClone(original)], advanced)
+      const shown = displayChoiceOptions(shuffled!)
+      expect(shown.map((option) => option.label).sort()).toEqual(['A', 'B', 'C'])
+      const byAuthored = new Map(shown.map((option) => [option.index, option.label]))
+      expect(byAuthored.get(0)).toBe('A')
+      expect(byAuthored.get(2)).toBe('B')
+      expect(byAuthored.get(3)).toBe('C')
+      expect(shown.find((option) => option.label === 'C')?.index).toBe(original.correctChoiceIndex)
+      expect(shuffled!.choiceIds).toEqual(shown.map((option) => original.choiceIds![option.index]))
+    }
   })
 })

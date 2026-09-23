@@ -2,8 +2,30 @@ import { type QuizAdvancedSettings, type QuizQuestion } from '../../lib/courses-
 import { shuffleArray, shuffledIndices } from '../../lib/shuffle'
 
 export function visibleChoices(q: QuizQuestion): string[] {
-  const choices = Array.isArray(q.choices) ? q.choices : []
-  return choices.map((c) => String(c).trim()).filter((c) => c.length > 0)
+  return displayChoiceOptions(q).map((option) => option.label)
+}
+
+/** Choices in the order shown to the learner, each tagged with its authored index. */
+export function displayChoiceOptions(q: QuizQuestion): { label: string; index: number }[] {
+  const raw = Array.isArray(q.choices) ? q.choices : []
+  const source = q.choiceSourceIndices
+  if (source && source.length === raw.length && raw.length > 0) {
+    return raw.map((label, i) => ({ label: String(label), index: source[i] ?? i }))
+  }
+  const out: { label: string; index: number }[] = []
+  for (let i = 0; i < raw.length; i++) {
+    const label = String(raw[i]).trim()
+    if (label.length > 0) out.push({ label, index: i })
+  }
+  return out
+}
+
+function keptChoiceIndexes(choices: string[]): number[] {
+  const kept: number[] = []
+  for (let i = 0; i < choices.length; i++) {
+    if (String(choices[i]).trim().length > 0) kept.push(i)
+  }
+  return kept
 }
 
 export function orderingItemsForQuestion(q: QuizQuestion): string[] {
@@ -67,13 +89,20 @@ function withShuffledChoices(q: QuizQuestion): QuizQuestion {
   if (q.questionType !== 'multiple_choice' && q.questionType !== 'true_false') {
     return q
   }
-  const choices = visibleChoices(q)
-  if (choices.length === 0) return q
-  const order = shuffledIndices(choices.length)
-  const newChoices = order.map((i) => choices[i])
+  const raw = Array.isArray(q.choices) ? q.choices : []
+  const kept = keptChoiceIndexes(raw)
+  if (kept.length === 0) return q
+  // choiceSourceIndices maps the displayed position back to the authored index.
+  // Grading compares selectedChoiceIndex with the unshuffled correctChoiceIndex.
+  const source = shuffledIndices(kept.length).map((pos) => kept[pos] ?? pos)
+  const authoredIds = q.choiceIds
+  const choiceIds =
+    authoredIds && authoredIds.length === raw.length ? source.map((i) => authoredIds[i] ?? '') : authoredIds
   return {
     ...q,
-    choices: newChoices,
+    choices: source.map((i) => String(raw[i]).trim()),
+    choiceIds,
+    choiceSourceIndices: source,
     correctChoiceIndex: null,
   }
 }

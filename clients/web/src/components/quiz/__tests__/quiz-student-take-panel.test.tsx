@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { BrowserRouter } from 'react-router-dom'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import {
   defaultQuizAdvancedSettings,
   type ModuleQuizPayload,
@@ -216,5 +216,93 @@ describe('QuizStudentTakePanel', () => {
     await waitFor(() => {
       expect(screen.getByText(/Pick Alpha/i)).toBeInTheDocument()
     })
+  })
+
+  it('submits the authored choice index when choices are shuffled', async () => {
+    const user = userEvent.setup()
+    setAccessToken('test-token')
+    const random = vi.spyOn(Math, 'random').mockReturnValue(0)
+    let submitted: { responses?: { questionId: string; selectedChoiceIndex?: number }[] } | null = null
+
+    server.use(
+      http.post('http://localhost:8080/api/v1/courses/:courseCode/quizzes/:itemId/start', () =>
+        HttpResponse.json({
+          attemptId: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+          attemptNumber: 1,
+          startedAt: new Date().toISOString(),
+          lockdownMode: 'standard',
+          hintsDisabled: false,
+          backNavigationAllowed: true,
+          currentQuestionIndex: 0,
+          deadlineAt: null,
+          reducedDistractionMode: false,
+          retakePolicy: 'latest',
+          maxAttempts: null,
+          remainingAttempts: null,
+        }),
+      ),
+      http.get('http://localhost:8080/api/v1/courses/:courseCode/quizzes/:itemId', () =>
+        HttpResponse.json({
+          ...minimalQuiz(),
+          shuffleChoices: true,
+          questions: [
+            {
+              id: 'q1',
+              prompt: 'Which letter comes first?',
+              questionType: 'multiple_choice',
+              choices: ['mem', 'shin', 'lamed', 'vav'],
+              typeConfig: {},
+              correctChoiceIndex: null,
+              multipleAnswer: false,
+              answerWithImage: false,
+              allowAnyAnswer: false,
+              required: true,
+              points: 1,
+              estimatedMinutes: 1,
+            },
+          ],
+        }),
+      ),
+      http.post('http://localhost:8080/api/v1/courses/:courseCode/quizzes/:itemId/submit', async ({ request }) => {
+        submitted = (await request.json()) as typeof submitted
+        return HttpResponse.json({
+          attemptId: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+          pointsEarned: 1,
+          pointsPossible: 1,
+          scorePercent: 100,
+        })
+      }),
+      http.get('http://localhost:8080/api/v1/courses/:courseCode/quizzes/:itemId/results', () =>
+        HttpResponse.json({ questions: [] }),
+      ),
+    )
+
+    renderPanel({
+      open: true,
+      onClose: () => {},
+      courseCode: 'C-TEST',
+      itemId: 'item-1',
+      quiz: minimalQuiz({ shuffleChoices: true }),
+      advanced: { ...defaultQuizAdvancedSettings(), shuffleChoices: true },
+      oneQuestionAtATime: false,
+      allowBackNavigation: true,
+    })
+
+    await user.click(screen.getByRole('button', { name: /^Begin$/i }))
+    await screen.findByText(/Which letter comes first/i)
+    // Math.random() === 0 rotates authored indexes to [1, 2, 3, 0], so "shin" is shown first.
+    expect(screen.getAllByRole('radio').map((el) => el.closest('label')?.textContent)).toEqual([
+      'shin',
+      'lamed',
+      'vav',
+      'mem',
+    ])
+    await user.click(screen.getByRole('radio', { name: 'shin' }))
+    await user.click(screen.getByRole('button', { name: 'Submit quiz' }))
+
+    await waitFor(() => {
+      expect(submitted?.responses?.[0]).toMatchObject({ questionId: 'q1', selectedChoiceIndex: 1 })
+    })
+    random.mockRestore()
   })
 })
