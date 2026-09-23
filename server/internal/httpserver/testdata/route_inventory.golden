@@ -1011,6 +1011,7 @@ GET	/api/v1/courses/{course_code}/meetings	session
 POST	/api/v1/courses/{course_code}/meetings	session
 POST	/api/v1/courses/{course_code}/modules-ai/chat	session
 GET	/api/v1/courses/{course_code}/modules/progress	anonymous
+GET	/api/v1/courses/{course_code}/my-assessment-completion	session
 GET	/api/v1/courses/{course_code}/my-grades	session
 GET	/api/v1/courses/{course_code}/my-groups	session
 GET	/api/v1/courses/{course_code}/my-progress	session

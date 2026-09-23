@@ -6,11 +6,45 @@ import {
   courseItemsCreatePermission,
   defaultContentToolConfig,
   isStudentEquivalentEnrollmentRole,
+  parseGraderAgentAIBuildResponse,
   viewerIsCourseStaffEnrollment,
   viewerIsLearnerOnlyCourseEnrollment,
   viewerShouldHideCourseEnrollmentsNav,
   viewerShouldShowMyGradesNav,
 } from '../courses-api'
+
+describe('parseGraderAgentAIBuildResponse', () => {
+  const graph = { nodes: [], edges: [] }
+
+  it('uses the last NDJSON line after progress frames', () => {
+    const body = [
+      JSON.stringify({ type: 'progress' }),
+      JSON.stringify({ type: 'progress' }),
+      JSON.stringify({ type: 'result', workflowGraph: graph, summary: 'Built it.' }),
+    ].join('\n')
+    expect(parseGraderAgentAIBuildResponse(body)).toEqual({
+      workflowGraph: graph,
+      summary: 'Built it.',
+    })
+  })
+
+  it('accepts a single JSON object from an older server', () => {
+    expect(
+      parseGraderAgentAIBuildResponse(JSON.stringify({ workflowGraph: graph, summary: 'ok' })),
+    ).toEqual({ workflowGraph: graph, summary: 'ok' })
+  })
+
+  it('surfaces the model error and a gateway HTML page', () => {
+    expect(() =>
+      parseGraderAgentAIBuildResponse(
+        `${JSON.stringify({ type: 'progress' })}\n${JSON.stringify({ type: 'error', message: 'Try rephrasing.' })}`,
+      ),
+    ).toThrow('Try rephrasing.')
+    expect(() => parseGraderAgentAIBuildResponse('<!DOCTYPE html><html>504</html>')).toThrow(
+      /gateway/i,
+    )
+  })
+})
 
 describe('defaultContentToolConfig', () => {
   const toolsWithRequiredFields = [

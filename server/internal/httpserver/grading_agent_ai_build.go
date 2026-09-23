@@ -116,35 +116,132 @@ func (d Deps) handlePostGraderAgentAIBuild() http.HandlerFunc {
 			MaxPoints: body.MaxPoints,
 		})
 
-		result, genErr := d.generateGraderAgentGraph(r.Context(), svc, modelID, systemPrompt, instruction, body.CurrentGraph)
-		if genErr != nil {
-			if ve, isVE := genErr.(gradingagentsvc.ValidationError); isVE {
-				apierr.WriteJSON(w, http.StatusUnprocessableEntity, apierr.CodeInvalidInput,
-					"The AI produced an invalid workflow: "+ve.Message+" Try rephrasing your instruction.")
-				return
-			}
-			if isTimeoutError(genErr) {
-				writeAIGenerationFailed(w, r,
-					"The AI model took too long to respond. Try again, simplify the instruction, or select a faster grading model in Settings.",
-					genErr)
-				return
-			}
-			writeAIGenerationFailed(w, r, "AI workflow generation failed: "+genErr.Error(), genErr)
-			return
-		}
-
-		graphJSON, marshalErr := gradingagentsvc.WorkflowGraphToJSON(result.Graph)
-		if marshalErr != nil {
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not serialize generated workflow.")
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		_ = json.NewEncoder(w).Encode(map[string]any{
-			"workflowGraph": json.RawMessage(graphJSON),
-			"summary":       result.Summary,
+		// NDJSON with keepalive frames. CloudFront's origin read timeout (default
+		// 30s) and the ALB idle timeout (default 60s) close a silent response with
+		// 504 while the model is still generating. Cloudflare then replaces that
+		// body with its HTML error page.
+		writeGraderAgentAIBuildStream(w, r, graderAgentBuildKeepalive, func(ctx context.Context) (gradingagentsvc.BuilderResult, error) {
+			return d.generateGraderAgentGraph(ctx, svc, modelID, systemPrompt, instruction, body.CurrentGraph)
 		})
 	}
+}
+
+// graderAgentBuildKeepalive is how often the build response writes a progress
+// frame. It must stay under CloudFront's origin read timeout and the ALB idle
+// timeout, both of which reset only when the next byte arrives.
+const graderAgentBuildKeepalive = 10 * time.Second
+
+type graderAgentAIBuildFrame struct {
+	Type          string          `json:"type"`
+	Message       string          `json:"message,omitempty"`
+	WorkflowGraph json.RawMessage `json:"workflowGraph,omitempty"`
+	Summary       string          `json:"summary,omitempty"`
+}
+
+// writeGraderAgentAIBuildStream writes an NDJSON response: progress frames while
+// run is in flight, then one result or error frame. Headers go out immediately
+// so the edge sees a response before its first-byte timeout.
+func writeGraderAgentAIBuildStream(
+	w http.ResponseWriter,
+	r *http.Request,
+	keepalive time.Duration,
+	run func(context.Context) (gradingagentsvc.BuilderResult, error),
+) {
+	if keepalive <= 0 {
+		keepalive = graderAgentBuildKeepalive
+	}
+	w.Header().Set("Content-Type", "application/x-ndjson; charset=utf-8")
+	w.Header().Set("Cache-Control", "no-cache, no-transform")
+	w.Header().Set("X-Accel-Buffering", "no")
+	w.WriteHeader(http.StatusOK)
+	if err := writeAIBuildFrame(w, graderAgentAIBuildFrame{Type: "progress"}); err != nil {
+		return
+	}
+
+	type outcome struct {
+		result gradingagentsvc.BuilderResult
+		err    error
+	}
+	done := make(chan outcome, 1)
+	go func() {
+		defer func() {
+			if rec := recover(); rec != nil {
+				done <- outcome{err: fmt.Errorf("workflow generation failed")}
+			}
+		}()
+		result, err := run(r.Context())
+		done <- outcome{result: result, err: err}
+	}()
+
+	ticker := time.NewTicker(keepalive)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-r.Context().Done():
+			return
+		case <-ticker.C:
+			if err := writeAIBuildFrame(w, graderAgentAIBuildFrame{Type: "progress"}); err != nil {
+				return
+			}
+		case out := <-done:
+			if out.err != nil {
+				msg := graderAgentAIBuildErrorMessage(out.err)
+				if _, isVE := out.err.(gradingagentsvc.ValidationError); !isVE {
+					apierr.RecordServerError(r, msg, out.err)
+				}
+				_ = writeAIBuildFrame(w, graderAgentAIBuildFrame{Type: "error", Message: msg})
+				return
+			}
+			graphJSON, marshalErr := gradingagentsvc.WorkflowGraphToJSON(out.result.Graph)
+			if marshalErr != nil || len(graphJSON) == 0 {
+				msg := "Could not serialize generated workflow."
+				apierr.RecordServerError(r, msg, marshalErr)
+				_ = writeAIBuildFrame(w, graderAgentAIBuildFrame{Type: "error", Message: msg})
+				return
+			}
+			_ = writeAIBuildFrame(w, graderAgentAIBuildFrame{
+				Type:          "result",
+				WorkflowGraph: graphJSON,
+				Summary:       out.result.Summary,
+			})
+			return
+		}
+	}
+}
+
+func graderAgentAIBuildErrorMessage(err error) string {
+	if ve, isVE := err.(gradingagentsvc.ValidationError); isVE {
+		return clipAIBuildMessage("The AI produced an invalid workflow: " + ve.Message + " Try rephrasing your instruction.")
+	}
+	if isTimeoutError(err) {
+		return "The AI model took too long to respond. Try again, simplify the instruction, or select a faster grading model in Settings."
+	}
+	return clipAIBuildMessage("AI workflow generation failed: " + err.Error())
+}
+
+func clipAIBuildMessage(msg string) string {
+	msg = strings.TrimSpace(msg)
+	if msg == "" {
+		return "AI generation failed."
+	}
+	if len(msg) > aiGenerationFailedClientMsgMax {
+		return msg[:aiGenerationFailedClientMsgMax]
+	}
+	return msg
+}
+
+func writeAIBuildFrame(w http.ResponseWriter, frame graderAgentAIBuildFrame) error {
+	payload, err := json.Marshal(frame)
+	if err != nil {
+		return err
+	}
+	if _, err := w.Write(append(payload, '\n')); err != nil {
+		return err
+	}
+	// A flusher that cannot unwrap the middleware chain must not fail the build.
+	// The final frame is still buffered and written when the handler returns.
+	_ = http.NewResponseController(w).Flush()
+	return nil
 }
 
 func isTimeoutError(err error) bool {
