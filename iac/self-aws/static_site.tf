@@ -97,10 +97,10 @@ resource "aws_cloudfront_distribution" "web" {
       origin_id   = "alb"
 
       custom_origin_config {
-        http_port                = 80
-        https_port               = 443
-        origin_protocol_policy   = "http-only"
-        origin_ssl_protocols     = ["TLSv1.2"]
+        http_port              = 80
+        https_port             = 443
+        origin_protocol_policy = "http-only"
+        origin_ssl_protocols   = ["TLSv1.2"]
         # Default 30s returns 504 while grader-agent AI build is still generating.
         # 60s is the quota every account has; the handler also writes a keepalive
         # every 10s because this timer resets only when the next packet arrives.
