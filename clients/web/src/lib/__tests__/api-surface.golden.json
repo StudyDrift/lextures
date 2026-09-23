@@ -1135,6 +1135,7 @@
     "normalizeModuleQuizPayload",
     "normalizeQuizQuestion",
     "parseCourseGradingSettings",
+    "parseGraderAgentAIBuildResponse",
     "parseRubricDefinition",
     "patchAdaptiveContentUnit",
     "patchCalendarEvent",

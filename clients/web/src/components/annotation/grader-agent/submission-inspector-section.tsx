@@ -6,6 +6,7 @@ import {
   submissionAttachmentsFromRow,
   type ModuleAssignmentSubmissionApi,
 } from '../../../lib/courses-api'
+import { SubmissionBodyText } from '../student-text-entry-editor'
 
 type SubmissionInspectorSectionProps = {
   submission: ModuleAssignmentSubmissionApi | null
@@ -56,9 +57,9 @@ export function SubmissionInspectorSection({ submission }: SubmissionInspectorSe
           <h4 className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
             {t('gradingAgent.canvas.inspector.submissionTextEntry')}
           </h4>
-          <p className="mt-2 max-h-40 overflow-y-auto whitespace-pre-wrap rounded-lg border border-border-default bg-surface-base px-3 py-2 text-sm text-fg-default dark:border-border-default dark:bg-surface-base dark:text-fg-default">
-            {bodyText}
-          </p>
+          <div className="mt-2 max-h-40 overflow-y-auto rounded-lg border border-border-default bg-surface-base px-3 py-2 text-sm text-fg-default dark:border-border-default dark:bg-surface-base dark:text-fg-default">
+            <SubmissionBodyText markdown={bodyText} />
+          </div>
         </div>
       ) : null}
       {files.length > 0 ? (

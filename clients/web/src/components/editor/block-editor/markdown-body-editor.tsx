@@ -45,7 +45,7 @@ import type { ContentToolsCatalogTool } from '../../../lib/courses-api'
 
 const editorShellClass = [
   'tiptap',
-  'min-h-[100px] w-full px-0 py-1 text-[15px] leading-[1.65] text-fg-default',
+  'w-full px-0 py-1 text-[15px] leading-[1.65] text-fg-default',
   'focus:outline-none',
   '[&_p]:mt-3 [&_p:first-child]:mt-0',
   '[&_h1]:mt-6 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-fg-default [&_h1]:first:mt-0',
@@ -125,6 +125,10 @@ export type MarkdownBodyEditorProps = {
   onBlur?: (e: FocusEvent) => void
   /** Register TipTap editor for floating toolbar commands; cleared on unmount. */
   onEditorChange?: (sectionId: string, editor: Editor | null) => void
+  /** Visible label element id. Replaces the placeholder as the accessible name. */
+  labelledBy?: string
+  /** `comfortable` is the assignment response box (about eight lines). */
+  size?: 'default' | 'comfortable'
   /** When set, typing @ opens a picker to insert links to module content pages and assignments. */
   courseCode?: string
   /** When set with `courseCode`, clipboard and drag-and-drop images upload and insert at the cursor. */
@@ -183,6 +187,8 @@ export function MarkdownBodyEditor({
   onFocus,
   onBlur,
   onEditorChange,
+  labelledBy,
+  size = 'default',
   courseCode,
   uploadCourseImage,
   showImagePickerRow,
@@ -568,8 +574,13 @@ export function MarkdownBodyEditor({
       editable: !disabled,
       editorProps: {
         attributes: {
-          class: editorShellClass,
-          'aria-label': placeholder ?? 'Markdown content',
+          class: [
+            size === 'comfortable' ? 'min-h-48' : 'min-h-[100px]',
+            editorShellClass,
+          ].join(' '),
+          ...(labelledBy
+            ? { 'aria-labelledby': labelledBy }
+            : { 'aria-label': placeholder ?? 'Markdown content' }),
           dir: 'auto',
         },
         ...editorPasteDropProps,
@@ -1029,7 +1040,13 @@ export function MarkdownBodyEditor({
           </span>
         </div>
       ) : null}
-      <div className="w-full [&_.ProseMirror]:min-h-[100px]">
+      <div
+        className={
+          size === 'comfortable'
+            ? 'w-full [&_.ProseMirror]:min-h-48'
+            : 'w-full [&_.ProseMirror]:min-h-[100px]'
+        }
+      >
         <EditorContent editor={editor} className="w-full" />
         {!disabled ? <MarkdownTableControls editor={editor} disabled={disabled} /> : null}
       </div>

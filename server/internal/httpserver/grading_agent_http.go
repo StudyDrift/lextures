@@ -16,12 +16,12 @@ import (
 	"github.com/lextures/lextures/server/internal/gradingagentqueue"
 	"github.com/lextures/lextures/server/internal/gradingredaction"
 	"github.com/lextures/lextures/server/internal/repos/course"
+	"github.com/lextures/lextures/server/internal/repos/coursegrades"
 	"github.com/lextures/lextures/server/internal/repos/coursemoduleassignments"
 	gradingagentrepo "github.com/lextures/lextures/server/internal/repos/gradingagent"
-	"github.com/lextures/lextures/server/internal/repos/coursegrades"
 	"github.com/lextures/lextures/server/internal/repos/moduleassignmentsubmissions"
-	"github.com/lextures/lextures/server/internal/repos/originalityreports"
 	"github.com/lextures/lextures/server/internal/repos/notificationsinbox"
+	"github.com/lextures/lextures/server/internal/repos/originalityreports"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 	"github.com/lextures/lextures/server/internal/repos/user"
 	"github.com/lextures/lextures/server/internal/service/aiprovider"
@@ -290,14 +290,14 @@ func (d Deps) handleGetGraderAgentConfig() http.HandlerFunc {
 }
 
 type putGraderAgentConfigBody struct {
-	Prompt                   string                           `json:"prompt"`
-	IncludeAssignmentContent bool                             `json:"includeAssignmentContent"`
-	IncludeRubric            bool                             `json:"includeRubric"`
-	Status                   string                           `json:"status"`
-	AutoGradeNew             *bool                            `json:"autoGradeNew"`
-	PostPolicy               string                           `json:"postPolicy"`
-	ConfidenceFloor          *float64                         `json:"confidenceFloor"`
-	ModelID                  *string                          `json:"modelId"`
+	Prompt                   string                         `json:"prompt"`
+	IncludeAssignmentContent bool                           `json:"includeAssignmentContent"`
+	IncludeRubric            bool                           `json:"includeRubric"`
+	Status                   string                         `json:"status"`
+	AutoGradeNew             *bool                          `json:"autoGradeNew"`
+	PostPolicy               string                         `json:"postPolicy"`
+	ConfidenceFloor          *float64                       `json:"confidenceFloor"`
+	ModelID                  *string                        `json:"modelId"`
 	WorkflowGraph            *gradingagentsvc.WorkflowGraph `json:"workflowGraph"`
 }
 
@@ -466,13 +466,13 @@ func (d Deps) handlePutGraderAgentConfig() http.HandlerFunc {
 }
 
 type postGraderAgentRunBody struct {
-	Scope        string                     `json:"scope"`
-	Mode         string                     `json:"mode"`
-	SubmissionID string                     `json:"submissionId"`
-	Overwrite    bool                       `json:"overwrite"`
-	AuthoredVia  *string                    `json:"authoredVia"`
-	Filter       *graderAgentRunFilterBody  `json:"filter"`
-	BudgetUSD    *float64                   `json:"budgetUsd"`
+	Scope        string                    `json:"scope"`
+	Mode         string                    `json:"mode"`
+	SubmissionID string                    `json:"submissionId"`
+	Overwrite    bool                      `json:"overwrite"`
+	AuthoredVia  *string                   `json:"authoredVia"`
+	Filter       *graderAgentRunFilterBody `json:"filter"`
+	BudgetUSD    *float64                  `json:"budgetUsd"`
 }
 
 func (d Deps) handlePostGraderAgentRun() http.HandlerFunc {
@@ -675,7 +675,7 @@ func gradableSubmissionsForAgent(rows []moduleassignmentsubmissions.SubmissionRo
 
 type invalidScopeError string
 
-func errInvalidScope(msg string) error { return invalidScopeError(msg) }
+func errInvalidScope(msg string) error    { return invalidScopeError(msg) }
 func (e invalidScopeError) Error() string { return string(e) }
 
 type patchGraderAgentResultBody struct {
@@ -887,11 +887,11 @@ func (d Deps) handlePostGraderAgentCancelRun() http.HandlerFunc {
 
 func graderAgentReviewQueueItemToJSON(item gradingagentrepo.ReviewQueueItem, label string) map[string]any {
 	entry := map[string]any{
-		"id":             item.ID.String(),
-		"submissionId":   item.SubmissionID.String(),
+		"id":              item.ID.String(),
+		"submissionId":    item.SubmissionID.String(),
 		"submissionLabel": label,
-		"status":         string(item.Status),
-		"createdAt":      item.CreatedAt.UTC().Format("2006-01-02T15:04:05.000000Z"),
+		"status":          string(item.Status),
+		"createdAt":       item.CreatedAt.UTC().Format("2006-01-02T15:04:05.000000Z"),
 	}
 	if item.RunID != nil {
 		entry["runId"] = item.RunID.String()
@@ -1084,8 +1084,8 @@ func (d Deps) handleGetGraderAgentReviewQueue() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid assignment id.")
 			return
 		}
-		cid, assignRow, ok := d.loadAssignmentForSubmissions(w, r, courseCode, itemID)
-		if !ok || assignRow == nil {
+		item, ok := d.loadGradingAgentModuleItem(w, r, courseCode, itemID)
+		if !ok || item == nil {
 			return
 		}
 		cfg, err := gradingagentrepo.GetConfigByItem(r.Context(), d.Pool, itemID)
@@ -1115,7 +1115,7 @@ func (d Deps) handleGetGraderAgentReviewQueue() http.HandlerFunc {
 		for _, item := range flagged {
 			submissionIDs = append(submissionIDs, item.SubmissionID)
 		}
-		labels, err := d.submissionLabelsForGraderAgentReview(r.Context(), *cid, itemID, assignRow, submissionIDs)
+		labels, err := d.graderAgentReviewLabels(r.Context(), item, submissionIDs)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to resolve submission labels.")
 			return
@@ -1139,10 +1139,10 @@ func (d Deps) handleGetGraderAgentReviewQueue() http.HandlerFunc {
 }
 
 type postGraderAgentTemplateBody struct {
-	Name                     string                           `json:"name"`
-	Prompt                   string                           `json:"prompt"`
-	IncludeAssignmentContent bool                             `json:"includeAssignmentContent"`
-	IncludeRubric            bool                             `json:"includeRubric"`
+	Name                     string                         `json:"name"`
+	Prompt                   string                         `json:"prompt"`
+	IncludeAssignmentContent bool                           `json:"includeAssignmentContent"`
+	IncludeRubric            bool                           `json:"includeRubric"`
 	WorkflowGraph            *gradingagentsvc.WorkflowGraph `json:"workflowGraph"`
 }
 
@@ -1470,4 +1470,3 @@ WHERE c.course_code = $1 AND ce.status = 'active'
 		_ = json.NewEncoder(w).Encode(map[string]any{"ok": true})
 	}
 }
-

@@ -137,7 +137,12 @@ import {
   type LockReason,
   type ModulesProgressSnapshot,
 } from '../../lib/conditional-release-api'
+import { ModuleCompleteMark } from '../../components/modules/module-complete-mark'
 import { ModuleRequirementsPanel } from '../../components/modules/module-requirements-panel'
+import {
+  fetchCompletedAssessmentItemIds,
+  moduleAssessmentsComplete,
+} from '../../lib/module-assessment-completion'
 import { ModulesAiPanel } from '../../components/modules/modules-ai-panel'
 import { ConditionalReleaseLockBadge } from '../../components/modules/conditional-release-lock-badge'
 import { useCourseNavFeatures } from '../../context/course-nav-features-context'
@@ -1023,6 +1028,8 @@ type ModuleCardBodyProps = {
   moduleDragHandle: ReactNode
   childrenList: ReactNode | null
   footerExtra?: ReactNode | null
+  /** Learner finished every published assignment and quiz in this module. */
+  showCompleteMark?: boolean
   /** UX.5 — siblings for single-pointer "Move to…" (modules list). */
   moduleSiblings?: CourseStructureItem[]
   onMoveModuleToIndex?: (moduleId: string, toIndex: number) => void
@@ -1053,6 +1060,7 @@ function ModuleCardBody({
   moduleDragHandle,
   childrenList,
   footerExtra,
+  showCompleteMark = false,
   moduleSiblings,
   onMoveModuleToIndex,
 }: ModuleCardBodyProps) {
@@ -1061,9 +1069,10 @@ function ModuleCardBody({
   const showAccordionToggle = !minified && children.length > 0
   return (
     <div
-      className={`w-full rounded-2xl border border-border-subtle bg-surface-sunken/60 shadow-sm ${ minified ? 'p-2.5' : 'p-4' }`}
+      className={`relative w-full rounded-2xl border border-border-subtle bg-surface-sunken/60 shadow-sm ${ minified ? 'p-2.5' : 'p-4' }`}
     >
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-3">
+      {showCompleteMark ? <ModuleCompleteMark /> : null}
+      <div className={`flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-3 ${ showCompleteMark ? 'pe-10' : '' }`}>
         <div className="group flex min-w-0 flex-1 items-start gap-2 sm:gap-3">
           {moduleDragHandle}
           <div className="min-w-0 flex-1">
@@ -1088,7 +1097,10 @@ function ModuleCardBody({
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="flex items-center gap-2 text-sm font-semibold text-slate-950 dark:text-fg-default">
-                      <span className="min-w-0">{item.title}</span>
+                      <span className="min-w-0">
+                        {item.title}
+                        {showCompleteMark ? <span className="sr-only">, complete</span> : null}
+                      </span>
                       <BlueprintLockIcon locked={item.blueprintLocked} />
                     </span>
                     {!collapsed ? (
@@ -1106,7 +1118,10 @@ function ModuleCardBody({
             ) : (
               <>
                 <p className="flex items-center gap-2 text-sm font-semibold text-slate-950 dark:text-fg-default">
-                  <span className="min-w-0">{item.title}</span>
+                  <span className="min-w-0">
+                    {item.title}
+                    {showCompleteMark ? <span className="sr-only">, complete</span> : null}
+                  </span>
                   <BlueprintLockIcon locked={item.blueprintLocked} />
                 </p>
                 {!minified && (
@@ -1530,12 +1545,14 @@ function StaticModuleCard({
   moduleChildrenById,
   studentGradeContext,
   gatingProgress,
+  completedAssessmentIds,
 }: {
   item: CourseStructureItem
   courseCode: string
   moduleChildrenById: Map<string, CourseStructureItem[]>
   studentGradeContext: { columns: CourseGradebookGridColumn[]; grades: Record<string, string> } | null
   gatingProgress: ModulesProgressSnapshot | null
+  completedAssessmentIds: ReadonlySet<string>
 }) {
   const [collapsed, setCollapsed] = useState(false)
   const children = moduleChildrenById.get(item.id) ?? []
@@ -1576,6 +1593,7 @@ function StaticModuleCard({
         onUnpublishAllItems={() => {}}
         onOpenModuleSettings={() => {}}
         moduleDragHandle={null}
+        showCompleteMark={moduleAssessmentsComplete(children, completedAssessmentIds)}
         footerExtra={
           modLock?.locked ? (
             <div className="mt-2">
@@ -1604,6 +1622,9 @@ export default function CourseModules() {
     columns: CourseGradebookGridColumn[]
     grades: Record<string, string>
   } | null>(null)
+  const [completedAssessmentIds, setCompletedAssessmentIds] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  )
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [reorderError, setReorderError] = useState<string | null>(null)
@@ -1778,7 +1799,7 @@ export default function CourseModules() {
     setLoadError(null)
     setModuleActionError(null)
     try {
-      const [list, myGrades, progress] = await Promise.all([
+      const [list, myGrades, progress, completedIds] = await Promise.all([
         fetchCourseStructure(courseCode),
         canLoadStudentGrades
           ? fetchCourseMyGrades(courseCode).catch(() => null)
@@ -1786,9 +1807,13 @@ export default function CourseModules() {
         ffConditionalRelease && !canEditModules
           ? fetchModulesProgress(courseCode).catch(() => null)
           : Promise.resolve(null),
+        !canEditModules
+          ? fetchCompletedAssessmentItemIds(courseCode).catch(() => [] as string[])
+          : Promise.resolve([] as string[]),
       ])
       setItems(list)
       setGatingProgress(progress)
+      setCompletedAssessmentIds(new Set(completedIds))
       if (myGrades) {
         setStudentGradeContext({ columns: myGrades.columns, grades: myGrades.grades })
       } else {
@@ -1799,6 +1824,7 @@ export default function CourseModules() {
       setItems([])
       setStudentGradeContext(null)
       setGatingProgress(null)
+      setCompletedAssessmentIds(new Set())
     } finally {
       if (!silent) setLoading(false)
     }
@@ -2956,6 +2982,7 @@ export default function CourseModules() {
                   moduleChildrenById={moduleChildrenById}
                   studentGradeContext={studentGradeContext}
                   gatingProgress={gatingProgress}
+                  completedAssessmentIds={completedAssessmentIds}
                 />
               ))}
           </ul>

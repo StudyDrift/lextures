@@ -8931,6 +8931,49 @@ export type GraderAgentAIBuildQuizSlot = {
   maxPoints: number
 }
 
+const graderAgentAIBuildGatewayMessage =
+  'The build timed out at the gateway before the AI finished. Try again.'
+
+/**
+ * Reads the AI-build body. The server streams NDJSON progress frames so the
+ * edge proxy does not 504, then a final result or error line. A single JSON
+ * object (older servers) is accepted too.
+ */
+export function parseGraderAgentAIBuildResponse(text: string): {
+  workflowGraph: GraderWorkflowGraphApi
+  summary: string
+} {
+  const trimmed = text.trim()
+  if (trimmed.startsWith('<')) {
+    throw new Error(graderAgentAIBuildGatewayMessage)
+  }
+  const lines = trimmed
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+  if (lines.length === 0) throw new Error('Request failed')
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(lines[lines.length - 1] ?? '')
+  } catch {
+    throw new Error('The build was interrupted before the AI finished. Try again.')
+  }
+  if (!parsed || typeof parsed !== 'object') throw new Error('Request failed')
+  const obj = parsed as {
+    type?: string
+    message?: string
+    workflowGraph?: GraderWorkflowGraphApi
+    summary?: string
+  }
+  if (obj.type === 'error') {
+    throw new Error(obj.message?.trim() || 'Could not generate the workflow. Try rephrasing.')
+  }
+  if (!obj.workflowGraph) {
+    throw new Error('The build was interrupted before the AI finished. Try again.')
+  }
+  return { workflowGraph: obj.workflowGraph, summary: obj.summary ?? '' }
+}
+
 /** Generates or modifies a grader-agent workflow graph from a plain-English instruction. */
 export async function postGraderAgentAIBuild(
   courseCode: string,
@@ -8948,9 +8991,20 @@ export async function postGraderAgentAIBuild(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   })
-  const raw = await parseJson(res)
-  if (!res.ok) throw new Error(readApiErrorMessage(raw))
-  return raw as { workflowGraph: GraderWorkflowGraphApi; summary: string }
+  const text = await res.text()
+  if (!res.ok) {
+    if (text.trimStart().startsWith('<') || res.status === 504 || res.status === 524) {
+      throw new Error(graderAgentAIBuildGatewayMessage)
+    }
+    let raw: unknown = {}
+    try {
+      raw = JSON.parse(text)
+    } catch {
+      raw = {}
+    }
+    throw new Error(readApiErrorMessage(raw))
+  }
+  return parseGraderAgentAIBuildResponse(text)
 }
 
 export type GraderAgentTemplateApi = {

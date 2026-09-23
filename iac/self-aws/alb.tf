@@ -9,6 +9,11 @@ resource "aws_lb" "main" {
 
   enable_deletion_protection = var.environment == "production"
 
+  # Longer than CloudFront's origin read timeout so a quiet upstream (AI build)
+  # is not cut off by the balancer first. Default is 60s, which 504s a build
+  # that is still running.
+  idle_timeout = 180
+
   tags = {
     Name = "${local.name_prefix}-alb"
   }

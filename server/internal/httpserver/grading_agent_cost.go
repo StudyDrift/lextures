@@ -51,8 +51,8 @@ func (d Deps) handleGetGraderAgentRunEstimate() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid assignment id.")
 			return
 		}
-		cid, _, ok := d.loadAssignmentForSubmissions(w, r, courseCode, itemID)
-		if !ok || cid == nil {
+		item, ok := d.loadGradingAgentModuleItem(w, r, courseCode, itemID)
+		if !ok || item == nil {
 			return
 		}
 		cfg, err := gradingagentrepo.GetConfigByItem(r.Context(), d.Pool, itemID)
@@ -80,18 +80,44 @@ func (d Deps) handleGetGraderAgentRunEstimate() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, parseErr.Error())
 			return
 		}
+		overwrite := strings.EqualFold(strings.TrimSpace(q.Get("overwrite")), "true")
+		if item.Kind == "quiz" {
+			quizFilter := runFilter
+			if !d.graderAgentRunFiltersEnabled() {
+				quizFilter = nil
+			}
+			targets, runScope, filterMeta, resolveErr := d.resolveQuizGraderAgentTargets(
+				r.Context(), courseCode, item.CourseID, itemID, viewer, scope, q.Get("submissionId"), overwrite, quizFilter,
+			)
+			if writeGraderAgentTargetError(w, resolveErr) {
+				return
+			}
+			var sample *gradingagentrepo.DryRunCostSample
+			if cfg != nil {
+				s, sampleErr := gradingagentrepo.GetLatestDryRunSample(r.Context(), d.Pool, cfg.ID)
+				if sampleErr != nil {
+					apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load cost sample.")
+					return
+				}
+				sample = s
+			}
+			estimate := gradingagentrepo.EstimateRunCost(len(targets), sample)
+			targetSummary := formatGraderAgentRunTargetSummary(runScope, filterMeta, len(targets))
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
+			_ = json.NewEncoder(w).Encode(graderAgentCostEstimateToJSON(estimate, targetSummary))
+			return
+		}
 		var filterMeta *graderAgentRunFilterContext
 		if d.graderAgentRunFiltersEnabled() && runFilter != nil && !runFilter.IsEmpty() {
-			meta, valErr := d.validateGraderAgentRunFilter(r.Context(), *cid, itemID, courseCode, viewer, runFilter)
+			meta, valErr := d.validateGraderAgentRunFilter(r.Context(), item.CourseID, itemID, courseCode, viewer, runFilter)
 			if valErr != nil {
 				apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, valErr.Error())
 				return
 			}
 			filterMeta = meta
 		}
-		overwrite := strings.EqualFold(strings.TrimSpace(q.Get("overwrite")), "true")
 		submissions, runScope, resolveErr := d.resolveGraderAgentSubmissions(
-			r.Context(), courseCode, *cid, itemID, viewer, scope, q.Get("submissionId"), overwrite, runFilter, d.graderAgentTextEntryGradingEnabled(),
+			r.Context(), courseCode, item.CourseID, itemID, viewer, scope, q.Get("submissionId"), overwrite, runFilter, d.graderAgentTextEntryGradingEnabled(),
 		)
 		if resolveErr != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, resolveErr.Error())

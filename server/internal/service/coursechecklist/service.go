@@ -340,43 +340,11 @@ func (s *Service) loadOrEvaluate(ctx context.Context, courseID uuid.UUID, course
 		observeSnapshotHit("stale")
 	}
 
-	res, computedAt, truncated, err := s.evaluateFull(ctx, courseID, courseCode)
+	res, computedAt, truncated, err := s.evaluateFull(ctx, courseID, courseCode, force)
 	if err != nil {
 		return Result{}, time.Time{}, false, false, err
 	}
-	if err := s.writeSnapshotBestEffort(ctx, courseID, res, computedAt, truncated); err != nil {
-		slog.Warn("coursechecklist.snapshot_write_failed",
-			"course_id", courseID.String(), "err", err.Error())
-	}
 	return res, computedAt, truncated, false, nil
-}
-
-func (s *Service) evaluateFull(ctx context.Context, courseID uuid.UUID, courseCode string) (Result, time.Time, bool, error) {
-	key := courseID.String()
-	type evalOut struct {
-		res       Result
-		at        time.Time
-		truncated bool
-	}
-	v, err, _ := evalFlight.Do(key, func() (any, error) {
-		acquireEvalSlot()
-		defer releaseEvalSlot()
-		needs := DataNeedsForEvaluate(MustDefault(), EvaluateOptions{})
-		snap, err := LoadSnapshot(ctx, s.Pool, courseCode, needs)
-		if err != nil {
-			return nil, err
-		}
-		opt := EvaluateOptions{LazyLoaders: s.lazyLoaders()}
-		res := Evaluate(ctx, snap, opt)
-		truncated := false
-		res, truncated = fitPayload(res)
-		return evalOut{res: res, at: s.now(), truncated: truncated}, nil
-	})
-	if err != nil {
-		return Result{}, time.Time{}, false, err
-	}
-	out := v.(evalOut)
-	return out.res, out.at, out.truncated, nil
 }
 
 func (s *Service) lazyLoaders() map[LazyLoaderID]LazyLoader {

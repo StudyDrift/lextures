@@ -59,8 +59,10 @@ import {
 import type { RubricDefinition } from '../../lib/courses-api'
 import { QuizSpeedGraderBranch } from '../quiz/quiz-speed-grader-branch'
 import { FullScreenModalShell } from '../ui/fullscreen-modal-shell'
+import { Button } from '../ui/button'
 import { toastMutationError } from '../../lib/lms-toast'
 import { useConfirm } from '../use-confirm'
+import { StudentTextEntryEditor, SubmissionBodyText } from './student-text-entry-editor'
 
 function submissionContentPath(contentPath?: string | null): string | null {
   const trimmed = contentPath?.trim()
@@ -183,6 +185,7 @@ function AssignmentAnnotationWorkbenchInner({
   const [revFeedback, setRevFeedback] = useState('')
   const [revisionBusy, setRevisionBusy] = useState(false)
   const [draftText, setDraftText] = useState('')
+  const responseLabelId = useId()
   const [deadlineNow, setDeadlineNow] = useState(() => Date.now())
   const [selectedAttachmentId, setSelectedAttachmentId] = useState<string | null>(null)
   const [downloadAllBusy, setDownloadAllBusy] = useState(false)
@@ -883,7 +886,7 @@ function AssignmentAnnotationWorkbenchInner({
       )
     ) : displayBodyText ? (
       <div className="h-full min-h-[40vh] overflow-y-auto rounded-lg border border-border-default bg-surface-raised px-4 py-4 text-sm text-fg-default dark:border-border-default dark:bg-surface-base dark:text-fg-default">
-        <p className="whitespace-pre-wrap">{displayBodyText}</p>
+        <SubmissionBodyText markdown={displayBodyText} courseCode={courseCode} />
       </div>
     ) : displayAttachmentFileId ? (
       <div className="flex h-full min-h-48 items-center justify-center rounded-lg border border-dashed border-amber-200 bg-amber-50 px-4 py-6 text-sm text-amber-950 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-100">
@@ -906,25 +909,23 @@ function AssignmentAnnotationWorkbenchInner({
           )
         ) : submissionAllowsText && mode === 'student' ? (
           <div className="w-full max-w-xl space-y-3 text-start">
-            <label className="block text-sm font-medium text-fg-default">
+            <label id={responseLabelId} className="block text-sm font-medium text-fg-default">
               Your response
             </label>
-            <textarea
+            <StudentTextEntryEditor
               value={draftText}
-              onChange={(e) => setDraftText(e.target.value)}
-              rows={8}
-              className="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-sm text-fg-default shadow-sm dark:border-border-default dark:bg-surface-base"
-              placeholder="Type your answer here…"
+              onChange={setDraftText}
               disabled={busy}
+              labelledBy={responseLabelId}
             />
-            <button
+            <Button
               type="button"
               onClick={() => void onSubmitStudentText()}
               disabled={busy || draftText.trim() === ''}
-              className="rounded-lg bg-accent-solid px-4 py-2 text-sm font-semibold text-white hover:bg-accent disabled:opacity-50"
+              loading={busy}
             >
-              {busy ? 'Submitting…' : 'Submit text'}
-            </button>
+              Submit text
+            </Button>
           </div>
         ) : submissionAllowsFile ? (
           <p>Upload a file to submit this assignment.</p>

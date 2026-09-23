@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
@@ -138,9 +139,13 @@ func (s *Service) RunBuilderPrompt(ctx context.Context, modelID, systemPrompt, p
 	if i := strings.TrimSpace(input); i != "" {
 		messages = append(messages, aiprovider.Message{Role: "user", Content: i})
 	}
-	chat, meta, err := s.AI.Complete(ctx, model, messages, aiprovider.ChatOptions{JSONMode: true, MaxTokens: maxTokens})
+	// Match the caller's deadline. The shared client timeout is 120s, which cuts
+	// off a workflow build whose handler budget is longer.
+	opt := aiprovider.ChatOptions{JSONMode: true, MaxTokens: maxTokens, Timeout: deadlineTimeout(ctx)}
+	chat, meta, err := s.AI.Complete(ctx, model, messages, opt)
 	if err != nil && isJSONModeRetryable(err) {
-		chat, meta, err = s.AI.Complete(ctx, model, messages, aiprovider.ChatOptions{MaxTokens: maxTokens})
+		opt.JSONMode = false
+		chat, meta, err = s.AI.Complete(ctx, model, messages, opt)
 	}
 	s.LastMeta = meta
 	if err != nil {
@@ -151,6 +156,20 @@ func (s *Service) RunBuilderPrompt(ctx context.Context, modelID, systemPrompt, p
 		return "", chat.Usage.PromptTokens, chat.Usage.CompletionTokens, chat.Usage.CostUSD, fmt.Errorf("empty model response")
 	}
 	return text, chat.Usage.PromptTokens, chat.Usage.CompletionTokens, chat.Usage.CostUSD, nil
+}
+
+// deadlineTimeout is the time left on ctx, or 0 when ctx has no deadline so the
+// provider keeps its default client timeout.
+func deadlineTimeout(ctx context.Context) time.Duration {
+	deadline, ok := ctx.Deadline()
+	if !ok {
+		return 0
+	}
+	remaining := time.Until(deadline)
+	if remaining <= 0 {
+		return time.Millisecond
+	}
+	return remaining
 }
 
 // ScoreWithVision grades a submission from image/PDF pages using a vision-capable model.
