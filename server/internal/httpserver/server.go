@@ -174,6 +174,7 @@ func NewHandler(d Deps) http.Handler {
 		health.metrics = metrics
 	}
 	r.Use(d.impersonationWriteBlockMiddleware())
+	r.Use(d.managedLearnerGuardMiddleware())
 	r.Get("/api/openapi.json", openapi.ServeOpenAPI)
 	r.Get("/api/docs", openapi.ServeDocs)
 	r.Get("/health", handleHealthAlias(metrics))
@@ -201,6 +202,7 @@ func NewHandler(d Deps) http.Handler {
 	d.registerLTIHTTPRoutes(r)
 	d.registerAuthRoutes(r)
 	d.registerMeRoutes(r)
+	d.registerManagedLearnersRoutes(r)
 	d.registerParentRoutes(r)
 	d.registerUserRoutes(r)
 	d.registerOrgRoutes(r)

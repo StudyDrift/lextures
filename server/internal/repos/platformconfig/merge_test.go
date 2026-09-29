@@ -432,3 +432,15 @@ func TestMergeMarketingContentDefaultsOff(t *testing.T) {
 		t.Fatal("expected DB setting to enable marketing content")
 	}
 }
+
+func TestMerge_HomeschoolManagedLearnersDefaultOn(t *testing.T) {
+	got := Merge(config.Config{}, nil)
+	if !got.FFHomeschoolManagedLearners {
+		t.Fatal("expected FFHomeschoolManagedLearners true (default ON) when DB unset")
+	}
+	off := false
+	got = Merge(config.Config{}, &Row{FFHomeschoolManagedLearners: &off})
+	if got.FFHomeschoolManagedLearners {
+		t.Fatal("expected explicit DB false to win")
+	}
+}

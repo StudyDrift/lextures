@@ -130,6 +130,30 @@ func UserFromRequestOrAccessKey(r *http.Request, signer *JWTSigner, pool *pgxpoo
 			OrgSlug: imp.OrgSlug,
 		}, ctx, nil
 	}
+	if signer != nil && JWTType(token) == "managed_learner" {
+		ml, err := signer.VerifyManagedLearner(token)
+		if err != nil {
+			return AuthUser{}, r.Context(), err
+		}
+		active, err := impersonationrepo.IsActive(r.Context(), pool, ml.JTI, timeNow())
+		if err != nil {
+			return AuthUser{}, r.Context(), ErrInvalidToken
+		}
+		if !active {
+			return AuthUser{}, r.Context(), ErrInvalidToken
+		}
+		ctx := WithManagedLearner(r.Context(), ManagedLearnerSession{
+			ActorID:      ml.ActorID,
+			TargetUserID: ml.TargetUserID,
+			JTI:          ml.JTI,
+		})
+		return AuthUser{
+			UserID:  ml.TargetUserID,
+			Email:   ml.TargetEmail,
+			OrgID:   ml.OrgID,
+			OrgSlug: ml.OrgSlug,
+		}, ctx, nil
+	}
 	u, err := signer.Verify(r.Context(), token)
 	return u, r.Context(), err
 }

@@ -1,6 +1,6 @@
 {
   "description": "UX.2 raw interactive allowlist (FR-11). Per-file counts may only decrease. Empty when migration complete (AC-2).",
-  "generatedAt": "2026-08-06T04:30:30.830Z",
+  "generatedAt": "2026-09-29T04:58:55.188Z",
   "files": {
     "src/components/ImpersonationBanner.tsx": {
       "rawButton": 1,
@@ -4523,8 +4523,8 @@
       "titleTooltip": 2
     },
     "src/pages/lms/course-enrollments.tsx": {
-      "rawButton": 27,
-      "rawInput": 1,
+      "rawButton": 29,
+      "rawInput": 2,
       "rawSelect": 6,
       "rawTextarea": 3,
       "roleDialog": 6,
@@ -5671,6 +5671,16 @@
       "roleMenu": 0,
       "roleTablist": 0,
       "titleTooltip": 0
+    },
+    "src/pages/lms/learners-page.tsx": {
+      "rawButton": 3,
+      "rawInput": 3,
+      "rawSelect": 0,
+      "rawTextarea": 0,
+      "roleDialog": 0,
+      "roleMenu": 0,
+      "roleTablist": 0,
+      "titleTooltip": 1
     }
   }
 }

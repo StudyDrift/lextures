@@ -17,6 +17,7 @@ const (
 	AccountTypeStandard = "standard"
 	AccountTypeParent   = "parent"
 	AccountTypeSystem   = "system"
+	AccountTypeManaged  = "managed"
 )
 
 // userRowColumns is the canonical SELECT/RETURNING column list for user rows.
@@ -40,7 +41,7 @@ type Row struct {
 	PhoneNumber     *string
 	LoginBlocked    bool
 	DeactivatedAt   *time.Time
-	// AccountType is "standard" (default) or "parent" (plan 5.10).
+	// AccountType is "standard" (default), "parent" (plan 5.10), "system", or "managed" (#640).
 	AccountType string
 }
 

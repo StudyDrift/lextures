@@ -108,6 +108,7 @@ export type PlatformFeaturesSnapshot = {
   ffTaxCollection?: boolean
   ffCourseMarketplace?: boolean
   ffCourseCoupons?: boolean
+  ffHomeschoolManagedLearners?: boolean
   ffContentToolMarketplace?: boolean
   ffLearningPaths?: boolean
   ffConditionalRelease?: boolean
@@ -250,6 +251,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffTaxCollection: false,
   ffCourseMarketplace: true,
   ffCourseCoupons: true,
+  ffHomeschoolManagedLearners: true,
   ffContentToolMarketplace: false,
   ffLearningPaths: false,
   ffConditionalRelease: true,

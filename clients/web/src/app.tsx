@@ -103,6 +103,7 @@ export default function App() {
             <Route path="/me/research-studies" element={<Pages.ResearchStudiesPage />} />
             <Route path="/me/accommodations" element={<Pages.MyAccommodationsPage />} />
             <Route path="/parent" element={<Pages.ParentDashboard />} />
+            <Route path="/learners" element={<Pages.LearnersPage />} />
             <Route path="/parent/conferences" element={<Pages.ConferenceBooking />} />
             <Route path="/conferences/availability" element={<Pages.ConferenceAvailabilitySetup />} />
             <Route path="/ai" element={<Pages.AskAiPage />} />

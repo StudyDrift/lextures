@@ -162,6 +162,8 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.FFCourseCoupons = mergeBool(db.FFCourseCoupons, true)
 	// Marketing content stays opt-in until the authoring and public APIs ship (MC.1).
 	out.FFMarketingContent = mergeBool(db.FFMarketingContent, false)
+	// Homeschool managed learners default ON (#640).
+	out.FFHomeschoolManagedLearners = mergeBool(db.FFHomeschoolManagedLearners, true)
 	// Discount ceiling: NULL/unset → 100 (uncapped). Explicit DB value is honoured (MKTC.7 FR-5).
 	out.CouponMaxPercentOff = mergePercentOff(db.CouponMaxPercentOff, 100)
 	out.FFContentToolMarketplace = mergeBool(db.FFContentToolMarketplace, false)

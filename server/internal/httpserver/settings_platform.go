@@ -166,6 +166,7 @@ type platformSettingsJSON struct {
 	FFPublicCatalog                    bool    `json:"ffPublicCatalog"`
 	FFCourseMarketplace                bool    `json:"ffCourseMarketplace"`
 	FFCourseCoupons                    bool    `json:"ffCourseCoupons"`
+	FFHomeschoolManagedLearners        bool    `json:"ffHomeschoolManagedLearners"`
 	FFMarketingContent                 bool    `json:"ffMarketingContent"`
 	CouponMaxPercentOff                float64 `json:"couponMaxPercentOff"`
 	FFContentToolMarketplace           bool    `json:"ffContentToolMarketplace"`
@@ -445,6 +446,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFPublicCatalog:                    merged.FFPublicCatalog,
 			FFCourseMarketplace:                merged.FFCourseMarketplace,
 			FFCourseCoupons:                    merged.FFCourseCoupons,
+			FFHomeschoolManagedLearners:        merged.FFHomeschoolManagedLearners,
 			FFMarketingContent:                 merged.FFMarketingContent,
 			CouponMaxPercentOff:                merged.CouponMaxPercentOff,
 			FFContentToolMarketplace:           merged.FFContentToolMarketplace,
@@ -705,6 +707,7 @@ type putPlatformBody struct {
 	FFPublicCatalog                    *bool    `json:"ffPublicCatalog"`
 	FFCourseMarketplace                *bool    `json:"ffCourseMarketplace"`
 	FFCourseCoupons                    *bool    `json:"ffCourseCoupons"`
+	FFHomeschoolManagedLearners        *bool    `json:"ffHomeschoolManagedLearners"`
 	FFMarketingContent                 *bool    `json:"ffMarketingContent"`
 	CouponMaxPercentOff                *float64 `json:"couponMaxPercentOff"`
 	FFContentToolMarketplace           *bool    `json:"ffContentToolMarketplace"`
@@ -1172,6 +1175,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffpubliccatalog", body.FFPublicCatalog, func(v bool) { wr.FFPublicCatalog = &v })
 		setBool("ffcoursemarketplace", body.FFCourseMarketplace, func(v bool) { wr.FFCourseMarketplace = &v })
 		setBool("ffcoursecoupons", body.FFCourseCoupons, func(v bool) { wr.FFCourseCoupons = &v })
+		setBool("ffhomeschoolmanagedlearners", body.FFHomeschoolManagedLearners, func(v bool) { wr.FFHomeschoolManagedLearners = &v })
 		setBool("ffmarketingcontent", body.FFMarketingContent, func(v bool) { wr.FFMarketingContent = &v })
 		set("couponmaxpercentoff", body.CouponMaxPercentOff != nil, func() {
 			v := *body.CouponMaxPercentOff
@@ -1440,6 +1444,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFPublicCatalog:                    merged.FFPublicCatalog,
 			FFCourseMarketplace:                merged.FFCourseMarketplace,
 			FFCourseCoupons:                    merged.FFCourseCoupons,
+			FFHomeschoolManagedLearners:        merged.FFHomeschoolManagedLearners,
 			FFMarketingContent:                 merged.FFMarketingContent,
 			CouponMaxPercentOff:                merged.CouponMaxPercentOff,
 			FFContentToolMarketplace:           merged.FFContentToolMarketplace,

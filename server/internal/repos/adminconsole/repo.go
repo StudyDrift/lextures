@@ -13,44 +13,44 @@ import (
 
 // Overview holds dashboard KPIs for an organization.
 type Overview struct {
-	TotalUsers           int64 `json:"totalUsers"`
-	ActiveCourses        int64 `json:"activeCourses"`
-	PendingEnrollments   int64 `json:"pendingEnrollments"`
-	StorageBytes         int64 `json:"storageBytes"`
+	TotalUsers         int64 `json:"totalUsers"`
+	ActiveCourses      int64 `json:"activeCourses"`
+	PendingEnrollments int64 `json:"pendingEnrollments"`
+	StorageBytes       int64 `json:"storageBytes"`
 }
 
 // UserRow is one row in the admin user-management table.
 type UserRow struct {
-	ID          string     `json:"id"`
-	Email       string     `json:"email"`
-	DisplayName *string    `json:"displayName"`
-	Role        string     `json:"role"`
-	OrgRole     *string    `json:"orgRole"`
-	Active      bool       `json:"active"`
-	CreatedAt   time.Time  `json:"createdAt"`
+	ID          string    `json:"id"`
+	Email       string    `json:"email"`
+	DisplayName *string   `json:"displayName"`
+	Role        string    `json:"role"`
+	OrgRole     *string   `json:"orgRole"`
+	Active      bool      `json:"active"`
+	CreatedAt   time.Time `json:"createdAt"`
 }
 
 // CourseRow is one row in the admin course-management table.
 type CourseRow struct {
-	ID           string    `json:"id"`
-	CourseCode   string    `json:"courseCode"`
-	Title        string    `json:"title"`
-	Status       string    `json:"status"`
-	Instructor   *string   `json:"instructorName"`
-	TermID       *string   `json:"termId"`
-	TermName     *string   `json:"termName"`
-	EnrollmentCount int64  `json:"enrollmentCount"`
-	UpdatedAt    time.Time `json:"updatedAt"`
+	ID              string    `json:"id"`
+	CourseCode      string    `json:"courseCode"`
+	Title           string    `json:"title"`
+	Status          string    `json:"status"`
+	Instructor      *string   `json:"instructorName"`
+	TermID          *string   `json:"termId"`
+	TermName        *string   `json:"termName"`
+	EnrollmentCount int64     `json:"enrollmentCount"`
+	UpdatedAt       time.Time `json:"updatedAt"`
 }
 
 // ListParams holds pagination and filter options.
 type ListParams struct {
-	Query    string
-	Role     string
-	Status   string
-	TermID   *uuid.UUID
-	Page     int
-	PerPage  int
+	Query   string
+	Role    string
+	Status  string
+	TermID  *uuid.UUID
+	Page    int
+	PerPage int
 }
 
 // ListResult is a paginated list response.
@@ -80,7 +80,7 @@ func OverviewForOrg(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID) (O
 	err := pool.QueryRow(ctx, `
 SELECT
   (SELECT COUNT(*)::bigint FROM "user".users u
-   WHERE u.org_id = $1 AND u.account_type <> 'system'
+   WHERE u.org_id = $1 AND u.account_type NOT IN ('system', 'managed')
      AND u.deactivated_at IS NULL AND NOT u.login_blocked),
   (SELECT COUNT(*)::bigint FROM course.courses c
    WHERE c.org_id = $1 AND c.archived = false AND c.published = true),
@@ -108,7 +108,7 @@ func ListUsers(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID, p ListP
 	args := []any{orgID}
 	where := []string{
 		`u.org_id = $1`,
-		`u.account_type <> 'system'`,
+		`u.account_type NOT IN ('system', 'managed')`,
 	}
 	argIdx := 2
 

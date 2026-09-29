@@ -199,6 +199,7 @@ func patch(ctx context.Context, pool *pgxpool.Pool, w *Write) error {
 	addBool("ff_course_marketplace", w.FFCourseMarketplace)
 	addBool("ff_course_coupons", w.FFCourseCoupons)
 	addBool("ff_marketing_content", w.FFMarketingContent)
+	addBool("ff_homeschool_managed_learners", w.FFHomeschoolManagedLearners)
 	addFloat64("coupon_max_percent_off", w.CouponMaxPercentOff)
 	addBool("ff_content_tool_marketplace", w.FFContentToolMarketplace)
 	addBool("ff_feedback", w.FFFeedback)

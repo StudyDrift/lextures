@@ -1723,6 +1723,15 @@
     "testAdminLRSEndpoint",
     "updateAdminLRSEndpoint"
   ],
+  "managed-learners-api.ts": [
+    "ManagedDependent",
+    "createDependent",
+    "deleteDependent",
+    "exitLearnAs",
+    "listDependents",
+    "patchDependent",
+    "startLearnAs"
+  ],
   "marketing-content-ai-api.ts": [
     "MarketingArticleAIDraft",
     "generateMarketingArticle",
@@ -1758,6 +1767,7 @@
     "getMarketingHealth",
     "getMarketingRevision",
     "lintMarketingArticle",
+    "lintMetadataFromArticle",
     "listMarketingArticles",
     "listMarketingAuthors",
     "listMarketingBuilds",
@@ -1769,7 +1779,6 @@
     "listMarketingRevisions",
     "listMarketingRouteHints",
     "listMarketingSearchGaps",
-    "lintMetadataFromArticle",
     "markMarketingArticleReviewed",
     "normalizeMarketingFinding",
     "previewMarketingRouteHints",
