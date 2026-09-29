@@ -66,6 +66,7 @@ export function SideNavMainLinks() {
     ragNotebookEnabled,
     ffParentPortal,
     ffMarketingContent,
+    ffHomeschoolManagedLearners,
   } = usePlatformFeatures()
 
   const canViewReports = !permLoading && allows(PERM_REPORTS_VIEW)
@@ -120,6 +121,11 @@ export function SideNavMainLinks() {
       </SideNavLink>
 
       <SideNavSectionLabel first>Learning</SideNavSectionLabel>
+      {ffHomeschoolManagedLearners ? (
+        <SideNavLink to="/learners" icon={<UsersRound className="h-5 w-5" />}>
+          Learners
+        </SideNavLink>
+      ) : null}
       {ragNotebookEnabled ? (
         <SideNavLink to="/ai" icon={<Bot className="h-5 w-5" />}>
           Ask AI

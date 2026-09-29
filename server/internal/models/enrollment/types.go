@@ -40,9 +40,10 @@ type PatchEnrollmentRequest struct {
 }
 
 type AddEnrollmentsRequest struct {
-	Emails     string     `json:"emails"`
-	AppRoleID  *uuid.UUID `json:"appRoleId"`
-	CourseRole *string    `json:"courseRole"`
+	Emails         string      `json:"emails"`
+	LearnerUserIds []uuid.UUID `json:"learnerUserIds"`
+	AppRoleID      *uuid.UUID  `json:"appRoleId"`
+	CourseRole     *string     `json:"courseRole"`
 }
 
 type AddEnrollmentsResponse struct {

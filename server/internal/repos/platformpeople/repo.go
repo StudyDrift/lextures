@@ -17,8 +17,6 @@ type rowQuerier interface {
 	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
 }
 
-
-
 // PersonRow is a search result row.
 type PersonRow struct {
 	ID          string    `json:"id"`
@@ -35,16 +33,16 @@ type PersonRow struct {
 
 // Dashboard filter query values for listing users behind a stats card.
 const (
-	FilterSignups7d  = "signups_7d"
-	FilterActive     = "active"
-	FilterRecent30d  = "recent_30d"
-	FilterTotal      = "total"
-	FilterSuspended  = "suspended"
+	FilterSignups7d = "signups_7d"
+	FilterActive    = "active"
+	FilterRecent30d = "recent_30d"
+	FilterTotal     = "total"
+	FilterSuspended = "suspended"
 )
 
 // ListParams holds search / filter pagination options.
 type ListParams struct {
-	Query   string
+	Query string
 	// Filter restricts results to a dashboard segment (see Filter* constants).
 	// Empty means free-text search only (Query required).
 	Filter  string
@@ -120,7 +118,7 @@ SELECT
         WHERE u.created_at >= NOW() - INTERVAL '7 days'
     )::bigint AS signups_last_7_days
 FROM "user".users u
-WHERE u.account_type <> 'system'
+WHERE u.account_type NOT IN ('system', 'managed')
   AND u.email NOT ILIKE '%@erased.invalid'
 `).Scan(
 		&stats.TotalAccounts,
@@ -136,7 +134,7 @@ SELECT COUNT(DISTINCT ua.user_id)::bigint
 FROM "user".user_audit ua
 INNER JOIN "user".users u ON u.id = ua.user_id
 WHERE ua.occurred_at >= NOW() - INTERVAL '30 days'
-  AND u.account_type <> 'system'
+  AND u.account_type NOT IN ('system', 'managed')
   AND u.email NOT ILIKE '%@erased.invalid'
 `).Scan(&stats.RecentlyActive30Days)
 	if err != nil {
@@ -186,7 +184,7 @@ WITH matched AS (
         ) AS rank
     FROM "user".users u
     INNER JOIN tenant.organizations o ON o.id = u.org_id
-    WHERE u.account_type <> 'system'
+    WHERE u.account_type NOT IN ('system', 'managed')
       AND (
           u.search_vector @@ websearch_to_tsquery('english', $1)
           OR u.email ILIKE $2
@@ -233,7 +231,7 @@ func ListByFilter(ctx context.Context, pool *pgxpool.Pool, p ListParams) (ListRe
 
 	// Base human-account predicates match FetchDashboardStats.
 	where := `
-u.account_type <> 'system'
+u.account_type NOT IN ('system', 'managed')
 AND u.email NOT ILIKE '%@erased.invalid'`
 	switch filter {
 	case FilterSignups7d:
@@ -336,40 +334,40 @@ func scanPersonList(rows pgx.Rows, page, perPage int) (ListResult, error) {
 
 // EnrollmentRow is one course enrollment on a user report.
 type EnrollmentRow struct {
-	CourseID     string  `json:"courseId"`
-	CourseCode   string  `json:"courseCode"`
-	CourseTitle  string  `json:"courseTitle"`
-	Role         string  `json:"role"`
-	Active       bool    `json:"active"`
-	State        string  `json:"state"`
-	EnrolledAt   string  `json:"enrolledAt"`
-	OrgName      *string `json:"orgName,omitempty"`
+	CourseID    string  `json:"courseId"`
+	CourseCode  string  `json:"courseCode"`
+	CourseTitle string  `json:"courseTitle"`
+	Role        string  `json:"role"`
+	Active      bool    `json:"active"`
+	State       string  `json:"state"`
+	EnrolledAt  string  `json:"enrolledAt"`
+	OrgName     *string `json:"orgName,omitempty"`
 }
 
 // ActivityRow is one recent learning-activity event.
 type ActivityRow struct {
-	EventKind  string `json:"eventKind"`
-	CourseCode string `json:"courseCode"`
+	EventKind   string `json:"eventKind"`
+	CourseCode  string `json:"courseCode"`
 	CourseTitle string `json:"courseTitle"`
-	OccurredAt string `json:"occurredAt"`
+	OccurredAt  string `json:"occurredAt"`
 }
 
 // Report is the full person report payload.
 type Report struct {
-	ID            string          `json:"id"`
-	Email         string          `json:"email"`
-	FirstName     *string         `json:"firstName"`
-	LastName      *string         `json:"lastName"`
-	DisplayName   *string         `json:"displayName"`
-	OrgID         string          `json:"orgId"`
-	OrgName       string          `json:"orgName"`
-	Role          string          `json:"role"`
-	Active        bool            `json:"active"`
-	CreatedAt     time.Time       `json:"createdAt"`
-	LastActivityAt *time.Time     `json:"lastActivityAt"`
-	EnrollmentCount int64         `json:"enrollmentCount"`
-	Enrollments   []EnrollmentRow `json:"enrollments"`
-	RecentActivity []ActivityRow  `json:"recentActivity"`
+	ID              string          `json:"id"`
+	Email           string          `json:"email"`
+	FirstName       *string         `json:"firstName"`
+	LastName        *string         `json:"lastName"`
+	DisplayName     *string         `json:"displayName"`
+	OrgID           string          `json:"orgId"`
+	OrgName         string          `json:"orgName"`
+	Role            string          `json:"role"`
+	Active          bool            `json:"active"`
+	CreatedAt       time.Time       `json:"createdAt"`
+	LastActivityAt  *time.Time      `json:"lastActivityAt"`
+	EnrollmentCount int64           `json:"enrollmentCount"`
+	Enrollments     []EnrollmentRow `json:"enrollments"`
+	RecentActivity  []ActivityRow   `json:"recentActivity"`
 }
 
 // UserReport returns profile, enrollments, and recent activity for one user.
@@ -397,7 +395,7 @@ SELECT
     u.created_at
 FROM "user".users u
 INNER JOIN tenant.organizations o ON o.id = u.org_id
-WHERE u.id = $1 AND u.account_type <> 'system'
+WHERE u.id = $1 AND u.account_type NOT IN ('system', 'managed')
 `, userID).Scan(
 		&rep.ID, &rep.Email, &rep.FirstName, &rep.LastName, &rep.DisplayName,
 		&rep.OrgID, &rep.OrgName, &roleName, &rep.Active, &rep.CreatedAt,

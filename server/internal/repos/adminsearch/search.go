@@ -12,8 +12,6 @@ import (
 	"github.com/lextures/lextures/server/internal/models/adminsearch"
 )
 
-
-
 // SearchUsers finds users in orgID matching free text (FTS + pg_trgm fuzzy).
 func SearchUsers(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID, q string, limit, offset int) ([]adminsearch.Result, int64, error) {
 	q = strings.TrimSpace(q)
@@ -51,7 +49,7 @@ WITH matched AS (
         ) AS rank
     FROM "user".users u
     WHERE u.org_id = $1
-      AND u.account_type <> 'system'
+      AND u.account_type NOT IN ('system', 'managed')
       AND (
           u.search_vector @@ websearch_to_tsquery('english', $2)
           OR u.email ILIKE $3

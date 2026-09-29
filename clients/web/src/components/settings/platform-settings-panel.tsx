@@ -206,6 +206,7 @@ function emptyForm(): PlatformSettingsPayload {
     ffPublicCatalog: false,
     ffCourseMarketplace: true,
     ffCourseCoupons: true,
+    ffHomeschoolManagedLearners: true,
     ffMarketingContent: false,
     couponMaxPercentOff: 100,
     ffContentToolMarketplace: false,

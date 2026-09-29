@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { getImpersonationToken } from '../lib/auth'
 import { exitImpersonation, fetchMeProfile, type MeProfile } from '../lib/impersonation'
+import { exitLearnAs } from '../lib/managed-learners-api'
 
 export function ImpersonationBanner() {
   const { t } = useTranslation('common')
@@ -17,7 +18,7 @@ export function ImpersonationBanner() {
       return
     }
     const me = await fetchMeProfile()
-    setProfile(me?.impersonating ? me : null)
+    setProfile(me?.impersonating || me?.learningAs ? me : null)
   }, [])
 
   useEffect(() => {
@@ -29,21 +30,29 @@ export function ImpersonationBanner() {
     return () => window.removeEventListener('studydrift-auth-token', onAuthChange)
   }, [load])
 
+  const isLearnAs = Boolean(profile?.learningAs)
+  const isImpersonation = Boolean(profile?.impersonating)
+
   async function handleExit() {
     setExiting(true)
     try {
-      await exitImpersonation()
-      navigate('/org-admin/users', { replace: true })
+      if (isLearnAs) {
+        await exitLearnAs()
+        navigate('/learners', { replace: true })
+      } else {
+        await exitImpersonation()
+        navigate('/org-admin/users', { replace: true })
+      }
     } finally {
       setExiting(false)
     }
   }
 
-  if (!profile?.impersonating) {
+  if (!isImpersonation && !isLearnAs) {
     return null
   }
 
-  const displayName = profile.displayName?.trim() || profile.email
+  const displayName = profile?.displayName?.trim() || profile?.email || 'learner'
 
   return (
     <div
@@ -53,7 +62,9 @@ export function ImpersonationBanner() {
       className="fixed inset-x-0 top-0 z-[9999] flex items-center justify-center gap-3 border-b border-amber-700 bg-amber-500 px-4 py-2 text-sm font-medium text-amber-950 shadow-md"
     >
       <span>
-        {t('impersonation.banner.viewingAs', { name: displayName, defaultValue: 'You are viewing as {{name}}.' })}
+        {isLearnAs
+          ? `Learning as ${displayName} — Exit to parent.`
+          : t('impersonation.banner.viewingAs', { name: displayName, defaultValue: 'You are viewing as {{name}}.' })}
       </span>
       <button
         type="button"
@@ -63,7 +74,9 @@ export function ImpersonationBanner() {
       >
         {exiting
           ? t('impersonation.banner.exiting', { defaultValue: 'Exiting…' })
-          : t('impersonation.banner.exit', { defaultValue: 'Exit impersonation' })}
+          : isLearnAs
+            ? 'Exit to parent'
+            : t('impersonation.banner.exit', { defaultValue: 'Exit impersonation' })}
       </button>
     </div>
   )

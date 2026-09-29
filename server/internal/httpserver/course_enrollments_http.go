@@ -22,6 +22,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/orgroles"
 	"github.com/lextures/lextures/server/internal/repos/user"
 	"github.com/lextures/lextures/server/internal/service/learningevents"
+	managedlearners "github.com/lextures/lextures/server/internal/service/managedlearners"
 	webhooksvc "github.com/lextures/lextures/server/internal/service/webhooks"
 	"github.com/lextures/lextures/server/internal/telemetry"
 )
@@ -137,8 +138,13 @@ func (d Deps) handleCourseEnrollmentsPost() http.HandlerFunc {
 			return
 		}
 		emails := parseEnrollmentEmails(body.Emails)
-		if len(emails) == 0 {
-			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Provide at least one email address.")
+		learnerIDs := uniqueLearnerUserIDs(body.LearnerUserIds)
+		if len(emails) == 0 && len(learnerIDs) == 0 {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Provide at least one email address or learnerUserIds.")
+			return
+		}
+		if len(learnerIDs) > 0 && !d.effectiveConfig().FFHomeschoolManagedLearners {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Managed learners are not enabled.")
 			return
 		}
 		cid, err := course.GetIDByCourseCode(r.Context(), d.Pool, courseCode)
@@ -160,12 +166,55 @@ func (d Deps) handleCourseEnrollmentsPost() http.HandlerFunc {
 		var added, already, notFound []string
 		var addedUserIDs []uuid.UUID
 		var invitedEnrollments []addedEnrollmentRecord
+		var managedEnrollments []addedEnrollmentRecord
 		tx, err := d.Pool.BeginTx(ctx, pgx.TxOptions{})
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to start transaction.")
 			return
 		}
 		defer func() { _ = tx.Rollback(ctx) }()
+
+		// Homeschool #640: enroll managed learners by user id (active student, no invite email).
+		if len(learnerIDs) > 0 {
+			if body.CourseRole != nil && strings.TrimSpace(*body.CourseRole) != "" {
+				requested := normalizeCourseEnrollmentRole(*body.CourseRole)
+				if requested != "" && requested != "student" {
+					apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput,
+						"Managed learners can only be enrolled as students.")
+					return
+				}
+			}
+			role := "student"
+			for _, uid := range learnerIDs {
+				can, err := managedlearners.CanEnrollManaged(ctx, d.Pool, viewer, uid, orgID)
+				if err != nil {
+					apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify learner.")
+					return
+				}
+				if !can {
+					notFound = append(notFound, uid.String())
+					continue
+				}
+				inserted, eid, err := insertCourseEnrollment(ctx, tx, *cid, uid, role, false)
+				if err != nil {
+					apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to add enrollment.")
+					return
+				}
+				if !inserted {
+					already = append(already, uid.String())
+					continue
+				}
+				added = append(added, uid.String())
+				addedUserIDs = append(addedUserIDs, uid)
+				managedEnrollments = append(managedEnrollments, addedEnrollmentRecord{
+					userID: uid, enrollmentID: eid, invited: false,
+				})
+				if err := courseroles.RefreshManagedGrantsForCourseUser(ctx, tx, uid, *cid, courseCode); err != nil {
+					apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to sync course permissions.")
+					return
+				}
+			}
+		}
 
 		if body.CourseRole != nil && strings.TrimSpace(*body.CourseRole) != "" {
 			role := normalizeCourseEnrollmentRole(*body.CourseRole)
@@ -342,6 +391,9 @@ LIMIT 1
 		}
 		learningevents.EmitEnrollmentAsync(d.Pool, d.effectiveConfig(), orgID, *cid, courseCode, added)
 		for _, rec := range invitedEnrollments {
+			webhooksvc.EmitEnrollmentCreatedEvent(d.Pool, d.effectiveConfig(), orgID, *cid, courseCode, rec.enrollmentID, rec.userID, "student")
+		}
+		for _, rec := range managedEnrollments {
 			webhooksvc.EmitEnrollmentCreatedEvent(d.Pool, d.effectiveConfig(), orgID, *cid, courseCode, rec.enrollmentID, rec.userID, "student")
 		}
 		d.invalidateCourseEnrollmentsCache(r.Context(), *cid)
@@ -706,4 +758,23 @@ func (d Deps) handleCourseEnrollmentMessagePost() http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(respBody{ID: msgID.String()})
 	}
+}
+
+func uniqueLearnerUserIDs(ids []uuid.UUID) []uuid.UUID {
+	if len(ids) == 0 {
+		return nil
+	}
+	seen := make(map[uuid.UUID]struct{}, len(ids))
+	out := make([]uuid.UUID, 0, len(ids))
+	for _, id := range ids {
+		if id == uuid.Nil {
+			continue
+		}
+		if _, ok := seen[id]; ok {
+			continue
+		}
+		seen[id] = struct{}{}
+		out = append(out, id)
+	}
+	return out
 }

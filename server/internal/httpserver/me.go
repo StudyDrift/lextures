@@ -191,12 +191,16 @@ func (d Deps) handleGetMe() http.HandlerFunc {
 	type impersonationInfo struct {
 		AdminID string `json:"adminId"`
 	}
+	type learningAsInfo struct {
+		ActorID string `json:"actorId"`
+	}
 	type resp struct {
 		ID            string             `json:"id"`
 		Email         string             `json:"email"`
 		DisplayName   *string            `json:"displayName"`
 		Org           *orgInfo           `json:"org,omitempty"`
 		Impersonating *impersonationInfo `json:"impersonating,omitempty"`
+		LearningAs    *learningAsInfo    `json:"learningAs,omitempty"`
 		CustomFields  map[string]any     `json:"customFields,omitempty"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -212,6 +216,13 @@ func (d Deps) handleGetMe() http.HandlerFunc {
 		out := resp{ID: row.ID, Email: row.Email, DisplayName: row.DisplayName}
 		if imp, ok := auth.ImpersonationFromContext(r.Context()); ok {
 			out.Impersonating = &impersonationInfo{AdminID: imp.AdminID}
+		}
+		if ml, ok := auth.ManagedLearnerFromContext(r.Context()); ok {
+			out.LearningAs = &learningAsInfo{ActorID: ml.ActorID}
+		}
+		// Never surface synthetic managed emails to clients.
+		if user.IsManagedEmail(out.Email) {
+			out.Email = ""
 		}
 		orgID, err := organization.OrgIDForUser(r.Context(), d.Pool, userID)
 		if err == nil && orgID != uuid.Nil {

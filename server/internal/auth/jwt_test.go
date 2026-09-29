@@ -241,3 +241,26 @@ func newTestSigner(secret string) *JWTSigner {
 func fixedNow() time.Time {
 	return time.Date(2026, 4, 24, 12, 0, 0, 0, time.UTC)
 }
+
+func TestSignVerifyManagedLearner(t *testing.T) {
+	signer := NewJWTSigner("01234567890123456789012345678901")
+	actorID := "11111111-1111-4111-8111-111111111111"
+	userID := "22222222-2222-4222-8222-222222222222"
+	tok, ml, err := signer.SignManagedLearner(actorID, userID, "22222222-2222-4222-8222-222222222222@managed.lextures.invalid", "33333333-3333-4333-8333-333333333333", "default")
+	if err != nil {
+		t.Fatalf("SignManagedLearner: %v", err)
+	}
+	if JWTType(tok) != "managed_learner" {
+		t.Fatalf("typ: %q", JWTType(tok))
+	}
+	got, err := signer.VerifyManagedLearner(tok)
+	if err != nil {
+		t.Fatalf("VerifyManagedLearner: %v", err)
+	}
+	if got.ActorID != actorID || got.TargetUserID != userID || got.JTI != ml.JTI {
+		t.Fatalf("mismatch: %+v vs %+v", got, ml)
+	}
+	if _, err := signer.VerifyImpersonation(tok); err == nil {
+		t.Fatal("managed_learner must not verify as impersonation")
+	}
+}

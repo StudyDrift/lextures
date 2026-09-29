@@ -165,6 +165,7 @@ type Row struct {
 	FFCourseMarketplace                *bool
 	FFCourseCoupons                    *bool
 	FFMarketingContent                 *bool
+	FFHomeschoolManagedLearners        *bool
 	CouponMaxPercentOff                *float64
 	FFContentToolMarketplace           *bool
 	FFFeedback                         *bool
@@ -393,6 +394,7 @@ type Write struct {
 	FFCourseMarketplace                *bool
 	FFCourseCoupons                    *bool
 	FFMarketingContent                 *bool
+	FFHomeschoolManagedLearners        *bool
 	CouponMaxPercentOff                *float64
 	FFContentToolMarketplace           *bool
 	FFFeedback                         *bool
@@ -617,6 +619,7 @@ SELECT
 	ff_course_marketplace,
 	ff_course_coupons,
 	ff_marketing_content,
+	ff_homeschool_managed_learners,
 	coupon_max_percent_off,
 	ff_content_tool_marketplace,
 	ff_feedback,
@@ -834,6 +837,7 @@ WHERE id = 1
 		&r.FFCourseMarketplace,
 		&r.FFCourseCoupons,
 		&r.FFMarketingContent,
+		&r.FFHomeschoolManagedLearners,
 		&r.CouponMaxPercentOff,
 		&r.FFContentToolMarketplace,
 		&r.FFFeedback,

@@ -688,6 +688,13 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     pack: 'marketplace',
   },
   {
+    key: 'ffHomeschoolManagedLearners',
+    label: 'Homeschool managed learners',
+    description:
+      'Lets parents create managed learner profiles by name (no email), enroll them in courses, and Learn as them on a shared device. Default on.',
+    pack: 'k12',
+  },
+  {
     key: 'ffMarketingContent',
     label: 'Marketing content workspace',
     description:

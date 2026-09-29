@@ -17,11 +17,16 @@ export type MeImpersonation = {
   adminId: string
 }
 
+export type MeLearningAs = {
+  actorId: string
+}
+
 export type MeProfile = {
   id: string
   email: string
   displayName?: string | null
   impersonating?: MeImpersonation
+  learningAs?: MeLearningAs
 }
 
 function readStorage(key: string): string | null {

@@ -23,10 +23,10 @@ const (
 	AccessTokenTTL = 15 * time.Minute
 	// CLIAccessTokenTTL is the lifetime of access JWTs issued via CLI browser auth.
 	CLIAccessTokenTTL = 7 * 24 * time.Hour
-	defaultTokenTTL = AccessTokenTTL
+	defaultTokenTTL   = AccessTokenTTL
 	mfaPendingTTL     = 60 * time.Second
-	ltiEmbedTicketTTL   = 15 * time.Minute
-	impersonationTTL    = 60 * time.Minute
+	ltiEmbedTicketTTL = 15 * time.Minute
+	impersonationTTL  = 60 * time.Minute
 	// Rust jsonwebtoken's default validation allows 60 seconds of clock skew.
 	jwtExpiryLeeway = time.Minute
 )
@@ -493,16 +493,16 @@ type jwtHeader struct {
 }
 
 type loginClaims struct {
-	Typ            string `json:"typ,omitempty"`
-	Subject        string `json:"sub"`
-	Email          string `json:"email"`
-	OrgID          string `json:"org_id,omitempty"`
-	OrgSlug        string `json:"org_slug,omitempty"`
-	SessionVersion int64  `json:"sv,omitempty"`
-	Issued         int64  `json:"iat,omitempty"`
-	JTI            string `json:"jti,omitempty"`
+	Typ            string  `json:"typ,omitempty"`
+	Subject        string  `json:"sub"`
+	Email          string  `json:"email"`
+	OrgID          string  `json:"org_id,omitempty"`
+	OrgSlug        string  `json:"org_slug,omitempty"`
+	SessionVersion int64   `json:"sv,omitempty"`
+	Issued         int64   `json:"iat,omitempty"`
+	JTI            string  `json:"jti,omitempty"`
 	RTI            *string `json:"rti,omitempty"`
-	Expires        int64  `json:"exp"`
+	Expires        int64   `json:"exp"`
 }
 
 type mfaPendingClaims struct {

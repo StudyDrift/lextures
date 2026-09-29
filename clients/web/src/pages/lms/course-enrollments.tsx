@@ -53,6 +53,10 @@ import { readApiErrorMessage } from '../../lib/errors'
 import { formatTimeAgoFromIso } from '../../lib/format-time-ago'
 import { toast, toastSaveOk } from '../../lib/lms-toast'
 import { usePlatformFeatures } from '../../context/platform-features-context'
+import {
+  listDependents,
+  type ManagedDependent,
+} from '../../lib/managed-learners-api'
 import { EnrollmentAvatar } from '../../components/enrollment/enrollment-avatar'
 import { EnrollmentStateBadge } from '../../components/enrollment/enrollment-state-badge'
 import {
@@ -136,7 +140,7 @@ export default function CourseEnrollments() {
   const { courseCode } = useParams<{ courseCode: string }>()
   const enrollmentsRevision = useEnrollmentsRevision()
   const enrollmentsUpdateCourseCode = useEnrollmentsUpdateCourseCode()
-  const { ffEnrollmentStateMachine } = usePlatformFeatures()
+  const { ffEnrollmentStateMachine, ffHomeschoolManagedLearners } = usePlatformFeatures()
   const courseViewPreview = useCourseViewAs(courseCode)
   const { allows, loading: permLoading, refresh: refreshPermissions } = usePermissions()
   const canUpdateEnrollments = usePermission(
@@ -163,6 +167,10 @@ export default function CourseEnrollments() {
 
   const [modalOpen, setModalOpen] = useState(false)
   const [emailListText, setEmailListText] = useState('')
+  const [enrollModalTab, setEnrollModalTab] = useState<'email' | 'managed'>('managed')
+  const [managedDependents, setManagedDependents] = useState<ManagedDependent[]>([])
+  const [managedDepsLoading, setManagedDepsLoading] = useState(false)
+  const [selectedLearnerIds, setSelectedLearnerIds] = useState<string[]>([])
   const [courseScopedRoles, setCourseScopedRoles] = useState<CourseScopedAppRole[]>([])
   const [rolesLoading, setRolesLoading] = useState(false)
   const [rolesError, setRolesError] = useState<string | null>(null)
@@ -535,12 +543,34 @@ export default function CourseEnrollments() {
   const closeModal = useCallback(() => {
     setModalOpen(false)
     setEmailListText('')
+    setEnrollModalTab('email')
+    setSelectedLearnerIds([])
     setSelectedAppRoleId('')
     setAddCourseRole('student')
     setAddStatus('idle')
     setAddMessage(null)
     setRolesError(null)
   }, [])
+
+
+  useEffect(() => {
+    if (!modalOpen || !ffHomeschoolManagedLearners) return
+    let cancelled = false
+    setManagedDepsLoading(true)
+    void listDependents()
+      .then((rows) => {
+        if (!cancelled) setManagedDependents(rows)
+      })
+      .catch(() => {
+        if (!cancelled) setManagedDependents([])
+      })
+      .finally(() => {
+        if (!cancelled) setManagedDepsLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [modalOpen, ffHomeschoolManagedLearners])
 
   const closeEditModal = useCallback(() => {
     setEditTarget(null)
@@ -735,19 +765,27 @@ export default function CourseEnrollments() {
 
   async function onSubmitAddEnrollments(e: FormEvent) {
     e.preventDefault()
-    if (!courseCode || !emailListText.trim()) {
+    const usingManaged = enrollModalTab === 'managed'
+    if (!courseCode) return
+    if (usingManaged) {
+      if (selectedLearnerIds.length === 0) {
+        setAddMessage('Select at least one managed learner.')
+        setAddStatus('error')
+        return
+      }
+    } else if (!emailListText.trim()) {
       setAddMessage('Enter at least one email address.')
       setAddStatus('error')
       return
     }
 
     const builtinAdd = addCourseRole.trim()
-    if (canUpdateEnrollments && !builtinAdd) {
+    if (!usingManaged && canUpdateEnrollments && !builtinAdd) {
       setAddMessage('Select an enrollment role.')
       setAddStatus('error')
       return
     }
-    if (isCourseCreator && !builtinAdd) {
+    if (!usingManaged && isCourseCreator && !builtinAdd) {
       if (rolesLoading) {
         setAddMessage('Loading roles…')
         setAddStatus('error')
@@ -770,11 +808,13 @@ export default function CourseEnrollments() {
     setAddStatus('loading')
     setAddMessage(null)
     try {
-      const body = builtinAdd
-        ? { emails: emailListText, courseRole: normEnrollmentRole(builtinAdd) }
-        : isCourseCreator
-          ? { emails: emailListText, appRoleId: selectedAppRoleId }
-          : { emails: emailListText, courseRole: 'student' }
+      const body = usingManaged
+        ? { learnerUserIds: selectedLearnerIds, courseRole: 'student' }
+        : builtinAdd
+          ? { emails: emailListText, courseRole: normEnrollmentRole(builtinAdd) }
+          : isCourseCreator
+            ? { emails: emailListText, appRoleId: selectedAppRoleId }
+            : { emails: emailListText, courseRole: 'student' }
 
       const res = await authorizedFetch(
         `/api/v1/courses/${encodeURIComponent(courseCode)}/enrollments`,
@@ -799,6 +839,7 @@ export default function CourseEnrollments() {
       setAddMessage(parts.length ? parts.join('. ') : 'Done.')
       setAddStatus('idle')
       setEmailListText('')
+      setSelectedLearnerIds([])
       await loadEnrollments()
       await refreshPermissions()
       invalidateChecklist(courseCode)
@@ -1692,6 +1733,69 @@ export default function CourseEnrollments() {
               </button>
             </div>
             <form onSubmit={(e) => void onSubmitAddEnrollments(e)} className="p-4">
+              {ffHomeschoolManagedLearners ? (
+                <div className="mb-4 flex gap-1 rounded-xl bg-surface-sunken p-1">
+                  <button
+                    type="button"
+                    className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-semibold ${enrollModalTab === 'managed' ? 'bg-surface-raised text-fg-default shadow-sm' : 'text-fg-muted'}`}
+                    onClick={() => setEnrollModalTab('managed')}
+                  >
+                    Managed learners
+                  </button>
+                  <button
+                    type="button"
+                    className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-semibold ${enrollModalTab === 'email' ? 'bg-surface-raised text-fg-default shadow-sm' : 'text-fg-muted'}`}
+                    onClick={() => setEnrollModalTab('email')}
+                  >
+                    Email
+                  </button>
+                </div>
+              ) : null}
+
+              {ffHomeschoolManagedLearners && enrollModalTab === 'managed' ? (
+                <div>
+                  {managedDepsLoading ? (
+                    <p className="text-sm text-fg-muted">Loading learners…</p>
+                  ) : managedDependents.length === 0 ? (
+                    <p className="text-sm text-fg-muted">
+                      No managed learners yet.{' '}
+                      <Link to="/learners" className="text-indigo-600 hover:underline dark:text-indigo-400">
+                        Add learners
+                      </Link>
+                    </p>
+                  ) : (
+                    <ul className="max-h-48 space-y-2 overflow-y-auto rounded-xl border border-border-default p-2">
+                      {managedDependents.map((d) => {
+                        const checked = selectedLearnerIds.includes(d.id)
+                        return (
+                          <li key={d.id}>
+                            <label className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-surface-sunken">
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() => {
+                                  setSelectedLearnerIds((prev) =>
+                                    checked ? prev.filter((id) => id !== d.id) : [...prev, d.id],
+                                  )
+                                }}
+                                disabled={addStatus === 'loading'}
+                              />
+                              <span className="font-medium text-fg-default">{d.displayName}</span>
+                              {d.gradeLevel ? (
+                                <span className="text-xs text-fg-muted">Grade {d.gradeLevel}</span>
+                              ) : null}
+                            </label>
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  )}
+                  <p className="mt-2 text-xs text-fg-muted">
+                    Enrolls as active students (no invitation email).
+                  </p>
+                </div>
+              ) : (
+                <>
               <label htmlFor="enrollment-emails" className="text-xs font-medium text-fg-muted">
                 Email addresses
               </label>
@@ -1710,6 +1814,8 @@ export default function CourseEnrollments() {
               <p className="mt-2 text-xs text-fg-muted">
                 Only people who already have an account can be enrolled.
               </p>
+                </>
+              )}
 
               <div className="mt-4">
                 <label htmlFor="enrollment-role" className="text-xs font-medium text-fg-muted">

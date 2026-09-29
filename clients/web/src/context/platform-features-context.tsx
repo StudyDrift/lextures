@@ -122,6 +122,7 @@ export type PlatformFeatures = {
   ffTaxCollection: boolean
   ffCourseMarketplace?: boolean
   ffCourseCoupons?: boolean
+  ffHomeschoolManagedLearners?: boolean
   ffContentToolMarketplace?: boolean
   ffLearningPaths: boolean
   ffConditionalRelease: boolean
@@ -272,6 +273,7 @@ const defaultFeatures: PlatformFeatures = {
   ffTaxCollection: false,
   ffCourseMarketplace: true,
   ffCourseCoupons: true,
+  ffHomeschoolManagedLearners: true,
   ffContentToolMarketplace: false,
   ffLearningPaths: false,
   ffConditionalRelease: true,
@@ -420,6 +422,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
   ffTaxCollection: false,
   ffCourseMarketplace: true,
   ffCourseCoupons: true,
+  ffHomeschoolManagedLearners: true,
   ffContentToolMarketplace: false,
   ffLearningPaths: false,
   ffConditionalRelease: true,
@@ -575,6 +578,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffTaxCollection: data.ffTaxCollection === true,
           ffCourseMarketplace: data.ffCourseMarketplace !== false,
           ffCourseCoupons: data.ffCourseCoupons === true,
+          ffHomeschoolManagedLearners: data.ffHomeschoolManagedLearners !== false,
           ffContentToolMarketplace: data.ffContentToolMarketplace === true,
           ffLearningPaths: data.ffLearningPaths === true,
           ffConditionalRelease: data.ffConditionalRelease === true,
@@ -687,6 +691,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffTaxCollection: next.ffTaxCollection === true,
           ffCourseMarketplace: next.ffCourseMarketplace !== false,
           ffCourseCoupons: next.ffCourseCoupons === true,
+          ffHomeschoolManagedLearners: next.ffHomeschoolManagedLearners !== false,
           ffContentToolMarketplace: next.ffContentToolMarketplace === true,
           ffLearningPaths: next.ffLearningPaths === true,
           ffConditionalRelease: next.ffConditionalRelease === true,
