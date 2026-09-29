@@ -174,6 +174,38 @@ export const COURSE_CREATE_STARTER_TEMPLATES: CourseCreateStarterTemplate[] = [
   },
 ]
 
+/** Default Higher ed syllabus scaffold (15-week style). */
+export const HIGHER_ED_SYLLABUS_TEMPLATE_ID = 'higher-ed-15-week'
+
+/** Default K–12 syllabus scaffold (also used when grade levels are set; no separate Homeschool template yet). */
+export const K12_SYLLABUS_TEMPLATE_ID = 'k12-semester'
+
+/**
+ * Pick the syllabus template to pre-select from step-1 grade levels.
+ * Any selected K–12 grade → K–12 template; otherwise Higher ed.
+ */
+export function defaultSyllabusTemplateId(gradeLevels: string[]): string {
+  return gradeLevels.length > 0 ? K12_SYLLABUS_TEMPLATE_ID : HIGHER_ED_SYLLABUS_TEMPLATE_ID
+}
+
+/**
+ * When advancing from basics → syllabus, update the selection if it is still
+ * one of the auto-defaults (so a manual pick like Self-paced is preserved).
+ */
+export function resolveSyllabusTemplateAfterBasics(
+  currentTemplateId: string,
+  gradeLevels: string[],
+): string {
+  const next = defaultSyllabusTemplateId(gradeLevels)
+  if (
+    currentTemplateId === HIGHER_ED_SYLLABUS_TEMPLATE_ID ||
+    currentTemplateId === K12_SYLLABUS_TEMPLATE_ID
+  ) {
+    return next
+  }
+  return currentTemplateId
+}
+
 export function templateSectionsToSyllabus(
   sections: CourseCreateTemplateSection[],
 ): { heading: string; markdown: string; id: string }[] {

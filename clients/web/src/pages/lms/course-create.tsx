@@ -26,6 +26,8 @@ import { getAccessToken } from '../../lib/auth'
 import { PERM_COURSE_CREATE } from '../../lib/rbac-api'
 import {
   COURSE_CREATE_STARTER_TEMPLATES,
+  HIGHER_ED_SYLLABUS_TEMPLATE_ID,
+  resolveSyllabusTemplateAfterBasics,
   templateSectionsToSyllabus,
 } from './course-create-templates'
 import { CourseFeaturesSection } from './course-features-section'
@@ -89,7 +91,7 @@ export default function CourseCreate() {
   const [description, setDescription] = useState('')
   const [courseMode, setCourseMode] = useState<CourseMode>('traditional')
   const [createdCourse, setCreatedCourse] = useState<CoursePublic | null>(null)
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('higher-ed-15-week')
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>(HIGHER_ED_SYLLABUS_TEMPLATE_ID)
   const [firstModuleTitle, setFirstModuleTitle] = useState('')
   const [competencies, setCompetencies] = useState<CompetencyDraft[]>(() => [emptyCompetency()])
   const [submitting, setSubmitting] = useState(false)
@@ -153,6 +155,7 @@ export default function CourseCreate() {
         })
         setCreatedCourse(course)
       }
+      setSelectedTemplateId((prev) => resolveSyllabusTemplateAfterBasics(prev, selectedGradeLevels))
       setStep(2)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not save.')
