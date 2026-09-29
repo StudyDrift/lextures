@@ -1,10 +1,12 @@
 status: 200
 content-type: application/json
 keys:
+  enrollmentGroupsEnabled
   enrollments
   enrollments[*]
   enrollments[*].displayName
   enrollments[*].id
+  enrollments[*].lastCourseAccessAt
   enrollments[*].role
   enrollments[*].roleDisplay
   enrollments[*].userId

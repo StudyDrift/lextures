@@ -13,21 +13,22 @@ import (
 
 // RosterRow is one row for GET /api/v1/courses/{course}/enrollments.
 type RosterRow struct {
-	ID                uuid.UUID
-	UserID            uuid.UUID
-	DisplayName       *string
-	AvatarURL         *string
-	Role              string
-	RoleDisplay       *string
-	SectionID         *uuid.UUID
-	SectionCode       *string
-	SectionName       *string
-	State             string
-	StateChangedAt    *time.Time
-	StateReason       *string
-	HomeOrgID         *uuid.UUID
-	HomeOrgName       *string
-	InvitationPending bool
+	ID                 uuid.UUID
+	UserID             uuid.UUID
+	DisplayName        *string
+	AvatarURL          *string
+	Role               string
+	RoleDisplay        *string
+	SectionID          *uuid.UUID
+	SectionCode        *string
+	SectionName        *string
+	State              string
+	StateChangedAt     *time.Time
+	StateReason        *string
+	HomeOrgID          *uuid.UUID
+	HomeOrgName        *string
+	InvitationPending  bool
+	LastCourseAccessAt *time.Time
 }
 
 // ListRosterForCourse returns enrollments for a course code, ordered for UI.
@@ -48,7 +49,8 @@ SELECT
 	ce.state_reason,
 	ce.home_org_id,
 	ho.name,
-	ce.invitation_pending
+	ce.invitation_pending,
+	ce.last_course_access_at
 FROM course.course_enrollments ce
 INNER JOIN course.courses c ON c.id = ce.course_id
 INNER JOIN "user".users u ON u.id = ce.user_id
@@ -92,7 +94,8 @@ ORDER BY
 		var stateReason sql.NullString
 		var homeOrgID sql.NullString
 		var homeOrgName sql.NullString
-		if err := rows.Scan(&r.ID, &r.UserID, &display, &avatar, &r.Role, &roleDisplay, &secID, &secCode, &secName, &stateStr, &stateChanged, &stateReason, &homeOrgID, &homeOrgName, &r.InvitationPending); err != nil {
+		var lastAccess sql.NullTime
+		if err := rows.Scan(&r.ID, &r.UserID, &display, &avatar, &r.Role, &roleDisplay, &secID, &secCode, &secName, &stateStr, &stateChanged, &stateReason, &homeOrgID, &homeOrgName, &r.InvitationPending, &lastAccess); err != nil {
 			return nil, err
 		}
 		fallback := ""
@@ -144,6 +147,10 @@ ORDER BY
 		if homeOrgName.Valid && homeOrgName.String != "" {
 			s := homeOrgName.String
 			r.HomeOrgName = &s
+		}
+		if lastAccess.Valid {
+			t := lastAccess.Time
+			r.LastCourseAccessAt = &t
 		}
 		out = append(out, r)
 	}

@@ -1,6 +1,7 @@
 package httpserver
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -21,6 +22,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/coursefiles"
 	"github.com/lextures/lextures/server/internal/repos/coursestructure"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
+	"github.com/lextures/lextures/server/internal/repos/enrollmentgroups"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 	"github.com/lextures/lextures/server/internal/repos/recommendations"
 	"github.com/lextures/lextures/server/internal/repos/srs"
@@ -191,13 +193,13 @@ func (d Deps) handleLearnerReviewQueue() http.HandlerFunc {
 
 func (d Deps) handleLearnerRecommendations() http.HandlerFunc {
 	type item struct {
-		ItemID            string                  `json:"itemId"`
-		ItemType          string                  `json:"itemType"`
-		Title             string                  `json:"title"`
-		Surface           string                  `json:"surface"`
-		Reason            string                  `json:"reason"`
-		Score             float64                 `json:"score"`
-		ProfileRationale  *profileRationaleJSON   `json:"profileRationale,omitempty"`
+		ItemID           string                `json:"itemId"`
+		ItemType         string                `json:"itemType"`
+		Title            string                `json:"title"`
+		Surface          string                `json:"surface"`
+		Reason           string                `json:"reason"`
+		Score            float64               `json:"score"`
+		ProfileRationale *profileRationaleJSON `json:"profileRationale,omitempty"`
 	}
 	type resp struct {
 		Recommendations []item `json:"recommendations"`
@@ -339,7 +341,26 @@ func (d Deps) requireCourseAccess(w http.ResponseWriter, r *http.Request) (strin
 		apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
 		return "", uuid.UUID{}, false
 	}
+	// Best-effort: record course access for roster "Last access" (throttled in SQL).
+	go d.touchCourseAccessAsync(*cid, viewer)
 	return courseCode, viewer, true
+}
+
+// touchCourseAccessAsync records last course access without blocking the request.
+func (d Deps) touchCourseAccessAsync(courseID, userID uuid.UUID) {
+	if d.Pool == nil {
+		return
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	updated, err := enrollment.TouchLastCourseAccess(ctx, d.Pool, courseID, userID)
+	if err != nil {
+		log.Printf("touch course access: %v", err)
+		return
+	}
+	if updated {
+		d.invalidateCourseEnrollmentsCache(ctx, courseID)
+	}
 }
 
 func (d Deps) handleCourseStructure() http.HandlerFunc {
@@ -792,23 +813,25 @@ func (d Deps) handleFeedMessagePost() http.HandlerFunc {
 
 func (d Deps) handleCourseEnrollmentsList() http.HandlerFunc {
 	type row struct {
-		ID                string  `json:"id"`
-		UserID            string  `json:"userId"`
-		DisplayName       *string `json:"displayName"`
-		AvatarURL         *string `json:"avatarUrl,omitempty"`
-		Role              string  `json:"role"`
-		RoleDisplay       *string `json:"roleDisplay,omitempty"`
-		SectionID         *string `json:"sectionId,omitempty"`
-		SectionCode       *string `json:"sectionCode,omitempty"`
-		SectionName       *string `json:"sectionName,omitempty"`
-		State             *string `json:"state,omitempty"`
-		StateChangedAt    *string `json:"stateChangedAt,omitempty"`
-		StateReason       *string `json:"stateReason,omitempty"`
-		HomeOrgName       *string `json:"homeOrgName,omitempty"`
-		InvitationPending bool    `json:"invitationPending,omitempty"`
+		ID                 string  `json:"id"`
+		UserID             string  `json:"userId"`
+		DisplayName        *string `json:"displayName"`
+		AvatarURL          *string `json:"avatarUrl,omitempty"`
+		Role               string  `json:"role"`
+		RoleDisplay        *string `json:"roleDisplay,omitempty"`
+		SectionID          *string `json:"sectionId,omitempty"`
+		SectionCode        *string `json:"sectionCode,omitempty"`
+		SectionName        *string `json:"sectionName,omitempty"`
+		State              *string `json:"state,omitempty"`
+		StateChangedAt     *string `json:"stateChangedAt,omitempty"`
+		StateReason        *string `json:"stateReason,omitempty"`
+		HomeOrgName        *string `json:"homeOrgName,omitempty"`
+		InvitationPending  bool    `json:"invitationPending,omitempty"`
+		LastCourseAccessAt *string `json:"lastCourseAccessAt,omitempty"`
 	}
 	type resp struct {
-		Enrollments []row `json:"enrollments"`
+		Enrollments             []row `json:"enrollments"`
+		EnrollmentGroupsEnabled bool  `json:"enrollmentGroupsEnabled"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
@@ -829,6 +852,10 @@ func (d Deps) handleCourseEnrollmentsList() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
 			return
 		}
+		// Viewing the roster counts as course access for the active viewer.
+		if updated, touchErr := enrollment.TouchLastCourseAccess(r.Context(), d.Pool, *cid, viewer); touchErr == nil && updated {
+			d.invalidateCourseEnrollmentsCache(r.Context(), *cid)
+		}
 		cacheKey := objectcache.CourseEnrollmentsKey(cid.String())
 		if c := d.objectCache(); c != nil {
 			var cached resp
@@ -841,6 +868,10 @@ func (d Deps) handleCourseEnrollmentsList() http.HandlerFunc {
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load enrollments.")
 			return
+		}
+		groupsOn := false
+		if on, gerr := enrollmentgroups.IsEnabled(r.Context(), d.Pool, *cid); gerr == nil {
+			groupsOn = on
 		}
 		out := make([]row, 0, len(roster))
 		for _, e := range roster {
@@ -875,9 +906,13 @@ func (d Deps) handleCourseEnrollmentsList() http.HandlerFunc {
 				r.HomeOrgName = e.HomeOrgName
 			}
 			r.InvitationPending = e.InvitationPending
+			if e.LastCourseAccessAt != nil {
+				ts := e.LastCourseAccessAt.UTC().Format(time.RFC3339)
+				r.LastCourseAccessAt = &ts
+			}
 			out = append(out, r)
 		}
-		payload := resp{Enrollments: out}
+		payload := resp{Enrollments: out, EnrollmentGroupsEnabled: groupsOn}
 		if c := d.objectCache(); c != nil {
 			_ = c.SetJSON(r.Context(), cacheKey, payload, cacheTTLCourseEnrollments)
 		}
