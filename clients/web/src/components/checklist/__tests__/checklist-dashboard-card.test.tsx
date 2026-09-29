@@ -1,10 +1,11 @@
+import type { ReactNode } from 'react'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
 import type { ChecklistItem, ChecklistSummary } from '../../../lib/course-checklist-api-schemas'
 import { ChecklistDashboardCard } from '../checklist-dashboard-card'
 
-function wrap(ui: JSX.Element) {
+function wrap(ui: ReactNode) {
   return render(<MemoryRouter>{ui}</MemoryRouter>)
 }
 
