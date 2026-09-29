@@ -168,7 +168,7 @@ export default function LearnersPage() {
         <button
           type="submit"
           disabled={saving || !name.trim()}
-          className="mt-4 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+          className="mt-4 inline-flex min-h-6 min-w-6 items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
         >
           <Plus className="h-4 w-4" />
           {saving ? 'Adding…' : 'Add learner'}
