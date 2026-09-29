@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { Plus, UserRound } from 'lucide-react'
 import { ConfirmDialog } from '../../components/confirm-dialog'
+import { Checkbox, Field, Input } from '../../components/ui'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import {
   createDependent,
@@ -125,44 +126,33 @@ export default function LearnersPage() {
       <form onSubmit={(e) => void onAdd(e)} className="rounded-2xl border border-border-default bg-surface-raised p-4 shadow-sm">
         <h2 className="text-sm font-semibold text-fg-default">Add learner</h2>
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          <div className="sm:col-span-2">
-            <label htmlFor="learner-name" className="text-xs font-medium text-fg-muted">
-              Display name
-            </label>
-            <input
+          <Field label="Display name" htmlFor="learner-name" required className="sm:col-span-2">
+            <Input
               id="learner-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="mt-1 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm text-fg-default outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
               placeholder="Alex"
               disabled={saving}
             />
-          </div>
-          <div>
-            <label htmlFor="learner-grade" className="text-xs font-medium text-fg-muted">
-              Grade level (optional)
-            </label>
-            <input
+          </Field>
+          <Field label="Grade level (optional)" htmlFor="learner-grade">
+            <Input
               id="learner-grade"
               value={grade}
               onChange={(e) => setGrade(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm text-fg-default outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20"
               placeholder="K, 1–12, …"
               disabled={saving}
             />
-          </div>
+          </Field>
           <div className="flex items-end pb-2">
-            <label className="flex items-center gap-2 text-sm text-fg-default">
-              <input
-                type="checkbox"
-                checked={under13}
-                onChange={(e) => setUnder13(e.target.checked)}
-                disabled={saving}
-                className="rounded border-border-default"
-              />
-              This learner is under 13 (COPPA)
-            </label>
+            <Checkbox
+              id="learner-under-13"
+              checked={under13}
+              onChange={(e) => setUnder13(e.target.checked)}
+              disabled={saving}
+              label="This learner is under 13 (COPPA)"
+            />
           </div>
         </div>
         <button
