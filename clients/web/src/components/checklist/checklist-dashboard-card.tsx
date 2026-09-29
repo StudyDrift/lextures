@@ -18,7 +18,9 @@ export function ChecklistDashboardCard({
   loading,
 }: ChecklistDashboardCardProps) {
   const href = `/courses/${encodeURIComponent(courseCode)}/checklist`
-  const outstanding = summary?.outstandingEssential ?? 0
+  // Match the checklist page: "complete" only when nothing still needs attention
+  // (essentials + recommended), not when essentials alone are cleared (#641).
+  const outstandingTotal = summary?.outstandingTotal ?? 0
   const outstandingItems = topItems.filter((i) => isOutstandingStatus(i.status)).slice(0, 3)
 
   return (
@@ -35,7 +37,7 @@ export function ChecklistDashboardCard({
           <div className="h-4 w-2/3 motion-safe:animate-pulse rounded bg-slate-200 dark:bg-neutral-700" />
           <div className="h-3 w-full motion-safe:animate-pulse rounded bg-surface-sunken" />
         </div>
-      ) : outstanding <= 0 ? (
+      ) : outstandingTotal <= 0 ? (
         <p className="mt-2 text-sm text-fg-muted">
           {courseChecklistI18n.dashboardComplete}
         </p>
@@ -43,6 +45,9 @@ export function ChecklistDashboardCard({
         <>
           <p className="mt-2 text-sm text-fg-muted">
             {courseChecklistI18n.dashboardProgress(summary?.done ?? 0, summary?.total ?? 0)}
+            {outstandingTotal > 0 ? (
+              <span> · {courseChecklistI18n.needAttention(outstandingTotal)}</span>
+            ) : null}
           </p>
           {outstandingItems.length > 0 ? (
             <ul className="mt-3 space-y-1.5 text-sm text-fg-default">
