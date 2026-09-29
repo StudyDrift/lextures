@@ -530,6 +530,18 @@ export const PLATFORM_FEATURE_MATRIX: readonly PlatformFeatureMatrixEntry[] = [
     gatedSurface: null,
   },
   {
+    key: 'ffHomeschoolManagedLearners',
+    label: 'Homeschool managed learners',
+    category: 'learner',
+    ownershipSource: 'database',
+    sourceKey: null,
+    runtimeKey: 'ffHomeschoolManagedLearners',
+    settingsOnlyRationale: null,
+    secretSensitive: false,
+    uiSample: false,
+    gatedSurface: null,
+  },
+  {
     key: 'ffContentToolMarketplace',
     label: 'Content tool marketplace',
     category: 'integration',

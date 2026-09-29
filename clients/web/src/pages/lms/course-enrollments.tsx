@@ -167,7 +167,7 @@ export default function CourseEnrollments() {
 
   const [modalOpen, setModalOpen] = useState(false)
   const [emailListText, setEmailListText] = useState('')
-  const [enrollModalTab, setEnrollModalTab] = useState<'email' | 'managed'>('managed')
+  const [enrollModalTab, setEnrollModalTab] = useState<'email' | 'managed'>('email')
   const [managedDependents, setManagedDependents] = useState<ManagedDependent[]>([])
   const [managedDepsLoading, setManagedDepsLoading] = useState(false)
   const [selectedLearnerIds, setSelectedLearnerIds] = useState<string[]>([])

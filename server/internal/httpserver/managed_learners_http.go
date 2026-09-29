@@ -38,8 +38,13 @@ func (d Deps) managedLearnerGuardMiddleware() func(http.Handler) http.Handler {
 	exitPath := "/api/v1/me/dependents/sessions/current"
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Nil-safe for unit tests without JWTSigner/Platform; also no-op when feature off.
+			if d.JWTSigner == nil || !d.effectiveConfig().FFHomeschoolManagedLearners {
+				next.ServeHTTP(w, r)
+				return
+			}
 			token, ok := auth.BearerToken(r.Header)
-			if !ok || d.JWTSigner == nil || auth.JWTType(token) != "managed_learner" {
+			if !ok || auth.JWTType(token) != "managed_learner" {
 				next.ServeHTTP(w, r)
 				return
 			}

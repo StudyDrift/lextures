@@ -21,7 +21,7 @@ func TestManagedLearners_DisabledReturns404(t *testing.T) {
 
 func TestManagedLearnerGuardMiddleware(t *testing.T) {
 	signer := auth.NewJWTSigner("01234567890123456789012345678901")
-	d := Deps{JWTSigner: signer}
+	d := Deps{JWTSigner: signer, Config: config.Config{FFHomeschoolManagedLearners: true}}
 	mw := d.managedLearnerGuardMiddleware()
 	next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
