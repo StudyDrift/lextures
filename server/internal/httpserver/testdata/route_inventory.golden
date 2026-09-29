@@ -1317,6 +1317,12 @@ GET	/api/v1/me/credentials	session
 GET	/api/v1/me/degree-progress	anonymous
 GET	/api/v1/me/demographics	anonymous
 PATCH	/api/v1/me/demographics	anonymous
+GET	/api/v1/me/dependents	anonymous
+POST	/api/v1/me/dependents	anonymous
+DELETE	/api/v1/me/dependents/sessions/current	anonymous
+DELETE	/api/v1/me/dependents/{id}	anonymous
+PATCH	/api/v1/me/dependents/{id}	anonymous
+POST	/api/v1/me/dependents/{id}/sessions	anonymous
 GET	/api/v1/me/device-tokens	session
 POST	/api/v1/me/device-tokens	session
 DELETE	/api/v1/me/device-tokens/{id}	session

@@ -29,7 +29,6 @@ const (
 	// UnusablePasswordHash prevents credential login (same pattern as system users).
 	UnusablePasswordHash = "!"
 	relationshipDefault  = "parent"
-	managedLearnerTTL    = 8 * time.Hour
 )
 
 var (
@@ -319,7 +318,6 @@ func Patch(ctx context.Context, pool *pgxpool.Pool, p PatchParams) (*Dependent, 
 		}
 		sets = append(sets, fmt.Sprintf("grade_level = $%d", argN))
 		args = append(args, gl)
-		argN++
 	}
 	if len(sets) == 0 {
 		return getDependent(ctx, pool, orgID, p.ActorID, p.DependentID)
@@ -501,6 +499,3 @@ func EndSession(ctx context.Context, pool *pgxpool.Pool, p EndSessionParams) err
 	telemetry.RecordBusinessEvent("managed_learner_session_end")
 	return nil
 }
-
-// TTL exported for tests / JWT signer alignment.
-func SessionTTL() time.Duration { return managedLearnerTTL }

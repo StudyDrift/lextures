@@ -42,9 +42,3 @@ func TestManagedEmailDomainMatchesHelper(t *testing.T) {
 	}
 	_ = id
 }
-
-func TestSessionTTL(t *testing.T) {
-	if SessionTTL().Hours() != 8 {
-		t.Fatalf("ttl hours %v", SessionTTL().Hours())
-	}
-}
