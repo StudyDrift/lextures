@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from 'react'
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import { Check, ChevronDown } from 'lucide-react'
 import {
   formatGradeLevelsSummary,
@@ -15,6 +15,8 @@ type GradeLevelMultiSelectProps = {
   'aria-label'?: string
 }
 
+type MenuPlacement = 'below' | 'above'
+
 export function GradeLevelMultiSelect({
   id,
   value,
@@ -27,24 +29,47 @@ export function GradeLevelMultiSelect({
   const fieldId = id ?? autoId
   const listboxId = `${fieldId}-listbox`
   const rootRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
   const [open, setOpen] = useState(false)
+  const [placement, setPlacement] = useState<MenuPlacement>('below')
   const selected = new Set(value)
+
+  useLayoutEffect(() => {
+    if (!open || !triggerRef.current) return
+    const rect = triggerRef.current.getBoundingClientRect()
+    const menuMaxHeight = 288 // max-h-72
+    const gap = 6
+    const spaceBelow = window.innerHeight - rect.bottom - gap
+    const spaceAbove = rect.top - gap
+    // Prefer below; flip above when the menu would cover actions under the field
+    // (e.g. Continue on course create) and there is more room upward.
+    if (spaceBelow < Math.min(menuMaxHeight, 200) && spaceAbove > spaceBelow) {
+      setPlacement('above')
+    } else {
+      setPlacement('below')
+    }
+  }, [open])
 
   useEffect(() => {
     if (!open) return
-    function onDocPointerDown(e: MouseEvent) {
+    function onDocPointerDown(e: PointerEvent) {
       if (!rootRef.current?.contains(e.target as Node)) {
         setOpen(false)
       }
     }
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') setOpen(false)
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        setOpen(false)
+        triggerRef.current?.focus()
+      }
     }
-    document.addEventListener('mousedown', onDocPointerDown)
-    document.addEventListener('keydown', onKeyDown)
+    // Capture so Escape/outside-close still win if a child stops propagation.
+    document.addEventListener('pointerdown', onDocPointerDown, true)
+    document.addEventListener('keydown', onKeyDown, true)
     return () => {
-      document.removeEventListener('mousedown', onDocPointerDown)
-      document.removeEventListener('keydown', onKeyDown)
+      document.removeEventListener('pointerdown', onDocPointerDown, true)
+      document.removeEventListener('keydown', onKeyDown, true)
     }
   }, [open])
 
@@ -60,10 +85,13 @@ export function GradeLevelMultiSelect({
   }
 
   const summary = formatGradeLevelsSummary(value)
+  const menuPositionClass =
+    placement === 'above' ? 'bottom-full mb-1.5' : 'top-full mt-1.5'
 
   return (
     <div ref={rootRef} className={`relative ${className}`}>
       <button
+        ref={triggerRef}
         type="button"
         id={fieldId}
         disabled={disabled}
@@ -95,7 +123,7 @@ export function GradeLevelMultiSelect({
           role="listbox"
           aria-multiselectable="true"
           aria-label={ariaLabel}
-          className="absolute z-30 mt-1.5 max-h-72 w-full overflow-auto rounded-xl border border-border-default bg-surface-raised py-1 shadow-lg shadow-slate-900/10 dark:border-border-default dark:bg-surface-base dark:shadow-black/40"
+          className={`absolute z-30 max-h-72 w-full overflow-auto rounded-xl border border-border-default bg-surface-raised py-1 shadow-lg shadow-slate-900/10 dark:border-border-default dark:bg-surface-base dark:shadow-black/40 ${menuPositionClass}`}
         >
           <div className="sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-border-subtle bg-surface-raised px-3 py-2 dark:border-border-subtle dark:bg-surface-base">
             <span className="text-xs font-medium text-fg-muted">
@@ -103,15 +131,27 @@ export function GradeLevelMultiSelect({
                 ? 'None selected'
                 : `${value.length} selected`}
             </span>
-            {value.length > 0 && (
+            <div className="flex items-center gap-2">
+              {value.length > 0 && (
+                <button
+                  type="button"
+                  onClick={clearAll}
+                  className="text-xs font-medium text-accent-fg hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+                >
+                  Clear
+                </button>
+              )}
               <button
                 type="button"
-                onClick={clearAll}
-                className="text-xs font-medium text-accent-fg hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+                onClick={() => {
+                  setOpen(false)
+                  triggerRef.current?.focus()
+                }}
+                className="text-xs font-semibold text-fg-default hover:text-indigo-600 dark:hover:text-indigo-300"
               >
-                Clear
+                Done
               </button>
-            )}
+            </div>
           </div>
           <ul className="py-1">
             {GRADE_LEVEL_OPTIONS.map((opt) => {
