@@ -105,6 +105,7 @@ func (d Deps) handleGetCourse() http.HandlerFunc {
 			FeedbackMediaEnabled:        d.effectiveConfig().FeedbackMediaEnabled,
 			ResubmissionWorkflowEnabled: d.effectiveConfig().ResubmissionWorkflowEnabled,
 		}
+		go d.touchCourseAccessAsync(cid, userID)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(resp)
 	}

@@ -11,6 +11,7 @@ import {
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { studentProgressFeatureEnabled } from '../../lib/student-progress'
 import { BarChart3, ClipboardList, Mail, Pencil, Send, Shuffle, Trash2, UsersRound, X } from 'lucide-react'
+import { enrollmentsPageSubtitle } from './enrollments-page-copy'
 import { EnrollmentRoleBadge } from './enrollment-role-badge'
 import { EnrollmentGroupsPanel } from './enrollment-groups-panel'
 import { EnrollmentsActionsMenu } from './enrollments-actions-menu'
@@ -157,6 +158,7 @@ export default function CourseEnrollments() {
   const [courseViewerEnrollmentRoles, setCourseViewerEnrollmentRoles] = useState<string[] | null>(
     null,
   )
+  const [courseTitle, setCourseTitle] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const [modalOpen, setModalOpen] = useState(false)
@@ -208,22 +210,27 @@ export default function CourseEnrollments() {
   const [messageStatus, setMessageStatus] = useState<'idle' | 'loading' | 'error'>('idle')
   const [messageError, setMessageError] = useState<string | null>(null)
 
+  const effectiveViewerRoles = useMemo(() => {
+    if (viewerRoles.length > 0) return viewerRoles
+    return courseViewerEnrollmentRoles ?? []
+  }, [viewerRoles, courseViewerEnrollmentRoles])
   const viewerIsTeacher = useMemo(
-    () => viewerRoles.some((r) => normEnrollmentRole(r) === 'teacher'),
-    [viewerRoles],
+    () => effectiveViewerRoles.some((r) => normEnrollmentRole(r) === 'teacher'),
+    [effectiveViewerRoles],
   )
   const viewerIsStaff = useMemo(
-    () => viewerIsCourseStaffEnrollment(viewerRoles),
-    [viewerRoles],
+    () => viewerIsCourseStaffEnrollment(effectiveViewerRoles),
+    [effectiveViewerRoles],
   )
   const viewerHasStudent = useMemo(
-    () => viewerRoles.some((r) => isStudentEquivalentEnrollmentRole(r)),
-    [viewerRoles],
+    () => effectiveViewerRoles.some((r) => isStudentEquivalentEnrollmentRole(r)),
+    [effectiveViewerRoles],
   )
 
   useEffect(() => {
     if (!courseCode) {
       setCourseViewerEnrollmentRoles(null)
+      setCourseTitle(null)
       return
     }
     let cancelled = false
@@ -231,11 +238,15 @@ export default function CourseEnrollments() {
       .then((c) => {
         if (!cancelled) {
           setCourseViewerEnrollmentRoles(c.viewerEnrollmentRoles ?? [])
+          setCourseTitle(typeof c.title === 'string' ? c.title : null)
           setSectionsEnabled(c.sectionsEnabled === true)
         }
       })
       .catch(() => {
-        if (!cancelled) setCourseViewerEnrollmentRoles([])
+        if (!cancelled) {
+          setCourseViewerEnrollmentRoles([])
+          setCourseTitle(null)
+        }
       })
     return () => {
       cancelled = true
@@ -976,9 +987,7 @@ export default function CourseEnrollments() {
             />
           </div>
           <p className="mt-2 max-w-2xl text-xs text-fg-muted">
-            {courseCode
-              ? `People and roles for course ${courseCode}.`
-              : 'Course enrollments'}
+            {enrollmentsPageSubtitle(courseTitle, courseCode)}
           </p>
           {enrollmentGroupsEnabled ? (
             <div
