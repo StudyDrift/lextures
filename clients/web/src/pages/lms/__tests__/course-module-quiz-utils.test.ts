@@ -39,6 +39,8 @@ describe('course-module-quiz-utils', () => {
     expect(formatLockdownModeLabel('standard')).toBe('Standard')
     expect(formatLockdownModeLabel('one_at_a_time')).toBe('One at a time')
     expect(formatLockdownModeLabel('kiosk')).toBe('Kiosk')
+    expect(formatLockdownModeLabel('kiosk', true)).toBe('Full screen')
+    expect(formatLockdownModeLabel('standard', true)).toBe('Usual')
   })
 
   it('makeQuestion produces a valid multiple-choice draft', () => {

@@ -69,6 +69,17 @@ describe('QuizPageSettingsPanel — control-level search', () => {
     expect(presentation).toHaveAttribute('open')
   })
 
+  it('uses parent-friendly lockdown labels for homeschool and K–12', async () => {
+    const user = userEvent.setup()
+    renderPanel({ familyAudience: true, lockdownMode: 'kiosk' })
+    await user.click(screen.getByText('Presentation'))
+    expect(screen.getByLabelText('Keep the quiz locked while taking')).toBeInTheDocument()
+    expect(screen.getByLabelText('Flag after leaving the quiz')).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'Full screen' })).toBeInTheDocument()
+    expect(screen.getByText('Advanced')).toBeInTheDocument()
+    expect(screen.getByText(/Course lockdown feature/)).toBeInTheDocument()
+  })
+
   it('AC-3: nonsense query shows empty state', async () => {
     const user = userEvent.setup()
     renderPanel()

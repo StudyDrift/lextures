@@ -55,7 +55,12 @@ export function formatGradePolicyShort(p: string): string {
   return p
 }
 
-export function formatLockdownModeLabel(mode: LockdownMode): string {
+export function formatLockdownModeLabel(mode: LockdownMode, family = false): string {
+  if (family) {
+    if (mode === 'one_at_a_time') return 'One question at a time'
+    if (mode === 'kiosk') return 'Full screen'
+    return 'Usual'
+  }
   if (mode === 'one_at_a_time') return 'One at a time'
   if (mode === 'kiosk') return 'Kiosk'
   return 'Standard'

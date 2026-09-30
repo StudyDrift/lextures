@@ -26,6 +26,8 @@ import {
 import { usePinnedSettings } from '../settings-panel/use-pinned-settings'
 import { ModuleItemOutcomesMappingAccordion } from '../outcomes/module-item-outcomes-mapping-accordion'
 import { AssignToEditor } from '../assignment/assign-to-editor'
+import { AdvancedNameDisclosure } from './advanced-name'
+import { quizAuthoringCopy } from './quiz-authoring-copy'
 import {
   RelativeScheduleBanner,
   ScheduleDatetimeField,
@@ -64,6 +66,8 @@ export type QuizPageSettingsPanelProps = {
   quizOutcomesQuestions?: { id: string; prompt: string }[]
   /** Course-level feature; when false, lockdown controls are hidden. */
   lockdownDeliveryEnabled?: boolean
+  /** Plain-language labels for Homeschool / K–12. */
+  familyAudience?: boolean
   lockdownMode?: LockdownMode
   onLockdownModeChange?: (mode: LockdownMode) => void
   focusLossThreshold?: number | null
@@ -237,6 +241,7 @@ export function QuizPageSettingsPanel({
   quizItemId,
   quizOutcomesQuestions,
   lockdownDeliveryEnabled,
+  familyAudience = false,
   lockdownMode = 'standard',
   onLockdownModeChange,
   focusLossThreshold = null,
@@ -246,6 +251,7 @@ export function QuizPageSettingsPanel({
   replaceWithFinal = false,
   onReplaceWithFinalChange,
 }: QuizPageSettingsPanelProps) {
+  const authoringCopy = quizAuthoringCopy(familyAudience)
   const [outcomesLinkCount, setOutcomesLinkCount] = useState(0)
   const [hasCourseOutcomes, setHasCourseOutcomes] = useState(false)
   const [settingsQuery, setSettingsQuery] = useState('')
@@ -772,12 +778,12 @@ export function QuizPageSettingsPanel({
                     <div className="space-y-3 border-t border-slate-100/90 py-3/80">
                       <SettingRow settingId="quiz.presentation.lockdown-mode">
                         <Field
-                          label="Lockdown delivery"
+                          label={authoringCopy.lockdownSettingsLabel}
                           htmlFor="quiz-lockdown-mode"
                           hint={
                             showAdaptiveSection
-                              ? 'Adaptive quizzes cannot use server-enforced lockdown. Turn off adaptive generation to enable these modes.'
-                              : 'Kiosk mode requests full-screen, logs tab or window changes, and disables hints.'
+                              ? authoringCopy.lockdownAdaptiveHint
+                              : authoringCopy.lockdownSettingsHint
                           }
                         >
                           <select
@@ -787,18 +793,23 @@ export function QuizPageSettingsPanel({
                             disabled={disabled || showAdaptiveSection}
                             className={inputClass}
                           >
-                            <option value="standard">Standard</option>
-                            <option value="one_at_a_time">One question at a time (server enforced)</option>
-                            <option value="kiosk">Kiosk (fullscreen + focus logging)</option>
+                            <option value="standard">{authoringCopy.lockdownOptionStandard}</option>
+                            <option value="one_at_a_time">{authoringCopy.lockdownOptionOneAtATime}</option>
+                            <option value="kiosk">{authoringCopy.lockdownOptionKiosk}</option>
                           </select>
                         </Field>
+                        {authoringCopy.advancedLockdown ? (
+                          <div className="mt-2">
+                            <AdvancedNameDisclosure detail={authoringCopy.advancedLockdown} />
+                          </div>
+                        ) : null}
                       </SettingRow>
                       {lockdownMode === 'kiosk' ? (
                         <SettingRow settingId="quiz.presentation.focus-loss-threshold">
                           <Field
-                            label="Focus-loss flag threshold"
+                            label={authoringCopy.focusLossLabel}
                             htmlFor="quiz-focus-threshold"
-                            hint="Leave empty so attempts are never auto-flagged. When set, exceeding this many logged events marks the attempt for review on submit."
+                            hint={authoringCopy.focusLossHint}
                           >
                             <input
                               id="quiz-focus-threshold"

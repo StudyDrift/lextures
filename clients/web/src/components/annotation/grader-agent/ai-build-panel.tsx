@@ -1,18 +1,22 @@
 import { useId, useState, type KeyboardEvent } from 'react'
 import { Loader2, Sparkles, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { AdvancedNameDisclosure, AdvancedNameTip } from '../../quiz/advanced-name'
 
 type AiBuildPanelProps = {
   building: boolean
   onBuild: (instruction: string) => Promise<boolean>
+  plainLanguage?: boolean
 }
 
 /**
  * Floating canvas control: describe the grading logic in plain English and the
  * registered AI builds/modifies the node graph in place for review.
  */
-export function AiBuildPanel({ building, onBuild }: AiBuildPanelProps) {
+export function AiBuildPanel({ building, onBuild, plainLanguage = false }: AiBuildPanelProps) {
   const { t } = useTranslation('common')
+  const openLabel = t(plainLanguage ? 'gradingAgent.aiBuilder.open.plain' : 'gradingAgent.aiBuilder.open')
+  const titleLabel = t(plainLanguage ? 'gradingAgent.aiBuilder.title.plain' : 'gradingAgent.aiBuilder.title')
   const [open, setOpen] = useState(false)
   const [instruction, setInstruction] = useState('')
   const textareaId = useId()
@@ -34,15 +38,20 @@ export function AiBuildPanel({ building, onBuild }: AiBuildPanelProps) {
   }
 
   if (!open) {
-    return (
+    const openButton = (
       <button
         type="button"
         onClick={() => setOpen(true)}
         className="absolute bottom-4 left-4 z-10 inline-flex items-center gap-2 rounded-full bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-lg hover:bg-accent"
       >
         <Sparkles className="h-4 w-4" aria-hidden />
-        {t('gradingAgent.aiBuilder.open')}
+        {openLabel}
       </button>
+    )
+    return plainLanguage ? (
+      <AdvancedNameTip detail={t('gradingAgent.aiBuilder.plainDetail')}>{openButton}</AdvancedNameTip>
+    ) : (
+      openButton
     )
   }
 
@@ -51,7 +60,7 @@ export function AiBuildPanel({ building, onBuild }: AiBuildPanelProps) {
       <div className="mb-2 flex items-center justify-between">
         <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-fg-default">
           <Sparkles className="h-4 w-4 text-indigo-500" aria-hidden />
-          {t('gradingAgent.aiBuilder.title')}
+          {titleLabel}
         </span>
         <button
           type="button"
@@ -63,8 +72,9 @@ export function AiBuildPanel({ building, onBuild }: AiBuildPanelProps) {
           <X className="h-4 w-4" aria-hidden />
         </button>
       </div>
+      {plainLanguage ? <AdvancedNameDisclosure detail={t('gradingAgent.aiBuilder.plainDetail')} /> : null}
       <label htmlFor={textareaId} className="sr-only">
-        {t('gradingAgent.aiBuilder.title')}
+        {titleLabel}
       </label>
       <textarea
         id={textareaId}
