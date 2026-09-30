@@ -12,6 +12,7 @@ import { Link, Navigate, useParams } from 'react-router-dom'
 import { studentProgressFeatureEnabled } from '../../lib/student-progress'
 import { BarChart3, ClipboardList, Mail, Pencil, Send, Shuffle, Trash2, UsersRound, X } from 'lucide-react'
 import { enrollmentsPageSubtitle } from './enrollments-page-copy'
+import { isEnrollAddSubmitDisabled } from './enroll-add-submit-disabled'
 import { EnrollmentRoleBadge } from './enrollment-role-badge'
 import { EnrollmentGroupsPanel } from './enrollment-groups-panel'
 import { EnrollmentsActionsMenu } from './enrollments-actions-menu'
@@ -976,14 +977,18 @@ export default function CourseEnrollments() {
     }
   }
 
-  const usingBuiltinAdd = addCourseRole.trim().length > 0
-  const submitDisabled =
-    addStatus === 'loading' ||
-    !emailListText.trim() ||
-    (canUpdateEnrollments && !addCourseRole.trim()) ||
-    (isCourseCreator &&
-      !usingBuiltinAdd &&
-      (rolesLoading || !selectedAppRoleId || !!rolesError))
+  const submitDisabled = isEnrollAddSubmitDisabled({
+    tab: enrollModalTab,
+    addStatus,
+    emailListText,
+    selectedLearnerIds,
+    canUpdateEnrollments,
+    addCourseRole,
+    isCourseCreator,
+    rolesLoading,
+    selectedAppRoleId,
+    rolesError,
+  })
 
   if (!courseCode) {
     return <Navigate to="/courses" replace />
