@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom'
+import { Link, Navigate, useOutletContext, useParams, useSearchParams } from 'react-router-dom'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { authorizedFetch } from '../../lib/api'
 import { studentProgressFeatureEnabled } from '../../lib/student-progress'
@@ -20,9 +20,13 @@ import {
   type AssignmentGroup,
   type CourseGradebookGridColumn,
   type CourseGradebookGridStudent,
+  type CoursePublic,
   type CourseSection,
   type RubricDefinition,
 } from '../../lib/courses-api'
+import { progressSurfaceCopy } from '../../lib/family-progress-copy'
+import { useFamilyProgressAudience } from '../../hooks/use-family-audience'
+import { LearnerSwitcher } from '../../components/lms/learner-switcher'
 import {
   GradebookGrid,
   type GradebookColumn,
@@ -309,7 +313,8 @@ function RubricGradeModal({
 
 export default function CourseGradebook() {
   const { courseCode } = useParams<{ courseCode: string }>()
-  const [searchParams] = useSearchParams()
+  const outlet = useOutletContext<{ course?: CoursePublic | null } | null>()
+  const [searchParams, setSearchParams] = useSearchParams()
   const highlightStudentId = searchParams.get('student')?.trim() || null
   const highlightColumnId = searchParams.get('item')?.trim() || null
   const { allows, loading } = usePermissions()
@@ -401,6 +406,10 @@ export default function CourseGradebook() {
       cancelled = true
     }
   }, [courseCode, sectionsEnabled])
+
+  const rosterUserIds = useMemo(() => students.map((s) => s.userId), [students])
+  const familyProgress = useFamilyProgressAudience(outlet?.course ?? null, rosterUserIds)
+  const progressCopy = progressSurfaceCopy(familyProgress)
 
   const gridStudents: GradebookStudent[] = useMemo(
     () =>
@@ -755,7 +764,7 @@ export default function CourseGradebook() {
     return (
       <LmsPage
         title="Gradebook"
-        description="Spreadsheet-style grades for enrolled students and each course assignment or quiz. Use the arrows, Tab, Enter, and double-click to edit cells; open the cell menu for rubric scoring, submission grading, history, and excused status. Save writes your changes to the server."
+        description={progressCopy.gradebookDescription}
       >
         <GradebookLoadingSkeleton />
       </LmsPage>
@@ -769,7 +778,7 @@ export default function CourseGradebook() {
   return (
     <LmsPage
       title="Gradebook"
-      description="Spreadsheet-style grades for enrolled students and each course assignment or quiz. Use the arrows, Tab, Enter, and double-click to edit cells; open the cell menu for rubric scoring, submission grading, history, and excused status. Save writes your changes to the server."
+      description={progressCopy.gradebookDescription}
       actions={
         <div className="flex flex-wrap items-center gap-2">
           {loadState === 'ok' && gradebookCsvEnabled ? (
@@ -931,11 +940,26 @@ export default function CourseGradebook() {
               />
             </div>
           ) : null}
+          {familyProgress && gridStudents.length > 0 ? (
+            <LearnerSwitcher
+              label={progressCopy.learnerSwitcherLabel}
+              allLabel={progressCopy.allLearners}
+              value={highlightStudentId ?? ''}
+              learners={gridStudents.map((student) => ({ id: student.id, name: student.name }))}
+              onChange={(id) => {
+                const next = new URLSearchParams(searchParams)
+                if (id) next.set('student', id)
+                else next.delete('student')
+                setSearchParams(next, { replace: true })
+              }}
+            />
+          ) : null}
           <GradebookGrid
             key={`${courseCode}:${gridNonce}:${gridStudents.map((s) => s.id).join(',')}:${gridColumns.map((c) => c.id).join(',')}:${assignmentGroups.map((g) => g.id).join(',')}`}
             courseCode={courseCode}
             columns={gridColumns}
             students={gridStudents}
+            familyLabels={familyProgress}
             initialGrades={initialGrades}
             assignmentGroups={assignmentGroups}
             readOnly={!canEditGrades}

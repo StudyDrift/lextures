@@ -17,6 +17,13 @@ func TestManagedLearners_DisabledReturns404(t *testing.T) {
 	if rec.Code != http.StatusNotFound {
 		t.Fatalf("status %d", rec.Code)
 	}
+
+	coursesReq := httptest.NewRequest(http.MethodGet, "/api/v1/me/dependents/courses", nil)
+	coursesRec := httptest.NewRecorder()
+	d.handleListDependentCourses()(coursesRec, coursesReq)
+	if coursesRec.Code != http.StatusNotFound {
+		t.Fatalf("courses status %d", coursesRec.Code)
+	}
 }
 
 func TestManagedLearnerGuardMiddleware(t *testing.T) {

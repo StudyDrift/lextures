@@ -1319,6 +1319,7 @@ GET	/api/v1/me/demographics	anonymous
 PATCH	/api/v1/me/demographics	anonymous
 GET	/api/v1/me/dependents	anonymous
 POST	/api/v1/me/dependents	anonymous
+GET	/api/v1/me/dependents/courses	anonymous
 DELETE	/api/v1/me/dependents/sessions/current	anonymous
 DELETE	/api/v1/me/dependents/{id}	anonymous
 PATCH	/api/v1/me/dependents/{id}	anonymous

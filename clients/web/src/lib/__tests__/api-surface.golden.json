@@ -1724,10 +1724,12 @@
     "updateAdminLRSEndpoint"
   ],
   "managed-learners-api.ts": [
+    "DependentCourseEnrollment",
     "ManagedDependent",
     "createDependent",
     "deleteDependent",
     "exitLearnAs",
+    "listDependentCourses",
     "listDependents",
     "patchDependent",
     "startLearnAs"

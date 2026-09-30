@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { formatDateTime } from '../../lib/format'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import { RefreshCw, Target } from 'lucide-react'
 import { LmsPage } from './lms-page'
 import {
@@ -12,8 +12,27 @@ import {
   type OutcomesReportOutcome,
 } from '../../lib/outcomes-report-api'
 import { usePlatformFeatures } from '../../context/platform-features-context'
+import { LearnerSwitcher } from '../../components/lms/learner-switcher'
+import { useFamilyProgressAudience } from '../../hooks/use-family-audience'
+import {
+  fetchCourseEnrollmentsList,
+  type CourseEnrollmentRosterRow,
+  type CoursePublic,
+} from '../../lib/courses-api'
+import { progressSurfaceCopy } from '../../lib/family-progress-copy'
 
-function OutcomeAchievementBar({ outcome }: { outcome: OutcomesReportOutcome }) {
+function isStudentEnrollment(row: CourseEnrollmentRosterRow): boolean {
+  const role = row.role.trim().toLowerCase()
+  return role === 'student' || role === 'learner'
+}
+
+function OutcomeAchievementBar({
+  outcome,
+  averageLabel,
+}: {
+  outcome: OutcomesReportOutcome
+  averageLabel: string
+}) {
   if (outcome.noAlignments) {
     return (
       <p className="text-sm text-fg-muted">
@@ -47,7 +66,7 @@ function OutcomeAchievementBar({ outcome }: { outcome: OutcomesReportOutcome }) 
       </div>
       <p className="text-xs text-fg-muted tabular-nums">
         {metPct}% met · {notMetPct}% not met
-        {outcome.meanScore != null ? ` · class avg ${outcome.meanScore.toFixed(1)}%` : ''}
+        {outcome.meanScore != null ? ` · ${averageLabel} ${outcome.meanScore.toFixed(1)}%` : ''}
       </p>
     </div>
   )
@@ -57,10 +76,12 @@ function OutcomeNoteField({
   courseCode,
   outcome,
   onSaved,
+  notePlaceholder,
 }: {
   courseCode: string
   outcome: OutcomesReportOutcome
   onSaved: (text: string) => void
+  notePlaceholder: string
 }) {
   const [open, setOpen] = useState(false)
   const [text, setText] = useState(outcome.improvementNote)
@@ -105,7 +126,7 @@ function OutcomeNoteField({
             onBlur={() => void save()}
             disabled={saving}
             className="w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm text-fg-default shadow-sm dark:border-border-default dark:bg-surface-base dark:text-fg-default"
-            placeholder="Qualitative notes for accreditation portfolio…"
+            placeholder={notePlaceholder}
           />
         </div>
       )}
@@ -115,7 +136,10 @@ function OutcomeNoteField({
 
 export default function CourseOutcomesReport() {
   const { courseCode } = useParams<{ courseCode: string }>()
+  const navigate = useNavigate()
+  const outlet = useOutletContext<{ course?: CoursePublic | null } | null>()
   const { outcomesReportEnabled, loading: featuresLoading } = usePlatformFeatures()
+  const [roster, setRoster] = useState<CourseEnrollmentRosterRow[]>([])
   const [report, setReport] = useState<OutcomesReport | null>(null)
   const [threshold, setThreshold] = useState(70)
   const [loading, setLoading] = useState(true)
@@ -142,6 +166,25 @@ export default function CourseOutcomesReport() {
     if (featuresLoading || !outcomesReportEnabled) return
     void load()
   }, [load, featuresLoading, outcomesReportEnabled])
+
+  useEffect(() => {
+    if (!courseCode) return
+    let cancelled = false
+    void fetchCourseEnrollmentsList(courseCode)
+      .then((rows) => {
+        if (!cancelled) setRoster(rows.filter(isStudentEnrollment))
+      })
+      .catch(() => {
+        if (!cancelled) setRoster([])
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [courseCode])
+
+  const rosterUserIds = useMemo(() => roster.map((row) => row.userId), [roster])
+  const familyProgress = useFamilyProgressAudience(outlet?.course ?? null, rosterUserIds)
+  const copy = progressSurfaceCopy(familyProgress)
 
   async function handleRefresh() {
     if (!courseCode) return
@@ -179,7 +222,7 @@ export default function CourseOutcomesReport() {
 
   if (featuresLoading) {
     return (
-      <LmsPage title="Outcomes report" description="Course learning outcomes achievement.">
+      <LmsPage title="Outcomes report" description={copy.outcomesDescription}>
         <p className="mt-8 text-sm text-fg-muted" aria-live="polite">
           Loading…
         </p>
@@ -189,7 +232,7 @@ export default function CourseOutcomesReport() {
 
   if (!outcomesReportEnabled) {
     return (
-      <LmsPage title="Outcomes report" description="Course learning outcomes achievement.">
+      <LmsPage title="Outcomes report" description={copy.outcomesDescription}>
         <p className="mt-8 text-sm text-fg-muted">
           Outcomes reporting is not enabled on this platform. Ask a global administrator to turn on
           &quot;Outcomes report&quot; in Settings → Global platform.
@@ -205,7 +248,7 @@ export default function CourseOutcomesReport() {
   return (
     <LmsPage
       title="Outcomes report"
-      description="Cohort achievement on course learning outcomes for accreditation and standards reporting."
+      description={copy.outcomesDescription}
       actions={
         <div className="flex flex-wrap items-center gap-3">
           <label className="flex items-center gap-2 text-sm text-fg-muted">
@@ -235,6 +278,23 @@ export default function CourseOutcomesReport() {
         </div>
       }
     >
+      {familyProgress && roster.length > 0 ? (
+        <LearnerSwitcher
+          label={copy.openLearnerProgress}
+          allLabel={copy.chooseLearner}
+          value=""
+          learners={roster.map((row) => ({
+            id: row.id,
+            name: row.displayName?.trim() || 'Learner',
+          }))}
+          onChange={(id) => {
+            if (!id || !courseCode) return
+            navigate(
+              `/courses/${encodeURIComponent(courseCode)}/students/${encodeURIComponent(id)}/progress`,
+            )
+          }}
+        />
+      ) : null}
       {loading && (
         <p className="mt-8 text-sm text-fg-muted" aria-live="polite">
           Loading outcomes report…
@@ -316,6 +376,7 @@ export default function CourseOutcomesReport() {
                         <OutcomeNoteField
                           courseCode={courseCode!}
                           outcome={o}
+                          notePlaceholder={copy.outcomesNotePlaceholder}
                           onSaved={(text) => updateOutcomeNote(o.outcomeId, text)}
                         />
                       )}
@@ -324,7 +385,7 @@ export default function CourseOutcomesReport() {
                       {o.nAssessed} / {o.nStudents}
                     </td>
                     <td className="px-4 py-4">
-                      <OutcomeAchievementBar outcome={o} />
+                      <OutcomeAchievementBar outcome={o} averageLabel={copy.outcomesAverageLabel} />
                     </td>
                   </tr>
                 ))}
@@ -333,7 +394,7 @@ export default function CourseOutcomesReport() {
           </div>
           <div
             role="img"
-            aria-label="Chart legend: green indicates students who met the mastery threshold; red indicates students who did not."
+            aria-label={copy.outcomesLegend}
             className="flex flex-wrap gap-4 text-xs text-fg-muted"
           >
             <span className="inline-flex items-center gap-1.5">
