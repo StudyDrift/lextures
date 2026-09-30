@@ -20,6 +20,7 @@ import {
   fetchCourseQuestions,
   defaultQuizAdvancedSettings,
   fetchCourse,
+  fetchOrgType,
   courseGradebookViewPermission,
   fetchCourseEnrollmentsList,
   fetchCourseGradingSettings,
@@ -44,6 +45,7 @@ import {
   type BankQuestionRow,
   type DraftContentPageSection,
   type LockdownMode,
+  type OrgType,
   type QuizAdvancedSettings,
   type QuizOutcomeLinkSuggestion,
   type QuizQuestion,
@@ -55,6 +57,7 @@ import { type ResolvedMarkdownTheme, resolveMarkdownTheme } from '../../lib/mark
 import { permCourseItemCreate, permCourseItemsCreate } from '../../lib/rbac-api'
 import { CourseItemPromptEditor } from '../../components/course-item-prompt-editor'
 import { expandQuizPromptWithRefs } from '../../lib/course-item-ref-tokens'
+import { AdvancedNameDisclosure, AdvancedNameTip } from '../../components/quiz/advanced-name'
 import { QuizPageSettingsPanel } from '../../components/quiz/quiz-page-settings-panel'
 import { QuizStudentPreviewModal } from '../../components/quiz/quiz-student-preview-modal'
 import { AuthoringSaveFootprint } from '../../components/authoring-save-footprint'
@@ -78,7 +81,10 @@ import {
   structureKindLabel,
   type QuestionType,
 } from './course-module-quiz-utils'
+import { getAccountType } from '../../lib/auth'
+import { isHomeschoolOrK12Audience } from '../../lib/family-audience'
 import { recordLastVisitedModuleItem } from '../../lib/last-visited-module-item'
+import { quizAuthoringCopy } from '../../components/quiz/quiz-authoring-copy'
 import { LmsPage } from './lms-page'
 import { QuizAnalyticsModal } from '../../components/quiz/quiz-analytics-modal'
 import { AssignmentAnnotationWorkbench } from '../../components/annotation/assignment-annotation-workbench'
@@ -162,6 +168,9 @@ function QuizEditorMoreMenu({
   showGradingAgent = false,
   onGradingAgent,
   reviewCount = 0,
+  plainLanguage = false,
+  generateLabel = 'Generate questions',
+  generateDetail = null,
 }: {
   disabled: boolean
   onPreview: () => void
@@ -171,8 +180,13 @@ function QuizEditorMoreMenu({
   showGradingAgent?: boolean
   onGradingAgent?: () => void
   reviewCount?: number
+  plainLanguage?: boolean
+  generateLabel?: string
+  generateDetail?: string | null
 }) {
   const { t } = useTranslation('common')
+  const graderLabel = plainLanguage ? t('gradingAgent.button.plain') : t('gradingAgent.button')
+  const graderDetail = plainLanguage ? t('gradingAgent.button.plainDetail') : null
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const menuId = useId()
@@ -227,41 +241,45 @@ function QuizEditorMoreMenu({
             Edit
           </button>
           {showGradingAgent && onGradingAgent ? (
+            <AdvancedNameTip detail={graderDetail}>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  onGradingAgent()
+                  setOpen(false)
+                }}
+                className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-fg-default transition-[background-color,color,border-color] hover:bg-surface-base dark:text-fg-default dark:hover:bg-surface-overlay"
+              >
+                <Sparkles className="h-4 w-4 shrink-0 text-fg-muted" aria-hidden />
+                <span className="flex flex-1 items-center justify-between gap-2">
+                  <span>{graderLabel}</span>
+                  {reviewCount > 0 ? (
+                    <span
+                      className="rounded-full bg-amber-500 px-2 py-0.5 text-xs font-semibold text-white"
+                      aria-live="polite"
+                    >
+                      {t('gradingAgent.review.inbox.countShort', { count: reviewCount })}
+                    </span>
+                  ) : null}
+                </span>
+              </button>
+            </AdvancedNameTip>
+          ) : null}
+          <AdvancedNameTip detail={generateDetail}>
             <button
               type="button"
               role="menuitem"
               onClick={() => {
-                onGradingAgent()
+                onGenerate()
                 setOpen(false)
               }}
               className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-fg-default transition-[background-color,color,border-color] hover:bg-surface-base dark:text-fg-default dark:hover:bg-surface-overlay"
             >
               <Sparkles className="h-4 w-4 shrink-0 text-fg-muted" aria-hidden />
-              <span className="flex flex-1 items-center justify-between gap-2">
-                <span>{t('gradingAgent.button')}</span>
-                {reviewCount > 0 ? (
-                  <span
-                    className="rounded-full bg-amber-500 px-2 py-0.5 text-xs font-semibold text-white"
-                    aria-live="polite"
-                  >
-                    {t('gradingAgent.review.inbox.countShort', { count: reviewCount })}
-                  </span>
-                ) : null}
-              </span>
+              {generateLabel}
             </button>
-          ) : null}
-          <button
-            type="button"
-            role="menuitem"
-            onClick={() => {
-              onGenerate()
-              setOpen(false)
-            }}
-            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-fg-default transition-[background-color,color,border-color] hover:bg-surface-base dark:text-fg-default dark:hover:bg-surface-overlay"
-          >
-            <Sparkles className="h-4 w-4 shrink-0 text-fg-muted" aria-hidden />
-            Generate questions
-          </button>
+          </AdvancedNameTip>
           <button
             type="button"
             role="menuitem"
@@ -387,7 +405,36 @@ export default function CourseModuleQuizPage() {
   const [searchParams] = useSearchParams()
   const { allows, loading: permLoading } = usePermissions()
   const outlet = useOutletContext<{ course?: CoursePublic | null } | null>()
-  const courseTimezone = outlet?.course?.courseTimezone ?? null
+  const outletCourse = outlet?.course ?? null
+  const courseTimezone = outletCourse?.courseTimezone ?? null
+  const [orgType, setOrgType] = useState<OrgType | null>(null)
+  useEffect(() => {
+    const orgId = outletCourse?.orgId?.trim()
+    const hasGradeLevels = (outletCourse?.gradeLevels ?? []).some((level) => level.trim() !== '')
+    if (!orgId || hasGradeLevels) {
+      setOrgType(null)
+      return
+    }
+    let cancelled = false
+    void fetchOrgType(orgId)
+      .then((next) => {
+        if (!cancelled) setOrgType(next)
+      })
+      .catch(() => {
+        if (!cancelled) setOrgType('higher-ed')
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [outletCourse?.orgId, outletCourse?.gradeLevels])
+  const familyAudience = isHomeschoolOrK12Audience({
+    accountType: getAccountType(),
+    orgKnown: outletCourse != null,
+    orgId: outletCourse?.orgId,
+    gradeLevels: outletCourse?.gradeLevels,
+    orgType,
+  })
+  const authoringCopy = quizAuthoringCopy(familyAudience)
   const canEdit = Boolean(courseCode && itemId && !permLoading && allows(permCourseItemCreate(courseCode)))
   const canEditQuizItems = Boolean(
     courseCode && itemId && !permLoading && allows(permCourseItemsCreate(courseCode)),
@@ -1307,15 +1354,17 @@ export default function CourseModuleQuizPage() {
           <div className="flex flex-wrap items-center gap-2">
             {canEdit ? <FeatureHelpTrigger topic="quiz-authoring" /> : null}
             {canEdit && aiConfigured ? (
-              <button
-                type="button"
-                onClick={() => setBuildAiOpen(true)}
-                disabled={saving}
-                className="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3.5 py-2.5 text-sm font-semibold text-accent-fg shadow-sm transition-[background-color,color,border-color] hover:border-indigo-300 hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-200 dark:hover:bg-indigo-950/70"
-              >
-                <Sparkles className="h-4 w-4" aria-hidden />
-                Build with AI
-              </button>
+              <AdvancedNameTip detail={authoringCopy.buildWithAiDetail}>
+                <button
+                  type="button"
+                  onClick={() => setBuildAiOpen(true)}
+                  disabled={saving}
+                  className="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3.5 py-2.5 text-sm font-semibold text-accent-fg shadow-sm transition-[background-color,color,border-color] hover:border-indigo-300 hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-200 dark:hover:bg-indigo-950/70"
+                >
+                  <Sparkles className="h-4 w-4" aria-hidden />
+                  {authoringCopy.buildWithAi}
+                </button>
+              </AdvancedNameTip>
             ) : null}
             <button
               type="button"
@@ -1363,6 +1412,9 @@ export default function CourseModuleQuizPage() {
                   onAnalytics={() => setAnalyticsOpen(true)}
                   showGradingAgent={graderAgentEnabled}
                   onGradingAgent={() => setGradingAgentOpen(true)}
+                  plainLanguage={familyAudience}
+                  generateLabel={authoringCopy.suggestQuestions}
+                  generateDetail={authoringCopy.suggestQuestionsDetail}
                 />
                 <button
                   type="button"
@@ -1545,7 +1597,16 @@ export default function CourseModuleQuizPage() {
                     </dd>
                   </div>
                   <div className="flex justify-between gap-4">
-                    <dt className="shrink-0 text-fg-muted">Course lockdown feature</dt>
+                    <dt className="shrink-0 text-fg-muted">
+                      <AdvancedNameTip detail={authoringCopy.lockdownSummaryDetail}>
+                        <span
+                          tabIndex={authoringCopy.lockdownSummaryDetail ? 0 : undefined}
+                          className={authoringCopy.lockdownSummaryDetail ? 'cursor-help' : undefined}
+                        >
+                          {authoringCopy.lockdownSummary}
+                        </span>
+                      </AdvancedNameTip>
+                    </dt>
                     <dd className="min-w-0 text-end font-medium text-fg-default">
                       {courseLockdownEnabled ? 'On' : 'Off'}
                     </dd>
@@ -1553,12 +1614,12 @@ export default function CourseModuleQuizPage() {
                   <div className="flex justify-between gap-4">
                     <dt className="shrink-0 text-fg-muted">Delivery mode</dt>
                     <dd className="min-w-0 text-end font-medium text-fg-default">
-                      {formatLockdownModeLabel(lockdownMode)}
+                      {formatLockdownModeLabel(lockdownMode, familyAudience)}
                     </dd>
                   </div>
                   {lockdownMode === 'kiosk' ? (
                     <div className="flex justify-between gap-4">
-                      <dt className="shrink-0 text-fg-muted">Focus-loss threshold</dt>
+                      <dt className="shrink-0 text-fg-muted">{authoringCopy.focusLossSummary}</dt>
                       <dd className="min-w-0 text-end font-medium text-fg-default">
                         {focusLossThreshold != null ? String(focusLossThreshold) : 'None'}
                       </dd>
@@ -1566,9 +1627,11 @@ export default function CourseModuleQuizPage() {
                   ) : null}
                   {!courseLockdownEnabled && lockdownMode !== 'standard' ? (
                     <p className="text-xs leading-snug text-amber-800 dark:text-amber-200/90">
-                      This quiz is set to {formatLockdownModeLabel(lockdownMode).toLowerCase()}, but the course
-                      lockdown feature is off, so learners currently get standard delivery.
+                      {authoringCopy.lockdownOffNote(formatLockdownModeLabel(lockdownMode, familyAudience))}
                     </p>
+                  ) : null}
+                  {authoringCopy.advancedLockdown ? (
+                    <AdvancedNameDisclosure detail={authoringCopy.advancedLockdown} />
                   ) : null}
                   {!unlimitedAttempts ? (
                     <div className="flex justify-between gap-4">
@@ -1752,6 +1815,7 @@ export default function CourseModuleQuizPage() {
                     quizItemId={itemId}
                     quizOutcomesQuestions={questions.map((q) => ({ id: q.id, prompt: q.prompt }))}
                     lockdownDeliveryEnabled={courseLockdownEnabled}
+                    familyAudience={familyAudience}
                     lockdownMode={draftLockdownMode}
                     onLockdownModeChange={(mode) => {
                       setDraftLockdownMode(mode)
@@ -1778,8 +1842,11 @@ export default function CourseModuleQuizPage() {
         <BuildContentPageWithAiModal
           open={buildAiOpen}
           existingMarkdown={sectionsToMarkdown(draft)}
-          description="Describe what this quiz intro should cover. The draft replaces the current editor content; nothing is saved until you click Save."
-          placeholder="e.g. Intro for a midterm on cell division: overview, time limit note, and what students should review…"
+          title={authoringCopy.buildWithAi}
+          advancedDetail={authoringCopy.buildWithAiDetail}
+          submitHint={authoringCopy.buildWithAiSubmitHint}
+          description={authoringCopy.buildWithAiDescription}
+          placeholder={authoringCopy.buildWithAiPlaceholder}
           onClose={() => setBuildAiOpen(false)}
           onBuild={async ({ prompt, existingMarkdown }) => {
             // Quiz intro is prose-only (no content tools).
@@ -1815,7 +1882,7 @@ export default function CourseModuleQuizPage() {
           <div className="w-full max-w-lg overflow-visible rounded-2xl border border-border-default bg-surface-raised shadow-xl">
             <div className="flex items-center justify-between border-b border-border-default px-4 py-3">
               <h3 id="quiz-generate-title" className="text-sm font-semibold text-fg-default">
-                Generate questions
+                {authoringCopy.suggestQuestions}
               </h3>
               <button
                 type="button"
@@ -1827,15 +1894,13 @@ export default function CourseModuleQuizPage() {
               </button>
             </div>
             <div className="space-y-4 p-4">
-              <p className="text-sm text-fg-muted">
-                Describe the topic or learning goals. The model will create the requested number of
-                questions using the quiz question types (multiple choice, true/false, fill-in-the-blank,
-                short answer, and essay). Type @ to tag a content page or assignment — it appears as a
-                highlighted @name; the item’s body is pulled in when you click Generate.
-              </p>
+              <p className="text-sm text-fg-muted">{authoringCopy.suggestQuestionsBody}</p>
+              {authoringCopy.suggestQuestionsAdvanced ? (
+                <AdvancedNameDisclosure detail={authoringCopy.suggestQuestionsAdvanced} />
+              ) : null}
               <div>
                 <label className="mb-1 block text-xs font-medium text-fg-muted" htmlFor="quiz-generate-prompt">
-                  Prompt
+                  {authoringCopy.suggestQuestionsPromptLabel}
                 </label>
                 <CourseItemPromptEditor
                   id="quiz-generate-prompt"
@@ -1844,7 +1909,7 @@ export default function CourseModuleQuizPage() {
                   onChange={setGeneratePrompt}
                   disabled={generateBusy}
                   autoFocus
-                  placeholder="e.g. Five questions on cell division… Type @ to tag a content page or assignment (content is added when you generate)."
+                  placeholder={authoringCopy.suggestQuestionsPlaceholder}
                 />
               </div>
               <div>
@@ -1884,7 +1949,7 @@ export default function CourseModuleQuizPage() {
                 disabled={generateBusy}
                 className="inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-60"
               >
-                {generateBusy ? 'Generating…' : 'Generate'}
+                {generateBusy ? authoringCopy.suggestQuestionsBusy : authoringCopy.suggestQuestionsAction}
               </button>
             </div>
           </div>
@@ -2012,6 +2077,7 @@ export default function CourseModuleQuizPage() {
           itemId={itemId}
           itemKind="quiz"
           assignmentTitle={title || 'Quiz'}
+          plainLanguage={familyAudience}
           submissionId={null}
           rubric={null}
           maxPoints={pointsWorth}

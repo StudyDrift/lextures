@@ -455,35 +455,39 @@ jobs:
               - 'e2e/**'
               - 'docs/completed/**'
 
+  # Runs on the host runner (not a container) so its node_modules caches are
+  # byte-compatible with the shard jobs that restore them. Caches are primed on
+  # main by ci-cache-warm.yml, so a PR's first run starts warm.
   e2e-build:
     name: E2E build (API + web)
     needs: e2e-changes
     if: needs.e2e-changes.outputs.e2e == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    container:
-      image: mcr.microsoft.com/playwright:v1.49.1-jammy
     steps:
       - uses: actions/checkout@v4
 
+      # Dedicated Go cache (restore-only here; saved by ci-cache-warm.yml) so the
+      # post-job cache upload never sits on the E2E critical path.
       - uses: actions/setup-go@v5
         with:
           go-version: "1.25.13"
-          cache-dependency-path: server/go.sum
+          cache: false
+
+      - name: Restore Go build cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: go-e2e-server-${{ runner.os }}-${{ hashFiles('server/go.sum') }}-${{ github.sha }}
+          restore-keys: |
+            go-e2e-server-${{ runner.os }}-${{ hashFiles('server/go.sum') }}-
+            go-e2e-server-${{ runner.os }}-
 
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: npm
-          cache-dependency-path: |
-            clients/web/package-lock.json
-            e2e/package-lock.json
-
-      - name: Build API server binary
-        working-directory: server
-        run: |
-          mkdir -p ../.cache/e2e
-          go build -buildvcs=false -trimpath -ldflags="-s -w" -o ../.cache/e2e/server ./cmd/server
 
       - name: Cache web node_modules
         id: web-node-modules
@@ -492,16 +496,6 @@ jobs:
           path: clients/web/node_modules
           key: web-node-modules-${{ runner.os }}-${{ hashFiles('clients/web/package-lock.json') }}
 
-      - name: Install and build web client
-        working-directory: clients/web
-        env:
-          VITE_API_URL: http://localhost:8080
-        run: |
-          if [ "${{ steps.web-node-modules.outputs.cache-hit }}" != "true" ]; then
-            npm ci
-          fi
-          npm run build
-
       - name: Cache e2e node_modules
         id: e2e-node-modules
         uses: actions/cache@v4
@@ -509,13 +503,25 @@ jobs:
           path: e2e/node_modules
           key: e2e-node-modules-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
 
-      # Playwright browsers + OS deps ship in the job container; only install npm packages.
-      - name: Install e2e dependencies
-        working-directory: e2e
+      # The API compile and web bundle are independent, so build them concurrently.
+      # Only `vite build` is needed here: typecheck and bundle-size checks already
+      # run in the "Client (web)" job.
+      - name: Build API server binary and web client
+        env:
+          VITE_API_URL: http://localhost:8080
         run: |
+          mkdir -p .cache/e2e
+          (cd server && go build -buildvcs=false -trimpath -ldflags="-s -w" -o ../.cache/e2e/server ./cmd/server) &
+          go_pid=$!
           if [ "${{ steps.e2e-node-modules.outputs.cache-hit }}" != "true" ]; then
+            (cd e2e && npm ci --prefer-offline --quiet)
+          fi
+          cd clients/web
+          if [ "${{ steps.web-node-modules.outputs.cache-hit }}" != "true" ]; then
             npm ci --prefer-offline --quiet
           fi
+          npx vite build
+          wait "$go_pid"
 
       - name: Upload e2e build artifacts
         uses: actions/upload-artifact@v4
@@ -685,6 +691,7 @@ jobs:
       # Cold migrate of ~450+ SQL files often exceeds 45s on GitHub runners.
       E2E_HEALTH_MAX_ATTEMPTS: "90"
       E2E_ADMIN_EMAIL: admin@e2e.test
+      E2E_WORKERS: "4"
       RTL_ENABLED: "true"
       CI: "true"
     services:
@@ -716,10 +723,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: npm
-          cache-dependency-path: |
-            clients/web/package-lock.json
-            e2e/package-lock.json
 
       - name: Cache web node_modules
         id: web-node-modules
@@ -735,16 +738,16 @@ jobs:
           path: e2e/node_modules
           key: e2e-node-modules-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
 
+      # Headless runs only use chromium-headless-shell, so skip the full Chromium
+      # download (separate key from the Lighthouse job, which needs full Chromium).
       - name: Cache Playwright browsers
         id: playwright-browsers
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
-          restore-keys: |
-            playwright-chromium-${{ runner.os }}-
+          key: playwright-shell-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
 
-      # node_modules + browser bundle only; apt deps were installed in e2e-build (Playwright image).
+      # node_modules + browser bundle only; the ubuntu-24.04 runner image already has Chromium's OS deps.
       - name: Restore e2e runtime
         run: |
           if [ "${{ steps.web-node-modules.outputs.cache-hit }}" != "true" ]; then
@@ -753,10 +756,14 @@ jobs:
           if [ "${{ steps.e2e-node-modules.outputs.cache-hit }}" != "true" ]; then
             (cd e2e && npm ci --prefer-offline --quiet)
           fi
-          (cd e2e && npx playwright install chromium)
+          if [ "${{ steps.playwright-browsers.outputs.cache-hit }}" != "true" ]; then
+            (cd e2e && npx playwright install --only-shell chromium)
+          fi
 
+      # Public-repo ubuntu-latest runners have 4 vCPUs; Playwright's CI default (50%)
+      # leaves half idle while the API, Postgres, and preview server are mostly waiting.
       - name: Run e2e shard (local stack)
-        run: bash e2e/scripts/e2e-local.sh --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+        run: bash e2e/scripts/e2e-local.sh --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }} --workers=${{ env.E2E_WORKERS }}
 
       - name: Upload blob report
         uses: actions/upload-artifact@v4
@@ -777,10 +784,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: npm
-          cache-dependency-path: e2e/package-lock.json
+
+      - name: Cache e2e node_modules
+        id: e2e-node-modules
+        uses: actions/cache@v4
+        with:
+          path: e2e/node_modules
+          key: e2e-node-modules-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
 
       - name: Install e2e dependencies
+        if: steps.e2e-node-modules.outputs.cache-hit != 'true'
         working-directory: e2e
         run: npm ci --prefer-offline --quiet
 

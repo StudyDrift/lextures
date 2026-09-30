@@ -1,11 +1,16 @@
 import { useEffect, useId, useState } from 'react'
 import { Loader2, Sparkles, X } from 'lucide-react'
 import type { DraftContentPageSection } from '../../lib/courses-api'
+import { AdvancedNameDisclosure } from '../quiz/advanced-name'
 
 type BuildContentPageWithAiModalProps = {
   open: boolean
   existingMarkdown: string
   /** Optional copy tweaks for quiz intro vs content page. */
+  title?: string
+  /** Power-user name shown behind an Advanced disclosure. */
+  advancedDetail?: string | null
+  submitHint?: string
   description?: string
   placeholder?: string
   /**
@@ -31,6 +36,9 @@ type BuildContentPageWithAiModalProps = {
 export function BuildContentPageWithAiModal({
   open,
   existingMarkdown,
+  title = 'Build with AI',
+  advancedDetail = null,
+  submitHint = '⌘/Ctrl + Enter to generate',
   description = 'Describe what this page should cover. The draft replaces the current editor content; nothing is saved until you click Save.',
   placeholder = 'e.g. An introduction to photosynthesis for high school biology, with key vocabulary and a short practice check…',
   contentToolsAvailable = false,
@@ -105,7 +113,7 @@ export function BuildContentPageWithAiModal({
             className="inline-flex items-center gap-1.5 text-sm font-semibold text-fg-default"
           >
             <Sparkles className="h-4 w-4 text-indigo-500" aria-hidden />
-            Build with AI
+            {title}
           </h3>
           <button
             type="button"
@@ -118,6 +126,7 @@ export function BuildContentPageWithAiModal({
           </button>
         </div>
         <div className="space-y-4 p-4">
+          {advancedDetail ? <AdvancedNameDisclosure detail={advancedDetail} /> : null}
           <p className="text-sm text-fg-muted">{description}</p>
           <div>
             <label className="mb-1 block text-xs font-medium text-fg-muted" htmlFor={promptId}>
@@ -139,9 +148,7 @@ export function BuildContentPageWithAiModal({
                 }
               }}
             />
-            <p className="mt-1 text-xs text-fg-muted">
-              ⌘/Ctrl + Enter to generate
-            </p>
+            <p className="mt-1 text-xs text-fg-muted">{submitHint}</p>
           </div>
           {contentToolsAvailable ? (
             <div className="rounded-xl border border-border-default bg-slate-50/80 px-3 py-3 dark:border-border-default/40">

@@ -27,6 +27,7 @@ import {
 import type { GradingAgentItemKind } from './types'
 import type { QuizQuestionSlot } from './quiz-question-slots'
 import { useHorizontalPanelResize } from './use-horizontal-panel-resize'
+import { AdvancedNameDisclosure } from '../../quiz/advanced-name'
 
 const INSPECTOR_DEFAULT_WIDTH = 288
 const INSPECTOR_MIN_WIDTH = 240
@@ -43,6 +44,8 @@ type GraderAgentWorkflowModalProps = {
   itemId: string
   itemKind?: GradingAgentItemKind
   assignmentTitle?: string
+  /** Plain-language title for Homeschool / K–12 quiz authoring. */
+  plainLanguage?: boolean
   submissionId: string | null
   rubric: RubricDefinition | null
   maxPoints: number | null
@@ -60,6 +63,7 @@ export function GraderAgentWorkflowModal({
   itemId,
   itemKind = 'assignment',
   assignmentTitle,
+  plainLanguage = false,
   submissionId,
   rubric,
   maxPoints,
@@ -275,8 +279,13 @@ export function GraderAgentWorkflowModal({
                 <h2 id={titleId} className="text-lg font-semibold text-fg-default">
                   {isTemplateMode
                     ? t('gradingAgent.settings.create.templateEditorTitle')
-                    : t('gradingAgent.canvas.modal.title')}
+                    : plainLanguage
+                      ? t('gradingAgent.canvas.modal.title.plain')
+                      : t('gradingAgent.canvas.modal.title')}
                 </h2>
+                {plainLanguage && !isTemplateMode ? (
+                  <AdvancedNameDisclosure detail={t('gradingAgent.canvas.modal.plainAdvanced')} />
+                ) : null}
                 {isTemplateMode ? (
                   <p className="truncate text-sm text-fg-muted">{templateMode.name}</p>
                 ) : assignmentTitle ? (
@@ -461,7 +470,7 @@ export function GraderAgentWorkflowModal({
               </Suspense>
             </div>
             {aiConfigured ? (
-              <AiBuildPanel building={aiBuilding} onBuild={handleAIBuild} />
+              <AiBuildPanel building={aiBuilding} onBuild={handleAIBuild} plainLanguage={plainLanguage} />
             ) : null}
           </main>
           <aside

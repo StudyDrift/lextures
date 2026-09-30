@@ -1,0 +1,99 @@
+# Prime the E2E dependency caches on main so every PR's first CI run starts warm.
+#
+# GitHub scopes Actions caches to the branch that saved them, with a fallback to
+# the base branch. CI (ci.yml) only runs on pull requests, so without this
+# workflow nothing is ever saved on main and each new PR re-downloads node_modules,
+# Playwright browsers, and Go modules and recompiles the API from scratch.
+#
+# Cache keys and paths here must match the ones restored in ci.yml.
+
+name: CI cache warm
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ci-cache-warm
+  cancel-in-progress: true
+
+jobs:
+  e2e-caches:
+    name: Warm E2E caches
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25.13"
+          cache: false
+
+      - name: Restore Go build cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: go-e2e-server-${{ runner.os }}-${{ hashFiles('server/go.sum') }}-${{ github.sha }}
+          restore-keys: |
+            go-e2e-server-${{ runner.os }}-${{ hashFiles('server/go.sum') }}-
+            go-e2e-server-${{ runner.os }}-
+
+      # Same flags as ci.yml's e2e-build so its compile is a build-cache hit.
+      - name: Build API server binary
+        working-directory: server
+        run: go build -buildvcs=false -trimpath -ldflags="-s -w" -o /dev/null ./cmd/server
+
+      - name: Save Go build cache
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: go-e2e-server-${{ runner.os }}-${{ hashFiles('server/go.sum') }}-${{ github.sha }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Cache web node_modules
+        id: web-node-modules
+        uses: actions/cache@v4
+        with:
+          path: clients/web/node_modules
+          key: web-node-modules-${{ runner.os }}-${{ hashFiles('clients/web/package-lock.json') }}
+
+      - name: Install web dependencies
+        if: steps.web-node-modules.outputs.cache-hit != 'true'
+        working-directory: clients/web
+        run: npm ci --prefer-offline --quiet
+
+      - name: Cache e2e node_modules
+        id: e2e-node-modules
+        uses: actions/cache@v4
+        with:
+          path: e2e/node_modules
+          key: e2e-node-modules-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
+
+      - name: Install e2e dependencies
+        if: steps.e2e-node-modules.outputs.cache-hit != 'true'
+        working-directory: e2e
+        run: npm ci --prefer-offline --quiet
+
+      # E2E shards only need the headless shell (the Lighthouse job keeps its own
+      # full-Chromium cache key).
+      - name: Cache Playwright headless shell
+        id: playwright-shell
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-shell-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
+
+      - name: Install Playwright headless shell
+        if: steps.playwright-shell.outputs.cache-hit != 'true'
+        working-directory: e2e
+        run: npx playwright install --only-shell chromium
