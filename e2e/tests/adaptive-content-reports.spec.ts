@@ -7,21 +7,15 @@
  *   [x] Admin org report + drill-down link
  *   [x] Report tab visible in workspace UI
  */
-import { execSync } from 'node:child_process'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
-import { test, expect, injectToken, uniqueEmail } from '../fixtures/test.js'
+import { test, expect, injectToken } from '../fixtures/test.js'
 import {
   apiCreateContentPage,
   apiCreateTimedQuiz,
-  apiLogin,
+  apiGetPlatformAdminToken,
   apiPatchCourseFeatures,
-  apiSignup,
 } from '../fixtures/api.js'
 
 const apiBase = process.env.E2E_API_URL ?? 'http://localhost:8080'
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
-const ADMIN_PASSWORD = 'E2eTestPass1!LongRandomAceReports'
 
 async function apiCreateAdaptiveUnit(
   token: string,
@@ -51,21 +45,6 @@ async function apiCreateAdaptiveUnit(
     }
     await new Promise((r) => setTimeout(r, 400))
   }
-}
-
-function bootstrapGlobalAdmin(email: string) {
-  const databaseURL =
-    process.env.DATABASE_URL ??
-    'postgres://studydrift:studydrift@localhost:5432/studydrift?sslmode=disable'
-  execSync(`go run ./cmd/bootstrap-admin -email=${email}`, {
-    cwd: path.join(repoRoot, 'server'),
-    stdio: 'pipe',
-    env: {
-      ...process.env,
-      PATH: `/usr/local/go/bin:${process.env.PATH ?? ''}`,
-      DATABASE_URL: databaseURL,
-    },
-  })
 }
 
 test.describe('Adaptive content reports (AC.9)', () => {
@@ -145,21 +124,7 @@ test.describe('Adaptive content reports (AC.9)', () => {
     )
     expect(studentRes.status).toBe(403)
 
-    const adminEmail = uniqueEmail('ace-report-admin')
-    await apiSignup({
-      email: adminEmail,
-      password: ADMIN_PASSWORD,
-      displayName: 'ACE Report Admin',
-    })
-    try {
-      bootstrapGlobalAdmin(adminEmail)
-    } catch (err) {
-      test.skip(true, `bootstrap unavailable: ${err}`)
-    }
-    const { access_token: adminToken } = await apiLogin({
-      email: adminEmail,
-      password: ADMIN_PASSWORD,
-    })
+    const adminToken = await apiGetPlatformAdminToken()
 
     const adminReportRes = await fetch(`${apiBase}/api/v1/admin/adaptive-content/report`, {
       headers: { Authorization: `Bearer ${adminToken}` },
