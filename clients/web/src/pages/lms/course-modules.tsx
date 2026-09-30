@@ -123,6 +123,7 @@ import {
   type StructurePathRule,
 } from '../../lib/courses-api'
 import { useCourseViewAs } from '../../lib/course-view-as'
+import { forgetLastVisitedItemIds } from '../../lib/last-visited-module-item'
 import { useViewerEnrollmentRoles } from '../../lib/use-viewer-enrollment-roles'
 import { permCourseItemCreate } from '../../lib/rbac-api'
 import { formatDueShort } from '../../lib/course-calendar-utils'
@@ -148,6 +149,30 @@ import { ConditionalReleaseLockBadge } from '../../components/modules/conditiona
 import { useCourseNavFeatures } from '../../context/course-nav-features-context'
 
 const MODULE_SORT_ID = 'sortable-modules'
+
+function structureIdsUnder(items: readonly { id: string; parentId: string | null }[], rootId: string): string[] {
+  const byParent = new Map<string, string[]>()
+  for (const item of items) {
+    if (!item.parentId) continue
+    const list = byParent.get(item.parentId) ?? []
+    list.push(item.id)
+    byParent.set(item.parentId, list)
+  }
+  const out: string[] = []
+  const stack = [rootId]
+  const seen = new Set<string>()
+  while (stack.length > 0) {
+    const id = stack.pop()
+    if (!id || seen.has(id)) continue
+    seen.add(id)
+    out.push(id)
+    const children = byParent.get(id)
+    if (children) {
+      for (const child of children) stack.push(child)
+    }
+  }
+  return out
+}
 
 /** Quiet icon-only controls — min 24×24 CSS px (WCAG 2.2 SC 2.5.8 / UX.5 FR-1). */
 const iconGhost =
@@ -2258,6 +2283,7 @@ export default function CourseModules() {
     setBusyChildItemId(child.id)
     try {
       await archiveCourseStructureItem(courseCode, child.id)
+      forgetLastVisitedItemIds([child.id])
       await load({ silent: true })
       setArchiveConfirmItem(null)
       const archivedId = child.id
@@ -2338,7 +2364,9 @@ export default function CourseModules() {
     setModuleDeleteError(null)
     setModuleDeleting(true)
     try {
+      const removedIds = structureIdsUnder(items, target.id)
       const result = await deleteCourseModule(courseCode, target.id)
+      forgetLastVisitedItemIds(removedIds)
       await load({ silent: true })
       setModuleDeleteTarget(null)
       setModuleDeleteGradedItems([])
@@ -2357,7 +2385,7 @@ export default function CourseModules() {
     } finally {
       setModuleDeleting(false)
     }
-  }, [courseCode, moduleDeleteTarget, load])
+  }, [courseCode, items, moduleDeleteTarget, load])
 
   useEffect(() => {
     if (!moduleDeleteTarget) return

@@ -31,7 +31,11 @@ import { fetchFeedChannels, fetchFeedMessages } from '../../lib/course-feed-api'
 import { readApiErrorMessage } from '../../lib/errors'
 import { formatAbsolute } from '../../lib/format-datetime'
 import { formatTimeAgoFromIso } from '../../lib/format-time-ago'
-import { getLastVisitedForCourse, hrefForLastVisited } from '../../lib/last-visited-module-item'
+import {
+  hrefForLastVisited,
+  reconcileLastVisitedCourse,
+  type LastVisitedModuleEntry,
+} from '../../lib/last-visited-module-item'
 
 import { getJwtSubject } from '../../lib/auth'
 import { hrefForRecommendationItem, surfaceLabel } from '../../lib/recommendation-nav'
@@ -215,6 +219,7 @@ export default function CourseDetail() {
 
   const [structure, setStructure] = useState<CourseStructureItem[] | null>(null)
   const [structureError, setStructureError] = useState<string | null>(null)
+  const [lastVisited, setLastVisited] = useState<LastVisitedModuleEntry | null>(null)
   const [myGrades, setMyGrades] = useState<CourseMyGradesResponse | null>(null)
   const [announcement, setAnnouncement] = useState<AnnouncementPreview | null>(null)
   const [gradebookEmptyCells, setGradebookEmptyCells] = useState<number | null>(null)
@@ -315,6 +320,24 @@ export default function CourseDetail() {
       cancelled = true
     }
   }, [courseCode, course, landing, structureRevision])
+
+  useEffect(() => {
+    if (!courseCode || structure == null || structureError) {
+      setLastVisited(null)
+      return
+    }
+    setLastVisited(
+      reconcileLastVisitedCourse(
+        courseCode,
+        structure.map((item) => ({
+          id: item.id,
+          kind: item.kind,
+          title: item.title,
+          sortOrder: item.sortOrder,
+        })),
+      ),
+    )
+  }, [courseCode, structure, structureError])
 
   useEffect(() => {
     if (!courseCode || !course || landing !== 'data') return
@@ -468,7 +491,6 @@ export default function CourseDetail() {
     )
   }
 
-  const lastVisited = getLastVisitedForCourse(courseCode)
   const staff = course ? viewerIsCourseStaffEnrollment(course.viewerEnrollmentRoles) : false
 
   return (
