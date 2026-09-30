@@ -94,12 +94,16 @@ func (s *Service) GetSummary(ctx context.Context, courseCode string) (ChecklistS
 			}
 			return DeriveSummary(res, dismissedByID, snap.ComputedAt.UTC(), false), nil
 		}
+		dismissedCount := snap.DismissedCount
+		if n, err := ccrepo.CountDismissed(ctx, s.Pool, courseID); err == nil {
+			dismissedCount = n
+		}
 		return ChecklistSummary{
 			OutstandingEssential: snap.OutstandingEssential,
 			OutstandingTotal:     snap.OutstandingTotal,
 			Done:                 snap.DoneCount,
 			Total:                snap.TotalCount,
-			Dismissed:            snap.DismissedCount,
+			Dismissed:            dismissedCount,
 			ComputedAt:           snap.ComputedAt.UTC(),
 			Stale:                false,
 		}, nil
