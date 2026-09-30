@@ -11,6 +11,7 @@ import {
 import { useShellNav } from './use-shell-nav'
 import { SideNavTooltip } from './side-nav-tooltip'
 import { MARKETING_SITE_URLS } from '../../lib/marketing-site'
+import { MobileAppPath } from './mobile-app-path'
 
 /**
  * Side-nav footer: collapse control + legal link disclosure.
@@ -51,6 +52,8 @@ export function SideNavFooter() {
     <footer
       className={`shrink-0 border-t border-border-default px-3 py-2.5 text-[11px] leading-snug text-fg-muted ${ sideNavCollapsed ? 'flex justify-center' : '' }`}
     >
+      <MobileAppPath collapsed={sideNavCollapsed} />
+
       <SideNavTooltip content={sideNavCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
         <button
           type="button"
