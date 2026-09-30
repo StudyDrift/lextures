@@ -43,7 +43,11 @@ import {
   type RecommendationItem,
   type ReviewStatsPayload,
 } from '../../lib/courses-api'
-import { getMostRecentLastVisited, hrefForLastVisited } from '../../lib/last-visited-module-item'
+import {
+  hrefForLastVisited,
+  resolveContinueTarget,
+  type LastVisitedModuleEntry,
+} from '../../lib/last-visited-module-item'
 import { hrefForRecommendationItem, surfaceLabel } from '../../lib/recommendation-nav'
 import { ProfileRationaleChip } from '../../components/learner-profile/profile-rationale-chip'
 import { DeadlineDateTime } from '../../components/timezone/deadline-datetime'
@@ -620,6 +624,31 @@ export default function Dashboard() {
   const weekFrac = useMemo(() => weekProgressFraction(), [])
 
   const courseCodes = useMemo(() => (courses ?? []).map((c) => c.courseCode), [courses])
+  const [continueTarget, setContinueTarget] = useState<
+    (LastVisitedModuleEntry & { courseCode: string }) | null
+  >(null)
+
+  useEffect(() => {
+    if (courseCodes.length === 0) {
+      setContinueTarget(null)
+      return
+    }
+    let cancelled = false
+    void resolveContinueTarget(courseCodes, async (code) => {
+      const items = await fetchCourseStructure(code)
+      return items.map((item) => ({
+        id: item.id,
+        kind: item.kind,
+        title: item.title,
+        sortOrder: item.sortOrder,
+      }))
+    }).then((next) => {
+      if (!cancelled) setContinueTarget(next)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [courseCodes])
 
   const courseTitles = useMemo(() => {
     const out: Record<string, string> = {}
@@ -628,10 +657,6 @@ export default function Dashboard() {
     }
     return out
   }, [courses])
-
-  /** Read on each render so returning from a module picks up the latest `localStorage` write. */
-  const continueTarget =
-    courseCodes.length > 0 ? getMostRecentLastVisited(courseCodes) : null
 
   const announcements = useMemo(() => {
     const list = studentRows.map((r) => r.announcement).filter(Boolean) as AnnouncementPreview[]

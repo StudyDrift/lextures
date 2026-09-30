@@ -68,6 +68,122 @@ export function getLastVisitedForCourse(courseCode: string): LastVisitedModuleEn
   return row
 }
 
+/** Drop this course's Continue pointer when it still names `itemId`. */
+export function forgetLastVisitedModuleItem(courseCode: string, itemId: string): void {
+  const code = courseCode.trim()
+  const id = itemId.trim()
+  if (!code || !id) return
+  const prev = readStore()
+  const row = prev[code]
+  if (!row?.itemId || row.itemId !== id) return
+  const next = { ...prev }
+  delete next[code]
+  writeStore(next)
+}
+
+/** Drop every Continue pointer that names one of these structure items. */
+export function forgetLastVisitedItemIds(itemIds: readonly string[]): void {
+  const drop = new Set(itemIds.map((id) => id.trim()).filter(Boolean))
+  if (drop.size === 0) return
+  const prev = readStore()
+  let changed = false
+  const next: StoreShape = {}
+  for (const [code, row] of Object.entries(prev)) {
+    if (row?.itemId && drop.has(row.itemId)) {
+      changed = true
+      continue
+    }
+    next[code] = row
+  }
+  if (changed) writeStore(next)
+}
+
+const NAVIGABLE_KINDS = new Set<LastVisitedModuleKind>([
+  'content_page',
+  'assignment',
+  'quiz',
+  'external_link',
+  'lti_link',
+  'h5p',
+  'scorm',
+  'vibe_activity',
+])
+
+export function isNavigableLastVisitedKind(kind: string): kind is LastVisitedModuleKind {
+  return NAVIGABLE_KINDS.has(kind as LastVisitedModuleKind)
+}
+
+export type LastVisitedStructureItem = {
+  id: string
+  kind: string
+  title: string
+  sortOrder: number
+}
+
+/**
+ * Keep the stored Continue target when it is still in the outline.
+ * When it is missing, point at the earliest remaining navigable item, or clear the pointer.
+ */
+export function reconcileLastVisitedCourse(
+  courseCode: string,
+  items: readonly LastVisitedStructureItem[],
+): LastVisitedModuleEntry | null {
+  const stored = getLastVisitedForCourse(courseCode)
+  if (!stored) return null
+  const live = items.find((item) => item.id === stored.itemId)
+  if (live && isNavigableLastVisitedKind(live.kind)) {
+    const title = live.title.trim() || 'Untitled'
+    if (live.kind !== stored.kind || title !== stored.title) {
+      recordLastVisitedModuleItem(courseCode, {
+        itemId: live.id,
+        kind: live.kind,
+        title,
+        openedAt: stored.openedAt,
+      })
+      return getLastVisitedForCourse(courseCode)
+    }
+    return stored
+  }
+  forgetLastVisitedModuleItem(courseCode, stored.itemId)
+  const replacement = [...items]
+    .filter((item) => isNavigableLastVisitedKind(item.kind))
+    .sort((a, b) => a.sortOrder - b.sortOrder || a.id.localeCompare(b.id))[0]
+  if (!replacement || !isNavigableLastVisitedKind(replacement.kind)) return null
+  recordLastVisitedModuleItem(courseCode, {
+    itemId: replacement.id,
+    kind: replacement.kind,
+    title: replacement.title,
+    openedAt: stored.openedAt,
+  })
+  return getLastVisitedForCourse(courseCode)
+}
+
+/**
+ * Most recent Continue target that still exists in the course outline.
+ * A failed outline load leaves the stored pointer in place.
+ */
+export async function resolveContinueTarget(
+  courseCodes: readonly string[],
+  loadItems: (courseCode: string) => Promise<readonly LastVisitedStructureItem[]>,
+): Promise<(LastVisitedModuleEntry & { courseCode: string }) | null> {
+  const allowed = courseCodes.map((code) => code.trim()).filter(Boolean)
+  const skipped = new Set<string>()
+  for (let i = 0; i < allowed.length; i++) {
+    const stored = getMostRecentLastVisited(allowed.filter((code) => !skipped.has(code)))
+    if (!stored) return null
+    let items: readonly LastVisitedStructureItem[]
+    try {
+      items = await loadItems(stored.courseCode)
+    } catch {
+      return stored
+    }
+    const next = reconcileLastVisitedCourse(stored.courseCode, items)
+    if (next) return { ...next, courseCode: stored.courseCode }
+    skipped.add(stored.courseCode)
+  }
+  return null
+}
+
 /** Most recently opened item among the given course codes (catalog membership). */
 export function getMostRecentLastVisited(
   courseCodes: readonly string[],

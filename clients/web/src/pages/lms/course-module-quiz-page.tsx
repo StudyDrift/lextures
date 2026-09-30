@@ -83,7 +83,10 @@ import {
 } from './course-module-quiz-utils'
 import { getAccountType } from '../../lib/auth'
 import { isHomeschoolOrK12Audience } from '../../lib/family-audience'
-import { recordLastVisitedModuleItem } from '../../lib/last-visited-module-item'
+import {
+  forgetLastVisitedModuleItem,
+  recordLastVisitedModuleItem,
+} from '../../lib/last-visited-module-item'
 import { quizAuthoringCopy } from '../../components/quiz/quiz-authoring-copy'
 import { LmsPage } from './lms-page'
 import { QuizAnalyticsModal } from '../../components/quiz/quiz-analytics-modal'
@@ -642,7 +645,10 @@ export default function CourseModuleQuizPage() {
       })
       void loadMarkups()
     } catch (e) {
-      setLoadError(e instanceof Error ? e.message : 'Could not load this quiz.')
+      const message = e instanceof Error ? e.message : 'Could not load this quiz.'
+      if (/not found/i.test(message)) forgetLastVisitedModuleItem(courseCode, itemId)
+      setQuestionsOpen(false)
+      setLoadError(message)
       setTitle('')
       setMarkdown('')
       setDueAt(null)
@@ -1383,7 +1389,7 @@ export default function CourseModuleQuizPage() {
               {saving ? 'Saving…' : 'Save'}
             </button>
           </div>
-        ) : canEdit || canGradeQuiz ? (
+        ) : !loadError && (canEdit || canGradeQuiz) ? (
           <div className="flex flex-wrap items-center justify-end gap-2">
             {canGradeQuiz ? (
               <button
@@ -2099,7 +2105,7 @@ export default function CourseModuleQuizPage() {
         />
       )}
 
-      {questionsOpen && (
+      {questionsOpen && !loadError && (
         <div
           className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/40 p-4 sm:items-center"
           role="dialog"
@@ -3356,7 +3362,7 @@ export default function CourseModuleQuizPage() {
           }}
         />
       ) : null}
-      {questionsOpen && !qeAdaptiveOn && importQuestionsOpen && importPopoverPos && (
+      {questionsOpen && !loadError && !qeAdaptiveOn && importQuestionsOpen && importPopoverPos && (
         <div
           ref={importDropdownRef}
           className="fixed z-[70] space-y-3 rounded-xl border border-border-default bg-surface-raised p-3 shadow-xl shadow-slate-900/10"
