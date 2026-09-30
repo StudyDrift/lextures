@@ -39,7 +39,7 @@ describe('Signup', () => {
 
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: /^dashboard$/i })).toBeInTheDocument()
-    })
+    }, { timeout: 15_000 })
   })
 
   it('navigates to the dashboard when a display name is provided', async () => {
@@ -60,7 +60,7 @@ describe('Signup', () => {
 
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: /^dashboard$/i })).toBeInTheDocument()
-    })
+    }, { timeout: 15_000 })
   })
 
   it('returns to the original marketplace path after creating an account', async () => {

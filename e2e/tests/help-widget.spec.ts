@@ -11,20 +11,18 @@
  *   [x] Contextual articles API returns articles for a route
  */
 import { test, expect } from '../fixtures/test.js'
-import { apiGetContextualArticles, apiLogin, apiSignup } from '../fixtures/api.js'
-import { bootstrapGlobalAdmin, setPlatformFlag } from '../lib/feature-lifecycle-helpers.js'
+import { apiGetContextualArticles, apiGetPlatformAdminToken } from '../fixtures/api.js'
+import { setPlatformFlag } from '../lib/feature-lifecycle-helpers.js'
 import { withPlatformSettingsLock } from '../lib/platform-feature-matrix-helpers.js'
 
 async function enableMarketingContent() {
-  const email = `help-widget-ga-${Date.now()}@test.invalid`
-  const password = 'E2eTestPass1!help-widget'
-  await apiSignup({ email, password })
-  await bootstrapGlobalAdmin(email)
-  const ga = await apiLogin({ email, password })
+  // The platform-settings lock can be held by another worker longer than the default hook timeout.
+  test.setTimeout(120_000)
+  const token = await apiGetPlatformAdminToken()
   // Take the cross-worker lock so we do not race other platform-settings writers.
   // Intentionally leave the flag on for the suite (no restore).
   await withPlatformSettingsLock(async () => {
-    await setPlatformFlag(ga.access_token, 'ffMarketingContent', true)
+    await setPlatformFlag(token, 'ffMarketingContent', true)
   })
 }
 
