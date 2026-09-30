@@ -8,10 +8,15 @@ import (
 )
 
 func TestParentAttendanceSummary(t *testing.T) {
+	// Use dates relative to now so the rolling 3-month term window stays valid.
+	now := time.Now().UTC()
+	d0 := now.AddDate(0, 0, -1)
+	d1 := now.AddDate(0, 0, -2)
+	d2 := now.AddDate(0, 0, -3)
 	records := []attendance.Record{
-		{Date: mustDate("2026-07-01"), Code: "P", CodeLabel: "Present", Category: "present"},
-		{Date: mustDate("2026-06-30"), Code: "A", CodeLabel: "Absent", Category: "absent"},
-		{Date: mustDate("2026-06-29"), Code: "T", CodeLabel: "Tardy", Category: "tardy"},
+		{Date: d0, Code: "P", CodeLabel: "Present", Category: "present"},
+		{Date: d1, Code: "A", CodeLabel: "Absent", Category: "absent"},
+		{Date: d2, Code: "T", CodeLabel: "Tardy", Category: "tardy"},
 	}
 	summary := parentAttendanceSummary(records, 2)
 	if summary.Present != 1 || summary.Absent != 1 || summary.Tardy != 1 {
@@ -20,7 +25,7 @@ func TestParentAttendanceSummary(t *testing.T) {
 	if len(summary.RecentDays) != 2 {
 		t.Fatalf("recent days want 2 got %d", len(summary.RecentDays))
 	}
-	if summary.RecentDays[0].Date != "2026-07-01" {
+	if summary.RecentDays[0].Date != d0.Format("2006-01-02") {
 		t.Fatalf("recent order: %+v", summary.RecentDays)
 	}
 }

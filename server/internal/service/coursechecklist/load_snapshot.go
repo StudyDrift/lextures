@@ -164,9 +164,6 @@ func loadSnapshot(ctx context.Context, pool *pgxpool.Pool, courseCode string, ne
 	if err := loadCourseMarkers(ctx, pool, courseID, pub, &snap, count); err != nil {
 		return CourseSnapshot{}, err
 	}
-	if err := enrichOrgIsK12(ctx, pool, &snap, count); err != nil {
-		return CourseSnapshot{}, err
-	}
 
 	if hasDataNeed(needs, DataNeedStructure) {
 		items, err := coursestructure.ListForCourse(ctx, pool, courseID)
