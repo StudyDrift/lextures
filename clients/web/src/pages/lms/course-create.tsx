@@ -14,6 +14,7 @@ import {
   createModuleQuiz,
   dedupeOrgTermsForPicker,
   fetchOrgTerms,
+  fetchOrgType,
   patchCourseOutcome,
   patchCourseSyllabus,
   putCourse,
@@ -22,11 +23,11 @@ import {
   type SyllabusSection,
 } from '../../lib/courses-api'
 import { decodeJwtPayload } from '../../lib/jwt-payload'
-import { getAccessToken } from '../../lib/auth'
+import { getAccessToken, getAccountType } from '../../lib/auth'
 import { PERM_COURSE_CREATE } from '../../lib/rbac-api'
 import {
   COURSE_CREATE_STARTER_TEMPLATES,
-  HIGHER_ED_SYLLABUS_TEMPLATE_ID,
+  defaultSyllabusTemplateId,
   resolveSyllabusTemplateAfterBasics,
   templateSectionsToSyllabus,
 } from './course-create-templates'
@@ -35,6 +36,10 @@ import { GradeLevelMultiSelect } from '../../components/lms/grade-level-multi-se
 
 const BLANK_TEMPLATE_ID = 'blank'
 const TOTAL_STEPS = 4
+
+function viewerPrefersFamilySyllabus(): boolean {
+  return getAccountType() === 'parent'
+}
 
 type CourseMode = 'traditional' | 'competency_based'
 
@@ -91,7 +96,10 @@ export default function CourseCreate() {
   const [description, setDescription] = useState('')
   const [courseMode, setCourseMode] = useState<CourseMode>('traditional')
   const [createdCourse, setCreatedCourse] = useState<CoursePublic | null>(null)
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string>(HIGHER_ED_SYLLABUS_TEMPLATE_ID)
+  const [familyOrg, setFamilyOrg] = useState(false)
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>(() =>
+    defaultSyllabusTemplateId([], viewerPrefersFamilySyllabus()),
+  )
   const [firstModuleTitle, setFirstModuleTitle] = useState('')
   const [competencies, setCompetencies] = useState<CompetencyDraft[]>(() => [emptyCompetency()])
   const [submitting, setSubmitting] = useState(false)
@@ -101,6 +109,23 @@ export default function CourseCreate() {
   const [selectedTermId, setSelectedTermId] = useState<string>('')
   const [selectedGradeLevels, setSelectedGradeLevels] = useState<string[]>([])
   const [skipFirstModule, setSkipFirstModule] = useState(false)
+
+  useEffect(() => {
+    if (!orgId || viewerPrefersFamilySyllabus()) return
+    let cancelled = false
+    void fetchOrgType(orgId)
+      .then((orgType) => {
+        if (cancelled || orgType !== 'k-12') return
+        setFamilyOrg(true)
+        setSelectedTemplateId((prev) =>
+          resolveSyllabusTemplateAfterBasics(prev, selectedGradeLevels, true),
+        )
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [orgId, selectedGradeLevels])
 
   useEffect(() => {
     if (!orgId) return
@@ -155,7 +180,13 @@ export default function CourseCreate() {
         })
         setCreatedCourse(course)
       }
-      setSelectedTemplateId((prev) => resolveSyllabusTemplateAfterBasics(prev, selectedGradeLevels))
+      setSelectedTemplateId((prev) =>
+        resolveSyllabusTemplateAfterBasics(
+          prev,
+          selectedGradeLevels,
+          viewerPrefersFamilySyllabus() || familyOrg,
+        ),
+      )
       setStep(2)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not save.')

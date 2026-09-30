@@ -19,14 +19,15 @@ export type CourseCreateStarterTemplate = {
 export const COURSE_CREATE_STARTER_TEMPLATES: CourseCreateStarterTemplate[] = [
   {
     id: 'k12-semester',
-    name: 'K–12',
-    summary: 'Term dates, grading categories, expectations, and contact — tuned for secondary classes.',
+    name: 'Homeschool / K–12',
+    summary:
+      'Family schedule, flexible pacing, and parent support for a learner at home or in class.',
     suggestedFirstModuleTitle: 'Unit 1: Getting started',
     sections: [
       {
         heading: 'Course overview',
         markdown:
-          'Briefly describe what students will learn this term and how day-to-day class time is structured.\n\n- **Big ideas**:\n- **Major projects or exams**:\n',
+          'Briefly describe what the learner will work on and how the family will pace the week. Use a flexible pace that fits your home schedule.\n\n- **Big ideas**:\n- **Projects or checkpoints**:\n',
       },
       {
         heading: 'Materials & technology',
@@ -36,17 +37,17 @@ export const COURSE_CREATE_STARTER_TEMPLATES: CourseCreateStarterTemplate[] = [
       {
         heading: 'Grading',
         markdown:
-          'Explain how the gradebook categories work and how families can check progress.\n\n- **Formative vs summative**:\n- **Late work**:\n- **Retakes or revisions**:\n',
+          'Explain how you will tell that the learner is making progress, and how a parent can check in.\n\n- **Practice vs finished work**:\n- **Missed days**:\n- **Revisions**:\n',
       },
       {
-        heading: 'Classroom expectations',
+        heading: 'How we work together',
         markdown:
-          'Norms for participation, discussion, academic honesty, and communication.\n\n1. **Respect** — listen and assume good intent.\n2. **Readiness** — arrive with materials.\n3. **Integrity** — cite sources; complete your own work.\n',
+          'Agreements for the learner and the parent: asking for help, honest work, and what a hard day looks like.\n\n1. **Respect** — assume good intent.\n2. **Readiness** — have materials before you start.\n3. **Integrity** — cite sources; the learner does their own work.\n',
       },
       {
-        heading: 'Contact & support',
+        heading: 'Parent support',
         markdown:
-          'Best way to reach you, typical response time, and how to request extra help or accommodations.\n\n- **Email**:\n- **Office hours**:\n- **School resources**:\n',
+          'How a parent can reach you, how quickly you reply, and where to get extra help.\n\n- **Email**:\n- **Check-in times**:\n- **Extra help**:\n',
       },
     ],
   },
@@ -177,15 +178,20 @@ export const COURSE_CREATE_STARTER_TEMPLATES: CourseCreateStarterTemplate[] = [
 /** Default Higher ed syllabus scaffold (15-week style). */
 export const HIGHER_ED_SYLLABUS_TEMPLATE_ID = 'higher-ed-15-week'
 
-/** Default K–12 syllabus scaffold (also used when grade levels are set; no separate Homeschool template yet). */
+/** Homeschool / K–12 syllabus scaffold. Higher ed keeps the campus template. */
 export const K12_SYLLABUS_TEMPLATE_ID = 'k12-semester'
 
 /**
- * Pick the syllabus template to pre-select from step-1 grade levels.
- * Any selected K–12 grade → K–12 template; otherwise Higher ed.
+ * Pick the syllabus template to pre-select.
+ * Grade levels, a homeschool parent, or a K–12 org → family scaffold; otherwise Higher ed.
  */
-export function defaultSyllabusTemplateId(gradeLevels: string[]): string {
-  return gradeLevels.length > 0 ? K12_SYLLABUS_TEMPLATE_ID : HIGHER_ED_SYLLABUS_TEMPLATE_ID
+export function defaultSyllabusTemplateId(
+  gradeLevels: string[],
+  familyAudience = false,
+): string {
+  return gradeLevels.length > 0 || familyAudience
+    ? K12_SYLLABUS_TEMPLATE_ID
+    : HIGHER_ED_SYLLABUS_TEMPLATE_ID
 }
 
 /**
@@ -195,8 +201,9 @@ export function defaultSyllabusTemplateId(gradeLevels: string[]): string {
 export function resolveSyllabusTemplateAfterBasics(
   currentTemplateId: string,
   gradeLevels: string[],
+  familyAudience = false,
 ): string {
-  const next = defaultSyllabusTemplateId(gradeLevels)
+  const next = defaultSyllabusTemplateId(gradeLevels, familyAudience)
   if (
     currentTemplateId === HIGHER_ED_SYLLABUS_TEMPLATE_ID ||
     currentTemplateId === K12_SYLLABUS_TEMPLATE_ID

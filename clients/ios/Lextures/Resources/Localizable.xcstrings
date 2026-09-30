@@ -80382,31 +80382,31 @@
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "K–12"
+            "value": "Homeschool / K–12"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "K–12"
+            "value": "Homeschool / K–12"
           }
         },
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "[K–12]"
+            "value": "[Homeschool / K–12]"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "K–12"
+            "value": "Homeschool / K–12"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "K–12"
+            "value": "Homeschool / K–12"
           }
         }
       }
@@ -80416,31 +80416,31 @@
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "Term dates, grading categories, expectations, and contact — tuned for secondary classes."
+            "value": "Family schedule, flexible pacing, and parent support for a learner at home or in class."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Term dates, grading categories, expectations, and contact — tuned for secondary classes."
+            "value": "Family schedule, flexible pacing, and parent support for a learner at home or in class."
           }
         },
         "en-XA": {
           "stringUnit": {
             "state": "translated",
-            "value": "[Term dates, grading categories, expectations, and contact — tuned for secondary classes.]"
+            "value": "[Family schedule, flexible pacing, and parent support for a learner at home or in class.]"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Term dates, grading categories, expectations, and contact — tuned for secondary classes."
+            "value": "Family schedule, flexible pacing, and parent support for a learner at home or in class."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Term dates, grading categories, expectations, and contact — tuned for secondary classes."
+            "value": "Family schedule, flexible pacing, and parent support for a learner at home or in class."
           }
         }
       }

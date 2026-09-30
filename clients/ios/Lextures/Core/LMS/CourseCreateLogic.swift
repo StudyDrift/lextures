@@ -164,7 +164,7 @@ enum CourseCreateLogic {
             sections: [
                 TemplateSection(
                     heading: "Course overview",
-                    markdown: "Briefly describe what students will learn this term and how day-to-day class time is structured.\n\n- **Big ideas**:\n- **Major projects or exams**:\n"
+                    markdown: "Briefly describe what the learner will work on and how the family will pace the week. Use a flexible pace that fits your home schedule.\n\n- **Big ideas**:\n- **Projects or checkpoints**:\n"
                 ),
                 TemplateSection(
                     heading: "Materials & technology",
@@ -172,16 +172,16 @@ enum CourseCreateLogic {
                 ),
                 TemplateSection(
                     heading: "Grading",
-                    markdown: "Explain how the gradebook categories work and how families can check progress.\n\n- **Formative vs summative**:\n- **Late work**:\n- **Retakes or revisions**:\n"
+                    markdown: "Explain how you will tell that the learner is making progress, and how a parent can check in.\n\n- **Practice vs finished work**:\n- **Missed days**:\n- **Revisions**:\n"
                 ),
                 TemplateSection(
-                    heading: "Classroom expectations",
-                    markdown: "Norms for participation, discussion, academic honesty, and communication.\n\n" +
-                        "1. **Respect** — listen and assume good intent.\n2. **Readiness** — arrive with materials.\n3. **Integrity** — cite sources; complete your own work.\n"
+                    heading: "How we work together",
+                    markdown: "Agreements for the learner and the parent: asking for help, honest work, and what a hard day looks like.\n\n" +
+                        "1. **Respect** — assume good intent.\n2. **Readiness** — have materials before you start.\n3. **Integrity** — cite sources; the learner does their own work.\n"
                 ),
                 TemplateSection(
-                    heading: "Contact & support",
-                    markdown: "Best way to reach you, typical response time, and how to request extra help or accommodations.\n\n- **Email**:\n- **Office hours**:\n- **School resources**:\n"
+                    heading: "Parent support",
+                    markdown: "How a parent can reach you, how quickly you reply, and where to get extra help.\n\n- **Email**:\n- **Check-in times**:\n- **Extra help**:\n"
                 ),
             ]
         ),
