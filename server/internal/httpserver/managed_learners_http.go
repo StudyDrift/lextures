@@ -25,6 +25,7 @@ func (d Deps) managedLearnersEnabled(w http.ResponseWriter) bool {
 
 func (d Deps) registerManagedLearnersRoutes(r chi.Router) {
 	r.Get("/api/v1/me/dependents", d.handleListDependents())
+	r.Get("/api/v1/me/dependents/courses", d.handleListDependentCourses())
 	r.Post("/api/v1/me/dependents", d.handleCreateDependent())
 	// Static session exit before parameterized routes.
 	r.Delete("/api/v1/me/dependents/sessions/current", d.handleEndDependentSession())
@@ -94,6 +95,27 @@ func (d Deps) handleListDependents() http.HandlerFunc {
 			list = []managedlearners.Dependent{}
 		}
 		writeJSON(w, http.StatusOK, map[string]any{"dependents": list})
+	}
+}
+
+func (d Deps) handleListDependentCourses() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if !d.managedLearnersEnabled(w) {
+			return
+		}
+		actor, ok := d.meSessionUserID(w, r)
+		if !ok {
+			return
+		}
+		list, err := managedlearners.ListCourseEnrollments(r.Context(), d.Pool, actor)
+		if err != nil {
+			writeManagedLearnersErr(w, err)
+			return
+		}
+		if list == nil {
+			list = []managedlearners.DependentCourseEnrollment{}
+		}
+		writeJSON(w, http.StatusOK, map[string]any{"enrollments": list})
 	}
 }
 

@@ -13,6 +13,24 @@ export type ManagedDependent = {
   createdAt: string
 }
 
+export type DependentCourseEnrollment = {
+  dependentId: string
+  displayName: string
+  courseCode: string
+  courseTitle: string
+  enrollmentId: string
+}
+
+export async function listDependentCourses(): Promise<DependentCourseEnrollment[]> {
+  const res = await authorizedFetch('/api/v1/me/dependents/courses')
+  if (!res.ok) {
+    const raw = await res.json().catch(() => ({}))
+    throw new Error((raw as { error?: { message?: string } })?.error?.message || 'Failed to load learner courses')
+  }
+  const data = (await res.json()) as { enrollments?: DependentCourseEnrollment[] }
+  return data.enrollments ?? []
+}
+
 export async function listDependents(): Promise<ManagedDependent[]> {
   const res = await authorizedFetch('/api/v1/me/dependents')
   if (!res.ok) {

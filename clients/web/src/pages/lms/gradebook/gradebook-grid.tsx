@@ -93,6 +93,8 @@ type GradebookGridProps = {
   postGradesPending?: string | null
   /** Plan 3.17 — active curves by column id. */
   activeCurves?: Record<string, { curveId: string; method: string; appliedAt: string }>
+  /** Homeschool / K–12 / managed-learner wording for filters and empty states. */
+  familyLabels?: boolean
   /** Open curve dialog for a column. */
   onCurveGrades?: (columnId: string) => void
   /** Plan 14.4 — open grant/resolve incomplete modal for a student row. */
@@ -275,8 +277,11 @@ export function GradebookGrid({
   activeCurves = undefined,
   onCurveGrades,
   onIncompleteAction,
+  familyLabels = false,
 }: GradebookGridProps) {
   const density = useUiDensity()
+  const personLabel = familyLabels ? 'Learner' : 'Student'
+  const peopleLabel = familyLabels ? 'learners' : 'students'
   const pad = gradebookCellPad(density)
   const stickyNameWidth = gradebookStickyNameWidthClass(density)
   const stickyFinalLeft = gradebookStickyFinalLeftClass(density)
@@ -1179,7 +1184,7 @@ export function GradebookGrid({
         >
           <span className="inline-flex items-center gap-2">
             <Users className="h-4 w-4 text-fg-muted" aria-hidden />
-            Former students ({formerStudents.length})
+            Former {peopleLabel} ({formerStudents.length})
           </span>
           <ChevronDown
             className={`h-4 w-4 shrink-0 transition-transform ${formerCollapsed ? '' : 'rotate-180'}`}
@@ -1192,7 +1197,7 @@ export function GradebookGrid({
               <thead>
                 <tr className="border-b border-border-default bg-surface-base dark:border-border-default dark:bg-surface-overlay">
                   <th scope="col" className="px-4 py-2 text-start font-medium text-fg-muted">
-                    Student
+                    {personLabel}
                   </th>
                   <th scope="col" className="px-4 py-2 text-start font-medium text-fg-muted">
                     Status
@@ -1235,7 +1240,7 @@ export function GradebookGrid({
               </tbody>
             </table>
             <p className="px-4 py-2 text-xs text-fg-muted">
-              Former students are read-only; grades are retained for transcript history.
+              Former {peopleLabel} are read-only; grades are retained for transcript history.
             </p>
           </div>
         )}
@@ -1261,7 +1266,7 @@ export function GradebookGrid({
       <div className="mt-6">
         <EmptyState
           icon={Users}
-          title="No students in this course yet"
+          title={familyLabels ? 'No learners in this course yet' : 'No students in this course yet'}
           body={
             baseColCount > 0 ? (
               <>
@@ -1269,8 +1274,14 @@ export function GradebookGrid({
                   {columns.length} assignment or quiz column{columns.length === 1 ? '' : 's'} will show scores here
                   once learners are enrolled.
                 </span>
-                <span className="mt-2 block">Invite students from enrollments so the gradebook has rows.</span>
+                <span className="mt-2 block">
+                  {familyLabels
+                    ? 'Enroll a learner so their scores show up here.'
+                    : 'Invite students from enrollments so the gradebook has rows.'}
+                </span>
               </>
+            ) : familyLabels ? (
+              'Enroll a learner, then add graded work in modules.'
             ) : (
               'Invite learners as students from enrollments, then add graded work in modules.'
             )
@@ -1303,14 +1314,14 @@ export function GradebookGrid({
     <div className="mt-6 space-y-3">
       <div className="flex flex-wrap items-end gap-4 rounded-xl border border-border-default bg-slate-50/80 px-4 py-3 dark:border-border-default/50">
         <label className="flex min-w-[10rem] flex-1 flex-col gap-1">
-          <span className="text-xs font-medium text-fg-muted">Student</span>
+          <span className="text-xs font-medium text-fg-muted">{personLabel}</span>
           <input
             type="search"
             className={filterInputClass}
             value={studentFilter}
             onChange={(e) => setStudentFilter(e.target.value)}
-            placeholder="Search by student name…"
-            aria-label="Filter students by name"
+            placeholder={familyLabels ? 'Search by learner name…' : 'Search by student name…'}
+            aria-label={familyLabels ? 'Filter learners by name' : 'Filter students by name'}
             autoComplete="off"
           />
         </label>
@@ -1389,7 +1400,7 @@ export function GradebookGrid({
 
       {rowCount === 0 && (
         <p className="text-sm text-fg-muted">
-          No students match &quot;{studentFilter.trim() || '…'}&quot;. Try a different search or clear filters.
+          {familyLabels ? 'No learners match' : 'No students match'} &quot;{studentFilter.trim() || '…'}&quot;. Try a different search or clear filters.
         </p>
       )}
 
@@ -1472,7 +1483,7 @@ export function GradebookGrid({
                     }}
                   >
                     <span className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
-                      Student
+                      {personLabel}
                     </span>
                     <ChevronDown className="size-3.5 shrink-0 opacity-70" aria-hidden />
                   </button>

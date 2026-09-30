@@ -8,14 +8,44 @@ import { usePlatformFeatures } from '../../context/platform-features-context'
 import {
   createDependent,
   deleteDependent,
+  listDependentCourses,
   listDependents,
   startLearnAs,
+  type DependentCourseEnrollment,
   type ManagedDependent,
 } from '../../lib/managed-learners-api'
+
+function LearnerCourseLinks({
+  dependentId,
+  courses,
+}: {
+  dependentId: string
+  courses: DependentCourseEnrollment[]
+}) {
+  const mine = courses.filter((course) => course.dependentId === dependentId)
+  if (mine.length === 0) {
+    return <p className="text-xs text-fg-muted">Not enrolled in a course yet.</p>
+  }
+  return (
+    <ul className="mt-1 space-y-1">
+      {mine.map((course) => (
+        <li key={course.enrollmentId}>
+          <Link
+            to={`/courses/${encodeURIComponent(course.courseCode)}/students/${encodeURIComponent(course.enrollmentId)}/progress`}
+            className="text-xs font-medium text-accent-fg hover:underline"
+          >
+            Progress in {course.courseTitle}
+          </Link>
+        </li>
+      ))}
+    </ul>
+  )
+}
 
 export default function LearnersPage() {
   const { ffHomeschoolManagedLearners, loading: featuresLoading } = usePlatformFeatures()
   const [deps, setDeps] = useState<ManagedDependent[]>([])
+  const [courses, setCourses] = useState<DependentCourseEnrollment[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [name, setName] = useState('')
@@ -29,7 +59,9 @@ export default function LearnersPage() {
     setLoading(true)
     setError(null)
     try {
-      setDeps(await listDependents())
+      const [nextDeps, nextCourses] = await Promise.all([listDependents(), listDependentCourses()])
+      setDeps(nextDeps)
+      setCourses(nextCourses)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load learners')
     } finally {
@@ -187,6 +219,7 @@ export default function LearnersPage() {
                       {d.gradeLevel ? `Grade ${d.gradeLevel}` : 'No grade'}
                       {d.coppaMinor ? ' · Under 13' : ''}
                     </p>
+                    <LearnerCourseLinks dependentId={d.id} courses={courses} />
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">

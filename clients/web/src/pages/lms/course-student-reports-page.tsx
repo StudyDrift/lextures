@@ -1,13 +1,18 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Link, Navigate, useParams } from 'react-router-dom'
+import { Link, Navigate, useOutletContext, useParams, useSearchParams } from 'react-router-dom'
 import { BarChart3, ChevronRight } from 'lucide-react'
+import { LearnerProgressCards } from '../../components/lms/learner-progress-cards'
+import { LearnerSwitcher } from '../../components/lms/learner-switcher'
 import { usePermissions } from '../../context/use-permissions'
 import { usePlatformFeatures } from '../../context/platform-features-context'
+import { useFamilyProgressAudience } from '../../hooks/use-family-audience'
 import {
   courseGradebookViewPermission,
   fetchCourseEnrollmentsList,
   type CourseEnrollmentRosterRow,
+  type CoursePublic,
 } from '../../lib/courses-api'
+import { progressSurfaceCopy } from '../../lib/family-progress-copy'
 import { LmsPage } from './lms-page'
 
 function normEnrollmentRole(role: string): string {
@@ -23,8 +28,17 @@ function studentDisplayName(row: CourseEnrollmentRosterRow): string {
   return row.displayName?.trim() || '—'
 }
 
+function sectionLabel(row: CourseEnrollmentRosterRow): string | null {
+  const code = row.sectionCode?.trim()
+  if (!code) return null
+  const name = row.sectionName?.trim()
+  return name ? `${code} (${name})` : code
+}
+
 export default function CourseStudentReportsPage() {
   const { courseCode } = useParams<{ courseCode: string }>()
+  const outlet = useOutletContext<{ course?: CoursePublic | null } | null>()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { studentProgressEnabled, loading: featuresLoading } = usePlatformFeatures()
   const { allows, loading: permLoading } = usePermissions()
   const canViewGradebook =
@@ -59,6 +73,15 @@ export default function CourseStudentReportsPage() {
     () => students?.some((s) => s.sectionCode?.trim()) ?? false,
     [students],
   )
+  const rosterUserIds = useMemo(() => (students ?? []).map((s) => s.userId), [students])
+  const familyProgress = useFamilyProgressAudience(outlet?.course ?? null, rosterUserIds)
+  const copy = progressSurfaceCopy(familyProgress)
+  const selectedLearner = searchParams.get('learner')?.trim() ?? ''
+  const visibleStudents = useMemo(() => {
+    if (!students) return students
+    if (!familyProgress || !selectedLearner) return students
+    return students.filter((student) => student.id === selectedLearner)
+  }, [familyProgress, selectedLearner, students])
 
   if (!courseCode) {
     return <Navigate to="/courses" replace />
@@ -89,7 +112,7 @@ export default function CourseStudentReportsPage() {
             Reports
           </h1>
           <p className="mt-2 max-w-2xl text-xs text-fg-muted">
-            Student progress reports for course {courseCode}. Select a student to view their report.
+            {copy.reportsDescription(courseCode)}
           </p>
         </div>
       }
@@ -101,19 +124,52 @@ export default function CourseStudentReportsPage() {
       ) : null}
 
       {students === null && !error ? (
-        <p className="mt-8 text-sm text-fg-muted">Loading students…</p>
+        <p className="mt-8 text-sm text-fg-muted">{copy.reportsLoading}</p>
       ) : null}
 
       {students && students.length === 0 && !error ? (
-        <p className="mt-8 text-sm text-fg-muted">No students enrolled yet.</p>
+        <p className="mt-8 text-sm text-fg-muted">{copy.reportsEmpty}</p>
       ) : null}
 
-      {students && students.length > 0 ? (
+      {familyProgress && students && students.length > 0 ? (
+        <>
+          <LearnerSwitcher
+            label={copy.learnerSwitcherLabel}
+            allLabel={copy.allLearners}
+            value={selectedLearner}
+            learners={students.map((student) => ({
+              id: student.id,
+              name: studentDisplayName(student),
+            }))}
+            onChange={(id) => {
+              const next = new URLSearchParams(searchParams)
+              if (id) next.set('learner', id)
+              else next.delete('learner')
+              setSearchParams(next, { replace: true })
+            }}
+          />
+          {visibleStudents && visibleStudents.length > 0 ? (
+            <LearnerProgressCards
+              courseCode={courseCode}
+              loadSummaries={visibleStudents.length <= 8}
+              learners={visibleStudents.map((student) => ({
+                enrollmentId: student.id,
+                name: studentDisplayName(student),
+                sectionLabel: sectionLabel(student),
+              }))}
+            />
+          ) : (
+            <p className="mt-6 text-sm text-fg-muted">That learner is not enrolled in this course.</p>
+          )}
+        </>
+      ) : null}
+
+      {!familyProgress && students && students.length > 0 ? (
         <div className="mt-8 overflow-x-auto rounded-xl border border-border-default bg-surface-raised shadow-sm dark:border-border-default dark:bg-surface-raised">
           <table className="w-full min-w-[16rem] text-start text-sm">
             <thead>
               <tr className="border-b border-border-default bg-surface-base text-xs font-semibold uppercase tracking-wide text-fg-muted dark:border-border-default/60 dark:text-fg-muted">
-                <th className="px-4 py-3">Student</th>
+                <th className="px-4 py-3">{copy.reportsColumn}</th>
                 {sectionsEnabled ? <th className="px-4 py-3">Section</th> : null}
                 <th className="px-2 py-3 text-end font-normal" aria-label="Actions" />
               </tr>

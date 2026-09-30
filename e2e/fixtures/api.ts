@@ -86,7 +86,7 @@ export async function apiGetCourse(
 
 export async function apiCreateCourse(
   token: string,
-  payload: { title: string; description?: string },
+  payload: { title: string; description?: string; gradeLevels?: string[] },
 ): Promise<{ courseCode: string; id: string; title: string }> {
   const res = await fetch(`${apiBase}/api/v1/courses`, {
     method: 'POST',
