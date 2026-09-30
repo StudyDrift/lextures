@@ -5,6 +5,7 @@ import { ChecklistProgressBar } from '../../../components/checklist/checklist-pr
 import type { ChecklistItem } from '../../../lib/course-checklist-api-schemas'
 import { isDoneStatus } from '../../../lib/course-checklist-api-schemas'
 import { courseChecklistI18n } from '../../../lib/course-checklist-i18n'
+import { isFamilyChecklist } from '../../../lib/family-checklist-copy'
 import { draftWelcomeAnnouncement } from '../../../lib/course-checklist-api'
 import { emitChecklistTelemetry } from '../../../lib/checklist-telemetry'
 import { formatTimeAgoFromIso } from '../../../lib/format-time-ago'
@@ -153,13 +154,15 @@ export default function CourseChecklistPage() {
   }
 
   const summary = page.data?.summary
+  const family = isFamilyChecklist(page.data?.categories)
+  const pageTitle = family ? courseChecklistI18n.familyPageTitle : courseChecklistI18n.pageTitle
   const checkedLabel = summary
     ? courseChecklistI18n.checkedAgo(formatTimeAgoFromIso(summary.computedAt).toLowerCase())
     : undefined
 
   return (
     <LmsPage
-      title={courseChecklistI18n.pageTitle}
+      title={pageTitle}
       actions={
         <button
           type="button"
@@ -208,10 +211,10 @@ export default function CourseChecklistPage() {
           {page.allDone ? (
             <div className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50/80 p-5 dark:border-emerald-900 dark:bg-emerald-950/30">
               <p className="text-base font-semibold text-emerald-900 dark:text-emerald-100">
-                {courseChecklistI18n.allDoneTitle}
+                {family ? courseChecklistI18n.familyAllDoneTitle : courseChecklistI18n.allDoneTitle}
               </p>
               <p className="mt-1 text-sm text-emerald-800 dark:text-emerald-200">
-                {courseChecklistI18n.allDoneBody}
+                {family ? courseChecklistI18n.familyAllDoneBody : courseChecklistI18n.allDoneBody}
               </p>
               {summary.done > 0 ? (
                 <button
@@ -283,6 +286,7 @@ export default function CourseChecklistPage() {
         itemTitle={page.dismissTarget?.title ?? ''}
         busy={page.dismissBusy}
         error={page.dismissError}
+        family={family}
         onClose={() => page.setDismissTarget(null)}
         onConfirm={(body) => void page.onDismissConfirm(body)}
       />

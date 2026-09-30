@@ -14,28 +14,28 @@ type CourseSnapshot struct {
 	CourseID   uuid.UUID
 
 	// Course (DataNeedCourse)
-	Title                   string
-	Description             string
-	Published               bool
-	StartsAt                *time.Time
-	EndsAt                  *time.Time
-	VisibleFrom             *time.Time
-	HiddenAt                *time.Time
-	CourseTimezone          *string
-	ScheduleMode            string
-	SectionsEnabled         bool
-	FeedEnabled             bool
-	FilesEnabled            bool
-	SbgEnabled              bool
-	SbgProficiencyScaleJSON json.RawMessage
-	ModuleGatingEnabled     bool
-	StandardsEnabled        bool
-	CourseType              string
-	CourseMode              string
-	HeroImageURL            *string
-	CourseHomeLanding       string
-	CourseHomeContentItemID *string
-	CreatedAt               time.Time
+	Title                       string
+	Description                 string
+	Published                   bool
+	StartsAt                    *time.Time
+	EndsAt                      *time.Time
+	VisibleFrom                 *time.Time
+	HiddenAt                    *time.Time
+	CourseTimezone              *string
+	ScheduleMode                string
+	SectionsEnabled             bool
+	FeedEnabled                 bool
+	FilesEnabled                bool
+	SbgEnabled                  bool
+	SbgProficiencyScaleJSON     json.RawMessage
+	ModuleGatingEnabled         bool
+	StandardsEnabled            bool
+	CourseType                  string
+	CourseMode                  string
+	HeroImageURL                *string
+	CourseHomeLanding           string
+	CourseHomeContentItemID     *string
+	CreatedAt                   time.Time
 	FeaturesReviewedAt          *time.Time
 	AccommodationsReviewedAt    *time.Time
 	IntegritySettingsReviewedAt *time.Time
@@ -49,6 +49,8 @@ type CourseSnapshot struct {
 	HomeschoolMode              bool // true when OrgID is nil (personal / single-instructor)
 	ParentPortalEnabled         bool
 	OrgIsK12                    bool
+	CreatorIsParent             bool // course creator account_type is parent
+	HasManagedLearner           bool // an enrolled user has account_type managed
 	GradeLevels                 []string
 	MarkdownThemePreset         string
 	MarkdownThemeCustom         json.RawMessage
@@ -105,9 +107,9 @@ type CourseSnapshot struct {
 	Sections []SectionSnap
 
 	// Accommodations (DataNeedAccommodations) — counts/types only; never student IDs (CC.5)
-	AccommodationCount       int
-	AccommodationTypeCounts  []AccommodationTypeCount
-	LatestAccommodationAt    *time.Time
+	AccommodationCount      int
+	AccommodationTypeCounts []AccommodationTypeCount
+	LatestAccommodationAt   *time.Time
 
 	// Assessment item details (DataNeedAssessmentItems)
 	AssessmentItems []AssessmentItemSnap
@@ -116,7 +118,7 @@ type CourseSnapshot struct {
 	PeerReviewConfigs []PeerReviewConfigSnap
 
 	// Discussions (DataNeedDiscussions)
-	DiscussionForumCount int
+	DiscussionForumCount  int
 	DiscussionPromptCount int
 
 	// Office hours (DataNeedOfficeHours)

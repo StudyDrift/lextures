@@ -21,10 +21,12 @@ const (
 	CategoryAccessibility CategoryID = "accessibility"
 	CategoryLaunch        CategoryID = "launch"
 	CategoryReference     CategoryID = "reference" // CC.1 reference rules only
+	CategoryFamily        CategoryID = "family"    // Homeschool / K–12 setup pack (#654)
 )
 
 // CategoryOrder is the deterministic category display order.
 var CategoryOrder = []CategoryID{
+	CategoryFamily,
 	CategoryFoundations,
 	CategoryOrientation,
 	CategoryStructure,

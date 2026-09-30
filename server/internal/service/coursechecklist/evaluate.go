@@ -51,6 +51,11 @@ func Evaluate(ctx context.Context, snap CourseSnapshot, opt EvaluateOptions) Res
 	for _, it := range items {
 		findings = append(findings, evaluateOne(ctx, snap, it))
 	}
+	// Homeschool, K–12, parent-created, and managed-learner courses replace the
+	// institutional pack with a short family setup list (#654).
+	if familyChecklistAudience(snap) {
+		findings = projectFamilyFindings(snap, findings)
+	}
 
 	// Deterministic category-then-registry order (already registry-ordered; re-group for counts).
 	res := Result{
@@ -479,7 +484,7 @@ func courseCodeForID(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID
 // hideCampusRubricSources is true for Homeschool / K–12 audiences where QM and
 // OSCQR codes are opaque to parents and teachers.
 func hideCampusRubricSources(snap CourseSnapshot) bool {
-	return snap.HomeschoolMode || snap.OrgIsK12
+	return familyChecklistAudience(snap)
 }
 
 // isCampusRubricSource reports whether a checklist source tag is a college

@@ -15,6 +15,8 @@ type ChecklistDismissDialogProps = {
   itemTitle: string
   busy?: boolean
   error?: string | null
+  /** Family setup uses plain dismiss copy. */
+  family?: boolean
   onConfirm: (body: { reason: DismissReason; note?: string }) => void
   onClose: () => void
 }
@@ -24,6 +26,7 @@ export function ChecklistDismissDialog({
   itemTitle,
   busy,
   error,
+  family,
   onConfirm,
   onClose,
 }: ChecklistDismissDialogProps) {
@@ -122,7 +125,7 @@ export function ChecklistDismissDialog({
           {courseChecklistI18n.dismissDialogTitle}
         </h2>
         <p id={descId} className="mt-1 text-sm text-fg-muted">
-          {courseChecklistI18n.dismissDialogHelp}
+          {family ? courseChecklistI18n.familyDismissDialogHelp : courseChecklistI18n.dismissDialogHelp}
         </p>
         <p className="mt-2 text-sm font-medium text-fg-default">{itemTitle}</p>
         <form className="mt-4 space-y-4" onSubmit={submit}>
@@ -155,7 +158,11 @@ export function ChecklistDismissDialog({
               maxLength={500}
               disabled={busy}
               rows={3}
-              placeholder={courseChecklistI18n.dismissNotePlaceholder}
+              placeholder={
+                family
+                  ? courseChecklistI18n.familyDismissNotePlaceholder
+                  : courseChecklistI18n.dismissNotePlaceholder
+              }
               onChange={(e) => setNote(e.target.value)}
               className="mt-1 w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base dark:text-fg-default"
             />

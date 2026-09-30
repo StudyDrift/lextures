@@ -19,6 +19,14 @@ func TestSourcesForAudience_HidesQmOscqrForHomeschoolAndK12(t *testing.T) {
 	}
 }
 
+func TestSourcesForAudience_HidesQmOscqrForParentCreator(t *testing.T) {
+	in := []string{"QM 1.1", "Product"}
+	got := sourcesForAudience(in, CourseSnapshot{CreatorIsParent: true})
+	if len(got) != 1 || got[0] != "Product" {
+		t.Fatalf("parent creator: got %#v", got)
+	}
+}
+
 func TestSourcesForAudience_KeepsCampusForHigherEd(t *testing.T) {
 	in := []string{"QM 1.1", "OSCQR 2", "WCAG 1.4.3"}
 	got := sourcesForAudience(in, CourseSnapshot{})
@@ -29,13 +37,13 @@ func TestSourcesForAudience_KeepsCampusForHigherEd(t *testing.T) {
 
 func TestIsCampusRubricSource(t *testing.T) {
 	cases := map[string]bool{
-		"QM 1.1":     true,
-		"QM 8.x":     true,
-		"OSCQR 2":    true,
-		"OSCQR 44":   true,
-		"WCAG 1.4.3": false,
-		"NSQ A":      false,
-		"Product":    false,
+		"QM 1.1":         true,
+		"QM 8.x":         true,
+		"OSCQR 2":        true,
+		"OSCQR 44":       true,
+		"WCAG 1.4.3":     false,
+		"NSQ A":          false,
+		"Product":        false,
 		"UDL Engagement": false,
 	}
 	for src, want := range cases {

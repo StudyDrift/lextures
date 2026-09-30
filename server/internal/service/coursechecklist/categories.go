@@ -17,6 +17,7 @@ var categoryMetaByID = map[CategoryID]CategoryMeta{
 	CategoryAccessibility: {TitleKey: "coursechecklist.category.accessibility", Title: "Accessibility"},
 	CategoryLaunch:        {TitleKey: "coursechecklist.category.launch", Title: "Launch readiness"},
 	CategoryReference:     {TitleKey: "coursechecklist.category.reference", Title: "Reference"},
+	CategoryFamily:        {TitleKey: "coursechecklist.category.family", Title: "Your course"},
 }
 
 // CategoryTitle returns title key + English default for a category.

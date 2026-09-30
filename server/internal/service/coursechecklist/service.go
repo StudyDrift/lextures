@@ -83,16 +83,23 @@ func (s *Service) GetSummary(ctx context.Context, courseCode string) (ChecklistS
 	now := s.now()
 	if !IsSnapshotStale(snap, engineV, catalogV, s.TTL, freshness, now) {
 		observeSnapshotHit("hit")
-		dismissedCount := snap.DismissedCount
-		if n, err := ccrepo.CountDismissed(ctx, s.Pool, courseID); err == nil {
-			dismissedCount = n
+		if res, _, err := decodeSnapshotPayload(snap.Payload); err == nil {
+			dismissed, err := ccrepo.ListDismissed(ctx, s.Pool, courseID)
+			if err != nil {
+				return ChecklistSummary{}, err
+			}
+			dismissedByID := make(map[string]ccrepo.ItemState, len(dismissed))
+			for _, st := range dismissed {
+				dismissedByID[st.ItemID] = st
+			}
+			return DeriveSummary(res, dismissedByID, snap.ComputedAt.UTC(), false), nil
 		}
 		return ChecklistSummary{
 			OutstandingEssential: snap.OutstandingEssential,
 			OutstandingTotal:     snap.OutstandingTotal,
 			Done:                 snap.DoneCount,
 			Total:                snap.TotalCount,
-			Dismissed:            dismissedCount,
+			Dismissed:            snap.DismissedCount,
 			ComputedAt:           snap.ComputedAt.UTC(),
 			Stale:                false,
 		}, nil
@@ -384,10 +391,6 @@ func (s *Service) evaluateOnly(ctx context.Context, courseID uuid.UUID, courseCo
 }
 
 func (s *Service) writeSnapshotBestEffort(ctx context.Context, courseID uuid.UUID, res Result, computedAt time.Time, truncated bool) error {
-	dismissedCount, err := ccrepo.CountDismissed(ctx, s.Pool, courseID)
-	if err != nil {
-		dismissedCount = 0
-	}
 	dismissed, err := ccrepo.ListDismissed(ctx, s.Pool, courseID)
 	if err != nil {
 		dismissed = nil
@@ -411,7 +414,7 @@ func (s *Service) writeSnapshotBestEffort(ctx context.Context, courseID uuid.UUI
 		DoneCount:            summary.Done,
 		OutstandingEssential: summary.OutstandingEssential,
 		OutstandingTotal:     summary.OutstandingTotal,
-		DismissedCount:       dismissedCount,
+		DismissedCount:       summary.Dismissed,
 	})
 }
 

@@ -32,7 +32,7 @@ const MaxEvidenceRows = 200
 
 // EngineVersionConst is the current evaluator contract version. Bump when Result
 // shape or evaluation semantics change in a way that invalidates cached snapshots (CC.2).
-const EngineVersionConst = 1
+const EngineVersionConst = 2
 
 // NavTarget describes where the UI should navigate for an actionable item (CC.8).
 type NavTarget struct {
@@ -62,11 +62,11 @@ const (
 // Endpoint is a relative API path template (e.g. "/api/v1/courses/{courseCode}/outcomes/suggest-links").
 // Clients that do not recognise Kind render nothing.
 type ItemAction struct {
-	Kind      ActionKind `json:"kind"`
-	LabelKey  string     `json:"labelKey"`
-	Label     string     `json:"label"`
-	Endpoint  string     `json:"endpoint"`
-	RequiresAI bool      `json:"requiresAi"`
+	Kind       ActionKind `json:"kind"`
+	LabelKey   string     `json:"labelKey"`
+	Label      string     `json:"label"`
+	Endpoint   string     `json:"endpoint"`
+	RequiresAI bool       `json:"requiresAi"`
 }
 
 // EvidenceRow is one offending (or exemplary) entity in a finding.

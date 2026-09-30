@@ -327,6 +327,9 @@ func loadSnapshot(ctx context.Context, pool *pgxpool.Pool, courseCode string, ne
 				SectionID:         p.SectionID,
 				Active:            p.Active,
 			})
+			if p.Managed {
+				snap.HasManagedLearner = true
+			}
 			if p.InvitationPending {
 				days := int(now.Sub(p.CreatedAt).Hours() / 24)
 				if days < 0 {

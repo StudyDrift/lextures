@@ -80,6 +80,7 @@ export function ChecklistCategorySection({
               onRecheck={onRecheck}
               onAssist={onAssist}
               hideAiActions={hideAiActions}
+              family={category.id === 'family'}
             />
           ))}
         </ul>
