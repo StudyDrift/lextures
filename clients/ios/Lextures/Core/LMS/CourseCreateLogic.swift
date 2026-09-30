@@ -164,7 +164,8 @@ enum CourseCreateLogic {
             sections: [
                 TemplateSection(
                     heading: "Course overview",
-                    markdown: "Briefly describe what the learner will work on and how the family will pace the week. Use a flexible pace that fits your home schedule.\n\n- **Big ideas**:\n- **Projects or checkpoints**:\n"
+                    markdown: "Briefly describe what the learner will work on and how the family will pace the week. " +
+                        "Use a flexible pace that fits your home schedule.\n\n- **Big ideas**:\n- **Projects or checkpoints**:\n"
                 ),
                 TemplateSection(
                     heading: "Materials & technology",
@@ -172,7 +173,8 @@ enum CourseCreateLogic {
                 ),
                 TemplateSection(
                     heading: "Grading",
-                    markdown: "Explain how you will tell that the learner is making progress, and how a parent can check in.\n\n- **Practice vs finished work**:\n- **Missed days**:\n- **Revisions**:\n"
+                    markdown: "Explain how you will tell that the learner is making progress, " +
+                        "and how a parent can check in.\n\n- **Practice vs finished work**:\n- **Missed days**:\n- **Revisions**:\n"
                 ),
                 TemplateSection(
                     heading: "How we work together",
