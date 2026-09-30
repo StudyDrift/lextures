@@ -51,6 +51,8 @@ import { CourseConsortiumSettingsSection } from './course-consortium-settings-se
 import { CourseMarketplaceSettingsSection } from './course-marketplace-settings-section'
 import { isTranslationMemoryEnabled } from '../../lib/course-translation-api'
 import { usePlatformFeatures } from '../../context/platform-features-context'
+import { useFamilyAudience } from '../../hooks/use-family-audience'
+import { scheduleAudienceCopy } from '../../lib/schedule-audience-copy'
 import { CourseHeroImage } from '../../components/course-hero-image'
 import { GradeLevelMultiSelect } from '../../components/lms/grade-level-multi-select'
 import {
@@ -203,6 +205,8 @@ export default function CourseSettings() {
   } = usePlatformFeatures()
   const location = useLocation()
   const [course, setCourse] = useState<CoursePublic | null>(null)
+  const familyAudience = useFamilyAudience(course)
+  const scheduleCopy = scheduleAudienceCopy(familyAudience)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -1164,12 +1168,8 @@ export default function CourseSettings() {
               </section>
 
               <section className="rounded-2xl border border-border-default bg-surface-raised p-5 shadow-sm shadow-slate-900/5 dark:border-border-subtle dark:bg-surface-raised">
-                <h2 className="text-sm font-semibold text-fg-default">Fixed Schedule & Visibility</h2>
-                <p className="mt-1 text-sm text-fg-muted">
-                  Control whether the course uses fixed calendar dates or a timeline from each
-                  student’s enrollment. Module release and due dates follow the same mode: relative
-                  courses shift those dates by the same offset.
-                </p>
+                <h2 className="text-sm font-semibold text-fg-default">{scheduleCopy.sectionTitle}</h2>
+                <p className="mt-1 text-sm text-fg-muted">{scheduleCopy.sectionIntro}</p>
                 <div className="mt-4 flex flex-wrap items-center gap-3">
                   <button
                     type="button"
@@ -1177,8 +1177,8 @@ export default function CourseSettings() {
                     aria-checked={scheduleMode === 'relative'}
                     aria-label={
                       scheduleMode === 'relative'
-                        ? 'Relative schedule from each enrollment'
-                        : 'Fixed calendar schedule (not relative to enrollment)'
+                        ? scheduleCopy.relativeSwitchLabel
+                        : scheduleCopy.fixedSwitchLabel
                     }
                     onClick={() =>
                       setScheduleMode((m) => (m === 'fixed' ? 'relative' : 'fixed'))
@@ -1192,8 +1192,8 @@ export default function CourseSettings() {
                   </button>
                   <span className="text-sm font-medium text-fg-default dark:text-fg-muted">
                     {scheduleMode === 'fixed'
-                      ? 'Fixed (calendar dates)'
-                      : 'Relative (from enrollment)'}
+                      ? scheduleCopy.modeLabelFixed
+                      : scheduleCopy.modeLabelRelative}
                   </span>
                 </div>
                 {scheduleMode === 'fixed' ? (
@@ -1234,11 +1234,7 @@ export default function CourseSettings() {
                   </>
                 ) : (
                   <>
-                    <p className="mt-3 text-sm text-fg-muted">
-                      Start and catalog visibility begin when the student is enrolled. Set how long
-                      the course runs and when it drops from the catalog (optional). Durations use
-                      ISO-style lengths (days, weeks, months, or years).
-                    </p>
+                    <p className="mt-3 text-sm text-fg-muted">{scheduleCopy.relativeBody}</p>
                     <div className="mt-4 grid gap-4 sm:grid-cols-2">
                       <RelativeDurationField
                         label="End after"

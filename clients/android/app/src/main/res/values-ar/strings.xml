@@ -2366,8 +2366,8 @@ Bring a photo ID</string>
     <string name="mobile_createCourse_template_bootcamp_summary">Daily flow, projects, tools, and conduct for short high-intensity programs.</string>
     <string name="mobile_createCourse_template_higherEd_name">Higher ed</string>
     <string name="mobile_createCourse_template_higherEd_summary">Learning outcomes, weekly rhythm, texts, assessment, and campus policies in one place.</string>
-    <string name="mobile_createCourse_template_k12_name">K–12</string>
-    <string name="mobile_createCourse_template_k12_summary">Term dates, grading categories, expectations, and contact — tuned for secondary classes.</string>
+    <string name="mobile_createCourse_template_k12_name">Homeschool / K–12</string>
+    <string name="mobile_createCourse_template_k12_summary">Family schedule, flexible pacing, and parent support for a learner at home or in class.</string>
     <string name="mobile_createCourse_template_onboarding_name">Internal onboarding</string>
     <string name="mobile_createCourse_template_onboarding_summary">Welcome new hires or members: role expectations, resources, and first-week checklist.</string>
     <string name="mobile_createCourse_template_selfPaced_name">Self-paced</string>
