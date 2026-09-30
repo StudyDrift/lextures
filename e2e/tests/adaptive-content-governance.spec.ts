@@ -7,20 +7,14 @@
  *   [x] Admin oversight endpoint returns summary
  *   [x] Admin quarantine + kill-switch endpoints work
  */
-import { execSync } from 'node:child_process'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
-import { test, expect, uniqueEmail } from '../fixtures/test.js'
+import { test, expect } from '../fixtures/test.js'
 import {
   apiCreateContentPage,
-  apiLogin,
+  apiGetPlatformAdminToken,
   apiPatchCourseFeatures,
-  apiSignup,
 } from '../fixtures/api.js'
 
 const apiBase = process.env.E2E_API_URL ?? 'http://localhost:8080'
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
-const ADMIN_PASSWORD = 'E2eTestPass1!LongRandomGovernance'
 
 async function apiCreateAdaptiveUnit(
   token: string,
@@ -52,15 +46,30 @@ async function apiCreateAdaptiveUnit(
   }
 }
 
-function bootstrapGlobalAdmin(email: string) {
-  execSync(`go run ./cmd/bootstrap-admin -email=${email}`, {
-    cwd: path.join(repoRoot, 'server'),
-    stdio: 'pipe',
-    env: process.env,
+async function disengageKillSwitch(token: string): Promise<boolean> {
+  const off = await fetch(`${apiBase}/api/v1/admin/adaptive-content/kill-switch`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ engage: false }),
   })
+  return off.ok
 }
 
 test.describe('Adaptive content governance (AC.8)', () => {
+  // A timed-out test does not finish its own finally. Shards share one API, so
+  // always release the durable kill-switch after this test.
+  test.afterEach(async () => {
+    try {
+      const token = await apiGetPlatformAdminToken()
+      await disengageKillSwitch(token)
+    } catch {
+      // The test body asserts disengage on the happy path.
+    }
+  })
+
   test('API: contest, resolve, oversight, quarantine, kill-switch', async ({
     seededCourse,
   }) => {
@@ -122,21 +131,7 @@ test.describe('Adaptive content governance (AC.8)', () => {
     )
     expect(resolveRes.ok).toBeTruthy()
 
-    const adminEmail = uniqueEmail('ace-admin')
-    await apiSignup({
-      email: adminEmail,
-      password: ADMIN_PASSWORD,
-      displayName: 'ACE Admin',
-    })
-    try {
-      bootstrapGlobalAdmin(adminEmail)
-    } catch (err) {
-      test.skip(true, `bootstrap unavailable: ${err}`)
-    }
-    const { access_token: adminToken } = await apiLogin({
-      email: adminEmail,
-      password: ADMIN_PASSWORD,
-    })
+    const adminToken = await apiGetPlatformAdminToken()
 
     const oversightRes = await fetch(`${apiBase}/api/v1/admin/adaptive-content/oversight`, {
       headers: { Authorization: `Bearer ${adminToken}` },
@@ -172,15 +167,7 @@ test.describe('Adaptive content governance (AC.8)', () => {
       expect(killRes.ok).toBeTruthy()
     } finally {
       // Always disengage: CI shards share one API and fullyParallel workers.
-      const off = await fetch(`${apiBase}/api/v1/admin/adaptive-content/kill-switch`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${adminToken}`,
-        },
-        body: JSON.stringify({ engage: false }),
-      })
-      expect(off.ok).toBeTruthy()
+      expect(await disengageKillSwitch(adminToken)).toBeTruthy()
     }
   })
 })
