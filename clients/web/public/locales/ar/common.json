@@ -2416,7 +2416,7 @@
   "common.validation.required": "أدخل قيمة لحقل {field}.",
   "common.validation.tooShort": "يجب أن يحتوي {field} على {min} أحرف على الأقل.",
   "common.validation.tooLong": "يجب ألا يتجاوز {field} {max} حرفًا.",
-  "common.validation.invalidEmail": "أدخل بريدًا إلكترونيًا صالحًا (مثل name@school.edu).",
+  "common.validation.invalidEmail": "أدخل بريدًا إلكترونيًا صالحًا (مثل name@example.com).",
   "common.validation.invalidUrl": "أدخل عنوان URL صالحًا يتضمن https://.",
   "common.validation.invalidPhone": "أدخل رقم هاتف صالحًا مع رمز الدولة إن لزم.",
   "common.validation.invalidFormat": "أدخل {field} بالصيغة المتوقعة.",

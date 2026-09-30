@@ -920,10 +920,6 @@ export default function CourseCreate() {
 
           {step === 4 && createdCourse && (
             <div className="space-y-5">
-              <p className="text-sm text-fg-muted">
-                Turn tools on or off for everyone in this course. Disabled tools disappear from the course menu. You can
-                change these anytime in course settings.
-              </p>
               <CourseFeaturesSection
                 courseCode={createdCourse.courseCode}
                 course={createdCourse}

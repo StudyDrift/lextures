@@ -580,7 +580,7 @@ export default function Inbox() {
                   value={composeTo}
                   onChange={(e) => setComposeTo(e.target.value)}
                   className="mt-1 w-full rounded-lg border border-border-default px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/20"
-                  placeholder="name@school.edu"
+                  placeholder="name@example.com"
                 />
               </label>
               <label className="block text-xs font-medium text-fg-muted">

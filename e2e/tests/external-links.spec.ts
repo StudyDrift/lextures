@@ -80,7 +80,23 @@ async function apiCreateExternalLink(
     const body = await res.text()
     throw new Error(`Create external link failed (${res.status}): ${body}`)
   }
-  return res.json() as Promise<{ id: string }>
+  const created = (await res.json()) as { id: string }
+  const pub = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/structure/items/${encodeURIComponent(created.id)}`,
+    {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ published: true }),
+    },
+  )
+  if (!pub.ok) {
+    const body = await pub.text()
+    throw new Error(`Publish external link failed (${pub.status}): ${body}`)
+  }
+  return created
 }
 
 test.describe('External link module items', () => {

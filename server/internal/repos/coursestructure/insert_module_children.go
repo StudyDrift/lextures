@@ -11,6 +11,7 @@ import (
 )
 
 // insertModuleChild inserts a structure row under an existing module and runs extraDDL in the same transaction.
+// New children start unpublished (draft) until the instructor publishes them.
 func insertModuleChild(
 	ctx context.Context,
 	pool *pgxpool.Pool,
@@ -58,7 +59,7 @@ INSERT INTO course.course_structure_items (
 	published, visible_from, archived
 )
 SELECT $2, $3, max_ord + 1, $4, $5, $1,
-	true, NULL, false
+	false, NULL, false
 FROM mx
 RETURNING
 	id, course_id, sort_order, kind, title, parent_id, published, visible_from, archived, due_at, assignment_group_id, blueprint_locked, blueprint_origin_id, created_at, updated_at

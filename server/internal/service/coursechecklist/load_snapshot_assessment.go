@@ -292,7 +292,7 @@ LIMIT 500
 	return rows.Err()
 }
 
-// loadCourseMarkers loads CC.5/CC.6 review markers, theme, and org id (one query).
+// loadCourseMarkers loads CC.5/CC.6 review markers, theme, org id, and org_type (one query).
 func loadCourseMarkers(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID, pub *course.CoursePublic, snap *CourseSnapshot, count func(int)) error {
 	var featuresReviewedAt *time.Time
 	var accommodationsReviewedAt *time.Time
@@ -307,19 +307,22 @@ func loadCourseMarkers(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UU
 	var themePreset string
 	var themeCustom []byte
 	var orgID *uuid.UUID
+	var orgType *string
 	err := pool.QueryRow(ctx, `
-SELECT features_reviewed_at, accommodations_reviewed_at, integrity_settings_reviewed_at,
-       a11y_reviewed_at, student_preview_at, last_export_at,
-       grading_scheme_id, NULLIF(TRIM(catalog_language), ''), created_by_user_id,
-       COALESCE(enrollment_groups_enabled, false),
-       COALESCE(markdown_theme_preset, 'classic'), markdown_theme_custom, org_id
-FROM course.courses
-WHERE id = $1
+SELECT c.features_reviewed_at, c.accommodations_reviewed_at, c.integrity_settings_reviewed_at,
+       c.a11y_reviewed_at, c.student_preview_at, c.last_export_at,
+       c.grading_scheme_id, NULLIF(TRIM(c.catalog_language), ''), c.created_by_user_id,
+       COALESCE(c.enrollment_groups_enabled, false),
+       COALESCE(c.markdown_theme_preset, 'classic'), c.markdown_theme_custom, c.org_id,
+       o.org_type
+FROM course.courses c
+LEFT JOIN tenant.organizations o ON o.id = c.org_id AND o.status <> 'deleted'
+WHERE c.id = $1
 `, courseID).Scan(
 		&featuresReviewedAt, &accommodationsReviewedAt, &integrityReviewedAt,
 		&a11yReviewedAt, &studentPreviewAt, &lastExportAt,
 		&gradingSchemeID, &catalogLanguage, &creatorID, &enrollmentGroupsEnabled,
-		&themePreset, &themeCustom, &orgID,
+		&themePreset, &themeCustom, &orgID, &orgType,
 	)
 	count(1)
 	if err != nil {
@@ -344,6 +347,9 @@ WHERE id = $1
 	}
 	if pub != nil {
 		snap.GradeLevels = append([]string(nil), pub.GradeLevels...)
+	}
+	if !snap.OrgIsK12 && orgType != nil && *orgType == "k-12" {
+		snap.OrgIsK12 = true
 	}
 	return nil
 }
@@ -392,3 +398,4 @@ LIMIT 500
 	}
 	return rows.Err()
 }
+

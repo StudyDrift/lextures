@@ -6,6 +6,7 @@ import {
   resolveChecklistHelp,
 } from '../../../lib/checklist-help'
 import { courseDesignResearchHref } from '../../../lib/checklist-research-anchors'
+import { filterChecklistSourcesForAudience } from '../../../lib/checklist-sources'
 import { courseChecklistI18n } from '../../../lib/course-checklist-i18n'
 import { emitChecklistTelemetry } from '../../../lib/checklist-telemetry'
 import { ChecklistResearchDialog } from './checklist-research-dialog'
@@ -23,6 +24,9 @@ export function ChecklistHelpPopover({ helpRef, itemId, open, onClose, sources }
   const closeRef = useRef<HTMLButtonElement>(null)
   const entry = resolveChecklistHelp(helpRef)
   const supportHref = helpSupportUrl(helpRef)
+  const visibleSources = filterChecklistSourcesForAudience(
+    sources?.length ? sources : entry?.sources,
+  )
   const [researchOpen, setResearchOpen] = useState(false)
   const [researchSource, setResearchSource] = useState<string | null>(null)
 
@@ -104,9 +108,9 @@ export function ChecklistHelpPopover({ helpRef, itemId, open, onClose, sources }
             </div>
           </section>
 
-          {(sources?.length || entry.sources?.length) ? (
+          {visibleSources.length > 0 ? (
             <ul className="mt-4 flex flex-wrap gap-1.5">
-              {(sources?.length ? sources : entry.sources).map((src) => (
+              {visibleSources.map((src) => (
                 <li key={src}>
                   <a
                     href={courseDesignResearchHref(src)}

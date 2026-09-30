@@ -1806,7 +1806,7 @@ export default function CourseEnrollments() {
                 rows={6}
                 placeholder={
                   'One per line, or separated by commas or spaces.\n' +
-                  'example@school.edu, other@school.edu'
+                  'example@email.com, other@email.com'
                 }
                 className="mt-1 w-full resize-y rounded-xl border border-border-default bg-surface-raised px-2 py-1.5 text-sm text-fg-default outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2"
                 disabled={addStatus === 'loading'}

@@ -175,6 +175,15 @@ test.describe('Conditional release', () => {
     )
     expect(quizBRes.ok).toBeTruthy()
     const quizB = (await quizBRes.json()) as { id: string }
+    const pubQuiz = await fetch(
+      `${apiBase}/api/v1/courses/${encodeURIComponent(course.courseCode)}/structure/items/${encodeURIComponent(quizB.id)}`,
+      {
+        method: 'PATCH',
+        headers: authHeaders(instructor.access_token),
+        body: JSON.stringify({ published: true }),
+      },
+    )
+    expect(pubQuiz.ok).toBeTruthy()
     const assignmentB = await apiCreateAssignment(
       instructor.access_token,
       course.courseCode,

@@ -165,7 +165,7 @@ export function ComponentsGalleryDemos() {
             <Input
               type="email"
               autoComplete="email"
-              placeholder="you@school.edu"
+              placeholder="you@example.com"
               value={formDemoEmail}
               onChange={(e) => setFormDemoEmail(e.target.value)}
             />

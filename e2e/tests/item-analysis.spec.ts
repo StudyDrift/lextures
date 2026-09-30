@@ -32,7 +32,20 @@ async function apiCreateQuiz(
     throw new Error(`Create quiz failed (${res.status}): ${body}`)
   }
   const data = (await res.json()) as Record<string, unknown>
-  return { itemId: data.id as string }
+  const itemId = data.id as string
+  const pub = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/structure/items/${encodeURIComponent(itemId)}`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ published: true }),
+    },
+  )
+  if (!pub.ok) {
+    const body = await pub.text()
+    throw new Error(`Publish quiz failed (${pub.status}): ${body}`)
+  }
+  return { itemId }
 }
 
 test.describe('Item Analysis — UI', () => {

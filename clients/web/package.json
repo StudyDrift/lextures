@@ -106,7 +106,7 @@
     "js-yaml": "4.3.2",
     "markdown-it": "^14.2.0",
     "postcss": "8.5.23",
-    "undici": "7.29.0"
+    "undici": "7.29.1"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.2",

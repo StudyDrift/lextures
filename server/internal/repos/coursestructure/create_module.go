@@ -8,6 +8,7 @@ import (
 )
 
 // CreateModule inserts a top-level module for a course at the next sort order.
+// New modules start unpublished (draft) until the instructor publishes them.
 func CreateModule(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID, title string) (ItemRow, error) {
 	var r ItemRow
 	err := pool.QueryRow(ctx, `
@@ -32,7 +33,7 @@ SELECT
 	'module',
 	$2,
 	NULL,
-	true,
+	false,
 	NULL,
 	false
 FROM next_sort

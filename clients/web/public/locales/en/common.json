@@ -2416,7 +2416,7 @@
   "common.validation.required": "Enter a value for {field}.",
   "common.validation.tooShort": "{field} must be at least {min} characters.",
   "common.validation.tooLong": "{field} must be at most {max} characters.",
-  "common.validation.invalidEmail": "Enter a valid email address (for example, name@school.edu).",
+  "common.validation.invalidEmail": "Enter a valid email address (for example, name@example.com).",
   "common.validation.invalidUrl": "Enter a valid URL, including https://.",
   "common.validation.invalidPhone": "Enter a valid phone number, including country code if needed.",
   "common.validation.invalidFormat": "Enter {field} in the expected format.",
