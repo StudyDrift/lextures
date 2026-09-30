@@ -124,7 +124,9 @@ export async function apiCreateContentPage(
     const body = await res.text()
     throw new Error(`Create content page failed (${res.status}): ${body}`)
   }
-  return res.json() as Promise<{ id: string; title: string }>
+  const created = (await res.json()) as { id: string; title: string }
+  await apiPublishStructureItem(token, courseCode, created.id)
+  return created
 }
 
 export async function apiPatchContentPage(
@@ -150,6 +152,54 @@ export async function apiPatchContentPage(
   }
 }
 
+
+/** Publish a top-level module (e2e fixtures expect student-visible structure). */
+export async function apiPublishModule(
+  token: string,
+  courseCode: string,
+  moduleId: string,
+  title: string,
+): Promise<void> {
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/structure/modules/${encodeURIComponent(moduleId)}`,
+    {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ title, published: true, visibleFrom: null }),
+    },
+  )
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Publish module failed (${res.status}): ${body}`)
+  }
+}
+
+/** Publish a module child (quiz, assignment, page, …). */
+export async function apiPublishStructureItem(
+  token: string,
+  courseCode: string,
+  itemId: string,
+): Promise<void> {
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/structure/items/${encodeURIComponent(itemId)}`,
+    {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ published: true }),
+    },
+  )
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Publish structure item failed (${res.status}): ${body}`)
+  }
+}
+
 export async function apiCreateModule(
   token: string,
   courseCode: string,
@@ -170,7 +220,9 @@ export async function apiCreateModule(
     const body = await res.text()
     throw new Error(`Create module failed (${res.status}): ${body}`)
   }
-  return res.json() as Promise<{ id: string; title: string }>
+  const created = (await res.json()) as { id: string; title: string }
+  await apiPublishModule(token, courseCode, created.id, created.title || title)
+  return created
 }
 
 async function apiApproveEnrollmentInvitation(
@@ -310,7 +362,9 @@ export async function apiCreateVibeActivity(
     const body = await res.text()
     throw new Error(`Create vibe activity failed (${res.status}): ${body}`)
   }
-  return res.json() as Promise<{ id: string; title: string }>
+  const created = (await res.json()) as { id: string; title: string }
+  await apiPublishStructureItem(token, courseCode, created.id)
+  return created
 }
 
 export async function apiCreateFeedChannel(
@@ -468,7 +522,9 @@ export async function apiCreateAssignment(
     const body = await res.text()
     throw new Error(`Create assignment failed (${res.status}): ${body}`)
   }
-  return res.json() as Promise<{ id: string; title: string }>
+  const created = (await res.json()) as { id: string; title: string }
+  await apiPublishStructureItem(token, courseCode, created.id)
+  return created
 }
 
 export async function apiPatchAssignment(
@@ -1516,6 +1572,7 @@ export async function apiCreateTimedQuiz(
     throw new Error(`Create quiz failed (${createRes.status}): ${body}`)
   }
   const created = (await createRes.json()) as { id: string }
+  await apiPublishStructureItem(token, courseCode, created.id)
   const patchRes = await fetch(
     `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/quizzes/${encodeURIComponent(created.id)}`,
     {
