@@ -691,7 +691,10 @@ jobs:
       # Cold migrate of ~450+ SQL files often exceeds 45s on GitHub runners.
       E2E_HEALTH_MAX_ATTEMPTS: "90"
       E2E_ADMIN_EMAIL: admin@e2e.test
-      E2E_WORKERS: "4"
+      # Four workers on the shared API/Postgres timed out shard setup and the
+      # marketplace storefront (nav missing, then the free listing missing).
+      # Two matches the previous CI default (50% of a 4-vCPU runner).
+      E2E_WORKERS: "2"
       RTL_ENABLED: "true"
       CI: "true"
     services:
@@ -760,8 +763,7 @@ jobs:
             (cd e2e && npx playwright install --only-shell chromium)
           fi
 
-      # Public-repo ubuntu-latest runners have 4 vCPUs; Playwright's CI default (50%)
-      # leaves half idle while the API, Postgres, and preview server are mostly waiting.
+      # Two workers: enough to overlap browser waits without saturating the one API and Postgres.
       - name: Run e2e shard (local stack)
         run: bash e2e/scripts/e2e-local.sh --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }} --workers=${{ env.E2E_WORKERS }}
 
