@@ -23,6 +23,6 @@
     "tsx": "^4.20.3"
   },
   "overrides": {
-    "brace-expansion": "2.1.2"
+    "brace-expansion": "2.1.7"
   }
 }
