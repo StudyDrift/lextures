@@ -47,9 +47,11 @@ func seedChecklistCourse(t *testing.T, pool *pgxpool.Pool, sectionsEnabled bool,
 		starts = time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
 		ends = time.Date(2026, 6, 1, 0, 0, 0, 0, time.UTC)
 	}
+	// Attach the default org so this fixture stays on the institutional checklist.
+	// A course with no organization is HomeschoolMode and gets the family pack.
 	_, err := pool.Exec(ctx, `
-INSERT INTO course.courses (id, course_code, title, sections_enabled, starts_at, ends_at)
-VALUES ($1, $2, 'CC.1 test', $3, $4, $5)
+INSERT INTO course.courses (id, course_code, title, sections_enabled, starts_at, ends_at, org_id)
+VALUES ($1, $2, 'CC.1 test', $3, $4, $5, (SELECT id FROM tenant.organizations WHERE slug = 'default' LIMIT 1))
 `, courseID, courseCode, sectionsEnabled, starts, ends)
 	if err != nil {
 		t.Fatalf("seed course: %v", err)

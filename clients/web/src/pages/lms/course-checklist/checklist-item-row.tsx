@@ -8,6 +8,7 @@ import {
   normalizeChecklistStatus,
 } from '../../../lib/course-checklist-api-schemas'
 import { courseChecklistI18n } from '../../../lib/course-checklist-i18n'
+import { familyChecklistHelp } from '../../../lib/family-checklist-copy'
 import { resolveChecklistHelp } from '../../../lib/checklist-help'
 import { courseDesignResearchHref } from '../../../lib/checklist-research-anchors'
 import { filterChecklistSourcesForAudience } from '../../../lib/checklist-sources'
@@ -29,6 +30,8 @@ type ChecklistItemRowProps = {
   /** When true, AI-required actions are hidden (opt-out / AI unavailable). */
   hideAiActions?: boolean
   highlighted?: boolean
+  /** Family setup items use plain help instead of the campus article. */
+  family?: boolean
 }
 
 function interactionMode(item: ChecklistItem): 'evidence' | 'link' | 'static' {
@@ -46,6 +49,7 @@ export function ChecklistItemRow({
   onAssist,
   hideAiActions,
   highlighted,
+  family,
 }: ChecklistItemRowProps) {
   const navigate = useNavigate()
   const { courseCode = '' } = useParams<{ courseCode: string }>()
@@ -69,7 +73,8 @@ export function ChecklistItemRow({
   const [researchOpen, setResearchOpen] = useState(false)
   const [researchSource, setResearchSource] = useState<string | null>(null)
   const interactive = isOutstandingStatus(item.status) || unknown
-  const hasHelp = !!resolveChecklistHelp(item.helpRef)
+  const familyHelp = family ? familyChecklistHelp(item.id) : null
+  const hasHelp = familyHelp != null || !!resolveChecklistHelp(item.helpRef)
   const showAction =
     !!item.action &&
     interactive &&
@@ -322,7 +327,8 @@ export function ChecklistItemRow({
         itemId={item.id}
         open={helpOpen}
         onClose={() => setHelpOpen(false)}
-        sources={visibleSources}
+        sources={familyHelp ? [] : visibleSources}
+        override={familyHelp}
       />
       <ChecklistResearchDialog
         open={researchOpen}

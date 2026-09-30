@@ -9,6 +9,8 @@ type ChecklistDashboardCardProps = {
   summary: ChecklistSummary | null
   topItems: ChecklistItem[]
   loading?: boolean
+  /** Family setup list uses plain dashboard copy. */
+  family?: boolean
 }
 
 export function ChecklistDashboardCard({
@@ -16,6 +18,7 @@ export function ChecklistDashboardCard({
   summary,
   topItems,
   loading,
+  family,
 }: ChecklistDashboardCardProps) {
   const href = `/courses/${encodeURIComponent(courseCode)}/checklist`
   // Match the checklist page: "complete" only when nothing still needs attention
@@ -28,7 +31,7 @@ export function ChecklistDashboardCard({
       <div className="flex items-center gap-2 text-warning-fg dark:text-amber-400">
         <ClipboardCheck className="h-5 w-5 shrink-0" aria-hidden />
         <span className="text-sm font-semibold text-fg-default">
-          {courseChecklistI18n.dashboardTitle}
+          {family ? courseChecklistI18n.familyDashboardTitle : courseChecklistI18n.dashboardTitle}
         </span>
       </div>
 
@@ -39,7 +42,7 @@ export function ChecklistDashboardCard({
         </div>
       ) : outstandingTotal <= 0 ? (
         <p className="mt-2 text-sm text-fg-muted">
-          {courseChecklistI18n.dashboardComplete}
+          {family ? courseChecklistI18n.familyDashboardComplete : courseChecklistI18n.dashboardComplete}
         </p>
       ) : (
         <>

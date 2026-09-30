@@ -43,6 +43,8 @@ type PeopleStub struct {
 	InvitationPending bool
 	SectionID         *uuid.UUID
 	CreatedAt         time.Time
+	// Managed is true when the enrolled user is a parent-managed learner.
+	Managed bool
 }
 
 // ListChecklistPeopleForCourse returns privacy-safe enrollment stubs enriched for
@@ -56,7 +58,8 @@ SELECT ce.user_id,
        ce.active,
        ce.invitation_pending,
        ce.section_id,
-       ce.created_at
+       ce.created_at,
+       (u.account_type = 'managed')
 FROM course.course_enrollments ce
 INNER JOIN "user".users u ON u.id = ce.user_id
 WHERE ce.course_id = $1
@@ -74,6 +77,7 @@ LIMIT 500
 		if err := rows.Scan(
 			&row.UserID, &row.DisplayName, &row.Role,
 			&row.Active, &row.InvitationPending, &row.SectionID, &row.CreatedAt,
+			&row.Managed,
 		); err != nil {
 			return nil, err
 		}

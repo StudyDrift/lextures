@@ -12,6 +12,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursegrading"
 	"github.com/lextures/lextures/server/internal/repos/studentaccommodations"
+	"github.com/lextures/lextures/server/internal/repos/user"
 )
 
 func loadGradingSlice(ctx context.Context, pool *pgxpool.Pool, courseCode string, snap *CourseSnapshot, count func(int)) error {
@@ -308,21 +309,24 @@ func loadCourseMarkers(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UU
 	var themeCustom []byte
 	var orgID *uuid.UUID
 	var orgType *string
+	var creatorAccountType *string
 	err := pool.QueryRow(ctx, `
 SELECT c.features_reviewed_at, c.accommodations_reviewed_at, c.integrity_settings_reviewed_at,
        c.a11y_reviewed_at, c.student_preview_at, c.last_export_at,
        c.grading_scheme_id, NULLIF(TRIM(c.catalog_language), ''), c.created_by_user_id,
        COALESCE(c.enrollment_groups_enabled, false),
        COALESCE(c.markdown_theme_preset, 'classic'), c.markdown_theme_custom, c.org_id,
-       o.org_type
+       o.org_type,
+       checklist_creator.account_type
 FROM course.courses c
 LEFT JOIN tenant.organizations o ON o.id = c.org_id AND o.status <> 'deleted'
+LEFT JOIN "user".users checklist_creator ON checklist_creator.id = c.created_by_user_id
 WHERE c.id = $1
 `, courseID).Scan(
 		&featuresReviewedAt, &accommodationsReviewedAt, &integrityReviewedAt,
 		&a11yReviewedAt, &studentPreviewAt, &lastExportAt,
 		&gradingSchemeID, &catalogLanguage, &creatorID, &enrollmentGroupsEnabled,
-		&themePreset, &themeCustom, &orgID, &orgType,
+		&themePreset, &themeCustom, &orgID, &orgType, &creatorAccountType,
 	)
 	count(1)
 	if err != nil {
@@ -350,6 +354,9 @@ WHERE c.id = $1
 	}
 	if !snap.OrgIsK12 && orgType != nil && *orgType == "k-12" {
 		snap.OrgIsK12 = true
+	}
+	if creatorAccountType != nil && *creatorAccountType == user.AccountTypeParent {
+		snap.CreatorIsParent = true
 	}
 	return nil
 }
@@ -398,4 +405,3 @@ LIMIT 500
 	}
 	return rows.Err()
 }
-

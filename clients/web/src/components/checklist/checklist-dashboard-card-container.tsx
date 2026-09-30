@@ -6,6 +6,7 @@ import type { ChecklistItem } from '../../lib/course-checklist-api-schemas'
 import { isOutstandingStatus } from '../../lib/course-checklist-api-schemas'
 import { courseItemCreatePermission } from '../../lib/courses-api'
 import { useCourseViewAs } from '../../lib/course-view-as'
+import { isFamilyChecklist } from '../../lib/family-checklist-copy'
 import { ChecklistDashboardCard } from './checklist-dashboard-card'
 
 type Props = {
@@ -20,11 +21,13 @@ export function ChecklistDashboardCardContainer({ courseCode }: Props) {
     !permLoading && allows(courseItemCreatePermission(courseCode)) && viewAs !== 'student'
   const { summary, loading: summaryLoading } = useCourseChecklistSummary()
   const [topItems, setTopItems] = useState<ChecklistItem[]>([])
+  const [family, setFamily] = useState(false)
   const [itemsLoading, setItemsLoading] = useState(false)
 
   useEffect(() => {
     if (!canManage) {
       setTopItems([])
+      setFamily(false)
       return
     }
     let cancelled = false
@@ -32,6 +35,7 @@ export function ChecklistDashboardCardContainer({ courseCode }: Props) {
     void fetchCourseChecklist(courseCode)
       .then((res) => {
         if (cancelled) return
+        setFamily(isFamilyChecklist(res.categories))
         const outstanding: ChecklistItem[] = []
         for (const cat of res.categories) {
           for (const item of cat.items) {
@@ -45,7 +49,10 @@ export function ChecklistDashboardCardContainer({ courseCode }: Props) {
         setTopItems(outstanding)
       })
       .catch(() => {
-        if (!cancelled) setTopItems([])
+        if (!cancelled) {
+          setTopItems([])
+          setFamily(false)
+        }
       })
       .finally(() => {
         if (!cancelled) setItemsLoading(false)
@@ -63,6 +70,7 @@ export function ChecklistDashboardCardContainer({ courseCode }: Props) {
       summary={summary}
       topItems={topItems}
       loading={summaryLoading || itemsLoading}
+      family={family}
     />
   )
 }

@@ -4,6 +4,13 @@ import type { DismissReason } from './course-checklist-api-schemas'
 export const courseChecklistI18n = {
   navLabel: 'Checklist',
   pageTitle: 'Course checklist',
+  familyPageTitle: 'Getting started',
+  familyAllDoneTitle: 'Your course is ready',
+  familyAllDoneBody: 'The learning plan, learners, a first lesson, progress, and pacing are set.',
+  familyDismissDialogHelp: 'A short note is enough if this step does not apply.',
+  familyDismissNotePlaceholder: 'Optional note (max 500 characters)',
+  familyDashboardTitle: 'Getting started',
+  familyDashboardComplete: 'Your course is ready for your family.',
   commandPaletteTitle: 'Course checklist',
   recheck: 'Re-check',
   rechecking: 'Re-checking…',

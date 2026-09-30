@@ -8,6 +8,7 @@ import {
 import { courseDesignResearchHref } from '../../../lib/checklist-research-anchors'
 import { filterChecklistSourcesForAudience } from '../../../lib/checklist-sources'
 import { courseChecklistI18n } from '../../../lib/course-checklist-i18n'
+import type { FamilyChecklistHelp } from '../../../lib/family-checklist-copy'
 import { emitChecklistTelemetry } from '../../../lib/checklist-telemetry'
 import { ChecklistResearchDialog } from './checklist-research-dialog'
 
@@ -17,15 +18,18 @@ type Props = {
   open: boolean
   onClose: () => void
   sources?: string[]
+  /** Plain family help. When set, the campus support article stays hidden. */
+  override?: FamilyChecklistHelp | null
 }
 
-export function ChecklistHelpPopover({ helpRef, itemId, open, onClose, sources }: Props) {
+export function ChecklistHelpPopover({ helpRef, itemId, open, onClose, sources, override }: Props) {
   const titleId = useId()
   const closeRef = useRef<HTMLButtonElement>(null)
-  const entry = resolveChecklistHelp(helpRef)
-  const supportHref = helpSupportUrl(helpRef)
+  const catalogEntry = resolveChecklistHelp(helpRef)
+  const entry = override ?? catalogEntry
+  const supportHref = override ? null : helpSupportUrl(helpRef)
   const visibleSources = filterChecklistSourcesForAudience(
-    sources?.length ? sources : entry?.sources,
+    override ? sources : sources?.length ? sources : catalogEntry?.sources,
   )
   const [researchOpen, setResearchOpen] = useState(false)
   const [researchSource, setResearchSource] = useState<string | null>(null)

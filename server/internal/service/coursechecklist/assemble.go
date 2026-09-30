@@ -97,12 +97,23 @@ func DeriveSummary(res Result, dismissedByID map[string]ccrepo.ItemState, comput
 			// N/A excluded from progress denominator
 		}
 	}
+	// Only dismissals for items in this result count. Family courses drop the
+	// institutional pack, so older campus dismissals must not inflate the badge.
+	dismissedN := 0
+	for id := range dismissedByID {
+		for _, fr := range res.Findings {
+			if string(fr.ID) == id {
+				dismissedN++
+				break
+			}
+		}
+	}
 	return ChecklistSummary{
 		OutstandingEssential: outstandingEssential,
 		OutstandingTotal:     outstandingTotal,
 		Done:                 done,
 		Total:                total,
-		Dismissed:            len(dismissedByID),
+		Dismissed:            dismissedN,
 		ComputedAt:           computedAt,
 		Stale:                stale,
 	}
