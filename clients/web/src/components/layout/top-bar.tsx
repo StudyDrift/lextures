@@ -37,6 +37,7 @@ import { TopBarMobileCommandPaletteButton } from './side-nav-command-palette'
 import { ReadingPreferencesPanel } from '../a11y/ReadingPreferencesPanel'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { Menu as UiMenu } from '../ui/menu'
+import { iosAppAccountMenuItem } from './ios-app-account-menu-item'
 
 function UserMenu() {
   const navigate = useNavigate()
@@ -133,6 +134,7 @@ function UserMenu() {
             ),
             onSelect: () => navigate('/settings/account'),
           },
+          iosAppAccountMenuItem(),
           {
             id: 'sign-out',
             textValue: 'Sign out',
