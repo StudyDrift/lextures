@@ -10,6 +10,7 @@ import {
 import { courseChecklistI18n } from '../../../lib/course-checklist-i18n'
 import { resolveChecklistHelp } from '../../../lib/checklist-help'
 import { courseDesignResearchHref } from '../../../lib/checklist-research-anchors'
+import { filterChecklistSourcesForAudience } from '../../../lib/checklist-sources'
 import { emitChecklistTelemetry } from '../../../lib/checklist-telemetry'
 import { hrefForTarget } from '../../../lib/use-focus-anchor'
 import { ChecklistEvidenceTable } from './checklist-evidence-table'
@@ -74,6 +75,10 @@ export function ChecklistItemRow({
     interactive &&
     !(item.action.requiresAi && hideAiActions) &&
     !!onAssist
+  const visibleSources = useMemo(
+    () => filterChecklistSourcesForAudience(item.sources),
+    [item.sources],
+  )
   const targetHref = useMemo(
     () =>
       hrefForTarget(
@@ -244,9 +249,9 @@ export function ChecklistItemRow({
             </p>
           ) : null}
 
-          {item.sources.length > 0 ? (
+          {visibleSources.length > 0 ? (
             <ul className="mt-2 flex flex-wrap gap-1.5">
-              {item.sources.map((src) => (
+              {visibleSources.map((src) => (
                 <li key={src}>
                   <a
                     href={courseDesignResearchHref(src)}
@@ -317,7 +322,7 @@ export function ChecklistItemRow({
         itemId={item.id}
         open={helpOpen}
         onClose={() => setHelpOpen(false)}
-        sources={item.sources}
+        sources={visibleSources}
       />
       <ChecklistResearchDialog
         open={researchOpen}

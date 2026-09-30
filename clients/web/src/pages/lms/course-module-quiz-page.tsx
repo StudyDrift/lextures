@@ -2118,9 +2118,9 @@ export default function CourseModuleQuizPage() {
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-fg-default">Is adaptive</p>
                       <p className="mt-1 text-xs text-fg-muted">
-                        When on, the quiz does not use a fixed question list. The model reads your selected course
-                        items and system prompt, then serves one question at a time and adapts from how the learner
-                        answered (including per-option weights you do not show in the UI).
+                        When on, the quiz does not use a fixed question list. Instead it picks one question at a
+                        time based on how the learner answered the previous one, using the course items and
+                        instructions you choose below.
                       </p>
                     </div>
                     <button

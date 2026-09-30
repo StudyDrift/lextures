@@ -81,7 +81,7 @@ export function MagicLinkRequestForm({ redirectTo, defaultEmail = '' }: Props) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className="w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-fg-default outline-none ring-indigo-500/20 transition-[background-color,color,border-color] placeholder:text-fg-subtle focus:border-indigo-400 focus:ring-2"
-          placeholder="you@school.edu"
+          placeholder="you@example.com"
         />
       </div>
       {message && status === 'error' && (

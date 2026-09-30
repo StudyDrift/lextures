@@ -97,7 +97,7 @@ export default function ForgotPassword() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className={authFieldClass}
-                placeholder="you@school.edu"
+                placeholder="you@example.com"
               />
             </div>
 

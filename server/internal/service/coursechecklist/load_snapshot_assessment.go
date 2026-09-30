@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/lextures/lextures/server/internal/repos/course"
@@ -391,4 +392,27 @@ LIMIT 500
 		}
 	}
 	return rows.Err()
+}
+
+// enrichOrgIsK12 sets OrgIsK12 when the course org is K–12 (in addition to
+// grade-levels already set during snapshot construction).
+func enrichOrgIsK12(ctx context.Context, pool *pgxpool.Pool, snap *CourseSnapshot, count func(int)) error {
+	if snap.OrgIsK12 || snap.OrgID == nil {
+		return nil
+	}
+	var orgType string
+	err := pool.QueryRow(ctx, `
+SELECT org_type FROM tenant.organizations WHERE id = $1 AND status <> 'deleted'
+`, *snap.OrgID).Scan(&orgType)
+	count(1)
+	if err != nil {
+		if isUndefinedTable(err) || err == pgx.ErrNoRows {
+			return nil
+		}
+		return err
+	}
+	if orgType == "k-12" {
+		snap.OrgIsK12 = true
+	}
+	return nil
 }

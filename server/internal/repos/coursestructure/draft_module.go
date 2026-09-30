@@ -9,16 +9,9 @@ import (
 )
 
 // CreateDraftModule inserts a top-level module with published=false (plan 19.2 FR-5).
+// CreateModule already defaults to draft; this remains for call-site clarity.
 func CreateDraftModule(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID, title string) (ItemRow, error) {
-	row, err := CreateModule(ctx, pool, courseID, title)
-	if err != nil {
-		return ItemRow{}, err
-	}
-	if err := SetItemPublished(ctx, pool, courseID, row.ID, false); err != nil {
-		return ItemRow{}, err
-	}
-	row.Published = false
-	return row, nil
+	return CreateModule(ctx, pool, courseID, title)
 }
 
 // SetItemPublished updates the published flag on a structure item.

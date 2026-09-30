@@ -3183,7 +3183,7 @@ export default function CourseModules() {
         key={`module-settings-${moduleSettingsKey}`}
         open={moduleSettingsOpen && settingsTargetItem !== null}
         initialTitle={settingsTargetItem?.title ?? ''}
-        initialPublished={settingsTargetItem?.published ?? true}
+        initialPublished={settingsTargetItem?.published ?? false}
         initialVisibleFrom={settingsTargetItem?.visibleFrom ?? null}
         scheduleMode={courseMeta?.scheduleMode}
         relativeScheduleAnchorAt={courseMeta?.relativeScheduleAnchorAt}

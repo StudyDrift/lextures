@@ -256,7 +256,7 @@ export default function AdminAccommodationsPage() {
                 }
               }}
               className="min-w-[12rem] flex-1 rounded-lg border border-border-default px-3 py-2 text-sm dark:border-border-default dark:bg-surface-base"
-              placeholder="e.g. jordan@school.edu, Lee, or 00123456"
+              placeholder="e.g. jordan@example.com, Lee, or 00123456"
               spellCheck={false}
               autoComplete="off"
             />

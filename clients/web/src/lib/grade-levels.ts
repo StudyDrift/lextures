@@ -43,7 +43,7 @@ export function sortGradeLevels(values: string[]): string[] {
 }
 
 export function formatGradeLevelsSummary(values: string[]): string {
-  if (values.length === 0) return 'No grade level — higher ed or unspecified'
+  if (values.length === 0) return 'No grade level selected'
   if (values.length === 1) return gradeLevelLabel(values[0]!)
   if (values.length <= 3) {
     return sortGradeLevels(values)

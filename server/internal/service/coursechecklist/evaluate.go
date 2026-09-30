@@ -101,7 +101,7 @@ func evaluateOne(ctx context.Context, snap CourseSnapshot, it ItemDescriptor) It
 		WhyKey:        it.WhyKey,
 		WhyDefault:    it.WhyDefault,
 		HelpRef:       it.HelpRef,
-		Sources:       append([]string(nil), it.Sources...),
+		Sources:       sourcesForAudience(it.Sources, snap),
 		Target:        it.Target,
 		EvidenceShape: it.EvidenceShape,
 		Action:        it.Action,
