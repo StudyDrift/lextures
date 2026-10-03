@@ -13,6 +13,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/coursegrants"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
+	"github.com/lextures/lextures/server/internal/service/managedlearners"
 )
 
 const searchQueryPerGroupLimit = 5
@@ -121,27 +122,57 @@ func (d Deps) handleSearchQuery() http.HandlerFunc {
 			})
 		}
 
-		if types["person"] && (rosterAll || len(rosterCourses) > 0) {
-			rosterFilter := rosterCourses
-			if rosterAll {
-				rosterFilter = nil
+		if types["person"] {
+			searchedPeople := false
+			var personItems []search.QueryResultItem
+			var personTotal int
+			if rosterAll || len(rosterCourses) > 0 {
+				searchedPeople = true
+				rosterFilter := rosterCourses
+				if rosterAll {
+					rosterFilter = nil
+				}
+				items, total, err := enrollment.SearchPeopleQuery(
+					ctx, d.Pool, userID, q, scopePtr, rosterFilter, gradebookCourses, searchQueryPerGroupLimit,
+				)
+				if err != nil {
+					apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Search failed.")
+					return
+				}
+				personItems = items
+				personTotal = total
 			}
-			items, total, err := enrollment.SearchPeopleQuery(
-				ctx, d.Pool, userID, q, scopePtr, rosterFilter, gradebookCourses, searchQueryPerGroupLimit,
-			)
-			if err != nil {
-				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Search failed.")
-				return
+			// Managed learners show on /learners before they join a course roster.
+			if d.effectiveConfig().FFHomeschoolManagedLearners {
+				hits, _, err := managedlearners.Search(
+					ctx, d.Pool, userID, q, scopePtr, searchQueryPerGroupLimit,
+				)
+				if err != nil && !managedlearners.IgnoreSearchAccessErr(err) {
+					apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Search failed.")
+					return
+				}
+				if err == nil && len(hits) > 0 {
+					searchedPeople = true
+					extra := make([]search.QueryResultItem, 0, len(hits))
+					for _, hit := range hits {
+						extra = append(extra, managedLearnerQueryItem(hit))
+					}
+					personItems, personTotal = mergeSearchPersonResults(
+						personItems, personTotal, extra, searchQueryPerGroupLimit,
+					)
+				}
 			}
-			if items == nil {
-				items = []search.QueryResultItem{}
+			if searchedPeople {
+				if personItems == nil {
+					personItems = []search.QueryResultItem{}
+				}
+				groups = append(groups, search.QueryGroup{
+					Type:  "person",
+					Label: "People",
+					Total: personTotal,
+					Items: personItems,
+				})
 			}
-			groups = append(groups, search.QueryGroup{
-				Type:  "person",
-				Label: "People",
-				Total: total,
-				Items: items,
-			})
 		}
 
 		if groups == nil {

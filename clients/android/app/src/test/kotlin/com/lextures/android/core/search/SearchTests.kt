@@ -61,6 +61,12 @@ class SearchTests {
     }
 
     @Test
+    fun pathNavigatorMapsLearners() {
+        val target = SearchPathNavigator.resolve("/learners?learner=abc")
+        assertEquals(SearchNavigationTarget.ShellTabTarget(ShellTab.Children), target)
+    }
+
+    @Test
     fun pathNavigatorMapsCourseContent() {
         val target = SearchPathNavigator.resolve("/courses/demo/assignments/item-1")
         assertTrue(target is SearchNavigationTarget.DeepLinkTarget)

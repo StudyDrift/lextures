@@ -43,7 +43,7 @@ object SearchPathNavigator {
             "inbox" -> SearchNavigationTarget.DeepLinkTarget(DeepLinkDestination.Inbox)
             "notebooks" -> SearchNavigationTarget.ShellTabTarget(ShellTab.Notebooks)
             "calendar" -> SearchNavigationTarget.ShellTabTarget(ShellTab.Calendar)
-            "parent" -> SearchNavigationTarget.ShellTabTarget(ShellTab.Children)
+            "parent", "learners" -> SearchNavigationTarget.ShellTabTarget(ShellTab.Children)
             "todos" -> SearchNavigationTarget.MoreTarget(MoreDestination.Planner)
             "portfolios" -> SearchNavigationTarget.MoreTarget(MoreDestination.Portfolio)
             "catalog" -> SearchNavigationTarget.MoreTarget(MoreDestination.Catalog)

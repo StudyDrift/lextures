@@ -48,7 +48,7 @@ enum SearchPathNavigator {
             return .shellTab(.notebooks)
         case "calendar":
             return .shellTab(.calendar)
-        case "parent":
+        case "parent", "learners":
             return .shellTab(.children)
         case "todos":
             return .more(.planner)

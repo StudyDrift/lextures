@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { Plus, UserRound } from 'lucide-react'
 import { ConfirmDialog } from '../../components/confirm-dialog'
 import { Checkbox, Field, Input } from '../../components/ui'
@@ -44,6 +44,8 @@ function LearnerCourseLinks({
 
 export default function LearnersPage() {
   const { ffHomeschoolManagedLearners, loading: featuresLoading } = usePlatformFeatures()
+  const [searchParams] = useSearchParams()
+  const focusLearnerId = searchParams.get('learner')
   const [deps, setDeps] = useState<ManagedDependent[]>([])
   const [courses, setCourses] = useState<DependentCourseEnrollment[]>([])
   const [loading, setLoading] = useState(true)
@@ -77,6 +79,11 @@ export default function LearnersPage() {
     }
     void reload()
   }, [featuresLoading, ffHomeschoolManagedLearners, reload])
+
+  useEffect(() => {
+    if (loading || !focusLearnerId) return
+    document.getElementById(`learner-${focusLearnerId}`)?.scrollIntoView({ block: 'nearest' })
+  }, [loading, focusLearnerId, deps])
 
   async function onAdd(e: FormEvent) {
     e.preventDefault()
@@ -208,7 +215,13 @@ export default function LearnersPage() {
         ) : (
           <ul className="divide-y divide-border-default overflow-hidden rounded-2xl border border-border-default bg-surface-raised">
             {deps.map((d) => (
-              <li key={d.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+              <li
+                key={d.id}
+                id={`learner-${d.id}`}
+                className={`flex flex-wrap items-center justify-between gap-3 px-4 py-3 ${
+                  focusLearnerId === d.id ? 'ring-2 ring-inset ring-accent-solid' : ''
+                }`}
+              >
                 <div className="flex min-w-0 items-center gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-200">
                     <UserRound className="h-4 w-4" />

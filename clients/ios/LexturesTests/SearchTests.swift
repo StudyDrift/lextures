@@ -40,6 +40,11 @@ final class SearchTests: XCTestCase {
         XCTAssertEqual(target, .shellTab(.calendar))
     }
 
+    func testPathNavigatorMapsLearners() {
+        let target = SearchPathNavigator.resolve("/learners?learner=abc")
+        XCTAssertEqual(target, .shellTab(.children))
+    }
+
     func testPathNavigatorMapsCourseContent() {
         let target = SearchPathNavigator.resolve("/courses/demo/assignments/item-1")
         guard case .deepLink(let destination) = target else {
