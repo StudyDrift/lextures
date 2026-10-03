@@ -11,13 +11,13 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lextures/lextures/server/internal/api"
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/repos/apitokens"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	"github.com/lextures/lextures/server/internal/repos/organization"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type accessKeyCourse struct {
@@ -90,22 +90,6 @@ func accessKeyItemFromRow(r apitokens.Row, courses []accessKeyCourse, now time.T
 		}
 	}
 	return item
-}
-
-func (d Deps) apiBaseURL(r *http.Request) string {
-	base := strings.TrimRight(strings.TrimSpace(d.effectiveConfig().LTIAPIBaseURL), "/")
-	if base != "" {
-		return base
-	}
-	proto := "http"
-	if r.TLS != nil {
-		proto = "https"
-	}
-	host := strings.TrimSpace(r.Host)
-	if host != "" {
-		return proto + "://" + host
-	}
-	return "http://localhost:8080"
 }
 
 func (d Deps) handleListAccessKeyScopes() http.HandlerFunc {
