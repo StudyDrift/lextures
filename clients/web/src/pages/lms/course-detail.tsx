@@ -19,8 +19,8 @@ import {
   fetchEnrollmentDiagnostic,
   fetchLearnerRecommendations,
   postCourseContext,
-  viewerIsCourseStaffEnrollment,
   viewerShouldShowMyGradesNav,
+  viewerShouldShowStaffCourseHome,
   type CourseGradebookGridResponse,
   type CourseMyGradesResponse,
   type CoursePublic,
@@ -44,7 +44,7 @@ import { CourseVisibilityPill } from '../../components/ui/status-vocabulary'
 import { useCourseLiveStructureRevision } from '../../context/course-live-context'
 import { useCourseNavFeatures } from '../../context/course-nav-features-context'
 import { usePermissions } from '../../context/use-permissions'
-import { getCourseViewAs } from '../../lib/course-view-as'
+import { useCourseViewAs } from '../../lib/course-view-as'
 import { permCourseItemsCreate } from '../../lib/rbac-api'
 import { CourseCalendar, type CourseCalendarAssignment } from './course-calendar'
 import { formatDueShort } from '../../lib/course-calendar-utils'
@@ -203,6 +203,7 @@ function countEmptyGradeCells(grid: CourseGradebookGridResponse): number {
 
 export default function CourseDetail() {
   const { courseCode } = useParams<{ courseCode: string }>()
+  const courseViewPreview = useCourseViewAs(courseCode)
   const [searchParams] = useSearchParams()
   const dateKey = searchParams.get('date')?.trim() || null
   const { calendarEnabled: courseCalendarEnabled, loading: courseFeatureFlagsLoading } =
@@ -343,7 +344,7 @@ export default function CourseDetail() {
     if (!courseCode || !course || landing !== 'data') return
     let cancelled = false
     void (async () => {
-      const preview = getCourseViewAs(courseCode)
+      const preview = courseViewPreview
       const tasks: Promise<void>[] = []
 
       tasks.push(
@@ -366,8 +367,8 @@ export default function CourseDetail() {
         setMyGrades(null)
       }
 
-      const staff = viewerIsCourseStaffEnrollment(course.viewerEnrollmentRoles)
-      if (staff && !permLoading && allows(courseGradebookViewPermission(courseCode))) {
+      const showStaffHome = viewerShouldShowStaffCourseHome(course.viewerEnrollmentRoles, preview)
+      if (showStaffHome && !permLoading && allows(courseGradebookViewPermission(courseCode))) {
         tasks.push(
           fetchCourseGradebookGrid(courseCode)
             .then((grid) => {
@@ -407,7 +408,7 @@ export default function CourseDetail() {
     return () => {
       cancelled = true
     }
-  }, [courseCode, course, landing, allows, permLoading])
+  }, [courseCode, course, courseViewPreview, landing, allows, permLoading])
 
   const viewerIsStudent =
     course?.viewerEnrollmentRoles?.some((r) => r.trim().toLowerCase() === 'student') ?? false
@@ -466,8 +467,19 @@ export default function CourseDetail() {
     }))
   }, [structure])
 
+  const showStaffCourseHome = viewerShouldShowStaffCourseHome(
+    course?.viewerEnrollmentRoles,
+    courseViewPreview,
+  )
+  const showLearnerGradesCard =
+    courseViewPreview === 'student' ||
+    (course?.viewerEnrollmentRoles?.some((r) => r.trim().toLowerCase() === 'student') ?? false)
+
   const canRescheduleDueByDrag = Boolean(
-    courseCode && !permLoading && allows(permCourseItemsCreate(courseCode)),
+    courseCode &&
+      showStaffCourseHome &&
+      !permLoading &&
+      allows(permCourseItemsCreate(courseCode)),
   )
 
   if (!courseCode) {
@@ -491,8 +503,6 @@ export default function CourseDetail() {
     )
   }
 
-  const staff = course ? viewerIsCourseStaffEnrollment(course.viewerEnrollmentRoles) : false
-
   return (
     <LmsPage
       title={course?.title ?? (loading ? 'Loading…' : 'Course')}
@@ -503,14 +513,14 @@ export default function CourseDetail() {
         <Link to="/courses" className="text-sm font-medium text-accent-fg hover:text-indigo-500">
           ← All courses
         </Link>
-        {courseCode && (
+        {showStaffCourseHome && courseCode ? (
           <Link
             to={`/courses/${encodeURIComponent(courseCode)}/settings/general`}
             className="text-sm font-medium text-accent-fg hover:text-indigo-500"
           >
             Course settings
           </Link>
-        )}
+        ) : null}
         {course?.isBlueprint ? (
           <span
             className="rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-semibold text-indigo-900 dark:bg-indigo-950 dark:text-indigo-100"
@@ -636,16 +646,24 @@ export default function CourseDetail() {
               {!courseFeatureFlagsLoading && !courseCalendarEnabled ? (
                 <div className="rounded-2xl border border-amber-200 bg-amber-50/90 p-4 text-sm text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-50">
                   <p className="font-medium">Course calendar is turned off</p>
-                  <p className="mt-1 text-amber-900/90 dark:text-amber-100/90">
-                    Turn on <strong>Calendar</strong> under Course settings → Features, or change the
-                    course home under General.
-                  </p>
-                  <Link
-                    to={`/courses/${encodeURIComponent(courseCode)}/settings/features`}
-                    className="mt-3 inline-block text-sm font-semibold text-amber-900 underline dark:text-amber-100"
-                  >
-                    Open Features
-                  </Link>
+                  {showStaffCourseHome ? (
+                    <>
+                      <p className="mt-1 text-amber-900/90 dark:text-amber-100/90">
+                        Turn on <strong>Calendar</strong> under Course settings → Features, or change the
+                        course home under General.
+                      </p>
+                      <Link
+                        to={`/courses/${encodeURIComponent(courseCode)}/settings/features`}
+                        className="mt-3 inline-block text-sm font-semibold text-amber-900 underline dark:text-amber-100"
+                      >
+                        Open Features
+                      </Link>
+                    </>
+                  ) : (
+                    <p className="mt-1 text-amber-900/90 dark:text-amber-100/90">
+                      The course calendar is not available.
+                    </p>
+                  )}
                 </div>
               ) : null}
               {structureError && (
@@ -809,7 +827,7 @@ export default function CourseDetail() {
                     </div>
                   )}
 
-                  {viewerIsStudent && myGrades && myGrades.columns.some((c) => c.maxPoints && c.maxPoints > 0) ? (
+                  {showLearnerGradesCard && myGrades && myGrades.columns.some((c) => c.maxPoints && c.maxPoints > 0) ? (
                     <div className="rounded-2xl border border-border-default bg-surface-raised p-5 shadow-sm dark:border-border-default dark:bg-surface-raised">
                       <div className="flex items-center gap-2 text-accent-fg">
                         <BarChart3 className="h-5 w-5 shrink-0" aria-hidden />
@@ -851,7 +869,7 @@ export default function CourseDetail() {
 
                   {courseCode ? <ChecklistDashboardCardContainer courseCode={courseCode} /> : null}
 
-                  {staff ? (
+                  {showStaffCourseHome ? (
                     <div className="rounded-2xl border border-border-default bg-surface-raised p-5 shadow-sm dark:border-border-default dark:bg-surface-raised sm:col-span-2 lg:col-span-1">
                       <div className="flex items-center gap-2 text-accent-fg">
                         <LayoutDashboard className="h-5 w-5 shrink-0" aria-hidden />
@@ -914,7 +932,8 @@ export default function CourseDetail() {
                     <dt className="font-medium text-fg-muted">Course code</dt>
                     <dd className="mt-1 text-fg-default">{course.courseCode}</dd>
                   </div>
-                  {course.scheduleMode === 'relative' &&
+                  {showStaffCourseHome &&
+                  course.scheduleMode === 'relative' &&
                   course.viewerEnrollmentRoles?.some((r) => r === 'teacher' || r === 'instructor') ? (
                     <>
                       <div>

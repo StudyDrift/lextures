@@ -11,6 +11,7 @@ import {
   viewerIsLearnerOnlyCourseEnrollment,
   viewerShouldHideCourseEnrollmentsNav,
   viewerShouldShowMyGradesNav,
+  viewerShouldShowStaffCourseHome,
 } from '../courses-api'
 
 describe('parseGraderAgentAIBuildResponse', () => {
@@ -162,6 +163,27 @@ describe('viewerShouldHideCourseEnrollmentsNav', () => {
   it('does not hide for staff-only enrollment in teacher preview', () => {
     expect(viewerShouldHideCourseEnrollmentsNav(['teacher'], 'teacher')).toBe(false)
     expect(viewerShouldHideCourseEnrollmentsNav(['student', 'teacher'], 'teacher')).toBe(false)
+  })
+})
+
+describe('viewerShouldShowStaffCourseHome', () => {
+  it('hides staff course home while previewing as a student, including Test Student dual enrollment', () => {
+    expect(viewerShouldShowStaffCourseHome(['teacher', 'student'], 'student')).toBe(false)
+    expect(viewerShouldShowStaffCourseHome(['teacher', 'test_student'], 'student')).toBe(false)
+    expect(viewerShouldShowStaffCourseHome(['teacher'], 'student')).toBe(false)
+  })
+
+  it('hides staff course home for a real learner', () => {
+    expect(viewerShouldShowStaffCourseHome(['student'], 'teacher')).toBe(false)
+    expect(viewerShouldShowStaffCourseHome(['test_student'], 'teacher')).toBe(false)
+    expect(viewerShouldShowStaffCourseHome([], 'teacher')).toBe(false)
+    expect(viewerShouldShowStaffCourseHome(null, 'teacher')).toBe(false)
+  })
+
+  it('shows staff course home for staff when preview is off', () => {
+    expect(viewerShouldShowStaffCourseHome(['teacher'], 'teacher')).toBe(true)
+    expect(viewerShouldShowStaffCourseHome(['instructor', 'student'], 'teacher')).toBe(true)
+    expect(viewerShouldShowStaffCourseHome(['teacher', 'test_student'], 'teacher')).toBe(true)
   })
 })
 
