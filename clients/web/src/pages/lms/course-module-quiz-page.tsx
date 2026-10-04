@@ -15,6 +15,7 @@ import {
 } from '../../components/syllabus/syllabus-block-editor'
 import { markdownToSectionsForEditor, sectionsToMarkdown } from '../../components/syllabus/syllabus-section-markdown'
 import { usePermissions } from '../../context/use-permissions'
+import { useCourseViewAs } from '../../lib/course-view-as'
 import {
   fetchCourseQuestion,
   fetchCourseQuestions,
@@ -438,13 +439,18 @@ export default function CourseModuleQuizPage() {
     orgType,
   })
   const authoringCopy = quizAuthoringCopy(familyAudience)
-  const canEdit = Boolean(courseCode && itemId && !permLoading && allows(permCourseItemCreate(courseCode)))
-  const canEditQuizItems = Boolean(
+  // Same “View as Test Student” switch as the course home and assignment pages.
+  const previewAsLearner = useCourseViewAs(courseCode) === 'student'
+  const staffCanEdit = Boolean(courseCode && itemId && !permLoading && allows(permCourseItemCreate(courseCode)))
+  const canEdit = staffCanEdit && !previewAsLearner
+  const staffCanEditQuizItems = Boolean(
     courseCode && itemId && !permLoading && allows(permCourseItemsCreate(courseCode)),
   )
-  const canGradeQuiz = Boolean(
+  const canEditQuizItems = staffCanEditQuizItems && !previewAsLearner
+  const staffCanGradeQuiz = Boolean(
     courseCode && itemId && !permLoading && allows(courseGradebookViewPermission(courseCode)),
   )
+  const canGradeQuiz = staffCanGradeQuiz && !previewAsLearner
   const [title, setTitle] = useState('')
   const [markdown, setMarkdown] = useState('')
   const [dueAt, setDueAt] = useState<string | null>(null)
@@ -497,6 +503,12 @@ export default function CourseModuleQuizPage() {
   const [saveError, setSaveError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [questionsOpen, setQuestionsOpen] = useState(false)
+  useEffect(() => {
+    if (!previewAsLearner) return
+    setEditingContent(false)
+    setQuestionsOpen(false)
+    setBuildAiOpen(false)
+  }, [previewAsLearner])
   const [questionsDraft, setQuestionsDraft] = useState<QuizQuestion[]>([])
   const [questionsSaving, setQuestionsSaving] = useState(false)
   const [questionsError, setQuestionsError] = useState<string | null>(null)
