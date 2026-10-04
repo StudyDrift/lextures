@@ -10,6 +10,7 @@ import (
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/courseroles"
 	"github.com/lextures/lextures/server/internal/repos/course"
+	"github.com/lextures/lextures/server/internal/repos/coursestandards"
 	"github.com/lextures/lextures/server/internal/repos/organization"
 	"github.com/lextures/lextures/server/internal/repos/orgroles"
 	"github.com/lextures/lextures/server/internal/repos/sbgreport"
@@ -24,8 +25,9 @@ func (d Deps) registerSBGReportRoutes(r chi.Router) {
 	r.Put("/api/v1/admin/orgs/{orgId}/sbg/mastery-scale", d.handlePutMasteryScale())
 	r.Post("/api/v1/admin/orgs/{orgId}/sbg/standards/import", d.handleImportStandards())
 
-	// Instructor: course standards list and mastery score recording
+	// Instructor: course standards list, standards gradebook matrix, and mastery score recording
 	r.Get("/api/v1/courses/{course_code}/sbg/standards", d.handleListCourseStandards())
+	r.Get("/api/v1/courses/{course_code}/standards-gradebook", d.handleStandardsGradebook())
 	r.Post("/api/v1/sbg/mastery-scores", d.handleRecordMasteryScore())
 
 	// Instructor: mastery heatmap for a course+period
@@ -252,6 +254,44 @@ func (d Deps) handleListCourseStandards() http.HandlerFunc {
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]any{"standards": out, "courseCode": courseCode})
+	}
+}
+
+// handleStandardsGradebook is GET /api/v1/courses/{course_code}/standards-gradebook (plan 3.7).
+// Returns students × course standards with cached proficiency labels. An empty standards
+// list is a normal empty matrix, not an error.
+func (d Deps) handleStandardsGradebook() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		courseCode, viewer, ok := d.requireCourseAccess(w, r)
+		if !ok {
+			return
+		}
+		perm := "course:" + courseCode + ":gradebook:view"
+		hasPerm, err := courseroles.UserHasPermission(r.Context(), d.Pool, viewer, perm)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")
+			return
+		}
+		if !hasPerm {
+			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "Gradebook access required.")
+			return
+		}
+		cid, err := course.GetIDByCourseCode(r.Context(), d.Pool, courseCode)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course.")
+			return
+		}
+		if cid == nil {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
+			return
+		}
+		matrix, err := coursestandards.LoadStandardsGradebook(r.Context(), d.Pool, *cid, courseCode)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load standards gradebook.")
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(matrix)
 	}
 }
 
