@@ -33,7 +33,9 @@ const requestTypeLabels: Record<string, string> = {
 export function CaliforniaPrivacyRightsPage() {
   const [optOut, setOptOut] = useState<OptOutState | null>(null)
   const [requests, setRequests] = useState<CCPARequest[]>([])
-  const [loading, setLoading] = useState(true)
+  // Prerender does not run effects, and this route is not hydrated in the browser.
+  // Start ready so the shipped HTML contains the CCPA copy, not a spinner.
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [requestType, setRequestType] = useState('know_categories')
@@ -44,7 +46,9 @@ export function CaliforniaPrivacyRightsPage() {
   }, [])
 
   useEffect(() => {
+    let cancelled = false
     async function load() {
+      setLoading(true)
       try {
         const [optOutRes, reqRes] = await Promise.all([
           fetch(`${API}/opt-out`),
@@ -52,19 +56,22 @@ export function CaliforniaPrivacyRightsPage() {
         ])
         if (optOutRes.ok) {
           const data = (await optOutRes.json()) as OptOutState
-          setOptOut(data)
+          if (!cancelled) setOptOut(data)
         }
         if (reqRes.ok) {
           const data = (await reqRes.json()) as { requests?: CCPARequest[] }
-          setRequests(data.requests ?? [])
+          if (!cancelled) setRequests(data.requests ?? [])
         }
       } catch {
-        setError('Failed to load California privacy rights data.')
+        if (!cancelled) setError('Failed to load California privacy rights data.')
       } finally {
-        setLoading(false)
+        if (!cancelled) setLoading(false)
       }
     }
     void load()
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   async function toggleDoNotSell() {
@@ -158,12 +165,7 @@ export function CaliforniaPrivacyRightsPage() {
       <main id="main-content" className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:py-12">
         <LegalNav />
 
-        {loading ? (
-          <div className="flex min-h-[40vh] items-center justify-center" role="status" aria-label="Loading">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-stone-200 border-t-accent" />
-          </div>
-        ) : (
-          <div className="space-y-8">
+        <div className="space-y-8">
             <header>
               <h1 className="font-display text-3xl font-normal tracking-tight text-stone-900 sm:text-4xl">
                 Your California Privacy Rights
@@ -174,6 +176,12 @@ export function CaliforniaPrivacyRightsPage() {
                 opt out of the sale or sharing of your personal information.
               </p>
             </header>
+
+            {loading && (
+              <p className="text-sm text-stone-500" role="status">
+                Loading your saved preferences…
+              </p>
+            )}
 
             {error && (
               <div
@@ -363,7 +371,6 @@ export function CaliforniaPrivacyRightsPage() {
               </p>
             </section>
           </div>
-        )}
       </main>
 
       <SiteFooter />
