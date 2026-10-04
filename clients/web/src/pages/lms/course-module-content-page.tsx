@@ -48,6 +48,7 @@ import { AuthoringSaveFootprint } from '../../components/authoring-save-footprin
 import { FeatureHelpTrigger } from '../../components/feature-help/feature-help-trigger'
 import { formatAbsolute } from '../../lib/format-datetime'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
+import { useCourseViewAs } from '../../lib/course-view-as'
 import { permCourseItemCreate } from '../../lib/rbac-api'
 import { LmsPage } from './lms-page'
 import { ReadingLevelBadge } from '../../components/reading-level/reading-level-badge'
@@ -87,6 +88,7 @@ function newLocalId(): string {
 export default function CourseModuleContentPage() {
   const { courseCode, itemId } = useParams<{ courseCode: string; itemId: string }>()
   const { allows, loading: permLoading } = usePermissions()
+  const previewAsLearner = useCourseViewAs(courseCode) === 'student'
   const { ffCeuTracking, aiStudyBuddyEnabled, aiConfigured } = usePlatformFeatures()
   const { contentToolsEnabled } = useCourseNavFeatures()
   const { prompt, InputDialogHost } = usePrompt()
@@ -101,6 +103,12 @@ export default function CourseModuleContentPage() {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState<SyllabusSection[]>([])
   const [buildAiOpen, setBuildAiOpen] = useState(false)
+
+  useEffect(() => {
+    if (!previewAsLearner) return
+    setEditing(false)
+    setBuildAiOpen(false)
+  }, [previewAsLearner])
   const [ctInstancesReloadKey, setCtInstancesReloadKey] = useState(0)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
@@ -200,10 +208,12 @@ export default function CourseModuleContentPage() {
     return () => clearTimeout(timer)
   }, [countdown, nextNav, navigate])
 
-  const canEdit = Boolean(
+  const staffCanAuthor = Boolean(
     courseCode && itemId && !permLoading && allows(permCourseItemCreate(courseCode)),
   )
-  const seatTimeEnabled = ffCeuTracking && !canEdit && !editing && Boolean(itemId)
+  // Preview hides authoring. Seat time stays off for staff so a preview does not record it.
+  const canEdit = staffCanAuthor && !previewAsLearner
+  const seatTimeEnabled = ffCeuTracking && !staffCanAuthor && !editing && Boolean(itemId)
   useSeatTimeHeartbeat(itemId, seatTimeEnabled)
 
   const loadMarkups = useCallback(async () => {

@@ -42,6 +42,7 @@ import { useCoursePageTitle } from '../../context/course-document-title-context'
 import { useLmsDarkMode } from '../../hooks/use-lms-dark-mode'
 import { recordLastVisitedModuleItem } from '../../lib/last-visited-module-item'
 import { getJwtSubject } from '../../lib/auth'
+import { useCourseViewAs } from '../../lib/course-view-as'
 import { permCourseItemCreate } from '../../lib/rbac-api'
 import { AssignmentPageActionsMenu } from '../../components/assignment/assignment-page-actions-menu'
 import { AssignmentPageSettingsPanel } from '../../components/assignment/assignment-page-settings-panel'
@@ -166,6 +167,8 @@ export default function CourseModuleAssignmentPage() {
   const { courseCode, itemId } = useParams<{ courseCode: string; itemId: string }>()
   const [searchParams] = useSearchParams()
   const { allows, loading: permLoading } = usePermissions()
+  const courseViewPreview = useCourseViewAs(courseCode)
+  const previewAsLearner = courseViewPreview === 'student'
   const { graderAgentEnabled, graderAgentReviewInboxEnabled } = usePlatformFeatures()
   const outlet = useOutletContext<{ course?: CoursePublic | null } | null>()
   const courseTimezone = outlet?.course?.courseTimezone ?? null
@@ -252,6 +255,14 @@ export default function CourseModuleAssignmentPage() {
   const [enrolledStudentCount, setEnrolledStudentCount] = useState<number | null>(null)
 
   const [editing, setEditing] = useState(false)
+
+  useEffect(() => {
+    if (!previewAsLearner) return
+    setEditing(false)
+    setPreviewModalOpen(false)
+    setGradingAgentOpen(false)
+  }, [previewAsLearner])
+
   const [draft, setDraft] = useState<SyllabusSection[]>([])
   const [saveError, setSaveError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
@@ -280,7 +291,11 @@ export default function CourseModuleAssignmentPage() {
   }, [assignmentMarkupTarget, courseCode, itemId])
 
   const canEdit = Boolean(
-    courseCode && itemId && !permLoading && allows(permCourseItemCreate(courseCode)),
+    courseCode &&
+      itemId &&
+      !permLoading &&
+      allows(permCourseItemCreate(courseCode)) &&
+      !previewAsLearner,
   )
 
   const load = useCallback(async () => {
@@ -449,7 +464,8 @@ export default function CourseModuleAssignmentPage() {
 
   useCoursePageTitle(!loading && title ? title : null)
 
-  const viewerIsCourseStaff = viewerIsCourseStaffEnrollment(viewerEnrollmentRoles)
+  const viewerIsCourseStaff =
+    viewerIsCourseStaffEnrollment(viewerEnrollmentRoles) && !previewAsLearner
 
   const assignmentAcceptsSubmissions = submissionTypesAreSet(
     submissionAllowText,
@@ -693,7 +709,8 @@ export default function CourseModuleAssignmentPage() {
 
   const myUserId = getJwtSubject()
   const viewerCanModerate = Boolean(
-    viewerCanRevealIdentities || (moderatorUserId != null && moderatorUserId === myUserId),
+    !previewAsLearner &&
+      (viewerCanRevealIdentities || (moderatorUserId != null && moderatorUserId === myUserId)),
   )
 
   const moderationDashboardPath =
