@@ -22,18 +22,19 @@ export function CourseAccessibilitySettingsSection({
   const [data, setData] = useState<CourseAccessibilityInfo | null>(null)
 
   useEffect(() => {
-    if (featuresLoading || !enabled) return
+    if (featuresLoading) return
     let cancelled = false
     void (async () => {
-      setFetchState('loading')
+      if (enabled) setFetchState('loading')
       try {
+        // Opening this page stamps the checklist review, including when coverage is off.
         const res = await fetchCourseAccessibility(courseCode)
         if (!cancelled) {
           setData(res)
           setFetchState('done')
         }
       } catch (e) {
-        if (!cancelled) {
+        if (!cancelled && enabled) {
           setError(e instanceof Error ? e.message : 'Failed to load accessibility data')
           setFetchState('error')
         }
@@ -55,12 +56,17 @@ export function CourseAccessibilitySettingsSection({
     )
   }
 
-  if (!enabled) {
+  if (!enabled || data?.enforcementEnabled === false) {
     return (
-      <p className="text-sm text-fg-muted">
-        Alt-text enforcement is not enabled on this platform. Ask a global admin to turn it on under
-        Settings → Global platform.
-      </p>
+      <section className="space-y-4" data-focus-anchor="course.accessibility.settings">
+        <div className="rounded-xl border border-border-default bg-surface-raised p-4 shadow-sm">
+          <h2 className="text-base font-semibold text-fg-default">Image alt text</h2>
+          <p className="mt-1 text-sm text-fg-muted">
+            Alt-text enforcement is not enabled on this platform. A global admin can turn it on under
+            Settings → Global platform.
+          </p>
+        </div>
+      </section>
     )
   }
 

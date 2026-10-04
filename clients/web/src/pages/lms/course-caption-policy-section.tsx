@@ -43,6 +43,7 @@ export function CourseCaptionPolicySection({ courseCode, course, onCourseUpdated
           type="button"
           role="switch"
           aria-checked={enabled}
+          aria-label="Mandatory captions for this course"
           disabled={saving}
           onClick={() => void toggle()}
           className={`relative inline-flex h-7 w-12 shrink-0 rounded-full border-2 border-transparent transition-colors ${ enabled ? 'bg-accent-solid' : 'bg-slate-200 dark:bg-neutral-700' }`}

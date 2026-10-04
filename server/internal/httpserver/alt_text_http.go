@@ -27,8 +27,8 @@ const (
 )
 
 type altTextRateEntry struct {
-	count   int
-	window  time.Time
+	count  int
+	window time.Time
 }
 
 var altTextRateMu sync.Mutex
@@ -156,20 +156,27 @@ func (d Deps) handlePostAltTextSuggest() http.HandlerFunc {
 }
 
 type courseAccessibilityResponse struct {
-	AltTextCoverage altTextCoverageJSON `json:"altTextCoverage"`
-	HardBlockSave   bool                `json:"hardBlockSave"`
+	// EnforcementEnabled is false when platform alt-text coverage is turned off.
+	// The settings page still loads so checklist review can confirm that and the caption policy.
+	EnforcementEnabled bool                 `json:"enforcementEnabled"`
+	AltTextCoverage    *altTextCoverageJSON `json:"altTextCoverage,omitempty"`
+	HardBlockSave      bool                 `json:"hardBlockSave"`
 }
 
 type altTextCoverageJSON struct {
-	WithAlt        int                      `json:"withAlt"`
-	Total          int                      `json:"total"`
-	Percent        int                      `json:"percent"`
+	WithAlt        int                         `json:"withAlt"`
+	Total          int                         `json:"total"`
+	Percent        int                         `json:"percent"`
 	UncoveredItems []imagealtrepo.ItemCoverage `json:"uncoveredItems"`
 }
 
 func (d Deps) handleGetCourseAccessibility() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !d.requireAltTextEnforcement(w) {
+		enforcementOn := d.altTextEnforcementEnabled()
+		// Keep the unconfigured handler at 404 (plan 12.5). A configured server
+		// still records the review so the checklist does not point at a dead page.
+		if !enforcementOn && (d.JWTSigner == nil || d.Pool == nil) {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Alt-text enforcement is not enabled.")
 			return
 		}
 		userID, ok := d.meUserID(w, r)
@@ -197,6 +204,13 @@ func (d Deps) handleGetCourseAccessibility() http.HandlerFunc {
 		}
 		// Side effect: opening accessibility settings stamps a11y.enforcement-settings (CC.6).
 		_ = course.StampA11yReviewed(r.Context(), d.Pool, *cid)
+		if !enforcementOn {
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
+			_ = json.NewEncoder(w).Encode(courseAccessibilityResponse{
+				EnforcementEnabled: false,
+			})
+			return
+		}
 		items, err := imagealtrepo.ListCourseMarkdownItems(r.Context(), d.Pool, *cid)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course content.")
@@ -228,7 +242,8 @@ func (d Deps) handleGetCourseAccessibility() http.HandlerFunc {
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(courseAccessibilityResponse{
-			AltTextCoverage: altTextCoverageJSON{
+			EnforcementEnabled: true,
+			AltTextCoverage: &altTextCoverageJSON{
 				WithAlt:        totalWith,
 				Total:          totalImages,
 				Percent:        pct,

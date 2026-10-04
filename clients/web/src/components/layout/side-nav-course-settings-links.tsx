@@ -32,7 +32,6 @@ type SideNavCourseSettingsLinksProps = {
 export function SideNavCourseSettingsLinks({ courseCode }: SideNavCourseSettingsLinksProps) {
   const location = useLocation()
   const {
-    altTextEnforcementEnabled,
     ffCourseMarketplace,
     ffPlagiarismChecks,
     graderAgentEnabled,
@@ -41,9 +40,6 @@ export function SideNavCourseSettingsLinks({ courseCode }: SideNavCourseSettings
   const { sectionsEnabled, loading: courseFeaturesLoading } = useCourseNavFeatures()
   const section = courseSettingsSectionFromPathname(location.pathname)
   const base = `/courses/${encodeURIComponent(courseCode)}/settings`
-
-  const showAccessLocalization =
-    (!featuresLoading && altTextEnforcementEnabled) || isTranslationMemoryEnabled()
 
   return (
     <>
@@ -136,28 +132,22 @@ export function SideNavCourseSettingsLinks({ courseCode }: SideNavCourseSettings
         </SideNavLink>
       ) : null}
 
-      {showAccessLocalization ? (
-        <>
-          <SideNavSectionLabel>Access & localization</SideNavSectionLabel>
-          {!featuresLoading && altTextEnforcementEnabled ? (
-            <SideNavLink
-              to={`${base}/accessibility`}
-              className={() => (section === 'accessibility' ? sideNavActiveClass : '')}
-              icon={<Eye className="h-5 w-5" />}
-            >
-              Accessibility
-            </SideNavLink>
-          ) : null}
-          {isTranslationMemoryEnabled() ? (
-            <SideNavLink
-              to={`${base}/translations`}
-              className={() => (section === 'translations' ? sideNavActiveClass : '')}
-              icon={<Languages className="h-5 w-5" />}
-            >
-              Translations
-            </SideNavLink>
-          ) : null}
-        </>
+      <SideNavSectionLabel>Access & localization</SideNavSectionLabel>
+      <SideNavLink
+        to={`${base}/accessibility`}
+        className={() => (section === 'accessibility' ? sideNavActiveClass : '')}
+        icon={<Eye className="h-5 w-5" />}
+      >
+        Accessibility
+      </SideNavLink>
+      {isTranslationMemoryEnabled() ? (
+        <SideNavLink
+          to={`${base}/translations`}
+          className={() => (section === 'translations' ? sideNavActiveClass : '')}
+          icon={<Languages className="h-5 w-5" />}
+        >
+          Translations
+        </SideNavLink>
       ) : null}
 
       <SideNavSectionLabel>Content & data</SideNavSectionLabel>
