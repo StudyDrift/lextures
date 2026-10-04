@@ -370,3 +370,29 @@ func RemoveUserFromRole(ctx context.Context, pool *pgxpool.Pool, roleID, userID 
 	}
 	return tag.RowsAffected() > 0, nil
 }
+
+// ListCourseScopedRoles returns app roles whose scope is course, for the enrollment picker.
+func ListCourseScopedRoles(ctx context.Context, pool *pgxpool.Pool) ([]modelrbac.AppRole, error) {
+	rows, err := pool.Query(ctx, `
+SELECT id, name, description, scope, created_at
+FROM "user".app_roles
+WHERE scope = 'course'
+ORDER BY name ASC, id ASC
+`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := []modelrbac.AppRole{}
+	for rows.Next() {
+		var r modelrbac.AppRole
+		if err := rows.Scan(&r.ID, &r.Name, &r.Description, &r.Scope, &r.CreatedAt); err != nil {
+			return nil, err
+		}
+		out = append(out, r)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return out, nil
+}

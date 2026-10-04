@@ -247,6 +247,7 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Post("/api/v1/courses/{course_code}/gradebook/import/validate", d.handleGradebookImportValidate())
 	r.Post("/api/v1/courses/{course_code}/gradebook/import/confirm", d.handleGradebookImportConfirm())
 	r.Delete("/api/v1/courses/{course_code}/gradebook/import/{token}", d.handleGradebookImportDelete())
+	r.Get("/api/v1/courses/{course_code}/course-scoped-roles", d.handleListCourseScopedRoles())
 	r.Post("/api/v1/courses/{course_code}/enrollments", d.handleCourseEnrollmentsPost())
 	r.Post("/api/v1/courses/{course_code}/enrollments/test-student", d.handleCourseEnrollmentsTestStudent())
 	r.Post("/api/v1/courses/{course_code}/enrollments/self-as-student", d.handleCourseEnrollmentsSelfStudent())

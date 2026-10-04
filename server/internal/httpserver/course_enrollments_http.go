@@ -15,11 +15,13 @@ import (
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/courseroles"
 	modelenrollment "github.com/lextures/lextures/server/internal/models/enrollment"
+	modelrbac "github.com/lextures/lextures/server/internal/models/rbac"
 	"github.com/lextures/lextures/server/internal/repos/communication"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursegrants"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	"github.com/lextures/lextures/server/internal/repos/orgroles"
+	"github.com/lextures/lextures/server/internal/repos/rbac"
 	"github.com/lextures/lextures/server/internal/repos/user"
 	"github.com/lextures/lextures/server/internal/service/learningevents"
 	managedlearners "github.com/lextures/lextures/server/internal/service/managedlearners"
@@ -777,4 +779,36 @@ func uniqueLearnerUserIDs(ids []uuid.UUID) []uuid.UUID {
 		out = append(out, id)
 	}
 	return out
+}
+
+// handleListCourseScopedRoles is GET /api/v1/courses/{course_code}/course-scoped-roles.
+// Lists app roles with scope "course" for the add-enrollment picker. An empty list is normal.
+func (d Deps) handleListCourseScopedRoles() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		courseCode, viewer, ok := d.requireCourseAccess(w, r)
+		if !ok {
+			return
+		}
+		can, err := courseroles.UserHasPermission(r.Context(), d.Pool, viewer, "course:"+courseCode+":enrollments:update")
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")
+			return
+		}
+		if !can {
+			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "You do not have permission to manage enrollments.")
+			return
+		}
+		roles, err := rbac.ListCourseScopedRoles(r.Context(), d.Pool)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to list course roles.")
+			return
+		}
+		if roles == nil {
+			roles = []modelrbac.AppRole{}
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(struct {
+			Roles []modelrbac.AppRole `json:"roles"`
+		}{Roles: roles})
+	}
 }

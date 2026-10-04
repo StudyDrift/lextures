@@ -812,6 +812,7 @@ POST	/api/v1/courses/{course_code}/course-files	session
 DELETE	/api/v1/courses/{course_code}/course-files/{file_id}	session
 GET	/api/v1/courses/{course_code}/course-files/{file_id}/content	session
 GET	/api/v1/courses/{course_code}/course-files/{file_id}/preview	session
+GET	/api/v1/courses/{course_code}/course-scoped-roles	session
 GET	/api/v1/courses/{course_code}/diagnostic-config	session
 PUT	/api/v1/courses/{course_code}/diagnostic-config	session
 GET	/api/v1/courses/{course_code}/diagnostic-results	session
