@@ -1575,6 +1575,7 @@ PUT	/api/v1/sections/{section_id}/overrides/{item_id}	session
 DELETE	/api/v1/settings/account	session
 GET	/api/v1/settings/account	session
 PATCH	/api/v1/settings/account	session
+POST	/api/v1/settings/account/generate-avatar	session
 GET	/api/v1/settings/ai	session
 PUT	/api/v1/settings/ai	session
 GET	/api/v1/settings/ai-disclosure/acknowledgements	anonymous
