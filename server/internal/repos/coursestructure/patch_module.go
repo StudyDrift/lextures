@@ -24,6 +24,9 @@ func PatchCourseModule(
 	if title == "" {
 		return ItemRow{}, errors.New("coursestructure: module title is required")
 	}
+	if err := ValidateItemTitle(title); err != nil {
+		return ItemRow{}, err
+	}
 	var r ItemRow
 	err := pool.QueryRow(ctx, `
 		UPDATE course.course_structure_items

@@ -270,11 +270,11 @@ func (d Deps) handleCreateModuleLibraryResource() http.HandlerFunc {
 			return
 		}
 		var body struct {
-			Title          string                         `json:"title"`
-			ResourceType   string                         `json:"resourceType"`
-			ExternalToolID *string                        `json:"externalToolId"`
+			Title          string                              `json:"title"`
+			ResourceType   string                              `json:"resourceType"`
+			ExternalToolID *string                             `json:"externalToolId"`
 			Metadata       coursestructure.LibraryResourceMeta `json:"metadata"`
-			SourceURL      string                         `json:"sourceUrl"`
+			SourceURL      string                              `json:"sourceUrl"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
@@ -302,6 +302,9 @@ func (d Deps) handleCreateModuleLibraryResource() http.HandlerFunc {
 			body.ResourceType, toolID, body.Metadata, ezproxyURL,
 		)
 		if err != nil {
+			if writeAPIErrorPayloadTitle(w, err) {
+				return
+			}
 			if strings.Contains(err.Error(), "title is required") {
 				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Title is required.")
 				return

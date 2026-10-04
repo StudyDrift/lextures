@@ -1,5 +1,6 @@
 import { useEffect, useId, useState } from 'react'
 import { X } from 'lucide-react'
+import { isApiErrorPayloadTitle } from '../../lib/structure-title'
 
 type ModuleNameModalProps = {
   open: boolean
@@ -43,6 +44,7 @@ function ModuleNameModalInner({
   const titleId = useId()
   const inputId = useId()
   const [value, setValue] = useState(initialTitle)
+  const [localError, setLocalError] = useState<string | null>(null)
 
   const dialogTitle =
     mode === 'heading'
@@ -148,6 +150,11 @@ function ModuleNameModalInner({
             e.preventDefault()
             const t = value.trim()
             if (!t || saving) return
+            if (isApiErrorPayloadTitle(t)) {
+              setLocalError('Title cannot be an API error response.')
+              return
+            }
+            setLocalError(null)
             void onSave(t)
           }}
         >
@@ -164,9 +171,9 @@ function ModuleNameModalInner({
             disabled={saving}
             className="mt-1 w-full rounded-xl border border-border-default bg-surface-raised px-3 py-2.5 text-sm text-fg-default outline-none ring-indigo-500/20 placeholder:text-fg-subtle focus:border-indigo-400 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60"
           />
-          {errorMessage && (
+          {(localError || errorMessage) && (
             <p className="mt-3 text-sm text-rose-700" role="status">
-              {errorMessage}
+              {localError || errorMessage}
             </p>
           )}
           <div className="mt-4 flex flex-wrap justify-end gap-2">

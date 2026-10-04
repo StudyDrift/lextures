@@ -3,6 +3,7 @@ package coursestructure
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -12,6 +13,13 @@ import (
 
 // InsertSurveyUnderModule appends a survey item under an existing module and creates an empty module_surveys row.
 func InsertSurveyUnderModule(ctx context.Context, pool *pgxpool.Pool, courseID, moduleID uuid.UUID, title string) (uuid.UUID, error) {
+	title = strings.TrimSpace(title)
+	if title == "" {
+		return uuid.UUID{}, errors.New("coursestructure: survey title is required")
+	}
+	if err := ValidateItemTitle(title); err != nil {
+		return uuid.UUID{}, err
+	}
 	tx, err := pool.Begin(ctx)
 	if err != nil {
 		return uuid.UUID{}, err

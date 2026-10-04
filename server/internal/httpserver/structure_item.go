@@ -99,6 +99,9 @@ func (d Deps) handlePatchCourseStructureItem() http.HandlerFunc {
 		row, err := coursestructure.PatchChildStructureItem(
 			r.Context(), d.Pool, *cid, itemID, title, body.Published, body.Archived,
 		)
+		if writeAPIErrorPayloadTitle(w, err) {
+			return
+		}
 		if errors.Is(err, pgx.ErrNoRows) {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Structure item not found.")
 			return

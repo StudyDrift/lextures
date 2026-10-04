@@ -15,8 +15,8 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursestructure"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
-	userai "github.com/lextures/lextures/server/internal/repos/user"
 	ltidb "github.com/lextures/lextures/server/internal/repos/lti"
+	userai "github.com/lextures/lextures/server/internal/repos/user"
 	aigateway "github.com/lextures/lextures/server/internal/service/aigateway"
 	"github.com/lextures/lextures/server/internal/service/aiprovider"
 )
@@ -62,9 +62,9 @@ func (d Deps) guardCourseItemCreateBlueprint(
 // handlePatchCourseModule is PATCH /api/v1/courses/{course_code}/structure/modules/{module_id}.
 func (d Deps) handlePatchCourseModule() http.HandlerFunc {
 	type body struct {
-		Title         string  `json:"title"`
-		Published     bool    `json:"published"`
-		VisibleFrom   *string `json:"visibleFrom"`
+		Title       string  `json:"title"`
+		Published   bool    `json:"published"`
+		VisibleFrom *string `json:"visibleFrom"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
@@ -120,6 +120,9 @@ func (d Deps) handlePatchCourseModule() http.HandlerFunc {
 			return
 		}
 		if err != nil {
+			if writeAPIErrorPayloadTitle(w, err) {
+				return
+			}
 			if strings.Contains(err.Error(), "module title is required") {
 				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Title cannot be empty.")
 				return
@@ -233,8 +236,8 @@ func (d Deps) handleCourseModuleDeletePreview() http.HandlerFunc {
 // {"action":"deleted"}.
 func (d Deps) handleDeleteCourseModule() http.HandlerFunc {
 	type response struct {
-		Action         string            `json:"action"`
-		ArchivedItems  []gradedChildJSON `json:"archivedItems,omitempty"`
+		Action        string            `json:"action"`
+		ArchivedItems []gradedChildJSON `json:"archivedItems,omitempty"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		cid, moduleID, ok := d.resolveCourseModuleForMutation(w, r)
@@ -382,6 +385,9 @@ func (d Deps) handleCreateModuleHeading() http.HandlerFunc {
 		}
 		row, err := coursestructure.InsertHeadingUnderModule(r.Context(), d.Pool, cid, moduleID, b.Title)
 		if err != nil {
+			if writeAPIErrorPayloadTitle(w, err) {
+				return
+			}
 			if strings.Contains(err.Error(), "title is required") {
 				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Title is required.")
 				return
@@ -411,6 +417,9 @@ func (d Deps) handleCreateModuleContentPage() http.HandlerFunc {
 		}
 		row, err := coursestructure.InsertContentPageUnderModule(r.Context(), d.Pool, cid, moduleID, b.Title)
 		if err != nil {
+			if writeAPIErrorPayloadTitle(w, err) {
+				return
+			}
 			if strings.Contains(err.Error(), "title is required") {
 				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Title is required.")
 				return
@@ -440,6 +449,9 @@ func (d Deps) handleCreateModuleAssignment() http.HandlerFunc {
 		}
 		row, err := coursestructure.InsertAssignmentUnderModule(r.Context(), d.Pool, cid, moduleID, b.Title)
 		if err != nil {
+			if writeAPIErrorPayloadTitle(w, err) {
+				return
+			}
 			if strings.Contains(err.Error(), "title is required") {
 				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Title is required.")
 				return
@@ -472,6 +484,9 @@ func (d Deps) handleCreateModuleQuiz() http.HandlerFunc {
 		}
 		row, err := coursestructure.InsertQuizUnderModule(r.Context(), d.Pool, cid, moduleID, b.Title)
 		if err != nil {
+			if writeAPIErrorPayloadTitle(w, err) {
+				return
+			}
 			if strings.Contains(err.Error(), "title is required") {
 				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Title is required.")
 				return
@@ -506,6 +521,9 @@ func (d Deps) handleCreateModuleExternalLink() http.HandlerFunc {
 		}
 		row, err := coursestructure.InsertExternalLinkUnderModule(r.Context(), d.Pool, cid, moduleID, b.Title, b.URL)
 		if err != nil {
+			if writeAPIErrorPayloadTitle(w, err) {
+				return
+			}
 			if strings.Contains(err.Error(), "title is required") {
 				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Title is required.")
 				return
@@ -522,10 +540,10 @@ func (d Deps) handleCreateModuleExternalLink() http.HandlerFunc {
 }
 
 type createLTILinkBody struct {
-	Title            string  `json:"title"`
-	ExternalToolID   string  `json:"externalToolId"`
-	ResourceLinkID   string  `json:"resourceLinkId"`
-	LineItemURL      *string `json:"lineItemUrl"`
+	Title          string  `json:"title"`
+	ExternalToolID string  `json:"externalToolId"`
+	ResourceLinkID string  `json:"resourceLinkId"`
+	LineItemURL    *string `json:"lineItemUrl"`
 }
 
 // handleCreateModuleLTILink is POST .../lti-links.
@@ -558,6 +576,9 @@ func (d Deps) handleCreateModuleLTILink() http.HandlerFunc {
 			r.Context(), d.Pool, cid, moduleID, toolID, b.Title, b.ResourceLinkID, b.LineItemURL,
 		)
 		if err != nil {
+			if writeAPIErrorPayloadTitle(w, err) {
+				return
+			}
 			if strings.Contains(err.Error(), "title is required") {
 				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Title is required.")
 				return
@@ -594,6 +615,9 @@ func (d Deps) handleCreateModuleVibeActivity() http.HandlerFunc {
 		}
 		row, err := coursestructure.InsertVibeActivityUnderModule(r.Context(), d.Pool, cid, moduleID, b.Title, b.HTML)
 		if err != nil {
+			if writeAPIErrorPayloadTitle(w, err) {
+				return
+			}
 			if strings.Contains(err.Error(), "title is required") {
 				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Title is required.")
 				return

@@ -314,6 +314,9 @@ func (d Deps) handleCreateModuleTextbookResource() http.HandlerFunc {
 			r.Context(), d.Pool, cid, moduleID, body.Title, provider, toolID, body.Metadata,
 		)
 		if err != nil {
+			if writeAPIErrorPayloadTitle(w, err) {
+				return
+			}
 			if strings.Contains(err.Error(), "title is required") {
 				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Title is required.")
 				return

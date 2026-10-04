@@ -1,6 +1,7 @@
 import { apiBaseUrl, apiUrl, authorizedFetch, wsUrl } from './api'
 import { getAccessToken } from './auth'
 import { readApiErrorMessage } from './errors'
+import { isApiErrorPayloadTitle } from './structure-title'
 import {
   accommodationSummaryPayloadSchema,
   accommodationUsersSearchResponseSchema,
@@ -10798,6 +10799,7 @@ function normalizeModulesAiProposal(raw: unknown): ModulesAiProposal | null {
   const p = raw as Record<string, unknown>
   const op = typeof p.op === 'string' ? p.op : ''
   const title = typeof p.title === 'string' ? p.title.trim() : ''
+  if (title && isApiErrorPayloadTitle(title)) return null
   const itemId = typeof p.itemId === 'string' ? p.itemId.trim() : ''
   const moduleId = typeof p.moduleId === 'string' ? p.moduleId.trim() : ''
   const moduleTitle = typeof p.moduleTitle === 'string' ? p.moduleTitle.trim() : ''

@@ -2,6 +2,7 @@ package coursestructure
 
 import (
 	"context"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -10,6 +11,10 @@ import (
 // CreateModule inserts a top-level module for a course at the next sort order.
 // New modules start unpublished (draft) until the instructor publishes them.
 func CreateModule(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID, title string) (ItemRow, error) {
+	title = strings.TrimSpace(title)
+	if err := ValidateItemTitle(title); err != nil {
+		return ItemRow{}, err
+	}
 	var r ItemRow
 	err := pool.QueryRow(ctx, `
 WITH next_sort AS (

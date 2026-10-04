@@ -9,6 +9,7 @@ import {
   type CourseStructureItem,
   type ModulesAiProposal,
 } from './courses-api'
+import { isApiErrorPayloadTitle } from './structure-title'
 
 function findItem(
   items: CourseStructureItem[],
@@ -19,6 +20,12 @@ function findItem(
 
 function normalizeTitle(s: string): string {
   return s.trim().toLowerCase().replace(/\s+/g, ' ')
+}
+
+function assertStructureTitle(title: string) {
+  if (isApiErrorPayloadTitle(title)) {
+    throw new Error('Title cannot be an API error response.')
+  }
 }
 
 function moduleParentLabel(p: ModulesAiProposal): string {
@@ -108,12 +115,14 @@ export async function applyModulesAiProposal(
 ): Promise<Map<string, string>> {
   switch (proposal.op) {
     case 'create_module': {
+      assertStructureTitle(proposal.title)
       const created = await createCourseModule(courseCode, { title: proposal.title })
       moduleIdByTitle.set(normalizeTitle(proposal.title), created.id)
       moduleIdByTitle.set(normalizeTitle(created.title), created.id)
       return moduleIdByTitle
     }
     case 'rename': {
+      assertStructureTitle(proposal.title)
       const item = findItem(items, proposal.itemId)
       if (!item) throw new Error('Item no longer exists in the outline.')
       if (item.kind === 'module') {
@@ -144,21 +153,25 @@ export async function applyModulesAiProposal(
       return moduleIdByTitle
     }
     case 'create_content_page': {
+      assertStructureTitle(proposal.title)
       const moduleId = resolveModuleId(proposal, moduleIdByTitle)
       await createModuleContentPage(courseCode, moduleId, { title: proposal.title })
       return moduleIdByTitle
     }
     case 'create_assignment': {
+      assertStructureTitle(proposal.title)
       const moduleId = resolveModuleId(proposal, moduleIdByTitle)
       await createModuleAssignment(courseCode, moduleId, { title: proposal.title })
       return moduleIdByTitle
     }
     case 'create_quiz': {
+      assertStructureTitle(proposal.title)
       const moduleId = resolveModuleId(proposal, moduleIdByTitle)
       await createModuleQuiz(courseCode, moduleId, { title: proposal.title })
       return moduleIdByTitle
     }
     case 'create_heading': {
+      assertStructureTitle(proposal.title)
       const moduleId = resolveModuleId(proposal, moduleIdByTitle)
       await createModuleHeading(courseCode, moduleId, { title: proposal.title })
       return moduleIdByTitle
