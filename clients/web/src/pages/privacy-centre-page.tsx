@@ -42,7 +42,13 @@ export default function PrivacyCentrePage() {
   const [message, setMessage] = useState<string | null>(null)
 
   useEffect(() => {
-    if (featuresLoading || !gdprModuleEnabled) return
+    if (featuresLoading) return
+    // The feature-off copy is below the spinner. Leaving loading true here
+    // makes a direct visit spin forever when GDPR is off.
+    if (!gdprModuleEnabled) {
+      setLoading(false)
+      return
+    }
 
     async function load() {
       try {
