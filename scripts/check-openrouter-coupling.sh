@@ -38,6 +38,8 @@ allowed_client() {
 allowed_direct() {
   case "$1" in
     internal/service/openrouter/*) return 0 ;;
+    # ImageProvider.GenerateImage is invoked here; it is not the OpenRouter client.
+    internal/service/aiprovider/resolver.go|\
     internal/service/aiprovider/openrouter.go|\
     internal/service/aiprovider/catalog.go|\
     internal/service/aiprovider/factory.go|\

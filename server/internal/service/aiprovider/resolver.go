@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -134,6 +135,83 @@ func (r *Resolver) CompleteVision(
 	return r.dispatch(ctx, orgID, modelOverride, OpVision, func(ctx context.Context, p Provider, modelID string) (ChatResult, error) {
 		return p.CompleteVision(ctx, modelID, messages, opts...)
 	})
+}
+
+// GenerateImage runs image generation against the tenant provider using the
+// image-generation alias (not the chat model). A missing credential is an error
+// so callers can return a configured-provider message instead of a missing route.
+func (r *Resolver) CreateImage(ctx context.Context, orgID *uuid.UUID, prompt string, opts ...ImageOptions) (ImageResult, CallMeta, error) {
+	if r == nil {
+		return ImageResult{}, CallMeta{}, fmt.Errorf("aiprovider: nil resolver")
+	}
+	prompt = strings.TrimSpace(prompt)
+	if prompt == "" {
+		return ImageResult{}, CallMeta{}, fmt.Errorf("aiprovider: empty prompt")
+	}
+	modelAlias := string(AliasImageGeneration)
+	if r.cfg.DryRun {
+		p := &DryRunProvider{}
+		start := time.Now()
+		got, err := p.GenerateImage(ctx, "dry-run", prompt, opts...)
+		meta := CallMeta{
+			Provider:   ProviderDryRun,
+			ModelAlias: modelAlias,
+			ModelID:    "dry-run",
+			Latency:    time.Since(start),
+			Operation:  OpImage,
+		}
+		if err == nil {
+			meta.Usage = got.Usage
+			recordLatency(meta.Provider, meta.ModelAlias, OpImage, meta.Latency.Seconds())
+			recordCostUSD(meta.Provider, got.Usage.CostUSD)
+			recordTelemetry(meta.Provider, meta.ModelAlias, "ok", meta.Latency.Seconds(), got.Usage.CostUSD)
+		} else {
+			recordError(meta.Provider, OpImage)
+			recordTelemetry(meta.Provider, meta.ModelAlias, "error", meta.Latency.Seconds(), 0)
+		}
+		return got, meta, err
+	}
+
+	settings, auth, err := r.resolveTenantAuth(ctx, orgID)
+	if err != nil {
+		return ImageResult{}, CallMeta{ModelAlias: modelAlias, Operation: OpImage}, err
+	}
+	modelID, err := ResolveModelID(modelAlias, settings.Provider)
+	meta := CallMeta{
+		Provider:   settings.Provider,
+		ModelAlias: modelAlias,
+		ModelID:    modelID,
+		Operation:  OpImage,
+	}
+	if err != nil {
+		return ImageResult{}, meta, err
+	}
+	authMode := AuthModeFromSettings(settings.Provider, settings.Extra)
+	meta.AuthMode = authMode
+	primary, err := r.factory.BuildWithAuth(settings.Provider, auth, settings.Extra)
+	if err != nil {
+		return ImageResult{}, meta, err
+	}
+	img, ok := primary.(ImageProvider)
+	if !ok || !Capabilities(settings.Provider).Image {
+		return ImageResult{}, meta, fmt.Errorf("aiprovider: image generation is not available for provider %s", settings.Provider)
+	}
+	start := time.Now()
+	got, err := img.GenerateImage(ctx, modelID, prompt, opts...)
+	meta.Latency = time.Since(start)
+	if err != nil {
+		recordErrorTyped(settings.Provider, OpImage, ClassifyError(err))
+		recordTelemetry(settings.Provider, modelAlias, "error", meta.Latency.Seconds(), 0)
+		return ImageResult{}, meta, err
+	}
+	if ApplyCostEstimate(settings.Provider, modelID, &got.Usage) {
+		got.Usage.CostEstimated = true
+	}
+	meta.Usage = got.Usage
+	recordLatency(settings.Provider, modelAlias, OpImage, meta.Latency.Seconds())
+	recordCostUSD(settings.Provider, got.Usage.CostUSD)
+	recordTelemetry(settings.Provider, modelAlias, "ok", meta.Latency.Seconds(), got.Usage.CostUSD)
+	return got, meta, nil
 }
 
 func (r *Resolver) dispatch(
