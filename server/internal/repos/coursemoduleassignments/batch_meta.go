@@ -133,3 +133,33 @@ func ItemDropFlagsForCourse(ctx context.Context, pool *pgxpool.Pool, courseID uu
 	}
 	return out, rows.Err()
 }
+
+// BlindManualHoldByItemID reports assignment items that are manual-hold and still blind
+// (identities not revealed). Score changes on these items require an explicit import acknowledgement.
+func BlindManualHoldByItemID(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID, itemIDs []uuid.UUID) (map[uuid.UUID]bool, error) {
+	if len(itemIDs) == 0 {
+		return map[uuid.UUID]bool{}, nil
+	}
+	rows, err := pool.Query(ctx, `
+		SELECT c.id
+		FROM course.course_structure_items c
+		INNER JOIN course.module_assignments m ON m.structure_item_id = c.id
+		WHERE c.course_id = $1 AND c.kind = 'assignment' AND c.id = ANY($2)
+		  AND COALESCE(NULLIF(TRIM(m.posting_policy), ''), 'automatic') = 'manual'
+		  AND m.blind_grading
+		  AND m.identities_revealed_at IS NULL
+	`, courseID, itemIDs)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := make(map[uuid.UUID]bool)
+	for rows.Next() {
+		var id uuid.UUID
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		out[id] = true
+	}
+	return out, rows.Err()
+}
