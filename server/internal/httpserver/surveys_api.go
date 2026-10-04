@@ -109,6 +109,9 @@ func (d Deps) handleCreateCourseSurvey() http.HandlerFunc {
 		}
 		newID, err := coursestructure.InsertSurveyUnderModule(r.Context(), d.Pool, *cid, req.ModuleID, title)
 		if err != nil {
+			if writeAPIErrorPayloadTitle(w, err) {
+				return
+			}
 			if errors.Is(err, pgx.ErrNoRows) {
 				apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Module not found.")
 				return

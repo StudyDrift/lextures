@@ -46,6 +46,10 @@ SELECT EXISTS(
 		return ItemRow{}, pgx.ErrNoRows
 	}
 
+	if err := ValidateItemTitle(title); err != nil {
+		return ItemRow{}, err
+	}
+
 	itemID := uuid.New()
 	var r ItemRow
 	err = tx.QueryRow(ctx, `

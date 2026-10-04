@@ -2,12 +2,12 @@ package httpserver
 
 import (
 	"encoding/json"
-	"net/http"
-	"strings"
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/repos/coursemoduleexternallinks"
 	"github.com/lextures/lextures/server/internal/repos/coursestructure"
 	"github.com/lextures/lextures/server/internal/service/oersearch"
+	"net/http"
+	"strings"
 )
 
 func (d Deps) oerService() *oersearch.Service {
@@ -140,6 +140,9 @@ func (d Deps) handlePostModuleOERImport() http.HandlerFunc {
 			body.ExternalID, body.LicenseSPDX, body.AttributionText, &oerProv,
 		)
 		if err != nil {
+			if writeAPIErrorPayloadTitle(w, err) {
+				return
+			}
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to add OER resource.")
 			return
 		}

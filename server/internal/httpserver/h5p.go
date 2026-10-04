@@ -211,6 +211,9 @@ func (d Deps) handleCreateModuleH5P() http.HandlerFunc {
 		}
 		row, err := coursestructure.InsertH5PUnderModule(r.Context(), d.Pool, cid, moduleID, packageID, title)
 		if err != nil {
+			if writeAPIErrorPayloadTitle(w, err) {
+				return
+			}
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to create module item.")
 			return
 		}
@@ -449,12 +452,12 @@ func (d Deps) handleGetH5PDownload() http.HandlerFunc {
 // handleGetH5PCompletions is GET .../h5p/{package_id}/completions (instructor).
 func (d Deps) handleGetH5PCompletions() http.HandlerFunc {
 	type row struct {
-		UserID    string  `json:"userId"`
-		Status    string  `json:"status"`
-		Label     string  `json:"label"`
+		UserID    string   `json:"userId"`
+		Status    string   `json:"status"`
+		Label     string   `json:"label"`
 		ScoreRaw  *float64 `json:"scoreRaw,omitempty"`
 		ScoreMax  *float64 `json:"scoreMax,omitempty"`
-		UpdatedAt string  `json:"updatedAt"`
+		UpdatedAt string   `json:"updatedAt"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !d.guardH5PFeature(w) {

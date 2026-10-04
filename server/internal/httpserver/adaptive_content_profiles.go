@@ -230,6 +230,9 @@ func (d Deps) handleAdaptiveContentPreCheckGenerate() http.HandlerFunc {
 
 		item, err := coursestructure.InsertQuizUnderModule(r.Context(), d.Pool, *cid, *moduleID, title)
 		if err != nil {
+			if writeAPIErrorPayloadTitle(w, err) {
+				return
+			}
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to create pre-check quiz.")
 			return
 		}

@@ -37,6 +37,8 @@ func TestSanitizeModulesAIProposals(t *testing.T) {
 		{Op: "create_quiz", ModuleID: "missing", Title: "Bad"},
 		{Op: "create_assignment", ModuleTitle: "Unknown Module", Title: "No"},
 		{Op: "delete", ItemID: itemID},
+		{Op: "rename", ItemID: itemID, Title: `{"error":{"code":"INTERNAL","message":"Failed to reorder course structure."}}`},
+		{Op: "create_content_page", ModuleID: modID, Title: `{"error":{"code":"INTERNAL","message":"Failed to reorder course structure."}}`},
 	}
 	out := sanitizeModulesAIProposals(in, items)
 	if len(out) != 4 {

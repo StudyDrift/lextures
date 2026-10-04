@@ -239,6 +239,9 @@ func (d Deps) handleCreateModuleScorm() http.HandlerFunc {
 		}
 		row, err := coursestructure.InsertScormUnderModule(r.Context(), d.Pool, cid, moduleID, packageID, title)
 		if err != nil {
+			if writeAPIErrorPayloadTitle(w, err) {
+				return
+			}
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to create module item.")
 			return
 		}
@@ -427,7 +430,7 @@ func (d Deps) handlePostScormRTECommit() http.HandlerFunc {
 					orgID, _ := organization.OrgIDForUser(r.Context(), d.Pool, viewer)
 					courseID := pkg.CourseID
 					stmt := map[string]string{
-						"verb": xapisvc.VerbCompleted,
+						"verb":       xapisvc.VerbCompleted,
 						"completion": state.CompletionStatus,
 					}
 					raw, _ := json.Marshal(stmt)

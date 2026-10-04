@@ -3,6 +3,7 @@ package coursestructure
 import (
 	"context"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -17,6 +18,13 @@ const patchableChildKindsSQL = `IN ('heading', 'content_page', 'assignment', 'qu
 func PatchChildStructureItem(
 	ctx context.Context, pool *pgxpool.Pool, courseID, itemID uuid.UUID, title *string, published, archived *bool,
 ) (ItemRow, error) {
+	if title != nil {
+		trimmed := strings.TrimSpace(*title)
+		if err := ValidateItemTitle(trimmed); err != nil {
+			return ItemRow{}, err
+		}
+		title = &trimmed
+	}
 	var r ItemRow
 	err := pool.QueryRow(ctx, `
 		UPDATE course.course_structure_items

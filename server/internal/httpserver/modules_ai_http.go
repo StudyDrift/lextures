@@ -300,12 +300,12 @@ func sanitizeModulesAIProposals(in []modulesAIProposal, items []coursestructurer
 		moduleTitle := strings.TrimSpace(p.ModuleTitle)
 		switch op {
 		case "create_module":
-			if title == "" {
+			if title == "" || coursestructurerepo.IsAPIErrorPayloadTitle(title) {
 				continue
 			}
 			creates = append(creates, modulesAIProposal{Op: op, Title: title})
 		case "rename":
-			if title == "" || itemID == "" || known[itemID] == "" {
+			if title == "" || coursestructurerepo.IsAPIErrorPayloadTitle(title) || itemID == "" || known[itemID] == "" {
 				continue
 			}
 			rest = append(rest, modulesAIProposal{Op: op, ItemID: itemID, Title: title})
@@ -316,7 +316,7 @@ func sanitizeModulesAIProposals(in []modulesAIProposal, items []coursestructurer
 			pub := *p.Published
 			rest = append(rest, modulesAIProposal{Op: op, ItemID: itemID, Published: &pub})
 		case "create_content_page", "create_assignment", "create_quiz", "create_heading":
-			if title == "" {
+			if title == "" || coursestructurerepo.IsAPIErrorPayloadTitle(title) {
 				continue
 			}
 			if moduleID != "" && modules[moduleID] {

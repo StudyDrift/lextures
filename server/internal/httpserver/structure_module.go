@@ -6,9 +6,9 @@ import (
 	"strings"
 
 	"github.com/lextures/lextures/server/internal/apierr"
+	"github.com/lextures/lextures/server/internal/courseroles"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursestructure"
-	"github.com/lextures/lextures/server/internal/courseroles"
 )
 
 type createModuleBody struct {
@@ -52,6 +52,9 @@ func (d Deps) handleCreateCourseModule() http.HandlerFunc {
 		}
 		row, err := coursestructure.CreateModule(r.Context(), d.Pool, *cid, title)
 		if err != nil {
+			if writeAPIErrorPayloadTitle(w, err) {
+				return
+			}
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to create module.")
 			return
 		}
