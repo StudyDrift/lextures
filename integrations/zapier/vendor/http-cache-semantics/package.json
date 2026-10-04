@@ -1,0 +1,16 @@
+{
+    "name": "http-cache-semantics",
+    "version": "4.3.0-lextures.1",
+    "description": "Parses Cache-Control and other headers. Helps building correct HTTP caches and proxies. Lextures patch: shared-cache max-stale cannot revive security-zeroed entries (GHSA-ch52-4w7c-c8xp).",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/kornelski/http-cache-semantics.git"
+    },
+    "main": "index.js",
+    "types": "index.js",
+    "files": [
+        "index.js"
+    ],
+    "author": "Kornel Lesiński <kornel@geekhood.net> (https://kornel.ski/)",
+    "license": "BSD-2-Clause"
+}

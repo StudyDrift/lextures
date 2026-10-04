@@ -7,8 +7,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 
-	"github.com/lextures/lextures/server/internal/config"
 	pauth "github.com/lextures/lextures/server/internal/auth"
+	"github.com/lextures/lextures/server/internal/config"
 	"github.com/lextures/lextures/server/internal/repos/user"
 )
 
@@ -203,8 +203,18 @@ SELECT role FROM course.course_enrollments WHERE course_id = $1 AND user_id = $2
 		}
 	}
 
-	// Remaining/CompletedAt reflect the shared test DB. Other packages may insert
-	// eligible users after this pass finishes, so only assert the clean-finish case.
+	// Remaining/CompletedAt reflect the shared test DB. Another package can enroll
+	// the last eligible users after this pass decides not to stamp completion.
+	// Re-run while that window is visible; a real miss still fails.
+	for attempt := 0; attempt < 3 && st.Remaining == 0 && st.CompletedAt == nil; attempt++ {
+		if err := svc.RunBackfill(ctx, cfg); err != nil {
+			t.Fatal(err)
+		}
+		st, err = svc.BackfillStatus(ctx, cfg)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
 	if st.Remaining == 0 && st.CompletedAt == nil {
 		t.Fatal("expected completed backfill when no eligible users remain")
 	}

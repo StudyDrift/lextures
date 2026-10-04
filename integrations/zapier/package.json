@@ -15,6 +15,7 @@
     "zapier-platform-core": "19.0.0"
   },
   "devDependencies": {
+    "http-cache-semantics": "file:vendor/http-cache-semantics",
     "zapier-platform-cli": "19.0.0"
   },
   "overrides": {
@@ -32,6 +33,7 @@
     "brace-expansion@5": "5.0.12",
     "ip-address": "^10.5.1",
     "undici": "^6.28.1",
-    "browserslist": "^4.28.7"
+    "browserslist": "^4.28.7",
+    "http-cache-semantics": "$http-cache-semantics"
   }
 }
