@@ -1096,6 +1096,7 @@ POST	/api/v1/courses/{course_code}/sections	session
 DELETE	/api/v1/courses/{course_code}/sections/{section_id}	session
 PATCH	/api/v1/courses/{course_code}/sections/{section_id}	session
 POST	/api/v1/courses/{course_code}/self-enroll	anonymous
+GET	/api/v1/courses/{course_code}/standards-gradebook	session
 GET	/api/v1/courses/{course_code}/storage-usage	anonymous
 GET	/api/v1/courses/{course_code}/structure	session
 GET	/api/v1/courses/{course_code}/structure/archived	session
