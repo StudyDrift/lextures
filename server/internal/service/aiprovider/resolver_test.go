@@ -247,7 +247,7 @@ func TestResolver_Complete_FallbackOn503(t *testing.T) {
 
 func TestResolver_GenerateImage_DryRun(t *testing.T) {
 	r := NewResolver(nil, nil, ResolverConfig{DryRun: true})
-	got, meta, err := r.GenerateImage(context.Background(), nil, "a course banner")
+	got, meta, err := r.CreateImage(context.Background(), nil, "a course banner")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -261,7 +261,7 @@ func TestResolver_GenerateImage_DryRun(t *testing.T) {
 
 func TestResolver_GenerateImage_NotConfigured(t *testing.T) {
 	r := NewResolver(nil, nil, ResolverConfig{})
-	_, _, err := r.GenerateImage(context.Background(), nil, "a course banner")
+	_, _, err := r.CreateImage(context.Background(), nil, "a course banner")
 	if err == nil || !strings.Contains(err.Error(), "not configured") {
 		t.Fatalf("err: %v", err)
 	}

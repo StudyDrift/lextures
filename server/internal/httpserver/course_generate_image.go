@@ -92,7 +92,7 @@ func (d Deps) handlePostCourseGenerateImage() http.HandlerFunc {
 		}
 
 		resolver := d.aiProviderResolver()
-		got, callMeta, err := resolver.GenerateImage(r.Context(), orgID, prompt, aiprovider.ImageOptions{N: 1})
+		got, callMeta, err := resolver.CreateImage(r.Context(), orgID, prompt, aiprovider.ImageOptions{N: 1})
 		if err != nil {
 			if imageGenNotConfigured(err) {
 				apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, aiNotConfiguredMsg)

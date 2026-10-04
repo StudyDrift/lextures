@@ -140,7 +140,7 @@ func (r *Resolver) CompleteVision(
 // GenerateImage runs image generation against the tenant provider using the
 // image-generation alias (not the chat model). A missing credential is an error
 // so callers can return a configured-provider message instead of a missing route.
-func (r *Resolver) GenerateImage(ctx context.Context, orgID *uuid.UUID, prompt string, opts ...ImageOptions) (ImageResult, CallMeta, error) {
+func (r *Resolver) CreateImage(ctx context.Context, orgID *uuid.UUID, prompt string, opts ...ImageOptions) (ImageResult, CallMeta, error) {
 	if r == nil {
 		return ImageResult{}, CallMeta{}, fmt.Errorf("aiprovider: nil resolver")
 	}
