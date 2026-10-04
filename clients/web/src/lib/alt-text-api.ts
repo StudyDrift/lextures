@@ -1,6 +1,6 @@
 import { authorizedFetch } from './api'
 
-export type CourseAccessibilityCoverage = {
+type CourseAccessibilityCoverage = {
   withAlt: number
   total: number
   percent: number
