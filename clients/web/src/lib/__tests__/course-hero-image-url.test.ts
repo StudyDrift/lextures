@@ -14,6 +14,10 @@ describe('courseHeroImageSrc', () => {
     expect(courseHeroImageSrc(courseFile, 'full')).toBe(courseFile)
   })
 
+  it('requests a 1920×384 banner derivative', () => {
+    expect(courseHeroImageSrc(courseFile, 'banner')).toBe(`${courseFile}?w=1920&h=384&q=85`)
+  })
+
   it('appends resize params for catalog list thumbnails', () => {
     expect(courseHeroImageSrc(courseFile, 'catalog-list')).toBe(
       `${courseFile}?w=224&h=160&q=82`,

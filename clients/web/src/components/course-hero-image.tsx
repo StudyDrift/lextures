@@ -6,7 +6,7 @@ import {
 import { courseHeroImageSrc, type CourseHeroImageSize } from '../lib/course-hero-image-url'
 
 type Props = ComponentPropsWithoutRef<'img'> & {
-  /** `full` preserves original quality (course dashboard); catalog sizes request smaller thumbnails. */
+  /** `full` keeps the original URL. `banner` and catalog sizes request a cached derivative. */
   size?: CourseHeroImageSize
 }
 
@@ -46,6 +46,7 @@ export function CourseHeroImage({ src, size = 'full', className, alt = '', ...pr
       alt={alt}
       className={['lex-content-img', className].filter(Boolean).join(' ')}
       {...props}
+      decoding="async"
     />
   )
 }

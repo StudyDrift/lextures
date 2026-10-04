@@ -76,6 +76,41 @@ func TestResizeIfNeeded_SVG(t *testing.T) {
 	}
 }
 
+func TestResizeIfNeeded_DoesNotUpscaleOrRecompress(t *testing.T) {
+	src := mustJPEG(t, 320, 64)
+	out, ct, err := ResizeIfNeeded(src, "image/jpeg", BannerOpts(FormatWebP))
+	if err != nil {
+		t.Fatalf("ResizeIfNeeded: %v", err)
+	}
+	if ct != "image/jpeg" {
+		t.Fatalf("content type = %q want original image/jpeg", ct)
+	}
+	if !bytes.Equal(out, src) {
+		t.Fatal("smaller than the banner slot must be served unchanged")
+	}
+}
+
+func TestResizeIfNeeded_WebPBanner(t *testing.T) {
+	src := mustJPEG(t, 1000, 400)
+	out, ct, err := ResizeIfNeeded(src, "image/jpeg", BannerOpts(FormatWebP))
+	if err != nil {
+		t.Fatalf("ResizeIfNeeded: %v", err)
+	}
+	if ct != "image/webp" {
+		t.Fatalf("content type = %q want image/webp", ct)
+	}
+	if bytes.Equal(out, src) {
+		t.Fatal("expected a derivative, not the master bytes")
+	}
+	cfg, _, err := image.DecodeConfig(bytes.NewReader(out))
+	if err != nil {
+		t.Fatalf("DecodeConfig: %v", err)
+	}
+	if cfg.Width != 960 || cfg.Height != 384 {
+		t.Fatalf("size = %dx%d want 960x384", cfg.Width, cfg.Height)
+	}
+}
+
 func mustJPEG(t *testing.T, w, h int) []byte {
 	t.Helper()
 	img := image.NewRGBA(image.Rect(0, 0, w, h))

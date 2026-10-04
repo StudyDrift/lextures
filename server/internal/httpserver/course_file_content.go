@@ -65,49 +65,57 @@ func (d Deps) handleGetCourseFileContent() http.HandlerFunc {
 		resizeOpts := parseCourseFileImageResizeOpts(r)
 		cfg := d.effectiveConfig()
 
-		// S3-backed: generate presigned URL and redirect for navigations/downloads.
-		// Skip redirect when the client is a CORS fetch/XHR that needs the response body
-		// same-origin (browser fetch cannot read cross-origin S3 redirects — no CORS on the bucket).
-		// Also skip when serving a resized thumbnail (must proxy through imageproxy).
-		if d.Storage != nil && resizeOpts.MaxWidth <= 0 && resizeOpts.MaxHeight <= 0 && !wantsSameOriginFileBody(r) {
-			ttl := time.Duration(cfg.StoragePresignTTL) * time.Second
-			if ttl <= 0 {
-				ttl = time.Hour
-			}
-			presignURL, presignErr := d.Storage.GetPresignedURL(r.Context(), row.StorageKey, ttl)
-			if presignErr != nil && !errors.Is(presignErr, filestorage.ErrNoPresignedURL) {
-				log.Printf("course-file-content: presign key=%q err=%v", row.StorageKey, presignErr)
-				apierr.WriteJSON(w, http.StatusBadGateway, apierr.CodeInternal, "File temporarily unavailable — try again in a moment.")
-				return
-			}
-			if presignURL != "" {
-				http.Redirect(w, r, presignURL, http.StatusFound)
-				return
-			}
-			// local driver falls through to GetObject / disk below
-		}
-
-		b, err := d.readCourseFileRowBytes(r.Context(), courseCode, row)
-		if err != nil {
-			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
-			return
-		}
-		ct := strings.TrimSpace(row.MimeType)
-		if ct == "" {
-			ct = "application/octet-stream"
-		}
+		var (
+			b  []byte
+			ct string
+		)
 		if resizeOpts.MaxWidth > 0 || resizeOpts.MaxHeight > 0 {
-			resized, resizedCT, err := imageproxy.ResizeIfNeeded(b, ct, resizeOpts)
-			if err != nil {
-				if errors.Is(err, imageproxy.ErrNotImage) {
-					// SVG and other non-raster formats: serve the original (e.g. course hero banners).
-				} else {
-					apierr.WriteJSON(w, http.StatusUnprocessableEntity, apierr.CodeInternal, "Could not resize image.")
+			// Resized heroes and catalog thumbnails are served from the derivative
+			// cache. A hit does not read the master object.
+			format := imageproxy.FormatFromAccept(r.Header.Get("Accept"))
+			resized, resizedCT, resizeErr := d.courseFileDerivative(r.Context(), courseCode, row, resizeOpts, format)
+			if resizeErr != nil {
+				var srcErr *imageproxy.SourceError
+				if errors.As(resizeErr, &srcErr) {
+					apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
 					return
 				}
-			} else {
-				b = resized
-				ct = resizedCT
+				apierr.WriteJSON(w, http.StatusUnprocessableEntity, apierr.CodeInternal, "Could not resize image.")
+				return
+			}
+			b = resized
+			ct = resizedCT
+			w.Header().Set("Vary", "Accept")
+		} else {
+			// S3-backed: generate presigned URL and redirect for navigations/downloads.
+			// Skip redirect when the client is a CORS fetch/XHR that needs the response body
+			// same-origin (browser fetch cannot read cross-origin S3 redirects — no CORS on the bucket).
+			if d.Storage != nil && !wantsSameOriginFileBody(r) {
+				ttl := time.Duration(cfg.StoragePresignTTL) * time.Second
+				if ttl <= 0 {
+					ttl = time.Hour
+				}
+				presignURL, presignErr := d.Storage.GetPresignedURL(r.Context(), row.StorageKey, ttl)
+				if presignErr != nil && !errors.Is(presignErr, filestorage.ErrNoPresignedURL) {
+					log.Printf("course-file-content: presign key=%q err=%v", row.StorageKey, presignErr)
+					apierr.WriteJSON(w, http.StatusBadGateway, apierr.CodeInternal, "File temporarily unavailable — try again in a moment.")
+					return
+				}
+				if presignURL != "" {
+					http.Redirect(w, r, presignURL, http.StatusFound)
+					return
+				}
+				// local driver falls through to GetObject / disk below
+			}
+
+			b, err = d.readCourseFileRowBytes(r.Context(), courseCode, row)
+			if err != nil {
+				apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
+				return
+			}
+			ct = strings.TrimSpace(row.MimeType)
+			if ct == "" {
+				ct = "application/octet-stream"
 			}
 		}
 		w.Header().Set("Content-Type", ct)

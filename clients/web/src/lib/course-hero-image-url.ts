@@ -1,11 +1,20 @@
 import { stripImageDisplayFragment } from './course-file-image'
 
-/** Display context for course hero banners; catalog variants request smaller server thumbnails. */
-export type CourseHeroImageSize = 'full' | 'catalog-card' | 'catalog-list' | 'catalog-gallery' | 'catalog-thumb'
+/** Display context for course hero images. `banner` matches the 5:1 course-page slot. */
+export type CourseHeroImageSize =
+  | 'full'
+  | 'banner'
+  | 'catalog-card'
+  | 'catalog-list'
+  | 'catalog-gallery'
+  | 'catalog-thumb'
 
 type SizeSpec = { w: number; h: number; q: number }
 
+/** Banner dimensions match server imageproxy.BannerWidth/Height/Quality. */
 const SIZE_SPECS: Record<Exclude<CourseHeroImageSize, 'full'>, SizeSpec> = {
+  // 1920×384 covers a typical content column at 2× without upscaling on the server.
+  banner: { w: 1920, h: 384, q: 85 },
   'catalog-thumb': { w: 80, h: 80, q: 80 },
   'catalog-list': { w: 224, h: 160, q: 82 },
   'catalog-gallery': { w: 480, h: 360, q: 82 },
@@ -18,7 +27,7 @@ function isResizableCourseFileContentURL(base: string): boolean {
   )
 }
 
-/** Resolve the image URL to fetch, appending resize query params for catalog thumbnails. */
+/** Resolve the image URL to fetch, appending resize query params for banner and catalog sizes. */
 export function courseHeroImageSrc(
   src: string | null | undefined,
   size: CourseHeroImageSize = 'full',
