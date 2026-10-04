@@ -7,8 +7,15 @@ calls. Implementation lives in
 ## Behaviour
 
 - On checklist read/refresh, if the per-course cache is missing or older than
-  24 hours, the item returns `unknown` (“Checking links…”) and enqueues
-  `checklist-linkcheck` (at most one in-flight job per course via unique key).
+  24 hours and `CHECKLIST_LINKCHECK_ENABLED` is on, the item returns `unknown`
+  (“Checking links…”) and enqueues `checklist-linkcheck` (at most one in-flight
+  job per course via unique key). When the job finishes it rewrites that item
+  in the stored checklist snapshot.
+- When the flag is off and the cache is stale, the item stays `unknown` but the
+  detail is “Outbound link checking is turned off.” It does not stay on
+  “Checking links…”. A course with no external links is `done` either way.
+- The checklist page polls Re-check while the detail is still “Checking links…”,
+  so an open page updates when the job finishes.
 - The worker extracts distinct `http(s)` URLs from the shared `ContentDoc`,
   caps at **200**, and checks with **8-way concurrency**, **2s** per request,
   **5s** total budget.
@@ -18,7 +25,7 @@ calls. Implementation lives in
 ## Kill switch
 
 ```bash
-CHECKLIST_LINKCHECK_ENABLED=false   # default — item stays unknown / no outbound calls
+CHECKLIST_LINKCHECK_ENABLED=false   # default — no outbound calls; row says checking is turned off
 CHECKLIST_LINKCHECK_ENABLED=true    # enable after security review
 ```
 

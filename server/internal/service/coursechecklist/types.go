@@ -32,7 +32,9 @@ const MaxEvidenceRows = 200
 
 // EngineVersionConst is the current evaluator contract version. Bump when Result
 // shape or evaluation semantics change in a way that invalidates cached snapshots (CC.2).
-const EngineVersionConst = 2
+// v3: links.external-health reports that outbound checking is off instead of
+// staying on "Checking links…" when CHECKLIST_LINKCHECK_ENABLED is false.
+const EngineVersionConst = 3
 
 // NavTarget describes where the UI should navigate for an actionable item (CC.8).
 type NavTarget struct {
