@@ -897,6 +897,7 @@ GET	/api/v1/courses/{course_code}/forums	session
 POST	/api/v1/courses/{course_code}/forums	session
 GET	/api/v1/courses/{course_code}/forums/{forum_id}/threads	session
 POST	/api/v1/courses/{course_code}/forums/{forum_id}/threads	session
+POST	/api/v1/courses/{course_code}/generate-image	session
 GET	/api/v1/courses/{course_code}/glossary	anonymous
 POST	/api/v1/courses/{course_code}/glossary	anonymous
 GET	/api/v1/courses/{course_code}/gradebook.csv	session

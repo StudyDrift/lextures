@@ -244,3 +244,25 @@ func TestResolver_Complete_FallbackOn503(t *testing.T) {
 		t.Fatalf("calls: %d", calls)
 	}
 }
+
+func TestResolver_GenerateImage_DryRun(t *testing.T) {
+	r := NewResolver(nil, nil, ResolverConfig{DryRun: true})
+	got, meta, err := r.GenerateImage(context.Background(), nil, "a course banner")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if meta.Provider != ProviderDryRun || meta.Operation != OpImage {
+		t.Fatalf("meta: %+v", meta)
+	}
+	if len(got.URLs) == 0 || got.URLs[0] == "" {
+		t.Fatalf("urls: %v", got.URLs)
+	}
+}
+
+func TestResolver_GenerateImage_NotConfigured(t *testing.T) {
+	r := NewResolver(nil, nil, ResolverConfig{})
+	_, _, err := r.GenerateImage(context.Background(), nil, "a course banner")
+	if err == nil || !strings.Contains(err.Error(), "not configured") {
+		t.Fatalf("err: %v", err)
+	}
+}
