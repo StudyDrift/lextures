@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/gradingdisplay"
@@ -14,6 +15,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/coursemoduleassignments"
 	"github.com/lextures/lextures/server/internal/repos/coursestructure"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
+	"github.com/lextures/lextures/server/internal/repos/gradeauditevents"
 	"github.com/lextures/lextures/server/internal/repos/gradingschemes"
 )
 
@@ -319,5 +321,78 @@ func (d Deps) handleCourseMyGrades() http.HandlerFunc {
 			GradeStatuses:    gradeStatuses,
 			GradingScheme:    schemePtr,
 		})
+	}
+}
+
+// handleCourseMyGradeItemHistory is GET /api/v1/courses/{course_code}/my-grades/{item_id}/history.
+// The current student's own grade-audit events for one item. An empty list is a normal empty history.
+func (d Deps) handleCourseMyGradeItemHistory() http.HandlerFunc {
+	type eventOut struct {
+		ID             string   `json:"id"`
+		Action         string   `json:"action"`
+		PreviousScore  *float64 `json:"previousScore"`
+		NewScore       *float64 `json:"newScore"`
+		PreviousStatus *string  `json:"previousStatus"`
+		NewStatus      *string  `json:"newStatus"`
+		Reason         *string  `json:"reason"`
+		ChangedAt      string   `json:"changedAt"`
+		ChangedBy      *string  `json:"changedBy"`
+	}
+	type resp struct {
+		Events []eventOut `json:"events"`
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		courseCode, viewer, ok := d.requireCourseAccess(w, r)
+		if !ok {
+			return
+		}
+		isStudent, err := enrollment.UserHasStudentEquivalentEnrollment(r.Context(), d.Pool, courseCode, viewer)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify enrollment.")
+			return
+		}
+		if !isStudent {
+			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "My grades are only available to student enrollments.")
+			return
+		}
+		itemID, err := uuid.Parse(chi.URLParam(r, "item_id"))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid item ID.")
+			return
+		}
+		cid, err := course.GetIDByCourseCode(r.Context(), d.Pool, courseCode)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course.")
+			return
+		}
+		if cid == nil {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
+			return
+		}
+		rows, err := gradeauditevents.ListForCell(r.Context(), d.Pool, *cid, itemID, viewer)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load grade history.")
+			return
+		}
+		events := make([]eventOut, 0, len(rows))
+		for _, row := range rows {
+			e := eventOut{
+				ID:             row.ID.String(),
+				Action:         row.Action,
+				PreviousScore:  row.PreviousScore,
+				NewScore:       row.NewScore,
+				PreviousStatus: row.PreviousStatus,
+				NewStatus:      row.NewStatus,
+				Reason:         row.Reason,
+				ChangedAt:      row.ChangedAt.UTC().Format("2006-01-02T15:04:05.000Z"),
+			}
+			if row.ChangedBy != nil {
+				s := row.ChangedBy.String()
+				e.ChangedBy = &s
+			}
+			events = append(events, e)
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(resp{Events: events})
 	}
 }

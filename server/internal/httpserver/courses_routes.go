@@ -209,6 +209,7 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Delete("/api/v1/courses/{course_code}/structure/items/{item_id}", d.handleDeleteCourseStructureItem())
 	r.Get("/api/v1/courses/{course_code}/my-assessment-completion", d.handleMyAssessmentCompletion())
 	r.Get("/api/v1/courses/{course_code}/my-grades", d.handleCourseMyGrades())
+	r.Get("/api/v1/courses/{course_code}/my-grades/{item_id}/history", d.handleCourseMyGradeItemHistory())
 
 	r.Get("/api/v1/courses/{course_code}/feed/channels", d.handleFeedChannels())
 	r.Post("/api/v1/courses/{course_code}/feed/channels", d.handleCreateFeedChannel())
