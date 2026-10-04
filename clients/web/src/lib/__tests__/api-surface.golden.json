@@ -1288,7 +1288,8 @@
     "viewerIsCourseStaffEnrollment",
     "viewerIsLearnerOnlyCourseEnrollment",
     "viewerShouldHideCourseEnrollmentsNav",
-    "viewerShouldShowMyGradesNav"
+    "viewerShouldShowMyGradesNav",
+    "viewerShouldShowStaffCourseHome"
   ],
   "credential-verify-api.ts": [
     "CredentialVerifyDocumentType",
