@@ -2,14 +2,19 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { MemoryRouter } from 'react-router-dom'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { server } from '../../test/mocks/server'
 import PrivacyCentrePage from '../privacy-centre-page'
 
+const features = vi.hoisted(() => ({
+  gdprModuleEnabled: true,
+  loading: false,
+}))
+
 vi.mock('../../context/platform-features-context', () => ({
   usePlatformFeatures: () => ({
-    gdprModuleEnabled: true,
-    loading: false,
+    gdprModuleEnabled: features.gdprModuleEnabled,
+    loading: features.loading,
   }),
 }))
 
@@ -47,6 +52,19 @@ function renderPage() {
 }
 
 describe('PrivacyCentrePage', () => {
+  beforeEach(() => {
+    features.gdprModuleEnabled = true
+    features.loading = false
+  })
+
+  it('shows the feature-off message instead of spinning when GDPR is disabled', async () => {
+    features.gdprModuleEnabled = false
+    renderPage()
+    expect(await screen.findByText(/privacy features are not enabled/i)).toBeInTheDocument()
+    expect(screen.queryByRole('status', { name: 'Loading' })).not.toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 1, name: /privacy center/i })).toBeInTheDocument()
+  })
+
   it('renders the privacy center heading', async () => {
     setupHandlers()
     renderPage()
