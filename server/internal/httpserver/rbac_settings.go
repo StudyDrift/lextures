@@ -479,6 +479,7 @@ func (d Deps) registerSettingsRoutes(r chi.Router) {
 	r.Get("/api/v1/settings/account", d.handleGetSettingsAccount())
 	r.Patch("/api/v1/settings/account", d.handlePatchSettingsAccount())
 	r.Delete("/api/v1/settings/account", d.handleDeleteSettingsAccount())
+	r.Post("/api/v1/settings/account/generate-avatar", d.handlePostSettingsAccountGenerateAvatar())
 	r.Get("/api/v1/settings/locale", d.handleGetSettingsLocale())
 	r.Put("/api/v1/settings/locale", d.handlePutSettingsLocale())
 	r.Get("/api/v1/settings/timezone", d.handleGetSettingsTimezone())
