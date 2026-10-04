@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/lextures/lextures/server/internal/repos/gradeauditevents"
 )
 
 func parseGradebookPutPoints(s string) (float64, bool) {
@@ -143,4 +144,156 @@ ON CONFLICT (student_user_id, module_item_id) DO UPDATE SET
 		return err
 	}
 	return nil
+}
+
+// ApplyGradebookBulkImport writes a validated CSV import and appends grade_audit_events
+// with reason bulk_import. Empty cell values delete the grade. Unsupported item ids are skipped.
+func ApplyGradebookBulkImport(ctx context.Context, pool *pgxpool.Pool, courseID, actor uuid.UUID, grades map[string]map[string]string) error {
+	if pool == nil {
+		return errors.New("nil pool")
+	}
+	if len(grades) == 0 {
+		return nil
+	}
+	itemSet := make(map[uuid.UUID]struct{})
+	for _, row := range grades {
+		for iu := range row {
+			iid, err := uuid.Parse(strings.TrimSpace(iu))
+			if err != nil {
+				continue
+			}
+			itemSet[iid] = struct{}{}
+		}
+	}
+	itemIDs := make([]uuid.UUID, 0, len(itemSet))
+	for id := range itemSet {
+		itemIDs = append(itemIDs, id)
+	}
+	if len(itemIDs) == 0 {
+		return nil
+	}
+
+	rows, err := pool.Query(ctx, `
+SELECT csi.id, COALESCE(NULLIF(TRIM(ma.posting_policy), ''), 'automatic')
+FROM course.course_structure_items csi
+LEFT JOIN course.module_assignments ma ON ma.structure_item_id = csi.id
+WHERE csi.course_id = $1 AND csi.id = ANY($2::uuid[])
+`, courseID, itemIDs)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+	postingByItem := make(map[uuid.UUID]string)
+	for rows.Next() {
+		var id uuid.UUID
+		var policy string
+		if err := rows.Scan(&id, &policy); err != nil {
+			return err
+		}
+		postingByItem[id] = policy
+	}
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
+	tx, err := pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	reason := "bulk_import"
+	graded := "graded"
+	for su, row := range grades {
+		sid, err := uuid.Parse(strings.TrimSpace(su))
+		if err != nil {
+			continue
+		}
+		for iu, raw := range row {
+			iid, err := uuid.Parse(strings.TrimSpace(iu))
+			if err != nil {
+				continue
+			}
+			if _, ok := postingByItem[iid]; !ok {
+				continue
+			}
+			var prevPts float64
+			scanErr := tx.QueryRow(ctx, `
+SELECT points_earned FROM course.course_grades
+WHERE student_user_id = $1 AND module_item_id = $2 AND course_id = $3
+`, sid, iid, courseID).Scan(&prevPts)
+			hasPrev := scanErr == nil
+			if scanErr != nil && !errors.Is(scanErr, pgx.ErrNoRows) {
+				return scanErr
+			}
+
+			val := strings.TrimSpace(raw)
+			var newPts float64
+			var newPtr *float64
+			action := "updated"
+			if val == "" {
+				if !hasPrev {
+					continue
+				}
+				if _, err := tx.Exec(ctx, `
+DELETE FROM course.course_grades
+WHERE student_user_id = $1 AND module_item_id = $2 AND course_id = $3
+`, sid, iid, courseID); err != nil {
+					return err
+				}
+				action = "deleted"
+			} else {
+				pts, ok := parseGradebookPutPoints(val)
+				if !ok {
+					return fmt.Errorf("invalid points for student %s item %s", sid, iid)
+				}
+				newPts = pts
+				newPtr = &newPts
+				if !hasPrev {
+					action = "created"
+				}
+				if postingByItem[iid] == "automatic" {
+					_, err = tx.Exec(ctx, `
+INSERT INTO course.course_grades (course_id, student_user_id, module_item_id, points_earned, updated_at, posted_at)
+VALUES ($1, $2, $3, $4, NOW(), NOW())
+ON CONFLICT (student_user_id, module_item_id) DO UPDATE SET
+	course_id = EXCLUDED.course_id,
+	points_earned = EXCLUDED.points_earned,
+	updated_at = NOW(),
+	posted_at = COALESCE(course.course_grades.posted_at, NOW())
+`, courseID, sid, iid, pts)
+				} else {
+					_, err = tx.Exec(ctx, `
+INSERT INTO course.course_grades (course_id, student_user_id, module_item_id, points_earned, updated_at, posted_at)
+VALUES ($1, $2, $3, $4, NOW(), NULL)
+ON CONFLICT (student_user_id, module_item_id) DO UPDATE SET
+	course_id = EXCLUDED.course_id,
+	points_earned = EXCLUDED.points_earned,
+	updated_at = NOW(),
+	posted_at = course.course_grades.posted_at
+`, courseID, sid, iid, pts)
+				}
+				if err != nil {
+					return err
+				}
+			}
+
+			var prevPtr *float64
+			var prevStatus, newStatus *string
+			if hasPrev {
+				p := prevPts
+				prevPtr = &p
+				ps := graded
+				prevStatus = &ps
+			}
+			if action != "deleted" {
+				ns := graded
+				newStatus = &ns
+			}
+			if err := gradeauditevents.Insert(ctx, tx, courseID, iid, sid, &actor, action, prevPtr, newPtr, prevStatus, newStatus, &reason); err != nil {
+				return err
+			}
+		}
+	}
+	return tx.Commit(ctx)
 }

@@ -898,8 +898,12 @@ GET	/api/v1/courses/{course_code}/forums/{forum_id}/threads	session
 POST	/api/v1/courses/{course_code}/forums/{forum_id}/threads	session
 GET	/api/v1/courses/{course_code}/glossary	anonymous
 POST	/api/v1/courses/{course_code}/glossary	anonymous
+GET	/api/v1/courses/{course_code}/gradebook.csv	session
 PUT	/api/v1/courses/{course_code}/gradebook/grades	session
 GET	/api/v1/courses/{course_code}/gradebook/grid	session
+POST	/api/v1/courses/{course_code}/gradebook/import/confirm	session
+POST	/api/v1/courses/{course_code}/gradebook/import/validate	session
+DELETE	/api/v1/courses/{course_code}/gradebook/import/{token}	session
 GET	/api/v1/courses/{course_code}/grader-agent-templates	anonymous
 POST	/api/v1/courses/{course_code}/grader-agent-templates	anonymous
 DELETE	/api/v1/courses/{course_code}/grader-agent-templates/{template_id}	anonymous
