@@ -155,11 +155,23 @@ func almostEqual(a, b, eps float64) bool {
 const LazyLinkHealth LazyLoaderID = "link_health"
 
 // LinkHealthLazy is the lazy payload for links.external-health.
+// Disabled means outbound checking is off and there is no fresh cache, so the
+// row must say so instead of sitting on "Checking links…".
 type LinkHealthLazy struct {
-	Pending  bool
-	Capped   bool
-	Rows     []linkhealth.Row
+	Pending   bool
+	Disabled  bool
+	Capped    bool
+	Rows      []linkhealth.Row
 	CheckedAt *time.Time
+}
+
+func linkHealthPayload(snap CourseSnapshot) (LinkHealthLazy, bool) {
+	raw, ok := snap.Lazy[LazyLinkHealth]
+	if !ok {
+		return LinkHealthLazy{}, false
+	}
+	payload, ok := raw.(LinkHealthLazy)
+	return payload, ok
 }
 
 func linkAndLaunchRules() []ItemDescriptor {
@@ -174,37 +186,40 @@ func linkAndLaunchRules() []ItemDescriptor {
 
 func ruleLinksExternalHealth() ItemDescriptor {
 	return ItemDescriptor{
-		ID:           ItemLinksExternalHealth,
-		Category:     CategoryLaunch,
-		TitleKey:     "coursechecklist.item.links.external-health.title",
-		TitleDefault: "Check external links",
-		WhyKey:       "coursechecklist.item.links.external-health.why",
-		WhyDefault:   "Dead external links frustrate learners; this check runs in the background with a crawl budget.",
-		HelpRef:      "course-checklist#links-external-health",
-		Tier:         TierRecommended,
-		Sources:      []string{"OSCQR 37"},
-		DataNeeds:    []DataNeed{DataNeedStructure, DataNeedItemMeta, DataNeedSyllabus},
-		LazyNeeds:    []LazyLoaderID{LazyLinkHealth},
-		Evaluate:     evalLinksExternalHealth,
-		Target:       NavTarget{Surface: "web", Route: "/courses/{courseCode}/modules"},
+		ID:            ItemLinksExternalHealth,
+		Category:      CategoryLaunch,
+		TitleKey:      "coursechecklist.item.links.external-health.title",
+		TitleDefault:  "Check external links",
+		WhyKey:        "coursechecklist.item.links.external-health.why",
+		WhyDefault:    "Dead external links frustrate learners; this check runs in the background with a crawl budget.",
+		HelpRef:       "course-checklist#links-external-health",
+		Tier:          TierRecommended,
+		Sources:       []string{"OSCQR 37"},
+		DataNeeds:     []DataNeed{DataNeedStructure, DataNeedItemMeta, DataNeedSyllabus},
+		LazyNeeds:     []LazyLoaderID{LazyLinkHealth},
+		Evaluate:      evalLinksExternalHealth,
+		Target:        NavTarget{Surface: "web", Route: "/courses/{courseCode}/modules"},
 		EvidenceShape: &EvidenceShape{Columns: []string{"URL", "Status", "Page"}},
 	}
 }
 
 func evalLinksExternalHealth(_ context.Context, snap CourseSnapshot) (Finding, error) {
-	raw, ok := snap.Lazy[LazyLinkHealth]
-	if !ok {
-		return Finding{
-			Status:        StatusUnknown,
-			DetailKey:     "coursechecklist.item.links.external-health.detail.checking",
-			DetailDefault: "Checking links…",
-		}, nil
-	}
-	payload, ok := raw.(LinkHealthLazy)
-	if !ok {
-		return Finding{Status: StatusUnknown, DetailDefault: "Checking links…"}, nil
-	}
-	if payload.Pending {
+	payload, hasPayload := linkHealthPayload(snap)
+	settled := hasPayload && !payload.Pending && !payload.Disabled
+	if !settled {
+		// An empty course has nothing to crawl, even while a job would be pending.
+		if len(ExtractExternalURLs(snap)) == 0 {
+			return Finding{Status: StatusDone, DetailDefault: "No external links to check."}, nil
+		}
+		// Kill switch defaults off. Pending with no worker would sit on
+		// "Checking links…" forever, including after Re-check.
+		if payload.Disabled || !LinkCheckEnabled() {
+			return Finding{
+				Status:        StatusUnknown,
+				DetailKey:     "coursechecklist.item.links.external-health.detail.disabled",
+				DetailDefault: "Outbound link checking is turned off.",
+			}, nil
+		}
 		return Finding{
 			Status:        StatusUnknown,
 			DetailKey:     "coursechecklist.item.links.external-health.detail.checking",
@@ -328,8 +343,8 @@ func ruleLaunchNoDraftsAfterStart() ItemDescriptor {
 			}
 			return !time.Now().UTC().Before(snap.StartsAt.UTC())
 		},
-		Evaluate: evalLaunchNoDraftsAfterStart,
-		Target:   NavTarget{Surface: "web", Route: "/courses/{courseCode}/modules"},
+		Evaluate:      evalLaunchNoDraftsAfterStart,
+		Target:        NavTarget{Surface: "web", Route: "/courses/{courseCode}/modules"},
 		EvidenceShape: &EvidenceShape{Columns: assessmentEvidenceColumns},
 	}
 }
@@ -380,8 +395,8 @@ func ruleLaunchCalendarSanity() ItemDescriptor {
 		Applies: func(snap CourseSnapshot) bool {
 			return len(snap.BlackoutDates) > 0
 		},
-		Evaluate: evalLaunchCalendarSanity,
-		Target:   NavTarget{Surface: "web", Route: "/courses/{courseCode}/modules"},
+		Evaluate:      evalLaunchCalendarSanity,
+		Target:        NavTarget{Surface: "web", Route: "/courses/{courseCode}/modules"},
 		EvidenceShape: &EvidenceShape{Columns: []string{"Item", "Due date", "Issue"}},
 	}
 }

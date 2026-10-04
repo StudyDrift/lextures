@@ -222,7 +222,7 @@ func TestCatalogVersionStable(t *testing.T) {
 	if a != b || len(a) != 16 {
 		t.Fatalf("catalog version %q / %q", a, b)
 	}
-	if EngineVersion() != 2 {
+	if EngineVersion() != 3 {
 		t.Fatalf("engine version=%d", EngineVersion())
 	}
 }

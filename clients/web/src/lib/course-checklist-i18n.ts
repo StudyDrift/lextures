@@ -54,6 +54,7 @@ export const courseChecklistI18n = {
   itemDismissedLive: 'Item dismissed',
   itemRestoredLive: 'Item restored',
   itemRecheckedLive: 'Re-checked',
+  linkCheckUpdatedLive: 'External link check updated',
   badgeAria: (n: number) =>
     n === 1 ? '1 checklist item needs attention' : `${n} checklist items need attention`,
   dashboardTitle: 'Course checklist',
