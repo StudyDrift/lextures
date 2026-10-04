@@ -52,6 +52,63 @@ describe('NotificationPreferencesPanel', () => {
     )
   })
 
+  it('shows parent-readable names for adaptive content events', async () => {
+    vi.mocked(authorizedFetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        preferences: [
+          {
+            eventType: 'adaptive_content_contest',
+            emailEnabled: true,
+            pushEnabled: false,
+            smsEnabled: false,
+            digestMode: 'instant',
+          },
+          {
+            eventType: 'adaptive_content_fairness',
+            emailEnabled: true,
+            pushEnabled: false,
+            smsEnabled: false,
+            digestMode: 'instant',
+          },
+          {
+            eventType: 'adaptive_content_regressing',
+            emailEnabled: true,
+            pushEnabled: false,
+            smsEnabled: false,
+            digestMode: 'instant',
+          },
+          {
+            eventType: 'future_event_type',
+            emailEnabled: true,
+            pushEnabled: false,
+            smsEnabled: false,
+            digestMode: 'instant',
+          },
+        ],
+      }),
+    } as Response)
+
+    render(<NotificationPreferencesPanel />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Reported problem with adapted content')).toBeInTheDocument()
+    })
+    expect(screen.getByText('A learner says an adapted section looks wrong.')).toBeInTheDocument()
+    expect(screen.getByText('Uneven results across learner groups')).toBeInTheDocument()
+    expect(
+      screen.getByText('Adapted content may be working better for some learners than others.'),
+    ).toBeInTheDocument()
+    expect(screen.getByText('Adapted content may be hurting learning')).toBeInTheDocument()
+    expect(
+      screen.getByText('An adapted section is doing worse than the unchanged version.'),
+    ).toBeInTheDocument()
+    expect(screen.getByText('Future event type')).toBeInTheDocument()
+    expect(screen.queryByText('adaptive_content_contest')).not.toBeInTheDocument()
+    expect(screen.queryByText('adaptive_content_fairness')).not.toBeInTheDocument()
+    expect(screen.queryByText('adaptive_content_regressing')).not.toBeInTheDocument()
+  })
+
   it('toggles push preference', async () => {
     vi.mocked(authorizedFetch)
       .mockResolvedValueOnce({
