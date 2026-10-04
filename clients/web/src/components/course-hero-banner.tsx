@@ -26,6 +26,7 @@ export function CourseHeroBanner({
     >
       <CourseHeroImage
         src={course.heroImageUrl}
+        size="banner"
         alt=""
         className="absolute inset-0 h-full w-full object-cover"
         style={heroImageObjectStyle(course.heroImageObjectPosition)}

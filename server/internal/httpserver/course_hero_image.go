@@ -141,6 +141,9 @@ func (d Deps) handlePutCourseHeroImage() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
 			return
 		}
+		if patch.UpdateImageURL && out.HeroImageURL != nil {
+			d.scheduleBannerDerivative(courseCode, *out.HeroImageURL)
+		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(out)
 	}

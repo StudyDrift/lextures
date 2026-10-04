@@ -76,7 +76,12 @@ describe('fetchCourseFileImageBlob', () => {
     expect(authorizedFetch).not.toHaveBeenCalled()
     expect(fetch).toHaveBeenCalledWith(
       'http://api.test/api/v1/courses/C-AIESS1/course-files/75782c7e-8410-4ac5-8f88-61a3290b938e/content',
-      { headers: { Prefer: 'return=representation' } },
+      {
+        headers: {
+          Prefer: 'return=representation',
+          Accept: 'image/webp,image/jpeg;q=0.8',
+        },
+      },
     )
   })
 
@@ -98,7 +103,12 @@ describe('fetchCourseFileImageBlob', () => {
     expect(out).toBe(blob)
     expect(authorizedFetch).toHaveBeenCalledWith(
       '/api/v1/courses/C-TEST/course-files/00000000-0000-4000-8000-000000000099/content',
-      { headers: { Prefer: 'return=representation' } },
+      {
+        headers: {
+          Prefer: 'return=representation',
+          Accept: 'image/webp,image/jpeg;q=0.8',
+        },
+      },
     )
   })
 
@@ -120,7 +130,12 @@ describe('fetchCourseFileImageBlob', () => {
     expect(fetchMock).not.toHaveBeenCalled()
     expect(authorizedFetch).toHaveBeenCalledWith(
       '/api/v1/courses/C-TEST/course-files/00000000-0000-4000-8000-000000000099/content',
-      { headers: { Prefer: 'return=representation' } },
+      {
+        headers: {
+          Prefer: 'return=representation',
+          Accept: 'image/webp,image/jpeg;q=0.8',
+        },
+      },
     )
   })
 })

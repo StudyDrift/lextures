@@ -9,21 +9,70 @@ import (
 	_ "image/png"
 	"strings"
 
+	"github.com/deepteams/webp"
 	"golang.org/x/image/draw"
+)
+
+const (
+	FormatWebP     = "webp"
+	FormatJPEG     = "jpeg"
+	FormatOriginal = "original"
+
+	// Banner slot is aspect-[5/1]. 1920px covers a typical content column at 2×.
+	BannerWidth   = 1920
+	BannerHeight  = 384
+	BannerQuality = 85
+
+	minEncodeQuality = 80
 )
 
 var ErrNotImage = errors.New("not a supported raster image")
 
-// ResizeOpts describes optional downscaling for course-file thumbnails.
+// ResizeOpts describes optional downscaling for course-file images.
+// The stored master is never rewritten; callers cache the returned bytes separately.
 type ResizeOpts struct {
 	MaxWidth  int
 	MaxHeight int
-	Quality   int // JPEG quality 1–100; values <= 0 default to 85
+	Quality   int    // 1–100; values <= 0 default to 85, and values below 80 are raised to 80
+	Format    string // FormatWebP or FormatJPEG; empty defaults to JPEG
+}
+
+// BannerOpts is the course-page hero derivative (1920×384, quality 85).
+func BannerOpts(format string) ResizeOpts {
+	return ResizeOpts{
+		MaxWidth:  BannerWidth,
+		MaxHeight: BannerHeight,
+		Quality:   BannerQuality,
+		Format:    format,
+	}
+}
+
+func (opts ResizeOpts) normalized() ResizeOpts {
+	if opts.MaxWidth < 0 {
+		opts.MaxWidth = 0
+	}
+	if opts.MaxHeight < 0 {
+		opts.MaxHeight = 0
+	}
+	if opts.Quality <= 0 || opts.Quality > 100 {
+		opts.Quality = 85
+	}
+	if opts.Quality < minEncodeQuality {
+		opts.Quality = minEncodeQuality
+	}
+	switch opts.Format {
+	case FormatWebP, FormatJPEG:
+	default:
+		opts.Format = FormatJPEG
+	}
+	return opts
 }
 
 // ResizeIfNeeded downscales raster image bytes when max width/height are set.
-// Returns original bytes when no resize dimension is requested.
+// Images that already fit are returned unchanged (no upscale, no recompress).
+// SVG and other non-raster inputs return ErrNotImage so callers can serve the original.
 func ResizeIfNeeded(data []byte, mime string, opts ResizeOpts) ([]byte, string, error) {
+	opts = opts.normalized()
 	if opts.MaxWidth <= 0 && opts.MaxHeight <= 0 {
 		return data, strings.TrimSpace(mime), nil
 	}
@@ -49,16 +98,32 @@ func ResizeIfNeeded(data []byte, mime string, opts ResizeOpts) ([]byte, string, 
 
 	dst := image.NewRGBA(image.Rect(0, 0, dstW, dstH))
 	draw.CatmullRom.Scale(dst, dst.Bounds(), src, bounds, draw.Over, nil)
+	return encodeScaled(dst, opts)
+}
 
-	quality := opts.Quality
-	if quality <= 0 || quality > 100 {
-		quality = 85
+func encodeScaled(dst *image.RGBA, opts ResizeOpts) ([]byte, string, error) {
+	if opts.Format == FormatWebP {
+		encoded, err := encodeWebP(dst, opts.Quality)
+		if err == nil {
+			return encoded, "image/webp", nil
+		}
+		// JPEG keeps the banner visible when WebP encoding fails.
 	}
 	var out bytes.Buffer
-	if err := jpeg.Encode(&out, dst, &jpeg.Options{Quality: quality}); err != nil {
+	if err := jpeg.Encode(&out, dst, &jpeg.Options{Quality: opts.Quality}); err != nil {
 		return nil, "", err
 	}
 	return out.Bytes(), "image/jpeg", nil
+}
+
+func encodeWebP(img image.Image, quality int) ([]byte, error) {
+	encOpts := webp.OptionsForPreset(webp.PresetPhoto, float32(quality))
+	encOpts.UseSharpYUV = true
+	var out bytes.Buffer
+	if err := webp.Encode(&out, img, encOpts); err != nil {
+		return nil, err
+	}
+	return out.Bytes(), nil
 }
 
 func isRasterImageMIME(mime string) bool {

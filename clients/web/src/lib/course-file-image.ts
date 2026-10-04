@@ -66,7 +66,10 @@ export function resolveAuthorizedFetchPath(src: string): string {
 export async function fetchCourseFileImageBlob(src: string): Promise<Blob> {
   const path = resolveAuthorizedFetchPath(src)
   const inlineInit: RequestInit = {
-    headers: { Prefer: 'return=representation' },
+    headers: {
+      Prefer: 'return=representation',
+      Accept: 'image/webp,image/jpeg;q=0.8',
+    },
   }
 
   if (!getBearerToken()) {
