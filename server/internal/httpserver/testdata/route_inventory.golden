@@ -1037,7 +1037,11 @@ POST	/api/v1/courses/{course_code}/outcomes/{outcome_id}/sub-outcomes	session
 GET	/api/v1/courses/{course_code}/plagiarism-settings	anonymous
 PATCH	/api/v1/courses/{course_code}/plagiarism-settings	anonymous
 GET	/api/v1/courses/{course_code}/questions	session
+POST	/api/v1/courses/{course_code}/questions	session
 GET	/api/v1/courses/{course_code}/questions/{question_id}	session
+PUT	/api/v1/courses/{course_code}/questions/{question_id}	session
+GET	/api/v1/courses/{course_code}/questions/{question_id}/versions	session
+POST	/api/v1/courses/{course_code}/questions/{question_id}/versions/{version_number}/restore	session
 GET	/api/v1/courses/{course_code}/quizzes/{item_id}	session
 PATCH	/api/v1/courses/{course_code}/quizzes/{item_id}	session
 GET	/api/v1/courses/{course_code}/quizzes/{item_id}/analytics	session
