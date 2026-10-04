@@ -1,19 +1,22 @@
 import { authorizedFetch } from './api'
 
-export type CourseAccessibilityInfo = {
-  altTextCoverage: {
+export type CourseAccessibilityCoverage = {
+  withAlt: number
+  total: number
+  percent: number
+  uncoveredItems: Array<{
+    itemId: string
+    title: string
+    kind: string
     withAlt: number
     total: number
-    percent: number
-    uncoveredItems: Array<{
-      itemId: string
-      title: string
-      kind: string
-      withAlt: number
-      total: number
-      missing: number
-    }>
-  }
+    missing: number
+  }>
+}
+
+export type CourseAccessibilityInfo = {
+  enforcementEnabled: boolean
+  altTextCoverage: CourseAccessibilityCoverage | null
   hardBlockSave: boolean
 }
 
@@ -37,9 +40,15 @@ export async function fetchCourseAccessibility(
     )
   }
   const r = raw as Record<string, unknown>
-  const cov = (r.altTextCoverage ?? {}) as Record<string, unknown>
+  // Missing field means an older payload that only returned coverage.
+  const enforcementEnabled = r.enforcementEnabled !== false && r.altTextCoverage != null
+  if (!enforcementEnabled) {
+    return { enforcementEnabled: false, altTextCoverage: null, hardBlockSave: false }
+  }
+  const cov = r.altTextCoverage as Record<string, unknown>
   const items = Array.isArray(cov.uncoveredItems) ? cov.uncoveredItems : []
   return {
+    enforcementEnabled: true,
     altTextCoverage: {
       withAlt: Number(cov.withAlt ?? 0),
       total: Number(cov.total ?? 0),

@@ -196,7 +196,6 @@ export default function CourseSettings() {
   const { allows, loading: permLoading } = usePermissions()
   const [createGradingAgentOpen, setCreateGradingAgentOpen] = useState(false)
   const {
-    altTextEnforcementEnabled,
     ffPlagiarismChecks,
     ffConsortiumSharing,
     ffCourseMarketplace,
@@ -802,7 +801,6 @@ export default function CourseSettings() {
   if (
     section === 'invalid' ||
     (section === 'translations' && !isTranslationMemoryEnabled()) ||
-    (section === 'accessibility' && !featuresLoading && !altTextEnforcementEnabled) ||
     (section === 'plagiarism' && !featuresLoading && !ffPlagiarismChecks) ||
     (section === 'grading-agents' && !featuresLoading && !graderAgentEnabled) ||
     (section === 'marketplace' && !featuresLoading && !ffCourseMarketplace)
@@ -895,7 +893,7 @@ export default function CourseSettings() {
             : section === 'adaptive-content'
               ? 'Configure adaptive units, preview learner archetypes, and approve or reject generated variants.'
             : section === 'accessibility'
-              ? 'Review image alt-text coverage and find content that still needs accessibility updates.'
+              ? 'Confirm caption requirements and review image alt-text coverage for this course.'
             : section === 'translations'
               ? 'Create locale variants, manage glossary terms, and review translation coverage.'
               : section === 'sections'
@@ -1518,12 +1516,15 @@ export default function CourseSettings() {
               canConfigure={canConfigureCourse}
             />
           )}
-          {section === 'accessibility' && (featuresLoading || altTextEnforcementEnabled) ? (
-            featuresLoading ? (
-              <p className="text-sm text-fg-muted">Loading accessibility settings…</p>
-            ) : (
+          {section === 'accessibility' ? (
+            <>
+              <CourseCaptionPolicySection
+                courseCode={courseCode}
+                course={course}
+                onCourseUpdated={setCourse}
+              />
               <CourseAccessibilitySettingsSection courseCode={courseCode} />
-            )
+            </>
           ) : null}
           {section === 'translations' && isTranslationMemoryEnabled() && courseCode ? (
             <div data-focus-anchor="course.general.language"><CourseTranslationsSettings /></div>
