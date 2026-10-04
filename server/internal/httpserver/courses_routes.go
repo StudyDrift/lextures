@@ -98,6 +98,7 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Post("/api/v1/courses/{course_code}/quizzes/{item_id}/import-questions-markdown", d.handleImportModuleQuizQuestionsMarkdown())
 	r.Post("/api/v1/courses/{course_code}/quizzes/{item_id}/suggest-outcome-links", d.handleSuggestQuizOutcomeLinks())
 	r.Get("/api/v1/courses/{course_code}/questions", d.handleListCourseBankQuestions())
+	r.Get("/api/v1/courses/{course_code}/misconception-report", d.handleMisconceptionReport())
 	r.Get("/api/v1/courses/{course_code}/questions/{question_id}", d.handleGetCourseBankQuestion())
 	d.registerQuizDeliveryRoutes(r)
 	// Proctoring config (plan 14.9)

@@ -19,6 +19,7 @@ func TestModuleQuizAIRoutes_Registered(t *testing.T) {
 		{http.MethodPost, "/api/v1/courses/demo/quizzes/00000000-0000-0000-0000-000000000001/generate-questions"},
 		{http.MethodPost, "/api/v1/courses/demo/quizzes/00000000-0000-0000-0000-000000000001/import-questions-markdown"},
 		{http.MethodGet, "/api/v1/courses/demo/questions"},
+		{http.MethodGet, "/api/v1/courses/demo/misconception-report"},
 		{http.MethodGet, "/api/v1/courses/demo/questions/00000000-0000-0000-0000-000000000002"},
 	}
 	for _, c := range paths {

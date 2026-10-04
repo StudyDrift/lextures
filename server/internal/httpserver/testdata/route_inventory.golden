@@ -1013,6 +1013,7 @@ PATCH	/api/v1/courses/{course_code}/markdown-theme	session
 PATCH	/api/v1/courses/{course_code}/me/content-locale	anonymous
 GET	/api/v1/courses/{course_code}/meetings	session
 POST	/api/v1/courses/{course_code}/meetings	session
+GET	/api/v1/courses/{course_code}/misconception-report	session
 POST	/api/v1/courses/{course_code}/modules-ai/chat	session
 GET	/api/v1/courses/{course_code}/modules/progress	anonymous
 GET	/api/v1/courses/{course_code}/my-assessment-completion	session
