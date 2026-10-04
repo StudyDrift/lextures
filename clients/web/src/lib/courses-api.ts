@@ -3744,6 +3744,19 @@ export function viewerShouldHideCourseEnrollmentsNav(
 }
 
 /**
+ * Staff course-home controls: Course settings, the Teaching card, Gradebook, and People.
+ * Hidden for learner-only enrollments and while View as Student is on, including when the
+ * signed-in user still has a staff enrollment (Test Student preview).
+ */
+export function viewerShouldShowStaffCourseHome(
+  viewerEnrollmentRoles: readonly string[] | null | undefined,
+  courseViewPreview: 'teacher' | 'student',
+): boolean {
+  if (courseViewPreview === 'student') return false
+  return viewerIsCourseStaffEnrollment(viewerEnrollmentRoles)
+}
+
+/**
  * Show “My grades” whenever “View as: Student” is active (staff preview), or when the viewer
  * has a student-equivalent enrollment (including Test Student dual seat).
  * While enrollment roles are still loading (`null`), returns false so the nav does not flash on.
