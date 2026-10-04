@@ -22,6 +22,12 @@ import { courseChecklistI18n } from '../../../lib/course-checklist-i18n'
 import { emitChecklistTelemetry } from '../../../lib/checklist-telemetry'
 import { fetchAiProcessingOptOut } from '../../../lib/study-buddy-api'
 import { useCourseChecklistSummary } from '../../../context/course-checklist-summary-context'
+import {
+  EXTERNAL_LINK_HEALTH_ITEM_ID,
+  checklistHasPendingLinkCheck,
+  isExternalLinkCheckPending,
+  replaceChecklistItem,
+} from '../../../lib/checklist-link-health'
 
 type LoadState = 'idle' | 'loading' | 'ready' | 'error' | 'forbidden'
 
@@ -43,6 +49,7 @@ export function useChecklistPage(courseCode: string | undefined) {
   const [dismissError, setDismissError] = useState<string | null>(null)
   const [aiOptOut, setAiOptOut] = useState(false)
   const [mappingAssistItem, setMappingAssistItem] = useState<ChecklistItem | null>(null)
+  const [linkPollNonce, setLinkPollNonce] = useState(0)
 
   useEffect(() => {
     let cancelled = false
@@ -251,13 +258,15 @@ export function useChecklistPage(courseCode: string | undefined) {
       setBusyItemId(item.id)
       try {
         const updated = await recheckChecklistItem(courseCode, item.id)
-        setData({
-          ...data,
-          categories: data.categories.map((c) => ({
-            ...c,
-            items: c.items.map((i) => (i.id === item.id ? updated : i)),
-          })),
-        })
+        if (item.id === EXTERNAL_LINK_HEALTH_ITEM_ID && isExternalLinkCheckPending(updated)) {
+          setData(replaceChecklistItem(data, updated))
+          setLinkPollNonce((n) => n + 1)
+        } else if (item.id === EXTERNAL_LINK_HEALTH_ITEM_ID) {
+          const fresh = await fetchCourseChecklist(courseCode)
+          setData(fresh)
+        } else {
+          setData(replaceChecklistItem(data, updated))
+        }
         setLiveMessage(courseChecklistI18n.itemRecheckedLive)
         emitChecklistTelemetry('checklist_item_rechecked', { itemId: item.id })
         await refreshSummary()
@@ -272,6 +281,52 @@ export function useChecklistPage(courseCode: string | undefined) {
     },
     [courseCode, data, refreshSummary],
   )
+
+  const linkCheckPending = useMemo(() => checklistHasPendingLinkCheck(data), [data])
+
+  // A background link check returns "Checking links…" immediately. Keep asking
+  // until the worker has written a result, then reload the checklist so the
+  // open page and its counts update without a manual refresh.
+  useEffect(() => {
+    if (!courseCode || !linkCheckPending) return
+    let cancelled = false
+    let inFlight = false
+    let attempts = 0
+    const maxAttempts = 20
+    const stop = (timer: number) => {
+      window.clearInterval(timer)
+    }
+    const timer = window.setInterval(() => {
+      if (cancelled || inFlight) return
+      inFlight = true
+      attempts += 1
+      void (async () => {
+        try {
+          const updated = await recheckChecklistItem(courseCode, EXTERNAL_LINK_HEALTH_ITEM_ID)
+          if (cancelled) return
+          if (isExternalLinkCheckPending(updated)) {
+            if (attempts >= maxAttempts) stop(timer)
+            return
+          }
+          const fresh = await fetchCourseChecklist(courseCode)
+          if (cancelled) return
+          setData(fresh)
+          setLoadState('ready')
+          setLiveMessage(courseChecklistI18n.linkCheckUpdatedLive)
+          await refreshSummary()
+          stop(timer)
+        } catch {
+          if (attempts >= maxAttempts) stop(timer)
+        } finally {
+          inFlight = false
+        }
+      })()
+    }, 2000)
+    return () => {
+      cancelled = true
+      stop(timer)
+    }
+  }, [courseCode, linkCheckPending, linkPollNonce, refreshSummary])
 
   const allDone = useMemo(() => {
     if (!data) return false

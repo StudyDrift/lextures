@@ -385,7 +385,11 @@ func NewLinkHealthLazyLoader(pool *pgxpool.Pool, enqueue bool) LazyLoader {
 			now := time.Now().UTC()
 			rows, err := linkhealth.ListForCourse(ctx, pool, snap.CourseID)
 			if err != nil {
-				// Table missing / error → pending unknown.
+				// A missing table must not look like a check that is still running.
+				if !LinkCheckEnabled() {
+					snap.Lazy[LazyLinkHealth] = LinkHealthLazy{Disabled: true}
+					return nil
+				}
 				snap.Lazy[LazyLinkHealth] = LinkHealthLazy{Pending: true}
 				return nil
 			}
@@ -406,8 +410,12 @@ func NewLinkHealthLazyLoader(pool *pgxpool.Pool, enqueue bool) LazyLoader {
 				}
 				return nil
 			}
+			if !LinkCheckEnabled() {
+				snap.Lazy[LazyLinkHealth] = LinkHealthLazy{Disabled: true}
+				return nil
+			}
 			snap.Lazy[LazyLinkHealth] = LinkHealthLazy{Pending: true}
-			if !LinkCheckEnabled() || !enqueue || pool == nil {
+			if !enqueue || pool == nil {
 				return nil
 			}
 			payload, _ := json.Marshal(map[string]string{"courseId": snap.CourseID.String()})
@@ -472,6 +480,11 @@ func RunLinkCheckJob(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID
 		return err
 	}
 	linkhealth.ObserveDuration(time.Since(start).Seconds())
+	// Fold the finished check into the stored checklist so an open page that
+	// reloads, and a poll of GET /checklist, see the result without waiting for TTL.
+	if _, err := NewService(pool, 0).Recheck(ctx, code, string(ItemLinksExternalHealth)); err != nil {
+		slog.Warn("coursechecklist linkcheck snapshot refresh failed", "err", err, "course_id", courseID)
+	}
 	return nil
 }
 
