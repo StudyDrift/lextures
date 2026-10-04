@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useOutletContext } from 'react-router-dom'
+import { useOutletContext, useParams } from 'react-router-dom'
 import { ConfirmDialog } from '../../components/confirm-dialog'
 import { usePermissions } from '../../context/use-permissions'
 import {
@@ -12,39 +12,71 @@ import {
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
 
 type CourseLayoutContext = {
-  course: CoursePublic
+  course?: CoursePublic | null
+}
+
+function isMissingRoute(message: string): boolean {
+  return /no http route is registered/i.test(message)
+}
+
+function isFeatureOff(message: string): boolean {
+  return /question bank/i.test(message) && /enable|disabled/i.test(message)
 }
 
 export default function CourseMisconceptionReportPage() {
-  const { course } = useOutletContext<CourseLayoutContext>()
+  const { courseCode: raw } = useParams()
+  const outlet = useOutletContext<CourseLayoutContext | null>()
+  // CourseLayout renders the outlet before the course fetch resolves, so course is null
+  // on the first paint. Gradebook treats that context as optional; this page must too.
+  const course = outlet?.course ?? null
+  const courseCode = course?.courseCode || (raw ? decodeURIComponent(raw) : '')
+  const bankOn = course?.questionBankEnabled === true
   const { allows, loading: permLoading } = usePermissions()
-  const canManage = !permLoading && allows(courseItemsCreatePermission(course.courseCode))
+  const canManage = Boolean(courseCode) && !permLoading && allows(courseItemsCreatePermission(courseCode))
   const [rows, setRows] = useState<MisconceptionReportRow[] | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [unavailable, setUnavailable] = useState(false)
   const [importBusy, setImportBusy] = useState(false)
   const [replaceSeedsOpen, setReplaceSeedsOpen] = useState(false)
 
   useEffect(() => {
+    if (!course) return
+    if (!bankOn) {
+      setRows(null)
+      setError(null)
+      setUnavailable(false)
+      return
+    }
+    if (!courseCode) return
     let cancelled = false
     ;(async () => {
       setError(null)
+      setUnavailable(false)
       try {
-        const res = await fetchMisconceptionReport(course.courseCode)
+        const res = await fetchMisconceptionReport(courseCode)
         if (!cancelled) setRows(res.misconceptions)
       } catch (e) {
-        if (!cancelled) setError(e instanceof Error ? e.message : 'Could not load report.')
+        if (cancelled) return
+        const msg = e instanceof Error ? e.message : 'Could not load report.'
+        if (isMissingRoute(msg) || isFeatureOff(msg)) {
+          setRows(null)
+          setUnavailable(true)
+          return
+        }
+        setError(msg)
       }
     })()
     return () => {
       cancelled = true
     }
-  }, [course.courseCode])
+  }, [bankOn, course, courseCode])
 
   async function runImport(replaceExistingSeeds: boolean) {
+    if (!courseCode) return
     setImportBusy(true)
     setError(null)
     try {
-      const res = await postImportMisconceptionSeedLibrary(course.courseCode, { replaceExistingSeeds })
+      const res = await postImportMisconceptionSeedLibrary(courseCode, { replaceExistingSeeds })
       toastSaveOk(`Imported ${res.imported} seed misconception${res.imported === 1 ? '' : 's'} (${res.skipped} skipped).`)
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Import failed.'
@@ -55,6 +87,8 @@ export default function CourseMisconceptionReportPage() {
       setReplaceSeedsOpen(false)
     }
   }
+
+  const featureOff = course != null && !bankOn
 
   return (
     <div className="mx-auto max-w-5xl space-y-4 p-4">
@@ -73,7 +107,7 @@ export default function CourseMisconceptionReportPage() {
         <p className="mt-1 text-sm text-fg-muted">
           Trigger counts for tagged distractors across submitted quiz attempts in this course.
         </p>
-        {canManage ? (
+        {canManage && bankOn ? (
           <div className="mt-3 flex flex-wrap gap-2">
             <button
               type="button"
@@ -94,6 +128,18 @@ export default function CourseMisconceptionReportPage() {
           </div>
         ) : null}
       </div>
+      {course == null && (
+        <p className="text-sm text-fg-muted">Loading course…</p>
+      )}
+      {featureOff && (
+        <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-100">
+          The question bank feature is disabled for this course. Turn on &quot;Question bank&quot; in course
+          features to use the misconception report.
+        </p>
+      )}
+      {unavailable && !featureOff && (
+        <p className="text-sm text-fg-muted">Misconception report is not available for this course.</p>
+      )}
       {error && (
         <p className="text-sm text-rose-700 dark:text-rose-400" role="alert">
           {error}

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -163,5 +164,36 @@ func (d Deps) handleGetCourseBankQuestion() http.HandlerFunc {
 		out := questionEntityToAPI(*row, true)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(out)
+	}
+}
+
+// handleMisconceptionReport is GET /api/v1/courses/{course_code}/misconception-report (plan 1.10).
+// Returns per-question trigger counts. An empty list is a normal empty report.
+func (d Deps) handleMisconceptionReport() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		_, courseID, _, ok := d.requireQuestionBankStaff(w, r)
+		if !ok {
+			return
+		}
+		rows, err := questionbank.ListMisconceptionReport(r.Context(), d.Pool, courseID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not load misconception report.")
+			return
+		}
+		out := make([]map[string]any, 0, len(rows))
+		for _, row := range rows {
+			out = append(out, map[string]any{
+				"misconceptionId":   row.MisconceptionID.String(),
+				"misconceptionName": row.MisconceptionName,
+				"questionId":        row.QuestionID.String(),
+				"questionStem":      row.QuestionStem,
+				"triggerCount":      row.TriggerCount,
+				"affectedStudents":  row.AffectedStudents,
+				"firstSeenAt":       row.FirstSeen.UTC().Format(time.RFC3339),
+				"lastSeenAt":        row.LastSeen.UTC().Format(time.RFC3339),
+			})
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(map[string]any{"misconceptions": out})
 	}
 }
