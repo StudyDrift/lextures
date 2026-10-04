@@ -13,18 +13,74 @@ type PreferenceRow = {
   digestMode: 'instant' | 'daily' | 'off'
 }
 
-const EVENT_LABELS: Record<string, string> = {
-  grade_posted: 'Grade posted',
-  assignment_created: 'New assignment',
-  discussion_reply: 'Discussion reply',
-  course_announcement: 'Course announcement',
-  submission_received: 'Submission received',
-  assignment_due_reminder: 'Assignment due reminder',
-  password_reset: 'Password reset',
-  welcome_invite: 'Welcome / invite',
-  canvas_course_imported: 'Canvas course imported',
-  course_copy_imported: 'Course copied from another course',
-  course_copy_import_failed: 'Course copy failed',
+type EventCopy = {
+  label: string
+  description?: string
+}
+
+// Labels cover notificationevents.All. Unknown keys are title-cased so the
+// Event column never shows a raw snake_case key.
+const EVENT_COPY: Record<string, EventCopy> = {
+  grade_posted: { label: 'Grade posted' },
+  assignment_created: { label: 'New assignment' },
+  discussion_reply: { label: 'Discussion reply' },
+  course_announcement: { label: 'Course announcement' },
+  submission_received: { label: 'Submission received' },
+  assignment_due_reminder: { label: 'Assignment due reminder' },
+  password_reset: { label: 'Password reset' },
+  welcome_invite: { label: 'Welcome / invite' },
+  meeting_reminder: { label: 'Meeting reminder' },
+  conference_confirmed: { label: 'Conference confirmed' },
+  conference_reminder: { label: 'Conference reminder' },
+  coaching_tip_weekly: { label: 'Weekly coaching tip' },
+  canvas_course_imported: { label: 'Canvas course imported' },
+  course_copy_imported: { label: 'Course copied from another course' },
+  course_copy_import_failed: { label: 'Course copy failed' },
+  inbox_message: { label: 'Inbox message' },
+  incomplete_granted: { label: 'Incomplete granted' },
+  incomplete_reminder: { label: 'Incomplete reminder' },
+  ceu_awarded: { label: 'Continuing education credit awarded' },
+  certificate_issued: { label: 'Certificate issued' },
+  payment_failed: { label: 'Payment failed' },
+  study_reminder_daily: { label: 'Daily study reminder' },
+  study_reminder_streak_at_risk: { label: 'Study streak at risk' },
+  study_reminder_weekly_summary: { label: 'Weekly study summary' },
+  seat_utilization_alert: { label: 'Seat use alert' },
+  intro_course_completed: { label: 'Intro course completed' },
+  transcript_order_submitted: { label: 'Transcript order submitted' },
+  transcript_order_on_hold: { label: 'Transcript order on hold' },
+  transcript_order_consent_needed: { label: 'Transcript consent needed' },
+  transcript_order_payment_needed: { label: 'Transcript payment needed' },
+  transcript_order_approved: { label: 'Transcript order approved' },
+  transcript_order_rejected: { label: 'Transcript order rejected' },
+  transcript_order_sent: { label: 'Transcript sent' },
+  transcript_order_delivered: { label: 'Transcript delivered' },
+  transcript_order_opened: { label: 'Transcript opened' },
+  transcript_order_failed: { label: 'Transcript delivery failed' },
+  transcript_order_canceled: { label: 'Transcript order canceled' },
+  transcript_order_exception: { label: 'Transcript order needs attention' },
+  adaptive_content_regressing: {
+    label: 'Adapted content may be hurting learning',
+    description: 'An adapted section is doing worse than the unchanged version.',
+  },
+  adaptive_content_fairness: {
+    label: 'Uneven results across learner groups',
+    description: 'Adapted content may be working better for some learners than others.',
+  },
+  adaptive_content_contest: {
+    label: 'Reported problem with adapted content',
+    description: 'A learner says an adapted section looks wrong.',
+  },
+  content_tool_state_reset: { label: 'Activity progress reset' },
+}
+
+function readableEventLabel(eventType: string): string {
+  const known = EVENT_COPY[eventType]?.label
+  if (known) return known
+  const words = eventType.split('_').filter(Boolean)
+  if (words.length === 0) return eventType
+  const [first, ...rest] = words
+  return [first.charAt(0).toUpperCase() + first.slice(1), ...rest].join(' ')
 }
 
 const DIGEST_OPTIONS: { value: PreferenceRow['digestMode']; label: string }[] = [
@@ -161,11 +217,17 @@ export function NotificationPreferencesPanel() {
               const pushId = `${baseId}-${row.eventType}-push`
               const smsId = `${baseId}-${row.eventType}-sms`
               const digestId = `${baseId}-${row.eventType}-digest`
-              const label = EVENT_LABELS[row.eventType] ?? row.eventType
+              const label = readableEventLabel(row.eventType)
+              const description = EVENT_COPY[row.eventType]?.description
               return (
                 <tr key={row.eventType} className="bg-surface-raised">
                   <td className="px-4 py-3 font-medium text-fg-default">
-                    {label}
+                    <span className="block">{label}</span>
+                    {description ? (
+                      <span className="mt-0.5 block text-xs font-normal text-fg-muted">
+                        {description}
+                      </span>
+                    ) : null}
                   </td>
                   <td className="px-4 py-3">
                     <label htmlFor={emailId} className="sr-only">
