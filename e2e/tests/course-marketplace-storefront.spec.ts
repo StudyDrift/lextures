@@ -347,7 +347,18 @@ test.describe('Marketplace storefront — UI', () => {
     })
     await expect(page.getByTestId('marketplace-price').first()).toContainText(/\$20\.00|Free/)
 
+    // Price is ANDed with the debounced `q`. The paid title is visible only
+    // after that write lands, so clear it before filtering or the free course
+    // cannot match.
+    await page.getByTestId('marketplace-search').fill('')
+    await expect
+      .poll(() => new URL(page.url()).searchParams.get('q'), { timeout: 15_000 })
+      .toBeNull()
     await page.getByTestId('marketplace-filter-price').selectOption('free')
+    await page.getByTestId('marketplace-search').fill(freeTitle)
+    await expect
+      .poll(() => new URL(page.url()).searchParams.get('q'), { timeout: 15_000 })
+      .toBe(freeTitle)
     await expect(page.getByRole('link', { name: new RegExp(freeTitle) })).toBeVisible({
       timeout: 15_000,
     })
