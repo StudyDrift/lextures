@@ -1,3 +1,9 @@
+/** Anchor id of the AI settings block on the Account settings page. */
+export const AI_SETTINGS_ANCHOR_ID = 'ai-settings'
+
+/** Where "Manage AI settings" style links should point (Account settings, AI block). */
+export const AI_SETTINGS_PATH = `/settings/account#${AI_SETTINGS_ANCHOR_ID}`
+
 /** i18n-style keys for AI disclosure UI (plan 10.17 / AP.6). */
 
 export const aiDisclosureI18n = {
@@ -9,6 +15,9 @@ export const aiDisclosureI18n = {
     'When enabled, your course content and messages are not sent to external AI providers for tutoring, notebook answers, translations, or similar features.',
   optOutLabel: 'Opt out of AI processing',
   optOutSaved: 'AI preference saved.',
+  tutorOptOutLabel: 'Turn off the AI tutor for my account',
+  tutorOptOutDescription:
+    'Hides the AI tutor in your courses. Other AI features follow the AI processing setting above.',
   bannerTitle: 'AI disclosure',
   bannerBody:
     'This feature sends your input to an AI model for processing. You can opt out anytime in Settings → Account → AI processing.',

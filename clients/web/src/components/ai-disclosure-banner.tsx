@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { authorizedFetch } from '../lib/api'
-import { aiDisclosureI18n, aiDisclosureProviderPhrase } from '../lib/ai-disclosure-i18n'
+import {
+  AI_SETTINGS_PATH,
+  aiDisclosureI18n,
+  aiDisclosureProviderPhrase,
+} from '../lib/ai-disclosure-i18n'
 import { providerLabel } from '../lib/ai-providers'
 import { usePlatformFeatures } from '../context/platform-features-context'
 
@@ -91,7 +95,7 @@ export function AiDisclosureBanner({ featureKey, modelLabel, providerLabel: prov
         >
           {aiDisclosureI18n.bannerUnderstand}
         </button>
-        <Link to="/settings/account" className="text-xs font-medium underline underline-offset-2">
+        <Link to={AI_SETTINGS_PATH} className="text-xs font-medium underline underline-offset-2">
           {aiDisclosureI18n.bannerOptOutLink}
         </Link>
         <Link to="/ai-disclosure" className="text-xs font-medium underline underline-offset-2">

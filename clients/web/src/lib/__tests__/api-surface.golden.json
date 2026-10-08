@@ -2434,8 +2434,10 @@
     "createTutorSession",
     "deleteTutorSession",
     "fetchAiTutorOptOut",
+    "fetchAiTutorOptOutSetting",
     "fetchTutorSession",
     "fetchTutorSessions",
+    "putAiTutorOptOut",
     "sendTutorSessionMessage"
   ],
   "virtual-meetings-api.ts": [
