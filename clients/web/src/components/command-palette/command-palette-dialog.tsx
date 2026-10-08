@@ -246,20 +246,19 @@ export function CommandPaletteDialog({
       )
     }
 
-    const localCandidates = buildLocalSearchCandidates(
-      coursesForSearch,
-      allows,
-      parsed,
-      globalSearchOptions,
+    const localFiltered = filterSearchItems(
+      [
+        ...(marketingContentItem ? [marketingContentItem] : []),
+        ...buildLocalSearchCandidates(coursesForSearch, allows, parsed, globalSearchOptions),
+      ],
+      query,
+      { currentCourseCode },
     )
-    const localFiltered = filterSearchItems(localCandidates, query, {
-      currentCourseCode,
-    })
     const go = buildCommandPaletteGoToItems(query, coursesForSearch, allows)
 
     const seen = new Set<string>()
     const merged: SearchListItem[] = []
-    for (const it of [...(marketingContentItem ? [marketingContentItem] : []), ...go, ...activeServerItems, ...localFiltered]) {
+    for (const it of [...go, ...activeServerItems, ...localFiltered]) {
       if (seen.has(it.id)) continue
       seen.add(it.id)
       merged.push(it)
