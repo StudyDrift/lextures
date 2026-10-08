@@ -29,6 +29,35 @@ SELECT EXISTS (
 	return ok, nil
 }
 
+// UserAccessibleCourseIDs reports which of courseIDs the user can open, using the same
+// rule as UserHasAccess (an active enrollment whose org matches the user's org, or
+// consortium / global-admin access). Courses missing from the result are not accessible.
+func UserAccessibleCourseIDs(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, courseIDs []uuid.UUID) (map[uuid.UUID]bool, error) {
+	out := make(map[uuid.UUID]bool, len(courseIDs))
+	if len(courseIDs) == 0 {
+		return out, nil
+	}
+	rows, err := pool.Query(ctx, `
+SELECT DISTINCT ce.course_id
+FROM course.course_enrollments ce
+INNER JOIN course.courses c ON c.id = ce.course_id
+INNER JOIN "user".users u ON u.id = ce.user_id
+WHERE ce.course_id = ANY($1) AND ce.user_id = $2 AND ce.active AND `+userCourseOrgMatch+`
+`, courseIDs, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var id uuid.UUID
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		out[id] = true
+	}
+	return out, rows.Err()
+}
+
 // UserHasAccessByCourseID is true when the user has any enrollment for the course primary key.
 func UserHasAccessByCourseID(ctx context.Context, pool *pgxpool.Pool, courseID, userID uuid.UUID) (bool, error) {
 	var ok bool

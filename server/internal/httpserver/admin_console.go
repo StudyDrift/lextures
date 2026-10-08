@@ -16,6 +16,7 @@ import (
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/repos/adminconsole"
 	"github.com/lextures/lextures/server/internal/repos/course"
+	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	"github.com/lextures/lextures/server/internal/repos/organization"
 	"github.com/lextures/lextures/server/internal/repos/orgbranding"
 	"github.com/lextures/lextures/server/internal/repos/orgrolegrant"
@@ -416,12 +417,18 @@ ON CONFLICT DO NOTHING
 
 func (d Deps) handleAdminConsoleCourses() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		_, orgID, _, ok := d.adminConsoleAccess(w, r, false)
+		actor, orgID, _, ok := d.adminConsoleAccess(w, r, false)
 		if !ok {
 			return
 		}
 		result, err := adminconsole.ListCourses(r.Context(), d.Pool, orgID, parseAdminConsoleListParams(r))
 		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to list courses.")
+			return
+		}
+		// The course shell (/courses/{code}) requires an enrollment, so tell the client which
+		// rows the admin can actually open; the rest render as plain text, not dead links.
+		if err := markAdminCoursesViewerAccess(r.Context(), d.Pool, actor, result.Items); err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to list courses.")
 			return
 		}
@@ -509,6 +516,7 @@ func (d Deps) handleAdminConsoleCourseStatusPatch() http.HandlerFunc {
 			writeJSON(w, http.StatusOK, map[string]any{"id": courseID.String(), "courseCode": courseCode})
 			return
 		}
+		_ = markAdminCoursesViewerAccess(ctx, d.Pool, actor, result.Items[:1])
 		writeJSON(w, http.StatusOK, result.Items[0])
 	}
 }
@@ -810,4 +818,27 @@ func adminConsoleClientIP(r *http.Request) string {
 		return strings.TrimSpace(parts[0])
 	}
 	return strings.TrimSpace(r.RemoteAddr)
+}
+
+// markAdminCoursesViewerAccess sets ViewerHasAccess on each row the viewer can open.
+func markAdminCoursesViewerAccess(ctx context.Context, pool *pgxpool.Pool, viewer uuid.UUID, rows []adminconsole.CourseRow) error {
+	if len(rows) == 0 {
+		return nil
+	}
+	ids := make([]uuid.UUID, 0, len(rows))
+	for _, row := range rows {
+		if id, err := uuid.Parse(row.ID); err == nil {
+			ids = append(ids, id)
+		}
+	}
+	access, err := enrollment.UserAccessibleCourseIDs(ctx, pool, viewer, ids)
+	if err != nil {
+		return err
+	}
+	for i := range rows {
+		if id, err := uuid.Parse(rows[i].ID); err == nil {
+			rows[i].ViewerHasAccess = access[id]
+		}
+	}
+	return nil
 }
