@@ -41,6 +41,9 @@ type CourseRow struct {
 	TermName        *string   `json:"termName"`
 	EnrollmentCount int64     `json:"enrollmentCount"`
 	UpdatedAt       time.Time `json:"updatedAt"`
+	// ViewerHasAccess is true when the requesting admin can open the course at
+	// /courses/{code} (they hold an active enrollment). Set by the HTTP handler.
+	ViewerHasAccess bool `json:"viewerHasAccess"`
 }
 
 // ListParams holds pagination and filter options.

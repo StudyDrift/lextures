@@ -165,12 +165,21 @@ export default function AdminCourses() {
               data.items.map((course) => (
                 <tr key={course.id} className="border-t border-border-subtle">
                   <td className="sticky left-0 bg-surface-raised px-4 py-2 dark:bg-surface-raised">
-                    <Link
-                      to={`/courses/${encodeURIComponent(course.courseCode)}`}
-                      className="text-accent-fg hover:underline dark:text-indigo-400"
-                    >
-                      {course.title}
-                    </Link>
+                    {course.viewerHasAccess ? (
+                      <Link
+                        to={`/courses/${encodeURIComponent(course.courseCode)}`}
+                        className="text-accent-fg hover:underline dark:text-indigo-400"
+                      >
+                        {course.title}
+                      </Link>
+                    ) : (
+                      <span className="flex flex-col">
+                        <span>{course.title}</span>
+                        <span className="text-xs text-fg-muted dark:text-fg-subtle">
+                          You aren&apos;t enrolled in this course
+                        </span>
+                      </span>
+                    )}
                   </td>
                   <td className="px-4 py-2 font-mono text-xs">{course.courseCode}</td>
                   <td className="px-4 py-2">{course.instructorName ?? '—'}</td>

@@ -55,6 +55,8 @@ export type AdminCourse = {
   termName: string | null
   enrollmentCount: number
   updatedAt: string
+  /** True when the viewing admin is enrolled and can open `/courses/{code}`. */
+  viewerHasAccess?: boolean
 }
 
 export type Paginated<T> = {
