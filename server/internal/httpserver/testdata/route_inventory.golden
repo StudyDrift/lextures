@@ -1139,6 +1139,7 @@ POST	/api/v1/courses/{course_code}/structure/modules/{module_id}/unlock-override
 POST	/api/v1/courses/{course_code}/structure/modules/{module_id}/vibe-activities	session
 POST	/api/v1/courses/{course_code}/structure/reorder	session
 GET	/api/v1/courses/{course_code}/structure/ws	anonymous
+GET	/api/v1/courses/{course_code}/students/{student_id}/mastery-transcript.pdf	session
 DELETE	/api/v1/courses/{course_code}/study-buddy/memory	anonymous
 GET	/api/v1/courses/{course_code}/study-buddy/memory	anonymous
 POST	/api/v1/courses/{course_code}/study-buddy/message	anonymous

@@ -28,6 +28,7 @@ func (d Deps) registerSBGReportRoutes(r chi.Router) {
 	// Instructor: course standards list, standards gradebook matrix, and mastery score recording
 	r.Get("/api/v1/courses/{course_code}/sbg/standards", d.handleListCourseStandards())
 	r.Get("/api/v1/courses/{course_code}/standards-gradebook", d.handleStandardsGradebook())
+	r.Get("/api/v1/courses/{course_code}/students/{student_id}/mastery-transcript.pdf", d.handleMasteryTranscriptPDF())
 	r.Post("/api/v1/sbg/mastery-scores", d.handleRecordMasteryScore())
 
 	// Instructor: mastery heatmap for a course+period
