@@ -1012,6 +1012,8 @@ DELETE	/api/v1/courses/{course_code}/live-quizzes/kits/{kit_id}/shares/{share_id
 POST	/api/v1/courses/{course_code}/live-quizzes/kits/{kit_id}/submit-to-catalog	session
 GET	/api/v1/courses/{course_code}/live-quizzes/kits/{kit_id}/validate	session
 GET	/api/v1/courses/{course_code}/lti-external-tools	session
+GET	/api/v1/courses/{course_code}/lti-links/{item_id}	session
+POST	/api/v1/courses/{course_code}/lti-links/{item_id}/embed-ticket	anonymous
 PATCH	/api/v1/courses/{course_code}/markdown-theme	session
 PATCH	/api/v1/courses/{course_code}/me/content-locale	anonymous
 GET	/api/v1/courses/{course_code}/meetings	session

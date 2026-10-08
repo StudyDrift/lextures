@@ -62,6 +62,8 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Patch("/api/v1/courses/{course_code}/vibe-activities/{item_id}", d.handlePatchModuleVibeActivity())
 	r.Get("/api/v1/courses/{course_code}/external-links/{item_id}", d.handleGetModuleExternalLink())
 	r.Patch("/api/v1/courses/{course_code}/external-links/{item_id}", d.handlePatchModuleExternalLink())
+	r.Get("/api/v1/courses/{course_code}/lti-links/{item_id}", d.handleGetModuleLTILink())
+	r.Post("/api/v1/courses/{course_code}/lti-links/{item_id}/embed-ticket", d.handlePostModuleLTIEmbedTicket())
 	// HE Library / E-Reserves (plan 14.10)
 	r.Get("/api/v1/courses/{course_code}/library-resources/{item_id}", d.handleGetModuleLibraryResource())
 	r.Patch("/api/v1/courses/{course_code}/library-resources/{item_id}", d.handlePatchModuleLibraryResource())
