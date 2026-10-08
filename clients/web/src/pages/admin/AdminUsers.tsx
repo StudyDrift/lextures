@@ -27,9 +27,18 @@ export default function AdminUsers() {
   const { impersonationEnabled } = usePlatformFeatures()
   const [searchParams] = useSearchParams()
   const orgId = searchParams.get('orgId')
-  const [q, setQ] = useState('')
+  // Admin search result links land here with `?q=` (e.g. a user's email or a course
+  // title), so seed the list filter from it and follow later changes to the param.
+  const urlQ = searchParams.get('q') ?? ''
+  const [q, setQ] = useState(urlQ)
+  const [seededQ, setSeededQ] = useState(urlQ)
   const [role, setRole] = useState('')
   const [page, setPage] = useState(1)
+  if (urlQ !== seededQ) {
+    setSeededQ(urlQ)
+    setQ(urlQ)
+    setPage(1)
+  }
   const [perPage, setPerPage] = useState(25)
   const [data, setData] = useState<Paginated<AdminUser> | null>(null)
   const [loading, setLoading] = useState(true)
