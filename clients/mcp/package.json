@@ -13,7 +13,7 @@
     "dev": "tsx src/index.ts"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.12.1",
+    "@modelcontextprotocol/sdk": "^1.31.0",
     "zod": "^3.25.28"
   },
   "devDependencies": {
@@ -26,6 +26,7 @@
     "@hono/node-server": "^2.0.5",
     "fast-uri": "3.1.8",
     "ip-address": "^10.5.1",
+    "proxy-addr": "2.0.8",
     "qs": "6.16.0"
   }
 }
