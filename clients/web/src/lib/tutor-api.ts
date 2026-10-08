@@ -76,11 +76,24 @@ export async function deleteTutorSession(courseCode: string, sessionId: string):
 }
 
 export async function fetchAiTutorOptOut(): Promise<boolean> {
+  return (await fetchAiTutorOptOutSetting()) ?? false
+}
+
+/** Current AI tutor opt-out, or `null` when the persistent tutor isn't available. */
+export async function fetchAiTutorOptOutSetting(): Promise<boolean | null> {
   const res = await authorizedFetch('/api/v1/settings/ai-tutor-opt-out')
-  if (res.status === 404) return false
-  if (!res.ok) return false
+  if (!res.ok) return null
   const data = (await res.json()) as { aiTutorOptOut?: boolean }
   return Boolean(data.aiTutorOptOut)
+}
+
+export async function putAiTutorOptOut(optOut: boolean): Promise<void> {
+  const res = await authorizedFetch('/api/v1/settings/ai-tutor-opt-out', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ aiTutorOptOut: optOut }),
+  })
+  if (!res.ok) throw new Error(`Failed to save AI tutor setting: ${res.status}`)
 }
 
 export async function sendTutorSessionMessage(

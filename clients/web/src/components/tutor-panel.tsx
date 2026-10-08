@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { formatNumber } from '../lib/format'
 import { Bot, Plus, Send, Trash2, X } from 'lucide-react'
 import { authorizedFetch } from '../lib/api'
+import { AI_SETTINGS_PATH } from '../lib/ai-disclosure-i18n'
 import { usePlatformFeatures } from '../context/platform-features-context'
 import {
   createTutorSession,
@@ -412,7 +413,7 @@ export function AiTutorMenu({ courseCode }: AiTutorMenuProps) {
             <div className="border-b border-amber-100 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200">
               <p>
                 This AI tutor uses your course materials and conversation history.{' '}
-                <Link to="/settings/privacy" className="underline">
+                <Link to={AI_SETTINGS_PATH} className="underline">
                   Manage AI settings
                 </Link>
               </p>

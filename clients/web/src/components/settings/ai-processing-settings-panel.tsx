@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { authorizedFetch } from '../../lib/api'
 import { readApiErrorMessage } from '../../lib/errors'
-import { aiDisclosureI18n } from '../../lib/ai-disclosure-i18n'
+import { AI_SETTINGS_ANCHOR_ID, aiDisclosureI18n } from '../../lib/ai-disclosure-i18n'
+import { fetchAiTutorOptOutSetting, putAiTutorOptOut } from '../../lib/tutor-api'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
 
 type Props = {
@@ -11,24 +12,32 @@ type Props = {
 
 export function AiProcessingSettingsPanel({ embedded = false }: Props) {
   const [optOut, setOptOut] = useState(false)
+  // null = the persistent AI tutor isn't available, so its toggle is hidden.
+  const [tutorOptOut, setTutorOptOut] = useState<boolean | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const location = useLocation()
+  const sectionRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
     let cancelled = false
     void (async () => {
       try {
         const res = await authorizedFetch('/api/v1/settings/ai-opt-out')
-        if (res.status === 404) {
-          return
-        }
-        if (!res.ok) {
+        if (res.ok) {
+          const data = (await res.json()) as { aiProcessingOptOut?: boolean }
+          if (!cancelled) setOptOut(Boolean(data.aiProcessingOptOut))
+        } else if (res.status !== 404) {
           throw new Error(await readApiErrorMessage(res))
         }
-        const data = (await res.json()) as { aiProcessingOptOut?: boolean }
-        if (!cancelled) setOptOut(Boolean(data.aiProcessingOptOut))
       } catch {
         /* module may be off */
+      }
+      try {
+        const tutor = await fetchAiTutorOptOutSetting()
+        if (!cancelled) setTutorOptOut(tutor)
+      } catch {
+        /* persistent tutor may be off */
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -49,13 +58,22 @@ export function AiProcessingSettingsPanel({ embedded = false }: Props) {
       if (!res.ok) {
         throw new Error(await readApiErrorMessage(res))
       }
+      if (tutorOptOut !== null) {
+        await putAiTutorOptOut(tutorOptOut)
+      }
       toastSaveOk(aiDisclosureI18n.optOutSaved)
     } catch (e) {
       toastMutationError(e instanceof Error ? e.message : 'Could not save AI settings.')
     } finally {
       setSaving(false)
     }
-  }, [optOut])
+  }, [optOut, tutorOptOut])
+
+  // "Manage AI settings" links land on /settings/account#ai-settings; bring this block into view.
+  useEffect(() => {
+    if (loading || location.hash !== `#${AI_SETTINGS_ANCHOR_ID}`) return
+    sectionRef.current?.scrollIntoView?.({ block: 'start' })
+  }, [loading, location.hash])
 
   if (loading) {
     return <p className="text-sm text-fg-muted">Loading AI settings…</p>
@@ -63,6 +81,8 @@ export function AiProcessingSettingsPanel({ embedded = false }: Props) {
 
   return (
     <section
+      id={AI_SETTINGS_ANCHOR_ID}
+      ref={sectionRef}
       className={embedded ? '' : 'mt-8 border-t border-border-default pt-8 dark:border-border-default'}
       aria-labelledby="ai-processing-heading"
     >
@@ -79,6 +99,22 @@ export function AiProcessingSettingsPanel({ embedded = false }: Props) {
         />
         <span className="text-sm text-fg-default">{aiDisclosureI18n.optOutLabel}</span>
       </label>
+      {tutorOptOut !== null ? (
+        <label className="mt-3 flex cursor-pointer items-start gap-3">
+          <input
+            type="checkbox"
+            className="mt-1 h-4 w-4 rounded border-border-strong"
+            checked={tutorOptOut}
+            onChange={(e) => setTutorOptOut(e.target.checked)}
+          />
+          <span className="text-sm text-fg-default">
+            {aiDisclosureI18n.tutorOptOutLabel}
+            <span className="mt-0.5 block text-fg-muted">
+              {aiDisclosureI18n.tutorOptOutDescription}
+            </span>
+          </span>
+        </label>
+      ) : null}
       <p className="mt-2 text-sm">
         <Link to="/ai-disclosure" className="text-accent-fg underline dark:text-indigo-300">
           {aiDisclosureI18n.fullDisclosureLink}
