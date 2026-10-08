@@ -32,6 +32,8 @@
     "brace-expansion@2": "2.1.7",
     "brace-expansion@5": "5.0.12",
     "ip-address": "^10.5.1",
+    "postcss-selector-parser": "7.1.6",
+    "simple-git": "4.0.2",
     "undici": "^6.28.1",
     "browserslist": "^4.28.7",
     "http-cache-semantics": "$http-cache-semantics"
