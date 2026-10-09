@@ -19,6 +19,7 @@ import {
   authPrimaryButtonClass,
 } from '../components/auth/auth-field-classes'
 import { PublicAuthShell } from '../components/auth/public-auth-shell'
+import { AuthLegalNotice } from '../components/auth/auth-legal-notice'
 import { TimezoneSelector } from '../components/timezone/timezone-selector'
 import { detectBrowserTimezone } from '../lib/format'
 
@@ -269,6 +270,7 @@ export default function Signup() {
             </Link>
           </p>
         </div>
+      <AuthLegalNotice variant="signup" />
     </PublicAuthShell>
   )
 }
