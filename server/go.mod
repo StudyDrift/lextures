@@ -147,8 +147,8 @@ require (
 	github.com/tinylib/msgp v1.6.4 // indirect
 	github.com/wlynxg/anet v0.0.5 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
-	github.com/xuri/efp v0.0.1 // indirect
-	github.com/xuri/excelize/v2 v2.11.1-0.20260910071107-696050fbf14e // indirect
+	github.com/xuri/efp v0.0.2 // indirect
+	github.com/xuri/excelize/v2 v2.11.1-0.20261003002531-6258dcebc4e2 // indirect
 	github.com/xuri/nfp v0.0.2-0.20250530014748-2ddeb826f9a9 // indirect
 	github.com/yuin/gopher-lua v1.1.1 // indirect
 	github.com/zeebo/xxh3 v1.1.0 // indirect
