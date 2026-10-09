@@ -1038,6 +1038,7 @@ type ModuleCardBodyProps = {
   h5pEnabled?: boolean
   scormIngestionEnabled?: boolean
   ltiToolsAvailable?: boolean
+  ltiRuntimeEnabled?: boolean
   heLibraryEnabled?: boolean
   bookstoreEnabled?: boolean
   onFindOpenResources?: (moduleId: string) => void
@@ -1070,6 +1071,7 @@ function ModuleCardBody({
   h5pEnabled,
   scormIngestionEnabled,
   ltiToolsAvailable,
+  ltiRuntimeEnabled,
   heLibraryEnabled,
   bookstoreEnabled,
   onFindOpenResources,
@@ -1204,6 +1206,7 @@ function ModuleCardBody({
               h5pEnabled={h5pEnabled}
               scormIngestionEnabled={scormIngestionEnabled}
               ltiToolsAvailable={ltiToolsAvailable}
+              ltiRuntimeEnabled={ltiRuntimeEnabled}
               heLibraryEnabled={heLibraryEnabled}
               bookstoreEnabled={bookstoreEnabled}
             />
@@ -1398,6 +1401,7 @@ type SortableModuleCardProps = {
   h5pEnabled?: boolean
   scormIngestionEnabled?: boolean
   ltiToolsAvailable?: boolean
+  ltiRuntimeEnabled?: boolean
   heLibraryEnabled?: boolean
   bookstoreEnabled?: boolean
   onFindOpenResources?: (moduleId: string) => void
@@ -1433,6 +1437,7 @@ function SortableModuleCard({
   h5pEnabled,
   scormIngestionEnabled,
   ltiToolsAvailable,
+  ltiRuntimeEnabled,
   heLibraryEnabled,
   bookstoreEnabled,
   onFindOpenResources,
@@ -1526,6 +1531,7 @@ function SortableModuleCard({
         h5pEnabled={h5pEnabled}
         scormIngestionEnabled={scormIngestionEnabled}
         ltiToolsAvailable={ltiToolsAvailable}
+        ltiRuntimeEnabled={ltiRuntimeEnabled}
         heLibraryEnabled={heLibraryEnabled}
         bookstoreEnabled={bookstoreEnabled}
         onFindOpenResources={onFindOpenResources}
@@ -1640,7 +1646,7 @@ export default function CourseModules() {
   const { allows, loading: permissionsLoading, error: permissionsError } = usePermissions()
   const viewerEnrollmentRoles = useViewerEnrollmentRoles(courseCode)
   const { modulesAiAssistantEnabled, loading: courseFeaturesLoading } = useCourseNavFeatures()
-  const { aiConfigured, ffConditionalRelease } = usePlatformFeatures()
+  const { aiConfigured, ffConditionalRelease, ltiRuntimeEnabled } = usePlatformFeatures()
   const [modulesAiOpen, setModulesAiOpen] = useState(false)
   const [adjustDatesOpen, setAdjustDatesOpen] = useState(false)
   const [items, setItems] = useState<CourseStructureItem[]>([])
@@ -2192,6 +2198,7 @@ export default function CourseModules() {
       return
     }
     if (kind === 'lti_link') {
+      if (ltiRuntimeEnabled === false) return
       if (!courseCode || ltiExternalTools.length === 0) return
       setLtiLinkSaveError(null)
       setLtiLinkModuleId(moduleId)
@@ -2231,7 +2238,7 @@ export default function CourseModules() {
       })()
       return
     }
-  }, [courseCode, ltiExternalTools.length])
+  }, [courseCode, ltiExternalTools.length, ltiRuntimeEnabled])
 
   const handleChildTogglePublished = useCallback(
     async (child: CourseStructureItem) => {
@@ -2927,6 +2934,7 @@ export default function CourseModules() {
                     h5pEnabled={h5pFeatureEnabled()}
                     scormIngestionEnabled={scormIngestionFeatureEnabled()}
                     ltiToolsAvailable={!ltiExternalToolsLoading && ltiExternalTools.length > 0}
+                    ltiRuntimeEnabled={ltiRuntimeEnabled !== false}
                     heLibraryEnabled={heLibraryIntegrationEnabled()}
                     bookstoreEnabled={bookstoreIntegrationEnabled()}
                     onFindOpenResources={(moduleId) => {

@@ -15,6 +15,7 @@ import {
   Sparkles,
 } from 'lucide-react'
 import { Menu, type MenuItem } from '../../components/ui/menu'
+import { ltiNotEnabledMessage } from '../../lib/lti-runtime'
 
 export type ModuleItemKind =
   | 'heading'
@@ -38,6 +39,8 @@ type AddModuleItemMenuProps = {
   scormIngestionEnabled?: boolean
   /** When false, LTI tool is shown disabled (no registered external tools). */
   ltiToolsAvailable?: boolean
+  /** When false, the API process cannot launch LTI. Defaults to available. */
+  ltiRuntimeEnabled?: boolean
   /** When true, shows the Library Resource option (HE e-reserves). */
   heLibraryEnabled?: boolean
   /** When true, shows the Textbook Resource option (bookstore / Inclusive Access). */
@@ -66,6 +69,7 @@ export function AddModuleItemMenu({
   h5pEnabled,
   scormIngestionEnabled,
   ltiToolsAvailable = true,
+  ltiRuntimeEnabled = true,
   heLibraryEnabled = false,
   bookstoreEnabled = false,
 }: AddModuleItemMenuProps) {
@@ -200,17 +204,16 @@ export function AddModuleItemMenu({
       })
     }
 
+    let ltiDescription = 'Embedded publisher or external LTI 1.3 tool'
+    if (!ltiRuntimeEnabled) ltiDescription = ltiNotEnabledMessage
+    else if (!ltiToolsAvailable) {
+      ltiDescription = 'No LTI tools registered — add under Settings → LTI tools'
+    }
     list.push({
       id: 'lti_link',
       textValue: 'LTI tool',
-      disabled: !ltiToolsAvailable,
-      label: itemLabel(
-        <Plug className="h-4 w-4" aria-hidden />,
-        'LTI tool',
-        ltiToolsAvailable
-          ? 'Embedded publisher or external LTI 1.3 tool'
-          : 'No LTI tools registered — add under Settings → LTI tools',
-      ),
+      disabled: !ltiRuntimeEnabled || !ltiToolsAvailable,
+      label: itemLabel(<Plug className="h-4 w-4" aria-hidden />, 'LTI tool', ltiDescription),
       onSelect: () => onAdd('lti_link'),
     })
 
@@ -224,6 +227,7 @@ export function AddModuleItemMenu({
     heLibraryEnabled,
     bookstoreEnabled,
     ltiToolsAvailable,
+    ltiRuntimeEnabled,
   ])
 
   return (

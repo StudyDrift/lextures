@@ -185,6 +185,10 @@ type platformFeaturesJSON struct {
 	AdaptiveLearnerModelEnabled  bool    `json:"adaptiveLearnerModelEnabled"`
 	LearnerModelEMAAlpha         float64 `json:"learnerModelEmaAlpha"`
 
+	// LTIRuntimeEnabled is true only when this process loaded a usable LTI key at startup.
+	// It is independent of the settings toggle: flipping ltiEnabled does not rebuild the runtime.
+	LTIRuntimeEnabled bool `json:"ltiRuntimeEnabled"`
+
 	// MB.1 — mobile in-app browser (always on; kept for API compatibility).
 	FFMobileInAppBrowser bool `json:"ffMobileInAppBrowser"`
 	// MB.1 — effective mobile link handling policy (org override wins when present).
@@ -418,6 +422,7 @@ func (d Deps) handleGetPlatformFeatures() http.HandlerFunc {
 		}
 		cfg := d.effectiveConfig()
 		out := platformFeaturesFromConfig(cfg)
+		out.LTIRuntimeEnabled = d.Lti != nil && d.Lti.Enabled
 		out.AiDisclosureEnabled = cfg.AiDisclosureEnabled
 		orgID := d.orgIDPtrForUser(r.Context(), userID)
 		out.AIConfigured = d.aiConfigured(r.Context(), orgID)

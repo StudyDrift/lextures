@@ -1220,7 +1220,8 @@ export const PLATFORM_FEATURE_MATRIX: readonly PlatformFeatureMatrixEntry[] = [
     ownershipSource: 'database',
     sourceKey: 'ltiEnabled',
     runtimeKey: null,
-    settingsOnlyRationale: 'LTI enablement is settings-only (launch paths check config directly)',
+    settingsOnlyRationale:
+      'Settings toggle ltiEnabled does not rebuild the startup runtime. Launch UI reads ltiRuntimeEnabled on /platform/features instead.',
     secretSensitive: false,
     uiSample: false,
     gatedSurface: null,

@@ -144,6 +144,8 @@ export type PlatformFeatures = {
   /** @deprecated AP.9 — use aiConfigured */
   openRouterConfigured: boolean
   aiConfigured: boolean
+  /** True when this API process can launch LTI. Absent until features load. */
+  ltiRuntimeEnabled?: boolean
   aiProvidersConfigured: string[]
   aiProviderAbstractionEnabled: boolean
   ragNotebookEnabled: boolean
@@ -599,6 +601,8 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           aiDisclosureEnabled: data.aiDisclosureEnabled === true,
           openRouterConfigured: data.openRouterConfigured === true,
           aiConfigured: data.aiConfigured === true,
+          ltiRuntimeEnabled:
+            typeof data.ltiRuntimeEnabled === 'boolean' ? data.ltiRuntimeEnabled : undefined,
           aiProvidersConfigured: Array.isArray(data.aiProvidersConfigured)
             ? data.aiProvidersConfigured.filter((p) => typeof p === 'string')
             : [],

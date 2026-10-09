@@ -146,6 +146,7 @@ keys:
   learnerModelEmaAlpha
   learnerProfileEnabled
   lrsAnonymizeActors
+  ltiRuntimeEnabled
   maintenanceBannerEnabled
   mobileLinkHandling
   oerLibraryEnabled

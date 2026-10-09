@@ -130,6 +130,8 @@ export type PlatformFeaturesSnapshot = {
   /** @deprecated AP.9 — use aiConfigured */
   openRouterConfigured?: boolean
   aiConfigured?: boolean
+  /** True when this API process can launch LTI. False when the runtime did not load at startup. */
+  ltiRuntimeEnabled?: boolean
   aiProvidersConfigured?: string[]
   aiProviderAbstractionEnabled?: boolean
   ragNotebookEnabled?: boolean
