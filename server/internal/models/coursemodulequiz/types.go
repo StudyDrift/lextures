@@ -198,6 +198,11 @@ type QuizAttemptsListResponse struct {
 	Attempts           []QuizAttemptSummary `json:"attempts"`
 	PolicyScorePercent *float64             `json:"policyScorePercent,omitempty"`
 	RetakePolicy       string               `json:"retakePolicy"`
+	// Set when the list is scoped to one learner. Omitted on the all-students staff list.
+	UnlimitedAttempts *bool  `json:"unlimitedAttempts,omitempty"`
+	MaxAttempts       *int32 `json:"maxAttempts,omitempty"`
+	AttemptsUsed      *int32 `json:"attemptsUsed,omitempty"`
+	AttemptsRemaining *int32 `json:"attemptsRemaining,omitempty"`
 }
 type QuizAttemptSummary struct {
 	ID                 uuid.UUID  `json:"id"`

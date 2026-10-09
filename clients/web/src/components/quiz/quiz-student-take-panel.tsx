@@ -54,6 +54,11 @@ function isBankQuestionId(id: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)
 }
 
+function attemptsAfterThisNotice(remaining: number): string {
+  if (remaining === 0) return 'This is your last allowed attempt for this quiz.'
+  return `${remaining} more attempt${remaining === 1 ? '' : 's'} allowed after this one.`
+}
+
 function formatRetakePolicyNotice(policy: string): string {
   switch (policy) {
     case 'highest':
@@ -1060,7 +1065,7 @@ export function QuizStudentTakePanel({
                   ? `Attempt ${startMeta.attemptNumber} of ${startMeta.maxAttempts}`
                   : `Attempt ${startMeta.attemptNumber}, unlimited attempts`,
                 typeof startMeta.remainingAttempts === 'number'
-                  ? `${startMeta.remainingAttempts} attempts remaining after this one`
+                  ? attemptsAfterThisNotice(startMeta.remainingAttempts)
                   : null,
                 formatRetakePolicyNotice(startMeta.retakePolicy),
               ]
@@ -1074,9 +1079,7 @@ export function QuizStudentTakePanel({
               </p>
               {startMeta.maxAttempts != null && typeof startMeta.remainingAttempts === 'number' ? (
                 <p className="text-fg-muted">
-                  {startMeta.remainingAttempts === 0
-                    ? 'This is your last allowed attempt for this quiz.'
-                    : `${startMeta.remainingAttempts} more attempt${startMeta.remainingAttempts === 1 ? '' : 's'} allowed after this one.`}
+                  {attemptsAfterThisNotice(startMeta.remainingAttempts)}
                 </p>
               ) : null}
               <p className="text-fg-muted">{formatRetakePolicyNotice(startMeta.retakePolicy)}</p>
