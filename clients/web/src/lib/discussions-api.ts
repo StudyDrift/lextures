@@ -13,6 +13,8 @@ export type DiscussionThreadSummary = {
   id: string
   forumId: string
   authorId: string
+  authorDisplayName?: string | null
+  authorAvatarUrl?: string | null
   title: string
   isPinned: boolean
   isLocked: boolean
@@ -32,6 +34,8 @@ export type DiscussionPost = {
   threadId: string
   parentPostId?: string | null
   authorId: string
+  authorDisplayName?: string | null
+  authorAvatarUrl?: string | null
   body: unknown
   upvoteCount: number
   viewerUpvoted: boolean
