@@ -175,7 +175,7 @@ export function PricingPage() {
               description="For homeschool families, certification prep, and language study — adaptive practice without running your own server."
               features={HOMESCHOOL_FEATURES}
               cta={
-                <a href={SITE_LINKS.homeschool} className="btn-primary w-full justify-center">
+                <a href={SITE_LINKS.homeschoolSignup} className="btn-primary w-full justify-center">
                   Sign up
                 </a>
               }
