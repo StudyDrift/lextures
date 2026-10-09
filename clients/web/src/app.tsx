@@ -1,6 +1,7 @@
 import { Suspense, useEffect } from 'react'
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { RequireAuth } from './auth/require-auth'
+import { ParentOnlyRoute } from './components/auth/parent-only-route'
 import { ApiErrorBoundary } from './components/api-error-boundary'
 import { AppShell } from './components/layout/app-shell'
 import { RouteFallback } from './components/route-fallback'
@@ -94,7 +95,14 @@ export default function App() {
             <Route path="/me/wallet" element={<Pages.CredentialWalletPage />} />
             <Route path="/me/badges" element={<Pages.MyBadges />} />
             <Route path="/me/ce-transcript" element={<Pages.CeTranscript />} />
-            <Route path="/me/billing" element={<Pages.BillingSettingsPage />} />
+            <Route
+              path="/me/billing"
+              element={
+                <ParentOnlyRoute>
+                  <Pages.BillingSettingsPage />
+                </ParentOnlyRoute>
+              }
+            />
             <Route path="/me/purchases" element={<Pages.MyPurchasesPage />} />
             <Route path="/me/creator/earnings" element={<Pages.CreatorEarningsPage />} />
             <Route path="/admin/tax" element={<Pages.OrgTaxSettingsPage />} />
@@ -105,7 +113,14 @@ export default function App() {
             <Route path="/me/research-studies" element={<Pages.ResearchStudiesPage />} />
             <Route path="/me/accommodations" element={<Pages.MyAccommodationsPage />} />
             <Route path="/parent" element={<Pages.ParentDashboard />} />
-            <Route path="/learners" element={<Pages.LearnersPage />} />
+            <Route
+              path="/learners"
+              element={
+                <ParentOnlyRoute>
+                  <Pages.LearnersPage />
+                </ParentOnlyRoute>
+              }
+            />
             <Route path="/parent/conferences" element={<Pages.ConferenceBooking />} />
             <Route path="/conferences/availability" element={<Pages.ConferenceAvailabilitySetup />} />
             <Route path="/ai" element={<Pages.AskAiPage />} />

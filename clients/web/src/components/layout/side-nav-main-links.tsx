@@ -29,6 +29,7 @@ import {
 import { useInboxUnreadCount } from '../../context/use-inbox-unread'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { usePermissions } from '../../context/use-permissions'
+import { useLearnAsSession } from '../../hooks/use-learn-as-session'
 import {
   PERM_ACCOMMODATIONS_MANAGE,
   PERM_MARKETING_CONTENT_VIEW,
@@ -42,6 +43,8 @@ import { SideNavSectionLabel } from './side-nav-section-label'
 
 export function SideNavMainLinks() {
   const unreadInboxCount = useInboxUnreadCount()
+  // The server refuses dependents and billing while a parent is learning as a child.
+  const learningAs = useLearnAsSession()
   const { allows, loading: permLoading } = usePermissions()
   const {
     accommodationsEngineEnabled,
@@ -101,7 +104,7 @@ export function SideNavMainLinks() {
     ffAdvisingIntegration ||
     ffResearchConsent ||
     ffAccessibilityIntake ||
-    ffStripeBilling ||
+    (ffStripeBilling && !learningAs) ||
     ffRevenueShare ||
     ffCourseMarketplace
 
@@ -121,7 +124,7 @@ export function SideNavMainLinks() {
       </SideNavLink>
 
       <SideNavSectionLabel first>Learning</SideNavSectionLabel>
-      {ffHomeschoolManagedLearners ? (
+      {ffHomeschoolManagedLearners && !learningAs ? (
         <SideNavLink to="/learners" icon={<UsersRound className="h-5 w-5" />}>
           Learners
         </SideNavLink>
@@ -181,7 +184,7 @@ export function SideNavMainLinks() {
               Advising notes
             </SideNavLink>
           ) : null}
-          {ffStripeBilling ? (
+          {ffStripeBilling && !learningAs ? (
             <SideNavLink to="/me/billing" icon={<CreditCard className="h-5 w-5" />}>
               Billing
             </SideNavLink>

@@ -39,6 +39,28 @@ export function getImpersonationToken(): string | null {
   }
 }
 
+/** JWT `typ` claim of the active impersonation token, read without verifying the signature. */
+function impersonationTokenType(): string | null {
+  const t = getImpersonationToken()
+  const seg = t?.split('.')[1]
+  if (!seg) return null
+  try {
+    const json = atob(seg.replace(/-/g, '+').replace(/_/g, '/'))
+    const o = JSON.parse(json) as { typ?: unknown }
+    return typeof o.typ === 'string' ? o.typ : null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * True while a parent is in a Learn as (managed learner) session. Read synchronously from the
+ * session token so chrome can hide parent-only areas the server refuses for that session.
+ */
+export function isLearnAsSession(): boolean {
+  return impersonationTokenType() === 'managed_learner'
+}
+
 export function setImpersonationToken(token: string): void {
   try {
     localStorage.setItem(IMPERSONATION_TOKEN_KEY, token)

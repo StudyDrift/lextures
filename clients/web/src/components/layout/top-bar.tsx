@@ -17,7 +17,7 @@ import {
   viewerIsCourseStaffEnrollment,
 } from '../../lib/courses-api'
 import { apiUrl, authorizedFetch } from '../../lib/api'
-import { getJwtSubject } from '../../lib/auth'
+import { getImpersonationToken, getJwtSubject } from '../../lib/auth'
 import { useViewerEnrollmentRoles } from '../../lib/use-viewer-enrollment-roles'
 import { EnrollmentAvatar } from '../enrollment/enrollment-avatar'
 
@@ -48,24 +48,38 @@ function UserMenu() {
 
   useEffect(() => {
     let cancelled = false
+    let generation = 0
     async function loadProfile() {
+      const mine = ++generation
       try {
         const res = await authorizedFetch('/api/v1/settings/account')
         const raw: unknown = await res.json().catch(() => ({}))
-        if (!res.ok || cancelled) return
+        if (!res.ok || cancelled || mine !== generation) return
         setProfile(parseAccountProfile(raw))
       } catch {
-        if (!cancelled) setProfile(null)
+        if (!cancelled && mine === generation) setProfile(null)
       }
     }
     void loadProfile()
     function onProfileUpdated() {
       void loadProfile()
     }
+    // Switching into or out of Learn as / impersonation swaps the acting user: drop the previous
+    // user's cached name right away instead of showing it until the refetch lands.
+    let sessionKey = getImpersonationToken() ?? ''
+    function onAuthTokenChanged() {
+      const next = getImpersonationToken() ?? ''
+      if (next === sessionKey) return
+      sessionKey = next
+      setProfile(null)
+      void loadProfile()
+    }
     window.addEventListener('studydrift-profile-updated', onProfileUpdated)
+    window.addEventListener('studydrift-auth-token', onAuthTokenChanged)
     return () => {
       cancelled = true
       window.removeEventListener('studydrift-profile-updated', onProfileUpdated)
+      window.removeEventListener('studydrift-auth-token', onAuthTokenChanged)
     }
   }, [])
 

@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { clearImpersonationToken, setImpersonationToken } from '../../../lib/auth'
 import { PERM_MARKETING_CONTENT_VIEW, PERM_REPORTS_VIEW } from '../../../lib/rbac-api'
 import { ShellNavProvider } from '../shell-nav-context'
 import { SideNavMainLinks } from '../side-nav-main-links'
@@ -182,5 +183,54 @@ describe('SideNavMainLinks', () => {
     )
 
     expect(screen.queryByRole('link', { name: /^marketing content$/i })).not.toBeInTheDocument()
+  })
+  describe('Learn as session', () => {
+    function jwtWithTyp(typ: string): string {
+      const b64 = (o: object) => btoa(JSON.stringify(o)).replace(/=+$/, '')
+      return `${b64({ alg: 'none' })}.${b64({ typ, sub: 'u1' })}.sig`
+    }
+
+    function renderNav() {
+      platformFeaturesMock.mockReturnValue({
+        accommodationsEngineEnabled: false,
+        ffEportfolio: false,
+        ragNotebookEnabled: true,
+        ffCourseMarketplace: false,
+        ffMarketingContent: false,
+        ffHomeschoolManagedLearners: true,
+        ffStripeBilling: true,
+      } as ReturnType<typeof platformFeaturesMock>)
+      return render(
+        <MemoryRouter>
+          <ShellNavProvider>
+            <SideNavMainLinks />
+          </ShellNavProvider>
+        </MemoryRouter>,
+      )
+    }
+
+    afterEach(() => {
+      clearImpersonationToken()
+    })
+
+    it('shows Learners and Billing to the parent', () => {
+      renderNav()
+      expect(screen.getByRole('link', { name: /^learners$/i })).toHaveAttribute('href', '/learners')
+      expect(screen.getByRole('link', { name: /^billing$/i })).toHaveAttribute('href', '/me/billing')
+    })
+
+    it('hides Learners and Billing while learning as a managed learner', () => {
+      setImpersonationToken(jwtWithTyp('managed_learner'))
+      renderNav()
+      expect(screen.queryByRole('link', { name: /^learners$/i })).not.toBeInTheDocument()
+      expect(screen.queryByRole('link', { name: /^billing$/i })).not.toBeInTheDocument()
+      expect(screen.getByRole('link', { name: /^ask ai$/i })).toBeInTheDocument()
+    })
+
+    it('keeps Learners and Billing during admin impersonation', () => {
+      setImpersonationToken(jwtWithTyp('impersonation'))
+      renderNav()
+      expect(screen.getByRole('link', { name: /^learners$/i })).toBeInTheDocument()
+    })
   })
 })
