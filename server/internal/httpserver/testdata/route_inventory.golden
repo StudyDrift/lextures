@@ -1589,8 +1589,8 @@ GET	/api/v1/settings/ai-disclosure/acknowledgements	anonymous
 POST	/api/v1/settings/ai-disclosure/acknowledgements	anonymous
 GET	/api/v1/settings/ai-opt-out	anonymous
 PUT	/api/v1/settings/ai-opt-out	anonymous
-GET	/api/v1/settings/ai-tutor-opt-out	anonymous
-PUT	/api/v1/settings/ai-tutor-opt-out	anonymous
+GET	/api/v1/settings/ai-tutor-opt-out	session
+PUT	/api/v1/settings/ai-tutor-opt-out	session
 GET	/api/v1/settings/ai/models	session
 GET	/api/v1/settings/ai/providers	anonymous
 PUT	/api/v1/settings/ai/providers	anonymous
