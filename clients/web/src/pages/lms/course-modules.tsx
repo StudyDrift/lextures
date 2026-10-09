@@ -124,6 +124,7 @@ import {
 } from '../../lib/courses-api'
 import { useCourseViewAs } from '../../lib/course-view-as'
 import { forgetLastVisitedItemIds } from '../../lib/last-visited-module-item'
+import { shouldShowModulesViewerOnlyHint } from '../../lib/modules-viewer-hint'
 import { useViewerEnrollmentRoles } from '../../lib/use-viewer-enrollment-roles'
 import { permCourseItemCreate } from '../../lib/rbac-api'
 import { formatDueShort } from '../../lib/course-calendar-utils'
@@ -1773,9 +1774,13 @@ export default function CourseModules() {
       !viewAsStudent &&
       allows(itemCreatePerm),
   )
-  const showViewerOnlyHint = Boolean(
-    courseCode && !permissionsLoading && !permissionsError && !allows(itemCreatePerm),
-  )
+  const showViewerOnlyHint = shouldShowModulesViewerOnlyHint({
+    courseCode,
+    permissionsLoading,
+    permissionsError: Boolean(permissionsError),
+    canCreateItems: allows(itemCreatePerm),
+    viewerEnrollmentRoles,
+  })
 
   const canLoadStudentGrades = Boolean(
     courseCode &&
