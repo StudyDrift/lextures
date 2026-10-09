@@ -1,3 +1,4 @@
+import { useImpersonatingSession } from '../../hooks/use-impersonating-session'
 import { lazy, Suspense, useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { CommandPaletteProvider } from '../command-palette/command-palette-provider'
@@ -47,7 +48,8 @@ function AppShellLayout() {
   const { focus } = useQuizShellFocus()
   const { readingFocus, setReadingFocus } = useReadingShellFocus()
   const hideChrome = Boolean(focus || readingFocus)
-  const shellClassName = `flex h-dvh min-h-0 overflow-hidden bg-surface-base ${
+  const impersonating = useImpersonatingSession()
+  const shellClassName = `flex min-h-0 flex-1 overflow-hidden bg-surface-base ${
     focus ? 'ring-2 ring-inset ring-indigo-900/35 dark:ring-amber-400/25' : ''
   }`
 
@@ -85,7 +87,8 @@ function AppShellLayout() {
           <Suspense fallback={null}>
             <IncidentStatusBanner />
           </Suspense>
-          <LegalUpdateBanner />
+          {/* A parent's policy acknowledgement is not the child's to make, and the banner stacks on a phone. */}
+          {impersonating ? null : <LegalUpdateBanner />}
           <main
             id="main-content"
             tabIndex={-1}
