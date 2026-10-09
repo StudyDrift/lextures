@@ -12,7 +12,7 @@ export const aiDisclosureI18n = {
     'Lextures uses third-party AI models (via providers your institution configures) to power optional features. This page describes which models are used, what data is sent, and how to opt out.',
   optOutTitle: 'AI processing',
   optOutDescription:
-    'When enabled, your course content and messages are not sent to external AI providers for tutoring, notebook answers, translations, or similar features.',
+    'When enabled, your course content and messages are not sent to external AI providers for tutoring, notebook answers, translations, or similar features. The AI tutor is hidden while this is on.',
   optOutLabel: 'Opt out of AI processing',
   optOutSaved: 'AI preference saved.',
   tutorOptOutLabel: 'Turn off the AI tutor for my account',

@@ -4,11 +4,13 @@ import { Link } from 'react-router-dom'
 import { formatNumber } from '../lib/format'
 import { Bot, Plus, Send, Trash2, X } from 'lucide-react'
 import { authorizedFetch } from '../lib/api'
+import { messageFromApiErrorBody } from '../lib/errors'
 import { AI_SETTINGS_PATH } from '../lib/ai-disclosure-i18n'
 import { usePlatformFeatures } from '../context/platform-features-context'
 import {
   createTutorSession,
   deleteTutorSession,
+  fetchTutorMenuBlocked,
   fetchTutorSession,
   fetchTutorSessions,
   sendTutorSessionMessage,
@@ -101,6 +103,7 @@ export function AiTutorMenu({ courseCode }: AiTutorMenuProps) {
   const disclosureKey = `tutor-disclosure-${courseCode}`
 
   const [open, setOpen] = useState(false)
+  const [menuAllowed, setMenuAllowed] = useState<boolean | null>(null)
   const [showDisclosure, setShowDisclosure] = useState(false)
   const [legacyConv, setLegacyConv] = useState<ConversationState | null>(null)
   const [sessions, setSessions] = useState<TutorSessionSummary[]>([])
@@ -129,6 +132,21 @@ export function AiTutorMenu({ courseCode }: AiTutorMenuProps) {
     if (!open) return
     setShowDisclosure(localStorage.getItem(disclosureKey) !== '1')
   }, [open, disclosureKey])
+
+  useEffect(() => {
+    let cancelled = false
+    setMenuAllowed(null)
+    void fetchTutorMenuBlocked()
+      .then((blocked) => {
+        if (!cancelled) setMenuAllowed(!blocked)
+      })
+      .catch(() => {
+        if (!cancelled) setMenuAllowed(true)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [courseCode])
 
   const loadPersistent = useCallback(async () => {
     const list = await fetchTutorSessions(courseCode)
@@ -260,7 +278,7 @@ export function AiTutorMenu({ courseCode }: AiTutorMenuProps) {
         },
       )
       if (!res.ok || !res.body) {
-        setError(await res.text())
+        setError(messageFromApiErrorBody(await res.text(), `Error ${res.status}`))
         setStreaming(false)
         return
       }
@@ -332,6 +350,8 @@ export function AiTutorMenu({ courseCode }: AiTutorMenuProps) {
     },
     [sendMessage],
   )
+
+  if (menuAllowed !== true) return null
 
   const displayMessages: LegacyMessage[] = persistent
     ? messages.map((m) => ({

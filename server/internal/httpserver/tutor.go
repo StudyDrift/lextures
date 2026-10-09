@@ -13,9 +13,9 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/organization"
 	tutorrepo "github.com/lextures/lextures/server/internal/repos/tutor"
 	"github.com/lextures/lextures/server/internal/repos/userai"
-	"github.com/lextures/lextures/server/internal/service/aitutor"
 	aigateway "github.com/lextures/lextures/server/internal/service/aigateway"
 	"github.com/lextures/lextures/server/internal/service/aiprovider"
+	"github.com/lextures/lextures/server/internal/service/aitutor"
 )
 
 const (
@@ -29,6 +29,9 @@ func (d Deps) registerTutorRoutes(r chi.Router) {
 	r.Post("/api/v1/courses/{course_code}/tutor/message", d.handlePostTutorMessage())
 	r.Delete("/api/v1/courses/{course_code}/tutor/conversation", d.handleDeleteTutorConversation())
 	r.Get("/api/v1/me/token-budget", d.handleGetTokenBudget())
+	// Account opt-out applies to the legacy tutor as well as persistent sessions.
+	r.Get("/api/v1/settings/ai-tutor-opt-out", d.handleGetAITutorOptOut())
+	r.Put("/api/v1/settings/ai-tutor-opt-out", d.handlePutAITutorOptOut())
 	d.registerPersistentTutorRoutes(r)
 }
 

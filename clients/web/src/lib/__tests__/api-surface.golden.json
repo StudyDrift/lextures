@@ -2426,6 +2426,7 @@
     "translateContent"
   ],
   "tutor-api.ts": [
+    "TutorAccountBlock",
     "TutorCitation",
     "TutorSessionDetail",
     "TutorSessionMessage",
@@ -2435,10 +2436,12 @@
     "deleteTutorSession",
     "fetchAiTutorOptOut",
     "fetchAiTutorOptOutSetting",
+    "fetchTutorMenuBlocked",
     "fetchTutorSession",
     "fetchTutorSessions",
     "putAiTutorOptOut",
-    "sendTutorSessionMessage"
+    "sendTutorSessionMessage",
+    "tutorMenuBlockReason"
   ],
   "virtual-meetings-api.ts": [
     "AttendanceRecord",

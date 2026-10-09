@@ -17,8 +17,8 @@ import (
 	tutorsessionrepo "github.com/lextures/lextures/server/internal/repos/tutorsession"
 	"github.com/lextures/lextures/server/internal/repos/userai"
 	aigateway "github.com/lextures/lextures/server/internal/service/aigateway"
-	tutorsession "github.com/lextures/lextures/server/internal/service/tutorsession"
 	lpsvc "github.com/lextures/lextures/server/internal/service/learnerprofile"
+	tutorsession "github.com/lextures/lextures/server/internal/service/tutorsession"
 )
 
 const aiTutorOptOutMessage = "AI tutor is disabled for your account."
@@ -59,8 +59,6 @@ func (d Deps) registerPersistentTutorRoutes(r chi.Router) {
 	r.Post("/api/v1/courses/{course_code}/tutor/sessions/{session_id}/messages", d.handlePostTutorSessionMessage())
 	r.Delete("/api/v1/courses/{course_code}/tutor/sessions/{session_id}", d.handleDeleteTutorSession())
 	r.Get("/api/v1/courses/{course_code}/tutor/concept-confusion", d.handleGetTutorConceptConfusion())
-	r.Get("/api/v1/settings/ai-tutor-opt-out", d.handleGetAITutorOptOut())
-	r.Put("/api/v1/settings/ai-tutor-opt-out", d.handlePutAITutorOptOut())
 }
 
 func (d Deps) handleListTutorSessions() http.HandlerFunc {
@@ -422,9 +420,6 @@ func (d Deps) handleGetTutorConceptConfusion() http.HandlerFunc {
 
 func (d Deps) handleGetAITutorOptOut() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !d.persistentTutorEnabled(w) {
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -441,9 +436,6 @@ func (d Deps) handleGetAITutorOptOut() http.HandlerFunc {
 
 func (d Deps) handlePutAITutorOptOut() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !d.persistentTutorEnabled(w) {
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return

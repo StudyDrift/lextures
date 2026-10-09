@@ -13,7 +13,7 @@ type Props = {
 
 export function AiProcessingSettingsPanel({ embedded = false }: Props) {
   const [optOut, setOptOut] = useState(false)
-  // null = the persistent AI tutor isn't available, so its toggle is hidden.
+  // null = the AI tutor opt-out setting could not be loaded, so its toggle is hidden.
   const [tutorOptOut, setTutorOptOut] = useState<boolean | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -38,7 +38,7 @@ export function AiProcessingSettingsPanel({ embedded = false }: Props) {
         const tutor = await fetchAiTutorOptOutSetting()
         if (!cancelled) setTutorOptOut(tutor)
       } catch {
-        /* persistent tutor may be off */
+        /* tutor opt-out setting may be unavailable */
       } finally {
         if (!cancelled) setLoading(false)
       }
