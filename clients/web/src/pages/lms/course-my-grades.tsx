@@ -11,7 +11,7 @@ import {
   viewerShouldShowMyGradesNav,
 } from '../../lib/courses-api'
 import { useCourseViewAs } from '../../lib/course-view-as'
-import { useViewerEnrollmentRoles } from '../../lib/use-viewer-enrollment-roles'
+import { useViewerEnrollmentRolesState } from '../../lib/use-viewer-enrollment-roles'
 import {
   computeCourseFinalPercent,
   computeDroppedGrades,
@@ -26,6 +26,7 @@ import { WhatIfGradesPanel } from '../../components/grading/what-if-grades-panel
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { FolderOpen } from 'lucide-react'
 import { LmsPage } from './lms-page'
+import { CoursePageLoadState } from './course-page-load-state'
 
 function parseEarned(raw: string | undefined): number {
   const t = (raw ?? '').trim()
@@ -43,10 +44,16 @@ function whatIfStorageKey(courseCode: string): string {
   return `whatif:${courseCode}`
 }
 
+const MY_GRADES_TITLE = 'My grades'
+
 export default function CourseMyGrades() {
   const { courseCode } = useParams<{ courseCode: string }>()
   const { ffEportfolio, ffWhatifGrades } = usePlatformFeatures()
-  const viewerEnrollmentRoles = useViewerEnrollmentRoles(courseCode)
+  const {
+    roles: viewerEnrollmentRoles,
+    error: viewerRolesError,
+    retry: retryViewerRoles,
+  } = useViewerEnrollmentRolesState(courseCode)
   const courseViewPreview = useCourseViewAs(courseCode)
   const [loadState, setLoadState] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle')
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -279,7 +286,9 @@ export default function CourseMyGrades() {
   }
 
   if (viewerEnrollmentRoles === null && courseViewPreview !== 'student') {
-    return null
+    return (
+      <CoursePageLoadState title={MY_GRADES_TITLE} error={viewerRolesError} onRetry={retryViewerRoles} />
+    )
   }
 
   if (!canView) {

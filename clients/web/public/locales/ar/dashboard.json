@@ -3,6 +3,8 @@
   "dashboard.description": "المواعيد النهائية والدرجات وإشارات التدريس عبر جميع مقرراتك.",
   "dashboard.errors.loadCourses": "تعذّر تحميل المقررات.",
   "dashboard.errors.loadDetails": "تعذّر تحميل تفاصيل لوحة التحكم.",
+  "dashboard.errors.loadCourseDetails": "تعذّر تحميل بعض مقرراتك، لذا قد تكون هذه الصفحة غير مكتملة.",
+  "dashboard.errors.retry": "إعادة المحاولة",
   "dashboard.empty.noCourses": "لا توجد مقررات بعد",
   "dashboard.empty.joinOrCreate": "انضم إلى مقرر عبر رابط دعوة، أو أنشئ مقررًا إذا كنت تُدرّس.",
   "dashboard.empty.joinOnly": "انضم إلى مقرر عبر رابط دعوة. عندما يضيفك المدرّس، ستظهر المقررات هنا.",
