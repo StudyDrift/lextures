@@ -1,6 +1,9 @@
 import { type FormEvent, useCallback, useEffect, useState } from 'react'
+import { Callout } from '../ui/callout'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 import { authorizedFetch } from '../../lib/api'
 import { readApiErrorMessage } from '../../lib/errors'
+import { ltiNotEnabledMessage } from '../../lib/lti-runtime'
 
 type ParentPlatform = {
   id: string
@@ -32,6 +35,7 @@ type RegistrationsResponse = {
 }
 
 export function LtiToolsSettingsPanel() {
+  const { ltiRuntimeEnabled } = usePlatformFeatures()
   const [data, setData] = useState<RegistrationsResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -107,6 +111,11 @@ export function LtiToolsSettingsPanel() {
         <code className="font-mono text-xs">LTI_RSA_PRIVATE_KEY_PEM</code> on the API server for LTI endpoints to
         respond.
       </p>
+      {ltiRuntimeEnabled === false ? (
+        <Callout tone="warning" className="mt-4">
+          {ltiNotEnabledMessage}
+        </Callout>
+      ) : null}
 
       {loading ? <p className="mt-6 text-sm text-fg-muted">Loading…</p> : null}
       {error ? (

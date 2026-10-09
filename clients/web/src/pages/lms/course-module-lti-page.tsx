@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { useCoursePageTitle } from '../../context/course-document-title-context'
 import { apiUrl } from '../../lib/api'
 import { fetchModuleLtiLink, postModuleLtiEmbedTicket } from '../../lib/courses-api'
+import { ltiLaunchErrorMessage } from '../../lib/lti-runtime'
 import { recordLastVisitedModuleItem } from '../../lib/last-visited-module-item'
 import { permCourseItemCreate } from '../../lib/rbac-api'
 import { usePermissions } from '../../context/use-permissions'
@@ -40,8 +41,8 @@ export default function CourseModuleLtiPage() {
       const u = new URL(apiUrl('/api/v1/lti/consumer/frame'))
       u.searchParams.set('ticket', ticket)
       setIframeSrc(u.toString())
-    } catch {
-      setError('Could not load this LTI link.')
+    } catch (e) {
+      setError(ltiLaunchErrorMessage(e))
     } finally {
       setLoading(false)
     }
@@ -76,7 +77,7 @@ export default function CourseModuleLtiPage() {
       ) : null}
       {loading ? <p className="text-sm text-fg-muted">Preparing launch…</p> : null}
       {error ? (
-        <p className="text-sm text-rose-600 dark:text-rose-400" role="alert">
+        <p className="text-sm text-danger-fg" role="alert">
           {error}
         </p>
       ) : null}

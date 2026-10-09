@@ -10922,6 +10922,10 @@
                     "ffPinnedSettings": {
                       "type": "boolean",
                       "description": "Plan PS.2: per-user pinned settings in assignment/quiz editors"
+                    },
+                    "ltiRuntimeEnabled": {
+                      "type": "boolean",
+                      "description": "True when this API process can launch LTI 1.3. False when LTI was off or the RSA key did not load at startup. Distinct from the settings toggle ltiEnabled, which does not rebuild the runtime until restart."
                     }
                   }
                 }
