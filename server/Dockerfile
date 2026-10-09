@@ -2,7 +2,7 @@
 
 # Compile on the CI runner's native arch and cross-compile per TARGETARCH (CGO_ENABLED=0).
 # Avoids QEMU emulation when publishing linux/amd64 + linux/arm64 images.
-FROM --platform=$BUILDPLATFORM golang:1.25-bookworm AS build
+FROM --platform=$BUILDPLATFORM golang:1.26-bookworm AS build
 ARG TARGETARCH
 WORKDIR /src
 COPY go.mod go.sum* ./
