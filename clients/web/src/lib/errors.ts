@@ -31,6 +31,21 @@ export function readApiErrorMessage(raw: unknown): string {
   return 'Request failed'
 }
 
+/** Human message from an API error body. Non-JSON text is returned as-is. */
+export function messageFromApiErrorBody(raw: string, fallback: string): string {
+  const trimmed = raw.trim()
+  if (!trimmed) return fallback
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(trimmed)
+  } catch {
+    return trimmed
+  }
+  if (parsed === null || typeof parsed !== 'object') return fallback
+  const msg = readApiErrorMessage(parsed)
+  return msg === 'Request failed' ? fallback : msg
+}
+
 /**
  * UX.6 FR-9 — extract field-addressable 422 violations when present.
  * Returns empty array for legacy banner-only errors.

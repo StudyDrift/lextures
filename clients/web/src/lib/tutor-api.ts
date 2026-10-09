@@ -1,4 +1,6 @@
 import { authorizedFetch } from './api'
+import { messageFromApiErrorBody } from './errors'
+import { fetchAiProcessingOptOut } from './study-buddy-api'
 
 const API_BASE = '/api/v1'
 
@@ -81,12 +83,33 @@ export async function fetchAiTutorOptOut(): Promise<boolean> {
 
 const AI_TUTOR_OPT_OUT_PATH = '/api/v1/settings/ai-tutor-opt-out'
 
-/** Current AI tutor opt-out, or `null` when the persistent tutor isn't available. */
+/** Current AI tutor opt-out, or `null` when the setting could not be loaded. */
 export async function fetchAiTutorOptOutSetting(): Promise<boolean | null> {
   const res = await authorizedFetch(AI_TUTOR_OPT_OUT_PATH)
   if (!res.ok) return null
   const data = (await res.json()) as { aiTutorOptOut?: boolean }
   return Boolean(data.aiTutorOptOut)
+}
+
+export type TutorAccountBlock = 'tutor' | 'processing'
+
+/** Why the course AI tutor should stay hidden, or null when it may be shown. */
+export function tutorMenuBlockReason(
+  tutorOptOut: boolean | null,
+  processingOptOut: boolean,
+): TutorAccountBlock | null {
+  if (tutorOptOut === true) return 'tutor'
+  if (processingOptOut) return 'processing'
+  return null
+}
+
+/** True when the account has turned off the tutor or AI processing. */
+export async function fetchTutorMenuBlocked(): Promise<boolean> {
+  const [tutorOptOut, processingOptOut] = await Promise.all([
+    fetchAiTutorOptOutSetting().catch(() => null),
+    fetchAiProcessingOptOut().catch(() => false),
+  ])
+  return tutorMenuBlockReason(tutorOptOut, processingOptOut) !== null
 }
 
 export async function putAiTutorOptOut(optOut: boolean): Promise<void> {
@@ -114,7 +137,7 @@ export async function sendTutorSessionMessage(
   )
   if (!res.ok || !res.body) {
     const body = await res.text()
-    onEvent({ type: 'error', message: body || `Error ${res.status}` })
+    onEvent({ type: 'error', message: messageFromApiErrorBody(body, `Error ${res.status}`) })
     return
   }
 
