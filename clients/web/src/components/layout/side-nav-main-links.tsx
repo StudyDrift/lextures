@@ -29,6 +29,7 @@ import {
 import { useInboxUnreadCount } from '../../context/use-inbox-unread'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { usePermissions } from '../../context/use-permissions'
+import { useImpersonatingSession } from '../../hooks/use-impersonating-session'
 import {
   PERM_ACCOMMODATIONS_MANAGE,
   PERM_MARKETING_CONTENT_VIEW,
@@ -68,6 +69,7 @@ export function SideNavMainLinks() {
     ffMarketingContent,
     ffHomeschoolManagedLearners,
   } = usePlatformFeatures()
+  const impersonating = useImpersonatingSession()
 
   const canViewReports = !permLoading && allows(PERM_REPORTS_VIEW)
   const canManageAccommodations = !permLoading && allows(PERM_ACCOMMODATIONS_MANAGE)
@@ -96,12 +98,15 @@ export function SideNavMainLinks() {
     ffCeuTracking ||
     ffDiplomas
 
+  const showLearners = Boolean(ffHomeschoolManagedLearners) && !impersonating
+  const showBilling = Boolean(ffStripeBilling) && !impersonating
+
   const showRecords =
     showWallet ||
     ffAdvisingIntegration ||
     ffResearchConsent ||
     ffAccessibilityIntake ||
-    ffStripeBilling ||
+    showBilling ||
     ffRevenueShare ||
     ffCourseMarketplace
 
@@ -121,7 +126,7 @@ export function SideNavMainLinks() {
       </SideNavLink>
 
       <SideNavSectionLabel first>Learning</SideNavSectionLabel>
-      {ffHomeschoolManagedLearners ? (
+      {showLearners ? (
         <SideNavLink to="/learners" icon={<UsersRound className="h-5 w-5" />}>
           Learners
         </SideNavLink>
@@ -181,7 +186,7 @@ export function SideNavMainLinks() {
               Advising notes
             </SideNavLink>
           ) : null}
-          {ffStripeBilling ? (
+          {showBilling ? (
             <SideNavLink to="/me/billing" icon={<CreditCard className="h-5 w-5" />}>
               Billing
             </SideNavLink>

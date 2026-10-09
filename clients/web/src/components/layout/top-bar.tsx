@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useId, useMemo, useRef, useState } from 'react'
 
 import { ChevronDown, LogOut, Menu, User } from 'lucide-react'
 import { matchPath, useLocation, useNavigate } from 'react-router-dom'
@@ -16,18 +16,15 @@ import {
   ensureCourseTestStudentEnrollment,
   viewerIsCourseStaffEnrollment,
 } from '../../lib/courses-api'
-import { apiUrl, authorizedFetch } from '../../lib/api'
+import { apiUrl } from '../../lib/api'
 import { getJwtSubject } from '../../lib/auth'
 import { useViewerEnrollmentRoles } from '../../lib/use-viewer-enrollment-roles'
 import { EnrollmentAvatar } from '../enrollment/enrollment-avatar'
 
 import { clearSessionTokens, getRefreshToken } from '../../lib/session-tokens'
 import { applyUiTheme } from '../../lib/ui-theme'
-import {
-  parseAccountProfile,
-  profileName,
-  type TopBarAccountProfile,
-} from './top-bar-utils'
+import { profileName } from './top-bar-utils'
+import { useTopBarAccountProfile } from './use-top-bar-account-profile'
 import { useShellNav } from './use-shell-nav'
 import { TopBarBreadcrumbs } from './top-bar-breadcrumbs'
 import { CanvasImportHeaderWidget } from '../../context/canvas-import-context'
@@ -42,32 +39,9 @@ import { iosAppAccountMenuItem } from './ios-app-account-menu-item'
 function UserMenu() {
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
-  const [profile, setProfile] = useState<TopBarAccountProfile | null>(null)
+  const profile = useTopBarAccountProfile()
   const triggerRef = useRef<HTMLButtonElement>(null)
   const menuId = useId()
-
-  useEffect(() => {
-    let cancelled = false
-    async function loadProfile() {
-      try {
-        const res = await authorizedFetch('/api/v1/settings/account')
-        const raw: unknown = await res.json().catch(() => ({}))
-        if (!res.ok || cancelled) return
-        setProfile(parseAccountProfile(raw))
-      } catch {
-        if (!cancelled) setProfile(null)
-      }
-    }
-    void loadProfile()
-    function onProfileUpdated() {
-      void loadProfile()
-    }
-    window.addEventListener('studydrift-profile-updated', onProfileUpdated)
-    return () => {
-      cancelled = true
-      window.removeEventListener('studydrift-profile-updated', onProfileUpdated)
-    }
-  }, [])
 
   async function signOut() {
     const rt = getRefreshToken()
