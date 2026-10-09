@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
+	"github.com/lextures/lextures/server/internal/auth"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursestructure"
 	ltidb "github.com/lextures/lextures/server/internal/repos/lti"
@@ -129,10 +130,27 @@ func (d Deps) handleGetModuleLTILink() http.HandlerFunc {
 	}
 }
 
+// authenticateBeforeLTIStatus requires a session before requireLtiHandler.
+// Otherwise an anonymous client learns that the LTI runtime is off (400) without signing in.
+func (d Deps) authenticateBeforeLTIStatus(w http.ResponseWriter, r *http.Request) bool {
+	if d.JWTSigner == nil {
+		apierr.WriteJSON(w, http.StatusUnauthorized, apierr.CodeUnauthorized, "Sign in required.")
+		return false
+	}
+	if _, _, err := auth.UserFromRequestOrAccessKey(r, d.JWTSigner, d.Pool, d.apiTokenIPHashKey(), d.apiTokensEnabled()); err != nil {
+		apierr.WriteJSON(w, http.StatusUnauthorized, apierr.CodeUnauthorized, "Sign in required.")
+		return false
+	}
+	return true
+}
+
 // handlePostModuleLTIEmbedTicket is POST /api/v1/courses/{course_code}/lti-links/{item_id}/embed-ticket.
 // It returns a short-lived ticket for GET /api/v1/lti/consumer/frame, which can't send a Bearer header.
 func (d Deps) handlePostModuleLTIEmbedTicket() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if !d.authenticateBeforeLTIStatus(w, r) {
+			return
+		}
 		if !d.requireLtiHandler(w) {
 			return
 		}
