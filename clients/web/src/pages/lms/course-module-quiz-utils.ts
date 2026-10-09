@@ -55,6 +55,80 @@ export function formatGradePolicyShort(p: string): string {
   return p
 }
 
+export type LearnerQuizAttemptScore = {
+  attemptNumber: number
+  pointsEarned: number
+  pointsPossible: number
+  scorePercent?: number | null
+  needsManualGrading?: boolean
+}
+
+function formatQuizPoints(n: number): string {
+  if (!Number.isFinite(n)) return '0'
+  if (Math.abs(n - Math.round(n)) < 0.001) return String(Math.round(n))
+  return String(Math.round(n * 100) / 100)
+}
+
+function attemptScorePercent(attempt: LearnerQuizAttemptScore): number {
+  if (typeof attempt.scorePercent === 'number' && Number.isFinite(attempt.scorePercent)) {
+    return attempt.scorePercent
+  }
+  if (attempt.pointsPossible > 0) return (attempt.pointsEarned / attempt.pointsPossible) * 100
+  return 0
+}
+
+function formatKeptAttemptScore(attempt: LearnerQuizAttemptScore): string {
+  const pct = Math.round(attemptScorePercent(attempt))
+  if (attempt.pointsPossible > 0) {
+    return `Score: ${formatQuizPoints(attempt.pointsEarned)} / ${formatQuizPoints(attempt.pointsPossible)} (${pct}%)`
+  }
+  return `Score: ${pct}%`
+}
+
+/** Score and attempt-cap copy for the learner quiz page. Null when the learner has not submitted. */
+export function summarizeLearnerQuizStanding(input: {
+  attempts: LearnerQuizAttemptScore[]
+  policy: string
+  unlimited: boolean
+  maxAttempts: number | null
+  /** Server cap after accommodations. When set, this decides whether another start is allowed. */
+  attemptsRemaining?: number | null
+}): { scoreLabel: string; attemptsLabel: string; exhausted: boolean } | null {
+  if (input.attempts.length === 0) return null
+  const used = input.attempts.length
+  const cap = input.unlimited ? null : input.maxAttempts
+  const exhausted =
+    typeof input.attemptsRemaining === 'number'
+      ? input.attemptsRemaining <= 0
+      : cap != null && used >= cap
+  const ready = input.attempts.filter((attempt) => !attempt.needsManualGrading)
+  let scoreLabel = 'Score pending review'
+  const byNumber = ready.slice().sort((a, b) => a.attemptNumber - b.attemptNumber)
+  const earliest = byNumber[0]
+  if (earliest) {
+    const latest = byNumber[byNumber.length - 1] ?? earliest
+    if (input.policy === 'average') {
+      const avg =
+        byNumber.reduce((sum, attempt) => sum + attemptScorePercent(attempt), 0) / byNumber.length
+      scoreLabel = `Score: ${Math.round(avg)}%`
+    } else if (input.policy === 'first') {
+      scoreLabel = formatKeptAttemptScore(earliest)
+    } else if (input.policy === 'highest') {
+      const best = byNumber.reduce((keep, attempt) =>
+        attempt.pointsEarned > keep.pointsEarned ? attempt : keep,
+      )
+      scoreLabel = formatKeptAttemptScore(best)
+    } else {
+      scoreLabel = formatKeptAttemptScore(latest)
+    }
+  }
+  return {
+    scoreLabel,
+    attemptsLabel: cap != null ? `Attempts used: ${used} of ${cap}` : `Attempts used: ${used}`,
+    exhausted,
+  }
+}
+
 export function formatLockdownModeLabel(mode: LockdownMode, family = false): string {
   if (family) {
     if (mode === 'one_at_a_time') return 'One question at a time'

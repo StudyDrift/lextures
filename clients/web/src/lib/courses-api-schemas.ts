@@ -645,6 +645,10 @@ export const quizAttemptsListPayloadSchema = z.object({
   attempts: z.array(quizAttemptSummaryApiSchema),
   policyScorePercent: z.number().nullable().optional(),
   retakePolicy: z.string(),
+  unlimitedAttempts: z.boolean().optional(),
+  maxAttempts: z.number().nullable().optional(),
+  attemptsUsed: z.number().optional(),
+  attemptsRemaining: z.number().nullable().optional(),
 })
 
 export const quizCurrentQuestionPayloadSchema = z.object({

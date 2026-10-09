@@ -29,6 +29,7 @@ import {
   fetchCourseOutcomes,
   fetchModuleQuiz,
   fetchQuizAttemptsList,
+  type QuizAttemptsListPayload,
   fetchQuizFocusLossEvents,
   fetchReaderMarkups,
   buildQuizIntroWithAi,
@@ -70,6 +71,7 @@ import {
   datetimeLocalValueToIso,
   defaultTypeConfigFor,
   formatGradePolicyShort,
+  summarizeLearnerQuizStanding,
   formatItemPointsWorth,
   formatLockdownModeLabel,
   formatQuizDateTime,
@@ -560,6 +562,7 @@ export default function CourseModuleQuizPage() {
   const [ungradedAttemptCount, setUngradedAttemptCount] = useState<number | null>(null)
   const [enrolledStudentCount, setEnrolledStudentCount] = useState<number | null>(null)
   const [studentQuizBanner, setStudentQuizBanner] = useState<{ kind: 'success' | 'error'; text: string } | null>(null)
+  const [learnerAttemptList, setLearnerAttemptList] = useState<QuizAttemptsListPayload | null>(null)
   const [proctoringConfig, setProctoringConfig] = useState<ProctoringConfig | null | undefined>(undefined)
   const [proctoringChecklistOpen, setProctoringChecklistOpen] = useState(false)
   const { ffProctoringIntegration, aiConfigured, graderAgentEnabled } = usePlatformFeatures()
@@ -743,6 +746,39 @@ export default function CourseModuleQuizPage() {
       cancelled = true
     }
   }, [canGradeQuiz, courseCode, itemId, gradingOpen])
+
+  const showLearnerAttemptStanding = Boolean(courseCode && itemId) && !canEdit && !staffCanGradeQuiz
+
+  useEffect(() => {
+    if (!showLearnerAttemptStanding || !courseCode || !itemId) {
+      setLearnerAttemptList(null)
+      return
+    }
+    let cancelled = false
+    void (async () => {
+      try {
+        const data = await fetchQuizAttemptsList(courseCode, itemId)
+        if (!cancelled) setLearnerAttemptList(data)
+      } catch {
+        if (!cancelled) setLearnerAttemptList(null)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [showLearnerAttemptStanding, courseCode, itemId])
+
+  const learnerStanding = useMemo(() => {
+    if (!learnerAttemptList || learnerAttemptList.attempts.length === 0) return null
+    const unlimited = learnerAttemptList.unlimitedAttempts ?? unlimitedAttempts
+    return summarizeLearnerQuizStanding({
+      attempts: learnerAttemptList.attempts,
+      policy: learnerAttemptList.retakePolicy || quizAdvanced.gradeAttemptPolicy,
+      unlimited,
+      maxAttempts: learnerAttemptList.maxAttempts ?? quizAdvanced.maxAttempts,
+      attemptsRemaining: learnerAttemptList.attemptsRemaining,
+    })
+  }, [learnerAttemptList, quizAdvanced.gradeAttemptPolicy, quizAdvanced.maxAttempts, unlimitedAttempts])
 
   useEffect(() => {
     if (!canGradeQuiz || loading || loadError) return
@@ -1516,7 +1552,14 @@ export default function CourseModuleQuizPage() {
               aria-label="Quiz summary"
             >
               {!canEdit ? (
-                <div className="mb-4 flex flex-wrap items-center justify-end gap-2">
+                <div className="mb-4 flex flex-col items-stretch gap-3">
+                  {learnerStanding ? (
+                    <div className="space-y-1" role="status">
+                      <p className="text-body-sm font-semibold text-fg-default">{learnerStanding.scoreLabel}</p>
+                      <p className="text-body-sm text-fg-muted">{learnerStanding.attemptsLabel}</p>
+                    </div>
+                  ) : null}
+                  <div className="flex flex-wrap items-center justify-end gap-2">
                   <ReadAloudControls />
                   {isOnline ? (
                     <button
@@ -1543,14 +1586,15 @@ export default function CourseModuleQuizPage() {
                   <button
                     type="button"
                     onClick={() => handleStudentStartQuiz()}
-                    disabled={loading || !isOnline}
-                    aria-disabled={!isOnline}
+                    disabled={loading || !isOnline || learnerStanding?.exhausted === true}
+                    aria-disabled={!isOnline || learnerStanding?.exhausted === true}
                     title={!isOnline ? 'Available when online' : undefined}
                     className="inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {!isOnline && <WifiOff className="h-4 w-4" aria-hidden />}
-                    Start Quiz
+                    {learnerStanding?.exhausted ? 'No attempts remaining.' : 'Start Quiz'}
                   </button>
+                  </div>
                 </div>
               ) : null}
               <div className="rounded-2xl border border-slate-200/90 bg-slate-50/70 p-4 dark:border-border-default/90">

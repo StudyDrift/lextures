@@ -218,6 +218,46 @@ describe('QuizStudentTakePanel', () => {
     })
   })
 
+  it('says the started attempt is the last one when none remain after it', async () => {
+    const user = userEvent.setup()
+    setAccessToken('test-token')
+    server.use(
+      http.post('http://localhost:8080/api/v1/courses/:courseCode/quizzes/:itemId/start', () =>
+        HttpResponse.json({
+          attemptId: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+          attemptNumber: 1,
+          startedAt: new Date().toISOString(),
+          lockdownMode: 'standard',
+          hintsDisabled: false,
+          backNavigationAllowed: true,
+          currentQuestionIndex: 0,
+          deadlineAt: null,
+          reducedDistractionMode: false,
+          retakePolicy: 'latest',
+          maxAttempts: 1,
+          remainingAttempts: 0,
+        }),
+      ),
+      http.get('http://localhost:8080/api/v1/courses/:courseCode/quizzes/:itemId', () =>
+        HttpResponse.json(minimalQuiz({ unlimitedAttempts: false, maxAttempts: 1 })),
+      ),
+    )
+    renderPanel({
+      open: true,
+      onClose: () => {},
+      courseCode: 'C-TEST',
+      itemId: 'item-1',
+      quiz: minimalQuiz({ unlimitedAttempts: false, maxAttempts: 1 }),
+      advanced: { ...defaultQuizAdvancedSettings(), maxAttempts: 1 },
+      oneQuestionAtATime: false,
+      allowBackNavigation: true,
+    })
+    await user.click(screen.getByRole('button', { name: /^Begin$/i }))
+    expect(await screen.findByText('Attempt 1 of 1')).toBeInTheDocument()
+    expect(screen.getByText('This is your last allowed attempt for this quiz.')).toBeInTheDocument()
+    expect(screen.queryByText(/more attempt/i)).toBeNull()
+  })
+
   it('submits the authored choice index when choices are shuffled', async () => {
     const user = userEvent.setup()
     setAccessToken('test-token')
