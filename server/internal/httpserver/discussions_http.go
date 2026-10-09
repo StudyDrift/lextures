@@ -154,6 +154,8 @@ func (d Deps) handleDiscussionThreadsList() http.HandlerFunc {
 			ID                        string  `json:"id"`
 			ForumID                   string  `json:"forumId"`
 			AuthorID                  string  `json:"authorId"`
+			AuthorDisplayName         *string `json:"authorDisplayName"`
+			AuthorAvatarURL           *string `json:"authorAvatarUrl"`
 			Title                     string  `json:"title"`
 			IsPinned                  bool    `json:"isPinned"`
 			IsLocked                  bool    `json:"isLocked"`
@@ -174,6 +176,8 @@ func (d Deps) handleDiscussionThreadsList() http.HandlerFunc {
 				ID:                        x.ID.String(),
 				ForumID:                   x.ForumID.String(),
 				AuthorID:                  x.AuthorID.String(),
+				AuthorDisplayName:         x.AuthorDisplayName,
+				AuthorAvatarURL:           x.AuthorAvatarURL,
 				Title:                     x.Title,
 				IsPinned:                  x.IsPinned,
 				IsLocked:                  x.IsLocked,
@@ -258,6 +262,8 @@ func threadDetailJSON(row *discussions.ThreadDetail) map[string]any {
 		"id":                        row.ID.String(),
 		"forumId":                   row.ForumID.String(),
 		"authorId":                  row.AuthorID.String(),
+		"authorDisplayName":         row.AuthorDisplayName,
+		"authorAvatarUrl":           row.AuthorAvatarURL,
 		"title":                     row.Title,
 		"body":                      json.RawMessage(row.Body),
 		"isPinned":                  row.IsPinned,
@@ -430,15 +436,17 @@ func (d Deps) handleDiscussionPostsList() http.HandlerFunc {
 			return
 		}
 		type p struct {
-			ID            string          `json:"id"`
-			ThreadID      string          `json:"threadId"`
-			ParentPostID  *string         `json:"parentPostId,omitempty"`
-			AuthorID      string          `json:"authorId"`
-			Body          json.RawMessage `json:"body"`
-			UpvoteCount   int             `json:"upvoteCount"`
-			ViewerUpvoted bool            `json:"viewerUpvoted"`
-			CreatedAt     string          `json:"createdAt"`
-			UpdatedAt     string          `json:"updatedAt"`
+			ID                string          `json:"id"`
+			ThreadID          string          `json:"threadId"`
+			ParentPostID      *string         `json:"parentPostId,omitempty"`
+			AuthorID          string          `json:"authorId"`
+			AuthorDisplayName *string         `json:"authorDisplayName"`
+			AuthorAvatarURL   *string         `json:"authorAvatarUrl"`
+			Body              json.RawMessage `json:"body"`
+			UpvoteCount       int             `json:"upvoteCount"`
+			ViewerUpvoted     bool            `json:"viewerUpvoted"`
+			CreatedAt         string          `json:"createdAt"`
+			UpdatedAt         string          `json:"updatedAt"`
 		}
 		out := make([]p, 0, len(rows))
 		for _, x := range rows {
@@ -448,15 +456,17 @@ func (d Deps) handleDiscussionPostsList() http.HandlerFunc {
 				pp = &s
 			}
 			out = append(out, p{
-				ID:            x.ID.String(),
-				ThreadID:      x.ThreadID.String(),
-				ParentPostID:  pp,
-				AuthorID:      x.AuthorID.String(),
-				Body:          json.RawMessage(x.Body),
-				UpvoteCount:   x.UpvoteCount,
-				ViewerUpvoted: x.ViewerUpvoted,
-				CreatedAt:     x.CreatedAt.UTC().Format(time.RFC3339),
-				UpdatedAt:     x.UpdatedAt.UTC().Format(time.RFC3339),
+				ID:                x.ID.String(),
+				ThreadID:          x.ThreadID.String(),
+				ParentPostID:      pp,
+				AuthorID:          x.AuthorID.String(),
+				AuthorDisplayName: x.AuthorDisplayName,
+				AuthorAvatarURL:   x.AuthorAvatarURL,
+				Body:              json.RawMessage(x.Body),
+				UpvoteCount:       x.UpvoteCount,
+				ViewerUpvoted:     x.ViewerUpvoted,
+				CreatedAt:         x.CreatedAt.UTC().Format(time.RFC3339),
+				UpdatedAt:         x.UpdatedAt.UTC().Format(time.RFC3339),
 			})
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -624,15 +634,17 @@ func postJSON(x *discussions.PostRow) map[string]any {
 		pp = &s
 	}
 	return map[string]any{
-		"id":            x.ID.String(),
-		"threadId":      x.ThreadID.String(),
-		"parentPostId":  pp,
-		"authorId":      x.AuthorID.String(),
-		"body":          json.RawMessage(x.Body),
-		"upvoteCount":   x.UpvoteCount,
-		"viewerUpvoted": x.ViewerUpvoted,
-		"createdAt":     x.CreatedAt.UTC().Format(time.RFC3339),
-		"updatedAt":     x.UpdatedAt.UTC().Format(time.RFC3339),
+		"id":                x.ID.String(),
+		"threadId":          x.ThreadID.String(),
+		"parentPostId":      pp,
+		"authorId":          x.AuthorID.String(),
+		"authorDisplayName": x.AuthorDisplayName,
+		"authorAvatarUrl":   x.AuthorAvatarURL,
+		"body":              json.RawMessage(x.Body),
+		"upvoteCount":       x.UpvoteCount,
+		"viewerUpvoted":     x.ViewerUpvoted,
+		"createdAt":         x.CreatedAt.UTC().Format(time.RFC3339),
+		"updatedAt":         x.UpdatedAt.UTC().Format(time.RFC3339),
 	}
 }
 

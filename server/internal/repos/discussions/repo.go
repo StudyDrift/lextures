@@ -31,6 +31,8 @@ type ThreadRow struct {
 	ForumID                   uuid.UUID
 	AssignmentStructureItemID *uuid.UUID
 	AuthorID                  uuid.UUID
+	AuthorDisplayName         *string
+	AuthorAvatarURL           *string
 	Title                     string
 	IsPinned                  bool
 	IsLocked                  bool
@@ -48,15 +50,17 @@ type ThreadDetail struct {
 
 // PostRow is one discussion post.
 type PostRow struct {
-	ID            uuid.UUID
-	ThreadID      uuid.UUID
-	ParentPostID  *uuid.UUID
-	AuthorID      uuid.UUID
-	Body          json.RawMessage
-	UpvoteCount   int
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
-	ViewerUpvoted bool `json:"viewerUpvoted"`
+	ID                uuid.UUID
+	ThreadID          uuid.UUID
+	ParentPostID      *uuid.UUID
+	AuthorID          uuid.UUID
+	AuthorDisplayName *string
+	AuthorAvatarURL   *string
+	Body              json.RawMessage
+	UpvoteCount       int
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
+	ViewerUpvoted     bool `json:"viewerUpvoted"`
 }
 
 // ListForums returns forums for a course ordered by position.
@@ -162,8 +166,10 @@ func ListThreads(ctx context.Context, pool *pgxpool.Pool, forumID uuid.UUID, lim
 SELECT
   t.id, t.forum_id, t.assignment_structure_item_id, t.author_id, t.title,
   t.is_pinned, t.is_locked, t.require_post_first, t.created_at, t.updated_at,
-  COALESCE((SELECT COUNT(*)::int FROM course.discussion_posts p WHERE p.thread_id = t.id), 0)
+  COALESCE((SELECT COUNT(*)::int FROM course.discussion_posts p WHERE p.thread_id = t.id), 0),
+  `+authorColumns+`
 FROM course.discussion_threads t
+`+threadAuthorJoin+`
 WHERE t.forum_id = $1
 ORDER BY t.is_pinned DESC, t.updated_at DESC, t.created_at DESC
 LIMIT $2
@@ -180,14 +186,16 @@ func scanThreadRows(rows pgx.Rows) ([]ThreadRow, error) {
 	for rows.Next() {
 		var r ThreadRow
 		var assign *uuid.UUID
+		var name, avatar sql.NullString
 		if err := rows.Scan(
 			&r.ID, &r.ForumID, &assign, &r.AuthorID, &r.Title,
 			&r.IsPinned, &r.IsLocked, &r.RequirePostFirst, &r.CreatedAt, &r.UpdatedAt,
-			&r.ReplyCount,
+			&r.ReplyCount, &name, &avatar,
 		); err != nil {
 			return nil, err
 		}
 		r.AssignmentStructureItemID = assign
+		r.AuthorDisplayName, r.AuthorAvatarURL = authorFromNulls(name, avatar)
 		out = append(out, r)
 	}
 	return out, rows.Err()
@@ -199,18 +207,21 @@ func GetThread(ctx context.Context, pool *pgxpool.Pool, courseID, threadID uuid.
 SELECT
   t.id, t.forum_id, t.assignment_structure_item_id, t.author_id, t.title, t.body,
   t.is_pinned, t.is_locked, t.require_post_first, t.created_at, t.updated_at,
-  COALESCE((SELECT COUNT(*)::int FROM course.discussion_posts p WHERE p.thread_id = t.id), 0)
+  COALESCE((SELECT COUNT(*)::int FROM course.discussion_posts p WHERE p.thread_id = t.id), 0),
+  `+authorColumns+`
 FROM course.discussion_threads t
 INNER JOIN course.discussion_forums f ON f.id = t.forum_id
+`+threadAuthorJoin+`
 WHERE t.id = $1 AND f.course_id = $2
 `, threadID, courseID)
 	var d ThreadDetail
 	var assign *uuid.UUID
 	var body []byte
+	var name, avatar sql.NullString
 	if err := row.Scan(
 		&d.ID, &d.ForumID, &assign, &d.AuthorID, &d.Title, &body,
 		&d.IsPinned, &d.IsLocked, &d.RequirePostFirst, &d.CreatedAt, &d.UpdatedAt,
-		&d.ReplyCount,
+		&d.ReplyCount, &name, &avatar,
 	); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, nil
@@ -219,6 +230,7 @@ WHERE t.id = $1 AND f.course_id = $2
 	}
 	d.AssignmentStructureItemID = assign
 	d.Body = json.RawMessage(body)
+	d.AuthorDisplayName, d.AuthorAvatarURL = authorFromNulls(name, avatar)
 	return &d, nil
 }
 
@@ -247,21 +259,32 @@ func CreateThread(ctx context.Context, pool *pgxpool.Pool, forumID, authorID uui
 	var d ThreadDetail
 	var assignOut *uuid.UUID
 	var bodyOut []byte
+	var name, avatar sql.NullString
 	err := pool.QueryRow(ctx, `
-INSERT INTO course.discussion_threads (
-  forum_id, assignment_structure_item_id, author_id, title, body, require_post_first
-) VALUES ($1, $2, $3, $4, $5, $6)
-RETURNING id, forum_id, assignment_structure_item_id, author_id, title, body,
-  is_pinned, is_locked, require_post_first, created_at, updated_at
+WITH inserted AS (
+  INSERT INTO course.discussion_threads (
+    forum_id, assignment_structure_item_id, author_id, title, body, require_post_first
+  ) VALUES ($1, $2, $3, $4, $5, $6)
+  RETURNING id, forum_id, assignment_structure_item_id, author_id, title, body,
+    is_pinned, is_locked, require_post_first, created_at, updated_at
+)
+SELECT
+  i.id, i.forum_id, i.assignment_structure_item_id, i.author_id, i.title, i.body,
+  i.is_pinned, i.is_locked, i.require_post_first, i.created_at, i.updated_at,
+  `+authorColumns+`
+FROM inserted i
+LEFT JOIN "user".users au ON au.id = i.author_id
 `, forumID, assign, authorID, title, body, requirePostFirst).Scan(
 		&d.ID, &d.ForumID, &assignOut, &d.AuthorID, &d.Title, &bodyOut,
 		&d.IsPinned, &d.IsLocked, &d.RequirePostFirst, &d.CreatedAt, &d.UpdatedAt,
+		&name, &avatar,
 	)
 	if err != nil {
 		return nil, err
 	}
 	d.AssignmentStructureItemID = assignOut
 	d.Body = json.RawMessage(bodyOut)
+	d.AuthorDisplayName, d.AuthorAvatarURL = authorFromNulls(name, avatar)
 	d.ReplyCount = 0
 	return &d, nil
 }
@@ -378,8 +401,10 @@ func ListPosts(ctx context.Context, pool *pgxpool.Pool, threadID, viewerID uuid.
 	}
 	q := `
 SELECT p.id, p.thread_id, p.parent_post_id, p.author_id, p.body, p.upvote_count, p.created_at, p.updated_at,
-       EXISTS(SELECT 1 FROM course.discussion_post_upvotes u WHERE u.post_id = p.id AND u.user_id = $2)
+       EXISTS(SELECT 1 FROM course.discussion_post_upvotes u WHERE u.post_id = p.id AND u.user_id = $2),
+       ` + authorColumns + `
 FROM course.discussion_posts p
+` + postAuthorJoin + `
 WHERE p.thread_id = $1
 `
 	if hidePeers && !staff {
@@ -399,11 +424,13 @@ LIMIT $3
 		var r PostRow
 		var parent *uuid.UUID
 		var body []byte
-		if err := rows.Scan(&r.ID, &r.ThreadID, &parent, &r.AuthorID, &body, &r.UpvoteCount, &r.CreatedAt, &r.UpdatedAt, &r.ViewerUpvoted); err != nil {
+		var name, avatar sql.NullString
+		if err := rows.Scan(&r.ID, &r.ThreadID, &parent, &r.AuthorID, &body, &r.UpvoteCount, &r.CreatedAt, &r.UpdatedAt, &r.ViewerUpvoted, &name, &avatar); err != nil {
 			return nil, err
 		}
 		r.ParentPostID = parent
 		r.Body = json.RawMessage(body)
+		r.AuthorDisplayName, r.AuthorAvatarURL = authorFromNulls(name, avatar)
 		out = append(out, r)
 	}
 	return out, rows.Err()
@@ -479,36 +506,6 @@ VALUES ($1, $2, $3, $4, $5)
 	if _, err := tx.Exec(ctx, `UPDATE course.discussion_threads SET updated_at = NOW() WHERE id = $1`, threadID); err != nil {
 		return nil, err
 	}
-	return &r, nil
-}
-
-// GetPost returns a post row if it exists in the course, with viewerUpvoted when viewer is non-nil.
-func GetPost(ctx context.Context, pool *pgxpool.Pool, courseID, postID uuid.UUID, viewer *uuid.UUID) (*PostRow, error) {
-	upvoteSel := `false`
-	args := []any{postID, courseID}
-	if viewer != nil {
-		upvoteSel = `EXISTS(SELECT 1 FROM course.discussion_post_upvotes u WHERE u.post_id = p.id AND u.user_id = $3)`
-		args = []any{postID, courseID, *viewer}
-	}
-	row := pool.QueryRow(ctx, `
-SELECT p.id, p.thread_id, p.parent_post_id, p.author_id, p.body, p.upvote_count, p.created_at, p.updated_at,
-       `+upvoteSel+`
-FROM course.discussion_posts p
-INNER JOIN course.discussion_threads t ON t.id = p.thread_id
-INNER JOIN course.discussion_forums f ON f.id = t.forum_id
-WHERE p.id = $1 AND f.course_id = $2
-`, args...)
-	var r PostRow
-	var parent *uuid.UUID
-	var body []byte
-	if err := row.Scan(&r.ID, &r.ThreadID, &parent, &r.AuthorID, &body, &r.UpvoteCount, &r.CreatedAt, &r.UpdatedAt, &r.ViewerUpvoted); err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, nil
-		}
-		return nil, err
-	}
-	r.ParentPostID = parent
-	r.Body = json.RawMessage(body)
 	return &r, nil
 }
 

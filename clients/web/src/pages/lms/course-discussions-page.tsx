@@ -2,7 +2,10 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, Lock, MessageCircle, Pin, Plus, ThumbsUp, Trash2 } from 'lucide-react'
+import { DiscussionAuthorByline } from '../../components/discussions/discussion-author-byline'
+import { discussionAuthorLabel } from '../../components/discussions/discussion-author-label'
 import { DiscussionDocEditor, DiscussionReadonlyBody } from '../../components/discussions/discussion-doc-editor'
+import { formatAbsolute, formatRelativeCompact } from '../../lib/format-datetime'
 import { usePermissions } from '../../context/use-permissions'
 import { getJwtSubject } from '../../lib/auth'
 import { fetchCourse, courseItemCreatePermission, type CoursePublic } from '../../lib/courses-api'
@@ -359,6 +362,12 @@ export default function CourseDiscussionsPage() {
                       <span className="min-w-0 flex-1">
                         <span className="font-medium text-fg-default">{t.title}</span>
                         <span className="mt-0.5 block text-xs text-fg-muted">
+                          {discussionAuthorLabel(t.authorDisplayName)}
+                          {' · '}
+                          <time dateTime={t.createdAt} title={formatAbsolute(t.createdAt)}>
+                            {formatRelativeCompact(t.createdAt)}
+                          </time>
+                          {' · '}
                           {t.replyCount} repl{t.replyCount === 1 ? 'y' : 'ies'}
                           {t.isLocked ? ' · Closed' : ''}
                         </span>
@@ -403,6 +412,13 @@ export default function CourseDiscussionsPage() {
                   <h1 className="text-xl font-semibold text-fg-default">
                     {threadDetail.title}
                   </h1>
+                  <div className="mt-2">
+                    <DiscussionAuthorByline
+                      name={threadDetail.authorDisplayName}
+                      avatarUrl={threadDetail.authorAvatarUrl}
+                      createdAt={threadDetail.createdAt}
+                    />
+                  </div>
                   <div className="mt-3 text-sm">
                     <DiscussionReadonlyBody docJson={threadDetail.body} />
                   </div>
@@ -480,7 +496,12 @@ export default function CourseDiscussionsPage() {
                       aria-level={displayIndent + 2}
                       className={`rounded-xl border border-border-default bg-surface-raised p-3 shadow-sm dark:border-border-default dark:bg-surface-raised ${marginClass}`}
                     >
-                      <div className="text-sm">
+                      <DiscussionAuthorByline
+                        name={p.authorDisplayName}
+                        avatarUrl={p.authorAvatarUrl}
+                        createdAt={p.createdAt}
+                      />
+                      <div className="mt-2 text-sm">
                         <DiscussionReadonlyBody docJson={p.body} />
                       </div>
                       <div className="mt-2 flex flex-wrap items-center gap-3 border-t border-border-subtle pt-2 text-xs dark:border-border-subtle">

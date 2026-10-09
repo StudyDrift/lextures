@@ -81,11 +81,13 @@ test.describe('Discussions', () => {
 
     const threadBtn = page.getByRole('button', { name: new RegExp(thread.title) })
     await expect(threadBtn).toBeVisible({ timeout: 10_000 })
+    await expect(threadBtn).toContainText('E2E Instructor')
     await threadBtn.click()
 
     await expect(page.getByRole('heading', { level: 1, name: thread.title })).toBeVisible({
       timeout: 10_000,
     })
+    await expect(page.getByText('E2E Instructor').first()).toBeVisible()
 
     const postBtn = page.getByRole('button', { name: /^Post$/i })
     await expect(postBtn).toBeVisible({ timeout: 15_000 })
@@ -99,6 +101,8 @@ test.describe('Discussions', () => {
     await postBtn.scrollIntoViewIfNeeded()
     await postBtn.click({ force: true })
 
-    await expect(page.getByText(replyText)).toBeVisible({ timeout: 10000 })
+    const reply = page.getByRole('article').filter({ hasText: replyText })
+    await expect(reply).toBeVisible({ timeout: 10000 })
+    await expect(reply.getByText('E2E Instructor')).toBeVisible()
   })
 })
