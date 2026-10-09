@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { CourseDocumentTitleProvider } from '../../../context/course-document-title-context'
+import { fetchQuizAttemptsList } from '../../../lib/courses-api'
 import CourseModuleQuizPage from '../course-module-quiz-page'
 
 const preview = vi.hoisted(() => ({ mode: 'teacher' as 'teacher' | 'student' }))
@@ -117,6 +118,7 @@ describe('Quiz View as Test Student', () => {
   beforeEach(() => {
     preview.mode = 'teacher'
     permissions.allows = true
+    vi.mocked(fetchQuizAttemptsList).mockResolvedValue({ attempts: [], retakePolicy: 'latest' })
   })
 
   it('shows Edit questions and More for staff when preview is off', async () => {
@@ -143,5 +145,55 @@ describe('Quiz View as Test Student', () => {
     expect(screen.getByRole('button', { name: 'Start Quiz' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Edit questions' })).toBeNull()
     expect(screen.queryByRole('button', { name: 'More' })).toBeNull()
+  })
+
+  it('shows the score and blocks another start after the last attempt', async () => {
+    permissions.allows = false
+    vi.mocked(fetchQuizAttemptsList).mockResolvedValue({
+      attempts: [
+        {
+          id: 'attempt-1',
+          attemptNumber: 1,
+          submittedAt: '2026-04-02T00:00:00Z',
+          scorePercent: 50,
+          pointsEarned: 1,
+          pointsPossible: 2,
+        },
+      ],
+      retakePolicy: 'latest',
+      unlimitedAttempts: false,
+      maxAttempts: 1,
+      attemptsUsed: 1,
+      attemptsRemaining: 0,
+    })
+    renderQuiz()
+    expect(await screen.findByText('Score: 1 / 2 (50%)')).toBeInTheDocument()
+    expect(screen.getByText('Attempts used: 1 of 1')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'No attempts remaining.' })).toBeDisabled()
+    expect(screen.queryByRole('button', { name: 'Start Quiz' })).toBeNull()
+  })
+
+  it('keeps Start Quiz when an accommodation leaves another attempt', async () => {
+    permissions.allows = false
+    vi.mocked(fetchQuizAttemptsList).mockResolvedValue({
+      attempts: [
+        {
+          id: 'attempt-1',
+          attemptNumber: 1,
+          submittedAt: '2026-04-02T00:00:00Z',
+          scorePercent: 50,
+          pointsEarned: 1,
+          pointsPossible: 2,
+        },
+      ],
+      retakePolicy: 'latest',
+      unlimitedAttempts: false,
+      maxAttempts: 2,
+      attemptsUsed: 1,
+      attemptsRemaining: 1,
+    })
+    renderQuiz()
+    expect(await screen.findByText('Attempts used: 1 of 2')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Start Quiz' })).toBeEnabled()
   })
 })

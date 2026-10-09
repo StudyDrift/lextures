@@ -15,6 +15,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/coursemodulequizzes"
 	"github.com/lextures/lextures/server/internal/repos/quizattempts"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
+	acsvc "github.com/lextures/lextures/server/internal/service/accommodations"
 )
 
 // handleQuizAttemptsList is GET /api/v1/courses/{course_code}/quizzes/{item_id}/attempts.
@@ -91,6 +92,9 @@ func (d Deps) handleQuizAttemptsList() http.HandlerFunc {
 				summary.StudentName = &name
 				sid := ar.StudentUserID
 				summary.StudentUserID = &sid
+			}
+			// Learners need this on their own rows so the quiz page can say the score is still pending.
+			if canViewAll || (filterStudent != nil && *filterStudent == viewer) {
 				summary.NeedsManualGrading = ar.NeedsManualGrading
 			}
 			attempts = append(attempts, summary)
@@ -99,6 +103,26 @@ func (d Deps) handleQuizAttemptsList() http.HandlerFunc {
 		out := coursemodulequiz.QuizAttemptsListResponse{
 			Attempts:     attempts,
 			RetakePolicy: row.GradeAttemptPolicy,
+		}
+		if filterStudent != nil {
+			submitted, countErr := quizattempts.CountSubmittedAttempts(ctx, d.Pool, *cid, itemID, *filterStudent)
+			if countErr != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to count attempts.")
+				return
+			}
+			eff := acsvc.ResolveEffectiveOrDefault(ctx, d.Pool, *filterStudent, *cid)
+			used := int32(submitted)
+			out.AttemptsUsed = &used
+			unlimited := row.UnlimitedAttempts
+			out.UnlimitedAttempts = &unlimited
+			if cap, limited := effectiveQuizAttemptCap(row.UnlimitedAttempts, row.MaxAttempts, eff.ExtraAttempts); limited {
+				out.MaxAttempts = &cap
+				rem := cap - used
+				if rem < 0 {
+					rem = 0
+				}
+				out.AttemptsRemaining = &rem
+			}
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(out)

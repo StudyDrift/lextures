@@ -5960,6 +5960,11 @@ export type QuizAttemptsListPayload = {
   attempts: QuizAttemptSummaryApi[]
   policyScorePercent?: number | null
   retakePolicy: string
+  /** Present when the list is the viewer's own attempts (or a single student filter). */
+  unlimitedAttempts?: boolean
+  maxAttempts?: number | null
+  attemptsUsed?: number
+  attemptsRemaining?: number | null
 }
 
 export async function fetchQuizAttemptsList(

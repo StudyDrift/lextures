@@ -122,15 +122,9 @@ func (d Deps) handleQuizStart() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to count attempts.")
 			return
 		}
-		if !row.UnlimitedAttempts {
-			max := row.MaxAttempts + eff.ExtraAttempts
-			if max < 1 {
-				max = 1
-			}
-			if int64(max) <= submitted {
-				apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "No attempts remaining.")
-				return
-			}
+		if cap, limited := effectiveQuizAttemptCap(row.UnlimitedAttempts, row.MaxAttempts, eff.ExtraAttempts); limited && int64(cap) <= submitted {
+			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "No attempts remaining.")
+			return
 		}
 		var baseLimitSec int32
 		if row.TimeLimitMinutes != nil && *row.TimeLimitMinutes > 0 {
@@ -179,25 +173,16 @@ func (d Deps) writeQuizStartResponse(
 	reduced := eff.ReducedDistraction
 	var maxAttempts *int32
 	var remaining *int32
-	if !row.UnlimitedAttempts {
-		max := row.MaxAttempts + eff.ExtraAttempts
-		if max < 1 {
-			max = 1
-		}
-		maxAttempts = &max
-		submitted := attempt.AttemptNumber - 1
-		if submitted < 0 {
-			submitted = 0
-		}
-		rem := max - submitted
-		if rem < 0 {
-			rem = 0
-		}
+	if cap, limited := effectiveQuizAttemptCap(row.UnlimitedAttempts, row.MaxAttempts, eff.ExtraAttempts); limited {
+		maxAttempts = &cap
+		// The take UI says "N more attempts allowed after this one", so the
+		// attempt that just started does not count as still remaining.
+		rem := attemptsRemainingAfterStart(cap, attempt.AttemptNumber)
 		remaining = &rem
 	}
 	out := coursemodulequiz.QuizStartResponse{
 		AttemptID:                     attempt.ID,
-		AttemptNumber:               attempt.AttemptNumber,
+		AttemptNumber:                 attempt.AttemptNumber,
 		StartedAt:                     attempt.StartedAt,
 		LockdownMode:                  lockdown,
 		HintsDisabled:                 hintsDisabled,
@@ -214,6 +199,28 @@ func (d Deps) writeQuizStartResponse(
 	}
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	_ = json.NewEncoder(w).Encode(out)
+}
+
+// effectiveQuizAttemptCap is how many submitted attempts a learner may use.
+// limited is false when the quiz allows unlimited attempts.
+func effectiveQuizAttemptCap(unlimited bool, maxAttempts, extraAttempts int32) (cap int32, limited bool) {
+	if unlimited {
+		return 0, false
+	}
+	cap = maxAttempts + extraAttempts
+	if cap < 1 {
+		cap = 1
+	}
+	return cap, true
+}
+
+// attemptsRemainingAfterStart is the number of starts still allowed after attemptNumber.
+func attemptsRemainingAfterStart(cap, attemptNumber int32) int32 {
+	rem := cap - attemptNumber
+	if rem < 0 {
+		return 0
+	}
+	return rem
 }
 
 func (d Deps) handleQuizCurrentQuestion() http.HandlerFunc {
@@ -283,10 +290,10 @@ func (d Deps) handleQuizCurrentQuestion() http.HandlerFunc {
 			q = &qq
 		}
 		out := coursemodulequiz.QuizCurrentQuestionResponse{
-			Question:      q,
-			QuestionIndex: idx,
+			Question:       q,
+			QuestionIndex:  idx,
 			TotalQuestions: total,
-			Completed:     completed,
+			Completed:      completed,
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(out)
