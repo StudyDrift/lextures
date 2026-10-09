@@ -79,7 +79,7 @@ export function SideNav() {
       <aside
         id="shell-nav"
         data-onboarding="side-nav"
-        className={`lms-chrome flex h-dvh min-h-0 w-[min(17.5rem,88vw)] max-w-[280px] flex-col border-e border-slate-200/70 bg-[#F2F2F2] text-fg-default transition-[width] duration-300 ease-in-out print:hidden dark:border-border-subtle dark:bg-surface-base dark:text-fg-default md:h-screen ${ sideNavCollapsed ? 'md:w-[72px]' : 'md:w-60' } md:max-w-none md:shrink-0 md:translate-x-0 ${ mobileNavOpen ? 'max-md:translate-x-0' : 'max-md:-translate-x-full' } max-md:fixed max-md:start-0 max-md:top-0 max-md:z-40 max-md:shadow-2xl max-md:transition-transform max-md:duration-200 max-md:ease-out max-md:pt-[env(safe-area-inset-top)] max-md:pb-[env(safe-area-inset-bottom)]`}
+        className={`lms-chrome flex min-h-0 w-[min(17.5rem,88vw)] max-w-[280px] flex-col border-e border-slate-200/70 bg-[#F2F2F2] text-fg-default transition-[width] duration-300 ease-in-out print:hidden dark:border-border-subtle dark:bg-surface-base dark:text-fg-default max-md:h-dvh md:h-full ${ sideNavCollapsed ? 'md:w-[72px]' : 'md:w-60' } md:max-w-none md:shrink-0 md:translate-x-0 ${ mobileNavOpen ? 'max-md:translate-x-0' : 'max-md:-translate-x-full' } max-md:fixed max-md:start-0 max-md:top-0 max-md:z-40 max-md:shadow-2xl max-md:transition-transform max-md:duration-200 max-md:ease-out max-md:pt-[env(safe-area-inset-top)] max-md:pb-[env(safe-area-inset-bottom)]`}
       >
         <div className="flex shrink-0 items-center px-3 pb-1 pt-3 md:px-3 md:pb-2 md:pt-4">
           <SideNavTooltip content="Lextures">

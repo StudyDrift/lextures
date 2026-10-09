@@ -59,7 +59,7 @@ export function ImpersonationBanner() {
       id={bannerId}
       role="status"
       aria-live="polite"
-      className="fixed inset-x-0 top-0 z-[9999] flex items-center justify-center gap-3 border-b border-amber-700 bg-amber-500 px-4 py-2 text-sm font-medium text-amber-950 shadow-md"
+      className="relative z-50 flex shrink-0 flex-wrap items-center justify-center gap-x-3 gap-y-1 border-b border-amber-700 bg-amber-500 px-4 py-2 text-sm font-medium text-amber-950 shadow-md"
     >
       <span>
         {isLearnAs
