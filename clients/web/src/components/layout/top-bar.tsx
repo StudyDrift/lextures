@@ -82,7 +82,7 @@ function UserMenu() {
           avatarUrl={profile?.avatarUrl}
           showPreview={false}
         />
-        <span className="hidden max-w-[10rem] truncate sm:inline">{name}</span>
+        <span className="hidden max-w-[10rem] truncate lg:inline">{name}</span>
         <ChevronDown
           className={`h-4 w-4 shrink-0 text-fg-muted transition-transform dark:text-fg-muted ${open ? 'rotate-180' : ''}`}
           aria-hidden
@@ -183,7 +183,7 @@ function CourseEnrollmentViewDropdown() {
         onClick={() => setOpen((o) => !o)}
         className={triggerClass}
       >
-        <span className="max-md:sr-only">View as: </span>
+        <span className="max-lg:sr-only">View as: </span>
         {enteringPreview ? 'Starting…' : label}
         <ChevronDown
           className={`h-4 w-4 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}

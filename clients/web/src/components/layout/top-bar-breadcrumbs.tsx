@@ -440,10 +440,13 @@ export function TopBarBreadcrumbs() {
         {crumbs.map((c, i) => {
           const last = i === crumbs.length - 1
           return (
-            <li key={c.key + String(i)} className="flex min-w-0 items-center gap-0.5">
+            <li
+              key={c.key + String(i)}
+              className={`min-w-0 items-center gap-0.5 ${last ? 'flex' : 'hidden sm:flex'}`}
+            >
               {i > 0 ? (
                 <ChevronRight
-                  className="h-3.5 w-3.5 shrink-0 text-slate-300 dark:text-neutral-600"
+                  className="hidden h-3.5 w-3.5 shrink-0 text-slate-300 sm:block dark:text-neutral-600"
                   aria-hidden
                 />
               ) : null}

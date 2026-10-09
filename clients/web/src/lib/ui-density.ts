@@ -28,9 +28,11 @@ export function gradebookCellPad(density: UiDensity): string {
 }
 
 export function gradebookStickyNameWidthClass(density: UiDensity): string {
+  // Narrow phones get a slimmer sticky name column so the last item column is never
+  // hidden under the sticky name + Final columns at maximum horizontal scroll.
   return density === 'compact'
-    ? 'w-[10rem] min-w-[10rem] max-w-[10rem]'
-    : 'w-[12rem] min-w-[12rem] max-w-[12rem]'
+    ? 'w-[7.5rem] min-w-[7.5rem] max-w-[7.5rem] sm:w-[10rem] sm:min-w-[10rem] sm:max-w-[10rem]'
+    : 'w-[7.5rem] min-w-[7.5rem] max-w-[7.5rem] sm:w-[12rem] sm:min-w-[12rem] sm:max-w-[12rem]'
 }
 
 export function gradebookStickyNameWidthPx(density: UiDensity): number {
@@ -39,7 +41,7 @@ export function gradebookStickyNameWidthPx(density: UiDensity): number {
 
 /** `left` offset for the sticky Final column (matches name column width). */
 export function gradebookStickyFinalLeftClass(density: UiDensity): string {
-  return density === 'compact' ? 'start-[10rem]' : 'start-[12rem]'
+  return density === 'compact' ? 'start-[7.5rem] sm:start-[10rem]' : 'start-[7.5rem] sm:start-[12rem]'
 }
 
 export function gradebookAssignmentColMinWidthClass(density: UiDensity): string {
