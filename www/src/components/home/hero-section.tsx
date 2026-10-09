@@ -32,7 +32,7 @@ export function HeroSection() {
               Start free →
             </a>
             <a href="#how" className="btn-secondary">
-              Watch a demo
+              See how it works
             </a>
           </div>
           <p
