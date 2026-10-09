@@ -1320,7 +1320,7 @@ export function GradebookGrid({
             className={filterInputClass}
             value={studentFilter}
             onChange={(e) => setStudentFilter(e.target.value)}
-            placeholder={familyLabels ? 'Search by learner name…' : 'Search by student name…'}
+            placeholder={familyLabels ? 'Search learners…' : 'Search students…'}
             aria-label={familyLabels ? 'Filter learners by name' : 'Filter students by name'}
             autoComplete="off"
           />

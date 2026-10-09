@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 import {
   applyUiDensityToDocument,
   gradebookCellPad,
+  gradebookStickyFinalLeftClass,
+  gradebookStickyNameWidthClass,
   readStoredUiDensity,
   UI_DENSITY_STORAGE_KEY,
 } from '../ui-density'
@@ -41,5 +43,14 @@ describe('ui-density', () => {
     expect(gradebookCellPad('comfortable')).toContain('px-3')
     expect(gradebookCellPad('compact')).toContain('text-xs')
     expect(gradebookCellPad('compact')).not.toContain('px-3')
+  })
+
+  it('keeps the sticky gradebook name column slim on phones and offsets Final to match', () => {
+    for (const density of ['comfortable', 'compact'] as const) {
+      expect(gradebookStickyNameWidthClass(density)).toContain('w-[7.5rem]')
+      expect(gradebookStickyNameWidthClass(density)).toContain('sm:w-[')
+      expect(gradebookStickyFinalLeftClass(density)).toContain('start-[7.5rem]')
+      expect(gradebookStickyFinalLeftClass(density)).toContain('sm:start-[')
+    }
   })
 })

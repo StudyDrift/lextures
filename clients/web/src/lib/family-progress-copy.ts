@@ -27,7 +27,7 @@ const campus: ProgressSurfaceCopy = {
   gradebookEmptyTitle: 'No students in this course yet',
   gradebookEmptyInvite: 'Invite students from enrollments so the gradebook has rows.',
   gradebookFilterLabel: 'Student',
-  gradebookFilterPlaceholder: 'Search by student name…',
+  gradebookFilterPlaceholder: 'Search students…',
   gradebookNoMatch: (query) =>
     `No students match "${query}". Try a different search or clear filters.`,
   gradebookPerson: 'Student',
@@ -55,7 +55,7 @@ const family: ProgressSurfaceCopy = {
   gradebookEmptyTitle: 'No learners in this course yet',
   gradebookEmptyInvite: 'Enroll a learner so their scores show up here.',
   gradebookFilterLabel: 'Learner',
-  gradebookFilterPlaceholder: 'Search by learner name…',
+  gradebookFilterPlaceholder: 'Search learners…',
   gradebookNoMatch: (query) =>
     `No learners match "${query}". Try a different search or clear filters.`,
   gradebookPerson: 'Learner',

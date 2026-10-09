@@ -490,7 +490,7 @@ export function CourseNotebookSidebar({
   const rootHasPages = useMemo(() => pages.some((p) => p.parentId === null), [pages])
 
   return (
-    <div className="flex h-full min-h-0 w-[min(17rem,42vw)] shrink-0 flex-col border-e border-border-default bg-slate-50/90 dark:border-border-subtle/80">
+    <div className="flex max-h-64 min-h-0 w-full shrink-0 flex-col bg-slate-50/90 md:h-full md:max-h-none md:w-[min(17rem,42vw)] md:border-e md:border-border-default dark:border-border-subtle/80">
       <div className="flex items-center justify-between gap-2 border-b border-border-default px-3 py-2.5 dark:border-border-subtle">
         <span className="text-xs font-semibold uppercase tracking-wide text-fg-muted">
           Pages
