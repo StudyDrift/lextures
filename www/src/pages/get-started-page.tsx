@@ -192,8 +192,9 @@ function SchoolCodeStep({ onBack }: { onBack: () => void }) {
             />
           </div>
           <p id="school-code-help" className="mt-2 text-sm text-slate-500">
-            Example: <span className="font-medium text-slate-700">example</span> opens{' '}
-            <span className="font-medium text-slate-700">example.lextures.com</span>.
+            Your school code is the first part of your school&apos;s Lextures address. For example, the code{' '}
+            <span className="font-medium text-slate-700">oakridge</span> opens{' '}
+            <span className="font-medium text-slate-700">oakridge.lextures.com</span>.
           </p>
           {error && (
             <div className="mt-2 space-y-1.5" role="alert">
@@ -243,7 +244,7 @@ export function GetStartedPage() {
     trackEvent('get_started_started', { path, first_touch_channel: getFirstTouch()?.channel ?? 'direct' })
     if (path === 'homeschool') {
       trackOnboarding(ONBOARDING_PROGRAM_HOMESCHOOL)
-      window.location.href = SITE_LINKS.homeschool
+      window.location.href = SITE_LINKS.homeschoolSignup
       return
     }
     setStep('school-code')

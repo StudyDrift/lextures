@@ -214,14 +214,18 @@ export default function Signup() {
                 className={authFieldClass}
                 placeholder={`At least ${minLen} characters`}
               />
-              <div id="password-strength" className="mt-2 flex items-center gap-2" aria-live="polite">
-                <span className="text-xs font-medium text-stone-600 dark:text-fg-muted">Strength:</span>
-                <span className="text-xs font-semibold text-stone-800 dark:text-fg-default">{strengthLabel}</span>
-                <div className="h-1.5 flex-1 rounded-full bg-stone-200 dark:bg-neutral-700" aria-hidden>
-                  <div
-                    className={`h-full rounded-full ${ strengthKey === 'password.strength.weak' ? 'w-1/3 bg-rose-500' : strengthKey === 'password.strength.fair' ? 'w-2/3 bg-amber-500' : 'w-full bg-emerald-600' }`}
-                  />
-                </div>
+              <div id="password-strength" className={password ? 'mt-2 flex items-center gap-2' : undefined} aria-live="polite">
+                {password ? (
+                  <>
+                    <span className="text-xs font-medium text-stone-600 dark:text-fg-muted">Strength:</span>
+                    <span className="text-xs font-semibold text-stone-800 dark:text-fg-default">{strengthLabel}</span>
+                    <div className="h-1.5 flex-1 rounded-full bg-stone-200 dark:bg-neutral-700" aria-hidden>
+                      <div
+                        className={`h-full rounded-full ${ strengthKey === 'password.strength.weak' ? 'w-1/3 bg-rose-500' : strengthKey === 'password.strength.fair' ? 'w-2/3 bg-amber-500' : 'w-full bg-emerald-600' }`}
+                      />
+                    </div>
+                  </>
+                ) : null}
               </div>
             </div>
 
