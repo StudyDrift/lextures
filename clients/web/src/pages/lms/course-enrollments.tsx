@@ -50,6 +50,7 @@ import {
   useEnrollmentsRevision,
   useEnrollmentsUpdateCourseCode,
 } from '../../context/use-inbox-unread'
+import { formatAddEnrollmentsMessage, type AddEnrollmentsResult } from '../../lib/add-enrollments-message'
 import { readApiErrorMessage } from '../../lib/errors'
 import { formatTimeAgoFromIso } from '../../lib/format-time-ago'
 import { toast, toastSaveOk } from '../../lib/lms-toast'
@@ -87,12 +88,6 @@ export type CourseEnrollment = {
 /** Blurred dim backdrop for roster modals (Escape closes in the keydown effect below). */
 const LMS_MODAL_OVERLAY_CLASS =
   'fixed inset-0 z-50 flex items-end justify-center p-4 backdrop-blur-md bg-slate-900/30 dark:bg-black/40 sm:items-center'
-
-type AddEnrollmentsResult = {
-  added: string[]
-  alreadyEnrolled: string[]
-  notFound: string[]
-}
 
 function normEnrollmentRole(role: string): string {
   return role.trim().toLowerCase()
@@ -842,13 +837,8 @@ export default function CourseEnrollments() {
         setAddMessage(readApiErrorMessage(raw))
         return
       }
-      const data = raw as AddEnrollmentsResult
-      const parts: string[] = []
-      if (data.added?.length) parts.push(`Added: ${data.added.join(', ')}`)
-      if (data.alreadyEnrolled?.length)
-        parts.push(`Already enrolled: ${data.alreadyEnrolled.join(', ')}`)
-      if (data.notFound?.length) parts.push(`No account for: ${data.notFound.join(', ')}`)
-      setAddMessage(parts.length ? parts.join('. ') : 'Done.')
+      const nameByUserId = new Map(managedDependents.map((d) => [d.id, d.displayName]))
+      setAddMessage(formatAddEnrollmentsMessage(raw as AddEnrollmentsResult, nameByUserId))
       setAddStatus('idle')
       setEmailListText('')
       setSelectedLearnerIds([])
