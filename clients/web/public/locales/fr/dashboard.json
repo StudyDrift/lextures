@@ -3,6 +3,8 @@
   "dashboard.description": "Échéances, notes et signaux pédagogiques dans tous vos cours.",
   "dashboard.errors.loadCourses": "Impossible de charger les cours.",
   "dashboard.errors.loadDetails": "Impossible de charger les détails du tableau de bord.",
+  "dashboard.errors.loadCourseDetails": "Certains de vos cours n'ont pas pu être chargés ; cette page peut donc être incomplète.",
+  "dashboard.errors.retry": "Réessayer",
   "dashboard.empty.noCourses": "Aucun cours pour le moment",
   "dashboard.empty.joinOrCreate": "Rejoignez un cours via un lien d'invitation, ou créez-en un si vous enseignez.",
   "dashboard.empty.joinOnly": "Rejoignez un cours via un lien d'invitation. Lorsqu'un enseignant vous ajoute, les cours apparaîtront ici.",

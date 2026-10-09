@@ -3,6 +3,8 @@
   "dashboard.description": "Plazos, calificaciones y señales de enseñanza en todos tus cursos.",
   "dashboard.errors.loadCourses": "No se pudieron cargar los cursos.",
   "dashboard.errors.loadDetails": "No se pudieron cargar los detalles del panel.",
+  "dashboard.errors.loadCourseDetails": "No se pudieron cargar algunos de tus cursos, por lo que esta página puede estar incompleta.",
+  "dashboard.errors.retry": "Reintentar",
   "dashboard.empty.noCourses": "Aún no hay cursos",
   "dashboard.empty.joinOrCreate": "Únete a un curso desde un enlace de invitación o crea uno si enseñas.",
   "dashboard.empty.joinOnly": "Únete a un curso desde un enlace de invitación. Cuando un instructor te agregue, los cursos aparecerán aquí.",

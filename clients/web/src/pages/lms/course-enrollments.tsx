@@ -20,7 +20,7 @@ import { ConfirmDialog } from '../../components/confirm-dialog'
 import { IconActionTooltip } from '../../components/ui/icon-action-tooltip'
 import { LmsPage } from './lms-page'
 import { usePermission, usePermissions } from '../../context/use-permissions'
-import { authorizedFetch } from '../../lib/api'
+import { authorizedFetch, RequestTimeoutError } from '../../lib/api'
 import { getJwtSubject } from '../../lib/auth'
 import { invalidateChecklist } from '../../lib/course-checklist-invalidate'
 import {
@@ -58,6 +58,7 @@ import {
   listDependents,
   type ManagedDependent,
 } from '../../lib/managed-learners-api'
+import { CoursePageLoadState } from './course-page-load-state'
 import { EnrollmentAvatar } from '../../components/enrollment/enrollment-avatar'
 import { EnrollmentStateBadge } from '../../components/enrollment/enrollment-state-badge'
 import {
@@ -137,6 +138,9 @@ function enrollmentRoleRank(role: string): number {
   }
 }
 
+const ADD_ENROLLMENT_TIMEOUT_MS = 30_000
+const ENROLLMENTS_TITLE = 'Enrollments'
+
 export default function CourseEnrollments() {
   const { courseCode } = useParams<{ courseCode: string }>()
   const enrollmentsRevision = useEnrollmentsRevision()
@@ -177,6 +181,8 @@ export default function CourseEnrollments() {
   const [rolesError, setRolesError] = useState<string | null>(null)
   const [selectedAppRoleId, setSelectedAppRoleId] = useState('')
   const [addStatus, setAddStatus] = useState<'idle' | 'loading' | 'error'>('idle')
+  const [courseLoadError, setCourseLoadError] = useState<string | null>(null)
+  const [courseLoadNonce, setCourseLoadNonce] = useState(0)
   const [addMessage, setAddMessage] = useState<string | null>(null)
   const [selfStudentStatus, setSelfStudentStatus] = useState<'idle' | 'loading' | 'error'>('idle')
   const [selfStudentMessage, setSelfStudentMessage] = useState<string | null>(null)
@@ -243,6 +249,7 @@ export default function CourseEnrollments() {
       return
     }
     let cancelled = false
+    setCourseLoadError(null)
     void fetchCourse(courseCode)
       .then((c) => {
         if (!cancelled) {
@@ -251,16 +258,18 @@ export default function CourseEnrollments() {
           setSectionsEnabled(c.sectionsEnabled === true)
         }
       })
-      .catch(() => {
+      .catch((e: unknown) => {
         if (!cancelled) {
-          setCourseViewerEnrollmentRoles([])
+          // Keep roles unset so the page shows an error with Retry instead of a blank screen.
+          setCourseViewerEnrollmentRoles(null)
           setCourseTitle(null)
+          setCourseLoadError(e instanceof Error && e.message ? e.message : 'Could not load this course.')
         }
       })
     return () => {
       cancelled = true
     }
-  }, [courseCode])
+  }, [courseCode, courseLoadNonce])
 
   const loadSections = useCallback(async () => {
     if (!courseCode || !sectionsEnabled) {
@@ -823,6 +832,8 @@ export default function CourseEnrollments() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body),
+          // Fail fast so the button never hangs on "Adding…" when the API stalls.
+          timeoutMs: ADD_ENROLLMENT_TIMEOUT_MS,
         },
       )
       const raw: unknown = await res.json().catch(() => ({}))
@@ -844,9 +855,9 @@ export default function CourseEnrollments() {
       await loadEnrollments()
       await refreshPermissions()
       invalidateChecklist(courseCode)
-    } catch {
+    } catch (e) {
       setAddStatus('error')
-      setAddMessage('Request failed.')
+      setAddMessage(e instanceof RequestTimeoutError ? e.message : 'Request failed.')
     }
   }
 
@@ -995,7 +1006,13 @@ export default function CourseEnrollments() {
   }
 
   if (permLoading || courseViewerEnrollmentRoles === null) {
-    return null
+    return (
+      <CoursePageLoadState
+        title={ENROLLMENTS_TITLE}
+        error={courseLoadError}
+        onRetry={() => setCourseLoadNonce((n) => n + 1)}
+      />
+    )
   }
 
   if (!allows(courseEnrollmentsReadPermission(courseCode))) {

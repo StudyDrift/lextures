@@ -3,6 +3,8 @@
   "dashboard.description": "Deadlines, grades, and teaching signals across your courses.",
   "dashboard.errors.loadCourses": "Could not load courses.",
   "dashboard.errors.loadDetails": "Could not load dashboard details.",
+  "dashboard.errors.loadCourseDetails": "Some of your courses could not be loaded, so this page may be incomplete.",
+  "dashboard.errors.retry": "Retry",
   "dashboard.empty.noCourses": "No courses yet",
   "dashboard.empty.joinOrCreate": "Join a course from an invite link, or create one if you teach.",
   "dashboard.empty.joinOnly": "Join a course from an invite link. When an instructor adds you, courses will appear here.",

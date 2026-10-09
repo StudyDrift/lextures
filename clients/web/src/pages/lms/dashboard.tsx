@@ -61,6 +61,7 @@ import {
   type AssignmentGroupWeight,
   type GradebookColumnForFinal,
 } from './gradebook/compute-course-final-percent'
+import { Button } from '../../components/ui/button'
 import { DashboardCourseSectionSkeleton, DashboardLoadingSkeleton } from '../../components/ui/lms-content-skeletons'
 import { LoadReveal, StaggerReveal } from '../../components/ui/load-reveal'
 import {
@@ -326,6 +327,7 @@ export default function Dashboard() {
   const [courses, setCourses] = useState<CoursePublic[] | null>(null)
   const [detailsLoading, setDetailsLoading] = useState(false)
   const [detailError, setDetailError] = useState<string | null>(null)
+  const [detailsNonce, setDetailsNonce] = useState(0)
   const [deferredStudentCourses, setDeferredStudentCourses] = useState<CoursePublic[]>([])
   const [deferredStaffCourses, setDeferredStaffCourses] = useState<CoursePublic[]>([])
   const [loadingMoreCourses, setLoadingMoreCourses] = useState(false)
@@ -487,14 +489,19 @@ export default function Dashboard() {
       setDetailsLoading(true)
 
       try {
+        let detailFetchFailed = false
         const enriched = await mapPool(list, 4, async (c) => {
           try {
             return await fetchCourse(c.courseCode)
           } catch {
+            // The catalog row has no viewerEnrollmentRoles; remember that so we report a load
+            // failure instead of claiming the learner has no enrollments.
+            detailFetchFailed = true
             return c
           }
         })
         if (detailGenRef.current !== gen) return
+        if (detailFetchFailed) setDetailError(t('dashboard.errors.loadCourseDetails'))
         setCourses(enriched)
         performance.mark('dashboard:courses-enriched')
 
@@ -523,7 +530,7 @@ export default function Dashboard() {
         setDetailsLoading(false)
       }
     })()
-  }, [catalog, permLoading, allows, t])
+  }, [catalog, permLoading, allows, t, detailsNonce])
 
   const loadMoreCourses = () => {
     if (loadingMoreCourses) return
@@ -691,7 +698,10 @@ export default function Dashboard() {
       )}
       {detailError && (
         <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-100">
-          {detailError}
+          {detailError}{' '}
+          <Button type="button" variant="ghost" size="sm" onClick={() => setDetailsNonce((n) => n + 1)}>
+            {t('dashboard.errors.retry')}
+          </Button>
         </p>
       )}
 
@@ -1479,7 +1489,7 @@ export default function Dashboard() {
             </StaggerReveal>
           )}
 
-          {!anyStudentExperience && !anyStaffExperience && hasCourses && (
+          {!anyStudentExperience && !anyStaffExperience && hasCourses && !detailError && (
             <p className="text-sm text-fg-muted">
               {t('dashboard.noEnrollments')}
             </p>
