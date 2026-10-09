@@ -74,7 +74,7 @@ func TestSweepExpiredAttempts_MasteryMatchesManualSubmit_Pg(t *testing.T) {
 
 func seedMasteryQuizFixture(t *testing.T, ctx context.Context, pool *pgxpool.Pool) (masteryQuizFixture, uuid.UUID, uuid.UUID) {
 	t.Helper()
-	ts := time.Now().Format("20060102150405")
+	ts := time.Now().Format("20060102150405") + "-" + uuid.NewString()[:8]
 	manualUser := insertTestStudent(t, ctx, pool, "manual-"+ts+"@example.com")
 	sweepUser := insertTestStudent(t, ctx, pool, "sweep-"+ts+"@example.com")
 
@@ -290,4 +290,39 @@ SELECT (mastery)::float8 FROM course.learner_concept_states WHERE user_id = $1 A
 		t.Fatalf("read mastery: %v", err)
 	}
 	return mastery
+}
+// An auto-submitted attempt must reach the gradebook without staff opening the quiz grader.
+func TestSweepExpiredAttempts_WritesGradebookCell_Pg(t *testing.T) {
+	if os.Getenv("DATABASE_URL") == "" {
+		t.Skip("DATABASE_URL")
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	defer cancel()
+	dsn := os.Getenv("DATABASE_URL")
+	if err := migrate.RunWithFS(ctx, serverdata.Migrations, dsn); err != nil {
+		t.Fatalf("migrate: %v", err)
+	}
+	pool, err := db.NewPool(ctx, dsn)
+	if err != nil {
+		t.Fatalf("pool: %v", err)
+	}
+	defer pool.Close()
+
+	fix, studentID, _ := seedMasteryQuizFixture(t, ctx, pool)
+	now := time.Now().UTC()
+	attemptID := insertTimedQuizAttempt(t, ctx, pool, fix, studentID, now.Add(-time.Minute))
+	insertCorrectResponse(t, ctx, pool, attemptID, fix.questionID)
+
+	if n, err := SweepExpiredAttempts(ctx, pool, fix.cfg, now, 10); err != nil || n != 1 {
+		t.Fatalf("sweep n=%d err=%v", n, err)
+	}
+	var points float64
+	if err := pool.QueryRow(ctx, `
+SELECT points_earned::float8 FROM course.course_grades WHERE student_user_id = $1 AND module_item_id = $2
+`, studentID, fix.quizID).Scan(&points); err != nil {
+		t.Fatalf("gradebook cell missing after auto-submit: %v", err)
+	}
+	if points != 1 {
+		t.Fatalf("points_earned = %v want 1", points)
+	}
 }

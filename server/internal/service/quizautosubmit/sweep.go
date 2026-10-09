@@ -17,6 +17,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/quizattempts"
 	"github.com/lextures/lextures/server/internal/service/learnerstate"
 	"github.com/lextures/lextures/server/internal/service/learningevents"
+	"github.com/lextures/lextures/server/internal/service/quizgradebook"
 )
 
 const defaultSweepBatch = 200
@@ -72,6 +73,9 @@ func SweepExpiredAttempts(ctx context.Context, pool *pgxpool.Pool, cfg config.Co
 			n++
 			slog.Info("quiz attempt auto-submitted after deadline", "attempt_id", id)
 			learningevents.EmitQuizGradedAsync(pool, cfg, id)
+			if _, err := quizgradebook.SyncStudentCell(ctx, pool, att.CourseID, att.StudentUserID, att.StructureItemID); err != nil {
+				slog.Warn("quiz auto-submit: gradebook sync failed", "attempt_id", id, "error", err)
+			}
 		}
 	}
 	return n, nil

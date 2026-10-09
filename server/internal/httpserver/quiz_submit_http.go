@@ -2,6 +2,7 @@ package httpserver
 
 import (
 	"encoding/json"
+	"log/slog"
 	"math"
 	"net/http"
 	"strings"
@@ -19,6 +20,7 @@ import (
 	"github.com/lextures/lextures/server/internal/service/gamification"
 	"github.com/lextures/lextures/server/internal/service/learningevents"
 	"github.com/lextures/lextures/server/internal/service/quizattemptgrading"
+	"github.com/lextures/lextures/server/internal/service/quizgradebook"
 	webhooksvc "github.com/lextures/lextures/server/internal/service/webhooks"
 )
 
@@ -192,6 +194,10 @@ func (d Deps) handleQuizSubmit() http.HandlerFunc {
 		}
 
 		d.maybeAutogradeIntroQuiz(ctx, *cid, viewer, itemID)
+		// Auto-graded attempts reach the gradebook (and My grades) without staff opening the grader.
+		if _, err := quizgradebook.SyncStudentCell(ctx, d.Pool, *cid, viewer, itemID); err != nil {
+			slog.Warn("quiz submit: gradebook sync failed", "attempt_id", body.AttemptID, "error", err)
+		}
 		learningevents.EmitQuizGradedAsync(d.Pool, d.effectiveConfig(), body.AttemptID)
 		webhooksvc.EmitQuizCompletedEvent(ctx, d.Pool, d.effectiveConfig(), *cid, courseCode, itemID, body.AttemptID, viewer, float64(earned), float64(score))
 		if score >= 60 && cid != nil {
