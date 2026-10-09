@@ -37,6 +37,19 @@ describe('Login', () => {
     expect(screen.getByLabelText(/^email$/i)).not.toHaveAttribute('placeholder', 'you@school.edu')
   })
 
+  it('links to the Terms of Service and Privacy Policy', () => {
+    renderWithRouter(<Login />, { route: '/login', path: '/login' })
+    expect(screen.getByTestId('auth-legal-notice')).toHaveTextContent(/by signing in, you agree to/i)
+    expect(screen.getByRole('link', { name: /terms of service/i })).toHaveAttribute(
+      'href',
+      'https://lextures.com/terms',
+    )
+    expect(screen.getByRole('link', { name: /privacy policy/i })).toHaveAttribute(
+      'href',
+      'https://lextures.com/privacy',
+    )
+  })
+
   it('submits credentials and navigates to the LMS dashboard', async () => {
     const user = userEvent.setup()
     render(

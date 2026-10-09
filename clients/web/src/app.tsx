@@ -41,6 +41,8 @@ export default function App() {
         <Route path="/saml-callback" element={<Pages.SamlCallback />} />
         <Route path="/sso-error" element={<Pages.SsoError />} />
         <Route path="/signup" element={<Pages.Signup />} />
+        <Route path="/terms" element={<Pages.LegalRedirectPage document="terms" />} />
+        <Route path="/privacy" element={<Pages.LegalRedirectPage document="privacy" />} />
         <Route path="/forgot-password" element={<Pages.ForgotPassword />} />
         <Route path="/reset-password" element={<Pages.ResetPassword />} />
         <Route path="/activate-parent" element={<Pages.ActivateParent />} />

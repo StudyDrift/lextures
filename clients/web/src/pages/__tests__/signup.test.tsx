@@ -22,6 +22,19 @@ describe('Signup', () => {
     expect(screen.getByLabelText(/parent or guardian/i)).toBeInTheDocument()
   })
 
+  it('shows Terms and Privacy consent text with links to the marketing site', () => {
+    renderWithRouter(<Signup />, { route: '/signup', path: '/signup' })
+    expect(screen.getByTestId('auth-legal-notice')).toHaveTextContent(/by creating an account, you agree to/i)
+    expect(screen.getByRole('link', { name: /terms of service/i })).toHaveAttribute(
+      'href',
+      'https://lextures.com/terms',
+    )
+    expect(screen.getByRole('link', { name: /privacy policy/i })).toHaveAttribute(
+      'href',
+      'https://lextures.com/privacy',
+    )
+  })
+
   it('submits email and password and navigates to the dashboard', async () => {
     const user = userEvent.setup()
     render(

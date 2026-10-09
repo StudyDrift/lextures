@@ -22,6 +22,7 @@ import {
 } from '../components/auth/auth-field-classes'
 import { MagicLinkRequestForm } from '../components/auth/magic-link-request-form'
 import { PublicAuthShell } from '../components/auth/public-auth-shell'
+import { AuthLegalNotice } from '../components/auth/auth-legal-notice'
 
 type LocationState = { from?: string; orgSlug?: string }
 
@@ -321,6 +322,7 @@ export default function Login() {
           </>
         )}
       </div>
+      <AuthLegalNotice variant="login" />
     </PublicAuthShell>
   )
 }
