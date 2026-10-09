@@ -1,13 +1,14 @@
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { clearImpersonationToken, setImpersonationToken } from '../../../lib/auth'
 import { PERM_MARKETING_CONTENT_VIEW, PERM_REPORTS_VIEW } from '../../../lib/rbac-api'
 import { ShellNavProvider } from '../shell-nav-context'
 import { SideNavMainLinks } from '../side-nav-main-links'
 
 const allowsMock = vi.fn((p: string) => p === PERM_REPORTS_VIEW)
 
-const platformFeaturesMock = vi.fn(() => ({
+const platformFeaturesMock = vi.fn((): Record<string, boolean> => ({
   accommodationsEngineEnabled: false,
   ffEportfolio: false,
   ragNotebookEnabled: true,
@@ -32,6 +33,7 @@ vi.mock('../../../context/platform-features-context', () => ({
 
 describe('SideNavMainLinks', () => {
   beforeEach(() => {
+    clearImpersonationToken()
     allowsMock.mockImplementation((p: string) => p === PERM_REPORTS_VIEW)
     platformFeaturesMock.mockReturnValue({
       accommodationsEngineEnabled: false,
@@ -182,5 +184,53 @@ describe('SideNavMainLinks', () => {
     )
 
     expect(screen.queryByRole('link', { name: /^marketing content$/i })).not.toBeInTheDocument()
+  })
+
+  it('shows Learners and Billing when those platform flags are on', () => {
+    platformFeaturesMock.mockReturnValue({
+      accommodationsEngineEnabled: false,
+      ffEportfolio: false,
+      ragNotebookEnabled: false,
+      ffCourseMarketplace: false,
+      ffMarketingContent: false,
+      ffHomeschoolManagedLearners: true,
+      ffStripeBilling: true,
+    })
+
+    render(
+      <MemoryRouter>
+        <ShellNavProvider>
+          <SideNavMainLinks />
+        </ShellNavProvider>
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByRole('link', { name: /^learners$/i })).toHaveAttribute('href', '/learners')
+    expect(screen.getByRole('link', { name: /^billing$/i })).toHaveAttribute('href', '/me/billing')
+  })
+
+  it('hides Learners and Billing during a Learn-as or view-as session', () => {
+    setImpersonationToken('learn-as-token')
+    platformFeaturesMock.mockReturnValue({
+      accommodationsEngineEnabled: false,
+      ffEportfolio: false,
+      ragNotebookEnabled: true,
+      ffCourseMarketplace: false,
+      ffMarketingContent: false,
+      ffHomeschoolManagedLearners: true,
+      ffStripeBilling: true,
+    })
+
+    render(
+      <MemoryRouter>
+        <ShellNavProvider>
+          <SideNavMainLinks />
+        </ShellNavProvider>
+      </MemoryRouter>,
+    )
+
+    expect(screen.queryByRole('link', { name: /^learners$/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /^billing$/i })).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /^ask ai$/i })).toBeInTheDocument()
   })
 })
