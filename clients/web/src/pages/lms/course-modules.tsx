@@ -2804,9 +2804,15 @@ export default function CourseModules() {
         </div>
       ) : null}
       {loadError && (
-        <p className="mt-6 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/50 dark:text-rose-200">
-          {loadError}
-        </p>
+        <div
+          role="alert"
+          className="mt-6 flex flex-wrap items-center gap-3 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/50 dark:text-rose-200"
+        >
+          <p className="flex-1">{loadError}</p>
+          <Button type="button" variant="secondary" size="sm" onClick={() => void load()}>
+            Retry
+          </Button>
+        </div>
       )}
       {reorderError && (
         <p className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/50 dark:text-rose-200">

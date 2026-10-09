@@ -24,6 +24,71 @@ export function apiBaseUrl(): string {
 }
 
 const MAX_IDEMPOTENT_ATTEMPTS = 3
+
+/** How long an API request may wait for response headers before it is aborted. */
+export const DEFAULT_REQUEST_TIMEOUT_MS = 30_000
+
+/** Thrown by {@link authorizedFetch} when the server does not answer within the request timeout. */
+export class RequestTimeoutError extends Error {
+  constructor(message = 'The request timed out. Check your connection and try again.') {
+    super(message)
+    this.name = 'RequestTimeoutError'
+  }
+}
+
+export type AuthorizedFetchInit = RequestInit & {
+  /**
+   * Abort the request when response headers have not arrived after this many milliseconds.
+   * GET/HEAD default to {@link DEFAULT_REQUEST_TIMEOUT_MS}; `0` disables the timeout. Writes
+   * (POST/PUT/PATCH/DELETE) have no default because some legitimately run long (AI generation,
+   * exports, uploads); pass `timeoutMs` for writes that should fail fast.
+   */
+  timeoutMs?: number
+}
+
+function resolveTimeoutMs(init: AuthorizedFetchInit | undefined): number {
+  if (init?.timeoutMs !== undefined) return Math.max(0, init.timeoutMs)
+  const method = (init?.method ?? 'GET').toUpperCase()
+  return method === 'GET' || method === 'HEAD' ? DEFAULT_REQUEST_TIMEOUT_MS : 0
+}
+
+/**
+ * `fetch` that rejects with {@link RequestTimeoutError} when no response arrives in time.
+ * The timer only covers the wait for headers, so long-lived streaming bodies are not cut off.
+ */
+async function fetchWithTimeout(
+  url: string,
+  init: RequestInit,
+  timeoutMs: number,
+): Promise<Response> {
+  if (timeoutMs <= 0) {
+    return fetch(url, init)
+  }
+  const controller = new AbortController()
+  const callerSignal = init.signal
+  const onCallerAbort = () => controller.abort(callerSignal?.reason)
+  if (callerSignal) {
+    if (callerSignal.aborted) {
+      controller.abort(callerSignal.reason)
+    } else {
+      callerSignal.addEventListener('abort', onCallerAbort, { once: true })
+    }
+  }
+  let timedOut = false
+  const timer = setTimeout(() => {
+    timedOut = true
+    controller.abort()
+  }, timeoutMs)
+  try {
+    return await fetch(url, { ...init, signal: controller.signal })
+  } catch (err) {
+    if (timedOut) throw new RequestTimeoutError()
+    throw err
+  } finally {
+    clearTimeout(timer)
+    callerSignal?.removeEventListener('abort', onCallerAbort)
+  }
+}
 const BASE_BACKOFF_MS = 250
 
 function sleep(ms: number): Promise<void> {
@@ -102,11 +167,15 @@ export async function tryRefreshSession(): Promise<boolean> {
   }
   refreshInFlight = (async () => {
     try {
-      const res = await fetch(apiUrl('/api/v1/auth/refresh'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refresh_token: rt }),
-      })
+      const res = await fetchWithTimeout(
+        apiUrl('/api/v1/auth/refresh'),
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refresh_token: rt }),
+        },
+        DEFAULT_REQUEST_TIMEOUT_MS,
+      )
       if (!res.ok) {
         clearSessionTokens()
         dispatchAuthRequired()
@@ -121,7 +190,9 @@ export async function tryRefreshSession(): Promise<boolean> {
       }
       applyAuthTokenResponse(data)
       return true
-    } catch {
+    } catch (err) {
+      // A stalled refresh is not proof the session is invalid; keep the tokens for the next try.
+      if (err instanceof RequestTimeoutError) return false
       clearSessionTokens()
       dispatchAuthRequired()
       return false
@@ -136,7 +207,10 @@ export async function tryRefreshSession(): Promise<boolean> {
  * `fetch` to the API with `Authorization: Bearer` when a token exists.
  * GET/HEAD requests retry transient 5xx responses and network failures (with jittered backoff).
  */
-export async function authorizedFetch(path: string, init?: RequestInit): Promise<Response> {
+export async function authorizedFetch(path: string, init?: AuthorizedFetchInit): Promise<Response> {
+  const fetchInit: RequestInit = { ...init }
+  delete (fetchInit as AuthorizedFetchInit).timeoutMs
+  const timeoutMs = resolveTimeoutMs(init)
   const method = (init?.method ?? 'GET').toUpperCase()
   const allowRetry = method === 'GET' || method === 'HEAD'
   const attempts = allowRetry ? MAX_IDEMPOTENT_ATTEMPTS : 1
@@ -151,7 +225,7 @@ export async function authorizedFetch(path: string, init?: RequestInit): Promise
     }
 
     try {
-      let res = await fetch(apiUrl(path), { ...init, headers })
+      let res = await fetchWithTimeout(apiUrl(path), { ...fetchInit, headers }, timeoutMs)
 
       if (res.status === 401 && getRefreshToken() && path !== '/api/v1/auth/refresh') {
         const ok = await tryRefreshSession()
@@ -161,7 +235,7 @@ export async function authorizedFetch(path: string, init?: RequestInit): Promise
           if (t2) {
             h2.set('Authorization', `Bearer ${t2}`)
           }
-          res = await fetch(apiUrl(path), { ...init, headers: h2 })
+          res = await fetchWithTimeout(apiUrl(path), { ...fetchInit, headers: h2 }, timeoutMs)
         }
       }
 
@@ -181,6 +255,9 @@ export async function authorizedFetch(path: string, init?: RequestInit): Promise
       return res
     } catch (err) {
       lastNetworkError = err
+      // A stalled origin will likely stall again; surface the timeout so the page can offer Retry.
+      if (err instanceof RequestTimeoutError) throw err
+      if (init?.signal?.aborted) throw err
       if (allowRetry && attempt < attempts - 1) {
         await sleep(backoffWithJitterMs(attempt))
         continue
