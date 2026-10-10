@@ -32,7 +32,7 @@ export const COURSE_CREATE_STARTER_TEMPLATES: CourseCreateStarterTemplate[] = [
       {
         heading: 'Materials & technology',
         markdown:
-          'List required texts, supplies, and any accounts or apps (including this LMS).\n\n| Item | Notes |\n|------|-------|\n| | |\n',
+          'List required texts, supplies, and any accounts or apps (including this LMS).\n\n| Item | Notes |\n|------|-------|\n| Example: math workbook | Chapters 1–6; replace with your own |\n',
       },
       {
         heading: 'Grading',

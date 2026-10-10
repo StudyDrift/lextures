@@ -239,7 +239,7 @@ export default function CredentialWalletPage() {
             {t('wallet.title')}
           </h1>
           <p className="mt-1 text-sm text-fg-muted dark:text-slate-300">{t('wallet.help')}</p>
-          {alumniNote ? (
+          {alumniNote && items.length > 0 ? (
             <p className="mt-2 text-xs text-fg-muted dark:text-fg-subtle">{t('wallet.alumniNote')}</p>
           ) : null}
         </div>

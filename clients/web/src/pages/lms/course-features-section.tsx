@@ -543,7 +543,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
         {
           label: 'Report cards',
           description:
-            'Author district-formatted report cards with comment banks, narrative comments, and PDF release to the parent portal.',
+            'Write report cards with comment banks and narrative comments, then release them as a PDF to parents or guardians.',
           enabled: reportCardsEnabled,
           onToggle: () => void persist({ reportCardsEnabled: !reportCardsEnabled }),
         },

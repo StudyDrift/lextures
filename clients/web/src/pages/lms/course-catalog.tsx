@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { BookOpen, CalendarDays, Clock, Search, X } from 'lucide-react'
+import { BookOpen, CalendarDays, Clock, Search, ShoppingBag, X } from 'lucide-react'
 import {
   getCatalogSection,
   listCatalogSections,
@@ -12,6 +12,9 @@ import {
   type ConsortiumSharedCourse,
 } from '../../lib/consortium-api'
 import { usePlatformFeatures } from '../../context/platform-features-context'
+import { usePermissions } from '../../context/use-permissions'
+import { PERM_RBAC_MANAGE } from '../../lib/rbac-api'
+import { EmptyState } from '../../components/ui/empty-state'
 import { LmsPage } from './lms-page'
 import { CourseCatalogStatusPill } from '../../components/ui/status-vocabulary'
 
@@ -50,7 +53,8 @@ function prereqLabel(status: string): string {
 }
 
 export default function CourseCatalogPage() {
-  const { ffCatalogIntegration, ffConsortiumSharing } = usePlatformFeatures()
+  const { ffCatalogIntegration, ffConsortiumSharing, ffCourseMarketplace } = usePlatformFeatures()
+  const { allows, loading: permLoading } = usePermissions()
   const [tab, setTab] = useState<'catalog' | 'partner'>('catalog')
   const [partnerCourses, setPartnerCourses] = useState<ConsortiumSharedCourse[]>([])
   const [partnerLoading, setPartnerLoading] = useState(false)
@@ -134,6 +138,23 @@ export default function CourseCatalogPage() {
   }
 
   if (!ffCatalogIntegration && !ffConsortiumSharing) {
+    if (permLoading) return null
+    if (!allows(PERM_RBAC_MANAGE)) {
+      return (
+        <LmsPage title="Course catalog">
+          <EmptyState
+            icon={ShoppingBag}
+            title="No course catalog here yet"
+            body={
+              ffCourseMarketplace
+                ? 'Browse the marketplace to find courses you can enroll in.'
+                : 'Your organization has not set up a course catalog. Check back later, or ask your administrator.'
+            }
+            primaryAction={ffCourseMarketplace ? { label: 'Browse the marketplace', to: '/marketplace' } : undefined}
+          />
+        </LmsPage>
+      )
+    }
     return (
       <main className="mx-auto max-w-4xl p-6">
         <p className="text-sm text-fg-muted">
