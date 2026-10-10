@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { authorizedFetch } from '../../lib/api'
 import { parseCalendarDateFromQuery } from '../../lib/command-palette-go-to'
+import { calendarCourseLabel } from '../../lib/course-calendar-utils'
 import { readApiErrorMessage } from '../../lib/errors'
 import {
   fetchCourseStructure,
@@ -71,7 +72,7 @@ function structureToAssignments(
     isAdaptive: i.isAdaptive,
     linkCourseCode: course.courseCode,
     courseTitle: title,
-    courseLabel: course.courseCode,
+    courseLabel: calendarCourseLabel(course),
     paletteIndex,
   }))
 }

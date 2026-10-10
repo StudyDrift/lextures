@@ -8,6 +8,8 @@ type AuthoringSaveFootprintProps = {
   error: string | null
   onRetry?: () => void
   className?: string
+  /** Text before the relative time; defaults to "Saved". */
+  savedLabel?: string
 }
 
 export function AuthoringSaveFootprint({
@@ -16,6 +18,7 @@ export function AuthoringSaveFootprint({
   error,
   onRetry,
   className = '',
+  savedLabel = 'Saved',
 }: AuthoringSaveFootprintProps) {
   const [, setTick] = useState(0)
   useEffect(() => {
@@ -37,7 +40,7 @@ export function AuthoringSaveFootprint({
           <span className="text-rose-700 dark:text-rose-300">Could not save — check your connection and try again.</span>
         ) : rel ? (
           <span>
-            <span className="font-medium text-emerald-800 dark:text-emerald-200">Saved</span>{' '}
+            <span className="font-medium text-emerald-800 dark:text-emerald-200">{savedLabel}</span>{' '}
             <span className="text-fg-muted">{rel}</span>
           </span>
         ) : (

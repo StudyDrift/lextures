@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { formatDateTime, formatDeadlineDisplay, isLearnerLocalTimezone } from '../../lib/format'
 import { formatEntityLabel } from '../../lib/format-entity-label'
+import { gradeSubmissionsLabel } from '../../lib/grade-submissions-label'
 import { Link, useOutletContext, useParams, useSearchParams } from 'react-router-dom'
 import { Eye } from 'lucide-react'
 import { usePlatformFeatures } from '../../context/platform-features-context'
@@ -492,10 +493,10 @@ export default function CourseModuleAssignmentPage() {
 
   const showAssignmentActionsMenu = Boolean(!loading && !loadError && !editing && canEdit)
 
-  const gradeSubmissionsLabel =
-    ungradedSubmissionCount != null && enrolledStudentCount != null
-      ? `Grade submissions ${ungradedSubmissionCount}/${enrolledStudentCount} ungraded`
-      : 'Grade submissions'
+  const gradeSubmissionsButtonLabel = gradeSubmissionsLabel(
+    ungradedSubmissionCount,
+    enrolledStudentCount,
+  )
   const allSubmissionsGraded =
     ungradedSubmissionCount != null && ungradedSubmissionCount === 0
 
@@ -782,7 +783,7 @@ export default function CourseModuleAssignmentPage() {
                 }
               >
                 <Eye className="h-4 w-4" aria-hidden />
-                {gradeSubmissionsLabel}
+                {gradeSubmissionsButtonLabel}
               </button>
             ) : null}
 
