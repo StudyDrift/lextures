@@ -1852,7 +1852,7 @@
   "wallet.alumniNote": "Your enrollment may have ended — this wallet remains yours.",
   "wallet.disabled": "Credential wallet is not enabled on this platform.",
   "wallet.loadError": "Failed to load wallet.",
-  "wallet.empty": "You do not have any credentials yet.",
+  "wallet.empty": "No credentials yet. Badges and certificates you earn will show up here.",
   "wallet.shareSelected": "Share selected",
   "wallet.export.downloadAll": "Download all",
   "wallet.export.starting": "Starting export…",

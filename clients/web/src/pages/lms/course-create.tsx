@@ -481,9 +481,9 @@ export default function CourseCreate() {
               <fieldset className="space-y-3">
                 <legend className="text-sm font-medium text-fg-default">Course structure</legend>
                 <p className="text-xs text-fg-muted">
-                  Traditional courses behave like a standard LMS outline. Competency-based courses require outcomes and
-                  assessments per competency; each competency is a module and the next module stays locked until prior
-                  assessments are completed.
+                  Traditional courses are a simple outline of modules you can open in any order. Competency-based courses
+                  organize learning around skills: each skill is a module with its own goals and a quiz or assignment, and
+                  the next module unlocks once the earlier ones are complete.
                 </p>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <label
@@ -667,7 +667,7 @@ export default function CourseCreate() {
           {step === 3 && !isCompetency && (
             <div className="space-y-5">
               <p className="text-sm text-fg-muted">
-                Modules organize pages, assignments, and quizzes. You can rename, reorder, and add items anytime.
+                Modules organize pages, assignments, and quizzes. You can rename, reorder, and add items anytime. Your first module is created when you finish on the last step.
               </p>
               <div>
                 <label
@@ -692,7 +692,7 @@ export default function CourseCreate() {
                   onClick={() => continueFromTraditionalStep(false)}
                   className="inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Continue
+                  Next: course features
                   <ChevronRight className="h-4 w-4" aria-hidden />
                 </button>
                 <button
