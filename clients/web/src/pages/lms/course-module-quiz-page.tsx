@@ -62,6 +62,7 @@ import { expandQuizPromptWithRefs } from '../../lib/course-item-ref-tokens'
 import { AdvancedNameDisclosure, AdvancedNameTip } from '../../components/quiz/advanced-name'
 import { QuizPageSettingsPanel } from '../../components/quiz/quiz-page-settings-panel'
 import { QuizStudentPreviewModal } from '../../components/quiz/quiz-student-preview-modal'
+import { gradeSubmissionsLabel } from '../../lib/grade-submissions-label'
 import { AuthoringSaveFootprint } from '../../components/authoring-save-footprint'
 import { Switch } from '../../components/ui'
 import { FeatureHelpTrigger } from '../../components/feature-help/feature-help-trigger'
@@ -1450,9 +1451,7 @@ export default function CourseModuleQuizPage() {
                     : 'inline-flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-950 shadow-sm transition-[background-color,color,border-color] hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-50 dark:hover:bg-amber-950/60'
                 }
               >
-                {ungradedAttemptCount != null && enrolledStudentCount != null
-                  ? `Grade submissions (${ungradedAttemptCount}/${enrolledStudentCount} ungraded)`
-                  : 'Grade submissions'}
+                {gradeSubmissionsLabel(ungradedAttemptCount, enrolledStudentCount)}
               </button>
             ) : null}
             {canEditQuizItems ? (
@@ -1503,6 +1502,7 @@ export default function CourseModuleQuizPage() {
         {canEdit && !loading && !loadError && (editingContent || questionsOpen) ? (
           <div className="mt-6">
             <AuthoringSaveFootprint
+              savedLabel="Quiz content saved"
               lastSavedIso={lastLocalAuthoringSave ?? updatedAt}
               saving={saving || questionsSaving}
               error={saveError ?? questionsError}
@@ -1516,6 +1516,7 @@ export default function CourseModuleQuizPage() {
         {canEdit && !loading && !loadError && !editingContent && !questionsOpen ? (
           <div className="mt-6">
             <AuthoringSaveFootprint
+              savedLabel="Quiz content saved"
               lastSavedIso={lastLocalAuthoringSave ?? updatedAt}
               saving={false}
               error={null}

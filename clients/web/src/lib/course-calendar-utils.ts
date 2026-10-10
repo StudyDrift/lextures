@@ -89,3 +89,20 @@ export function mergeLocalCalendarDayPreserveWallClock(
   )
   return next.toISOString()
 }
+
+const CALENDAR_COURSE_LABEL_MAX = 28
+
+/**
+ * Short course label for calendar chips and week rows: the viewer's catalog nickname when set,
+ * otherwise the course title, otherwise the course code. Long values are truncated with an ellipsis.
+ */
+export function calendarCourseLabel(course: {
+  title: string
+  courseCode: string
+  catalogNickname?: string | null
+}): string {
+  const raw =
+    course.catalogNickname?.trim() || course.title.trim() || course.courseCode
+  if (raw.length <= CALENDAR_COURSE_LABEL_MAX) return raw
+  return `${raw.slice(0, CALENDAR_COURSE_LABEL_MAX - 1).trimEnd()}…`
+}

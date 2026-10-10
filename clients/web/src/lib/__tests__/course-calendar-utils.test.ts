@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   addMonths,
+  calendarCourseLabel,
   countByDateKey,
   dateKeyLocal,
   endOfWeekMondayExclusive,
@@ -122,5 +123,28 @@ describe('mergeLocalCalendarDayPreserveWallClock', () => {
 
   it('returns the original string when previous due is not a date', () => {
     expect(mergeLocalCalendarDayPreserveWallClock(new Date(2026, 3, 1), 'x')).toBe('x')
+  })
+})
+
+describe('calendarCourseLabel', () => {
+  it('prefers the catalog nickname, then the title, then the code', () => {
+    expect(
+      calendarCourseLabel({ title: 'QA LTI test', courseCode: 'C-JPYK7G', catalogNickname: ' QA ' }),
+    ).toBe('QA')
+    expect(calendarCourseLabel({ title: ' QA LTI test (delete me) ', courseCode: 'C-JPYK7G' })).toBe(
+      'QA LTI test (delete me)',
+    )
+    expect(calendarCourseLabel({ title: '  ', courseCode: 'C-JPYK7G', catalogNickname: null })).toBe(
+      'C-JPYK7G',
+    )
+  })
+
+  it('truncates long names with an ellipsis', () => {
+    const out = calendarCourseLabel({
+      title: 'Introduction to Advanced Homeschool Mathematics and Logic',
+      courseCode: 'C-ABCDEF',
+    })
+    expect(out.length).toBe(28)
+    expect(out.endsWith('…')).toBe(true)
   })
 })
