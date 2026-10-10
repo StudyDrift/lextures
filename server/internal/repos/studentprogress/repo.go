@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/lextures/lextures/server/internal/repos/gradeitempoints"
 )
 
 const refreshStaleAfter = 5 * time.Minute
@@ -98,14 +99,16 @@ WHERE enrollment_id = $1`
 	return &r, nil
 }
 
-// AvgGradePercent computes mean percent across posted course grades for gradable items.
+// AvgGradePercent computes the unweighted mean percent across graded assignment/quiz items.
+// It is a simple per-item average; the student progress page uses the weighted course grade from
+// service/coursefinalgrade instead so it agrees with the gradebook. Quizzes without an explicit
+// points worth fall back to their question-point total (gradeitempoints.WorthSQL).
 func AvgGradePercent(ctx context.Context, pool *pgxpool.Pool, courseID, userID uuid.UUID) (*float64, error) {
 	var avg *float64
 	err := pool.QueryRow(ctx, `
 SELECT AVG(
     CASE
-        WHEN COALESCE(ma.points_worth, mq.points_worth, 0) > 0
-            THEN (cg.points_earned / COALESCE(ma.points_worth, mq.points_worth)::float8) * 100.0
+        WHEN w.worth > 0 THEN (cg.points_earned / w.worth::float8) * 100.0
         ELSE NULL
     END
 )::float8
@@ -113,6 +116,7 @@ FROM course.course_grades cg
 INNER JOIN course.course_structure_items csi ON csi.id = cg.module_item_id
 LEFT JOIN course.module_assignments ma ON ma.structure_item_id = csi.id
 LEFT JOIN course.module_quizzes mq ON mq.structure_item_id = csi.id
+CROSS JOIN LATERAL (SELECT `+gradeitempoints.WorthSQL+` AS worth) w
 WHERE cg.course_id = $1 AND cg.student_user_id = $2
   AND csi.published AND NOT csi.archived
   AND csi.kind IN ('assignment', 'quiz')
