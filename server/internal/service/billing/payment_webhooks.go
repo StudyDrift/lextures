@@ -3,10 +3,12 @@ package billing
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"strings"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stripe/stripe-go/v82"
 
@@ -61,6 +63,22 @@ func recordStripePaymentTransaction(ctx context.Context, pool *pgxpool.Pool, eve
 				Status:        repoPayments.SubStatusActive,
 			})
 		}
+		// Checkout start already inserted a pending row keyed by the session id; promote it instead of
+		// inserting a second row (provider_txn_id is unique, so a plain insert would fail and leave the
+		// purchase "Pending" forever).
+		promoted, err := repoPayments.MarkCompletedByProviderTxn(ctx, pool, repoPayments.ProviderStripe, sess.ID, int(sess.AmountTotal), string(sess.Currency), subID)
+		if err != nil {
+			return err
+		}
+		if promoted {
+			paymentprovider.RecordTransaction(paymentprovider.ProviderStripe, repoPayments.StatusCompleted, string(sess.Currency))
+			return nil
+		}
+		if existing, err := repoPayments.GetByProviderTxn(ctx, pool, repoPayments.ProviderStripe, sess.ID); err == nil && existing != nil {
+			return nil // already completed (webhook retry) or refunded
+		} else if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+			return err
+		}
 		_, _, err = repoPayments.CreateIdempotent(ctx, pool, repoPayments.CreateTransactionInput{
 			UserID:         userID,
 			CourseID:       courseID,
@@ -76,6 +94,18 @@ func recordStripePaymentTransaction(ctx context.Context, pool *pgxpool.Pool, eve
 			return err
 		}
 		paymentprovider.RecordTransaction(paymentprovider.ProviderStripe, repoPayments.StatusCompleted, string(sess.Currency))
+	case "checkout.session.expired":
+		var sess stripe.CheckoutSession
+		if err := json.Unmarshal(event.Data.Raw, &sess); err != nil {
+			return err
+		}
+		if sid := strings.TrimSpace(sess.ID); sid != "" {
+			if canceled, err := repoPayments.CancelPendingByProviderTxn(ctx, pool, repoPayments.ProviderStripe, sid); err != nil {
+				return err
+			} else if canceled {
+				paymentprovider.RecordTransaction(paymentprovider.ProviderStripe, repoPayments.StatusCanceled, string(sess.Currency))
+			}
+		}
 	case "invoice.payment_failed":
 		var inv stripe.Invoice
 		if err := json.Unmarshal(event.Data.Raw, &inv); err != nil {
