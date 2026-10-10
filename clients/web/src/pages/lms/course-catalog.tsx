@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { BookOpen, CalendarDays, Clock, Search, ShoppingBag, X } from 'lucide-react'
+import { BookOpen, CalendarDays, Clock, Search, X } from 'lucide-react'
 import {
   getCatalogSection,
   listCatalogSections,
@@ -14,7 +14,7 @@ import {
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { usePermissions } from '../../context/use-permissions'
 import { PERM_RBAC_MANAGE } from '../../lib/rbac-api'
-import { EmptyState } from '../../components/ui/empty-state'
+import { CourseCatalogNotEnabled } from './course-catalog-not-enabled'
 import { LmsPage } from './lms-page'
 import { CourseCatalogStatusPill } from '../../components/ui/status-vocabulary'
 
@@ -140,20 +140,7 @@ export default function CourseCatalogPage() {
   if (!ffCatalogIntegration && !ffConsortiumSharing) {
     if (permLoading) return null
     if (!allows(PERM_RBAC_MANAGE)) {
-      return (
-        <LmsPage title="Course catalog">
-          <EmptyState
-            icon={ShoppingBag}
-            title="No course catalog here yet"
-            body={
-              ffCourseMarketplace
-                ? 'Browse the marketplace to find courses you can enroll in.'
-                : 'Your organization has not set up a course catalog. Check back later, or ask your administrator.'
-            }
-            primaryAction={ffCourseMarketplace ? { label: 'Browse the marketplace', to: '/marketplace' } : undefined}
-          />
-        </LmsPage>
-      )
+      return <CourseCatalogNotEnabled marketplaceEnabled={!!ffCourseMarketplace} />
     }
     return (
       <main className="mx-auto max-w-4xl p-6">
