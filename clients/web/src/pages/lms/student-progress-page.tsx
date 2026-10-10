@@ -571,6 +571,7 @@ export default function StudentProgressPage() {
                   ? `${Math.round(data.summary.avgGradePercent * 10) / 10}%`
                   : '—'}
               </dd>
+              <dd className="mt-1 text-xs text-fg-muted">{studentProgressI18n.avgScoreLiveNote}</dd>
             </dl>
             <dl>
               <dt className="text-xs font-medium uppercase tracking-wide text-fg-muted">

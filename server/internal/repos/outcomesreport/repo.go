@@ -12,6 +12,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lextures/lextures/server/internal/repos/courseoutcomes"
+	"github.com/lextures/lextures/server/internal/repos/gradeitempoints"
 )
 
 const refreshStaleAfter = time.Hour
@@ -520,7 +521,7 @@ func scorePercentGradedItem(
 	var earned *float64
 	var worth *int32
 	err := q.QueryRow(ctx, `
-SELECT cg.points_earned, COALESCE(ma.points_worth, mq.points_worth)
+SELECT cg.points_earned, `+gradeitempoints.WorthSQL+`
 FROM course.course_grades cg
 INNER JOIN course.course_structure_items csi ON csi.id = cg.module_item_id
 LEFT JOIN course.module_assignments ma ON ma.structure_item_id = csi.id

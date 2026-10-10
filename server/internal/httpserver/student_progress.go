@@ -22,6 +22,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	stprog "github.com/lextures/lextures/server/internal/repos/studentprogress"
 	"github.com/lextures/lextures/server/internal/repos/user"
+	"github.com/lextures/lextures/server/internal/service/coursefinalgrade"
 )
 
 // applyAssignToDueDates patches missing/assignment row due dates in place with each item's
@@ -214,7 +215,13 @@ func (d Deps) handleEnrollmentProgressGet() http.HandlerFunc {
 			}
 		}
 
-		avgGrade, _ := stprog.AvgGradePercent(ctx, d.Pool, en.CourseID, en.UserID)
+		// Average grade is the live course grade (same calculation as the gradebook FINAL / My grades),
+		// not part of the analytics snapshot, so it is unaffected by the snapshot's refresh age.
+		avgGrade, err := coursefinalgrade.PercentForStudent(ctx, d.Pool, en.CourseID, en.UserID, time.Now().UTC())
+		if err != nil {
+			slog.Warn("progress.course_grade_failed", "err", err)
+			avgGrade = nil
+		}
 		missing, _ := stprog.ListMissing(ctx, d.Pool, en.CourseID, en.UserID, time.Now().UTC())
 		assignRows, _ := stprog.ListAssignments(ctx, d.Pool, en.CourseID, en.UserID)
 		quizRows, _ := stprog.ListQuizAttempts(ctx, d.Pool, en.CourseID, en.UserID)
@@ -227,6 +234,8 @@ func (d Deps) handleEnrollmentProgressGet() http.HandlerFunc {
 			f := float64(*snap.AvgQuizScore)
 			avgQuiz = &f
 		}
+		// DataAsOf/StaleMinutes describe only the snapshot tiles (submitted %, modules viewed,
+		// average quiz score, last active); the grade, missing items, and lists are live.
 		staleMin := int(time.Since(meta.RefreshedAt).Minutes())
 		canNotes := false
 		if en.UserID != viewer {

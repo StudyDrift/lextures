@@ -517,17 +517,7 @@ func (d Deps) handleGradebookGrid() http.HandlerFunc {
 }
 
 func gradebookMaxPoints(item *coursestructure.ItemResponse) *int {
-	if item.PointsWorth != nil {
-		v := *item.PointsWorth
-		return &v
-	}
-	if item.Kind == "quiz" && (item.IsAdaptive == nil || !*item.IsAdaptive) {
-		if item.PointsPossible != nil {
-			v := *item.PointsPossible
-			return &v
-		}
-	}
-	return nil
+	return coursestructure.GradebookMaxPoints(item)
 }
 
 func parseGradebookPoints(s string) float64 {
