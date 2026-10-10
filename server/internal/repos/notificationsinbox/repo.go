@@ -31,6 +31,18 @@ RETURNING id
 	return id, err
 }
 
+// HasUnread reports whether the user already has an unread notification with the same event type, title, and action URL.
+func HasUnread(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, eventType, title, actionURL string) (bool, error) {
+	var exists bool
+	err := pool.QueryRow(ctx, `
+SELECT EXISTS (
+  SELECT 1 FROM settings.notifications
+  WHERE user_id = $1 AND event_type = $2 AND title = $3
+    AND COALESCE(action_url,'') = $4 AND is_read = false
+)`, userID, eventType, title, actionURL).Scan(&exists)
+	return exists, err
+}
+
 // List returns paginated notifications for a user, newest first.
 func List(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, limit, offset int) ([]Row, error) {
 	if limit <= 0 {

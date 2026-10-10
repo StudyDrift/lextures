@@ -217,6 +217,10 @@ func (d Deps) handleQuizAttemptGradingPut() http.HandlerFunc {
 				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to sync gradebook.")
 				return
 			}
+			// Notify only when the cell is already visible to the student (posted).
+			if cell, cerr := coursegrades.GetCell(ctx, d.Pool, *cid, attempt.StudentUserID, itemID); cerr == nil && cell != nil && cell.PostedAt != nil {
+				d.notifyGradePosted(ctx, *cid, itemID, attempt.StudentUserID)
+			}
 		}
 
 		needsManual, _ := quizattempts.AttemptNeedsManualGrading(ctx, d.Pool, attemptID)

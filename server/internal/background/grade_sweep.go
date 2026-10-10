@@ -57,7 +57,7 @@ func markPostedScheduled(ctx context.Context, pool *pgxpool.Pool, cfg config.Con
 	if err := tx.Commit(ctx); err != nil {
 		return err
 	}
-	notifications.NotifyGradesPostedAfterRelease(ctx, pool, cfg, courseID, moduleItemID, posted, smsQueue)
+	notifications.NotifyGradesPostedAfterRelease(ctx, pool, cfg, courseID, moduleItemID, posted, smsQueue, nil)
 	webhooksvc.EmitGradePostedCells(ctx, pool, cfg, courseID, moduleItemID, posted)
 	for _, cell := range posted {
 		webhooksvc.EmitGradeReleasedEvent(ctx, pool, cfg, courseID, moduleItemID, cell.StudentUserID, cell.PointsEarned)
