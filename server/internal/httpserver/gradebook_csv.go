@@ -142,7 +142,7 @@ func (d Deps) handleGradebookImportConfirm() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Could not apply grade import.")
 			return
 		}
-		notifications.NotifyAutoPostedFromGradebookPut(r.Context(), d.Pool, d.effectiveConfig(), courseID, sess.Grades, d.SmsNotificationQueue)
+		notifications.NotifyAutoPostedFromGradebookPut(r.Context(), d.Pool, d.effectiveConfig(), courseID, sess.Grades, d.SmsNotificationQueue, d.NotifHub)
 		n := 0
 		for _, row := range sess.Grades {
 			n += len(row)

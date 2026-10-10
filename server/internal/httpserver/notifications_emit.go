@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/lextures/lextures/server/internal/repos/course"
+	"github.com/lextures/lextures/server/internal/repos/coursegrades"
 	"github.com/lextures/lextures/server/internal/repos/discussions"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	"github.com/lextures/lextures/server/internal/repos/user"
@@ -104,4 +105,13 @@ func (d Deps) emitAssignmentCreatedNotifications(ctx context.Context, courseCode
 	}
 	ns.NotifyAssignmentCreated(ctx, ids, courseName, assignmentTitle, courseCode, orgID)
 	d.smsNotificationService().NotifyAssignmentCreated(ctx, ids, courseName, assignmentTitle, courseCode)
+}
+
+// notifyGradePosted tells a student (in-app, plus email/SMS when enabled) that a grade or feedback is visible.
+// Callers invoke it only when the cell is posted to the student.
+func (d Deps) notifyGradePosted(ctx context.Context, courseID, itemID, studentUserID uuid.UUID) {
+	notifications.NotifyGradesPostedAfterRelease(
+		ctx, d.Pool, d.effectiveConfig(), courseID, itemID,
+		[]coursegrades.PostedCell{{StudentUserID: studentUserID}}, d.SmsNotificationQueue, d.NotifHub,
+	)
 }

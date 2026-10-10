@@ -193,6 +193,8 @@ func (d Deps) writeSubmissionGrade(
 	}
 	if posting == "automatic" {
 		webhooksvc.EmitSingleGradePosted(r.Context(), d.Pool, d.effectiveConfig(), cid, itemID, studentUserID, points)
+		// Grades and feedback-only updates both surface in the learner's bell (managed learners have no email).
+		d.notifyGradePosted(r.Context(), cid, itemID, studentUserID)
 	}
 	out := map[string]any{
 		"studentUserId": studentUserID.String(),

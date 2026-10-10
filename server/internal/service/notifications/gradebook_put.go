@@ -9,13 +9,14 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/lextures/lextures/server/internal/config"
+	"github.com/lextures/lextures/server/internal/notifevents"
 	"github.com/lextures/lextures/server/internal/repos/coursegrades"
 	"github.com/lextures/lextures/server/internal/smsnotificationqueue"
 )
 
-// NotifyAutoPostedFromGradebookPut emails and SMS-notifies students when automatic posting policy released grades from the grid save.
-func NotifyAutoPostedFromGradebookPut(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, courseID uuid.UUID, grades map[string]map[string]string, smsQueue *smsnotificationqueue.Bus) {
-	if (!cfg.EmailNotificationsEnabled && !cfg.SmsNotificationsEnabled) || len(grades) == 0 {
+// NotifyAutoPostedFromGradebookPut notifies (in-app, plus email/SMS when enabled) students when automatic posting policy released grades from the grid save.
+func NotifyAutoPostedFromGradebookPut(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, courseID uuid.UUID, grades map[string]map[string]string, smsQueue *smsnotificationqueue.Bus, hub *notifevents.Hub) {
+	if len(grades) == 0 {
 		return
 	}
 	itemSet := make(map[uuid.UUID]struct{})
@@ -77,6 +78,6 @@ WHERE cg.course_id = $1
 			continue
 		}
 		seen[k] = struct{}{}
-		NotifyGradesPostedAfterRelease(ctx, pool, cfg, courseID, itemID, []coursegrades.PostedCell{{StudentUserID: studentID}}, smsQueue)
+		NotifyGradesPostedAfterRelease(ctx, pool, cfg, courseID, itemID, []coursegrades.PostedCell{{StudentUserID: studentID}}, smsQueue, hub)
 	}
 }
