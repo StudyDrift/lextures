@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ExternalLink, Loader2, ShoppingBag } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -25,7 +25,6 @@ function sourceLabel(source: string, t: (key: string) => string): string {
 }
 
 export default function MyPurchasesPage() {
-  const titleId = useId()
   const { t, i18n } = useTranslation('common')
   const { ffCourseMarketplace, loading: featuresLoading } = usePlatformFeatures()
   const [purchases, setPurchases] = useState<CoursePurchase[] | null>(null)
@@ -70,13 +69,6 @@ export default function MyPurchasesPage() {
   return (
     <LmsPage title={t('purchases.title')} description={t('purchases.subtitle')}>
       <div className="mx-auto max-w-3xl space-y-6">
-        <header>
-          <h1 id={titleId} className="text-2xl font-semibold text-fg-default">
-            {t('purchases.title')}
-          </h1>
-          <p className="mt-2 text-sm text-fg-muted">{t('purchases.subtitle')}</p>
-        </header>
-
         {error ? (
           <p
             role="alert"

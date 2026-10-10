@@ -30,6 +30,29 @@ export type Transaction = {
   createdAt: string
 }
 
+/** Human label for a payment transaction status ("completed" reads as "Paid"). */
+export function transactionStatusLabel(status: string): string {
+  switch (status) {
+    case 'completed':
+      return 'Paid'
+    case 'pending':
+      return 'Pending'
+    case 'failed':
+      return 'Failed'
+    case 'refunded':
+      return 'Refunded'
+    case 'canceled':
+      return 'Canceled'
+    default:
+      return status
+  }
+}
+
+/** Abandoned/expired checkouts (canceled) never produced a payment, so they are hidden from billing history. */
+export function visibleTransactions(items: Transaction[]): Transaction[] {
+  return items.filter((tx) => tx.status !== 'canceled')
+}
+
 export type CheckoutPayload = {
   courseId?: string
   plan?: 'monthly' | 'annual'

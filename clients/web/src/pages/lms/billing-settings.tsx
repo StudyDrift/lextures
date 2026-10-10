@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useId, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ExternalLink, Loader2 } from 'lucide-react'
 import { usePlatformFeatures } from '../../context/platform-features-context'
-import { fetchMyEntitlements, fetchMyTransactions, formatMoney, openBillingPortal, type Entitlement, type Transaction } from '../../lib/billing-api'
+import { fetchMyEntitlements, fetchMyTransactions, formatMoney, openBillingPortal, transactionStatusLabel, visibleTransactions, type Entitlement, type Transaction } from '../../lib/billing-api'
 import { invoiceDownloadUrl } from '../../lib/tax-api'
 import { authorizedFetch } from '../../lib/api'
 import { LmsPage } from './lms-page'
@@ -23,7 +23,6 @@ function entitlementLabel(e: Entitlement): string {
 }
 
 export default function BillingSettingsPage() {
-  const titleId = useId()
   const { ffStripeBilling, ffPaymentsEnabled, ffCourseMarketplace, loading: featuresLoading } = usePlatformFeatures()
   const [entitlements, setEntitlements] = useState<Entitlement[]>([])
   const [transactions, setTransactions] = useState<Transaction[]>([])
@@ -42,7 +41,7 @@ export default function BillingSettingsPage() {
         authorizedFetch('/api/v1/me'),
       ])
       setEntitlements(items)
-      setTransactions(txItems)
+      setTransactions(visibleTransactions(txItems))
       if (meRes.ok) {
         setMe((await meRes.json()) as MeProfile)
       }
@@ -86,17 +85,11 @@ export default function BillingSettingsPage() {
   }
 
   return (
-    <LmsPage title="Billing">
+    <LmsPage
+      title="Billing"
+      description="Manage your subscription, payment method, and purchase history."
+    >
       <div className="mx-auto max-w-3xl space-y-6">
-        <header>
-          <h1 id={titleId} className="text-2xl font-semibold text-fg-default">
-            Billing
-          </h1>
-          <p className="mt-2 text-sm text-fg-muted">
-            Manage your subscription, payment method, and purchase history.
-          </p>
-        </header>
-
         {error ? (
           <p
             role="alert"
@@ -162,7 +155,7 @@ export default function BillingSettingsPage() {
                       <td className="py-3 pr-4 capitalize">{tx.provider}</td>
                       <td className="py-3 pr-4">{formatMoney(tx.amountCents, tx.currency)}</td>
                       <td className="py-3 pr-4">{new Date(tx.createdAt).toLocaleDateString()}</td>
-                      <td className="py-3 capitalize">{tx.status}</td>
+                      <td className="py-3">{transactionStatusLabel(tx.status)}</td>
                     </tr>
                   ))}
                 </tbody>

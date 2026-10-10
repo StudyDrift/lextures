@@ -19,3 +19,15 @@ func sweepPaymentWebhookJobs(ctx context.Context, pool *pgxpool.Pool, cfg config
 		TaxCollectionEnabled: cfg.FFTaxCollection,
 	}, now)
 }
+
+// sweepStalePendingPayments resolves Stripe transactions stuck in "pending" (issue #740).
+func sweepStalePendingPayments(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, now time.Time) {
+	if !cfg.FFPaymentsEnabled || pool == nil {
+		return
+	}
+	pcfg := paymentprovider.ConfigFrom(cfg)
+	if pcfg.StripeSecretKey == "" {
+		return
+	}
+	svcBilling.ReconcileStalePendingStripe(ctx, pool, svcBilling.StripeCheckoutSessionLookup(pcfg.StripeSecretKey), now)
+}

@@ -19,6 +19,8 @@ const (
 	StatusCompleted = "completed"
 	StatusFailed    = "failed"
 	StatusRefunded  = "refunded"
+	// StatusCanceled marks an abandoned or expired checkout that never produced a payment.
+	StatusCanceled = "canceled"
 
 	SubStatusActive   = "active"
 	SubStatusPastDue  = "past_due"
@@ -170,4 +172,75 @@ func scanTransactionRow(row pgx.Row) (*Transaction, error) {
 	}
 	tx.CourseID = courseID
 	return &tx, nil
+}
+
+// GetByProviderTxn loads a transaction by provider and provider transaction (session) id.
+func GetByProviderTxn(ctx context.Context, pool *pgxpool.Pool, provider, providerTxnID string) (*Transaction, error) {
+	return scanTransaction(ctx, pool, `
+SELECT id, user_id, course_id, provider, provider_txn_id, idempotency_key,
+       amount_cents, currency, status, subscription_id, created_at, updated_at
+FROM payments.transactions WHERE provider = $1 AND provider_txn_id = $2
+`, provider, providerTxnID)
+}
+
+// MarkCompletedByProviderTxn promotes the pending (or abandoned) row created at checkout start to
+// completed. It reports whether a row was updated; refunded and already-completed rows are untouched.
+func MarkCompletedByProviderTxn(ctx context.Context, pool *pgxpool.Pool, provider, providerTxnID string, amountCents int, currency string, subscriptionID *string) (bool, error) {
+	if currency == "" {
+		currency = "usd"
+	}
+	tag, err := pool.Exec(ctx, `
+UPDATE payments.transactions
+SET status = $3,
+    amount_cents = CASE WHEN $4 > 0 THEN $4 ELSE amount_cents END,
+    currency = $5,
+    subscription_id = COALESCE($6, subscription_id),
+    updated_at = NOW()
+WHERE provider = $1 AND provider_txn_id = $2
+  AND status IN ('pending', 'canceled', 'failed')
+`, provider, providerTxnID, StatusCompleted, amountCents, currency, subscriptionID)
+	if err != nil {
+		return false, err
+	}
+	return tag.RowsAffected() > 0, nil
+}
+
+// CancelPendingByProviderTxn marks a still-pending transaction canceled (expired or abandoned checkout).
+func CancelPendingByProviderTxn(ctx context.Context, pool *pgxpool.Pool, provider, providerTxnID string) (bool, error) {
+	tag, err := pool.Exec(ctx, `
+UPDATE payments.transactions SET status = $3, updated_at = NOW()
+WHERE provider = $1 AND provider_txn_id = $2 AND status = 'pending'
+`, provider, providerTxnID, StatusCanceled)
+	if err != nil {
+		return false, err
+	}
+	return tag.RowsAffected() > 0, nil
+}
+
+// ListStalePending returns pending transactions for a provider created before cutoff, oldest first.
+func ListStalePending(ctx context.Context, pool *pgxpool.Pool, provider string, cutoff time.Time, limit int) ([]Transaction, error) {
+	if limit <= 0 {
+		limit = 50
+	}
+	rows, err := pool.Query(ctx, `
+SELECT id, user_id, course_id, provider, provider_txn_id, idempotency_key,
+       amount_cents, currency, status, subscription_id, created_at, updated_at
+FROM payments.transactions
+WHERE provider = $1 AND status = 'pending' AND created_at < $2
+ORDER BY created_at ASC
+LIMIT $3
+`, provider, cutoff, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []Transaction
+	for rows.Next() {
+		tx, err := scanTransactionRow(rows)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, *tx)
+	}
+	return out, rows.Err()
 }
