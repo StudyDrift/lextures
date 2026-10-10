@@ -171,7 +171,9 @@
     "fetchMyPurchases",
     "fetchMyTransactions",
     "formatMoney",
-    "openBillingPortal"
+    "openBillingPortal",
+    "transactionStatusLabel",
+    "visibleTransactions"
   ],
   "boards-api.ts": [
     "ArrangeBoardPostInput",
