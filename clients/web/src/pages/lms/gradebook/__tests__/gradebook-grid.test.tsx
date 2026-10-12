@@ -1,7 +1,7 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { UiDensityProvider } from '../../../../context/ui-density-context'
 import { GradebookGrid, type GradebookColumn, type GradebookStudent } from '../gradebook-grid'
 
@@ -141,5 +141,82 @@ describe('GradebookGrid — accessibility', () => {
     expect(screen.getByRole('grid', { name: /grades by student and assignment/i })).toBeInTheDocument()
     expect(screen.queryByRole('grid', { name: /grades by assignment and student/i })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: /^transpose$/i })).toHaveAttribute('aria-pressed', 'false')
+  })
+})
+
+describe('GradebookGrid — cell editing', () => {
+  const emptyGrades = {
+    s1: { a1: '', a2: '' },
+    s2: { a1: '', a2: '' },
+  }
+
+  function lastGrades(fn: ReturnType<typeof vi.fn>) {
+    const calls = fn.mock.calls
+    return calls[calls.length - 1]?.[0] as Record<string, Record<string, string>>
+  }
+
+  function scoreCells() {
+    return screen.getAllByRole('gridcell').filter((c) => c.hasAttribute('data-gradebook-cell'))
+  }
+
+  it('stages a score typed into a focused cell when Enter is pressed (#763)', async () => {
+    const user = userEvent.setup()
+    const onGradesChange = vi.fn()
+    renderGrid({ initialGrades: emptyGrades, onGradesChange })
+    const cell = scoreCells()[3]!
+    await user.click(cell)
+    await user.keyboard('9')
+    expect(screen.getByRole('textbox', { name: /grade for bob jones, quiz 1/i })).toHaveValue('9')
+    await user.keyboard('{Enter}')
+    expect(screen.queryByRole('textbox', { name: /grade for/i })).not.toBeInTheDocument()
+    expect(lastGrades(onGradesChange).s2!.a2).toBe('9')
+    expect(cell).toHaveTextContent('9')
+  })
+
+  it('stages a score typed into a focused cell when Tab is pressed', async () => {
+    const user = userEvent.setup()
+    const onGradesChange = vi.fn()
+    renderGrid({ initialGrades: emptyGrades, onGradesChange })
+    await user.click(scoreCells()[1]!)
+    await user.keyboard('95')
+    await user.keyboard('{Tab}')
+    expect(lastGrades(onGradesChange).s1!.a2).toBe('95')
+  })
+
+  it('typing replaces an existing score, Enter commits it', async () => {
+    const user = userEvent.setup()
+    const onGradesChange = vi.fn()
+    renderGrid({ onGradesChange })
+    await user.click(scoreCells()[0]!)
+    await user.keyboard('7{Enter}')
+    expect(lastGrades(onGradesChange).s1!.a1).toBe('7')
+  })
+
+  it('commits an edited score on Enter after double-click', async () => {
+    const user = userEvent.setup()
+    const onGradesChange = vi.fn()
+    renderGrid({ initialGrades: emptyGrades, onGradesChange })
+    await user.dblClick(scoreCells()[3]!)
+    const input = screen.getByRole('textbox', { name: /grade for bob jones, quiz 1/i })
+    await user.type(input, '9')
+    await user.keyboard('{Enter}')
+    expect(lastGrades(onGradesChange).s2!.a2).toBe('9')
+  })
+
+  it('Escape after typing discards the typed score', async () => {
+    const user = userEvent.setup()
+    const onGradesChange = vi.fn()
+    renderGrid({ initialGrades: emptyGrades, onGradesChange })
+    await user.click(scoreCells()[0]!)
+    await user.keyboard('9{Escape}')
+    expect(lastGrades(onGradesChange).s1!.a1).toBe('')
+  })
+
+  it('does not start editing on typing when read-only', async () => {
+    const user = userEvent.setup()
+    renderGrid({ initialGrades: emptyGrades, readOnly: true })
+    await user.click(scoreCells()[0]!)
+    await user.keyboard('9')
+    expect(screen.queryByRole('textbox', { name: /grade for/i })).not.toBeInTheDocument()
   })
 })
