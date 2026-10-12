@@ -43,7 +43,6 @@
   "parent.messageTeacherSubject": "Au sujet de {childName} — {courseTitle}",
   "parent.messageInboxHint": "Vous pouvez aussi écrire depuis la <inboxLink>boîte de réception</inboxLink>.",
   "parent.inboxLink": "Boîte de réception",
-
   "parentAssign.title": "Attribuer des parents",
   "parentAssign.subtitle": "Recherchez un élève, puis liez jusqu'à trois parents ou tuteurs. Les comptes existants sont liés immédiatement ; les nouvelles adresses reçoivent une invitation d'activation.",
   "parentAssign.loading": "Chargement des permissions…",
@@ -84,5 +83,21 @@
   "parentAssign.fixErrors": "Corrigez les champs signalés et réessayez.",
   "parentAssign.saveError": "Impossible d'enregistrer les tuteurs.",
   "parentAssign.successToast": "Liés {linked}, invités {invited}.",
-  "parentAssign.partialToast": "Liés {linked}, invités {invited}, {errors} en échec."
+  "parentAssign.partialToast": "Liés {linked}, invités {invited}, {errors} en échec.",
+  "parent.home.heading": "Cette semaine",
+  "parent.home.loading": "Chargement de la semaine…",
+  "parent.home.error": "Impossible de charger le résumé de la semaine.",
+  "parent.home.dueThisWeek": "À rendre cette semaine ({count})",
+  "parent.home.completedThisWeek": "Terminé cette semaine ({count})",
+  "parent.home.grades": "Notes actuelles",
+  "parent.home.noGrade": "Pas encore de note",
+  "parent.home.overdue": "En retard",
+  "parent.home.completedAt": "Fait {date}",
+  "parent.home.nothingDue": "Rien à rendre cette semaine.",
+  "parent.home.nothingCompleted": "Rien de terminé cette semaine pour l’instant.",
+  "parent.home.timeSpent": "Temps passé cette semaine : {time}",
+  "parent.home.noCourses": "Inscrit à aucun cours pour l’instant.",
+  "parent.home.addCourse": "Ajouter un cours",
+  "parent.home.switchToTeacher": "Passer au tableau de bord enseignant",
+  "parent.home.switchToParent": "Accueil parent"
 }

@@ -44,7 +44,7 @@ func (d Deps) requireParentViewer(w http.ResponseWriter, r *http.Request) (paren
 		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load user.")
 		return uuid.UUID{}, uuid.UUID{}, false
 	}
-	if row == nil || row.AccountType != user.AccountTypeParent {
+	if row == nil || row.AccountType == user.AccountTypeManaged || row.AccountType == user.AccountTypeSystem {
 		apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "Parent account required.")
 		return uuid.UUID{}, uuid.UUID{}, false
 	}
@@ -52,6 +52,19 @@ func (d Deps) requireParentViewer(w http.ResponseWriter, r *http.Request) (paren
 	if err != nil {
 		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load organization.")
 		return uuid.UUID{}, uuid.UUID{}, false
+	}
+	if row.AccountType != user.AccountTypeParent {
+		// Homeschool parents (#772) keep a standard account and reach the parent views through
+		// managed learners or linked students rather than the parent account type.
+		has, err := parentlinks.HasChildren(r.Context(), d.Pool, uid, oid)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify parent link.")
+			return uuid.UUID{}, uuid.UUID{}, false
+		}
+		if !has {
+			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "Parent account required.")
+			return uuid.UUID{}, uuid.UUID{}, false
+		}
 	}
 	return uid, oid, true
 }
@@ -736,6 +749,7 @@ func (d Deps) registerParentRoutes(r chi.Router) {
 	r.Get("/api/v1/parent/students/{sid}/attendance-summary", d.handleParentStudentAttendanceSummary())
 	r.Get("/api/v1/parent/students/{sid}/assignments", d.handleParentStudentAssignments())
 	r.Get("/api/v1/parent/weekly-summary", d.handleParentWeeklySummary())
+	r.Get("/api/v1/parent/home", d.handleParentHome())
 	r.Method(http.MethodGet, "/api/v1/parent/notification-prefs", d.handleParentNotificationPrefs())
 	r.Method(http.MethodPatch, "/api/v1/parent/notification-prefs", d.handleParentNotificationPrefs())
 }

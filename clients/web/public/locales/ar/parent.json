@@ -43,7 +43,6 @@
   "parent.messageTeacherSubject": "بخصوص {childName} — {courseTitle}",
   "parent.messageInboxHint": "يمكنك أيضًا المراسلة من <inboxLink>صندوق الوارد</inboxLink>.",
   "parent.inboxLink": "صندوق الوارد",
-
   "parentAssign.title": "تعيين أولياء الأمور",
   "parentAssign.subtitle": "ابحث عن طالب ثم اربط حتى ثلاثة أولياء أو أوصياء. تُربط الحسابات الحالية فورًا؛ وتستلم الرسائل الجديدة دعوة تفعيل.",
   "parentAssign.loading": "جارٍ تحميل الصلاحيات…",
@@ -84,5 +83,21 @@
   "parentAssign.fixErrors": "صحّح الحقول المميزة وحاول مجددًا.",
   "parentAssign.saveError": "تعذر حفظ الأولياء.",
   "parentAssign.successToast": "تم الربط {linked}، والدعوة {invited}.",
-  "parentAssign.partialToast": "تم الربط {linked}، والدعوة {invited}، وفشل {errors}."
+  "parentAssign.partialToast": "تم الربط {linked}، والدعوة {invited}، وفشل {errors}.",
+  "parent.home.heading": "هذا الأسبوع",
+  "parent.home.loading": "جارٍ تحميل هذا الأسبوع…",
+  "parent.home.error": "تعذّر تحميل ملخص هذا الأسبوع.",
+  "parent.home.dueThisWeek": "مستحق هذا الأسبوع ({count})",
+  "parent.home.completedThisWeek": "مكتمل هذا الأسبوع ({count})",
+  "parent.home.grades": "الدرجات الحالية",
+  "parent.home.noGrade": "لا توجد درجة بعد",
+  "parent.home.overdue": "متأخر",
+  "parent.home.completedAt": "اكتمل {date}",
+  "parent.home.nothingDue": "لا شيء مستحق هذا الأسبوع.",
+  "parent.home.nothingCompleted": "لم يكتمل شيء بعد هذا الأسبوع.",
+  "parent.home.timeSpent": "الوقت المستغرق هذا الأسبوع: {time}",
+  "parent.home.noCourses": "غير مسجّل في أي دورة بعد.",
+  "parent.home.addCourse": "إضافة دورة",
+  "parent.home.switchToTeacher": "التبديل إلى لوحة المعلم",
+  "parent.home.switchToParent": "صفحة ولي الأمر"
 }

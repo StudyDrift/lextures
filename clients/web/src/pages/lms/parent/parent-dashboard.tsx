@@ -1,11 +1,17 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { formatDateTime } from '../../../lib/format'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { CalendarHeart, Mail, Users } from 'lucide-react'
 import { usePlatformFeatures } from '../../../context/platform-features-context'
+import { getAccountType } from '../../../lib/auth'
+import { setDashboardViewPreference } from '../../../lib/dashboard-view-preference'
+import { ParentHomeCards } from '../../../components/parent/parent-home-cards'
+import { Button } from '../../../components/ui/button'
 import {
   fetchParentChildren,
+  fetchParentHome,
+  type ParentHomeChild,
   fetchParentStudentAssignments,
   fetchParentStudentAttendanceSummary,
   fetchParentStudentBehavior,
@@ -102,7 +108,31 @@ export default function ParentDashboard() {
   const [behavior, setBehavior] = useState<SectionState<ParentBehaviorResponse>>(emptySection)
   const [reportCards, setReportCards] = useState<SectionState<ParentReportCard[]>>(emptySection)
 
+  const [home, setHome] = useState<SectionState<ParentHomeChild[]>>(() => ({ data: null, loading: true, error: null }))
+  const navigate = useNavigate()
+  // Homeschool parents keep a standard account and can author courses; offer the teacher view.
+  const canSwitchToTeacher = getAccountType() !== 'parent'
+
   const selectedId = params.get('student') ?? ''
+
+  useEffect(() => {
+    let cancelled = false
+    void fetchParentHome()
+      .then((data) => {
+        if (!cancelled) setHome({ data: data.children, loading: false, error: null })
+      })
+      .catch(() => {
+        if (!cancelled) setHome({ data: null, loading: false, error: t('parent.home.error') })
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [t])
+
+  const switchToTeacher = () => {
+    setDashboardViewPreference('teacher')
+    navigate('/')
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -244,9 +274,27 @@ export default function ParentDashboard() {
             {t('parent.bookConferences')}
           </Link>
         )}
+        {canSwitchToTeacher && (
+          <div className="mt-2">
+            <Button type="button" variant="secondary" size="sm" onClick={switchToTeacher}>
+              {t('parent.home.switchToTeacher')}
+            </Button>
+          </div>
+        )}
       </header>
 
       {loadError && <SectionError message={loadError} />}
+
+      {children && children.length > 0 && (
+        <section className="space-y-3" aria-labelledby="parent-home-heading">
+          <h2 id="parent-home-heading" className="text-lg font-semibold text-fg-default">
+            {t('parent.home.heading')}
+          </h2>
+          {home.loading && <p className="text-sm text-fg-muted">{t('parent.home.loading')}</p>}
+          {home.error && <SectionError message={home.error} />}
+          {home.data && <ParentHomeCards items={home.data} />}
+        </section>
+      )}
 
       {children && children.length === 0 && !loadError && (
         <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-100">

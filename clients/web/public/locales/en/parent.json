@@ -43,7 +43,6 @@
   "parent.messageTeacherSubject": "Regarding {childName} — {courseTitle}",
   "parent.messageInboxHint": "You can also message instructors from the <inboxLink>Inbox</inboxLink>.",
   "parent.inboxLink": "Inbox",
-
   "parentAssign.title": "Assign parents",
   "parentAssign.subtitle": "Search for a student, then link up to three parents or guardians. Existing accounts are linked immediately; new emails receive an activate invite.",
   "parentAssign.loading": "Loading permissions…",
@@ -84,5 +83,21 @@
   "parentAssign.fixErrors": "Fix the highlighted fields and try again.",
   "parentAssign.saveError": "Could not save guardians.",
   "parentAssign.successToast": "Linked {linked}, invited {invited}.",
-  "parentAssign.partialToast": "Linked {linked}, invited {invited}, {errors} failed."
+  "parentAssign.partialToast": "Linked {linked}, invited {invited}, {errors} failed.",
+  "parent.home.heading": "This week",
+  "parent.home.loading": "Loading this week…",
+  "parent.home.error": "Could not load this week's summary.",
+  "parent.home.dueThisWeek": "Due this week ({count})",
+  "parent.home.completedThisWeek": "Completed this week ({count})",
+  "parent.home.grades": "Current grades",
+  "parent.home.noGrade": "No grade yet",
+  "parent.home.overdue": "Overdue",
+  "parent.home.completedAt": "Done {date}",
+  "parent.home.nothingDue": "Nothing due this week.",
+  "parent.home.nothingCompleted": "Nothing completed yet this week.",
+  "parent.home.timeSpent": "Time spent this week: {time}",
+  "parent.home.noCourses": "Not enrolled in any courses yet.",
+  "parent.home.addCourse": "Add a course",
+  "parent.home.switchToTeacher": "Switch to teacher dashboard",
+  "parent.home.switchToParent": "Parent home"
 }
