@@ -108,7 +108,7 @@ export default function StarterLibraryPage() {
 
   return (
     <LmsPage
-      title="Starter library"
+      title={'Starter library'}
       description="Copy a ready course for a grade and subject, then edit it for your family."
     >
       {error ? (
