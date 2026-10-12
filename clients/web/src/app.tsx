@@ -47,6 +47,7 @@ export default function App() {
         <Route path="/forgot-password" element={<Pages.ForgotPassword />} />
         <Route path="/reset-password" element={<Pages.ResetPassword />} />
         <Route path="/activate-parent" element={<Pages.ActivateParent />} />
+        <Route path="/family" element={<Pages.FamilySignInPage />} />
         <Route path="/ai-disclosure" element={<Pages.AiDisclosurePage />} />
         <Route path="/trust" element={<Pages.TrustCenterPage />} />
         <Route path="/type" element={<Pages.TypefacePage />} />

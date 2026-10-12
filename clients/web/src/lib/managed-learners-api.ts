@@ -11,6 +11,9 @@ export type ManagedDependent = {
   status: string
   coppaMinor: boolean
   createdAt: string
+  /** Family-device sign-in (#771). */
+  signInMethod?: 'none' | 'pin' | 'picture'
+  signInLockedUntil?: string | null
 }
 
 export type DependentCourseEnrollment = {

@@ -1426,6 +1426,21 @@
     "portfolioContentPageHref",
     "publicPortfolioContentPageHref"
   ],
+  "family-sign-in-api.ts": [
+    "FamilyDevice",
+    "FamilyPicker",
+    "FamilyPickerLearner",
+    "FamilySignInError",
+    "SignInMethod",
+    "disableLearnerSignIn",
+    "familySignIn",
+    "fetchFamilyPicker",
+    "listFamilyDevices",
+    "registerThisFamilyDevice",
+    "revokeFamilyDevice",
+    "setLearnerSignIn",
+    "signOutFamilySession"
+  ],
   "feedback-admin-api.ts": [
     "FEEDBACK_CATEGORIES",
     "FEEDBACK_LIST_PAGE_SIZE",

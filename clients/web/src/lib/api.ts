@@ -1,4 +1,5 @@
 import { getBearerToken, getImpersonationToken } from './auth'
+import { handleFamilySessionUnauthorized } from './family-device'
 import {
   applyAuthTokenResponse,
   clearSessionTokens,
@@ -155,6 +156,8 @@ function applyUnauthorizedHandling(res: Response): void {
   // session or bounce the browser to /login (#762). The Learn-as token stays
   // active; Exit to parent can still restore the parent account.
   if (getImpersonationToken()) {
+    // An expired family-device learner session returns to "Who's learning?" (#771).
+    handleFamilySessionUnauthorized()
     return
   }
   clearSessionTokens()

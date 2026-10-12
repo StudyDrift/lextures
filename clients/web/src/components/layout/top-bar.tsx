@@ -22,6 +22,8 @@ import { useViewerEnrollmentRoles } from '../../lib/use-viewer-enrollment-roles'
 import { EnrollmentAvatar } from '../enrollment/enrollment-avatar'
 
 import { clearSessionTokens, getRefreshToken } from '../../lib/session-tokens'
+import { FAMILY_PICKER_PATH, isFamilySessionActive } from '../../lib/family-device'
+import { signOutFamilySession } from '../../lib/family-sign-in-api'
 import { applyUiTheme } from '../../lib/ui-theme'
 import { profileName } from './top-bar-utils'
 import { useTopBarAccountProfile } from './use-top-bar-account-profile'
@@ -44,6 +46,13 @@ function UserMenu() {
   const menuId = useId()
 
   async function signOut() {
+    // A learner on a family device signs out to "Who's learning?" without touching
+    // the parent's refresh token (#771).
+    if (isFamilySessionActive()) {
+      await signOutFamilySession()
+      navigate(FAMILY_PICKER_PATH, { replace: true })
+      return
+    }
     const rt = getRefreshToken()
     if (rt) {
       try {

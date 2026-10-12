@@ -193,6 +193,8 @@ func (d Deps) handleGetMe() http.HandlerFunc {
 	}
 	type learningAsInfo struct {
 		ActorID string `json:"actorId"`
+		// Via is "family_device" when the learner signed in themselves on a family device (#771).
+		Via string `json:"via,omitempty"`
 	}
 	type resp struct {
 		ID            string             `json:"id"`
@@ -218,7 +220,7 @@ func (d Deps) handleGetMe() http.HandlerFunc {
 			out.Impersonating = &impersonationInfo{AdminID: imp.AdminID}
 		}
 		if ml, ok := auth.ManagedLearnerFromContext(r.Context()); ok {
-			out.LearningAs = &learningAsInfo{ActorID: ml.ActorID}
+			out.LearningAs = &learningAsInfo{ActorID: ml.ActorID, Via: ml.Via}
 		}
 		// Never surface synthetic managed emails to clients.
 		if user.IsManagedEmail(out.Email) {

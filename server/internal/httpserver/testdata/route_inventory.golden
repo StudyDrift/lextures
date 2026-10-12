@@ -390,6 +390,8 @@ POST	/api/v1/auth/change-password	session
 POST	/api/v1/auth/cli/approve	session
 GET	/api/v1/auth/cli/poll	anonymous
 POST	/api/v1/auth/cli/request	anonymous
+POST	/api/v1/auth/family-device/learners	anonymous
+POST	/api/v1/auth/family-device/sessions	anonymous
 POST	/api/v1/auth/forgot-password	anonymous
 POST	/api/v1/auth/login	anonymous
 POST	/api/v1/auth/logout	anonymous
@@ -1337,10 +1339,15 @@ PATCH	/api/v1/me/demographics	anonymous
 GET	/api/v1/me/dependents	anonymous
 POST	/api/v1/me/dependents	anonymous
 GET	/api/v1/me/dependents/courses	anonymous
+GET	/api/v1/me/dependents/family-devices	anonymous
+POST	/api/v1/me/dependents/family-devices	anonymous
+DELETE	/api/v1/me/dependents/family-devices/{deviceId}	anonymous
 DELETE	/api/v1/me/dependents/sessions/current	anonymous
 DELETE	/api/v1/me/dependents/{id}	anonymous
 PATCH	/api/v1/me/dependents/{id}	anonymous
 POST	/api/v1/me/dependents/{id}/sessions	anonymous
+DELETE	/api/v1/me/dependents/{id}/sign-in	anonymous
+PUT	/api/v1/me/dependents/{id}/sign-in	anonymous
 GET	/api/v1/me/device-tokens	session
 POST	/api/v1/me/device-tokens	session
 DELETE	/api/v1/me/device-tokens/{id}	session
