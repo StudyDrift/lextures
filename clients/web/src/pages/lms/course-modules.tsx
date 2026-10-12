@@ -897,7 +897,7 @@ function ModuleItemRowActions({
               }}
               className="flex w-full border-t border-border-subtle px-2.5 py-2 text-start text-sm font-medium text-rose-700 transition-[background-color,color,border-color] hover:bg-rose-50 dark:border-border-default dark:text-rose-300 dark:hover:bg-rose-950/50"
             >
-              Delete
+              Archive
             </button>
           </div>
         )}
@@ -3404,7 +3404,7 @@ export default function CourseModules() {
                 id={archiveDialogTitleId}
                 className="text-sm font-semibold text-fg-default"
               >
-                Delete item
+                Archive item
               </h3>
               <button
                 type="button"
@@ -3443,7 +3443,7 @@ export default function CourseModules() {
                   disabled={busyChildItemId === archiveConfirmItem.id}
                   className="rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-indigo-500 dark:hover:bg-indigo-400"
                 >
-                  {busyChildItemId === archiveConfirmItem.id ? 'Archiving…' : 'Delete'}
+                  {busyChildItemId === archiveConfirmItem.id ? 'Archiving…' : 'Archive'}
                 </button>
               </div>
             </div>
