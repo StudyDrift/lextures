@@ -32,7 +32,9 @@ import {
   securityGraph,
   comparisonPageGraph,
   integrationPageGraph,
+  guidePageGraph,
 } from './schema/page-graphs'
+import { getPublishedGuide, publishedGuides } from './guides-data'
 import { DEFAULT_LOCALE, getLocale, isPublishedLocale, isValidLocaleCode, isWellFormedBcp47, localizedPath, type LocaleCode, type TranslationStatus } from './locales'
 
 export type { JsonLdNode }
@@ -372,6 +374,20 @@ const ENGLISH_ROUTE_MANIFEST: Array<Omit<RouteDescriptor, 'locale'>> = [
     navGroup: navGroup as RouteDescriptor['navGroup'],
     hub: Boolean(hub),
   })),
+  {
+    // Repository-native guides. Future-dated guides (publishDate after today in
+    // America/Boise) are not enumerated, so no HTML, sitemap entry, or listing.
+    path: '/guides/:slug',
+    title: c => getPublishedGuide(c.params.slug ?? '')?.metaTitle ?? 'Guide — Lextures',
+    description: c => getPublishedGuide(c.params.slug ?? '')?.description ?? 'Lextures guide.',
+    changefreq: 'monthly', sitemap: true, priority: '0.6', interactive: false,
+    jsonLd: guidePageGraph, parent: '/guides', cluster: 'homeschool',
+    relatedTo: ['/homeschool', '/compare/lextures-vs-canvas', '/alternatives/canvas', '/pricing'],
+    enumerate: () => publishedGuides().map(g => ({
+      path: g.path, title: g.metaTitle, description: g.description,
+      lastmod: g.verifiedOn > g.publishDate ? g.verifiedOn : g.publishDate, params: { slug: g.slug },
+    })),
+  },
   {
     path: '/glossary', title: 'Learning and assessment glossary — Lextures',
     description: 'Reviewed definitions, examples, sources, and practical decisions for assessment, adaptive learning, and instructional design.',

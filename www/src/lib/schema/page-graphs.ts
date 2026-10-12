@@ -28,6 +28,7 @@ import { PRICING_FAQS } from './pricing-faqs'
 import type { PublicMarketplaceCourse, PublicMarketplaceCourseDetail } from '../marketplace-api'
 import { getCompetitor, VERIFIED_AT } from '../competitors'
 import { getIntegration } from '../integrations'
+import { getPublishedGuide } from '../guides-data'
 import { softwareApplicationId, absoluteUrl } from './ids'
 
 export function siteOriginFromCtx(ctx: SchemaRenderContext): string {
@@ -335,4 +336,18 @@ export function legalDocumentGraph(
       }),
     ],
   })
+}
+
+/** `/guides/:slug`: Article + FAQPage (answers match the visible FAQ verbatim). */
+export function guidePageGraph(ctx: SchemaRenderContext): JsonLdNode[] {
+  const origin = siteOriginFromCtx(ctx)
+  const guide = getPublishedGuide(ctx.params.slug || '')
+  if (!guide) return defaultPageGraph(ctx, 'Guide')
+  const author = getAuthor(guide.authorSlug); const person = author ? buildPerson(author, origin) : null
+  const faq = buildFaqPage(ctx.path, guide.faqs, origin)
+  return composePageGraph({ path: ctx.path, leafName: guide.headline, siteOrigin: origin, pageNodes: [
+    ...(person ? [person] : []),
+    buildArticle({ path: ctx.path, headline: guide.headline, description: guide.description, datePublished: guide.publishDate, dateModified: guide.verifiedOn > guide.publishDate ? guide.verifiedOn : guide.publishDate, authorSlug: guide.authorSlug, articleSection: 'Homeschool', citations: guide.citations, siteOrigin: origin }),
+    ...(faq ? [faq] : []),
+  ] })
 }

@@ -61,6 +61,7 @@ export const PAGE_LOADERS: Record<string, Loader> = {
   '/alternatives/:slug': () => import('../pages/comparison-page').then(m => pick(m, 'AlternativesPage')),
   '/integrations/:slug': () => import('../pages/comparison-page').then(m => pick(m, 'IntegrationPage')),
   '/blog': () => import('../pages/blog-index').then(m => pick(m, 'BlogIndex')),
+  '/guides/:slug': () => import('../pages/guide-page').then(m => pick(m, 'GuidePage')),
   '/resources/guides': () => import('../pages/guides-index-page').then(m => pick(m, 'GuidesIndexPage')),
   '/resources/research': () => import('../pages/research-pages').then(m => pick(m, 'ResearchIndexPage')),
   '/resources/research/methodology': () => import('../pages/research-pages').then(m => pick(m, 'ResearchMethodologyPage')),

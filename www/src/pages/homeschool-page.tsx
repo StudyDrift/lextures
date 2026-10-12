@@ -5,6 +5,7 @@ import {
   MarketingPageShell,
 } from '../components/marketing-page-shell'
 import { SITE_LINKS } from '../lib/site-links'
+import { publishedGuides } from '../lib/guides-data'
 
 const FEATURES = [
   {
@@ -70,6 +71,17 @@ export function HomeschoolPage() {
       </section>
 
       <CardGrid heading="Common use cases" items={USE_CASES} columns={3} />
+
+      {publishedGuides().length > 0 && (
+        <section className="py-12" aria-labelledby="homeschool-guides">
+          <div className="mx-auto max-w-[960px] px-5 md:px-10 xl:px-14">
+            <h2 id="homeschool-guides" className="font-display text-[clamp(22px,2.6vw,28px)] font-semibold" style={{ color: 'var(--ink)' }}>Homeschool guides</h2>
+            <ul className="mt-4 grid gap-2 text-[16px]">
+              {publishedGuides().map(guide => <li key={guide.slug}><a href={guide.path}>{guide.linkLabel}</a></li>)}
+            </ul>
+          </div>
+        </section>
+      )}
 
       <section className="border-t py-12" style={{ borderColor: 'var(--line)' }}>
         <div className="mx-auto max-w-[960px] px-5 md:px-10 xl:px-14">
