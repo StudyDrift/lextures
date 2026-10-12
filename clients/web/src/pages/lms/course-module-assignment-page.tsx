@@ -583,6 +583,7 @@ export default function CourseModuleAssignmentPage() {
     try {
       const updated = await patchCourseStructureItemAssignmentGroup(courseCode, itemId, next)
       setAssignmentGroupId(updated.assignmentGroupId ?? null)
+      if (updated.updatedAt) setUpdatedAt(updated.updatedAt)
     } catch (e) {
       setAssignmentGroupPatchError(
         e instanceof Error ? e.message : 'Could not update assignment group.',

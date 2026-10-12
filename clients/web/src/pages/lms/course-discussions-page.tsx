@@ -5,6 +5,7 @@ import { ArrowLeft, Lock, MessageCircle, Pin, Plus, ThumbsUp, Trash2 } from 'luc
 import { DiscussionAuthorByline } from '../../components/discussions/discussion-author-byline'
 import { discussionAuthorLabel } from '../../components/discussions/discussion-author-label'
 import { DiscussionDocEditor, DiscussionReadonlyBody } from '../../components/discussions/discussion-doc-editor'
+import { resolveDiscussionOpeningPost } from '../../components/discussions/discussion-opening-post'
 import { formatAbsolute, formatRelativeCompact } from '../../lib/format-datetime'
 import { usePermissions } from '../../context/use-permissions'
 import { getJwtSubject } from '../../lib/auth'
@@ -66,8 +67,11 @@ export default function CourseDiscussionsPage() {
   const [course, setCourse] = useState<CoursePublic | null>(null)
   const [loadErr, setLoadErr] = useState<string | null>(null)
   const [forums, setForums] = useState<DiscussionForum[]>([])
+  /** True until the first forums fetch settles, so the empty state does not flash. */
+  const [forumsLoading, setForumsLoading] = useState(true)
   const [forumId, setForumId] = useState<string | null>(null)
   const [threads, setThreads] = useState<DiscussionThreadSummary[]>([])
+  const [threadsLoading, setThreadsLoading] = useState(false)
   const [threadId, setThreadId] = useState<string | null>(null)
   const [threadDetail, setThreadDetail] = useState<DiscussionThreadDetail | null>(null)
   const [posts, setPosts] = useState<DiscussionPost[]>([])
@@ -98,6 +102,7 @@ export default function CourseDiscussionsPage() {
     let cancelled = false
     void (async () => {
       setLoadErr(null)
+      setForumsLoading(true)
       try {
         const c = await fetchCourse(courseCode)
         if (cancelled) return
@@ -109,6 +114,8 @@ export default function CourseDiscussionsPage() {
         await reloadForums()
       } catch (e) {
         if (!cancelled) setLoadErr(e instanceof Error ? e.message : 'Could not load discussions.')
+      } finally {
+        if (!cancelled) setForumsLoading(false)
       }
     })()
     return () => {
@@ -119,12 +126,15 @@ export default function CourseDiscussionsPage() {
   useEffect(() => {
     if (!courseCode || !forumId || course?.discussionsEnabled !== true) return
     let cancelled = false
+    setThreadsLoading(true)
     void (async () => {
       try {
         const t = await fetchDiscussionThreads(courseCode, forumId)
         if (!cancelled) setThreads(t)
       } catch {
         if (!cancelled) setThreads([])
+      } finally {
+        if (!cancelled) setThreadsLoading(false)
       }
     })()
     return () => {
@@ -157,11 +167,20 @@ export default function CourseDiscussionsPage() {
     [courseCode],
   )
 
-  const orderedPosts = useMemo(() => nestPosts(posts), [posts])
+  const opening = useMemo(
+    () =>
+      threadDetail
+        ? resolveDiscussionOpeningPost(threadDetail, posts)
+        : { openingBody: null, promotedPost: null, replies: posts },
+    [threadDetail, posts],
+  )
+  const replyPosts = opening.replies
+
+  const orderedPosts = useMemo(() => nestPosts(replyPosts), [replyPosts])
 
   const depthOf = useCallback(
     (id: string): number => {
-      const byId = new Map(posts.map((p) => [p.id, p]))
+      const byId = new Map(replyPosts.map((p) => [p.id, p]))
       let d = 0
       let cur: DiscussionPost | undefined = byId.get(id)
       while (cur?.parentPostId) {
@@ -170,7 +189,7 @@ export default function CourseDiscussionsPage() {
       }
       return d
     },
-    [posts],
+    [replyPosts],
   )
 
   const handleCreateThread = useCallback(async () => {
@@ -218,6 +237,60 @@ export default function CourseDiscussionsPage() {
       }
     },
     [confirm, courseCode, loadThread, t, threadDetail],
+  )
+
+  const renderPostActions = (p: DiscussionPost) => (
+    <div className="mt-2 flex flex-wrap items-center gap-3 border-t border-border-subtle pt-2 text-xs dark:border-border-subtle">
+      <button
+        type="button"
+        className="inline-flex items-center gap-1 rounded-lg border border-border-default px-2 py-1 font-medium text-fg-muted hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
+        aria-label={`Upvote (${p.upvoteCount} votes)`}
+        disabled={busy || threadDetail?.isLocked}
+        onClick={async () => {
+          if (!threadDetail) return
+          setBusy(true)
+          try {
+            const r = await upvoteDiscussionPost(courseCode, p.id)
+            setPosts((prev) =>
+              prev.map((x) =>
+                x.id === p.id ? { ...x, upvoteCount: r.upvoteCount, viewerUpvoted: true } : x,
+              ),
+            )
+          } catch (e) {
+            const raw = e instanceof Error ? e.message : ''
+            if (!raw.toLowerCase().includes('conflict')) {
+              setMsg(raw || 'Could not upvote.')
+            }
+          } finally {
+            setBusy(false)
+          }
+        }}
+      >
+        <ThumbsUp className="h-3.5 w-3.5" aria-hidden />
+        {p.upvoteCount}
+      </button>
+      <button
+        type="button"
+        className="text-accent-fg hover:underline dark:text-indigo-300"
+        disabled={!!threadDetail?.isLocked}
+        onClick={() => {
+          setReplyParentId(p.id)
+          setReplyBody(emptyTipTapDoc as Record<string, unknown>)
+        }}
+      >
+        Reply
+      </button>
+      {(viewerId && p.authorId === viewerId) || canModerate ? (
+        <button
+          type="button"
+          className="inline-flex items-center gap-1 text-rose-600 hover:underline dark:text-rose-400"
+          onClick={() => void handleDeletePost(p.id)}
+        >
+          <Trash2 className="h-3.5 w-3.5" aria-hidden />
+          Delete
+        </button>
+      ) : null}
+    </div>
   )
 
   if (!courseCode) {
@@ -309,7 +382,12 @@ export default function CourseDiscussionsPage() {
               </button>
             ))}
           </nav>
-          {forums.length === 0 && !loadErr ? (
+          {forumsLoading && forums.length === 0 && !loadErr ? (
+            <p className="text-xs text-fg-muted" role="status">
+              Loading forums…
+            </p>
+          ) : null}
+          {!forumsLoading && forums.length === 0 && !loadErr ? (
             <p className="text-xs text-fg-muted">No forums yet.</p>
           ) : null}
         </aside>
@@ -376,7 +454,12 @@ export default function CourseDiscussionsPage() {
                   </li>
                 ))}
               </ul>
-              {threads.length === 0 && forumId ? (
+              {(threadsLoading || (forumsLoading && !loadErr)) && threads.length === 0 ? (
+                <p className="text-sm text-fg-muted" role="status">
+                  Loading threads…
+                </p>
+              ) : null}
+              {!threadsLoading && threads.length === 0 && forumId ? (
                 <p className="text-sm text-fg-muted">No threads in this forum yet.</p>
               ) : null}
             </section>
@@ -419,9 +502,12 @@ export default function CourseDiscussionsPage() {
                       createdAt={threadDetail.createdAt}
                     />
                   </div>
-                  <div className="mt-3 text-sm">
-                    <DiscussionReadonlyBody docJson={threadDetail.body} />
-                  </div>
+                  {opening.openingBody != null ? (
+                    <div className="mt-3 text-sm">
+                      <DiscussionReadonlyBody docJson={opening.openingBody} />
+                    </div>
+                  ) : null}
+                  {opening.promotedPost ? renderPostActions(opening.promotedPost) : null}
                   {canModerate ? (
                     <div className="mt-4 flex flex-wrap gap-2 border-t border-border-subtle pt-3 dark:border-border-subtle">
                       <button
@@ -504,57 +590,7 @@ export default function CourseDiscussionsPage() {
                       <div className="mt-2 text-sm">
                         <DiscussionReadonlyBody docJson={p.body} />
                       </div>
-                      <div className="mt-2 flex flex-wrap items-center gap-3 border-t border-border-subtle pt-2 text-xs dark:border-border-subtle">
-                        <button
-                          type="button"
-                          className="inline-flex items-center gap-1 rounded-lg border border-border-default px-2 py-1 font-medium text-fg-muted hover:bg-surface-base disabled:opacity-50 dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
-                          aria-label={`Upvote (${p.upvoteCount} votes)`}
-                          disabled={busy || threadDetail?.isLocked}
-                          onClick={async () => {
-                            if (!threadDetail) return
-                            setBusy(true)
-                            try {
-                              const r = await upvoteDiscussionPost(courseCode, p.id)
-                              setPosts((prev) =>
-                                prev.map((x) =>
-                                  x.id === p.id ? { ...x, upvoteCount: r.upvoteCount, viewerUpvoted: true } : x,
-                                ),
-                              )
-                            } catch (e) {
-                              const raw = e instanceof Error ? e.message : ''
-                              if (!raw.toLowerCase().includes('conflict')) {
-                                setMsg(raw || 'Could not upvote.')
-                              }
-                            } finally {
-                              setBusy(false)
-                            }
-                          }}
-                        >
-                          <ThumbsUp className="h-3.5 w-3.5" aria-hidden />
-                          {p.upvoteCount}
-                        </button>
-                        <button
-                          type="button"
-                          className="text-accent-fg hover:underline dark:text-indigo-300"
-                          disabled={!!threadDetail?.isLocked}
-                          onClick={() => {
-                            setReplyParentId(p.id)
-                            setReplyBody(emptyTipTapDoc as Record<string, unknown>)
-                          }}
-                        >
-                          Reply
-                        </button>
-                        {(viewerId && p.authorId === viewerId) || canModerate ? (
-                          <button
-                            type="button"
-                            className="inline-flex items-center gap-1 text-rose-600 hover:underline dark:text-rose-400"
-                            onClick={() => void handleDeletePost(p.id)}
-                          >
-                            <Trash2 className="h-3.5 w-3.5" aria-hidden />
-                            Delete
-                          </button>
-                        ) : null}
-                      </div>
+                      {renderPostActions(p)}
                     </article>
                   )
                 })}

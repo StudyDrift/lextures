@@ -227,6 +227,7 @@ export default function CourseSettings() {
   const [courseTimezone, setCourseTimezone] = useState<string | null>(null)
   const [gradeLevels, setGradeLevels] = useState<string[]>([])
   const [structureForHomePicker, setStructureForHomePicker] = useState<CourseStructureItem[]>([])
+  const [structureForHomePickerLoading, setStructureForHomePickerLoading] = useState(true)
 
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [saveMessage, setSaveMessage] = useState<string | null>(null)
@@ -287,12 +288,13 @@ export default function CourseSettings() {
       setCourseTimezone(c.courseTimezone?.trim() || null)
       setGradeLevels(gradeLevelsFromCourse(c))
       setMarkdownThemePreset(c.markdownThemePreset ?? 'default')
-      try {
-        const items = await fetchCourseStructure(courseCode)
-        setStructureForHomePicker(items)
-      } catch {
-        setStructureForHomePicker([])
-      }
+      // The course outline only feeds the course-home page picker; load it in the background
+      // so settings tabs render as soon as the course itself arrives.
+      setStructureForHomePickerLoading(true)
+      void fetchCourseStructure(courseCode)
+        .then((items) => setStructureForHomePicker(items))
+        .catch(() => setStructureForHomePicker([]))
+        .finally(() => setStructureForHomePickerLoading(false))
     } catch {
       setLoadError('Could not load this course.')
     } finally {
@@ -1016,6 +1018,7 @@ export default function CourseSettings() {
                     value={courseTimezone}
                     onChange={setCourseTimezone}
                     label="Course time zone"
+                    hideLabel
                     showDetectedHint={false}
                     courseMode
                     allowClear
@@ -1156,7 +1159,11 @@ export default function CourseSettings() {
                           </option>
                         ))}
                     </select>
-                    {structureForHomePicker.filter((i) => i.kind === 'content_page').length === 0 ? (
+                    {structureForHomePickerLoading ? (
+                      <p className="mt-2 text-xs text-fg-muted" role="status">
+                        Loading pages…
+                      </p>
+                    ) : structureForHomePicker.filter((i) => i.kind === 'content_page').length === 0 ? (
                       <p className="mt-2 text-xs text-amber-800 dark:text-amber-200">
                         Add a content page in Modules first, then pick it here.
                       </p>

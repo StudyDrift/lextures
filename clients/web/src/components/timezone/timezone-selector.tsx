@@ -13,6 +13,8 @@ export type TimezoneSelectorProps = {
   onChange: (value: string | null) => void
   disabled?: boolean
   label?: string
+  /** Visually hide the field label (still read by screen readers) when a section heading already names it. */
+  hideLabel?: boolean
   showDetectedHint?: boolean
   /**
    * When true, value may be cleared (null). Course settings typically leave this false
@@ -53,6 +55,7 @@ export function TimezoneSelector({
   onChange,
   disabled,
   label = 'Time zone',
+  hideLabel = false,
   showDetectedHint = true,
   allowClear = false,
   courseMode = false,
@@ -188,7 +191,10 @@ export function TimezoneSelector({
 
   return (
     <div className="space-y-2" data-testid={testId}>
-      <label htmlFor={listId} className="block text-sm font-medium text-stone-800 dark:text-fg-default">
+      <label
+        htmlFor={listId}
+        className={hideLabel ? 'sr-only' : 'block text-sm font-medium text-stone-800 dark:text-fg-default'}
+      >
         {label}
       </label>
       {showDetectedHint && !courseMode && (

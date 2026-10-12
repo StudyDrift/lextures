@@ -44,10 +44,12 @@ type CourseItemAssignmentRow struct {
 }
 
 // GetForCourseItem returns assignment body + structure fields for a module assignment item.
+// UpdatedAt is the later of the assignment body and its structure row, so outline-level edits
+// (title, due date, assignment group) also bump the "Updated" time shown on the item page.
 func GetForCourseItem(ctx context.Context, pool *pgxpool.Pool, courseID, itemID uuid.UUID) (*CourseItemAssignmentRow, error) {
 	var r CourseItemAssignmentRow
 	err := pool.QueryRow(ctx, `
-		SELECT c.title, m.markdown, c.due_at, m.points_worth, c.assignment_group_id, m.updated_at,
+		SELECT c.title, m.markdown, c.due_at, m.points_worth, c.assignment_group_id, GREATEST(m.updated_at, c.updated_at),
 		       m.available_from, m.available_until, m.assignment_access_code,
 		       m.submission_allow_text, m.submission_allow_file_upload, m.submission_allow_url,
 		       m.late_submission_policy, m.late_penalty_percent, m.rubric_json,
