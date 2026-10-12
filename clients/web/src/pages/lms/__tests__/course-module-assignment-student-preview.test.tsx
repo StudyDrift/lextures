@@ -129,7 +129,8 @@ describe('Assignment View as Test Student', () => {
     expect(await screen.findByRole('heading', { name: 'Final Project' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Actions' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /grade submissions/i })).toBeInTheDocument()
-    expect(screen.getByText('Staff submission review')).toBeInTheDocument()
+    // Staff grader mounts only when Grade submissions is clicked (modal), not inline.
+    expect(screen.queryByText('Staff submission review')).toBeNull()
     expect(screen.queryByRole('button', { name: 'Submit text' })).toBeNull()
   })
 

@@ -144,29 +144,10 @@ function newLocalId(): string {
   return `local-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
 }
 
-function scrollToSubmissionPreview() {
-  const el = document.getElementById('submission-preview')
-  if (!el) return
-  const main = document.getElementById('main-content')
-  if (main) {
-    const mainRect = main.getBoundingClientRect()
-    const elRect = el.getBoundingClientRect()
-    const fullyVisible = elRect.top >= mainRect.top && elRect.bottom <= mainRect.bottom
-    if (!fullyVisible) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' })
-    }
-  } else {
-    el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' })
-  }
-  window.requestAnimationFrame(() => {
-    el.focus({ preventScroll: true })
-  })
-}
-
 export default function CourseModuleAssignmentPage() {
   const { t } = useTranslation('common')
   const { courseCode, itemId } = useParams<{ courseCode: string; itemId: string }>()
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { allows, loading: permLoading } = usePermissions()
   const courseViewPreview = useCourseViewAs(courseCode)
   const previewAsLearner = courseViewPreview === 'student'
@@ -248,7 +229,7 @@ export default function CourseModuleAssignmentPage() {
   const [blindGrading, setBlindGrading] = useState(false)
   const [identitiesRevealedAt, setIdentitiesRevealedAt] = useState<string | null>(null)
   const [viewerCanRevealIdentities, setViewerCanRevealIdentities] = useState(false)
-  const [previewModalOpen, setPreviewModalOpen] = useState(false)
+  const [gradingOpen, setGradingOpen] = useState(false)
   const [rubricViewerOpen, setRubricViewerOpen] = useState(false)
   const [gradingAgentOpen, setGradingAgentOpen] = useState(false)
   const [graderReviewCount, setGraderReviewCount] = useState(0)
@@ -260,7 +241,7 @@ export default function CourseModuleAssignmentPage() {
   useEffect(() => {
     if (!previewAsLearner) return
     setEditing(false)
-    setPreviewModalOpen(false)
+    setGradingOpen(false)
     setGradingAgentOpen(false)
   }, [previewAsLearner])
 
@@ -477,8 +458,6 @@ export default function CourseModuleAssignmentPage() {
   const viewerCanPreviewSubmissions = canEdit || viewerIsCourseStaff
 
   const annotationsActive = Boolean(annotationsEnabled && submissionAllowFileUpload)
-  const staffPreviewInModal = Boolean(viewerCanPreviewSubmissions && !annotationsActive)
-
   const showSubmissionWorkbench = Boolean(
     itemId && (assignmentAcceptsSubmissions || feedbackMediaEnabled),
   )
@@ -533,21 +512,26 @@ export default function CourseModuleAssignmentPage() {
   useEffect(() => {
     if (!showPreviewSubmissionsAction) return
     const preview = searchParams.get('preview')
-    if (preview !== 'submissions' && preview !== '1') return
-    if (staffPreviewInModal) {
-      setPreviewModalOpen(true)
-      return
+    if (preview === 'grading' || preview === 'submissions' || preview === '1') {
+      setGradingOpen(true)
     }
-    const t = window.setTimeout(() => scrollToSubmissionPreview(), 150)
-    return () => window.clearTimeout(t)
-  }, [showPreviewSubmissionsAction, searchParams, loading, loadError, editing, staffPreviewInModal])
+  }, [showPreviewSubmissionsAction, searchParams])
 
-  function openSubmissionPreview() {
-    if (staffPreviewInModal) {
-      setPreviewModalOpen(true)
-      return
-    }
-    scrollToSubmissionPreview()
+  function openGrader() {
+    setGradingOpen(true)
+    const preview = searchParams.get('preview')
+    if (preview === 'grading' || preview === 'submissions' || preview === '1') return
+    const next = new URLSearchParams(searchParams)
+    next.set('preview', 'submissions')
+    setSearchParams(next, { replace: true })
+  }
+
+  function closeGrader() {
+    setGradingOpen(false)
+    if (!searchParams.has('preview')) return
+    const next = new URLSearchParams(searchParams)
+    next.delete('preview')
+    setSearchParams(next, { replace: true })
   }
 
   function syncDraftsFromSaved() {
@@ -775,7 +759,7 @@ export default function CourseModuleAssignmentPage() {
             {showPreviewSubmissionsAction ? (
               <button
                 type="button"
-                onClick={openSubmissionPreview}
+                onClick={openGrader}
                 className={
                   allSubmissionsGraded
                     ? 'inline-flex h-10 items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 text-sm font-semibold text-emerald-900 shadow-sm transition-[background-color,color,border-color] hover:bg-emerald-100 dark:border-emerald-900 dark:bg-emerald-950/60 dark:text-emerald-100 dark:hover:bg-emerald-950'
@@ -940,36 +924,31 @@ export default function CourseModuleAssignmentPage() {
               contentTitle={title || 'Assignment'}
               emptyMessage="No instructions yet. Select Edit to add Markdown."
             />
-            {showSubmissionWorkbench ? (
+            {showSubmissionWorkbench && !viewerCanPreviewSubmissions ? (
               <>
-                {!viewerIsCourseStaff && originalityDetection !== 'disabled' ? (
+                {originalityDetection !== 'disabled' ? (
                   <AcademicIntegrityNotice className="mt-6" />
                 ) : null}
                 <AssignmentAnnotationWorkbench
-                courseCode={courseCode}
-                itemId={itemId}
-                assignmentTitle={title}
-                mode={viewerCanPreviewSubmissions ? 'staff' : 'student'}
-                submissionAllowsFile={submissionAllowFileUpload}
-                submissionAllowsText={submissionAllowText}
-                submissionAllowsUrl={submissionAllowUrl}
-                annotationsActive={annotationsActive}
-                feedbackMediaEnabled={Boolean(feedbackMediaEnabled)}
-                resubmissionWorkflowEnabled={resubmissionWorkflowEnabled}
-                blindGradingActive={
-                  Boolean(blindGrading && !identitiesRevealedAt && viewerIsCourseStaff)
-                }
-                canRevealIdentities={viewerCanRevealIdentities}
-                onAfterRevealIdentities={() => void load()}
-                moderatedGradingActive={Boolean(moderatedGrading && viewerIsCourseStaff)}
-                assignmentPointsWorth={pointsWorth}
-                assignmentRubric={rubric}
-                provisionalGraderUserIds={provisionalGraderUserIds}
-                originalityDetection={originalityDetection}
-                presentation={staffPreviewInModal ? 'modal' : 'inline'}
-                modalOpen={previewModalOpen}
-                onModalClose={() => setPreviewModalOpen(false)}
-              />
+                  courseCode={courseCode}
+                  itemId={itemId}
+                  assignmentTitle={title}
+                  mode="student"
+                  submissionAllowsFile={submissionAllowFileUpload}
+                  submissionAllowsText={submissionAllowText}
+                  submissionAllowsUrl={submissionAllowUrl}
+                  annotationsActive={annotationsActive}
+                  feedbackMediaEnabled={Boolean(feedbackMediaEnabled)}
+                  resubmissionWorkflowEnabled={resubmissionWorkflowEnabled}
+                  blindGradingActive={false}
+                  canRevealIdentities={false}
+                  moderatedGradingActive={false}
+                  assignmentPointsWorth={pointsWorth}
+                  assignmentRubric={rubric}
+                  provisionalGraderUserIds={provisionalGraderUserIds}
+                  originalityDetection={originalityDetection}
+                  presentation="inline"
+                />
               </>
             ) : null}
           </div>
@@ -1070,6 +1049,31 @@ export default function CourseModuleAssignmentPage() {
         rubric={rubric}
         onClose={() => setRubricViewerOpen(false)}
       />
+      {viewerCanPreviewSubmissions && assignmentAcceptsSubmissions && gradingOpen ? (
+        <AssignmentAnnotationWorkbench
+          courseCode={courseCode}
+          itemId={itemId}
+          assignmentTitle={title}
+          mode="staff"
+          submissionAllowsFile={submissionAllowFileUpload}
+          submissionAllowsText={submissionAllowText}
+          submissionAllowsUrl={submissionAllowUrl}
+          annotationsActive={annotationsActive}
+          feedbackMediaEnabled={Boolean(feedbackMediaEnabled)}
+          resubmissionWorkflowEnabled={resubmissionWorkflowEnabled}
+          blindGradingActive={Boolean(blindGrading && !identitiesRevealedAt && viewerIsCourseStaff)}
+          canRevealIdentities={viewerCanRevealIdentities}
+          onAfterRevealIdentities={() => void load()}
+          moderatedGradingActive={Boolean(moderatedGrading && viewerIsCourseStaff)}
+          assignmentPointsWorth={pointsWorth}
+          assignmentRubric={rubric}
+          provisionalGraderUserIds={provisionalGraderUserIds}
+          originalityDetection={originalityDetection}
+          presentation="modal"
+          modalOpen
+          onModalClose={closeGrader}
+        />
+      ) : null}
       <GraderAgentWorkflowModal
         open={gradingAgentOpen}
         onClose={() => setGradingAgentOpen(false)}
