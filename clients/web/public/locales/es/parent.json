@@ -43,7 +43,6 @@
   "parent.messageTeacherSubject": "Sobre {childName} — {courseTitle}",
   "parent.messageInboxHint": "También puede enviar mensajes desde la <inboxLink>bandeja de entrada</inboxLink>.",
   "parent.inboxLink": "Bandeja de entrada",
-
   "parentAssign.title": "Asignar padres",
   "parentAssign.subtitle": "Busque un estudiante y vincule hasta tres padres o tutores. Las cuentas existentes se vinculan de inmediato; los correos nuevos reciben una invitación de activación.",
   "parentAssign.loading": "Cargando permisos…",
@@ -84,5 +83,21 @@
   "parentAssign.fixErrors": "Corrija los campos marcados e intente de nuevo.",
   "parentAssign.saveError": "No se pudieron guardar los tutores.",
   "parentAssign.successToast": "Vinculados {linked}, invitados {invited}.",
-  "parentAssign.partialToast": "Vinculados {linked}, invitados {invited}, {errors} fallaron."
+  "parentAssign.partialToast": "Vinculados {linked}, invitados {invited}, {errors} fallaron.",
+  "parent.home.heading": "Esta semana",
+  "parent.home.loading": "Cargando esta semana…",
+  "parent.home.error": "No se pudo cargar el resumen de esta semana.",
+  "parent.home.dueThisWeek": "Para esta semana ({count})",
+  "parent.home.completedThisWeek": "Completado esta semana ({count})",
+  "parent.home.grades": "Calificaciones actuales",
+  "parent.home.noGrade": "Sin calificación aún",
+  "parent.home.overdue": "Atrasado",
+  "parent.home.completedAt": "Hecho {date}",
+  "parent.home.nothingDue": "Nada pendiente esta semana.",
+  "parent.home.nothingCompleted": "Nada completado aún esta semana.",
+  "parent.home.timeSpent": "Tiempo dedicado esta semana: {time}",
+  "parent.home.noCourses": "Aún no está inscrito en ningún curso.",
+  "parent.home.addCourse": "Agregar un curso",
+  "parent.home.switchToTeacher": "Cambiar al panel docente",
+  "parent.home.switchToParent": "Inicio para padres"
 }
