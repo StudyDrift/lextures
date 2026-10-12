@@ -19,7 +19,7 @@ func TestCatalogCoversCoreSubjects(t *testing.T) {
 		t.Fatal("expected at least one elective")
 	}
 	seen := map[string]struct{}{}
-	for _, c := range Catalog() {
+	for _, c := range Filter("", "") {
 		if _, ok := seen[c.Slug]; ok {
 			t.Fatalf("duplicate slug %s", c.Slug)
 		}

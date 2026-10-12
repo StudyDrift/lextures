@@ -192,11 +192,6 @@ func catalog() []Course {
 	return out
 }
 
-// Catalog returns every launch starter course.
-func Catalog() []Course {
-	return catalog()
-}
-
 // Filter returns courses matching optional band and subject. Empty filters match all.
 func Filter(band, subject string) []Course {
 	band = strings.TrimSpace(band)
