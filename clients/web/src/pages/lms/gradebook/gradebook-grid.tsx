@@ -686,7 +686,7 @@ export function GradebookGrid({
         range?: 'selection' | 'single'
         /**
          * Spreadsheet-style "type to edit": replace the cell value with the key the user typed.
-         * Ignored when the editor is a `<select>` (pass/fail, letter, …) since it cannot hold free text.
+         * Ignored for dropdown editors (pass/fail, letter, …) since they cannot hold free text.
          */
         initialDraft?: string
       },
