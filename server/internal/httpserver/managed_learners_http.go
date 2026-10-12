@@ -65,6 +65,12 @@ func (d Deps) managedLearnerGuardMiddleware() func(http.Handler) http.Handler {
 				blocked = true
 			case strings.Contains(path, "/billing"), strings.HasPrefix(path, "/api/v1/me/billing"):
 				blocked = true
+			case path == "/api/v1/checkout" || strings.HasPrefix(path, "/api/v1/checkout/"):
+				blocked = method != http.MethodGet && method != http.MethodHead && method != http.MethodOptions
+			case strings.Contains(path, "/marketplace/courses/") && strings.HasSuffix(path, "/checkout"):
+				blocked = true
+			case strings.Contains(path, "/me/purchases/") && strings.HasSuffix(path, "/assign"):
+				blocked = true
 			case path == "/api/v1/me/password" || strings.HasSuffix(path, "/change-password"):
 				blocked = method != http.MethodGet && method != http.MethodHead && method != http.MethodOptions
 			}

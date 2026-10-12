@@ -14,5 +14,18 @@
   "billing.checkout.cancel.description": "No se realizó ningún cargo. Puede volver al catálogo de cursos cuando esté listo.",
   "billing.checkout.cancel.couponKept": "Tu cupón {{code}} sigue listo para usar.",
   "billing.checkout.cancel.backToCourses": "Volver a los cursos",
-  "billing.checkout.cancel.backToCourse": "Back to course"
+  "billing.checkout.cancel.backToCourse": "Back to course",
+  "billing.checkout.cancel.billingDescription": "No se realizó ningún cargo. Tu cuenta no cambió.",
+  "billing.checkout.cancel.backToBilling": "Volver a facturación",
+  "billing.checkout.success.ready.homeschoolTitle": "El plan Homeschool está activo",
+  "billing.checkout.success.ready.homeschoolDescription": "Tu plan Homeschool está activo. Puedes gestionarlo o cancelarlo desde facturación.",
+  "billing.checkout.success.ready.billing": "Ver facturación",
+  "billing.plan.heading": "Plan",
+  "billing.plan.homeschool": "Homeschool",
+  "billing.plan.active": "Activo — Homeschool",
+  "billing.plan.renews": "Se renueva el {{date}}",
+  "billing.plan.none": "Sin suscripción activa",
+  "billing.plan.upgrade": "Pasar a Homeschool ({{price}})",
+  "billing.plan.upgradeError": "No se pudo iniciar el pago.",
+  "billing.plan.manage": "Gestionar o cancelar"
 }

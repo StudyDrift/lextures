@@ -137,11 +137,11 @@ describe('checkoutMarketplaceCourse', () => {
         { status: 200 },
       ),
     )
-    await checkoutMarketplaceCourse('paid', { couponCode: 'LAUNCH25' })
+    await checkoutMarketplaceCourse('paid', { couponCode: 'LAUNCH25', learnerUserId: 'learner-1' })
     expect(authorizedFetch).toHaveBeenCalledWith(
       '/api/v1/marketplace/courses/paid/checkout',
       expect.objectContaining({
-        body: JSON.stringify({ couponCode: 'LAUNCH25' }),
+        body: JSON.stringify({ couponCode: 'LAUNCH25', learnerUserId: 'learner-1' }),
       }),
     )
   })

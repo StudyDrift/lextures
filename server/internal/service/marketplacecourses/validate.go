@@ -127,8 +127,8 @@ func checkManifest(ve *ValidationError, m CourseManifest) {
 	default:
 		ve.add(fmt.Sprintf("%s: difficulty_level must be beginner|intermediate|advanced, got %q", src, m.DifficultyLevel))
 	}
-	if m.PriceCents != 0 {
-		ve.add(fmt.Sprintf("%s: price_cents must be 0 for official free courses, got %d", src, m.PriceCents))
+	if m.PriceCents < 0 {
+		ve.add(fmt.Sprintf("%s: price_cents must be >= 0, got %d", src, m.PriceCents))
 	}
 	if !m.MarketplaceListed {
 		ve.add(src + ": marketplace_listed must be true")

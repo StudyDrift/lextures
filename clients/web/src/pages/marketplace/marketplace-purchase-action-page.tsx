@@ -2,7 +2,10 @@ import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Loader2, Store } from 'lucide-react'
+import { Button, Radio, RadioGroup } from '../../components/ui'
 import { usePlatformFeatures } from '../../context/platform-features-context'
+import { useImpersonatingSession } from '../../hooks/use-impersonating-session'
+import { listDependents, type ManagedDependent } from '../../lib/managed-learners-api'
 import {
   claimMarketplaceCourse,
   checkoutMarketplaceCourse,
@@ -33,14 +36,50 @@ export default function MarketplacePurchaseActionPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const { t } = useTranslation('common')
-  const { ffCourseMarketplace, ffCourseCoupons, loading: featuresLoading } = usePlatformFeatures()
+  const { ffCourseMarketplace, ffCourseCoupons, ffHomeschoolManagedLearners, loading: featuresLoading } =
+    usePlatformFeatures()
+  const impersonating = useImpersonatingSession()
   const isClaim = location.pathname.endsWith('/claim')
   const [error, setError] = useState<string | null>(null)
   const [status, setStatus] = useState<'idle' | 'working' | 'done'>('idle')
   const [retryKey, setRetryKey] = useState(0)
+  const [dependents, setDependents] = useState<ManagedDependent[] | null>(null)
+  const [learnerChoice, setLearnerChoice] = useState<string | null>(null)
+  const [draftChoice, setDraftChoice] = useState('self')
+
+  const askRecipient =
+    !isClaim &&
+    !impersonating &&
+    Boolean(ffHomeschoolManagedLearners) &&
+    !featuresLoading
 
   useEffect(() => {
-    if (featuresLoading || !ffCourseMarketplace || !slug) return
+    if (!askRecipient) {
+      setDependents([])
+      return
+    }
+    let cancelled = false
+    void listDependents()
+      .then((rows) => {
+        if (!cancelled) setDependents(rows.filter((row) => row.status === 'active'))
+      })
+      .catch(() => {
+        if (!cancelled) setDependents([])
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [askRecipient])
+
+  const needsChoice = askRecipient && dependents != null && dependents.length > 0 && learnerChoice == null
+  const waitingForLearners = askRecipient && dependents == null
+
+  useEffect(() => {
+    if (featuresLoading || !ffCourseMarketplace || !slug || needsChoice || waitingForLearners) return
+    if (!isClaim && impersonating) {
+      setError(t('marketplace.buyHidden'))
+      return
+    }
     let cancelled = false
 
     function resolveCoupon(): string | undefined {
@@ -80,7 +119,10 @@ export default function MarketplacePurchaseActionPage() {
         if (opts?.couponCode) {
           emitLearnerCouponTelemetry('coupon_checkout_started', { discounted: true })
         }
-        const result = await checkoutMarketplaceCourse(slug!, opts)
+        const result = await checkoutMarketplaceCourse(slug!, {
+          ...opts,
+          learnerUserId: learnerChoice && learnerChoice !== 'self' ? learnerChoice : undefined,
+        })
         if (cancelled) return
         if (isMarketplaceGrantedFree(result)) {
           setStatus('done')
@@ -129,6 +171,10 @@ export default function MarketplacePurchaseActionPage() {
     t,
     retryKey,
     searchParams,
+    learnerChoice,
+    needsChoice,
+    waitingForLearners,
+    impersonating,
   ])
 
   if (!ffCourseMarketplace && !featuresLoading) {
@@ -151,6 +197,37 @@ export default function MarketplacePurchaseActionPage() {
       })()
     : '/marketplace'
 
+  if (needsChoice) {
+    return (
+      <LmsPage title={t('marketplace.checkoutTitle')}>
+        <div
+          className="max-w-xl rounded-2xl border border-border-default bg-surface-raised p-6 shadow-sm"
+          data-testid="marketplace-recipient-picker"
+        >
+          <RadioGroup
+            name="purchase-recipient"
+            value={draftChoice}
+            onChange={setDraftChoice}
+            legend={t('marketplace.recipient.legend')}
+          >
+            <Radio value="self" label={t('marketplace.recipient.me')} />
+            {dependents?.map((learner) => (
+              <Radio key={learner.id} value={learner.id} label={learner.displayName} />
+            ))}
+          </RadioGroup>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Button type="button" onClick={() => setLearnerChoice(draftChoice)} data-testid="marketplace-recipient-continue">
+              {t('marketplace.recipient.continue')}
+            </Button>
+            <Link to={backHref} className="self-center text-sm font-semibold text-accent-fg hover:opacity-90">
+              {t('marketplace.back')}
+            </Link>
+          </div>
+        </div>
+      </LmsPage>
+    )
+  }
+
   return (
     <LmsPage title={isClaim ? t('marketplace.enrollFree') : t('marketplace.checkoutTitle')}>
       <div
@@ -159,7 +236,7 @@ export default function MarketplacePurchaseActionPage() {
         data-flow={isClaim ? 'claim' : 'checkout'}
         aria-live="polite"
       >
-        {status === 'working' || status === 'done' ? (
+        {status === 'working' || status === 'done' || waitingForLearners ? (
           <div className="flex flex-col items-center gap-3 py-4 text-center">
             <Loader2 className="h-8 w-8 motion-safe:animate-spin text-accent-fg" aria-hidden />
             <p className="text-sm text-fg-muted">{t('marketplace.cta.processing')}</p>
@@ -169,13 +246,9 @@ export default function MarketplacePurchaseActionPage() {
           <div role="alert" className="space-y-3">
             <p className="text-sm text-danger-fg">{error}</p>
             <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                className="rounded-lg bg-accent-solid px-3 py-1.5 text-sm font-medium text-fg-on-accent hover:opacity-90"
-                onClick={() => setRetryKey((k) => k + 1)}
-              >
+              <Button type="button" onClick={() => setRetryKey((k) => k + 1)}>
                 {t('marketplace.error.retry')}
-              </button>
+              </Button>
               <Link to={backHref} className="text-sm font-semibold text-accent-fg hover:opacity-90">
                 {t('marketplace.back')}
               </Link>

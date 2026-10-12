@@ -66,6 +66,30 @@ func TestManagedLearnerGuardMiddleware(t *testing.T) {
 		t.Fatalf("course write should be allowed, got %d", rec3.Code)
 	}
 
+	checkoutReq := httptest.NewRequest(http.MethodPost, "/api/v1/marketplace/courses/paid/checkout", nil)
+	checkoutReq.Header.Set("Authorization", "Bearer "+token)
+	recCheckout := httptest.NewRecorder()
+	handler.ServeHTTP(recCheckout, checkoutReq)
+	if recCheckout.Code != http.StatusForbidden {
+		t.Fatalf("marketplace checkout status %d", recCheckout.Code)
+	}
+
+	billingReq := httptest.NewRequest(http.MethodPost, "/api/v1/billing/checkout", nil)
+	billingReq.Header.Set("Authorization", "Bearer "+token)
+	recBilling := httptest.NewRecorder()
+	handler.ServeHTTP(recBilling, billingReq)
+	if recBilling.Code != http.StatusForbidden {
+		t.Fatalf("billing checkout status %d", recBilling.Code)
+	}
+
+	assignReq := httptest.NewRequest(http.MethodPost, "/api/v1/me/purchases/C-STUDY1/assign", nil)
+	assignReq.Header.Set("Authorization", "Bearer "+token)
+	recAssign := httptest.NewRecorder()
+	handler.ServeHTTP(recAssign, assignReq)
+	if recAssign.Code != http.StatusForbidden {
+		t.Fatalf("assign purchase status %d", recAssign.Code)
+	}
+
 	exitReq := httptest.NewRequest(http.MethodDelete, "/api/v1/me/dependents/sessions/current", nil)
 	exitReq.Header.Set("Authorization", "Bearer "+token)
 	rec4 := httptest.NewRecorder()

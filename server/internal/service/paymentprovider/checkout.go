@@ -36,6 +36,8 @@ type StartCheckoutRequest struct {
 	CouponID            string
 	CouponCode          string
 	ListPriceCents      int // 0 → use catalog price
+	// EnrollUserID is an optional managed learner to enroll after a course purchase.
+	EnrollUserID *uuid.UUID
 }
 
 // StartCheckout creates a hosted checkout session via the selected provider.
@@ -67,6 +69,9 @@ func StartCheckout(ctx context.Context, pool *pgxpool.Pool, cfg Config, req Star
 			return nil, fmt.Errorf("course is free")
 		}
 		meta["entitlement_type"] = repoBilling.TypeCoursePurchase
+		if req.EnrollUserID != nil && *req.EnrollUserID != uuid.Nil && *req.EnrollUserID != req.UserID {
+			meta["enroll_user_id"] = req.EnrollUserID.String()
+		}
 		if code := strings.TrimSpace(req.AffiliateCode); code != "" {
 			meta["affiliate_code"] = code
 		}

@@ -1,0 +1,20 @@
+{
+  "require_acceptance": false,
+  "sections": [
+    {
+      "id": "overview",
+      "heading": "Course overview",
+      "markdown": "**Family Study Skills** is a short paid marketplace course for homeschool families.\n\n- **Estimated time:** about 20 minutes\n- **Format:** One module with a page, a short reflection, and a knowledge check\n- **Price:** $20 — buy it from the marketplace, then assign it to a learner if you want\n\nThe ideas are practical: a weekly plan, a focused study block, and a quick review."
+    },
+    {
+      "id": "outcomes",
+      "heading": "What you'll learn",
+      "markdown": "By the end of this course, you will be able to:\n\n1. **Plan** a week of study with a short list of priorities\n2. **Run** a focused study block and a two-minute review"
+    },
+    {
+      "id": "grading",
+      "heading": "Grading & completion",
+      "markdown": "- The knowledge-check quiz is auto-scored\n- The reflection awards full credit on a good-faith text submission\n\nThere are no due dates. Work at your own pace."
+    }
+  ]
+}

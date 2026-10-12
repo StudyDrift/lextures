@@ -5,12 +5,14 @@ import { ArrowLeft, Star, Store } from 'lucide-react'
 import { CourseHeroImage } from '../../components/course-hero-image'
 import { Button } from '../../components/ui'
 import { EmptyState } from '../../components/ui/empty-state'
+import { useImpersonatingSession } from '../../hooks/use-impersonating-session'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import {
   claimMarketplaceCourse,
   checkoutMarketplaceCourse,
   fetchMarketplaceCourse,
   isMarketplaceGrantedFree,
+  marketplaceCheckoutPath,
   marketplaceCourseItemPath,
   marketplaceCoursePath,
   MarketplaceApiError,
@@ -36,6 +38,7 @@ export default function MarketplaceCoursePage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const { t, i18n } = useTranslation('common')
+  const impersonating = useImpersonatingSession()
   const {
     ffCourseMarketplace,
     ffCourseCoupons,
@@ -238,32 +241,11 @@ export default function MarketplaceCoursePage() {
       emitLearnerCouponTelemetry('coupon_checkout_started', {
         discounted: Boolean(activeCouponCode),
       })
-      const result = await checkoutMarketplaceCourse(
-        slug,
-        activeCouponCode ? { couponCode: activeCouponCode } : undefined,
-      )
-      if (isMarketplaceGrantedFree(result)) {
-        clearPendingCoupon(slug)
-        emitLearnerCouponTelemetry('coupon_free_grant')
-        toastSaveOk(
-          t('marketplace.coupon.applied', {
-            code: activeCouponCode ?? result.courseCode,
-            price: freeLabel,
-          }),
-        )
-        navigate(marketplaceCourseItemPath(result.courseCode, result.firstItemId))
-        return
-      }
-      if ('alreadyOwned' in result && result.alreadyOwned) {
-        clearPendingCoupon(slug)
-        navigate(marketplaceCoursePath(result.courseCode))
-        return
-      }
-      if ('checkoutUrl' in result && result.checkoutUrl) {
-        window.location.assign(result.checkoutUrl)
-        return
-      }
-      setCtaError(t('marketplace.error.retry'))
+      const qs = new URLSearchParams()
+      if (activeCouponCode) qs.set('coupon', activeCouponCode)
+      const query = qs.toString()
+      navigate(`${marketplaceCheckoutPath(slug)}${query ? `?${query}` : ''}`)
+      return
     } catch (e: unknown) {
       if (e instanceof MarketplaceApiError && e.status === 402 && e.checkoutHint) {
         navigate(e.checkoutHint)
@@ -282,6 +264,7 @@ export default function MarketplaceCoursePage() {
 
   const showCouponField =
     couponsEnabled && !owned && listPriceCents > 0 && !loading && Boolean(course)
+  const hidePaidBuy = impersonating && !owned && !isFree && !isFreeAfterCoupon
 
   return (
     <LmsPage title={course?.title ?? t('marketplace.title')}>
@@ -424,6 +407,7 @@ export default function MarketplaceCoursePage() {
               {coupon.announcement}
             </span>
             <div className="flex flex-col items-end gap-2">
+              {hidePaidBuy ? null : (
               <Button
                 type="button"
                 aria-describedby={`${priceId} ${statusId}`}
@@ -435,6 +419,7 @@ export default function MarketplaceCoursePage() {
               >
                 {ctaLabel}
               </Button>
+              )}
               <span id={statusId} className="sr-only" aria-live="polite">
                 {ctaPending ? t('marketplace.cta.processing') : (ctaError ?? '')}
               </span>

@@ -48,9 +48,35 @@ export function transactionStatusLabel(status: string): string {
   }
 }
 
-/** Abandoned/expired checkouts (canceled) never produced a payment, so they are hidden from billing history. */
+/**
+ * Unfinished checkouts never produced a settled payment. Pending rows stay pending until
+ * Stripe reports completion or the hourly reconcile marks them canceled (#740), so they
+ * are hidden here instead of sitting on "Pending".
+ */
 export function visibleTransactions(items: Transaction[]): Transaction[] {
-  return items.filter((tx) => tx.status !== 'canceled')
+  return items.filter((tx) => tx.status !== 'canceled' && tx.status !== 'pending')
+}
+
+/** Homeschool plan shown on the billing page. Charged via the configured Stripe monthly price. */
+export const HOMESCHOOL_MONTHLY_CENTS = 2000
+
+/** Display price for the upgrade button, for example "$20/mo". */
+export function homeschoolMonthlyPriceLabel(locale?: string): string {
+  const amount = new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(HOMESCHOOL_MONTHLY_CENTS / 100)
+  return `${amount}/mo`
+}
+
+export function homeschoolCheckoutPayload(origin: string): CheckoutPayload {
+  const base = origin.replace(/\/$/, '')
+  return {
+    plan: 'monthly',
+    successUrl: `${base}/checkout/success?plan=homeschool`,
+    cancelUrl: `${base}/checkout/cancel?source=billing`,
+  }
 }
 
 export type CheckoutPayload = {
@@ -110,6 +136,23 @@ export async function fetchMyTransactions(): Promise<Transaction[]> {
   }
   const data = (await res.json()) as { transactions?: Transaction[] }
   return data.transactions ?? []
+}
+
+export async function startHomeschoolCheckout(): Promise<string> {
+  const res = await authorizedFetch('/api/v1/billing/checkout', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(homeschoolCheckoutPayload(window.location.origin)),
+  })
+  if (!res.ok) {
+    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>
+    throw new Error(readApiErrorMessage(raw) || 'Could not start checkout.')
+  }
+  const data = (await res.json()) as { checkoutUrl?: string }
+  if (!data.checkoutUrl) {
+    throw new Error('Unexpected response from server.')
+  }
+  return data.checkoutUrl
 }
 
 export async function openBillingPortal(returnUrl?: string): Promise<string> {

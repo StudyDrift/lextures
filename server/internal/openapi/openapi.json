@@ -3700,11 +3700,53 @@
                   "couponCode": {
                     "type": "string",
                     "description": "Optional first-party course coupon; server re-evaluates and reserves a seat"
+                  },
+                  "learnerUserId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "Optional managed learner to enroll in addition to the buyer after payment"
                   }
                 }
               }
             }
           }
+        }
+      }
+    },
+    "/api/v1/me/purchases/{courseCode}/assign": {
+      "post": {
+        "tags": ["billing"],
+        "summary": "Enroll a managed learner in a marketplace course the caller already owns",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "courseCode",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["learnerUserId"],
+                "properties": {
+                  "learnerUserId": { "type": "string", "format": "uuid" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "{ enrolled, alreadyEnrolled, courseCode, learnerUserId }"
+          },
+          "401": { "description": "Sign in required" },
+          "403": { "description": "Not owned, or learner is not an active managed dependent" },
+          "404": { "description": "Course not found, marketplace off, or managed learners off" }
         }
       }
     },

@@ -14,5 +14,18 @@
   "billing.checkout.cancel.description": "No charge was made. You can return to the course catalog when you are ready.",
   "billing.checkout.cancel.couponKept": "Your coupon {{code}} is still ready to use.",
   "billing.checkout.cancel.backToCourses": "Back to courses",
-  "billing.checkout.cancel.backToCourse": "Back to course"
+  "billing.checkout.cancel.backToCourse": "Back to course",
+  "billing.checkout.cancel.billingDescription": "No charge was made. Your account is unchanged.",
+  "billing.checkout.cancel.backToBilling": "Back to billing",
+  "billing.checkout.success.ready.homeschoolTitle": "Homeschool plan is active",
+  "billing.checkout.success.ready.homeschoolDescription": "Your Homeschool plan is active. You can manage or cancel it from billing.",
+  "billing.checkout.success.ready.billing": "View billing",
+  "billing.plan.heading": "Plan",
+  "billing.plan.homeschool": "Homeschool",
+  "billing.plan.active": "Active — Homeschool",
+  "billing.plan.renews": "Renews {{date}}",
+  "billing.plan.none": "No active subscription",
+  "billing.plan.upgrade": "Upgrade to Homeschool ({{price}})",
+  "billing.plan.upgradeError": "Could not start checkout.",
+  "billing.plan.manage": "Manage or cancel"
 }

@@ -1402,6 +1402,7 @@ GET	/api/v1/me/portfolios/{pid}/artifacts/{aid}/content	anonymous
 GET	/api/v1/me/profile-fields	session
 PATCH	/api/v1/me/profile-fields	anonymous
 GET	/api/v1/me/purchases	session
+POST	/api/v1/me/purchases/{courseCode}/assign	session
 POST	/api/v1/me/push-subscriptions	session
 DELETE	/api/v1/me/push-subscriptions/{id}	session
 GET	/api/v1/me/reading-log	anonymous

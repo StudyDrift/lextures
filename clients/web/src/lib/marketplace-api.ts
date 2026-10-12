@@ -235,6 +235,15 @@ function couponBody(couponCode?: string): string {
   return '{}'
 }
 
+function checkoutRequestBody(opts?: { couponCode?: string; learnerUserId?: string }): string {
+  const body: Record<string, string> = {}
+  if (opts?.couponCode?.trim()) body.couponCode = opts.couponCode.trim()
+  if (opts?.learnerUserId?.trim() && opts.learnerUserId !== 'self') {
+    body.learnerUserId = opts.learnerUserId.trim()
+  }
+  return JSON.stringify(body)
+}
+
 /** Preview a coupon without reserving a seat (MKTC.3 FR-1). */
 export async function previewMarketplaceCoupon(
   slug: string,
@@ -273,17 +282,32 @@ export async function claimMarketplaceCourse(
  */
 export async function checkoutMarketplaceCourse(
   slug: string,
-  opts?: { couponCode?: string },
+  opts?: { couponCode?: string; learnerUserId?: string },
 ): Promise<MarketplaceCheckoutResult> {
   const res = await authorizedFetch(
     `/api/v1/marketplace/courses/${encodeURIComponent(slug)}/checkout`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: couponBody(opts?.couponCode),
+      body: checkoutRequestBody(opts),
     },
   )
   return marketplaceMutationOrThrow<MarketplaceCheckoutResult>(res)
+}
+
+export async function assignPurchasedCourse(
+  courseCode: string,
+  learnerUserId: string,
+): Promise<{ enrolled: boolean; alreadyEnrolled: boolean }> {
+  const res = await authorizedFetch(
+    `/api/v1/me/purchases/${encodeURIComponent(courseCode)}/assign`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ learnerUserId }),
+    },
+  )
+  return marketplaceMutationOrThrow(res)
 }
 
 export function isMarketplaceGrantedFree(
