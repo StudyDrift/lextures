@@ -679,7 +679,18 @@ export function GradebookGrid({
   )
 
   const beginEdit = useCallback(
-    (row: number, col: number, opts?: { range?: 'selection' | 'single' }) => {
+    (
+      row: number,
+      col: number,
+      opts?: {
+        range?: 'selection' | 'single'
+        /**
+         * Spreadsheet-style "type to edit": replace the cell value with the key the user typed.
+         * Ignored for dropdown editors (pass/fail, letter, …) since they cannot hold free text.
+         */
+        initialDraft?: string
+      },
+    ) => {
       if (readOnly) return
       const rangeMode = opts?.range ?? 'selection'
       let rowMin = row
@@ -693,8 +704,13 @@ export function GradebookGrid({
         colMax = Math.max(selectionAnchor.col, focusCol)
       }
       const sid = filteredStudents[row]!.id
-      const aid = visibleColumns[col]!.id
-      if (gradeExcused?.[sid]?.[aid] === true) {
+      const column = visibleColumns[col]!
+      const aid = column.id
+      const single = rowMin === rowMax && colMin === colMax
+      const usesSelectEditor = single && gradingSelectOptions(column, gradingScheme).length > 0
+      if (opts?.initialDraft != null && !usesSelectEditor) {
+        setDraft(opts.initialDraft)
+      } else if (gradeExcused?.[sid]?.[aid] === true) {
         setDraft(grades[sid]?.[aid] ?? '')
       } else {
         setDraft(displayValue(row, col))
@@ -703,6 +719,7 @@ export function GradebookGrid({
     },
     [
       displayValue,
+      gradingScheme,
       selectionAnchor,
       focusRow,
       focusCol,
@@ -1023,6 +1040,20 @@ export function GradebookGrid({
           }
           break
         default:
+          // Typing a character on a focused cell starts editing with that character (like a
+          // spreadsheet). Without this the keystroke was dropped, and a following Enter opened an
+          // empty editor instead of committing the typed score (#763).
+          if (
+            !readOnly &&
+            e.key.length === 1 &&
+            e.key.trim() !== '' &&
+            !e.ctrlKey &&
+            !e.metaKey &&
+            !e.altKey
+          ) {
+            e.preventDefault()
+            beginEdit(row, col, { initialDraft: e.key })
+          }
           break
       }
     },
