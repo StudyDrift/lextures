@@ -11,12 +11,12 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
-	repoBilling "github.com/lextures/lextures/server/internal/repos/billing"
 	"github.com/lextures/lextures/server/internal/notificationevents"
+	repoBilling "github.com/lextures/lextures/server/internal/repos/billing"
+	repoPayments "github.com/lextures/lextures/server/internal/repos/payments"
 	svcBilling "github.com/lextures/lextures/server/internal/service/billing"
 	"github.com/lextures/lextures/server/internal/service/notifications"
 	"github.com/lextures/lextures/server/internal/service/paymentprovider"
-	repoPayments "github.com/lextures/lextures/server/internal/repos/payments"
 	"github.com/lextures/lextures/server/internal/telemetry"
 )
 
@@ -58,26 +58,27 @@ func (d Deps) registerBillingRoutes(r chi.Router) {
 	r.Get("/api/v1/billing/portal", d.handleBillingPortal())
 	r.Get("/api/v1/me/entitlements", d.handleMyEntitlements())
 	r.Get("/api/v1/me/purchases", d.handleMyPurchases())
+	r.Post("/api/v1/me/purchases/{courseCode}/assign", d.handleAssignPurchase())
 	r.Get("/api/v1/internal/entitlements/check", d.handleInternalEntitlementCheck())
 	r.Post("/api/v1/webhooks/stripe", d.handleStripeWebhook())
 	d.registerAppleIAPRoutes(r)
 }
 
 type entitlementJSON struct {
-	ID              string   `json:"id"`
-	EntitlementType string   `json:"entitlementType"`
-	CourseID        *string  `json:"courseId,omitempty"`
-	AmountPaidCents int      `json:"amountPaidCents"`
-	SubtotalCents   int      `json:"subtotalCents,omitempty"`
-	TaxAmountCents  int      `json:"taxAmountCents,omitempty"`
-	TaxType         string   `json:"taxType,omitempty"`
-	TaxJurisdiction string   `json:"taxJurisdiction,omitempty"`
-	ReverseCharge   bool     `json:"reverseCharge,omitempty"`
-	InvoiceID       *string  `json:"invoiceId,omitempty"`
-	Currency        string   `json:"currency"`
-	ValidFrom       string   `json:"validFrom"`
-	ValidUntil      *string  `json:"validUntil,omitempty"`
-	Status          string   `json:"status"`
+	ID              string  `json:"id"`
+	EntitlementType string  `json:"entitlementType"`
+	CourseID        *string `json:"courseId,omitempty"`
+	AmountPaidCents int     `json:"amountPaidCents"`
+	SubtotalCents   int     `json:"subtotalCents,omitempty"`
+	TaxAmountCents  int     `json:"taxAmountCents,omitempty"`
+	TaxType         string  `json:"taxType,omitempty"`
+	TaxJurisdiction string  `json:"taxJurisdiction,omitempty"`
+	ReverseCharge   bool    `json:"reverseCharge,omitempty"`
+	InvoiceID       *string `json:"invoiceId,omitempty"`
+	Currency        string  `json:"currency"`
+	ValidFrom       string  `json:"validFrom"`
+	ValidUntil      *string `json:"validUntil,omitempty"`
+	Status          string  `json:"status"`
 }
 
 func entitlementToJSON(e repoBilling.Entitlement) entitlementJSON {
@@ -247,15 +248,15 @@ func (d Deps) handleMyEntitlements() http.HandlerFunc {
 }
 
 type purchaseJSON struct {
-	CourseCode        string  `json:"courseCode"`
-	CourseID          string  `json:"courseId"`
-	Title             string  `json:"title"`
-	PriceCents        int     `json:"priceCents"`
-	Currency          string  `json:"currency"`
-	Source            string  `json:"source"`
-	AcquiredAt        string  `json:"acquiredAt"`
-	ReceiptURL        *string `json:"receiptUrl,omitempty"`
-	EntitlementID     string  `json:"entitlementId"`
+	CourseCode    string  `json:"courseCode"`
+	CourseID      string  `json:"courseId"`
+	Title         string  `json:"title"`
+	PriceCents    int     `json:"priceCents"`
+	Currency      string  `json:"currency"`
+	Source        string  `json:"source"`
+	AcquiredAt    string  `json:"acquiredAt"`
+	ReceiptURL    *string `json:"receiptUrl,omitempty"`
+	EntitlementID string  `json:"entitlementId"`
 }
 
 func (d Deps) handleMyPurchases() http.HandlerFunc {

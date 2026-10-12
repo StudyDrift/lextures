@@ -11,6 +11,8 @@ export default function CheckoutCancelPage() {
   const { t } = useTranslation('billing')
   const [params] = useSearchParams()
   const slug = params.get('slug') ?? ''
+  const source = params.get('source') ?? ''
+  const billingReturn = source === 'billing'
   const couponRaw = params.get('coupon') ?? ''
   const coupon = couponRaw ? normalizeCouponInput(couponRaw) : ''
 
@@ -22,21 +24,30 @@ export default function CheckoutCancelPage() {
   }, [slug, coupon])
 
   const backTo = (() => {
+    if (billingReturn) return '/me/billing'
     if (!slug) return '/courses'
     const base = `/marketplace/${encodeURIComponent(slug)}`
     if (coupon) return `${base}?coupon=${encodeURIComponent(coupon)}`
     return base
   })()
-  const backLabel = slug
-    ? t('billing.checkout.cancel.backToCourse')
-    : t('billing.checkout.cancel.backToCourses')
+  const backLabel = billingReturn
+    ? t('billing.checkout.cancel.backToBilling')
+    : slug
+      ? t('billing.checkout.cancel.backToCourse')
+      : t('billing.checkout.cancel.backToCourses')
 
   const displayCode = coupon ? displayCouponCode(coupon) : ''
 
   return (
     <main className="mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center px-4 text-center">
-      <h1 className="text-2xl font-semibold">{t('billing.checkout.cancel.title')}</h1>
-      <p className="mt-2 text-fg-muted">{t('billing.checkout.cancel.description')}</p>
+      <h1 className="text-2xl font-semibold" data-testid="checkout-cancel-title">
+        {t('billing.checkout.cancel.title')}
+      </h1>
+      <p className="mt-2 text-fg-muted">
+        {billingReturn
+          ? t('billing.checkout.cancel.billingDescription')
+          : t('billing.checkout.cancel.description')}
+      </p>
       {displayCode ? (
         <p className="mt-2 text-sm text-fg-muted" data-testid="checkout-cancel-coupon" role="status">
           {t('billing.checkout.cancel.couponKept', { code: displayCode })}

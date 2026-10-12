@@ -347,18 +347,34 @@ func TestValidateAllCourses(t *testing.T) {
 	}
 }
 
-func TestValidateCourseSpec_RejectsNonZeroPrice(t *testing.T) {
+func TestValidateCourseSpec_RejectsNegativePrice(t *testing.T) {
 	spec, err := LoadCourseSpec("harness-smoke")
 	if err != nil {
 		t.Fatal(err)
 	}
-	spec.Manifest.PriceCents = 999
+	spec.Manifest.PriceCents = -1
 	err = ValidateCourseSpec(spec)
 	if err == nil {
 		t.Fatal("expected price validation error")
 	}
 	if !strings.Contains(err.Error(), "price_cents") {
 		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestLoadCourseSpec_FamilyStudySkillsIsPaid(t *testing.T) {
+	spec, err := LoadCourseSpec("family-study-skills")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if spec.Manifest.PriceCents != 2000 {
+		t.Fatalf("price_cents: %d", spec.Manifest.PriceCents)
+	}
+	if !IsDeployCourse("family-study-skills") {
+		t.Fatal("paid listing must provision on deploy")
+	}
+	if err := ValidateCourseSpec(spec); err != nil {
+		t.Fatal(err)
 	}
 }
 

@@ -14,5 +14,18 @@
   "billing.checkout.cancel.description": "لم يتم خصم أي مبلغ. يمكنك العودة إلى كتالوج المقررات عندما تكون جاهزًا.",
   "billing.checkout.cancel.couponKept": "قسيمتك {{code}} ما زالت جاهزة للاستخدام.",
   "billing.checkout.cancel.backToCourses": "العودة إلى المقررات",
-  "billing.checkout.cancel.backToCourse": "Back to course"
+  "billing.checkout.cancel.backToCourse": "Back to course",
+  "billing.checkout.cancel.billingDescription": "لم يتم خصم أي مبلغ. حسابك لم يتغير.",
+  "billing.checkout.cancel.backToBilling": "العودة إلى الفوترة",
+  "billing.checkout.success.ready.homeschoolTitle": "خطة Homeschool نشطة",
+  "billing.checkout.success.ready.homeschoolDescription": "خطة Homeschool نشطة. يمكنك إدارتها أو إلغاءها من الفوترة.",
+  "billing.checkout.success.ready.billing": "عرض الفوترة",
+  "billing.plan.heading": "الخطة",
+  "billing.plan.homeschool": "Homeschool",
+  "billing.plan.active": "نشطة — Homeschool",
+  "billing.plan.renews": "تتجدد في {{date}}",
+  "billing.plan.none": "لا يوجد اشتراك نشط",
+  "billing.plan.upgrade": "الترقية إلى Homeschool ({{price}})",
+  "billing.plan.upgradeError": "تعذر بدء الدفع.",
+  "billing.plan.manage": "إدارة أو إلغاء"
 }

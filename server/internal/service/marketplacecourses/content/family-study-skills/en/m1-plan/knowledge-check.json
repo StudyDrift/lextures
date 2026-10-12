@@ -1,0 +1,49 @@
+{
+  "slug": "m1.plan.knowledge-check",
+  "title": "Module 1 knowledge check",
+  "sort_order": 2,
+  "markdown": "Two questions about planning a study week.",
+  "content_version": 1,
+  "questions": [
+    {
+      "id": "m1-q1",
+      "prompt": "How many priorities does this course recommend writing down for the week?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Three",
+        "Every task you can think of",
+        "None — keep it in your head",
+        "One per subject, with no limit"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m1-q2",
+      "prompt": "What should you do when the 25-minute timer ends?",
+      "questionType": "multiple_choice",
+      "choices": [
+        "Stop and write one sentence about what is still unfinished",
+        "Keep going until the whole list is done",
+        "Start a new subject immediately",
+        "Skip the review for the rest of the week"
+      ],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    },
+    {
+      "id": "m1-q3",
+      "prompt": "The two-minute review asks what you finished and what moves to tomorrow.",
+      "questionType": "true_false",
+      "choices": ["True", "False"],
+      "typeConfig": {},
+      "correctChoiceIndex": 0,
+      "points": 1,
+      "required": true
+    }
+  ]
+}

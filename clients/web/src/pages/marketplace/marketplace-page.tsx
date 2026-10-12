@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Search, Star, Store } from 'lucide-react'
 import { CourseHeroImage } from '../../components/course-hero-image'
@@ -11,7 +11,9 @@ import {
   type MarketplaceCard,
   type MarketplaceCategory,
 } from '../../lib/marketplace-api'
+import { Button } from '../../components/ui'
 import { EmptyState } from '../../components/ui/empty-state'
+import { useImpersonatingSession } from '../../hooks/use-impersonating-session'
 import { LmsPage } from '../lms/lms-page'
 import { MarketplacePriceBadge } from './marketplace-price-badge'
 
@@ -41,14 +43,20 @@ function MarketplaceCourseCard({
   course,
   freeLabel,
   ownedLabel,
+  buyLabel,
   locale,
 }: {
   course: MarketplaceCard
   freeLabel: string
   ownedLabel: string
+  buyLabel: string
   locale?: string
 }) {
+  const navigate = useNavigate()
+  const impersonating = useImpersonatingSession()
   const accessibleName = marketplaceCardAccessibleName(course, freeLabel, ownedLabel, locale)
+  const showBuy = course.priceCents > 0 && !course.owned && !impersonating
+  const slug = course.slug || course.courseCode
   return (
     <article className="relative flex flex-col overflow-hidden rounded-2xl border border-border-default bg-surface-raised shadow-sm motion-safe:transition-[box-shadow,border-color] hover:border-indigo-200 hover:shadow-md dark:border-border-default dark:bg-surface-raised dark:hover:border-indigo-800">
       {course.heroImageUrl ? (
@@ -105,13 +113,28 @@ function MarketplaceCourseCard({
               {course.enrollmentCount.toLocaleString()}
             </span>
           </span>
-          <MarketplacePriceBadge
-            priceCents={course.priceCents}
-            priceCurrency={course.priceCurrency}
-            listPriceCents={course.listPriceCents}
-            freeLabel={freeLabel}
-            locale={locale}
-          />
+          <span className="flex items-center gap-2">
+            <MarketplacePriceBadge
+              priceCents={course.priceCents}
+              priceCurrency={course.priceCurrency}
+              listPriceCents={course.listPriceCents}
+              freeLabel={freeLabel}
+              locale={locale}
+            />
+            {showBuy ? (
+              <Button
+                type="button"
+                size="sm"
+                className="relative z-10"
+                data-testid="marketplace-card-buy"
+                onClick={() => {
+                  navigate(`/marketplace/${encodeURIComponent(slug)}/checkout`)
+                }}
+              >
+                {buyLabel}
+              </Button>
+            ) : null}
+          </span>
         </div>
       </div>
     </article>
@@ -424,6 +447,7 @@ export default function MarketplacePage() {
                   course={course}
                   freeLabel={freeLabel}
                   ownedLabel={ownedLabel}
+                  buyLabel={t('marketplace.buyNow')}
                   locale={i18n.language}
                 />
               </li>

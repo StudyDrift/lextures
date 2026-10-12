@@ -1,0 +1,17 @@
+code: C-STUDY1
+title: Family Study Skills
+catalog_slug: family-study-skills
+catalog_category: Study Skills
+difficulty_level: beginner
+catalog_language: en
+summary: A short paid course for homeschool families on planning a week, focusing a study block, and reviewing what stuck. One module, about 20 minutes.
+outcomes:
+  - Plan a week of study with a short list of priorities
+  - Run a focused study block and a two-minute review
+estimated_minutes: 20
+price_cents: 2000
+is_public: true
+marketplace_listed: true
+hero_image: ""
+content_version: 1
+short_code: LEX-MC-STUDY

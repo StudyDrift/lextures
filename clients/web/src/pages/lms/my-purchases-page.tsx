@@ -2,12 +2,17 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ExternalLink, Loader2, ShoppingBag } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { Button, Dialog, Radio, RadioGroup } from '../../components/ui'
 import { usePlatformFeatures } from '../../context/platform-features-context'
+import { useImpersonatingSession } from '../../hooks/use-impersonating-session'
 import {
   fetchMyPurchases,
   formatMoney,
   type CoursePurchase,
 } from '../../lib/billing-api'
+import { assignPurchasedCourse } from '../../lib/marketplace-api'
+import { listDependents, type ManagedDependent } from '../../lib/managed-learners-api'
+import { toastSaveOk } from '../../lib/lms-toast'
 import { EmptyState } from '../../components/ui/empty-state'
 import { LmsPage } from './lms-page'
 
@@ -26,10 +31,17 @@ function sourceLabel(source: string, t: (key: string) => string): string {
 
 export default function MyPurchasesPage() {
   const { t, i18n } = useTranslation('common')
-  const { ffCourseMarketplace, loading: featuresLoading } = usePlatformFeatures()
+  const { ffCourseMarketplace, ffHomeschoolManagedLearners, loading: featuresLoading } =
+    usePlatformFeatures()
+  const impersonating = useImpersonatingSession()
   const [purchases, setPurchases] = useState<CoursePurchase[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [learners, setLearners] = useState<ManagedDependent[]>([])
+  const [assignCourse, setAssignCourse] = useState<CoursePurchase | null>(null)
+  const [assignChoice, setAssignChoice] = useState('')
+  const [assigning, setAssigning] = useState(false)
+  const [assignError, setAssignError] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -49,6 +61,44 @@ export default function MyPurchasesPage() {
     if (featuresLoading || !ffCourseMarketplace) return
     void load()
   }, [featuresLoading, ffCourseMarketplace, load])
+
+  useEffect(() => {
+    if (featuresLoading || impersonating || !ffHomeschoolManagedLearners) {
+      setLearners([])
+      return
+    }
+    let cancelled = false
+    void listDependents()
+      .then((rows) => {
+        if (!cancelled) setLearners(rows.filter((row) => row.status === 'active'))
+      })
+      .catch(() => {
+        if (!cancelled) setLearners([])
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [featuresLoading, impersonating, ffHomeschoolManagedLearners])
+
+  async function confirmAssign() {
+    if (!assignCourse || !assignChoice) return
+    setAssigning(true)
+    setAssignError(null)
+    const learner = learners.find((row) => row.id === assignChoice)
+    try {
+      const result = await assignPurchasedCourse(assignCourse.courseCode, assignChoice)
+      toastSaveOk(
+        result.alreadyEnrolled
+          ? t('purchases.assignAlready', { name: learner?.displayName ?? '' })
+          : t('purchases.assignDone', { name: learner?.displayName ?? '' }),
+      )
+      setAssignCourse(null)
+    } catch (e) {
+      setAssignError(e instanceof Error ? e.message : t('purchases.error'))
+    } finally {
+      setAssigning(false)
+    }
+  }
 
   if (featuresLoading) {
     return <p>{t('marketplace.loading')}</p>
@@ -129,7 +179,22 @@ export default function MyPurchasesPage() {
                     >
                       {t('marketplace.goToCourse')}
                     </Link>
-                    {p.receiptUrl ? (
+                    {!impersonating && learners.length > 0 ? (
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        data-testid="purchase-assign"
+                        onClick={() => {
+                          setAssignError(null)
+                          setAssignChoice(learners[0]?.id ?? '')
+                          setAssignCourse(p)
+                        }}
+                      >
+                        {t('purchases.assign')}
+                      </Button>
+                    ) : null}
+                    {!impersonating && p.receiptUrl ? (
                       <Link
                         to="/me/billing"
                         className="inline-flex items-center gap-1 rounded-lg border border-border-default px-3 py-1.5 text-sm font-medium text-fg-muted hover:bg-surface-base dark:border-border-default dark:text-fg-default dark:hover:bg-surface-overlay"
@@ -145,6 +210,40 @@ export default function MyPurchasesPage() {
           </ul>
         )}
       </div>
+      <Dialog
+        open={assignCourse != null}
+        onClose={() => {
+          if (!assigning) setAssignCourse(null)
+        }}
+        title={t('purchases.assignTitle')}
+        closeLabel={t('marketplace.back')}
+        footer={
+          <Button
+            type="button"
+            loading={assigning}
+            disabled={!assignChoice}
+            onClick={() => void confirmAssign()}
+          >
+            {t('purchases.assignConfirm')}
+          </Button>
+        }
+      >
+        <RadioGroup
+          name="assign-learner"
+          value={assignChoice}
+          onChange={setAssignChoice}
+          legend={t('purchases.assignLegend')}
+        >
+          {learners.map((learner) => (
+            <Radio key={learner.id} value={learner.id} label={learner.displayName} />
+          ))}
+        </RadioGroup>
+        {assignError ? (
+          <p role="alert" className="mt-3 text-sm text-danger-fg">
+            {assignError}
+          </p>
+        ) : null}
+      </Dialog>
     </LmsPage>
   )
 }

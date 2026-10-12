@@ -34,7 +34,7 @@ Directory name is usually the `catalog_slug` (e.g. `ai-essentials`).
 | `summary` | Course description |
 | `outcomes` | YAML list of learning outcomes |
 | `estimated_minutes` | Approximate duration |
-| `price_cents` | **Must be `0`** for this epic |
+| `price_cents` | Integer cents, `>= 0`. `0` is free. Paid listings (for example Family Study Skills at `2000`) are provisioned on deploy. |
 | `is_public` | SEO catalog listing (optional) |
 | `marketplace_listed` | **Must be `true`** |
 | `hero_image` | Optional path to an embedded banner under `assets/` (e.g. `assets/ai-essentials-banner.jpg`). When set for a known course, provisioning writes the file into course-files and sets `hero_image_url`. |
@@ -76,6 +76,7 @@ cd server && go run ./cmd/provision-marketplace-courses --only harness-smoke
 cd server && go run ./cmd/provision-marketplace-courses --only ai-essentials
 cd server && go run ./cmd/provision-marketplace-courses --only introduction-to-python
 cd server && go run ./cmd/provision-marketplace-courses --only personal-finance
+cd server && go run ./cmd/provision-marketplace-courses --only family-study-skills
 ```
 
 `--deploy` matches API startup (official courses only; skips `harness-smoke`).

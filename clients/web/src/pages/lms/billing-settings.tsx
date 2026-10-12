@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ExternalLink, Loader2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { ExternalLink } from 'lucide-react'
+import { Button } from '../../components/ui'
 import { usePlatformFeatures } from '../../context/platform-features-context'
-import { fetchMyEntitlements, fetchMyTransactions, formatMoney, openBillingPortal, transactionStatusLabel, visibleTransactions, type Entitlement, type Transaction } from '../../lib/billing-api'
+import { fetchMyEntitlements, fetchMyTransactions, formatMoney, homeschoolMonthlyPriceLabel, openBillingPortal, startHomeschoolCheckout, transactionStatusLabel, visibleTransactions, type Entitlement, type Transaction } from '../../lib/billing-api'
 import { invoiceDownloadUrl } from '../../lib/tax-api'
 import { authorizedFetch } from '../../lib/api'
 import { LmsPage } from './lms-page'
@@ -23,12 +25,14 @@ function entitlementLabel(e: Entitlement): string {
 }
 
 export default function BillingSettingsPage() {
+  const { t, i18n } = useTranslation('billing')
   const { ffStripeBilling, ffPaymentsEnabled, ffCourseMarketplace, loading: featuresLoading } = usePlatformFeatures()
   const [entitlements, setEntitlements] = useState<Entitlement[]>([])
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [me, setMe] = useState<MeProfile | null>(null)
   const [loading, setLoading] = useState(false)
   const [portalLoading, setPortalLoading] = useState(false)
+  const [upgradeLoading, setUpgradeLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const load = useCallback(async () => {
@@ -72,6 +76,27 @@ export default function BillingSettingsPage() {
     }
   }
 
+  async function handleUpgrade() {
+    setUpgradeLoading(true)
+    setError(null)
+    try {
+      const url = await startHomeschoolCheckout()
+      window.location.assign(url)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : t('billing.plan.upgradeError'))
+      setUpgradeLoading(false)
+    }
+  }
+
+  const homeschoolPrice = homeschoolMonthlyPriceLabel(i18n.language)
+  const renewalLabel = activeSubscription?.validUntil
+    ? new Date(activeSubscription.validUntil).toLocaleDateString(i18n.language, {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    : ''
+
   if (featuresLoading) {
     return <p>Loading…</p>
   }
@@ -102,25 +127,44 @@ export default function BillingSettingsPage() {
         <section className="rounded-xl border border-border-default bg-surface-raised p-5 shadow-sm dark:border-border-subtle dark:bg-surface-raised">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-medium text-fg-default">Subscription</h2>
+              <h2 className="text-lg font-medium text-fg-default">{t('billing.plan.heading')}</h2>
               {activeSubscription ? (
-                <p className="mt-1 text-sm text-emerald-700 dark:text-emerald-300">
-                  Active — {entitlementLabel(activeSubscription)}
-                </p>
+                <>
+                  <p className="mt-1 text-sm text-success-fg" data-testid="billing-plan-status">
+                    {activeSubscription.entitlementType === 'subscription_monthly'
+                      ? t('billing.plan.active')
+                      : `Active — ${entitlementLabel(activeSubscription)}`}
+                  </p>
+                  {renewalLabel ? (
+                    <p className="mt-1 text-sm text-fg-muted" data-testid="billing-plan-renews">
+                      {t('billing.plan.renews', { date: renewalLabel })}
+                    </p>
+                  ) : null}
+                </>
               ) : (
-                <p className="mt-1 text-sm text-fg-muted">No active subscription</p>
+                <p className="mt-1 text-sm text-fg-muted">{t('billing.plan.none')}</p>
               )}
             </div>
-            <button
-              type="button"
-              onClick={() => void handleManageSubscription()}
-              disabled={portalLoading}
-              className="inline-flex items-center gap-2 rounded-lg bg-accent-solid px-4 py-2 text-sm font-medium text-white hover:bg-accent disabled:opacity-60"
-            >
-              {portalLoading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null}
-              Manage subscription
-              <ExternalLink className="h-4 w-4" aria-hidden />
-            </button>
+            {activeSubscription ? (
+              <Button
+                type="button"
+                onClick={() => void handleManageSubscription()}
+                loading={portalLoading}
+                data-testid="billing-manage"
+              >
+                {t('billing.plan.manage')}
+                <ExternalLink className="h-4 w-4" aria-hidden />
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                onClick={() => void handleUpgrade()}
+                loading={upgradeLoading}
+                data-testid="billing-upgrade-homeschool"
+              >
+                {t('billing.plan.upgrade', { price: homeschoolPrice })}
+              </Button>
+            )}
           </div>
         </section>
 

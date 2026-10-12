@@ -44,6 +44,9 @@ type CheckoutRequest struct {
 	CouponID            string
 	CouponCode          string
 	ListPriceCents      int
+	// EnrollUserID, when set, is a managed learner who should be enrolled after payment.
+	// The buyer still receives the entitlement.
+	EnrollUserID *uuid.UUID
 }
 
 // CheckoutResult is a Stripe Checkout redirect.
@@ -117,6 +120,7 @@ func CreateCheckoutSession(ctx context.Context, pool *pgxpool.Pool, cfg StripeCo
 		CouponID:            req.CouponID,
 		CouponCode:          req.CouponCode,
 		ListPriceCents:      req.ListPriceCents,
+		EnrollUserID:        req.EnrollUserID,
 	})
 	if err != nil {
 		return nil, err
@@ -277,6 +281,13 @@ func handleCheckoutCompleted(ctx context.Context, pool *pgxpool.Pool, event stri
 	if courseID != nil && entType == repoBilling.TypeCoursePurchase {
 		if err := enrollCoursePurchase(ctx, pool, userID, *courseID); err != nil {
 			return nil, err
+		}
+		if raw := strings.TrimSpace(sess.Metadata["enroll_user_id"]); raw != "" {
+			if learnerID, parseErr := uuid.Parse(raw); parseErr == nil && learnerID != userID {
+				if err := enrollCoursePurchase(ctx, pool, learnerID, *courseID); err != nil {
+					return nil, err
+				}
+			}
 		}
 		if created && amount > 0 {
 			telemetry.RecordMarketplacePurchaseCompleted()

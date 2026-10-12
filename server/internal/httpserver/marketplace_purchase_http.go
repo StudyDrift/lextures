@@ -14,9 +14,9 @@ import (
 
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/courseroles"
-	"github.com/lextures/lextures/server/internal/repos/learnerprogress"
 	repoBilling "github.com/lextures/lextures/server/internal/repos/billing"
 	repoCourse "github.com/lextures/lextures/server/internal/repos/course"
+	"github.com/lextures/lextures/server/internal/repos/learnerprogress"
 	svcBilling "github.com/lextures/lextures/server/internal/service/billing"
 	"github.com/lextures/lextures/server/internal/service/coupons"
 	"github.com/lextures/lextures/server/internal/telemetry"
@@ -40,6 +40,8 @@ type marketplaceClaimResponse struct {
 
 type marketplaceCouponBody struct {
 	CouponCode string `json:"couponCode"`
+	// LearnerUserID enrolls a managed learner in addition to the buyer (#770).
+	LearnerUserID string `json:"learnerUserId"`
 	// Client-supplied amounts are intentionally ignored (FR-6).
 	ChargedCents  *int `json:"chargedCents"`
 	DiscountCents *int `json:"discountCents"`
@@ -377,13 +379,19 @@ func (d Deps) handleMarketplaceCheckout() http.HandlerFunc {
 			return
 		}
 
-		// Optional couponCode body (FR-4). Client amounts are ignored (FR-6).
+		// Optional couponCode and learnerUserId. Client amounts are ignored (FR-6).
 		couponCode := ""
+		learnerRaw := ""
 		{
 			var body marketplaceCouponBody
 			if err := json.NewDecoder(r.Body).Decode(&body); err == nil {
 				couponCode = strings.TrimSpace(body.CouponCode)
+				learnerRaw = strings.TrimSpace(body.LearnerUserID)
 			}
+		}
+		enrollUserID, ok := d.resolvePurchaseLearner(w, r, userID, course.CourseCode, learnerRaw)
+		if !ok {
+			return
 		}
 		// Flag off: ignore couponCode so behaviour is unchanged (rollout FR).
 		if !d.effectiveConfig().FFCourseCoupons {
@@ -474,6 +482,7 @@ func (d Deps) handleMarketplaceCheckout() http.HandlerFunc {
 			SuccessURL:         successURL,
 			CancelURL:          cancelURL,
 			PlatformTaxEnabled: d.effectiveConfig().FFTaxCollection,
+			EnrollUserID:       enrollUserID,
 		}
 		if reserved != nil && reserved.Coupon != nil && reserved.Redemption != nil {
 			checkoutReq.HasFirstPartyCoupon = true

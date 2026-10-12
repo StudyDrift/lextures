@@ -17,6 +17,8 @@ export default function CheckoutSuccessPage() {
   const courseId = params.get('course_id') ?? ''
   const courseCode = params.get('course_code') ?? ''
   const slug = params.get('slug') ?? ''
+  const plan = params.get('plan') ?? ''
+  const homeschoolPlan = plan === 'homeschool'
   const couponRaw = params.get('coupon') ?? params.get('coupon_code') ?? ''
   const coupon = couponRaw ? displayCouponCode(couponRaw) : ''
   const discountCentsRaw = params.get('discount_cents') ?? params.get('saved_cents') ?? ''
@@ -48,7 +50,13 @@ export default function CheckoutSuccessPage() {
           }
         } else {
           const items = await fetchMyEntitlements()
-          if (items.length > 0) {
+          const ready = homeschoolPlan
+            ? items.some(
+                (item) =>
+                  item.entitlementType.startsWith('subscription') && item.status === 'active',
+              )
+            : items.length > 0
+          if (ready) {
             if (!cancelled) setStatus('ready')
             return
           }
@@ -67,13 +75,15 @@ export default function CheckoutSuccessPage() {
     return () => {
       cancelled = true
     }
-  }, [courseId])
+  }, [courseId, homeschoolPlan])
 
-  const continueTo = courseCode
-    ? marketplaceCoursePath(courseCode)
-    : courseId
-      ? `/courses/${encodeURIComponent(courseId)}`
-      : '/'
+  const continueTo = homeschoolPlan
+    ? '/me/billing'
+    : courseCode
+      ? marketplaceCoursePath(courseCode)
+      : courseId
+        ? `/courses/${encodeURIComponent(courseId)}`
+        : '/'
   const fallbackTo = slug
     ? `/marketplace/${encodeURIComponent(slug)}`
     : courseCode
@@ -100,10 +110,16 @@ export default function CheckoutSuccessPage() {
       ) : null}
       {status === 'ready' ? (
         <>
-          <h1 className="text-2xl font-semibold text-success-fg">
-            {t('billing.checkout.success.ready.title')}
+          <h1 className="text-2xl font-semibold text-success-fg" data-testid="checkout-success-title">
+            {homeschoolPlan
+              ? t('billing.checkout.success.ready.homeschoolTitle')
+              : t('billing.checkout.success.ready.title')}
           </h1>
-          <p className="mt-2 text-fg-muted">{t('billing.checkout.success.ready.description')}</p>
+          <p className="mt-2 text-fg-muted">
+            {homeschoolPlan
+              ? t('billing.checkout.success.ready.homeschoolDescription')
+              : t('billing.checkout.success.ready.description')}
+          </p>
           {coupon || savedLabel ? (
             <p
               className="mt-3 text-sm text-fg-muted"
@@ -124,7 +140,9 @@ export default function CheckoutSuccessPage() {
             to={continueTo}
             className="mt-6 inline-flex rounded-lg bg-accent-solid px-4 py-2 text-sm font-medium text-fg-on-accent hover:opacity-90"
           >
-            {t('billing.checkout.success.ready.continue')}
+            {homeschoolPlan
+              ? t('billing.checkout.success.ready.billing')
+              : t('billing.checkout.success.ready.continue')}
           </Link>
         </>
       ) : null}
