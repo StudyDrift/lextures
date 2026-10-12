@@ -3,7 +3,9 @@ import type { FormEvent } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Plus, UserRound } from 'lucide-react'
 import { ConfirmDialog } from '../../components/confirm-dialog'
-import { Checkbox, Field, Input } from '../../components/ui'
+import { FamilyDevicePanel } from '../../components/family-sign-in/family-device-panel'
+import { LearnerSignInDialog } from '../../components/family-sign-in/learner-sign-in-dialog'
+import { Badge, Button, Checkbox, Field, Input } from '../../components/ui'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import {
   createDependent,
@@ -42,6 +44,20 @@ function LearnerCourseLinks({
   )
 }
 
+function LearnerSignInStatus({ learner }: { learner: ManagedDependent }) {
+  const locked = learner.signInLockedUntil && new Date(learner.signInLockedUntil) > new Date()
+  if (locked) {
+    return (
+      <Badge tone="warning" className="mt-1">
+        Sign-in locked until {new Date(learner.signInLockedUntil as string).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+      </Badge>
+    )
+  }
+  if (learner.signInMethod === 'pin') return <Badge tone="success" className="mt-1">PIN sign-in on</Badge>
+  if (learner.signInMethod === 'picture') return <Badge tone="success" className="mt-1">Picture sign-in on</Badge>
+  return null
+}
+
 export default function LearnersPage() {
   const { ffHomeschoolManagedLearners, loading: featuresLoading } = usePlatformFeatures()
   const [searchParams] = useSearchParams()
@@ -56,6 +72,7 @@ export default function LearnersPage() {
   const [saving, setSaving] = useState(false)
   const [busyId, setBusyId] = useState<string | null>(null)
   const [removeTarget, setRemoveTarget] = useState<ManagedDependent | null>(null)
+  const [signInTarget, setSignInTarget] = useState<ManagedDependent | null>(null)
 
   const reload = useCallback(async () => {
     setLoading(true)
@@ -152,7 +169,7 @@ export default function LearnersPage() {
       <div>
         <h1 className="text-xl font-semibold text-fg-default">Learners</h1>
         <p className="mt-1 text-sm text-fg-muted">
-          Add children by name (no email required), enroll them in your courses, then Learn as them on a shared device.
+          Add children by name (no email required), enroll them in your courses, then Learn as them or give them their own PIN or picture sign-in on a family device.
         </p>
       </div>
 
@@ -232,10 +249,20 @@ export default function LearnersPage() {
                       {d.gradeLevel ? `Grade ${d.gradeLevel}` : 'No grade'}
                       {d.coppaMinor ? ' · Under 13' : ''}
                     </p>
+                    <LearnerSignInStatus learner={d} />
                     <LearnerCourseLinks dependentId={d.id} courses={courses} />
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    disabled={busyId === d.id}
+                    onClick={() => setSignInTarget(d)}
+                  >
+                    {d.signInMethod === 'pin' || d.signInMethod === 'picture' ? 'Sign-in…' : 'Set up sign-in'}
+                  </Button>
                   <button
                     type="button"
                     disabled={busyId === d.id}
@@ -264,6 +291,17 @@ export default function LearnersPage() {
           </Link>
         </p>
       </section>
+
+      <FamilyDevicePanel />
+
+      <LearnerSignInDialog
+        learner={signInTarget}
+        onClose={() => setSignInTarget(null)}
+        onSaved={(updated) => {
+          setDeps((prev) => prev.map((d) => (d.id === updated.id ? { ...d, ...updated } : d)))
+          setSignInTarget(null)
+        }}
+      />
 
       <ConfirmDialog
         open={removeTarget !== null}

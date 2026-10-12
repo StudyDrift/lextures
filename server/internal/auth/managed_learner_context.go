@@ -7,6 +7,8 @@ type ManagedLearnerSession struct {
 	ActorID      string
 	TargetUserID string
 	JTI          string
+	// Via is ManagedLearnerViaFamilyDevice when the learner signed in from a family device (#771).
+	Via string
 }
 
 type managedLearnerCtxKey struct{}

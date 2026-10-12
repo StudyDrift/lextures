@@ -9,6 +9,10 @@ import (
 
 const managedLearnerTTL = 8 * time.Hour
 
+// ManagedLearnerViaFamilyDevice marks a managed-learner session the learner started
+// themselves from a family device picker (#771) rather than a parent Learn-as.
+const ManagedLearnerViaFamilyDevice = "family_device"
+
 // ManagedLearnerUser is the identity encoded in a parent Learn-as JWT (#640).
 type ManagedLearnerUser struct {
 	ActorID      string // parent / managing adult
@@ -18,10 +22,21 @@ type ManagedLearnerUser struct {
 	OrgSlug      string
 	JTI          string
 	ExpiresAt    time.Time
+	// Via is empty for parent Learn-as, or ManagedLearnerViaFamilyDevice (#771).
+	Via string
 }
 
 // SignManagedLearner issues a Learn-as JWT for a parent switching into a managed learner (#640).
 func (s *JWTSigner) SignManagedLearner(actorID, targetUserID, targetEmail, orgID, orgSlug string) (string, ManagedLearnerUser, error) {
+	return s.SignManagedLearnerVia(actorID, targetUserID, targetEmail, orgID, orgSlug, "")
+}
+
+// SignManagedLearnerVia issues a managed_learner JWT tagged with how the session began.
+// via must be empty (parent Learn-as) or ManagedLearnerViaFamilyDevice.
+func (s *JWTSigner) SignManagedLearnerVia(actorID, targetUserID, targetEmail, orgID, orgSlug, via string) (string, ManagedLearnerUser, error) {
+	if via != "" && via != ManagedLearnerViaFamilyDevice {
+		return "", ManagedLearnerUser{}, ErrInvalidToken
+	}
 	if !isUUID(actorID) || !isUUID(targetUserID) || strings.TrimSpace(targetEmail) == "" {
 		return "", ManagedLearnerUser{}, ErrInvalidToken
 	}
@@ -38,6 +53,7 @@ func (s *JWTSigner) SignManagedLearner(actorID, targetUserID, targetEmail, orgID
 		OrgID:   orgID,
 		OrgSlug: orgSlug,
 		JTI:     jti,
+		Via:     via,
 		Expires: unixSeconds(exp),
 	}
 	tok, err := s.sign(claims)
@@ -52,6 +68,7 @@ func (s *JWTSigner) SignManagedLearner(actorID, targetUserID, targetEmail, orgID
 		OrgSlug:      strings.TrimSpace(orgSlug),
 		JTI:          jti,
 		ExpiresAt:    exp.UTC(),
+		Via:          via,
 	}, nil
 }
 
@@ -70,6 +87,9 @@ func (s *JWTSigner) VerifyManagedLearner(token string) (ManagedLearnerUser, erro
 	if claims.OrgID != "" && !isUUID(claims.OrgID) {
 		return ManagedLearnerUser{}, ErrInvalidToken
 	}
+	if claims.Via != "" && claims.Via != ManagedLearnerViaFamilyDevice {
+		return ManagedLearnerUser{}, ErrInvalidToken
+	}
 	if isExpired(claims.Expires, s.now()) {
 		return ManagedLearnerUser{}, ErrExpiredToken
 	}
@@ -81,6 +101,7 @@ func (s *JWTSigner) VerifyManagedLearner(token string) (ManagedLearnerUser, erro
 		OrgSlug:      strings.TrimSpace(claims.OrgSlug),
 		JTI:          claims.JTI,
 		ExpiresAt:    time.Unix(claims.Expires, 0).UTC(),
+		Via:          claims.Via,
 	}, nil
 }
 
@@ -92,5 +113,6 @@ type managedLearnerClaims struct {
 	OrgID   string `json:"org_id,omitempty"`
 	OrgSlug string `json:"org_slug,omitempty"`
 	JTI     string `json:"jti"`
+	Via     string `json:"via,omitempty"`
 	Expires int64  `json:"exp"`
 }

@@ -51,6 +51,9 @@ type Dependent struct {
 	Status       string    `json:"status"`
 	CoppaMinor   bool      `json:"coppaMinor"`
 	CreatedAt    time.Time `json:"createdAt"`
+	// SignInMethod is "none", "pin", or "picture" for family-device sign-in (#771).
+	SignInMethod      string     `json:"signInMethod"`
+	SignInLockedUntil *time.Time `json:"signInLockedUntil,omitempty"`
 }
 
 // CreateParams is input for creating a managed learner.
@@ -187,7 +190,13 @@ ORDER BY u.display_name NULLS LAST, l.linked_at
 		d.GradeLevel = gl
 		out = append(out, d)
 	}
-	return out, rows.Err()
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	if err := decorateSignIn(ctx, pool, out); err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 // Create provisions a managed learner + active parent_student_links row.
@@ -283,6 +292,7 @@ VALUES ($1, $2, $3, $4, NOW(), FALSE)
 		Status:       "active",
 		CoppaMinor:   coppaMinor,
 		CreatedAt:    linkedAt.UTC(),
+		SignInMethod: "none",
 	}, nil
 }
 
@@ -409,7 +419,11 @@ WHERE l.parent_user_id = $1 AND l.org_id = $2 AND l.student_user_id = $3
 		return nil, err
 	}
 	d.GradeLevel = gl
-	return &d, nil
+	one := []Dependent{d}
+	if err := decorateSignIn(ctx, pool, one); err != nil {
+		return nil, err
+	}
+	return &one[0], nil
 }
 
 // CanEnrollManaged reports whether actor may enroll childID as a managed learner (active link).

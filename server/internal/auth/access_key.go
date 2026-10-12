@@ -146,6 +146,7 @@ func UserFromRequestOrAccessKey(r *http.Request, signer *JWTSigner, pool *pgxpoo
 			ActorID:      ml.ActorID,
 			TargetUserID: ml.TargetUserID,
 			JTI:          ml.JTI,
+			Via:          ml.Via,
 		})
 		return AuthUser{
 			UserID:  ml.TargetUserID,

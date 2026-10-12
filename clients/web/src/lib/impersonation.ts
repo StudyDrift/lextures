@@ -19,6 +19,8 @@ export type MeImpersonation = {
 
 export type MeLearningAs = {
   actorId: string
+  /** "family_device" when the learner signed in themselves from the family picker (#771). */
+  via?: string
 }
 
 export type MeProfile = {

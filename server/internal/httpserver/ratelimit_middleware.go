@@ -24,6 +24,7 @@ var authSensitivePaths = map[string]bool{
 	"/api/v1/auth/magic-link/request":    true,
 	"/api/v1/auth/oidc/apple/native":     true,
 	"/api/v1/auth/oidc/google/native":    true,
+	familySignInSessionPath:              true, // learner PIN / picture sign-in (#771)
 }
 
 // buildRateLimiter constructs the request limiter from config + Redis. IPs are

@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom'
 import { getImpersonationToken } from '../lib/auth'
 import { exitImpersonation, fetchMeProfile, type MeProfile } from '../lib/impersonation'
 import { exitLearnAs } from '../lib/managed-learners-api'
+import { FAMILY_PICKER_PATH } from '../lib/family-device'
+import { signOutFamilySession } from '../lib/family-sign-in-api'
 
 export function ImpersonationBanner() {
   const { t } = useTranslation('common')
@@ -32,11 +34,16 @@ export function ImpersonationBanner() {
 
   const isLearnAs = Boolean(profile?.learningAs)
   const isImpersonation = Boolean(profile?.impersonating)
+  // Learner signed in themselves on a family device (#771): sign-out returns to the picker.
+  const isFamilySession = profile?.learningAs?.via === 'family_device'
 
   async function handleExit() {
     setExiting(true)
     try {
-      if (isLearnAs) {
+      if (isFamilySession) {
+        await signOutFamilySession()
+        navigate(FAMILY_PICKER_PATH, { replace: true })
+      } else if (isLearnAs) {
         await exitLearnAs()
         navigate('/learners', { replace: true })
       } else {
@@ -62,7 +69,9 @@ export function ImpersonationBanner() {
       className="relative z-50 flex shrink-0 flex-wrap items-center justify-center gap-x-3 gap-y-1 border-b border-amber-700 bg-amber-500 px-4 py-2 text-sm font-medium text-amber-950 shadow-md"
     >
       <span>
-        {isLearnAs
+        {isFamilySession
+          ? `Signed in as ${displayName}.`
+          : isLearnAs
           ? `Learning as ${displayName} — Exit to parent.`
           : t('impersonation.banner.viewingAs', { name: displayName, defaultValue: 'You are viewing as {{name}}.' })}
       </span>
@@ -74,7 +83,9 @@ export function ImpersonationBanner() {
       >
         {exiting
           ? t('impersonation.banner.exiting', { defaultValue: 'Exiting…' })
-          : isLearnAs
+          : isFamilySession
+            ? 'Sign out'
+            : isLearnAs
             ? 'Exit to parent'
             : t('impersonation.banner.exit', { defaultValue: 'Exit impersonation' })}
       </button>

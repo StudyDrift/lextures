@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { getAccountType } from '../../lib/auth'
+import { isFamilySessionActive } from '../../lib/family-device'
 import { fetchOnboardingStatus } from '../../lib/onboarding-api'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 
@@ -17,7 +18,8 @@ export function useOnboardingRedirect(): { checking: boolean; shouldRedirect: bo
       setChecking(false)
       return
     }
-    if (!ffOnboardingFlow || getAccountType() === 'parent') {
+    // Learners who signed in on a family device land on their own dashboard (#771).
+    if (!ffOnboardingFlow || getAccountType() === 'parent' || isFamilySessionActive()) {
       setShouldRedirect(false)
       setChecking(false)
       return

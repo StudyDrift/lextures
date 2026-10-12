@@ -32,6 +32,7 @@ func (d Deps) registerManagedLearnersRoutes(r chi.Router) {
 	r.Post("/api/v1/me/dependents/{id}/sessions", d.handleStartDependentSession())
 	r.Patch("/api/v1/me/dependents/{id}", d.handlePatchDependent())
 	r.Delete("/api/v1/me/dependents/{id}", d.handleDeleteDependent())
+	d.registerFamilySignInRoutes(r)
 }
 
 // managedLearnerGuardMiddleware blocks sensitive writes during Learn-as sessions.
