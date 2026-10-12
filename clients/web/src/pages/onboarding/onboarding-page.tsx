@@ -191,6 +191,12 @@ export default function OnboardingPage() {
           >
             {t('onboarding.welcome.skip')}
           </button>
+          <Link
+            to="/starter-library"
+            className="inline-flex items-center rounded-xl px-2 py-2.5 text-sm font-semibold text-accent-fg underline-offset-2 hover:underline"
+          >
+            {t('onboarding.welcome.starterLibrary')}
+          </Link>
         </div>
       </OnboardingShell>
     )
@@ -499,6 +505,12 @@ export default function OnboardingPage() {
       ) : (
         <p className="mt-4 text-sm text-fg-muted">{t('onboarding.done.browseCatalog')}</p>
       )}
+      <Link
+        to="/starter-library"
+        className="mt-4 inline-flex items-center text-sm font-semibold text-accent-fg underline-offset-2 hover:underline"
+      >
+        {t('onboarding.done.starterLibrary')}
+      </Link>
       <Link
         to={afterOnboarding}
         className="mt-6 inline-flex items-center gap-2 rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500"

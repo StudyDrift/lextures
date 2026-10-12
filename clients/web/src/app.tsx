@@ -126,6 +126,7 @@ export default function App() {
             <Route path="/ai" element={<Pages.AskAiPage />} />
             <Route path="/review" element={<Pages.ReviewSessionPage />} />
             <Route path="/courses" element={<Pages.Courses />} />
+            <Route path="/starter-library" element={<Pages.StarterLibraryPage />} />
             <Route path="/my-paths" element={<Pages.MyPaths />} />
             <Route path="/creator/learning-paths" element={<Pages.CreatorLearningPathsPage />} />
             <Route path="/notebooks/global" element={<Pages.GlobalNotebookPage />} />

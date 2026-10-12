@@ -122,6 +122,12 @@ export function buildGlobalSearchItems(
     { title: 'Dashboard', subtitle: 'Home', path: '/', hint: 'dashboard home' },
     { title: 'Courses', subtitle: 'All your courses', path: '/courses', hint: 'courses catalog' },
     {
+      title: 'Starter library',
+      subtitle: 'Courses by grade and subject',
+      path: '/starter-library',
+      hint: 'starter library grade subject copy course',
+    },
+    {
       title: 'My Notebooks',
       subtitle: 'Notes across courses',
       path: '/notebooks',

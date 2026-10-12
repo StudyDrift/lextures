@@ -18,6 +18,7 @@
   "onboarding.welcome.description": "لنخصّص مسار تعلّمك في نحو خمس دقائق. يمكنك تخطي أي خطوة.",
   "onboarding.welcome.start": "لنبدأ",
   "onboarding.welcome.skip": "تخطّ لاحقًا",
+  "onboarding.welcome.starterLibrary": "تصفح المقررات الجاهزة",
   "onboarding.goal.title": "ماذا تريد أن تتعلّم؟",
   "onboarding.goal.description": "اختر موضوعًا وصف هدفك.",
   "onboarding.goal.label": "هدفك",
@@ -52,5 +53,6 @@
   "onboarding.done.startHere": "ابدأ هنا",
   "onboarding.done.openCourse": "فتح المقرر",
   "onboarding.done.browseCatalog": "تصفّح الكتالوج للعثور على مقررات تتوافق مع هدفك.",
-  "onboarding.done.goToDashboard": "الذهاب إلى اللوحة"
+  "onboarding.done.goToDashboard": "الذهاب إلى اللوحة",
+  "onboarding.done.starterLibrary": "تصفح مكتبة المقررات الجاهزة"
 }

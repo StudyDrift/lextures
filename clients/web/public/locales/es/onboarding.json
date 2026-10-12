@@ -18,6 +18,7 @@
   "onboarding.welcome.description": "Personalicemos tu ruta de aprendizaje en unos cinco minutos. Puedes omitir cualquier paso.",
   "onboarding.welcome.start": "Empecemos",
   "onboarding.welcome.skip": "Omitir por ahora",
+  "onboarding.welcome.starterLibrary": "Ver cursos iniciales",
   "onboarding.goal.title": "¿Qué quieres aprender?",
   "onboarding.goal.description": "Elige un tema y describe tu objetivo.",
   "onboarding.goal.label": "Tu objetivo",
@@ -52,5 +53,6 @@
   "onboarding.done.startHere": "Empieza aquí",
   "onboarding.done.openCourse": "Abrir curso",
   "onboarding.done.browseCatalog": "Explora el catálogo para encontrar cursos que coincidan con tu objetivo.",
-  "onboarding.done.goToDashboard": "Ir al panel"
+  "onboarding.done.goToDashboard": "Ir al panel",
+  "onboarding.done.starterLibrary": "Ver la biblioteca inicial"
 }
