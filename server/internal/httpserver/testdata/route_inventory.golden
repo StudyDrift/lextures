@@ -1636,6 +1636,10 @@ GET	/api/v1/slots/{slot_id}/ical	anonymous
 GET	/api/v1/standards	session
 GET	/api/v1/standards/search	session
 GET	/api/v1/standards/{id}	session
+GET	/api/v1/starter-library	session
+POST	/api/v1/starter-library/generate	session
+GET	/api/v1/starter-library/{slug}	session
+POST	/api/v1/starter-library/{slug}/use	session
 GET	/api/v1/status-summary	anonymous
 GET	/api/v1/status/banner	anonymous
 GET	/api/v1/status/banner/ws	anonymous

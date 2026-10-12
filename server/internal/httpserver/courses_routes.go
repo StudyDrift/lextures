@@ -3,6 +3,7 @@ package httpserver
 import "github.com/go-chi/chi/v5"
 
 func (d Deps) registerCourseRoutes(r chi.Router) {
+	d.registerStarterLibraryRoutes(r)
 	r.Get("/api/v1/courses", d.handleListCourses())
 	r.Get("/api/v1/courses/catalog-settings", d.handleGetCourseCatalogSettings())
 	r.Put("/api/v1/courses/catalog-settings", d.handlePutCourseCatalogSettings())

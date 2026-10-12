@@ -54,10 +54,12 @@ const (
 	FeatureVibeGeneration             = "vibe_generation"
 	FeatureGraderAgent                = "grader_agent"
 	FeatureLessonGeneration           = "lesson_generation"
-	FeatureAIStudyBuddy               = "ai_study_buddy"
-	FeatureReportCardComment          = "report_card_comment"
-	FeatureHeroImageGeneration        = "hero_image_generation"
-	FeatureAvatarGeneration           = "avatar_generation"
+	// FeatureStarterLibrary drafts a short editable starter course (issue 773).
+	FeatureStarterLibrary      = "starter_library"
+	FeatureAIStudyBuddy        = "ai_study_buddy"
+	FeatureReportCardComment   = "report_card_comment"
+	FeatureHeroImageGeneration = "hero_image_generation"
+	FeatureAvatarGeneration    = "avatar_generation"
 	// FeatureAdaptiveContent is reserved for ACE generation (plan AC.1 / AC.3).
 	FeatureAdaptiveContent = "adaptive_content"
 	// FeatureContentTool is the shared AI feature id for Content Tools grounded calls (CT.6).

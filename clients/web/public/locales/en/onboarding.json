@@ -18,6 +18,7 @@
   "onboarding.welcome.description": "Let's personalize your learning path in about five minutes. You can skip any step.",
   "onboarding.welcome.start": "Let's get started",
   "onboarding.welcome.skip": "Skip for now",
+  "onboarding.welcome.starterLibrary": "Browse starter courses",
   "onboarding.goal.title": "What do you want to learn?",
   "onboarding.goal.description": "Pick a topic and describe your goal.",
   "onboarding.goal.label": "Your goal",
@@ -52,5 +53,6 @@
   "onboarding.done.startHere": "Start here",
   "onboarding.done.openCourse": "Open course",
   "onboarding.done.browseCatalog": "Browse the catalog to find courses matching your goal.",
-  "onboarding.done.goToDashboard": "Go to Dashboard"
+  "onboarding.done.goToDashboard": "Go to Dashboard",
+  "onboarding.done.starterLibrary": "Browse the starter library"
 }

@@ -2233,6 +2233,21 @@
     "triggerSISSync",
     "vendorLabel"
   ],
+  "starter-library-api.ts": [
+    "StarterCopyResult",
+    "StarterDetail",
+    "StarterLibraryList",
+    "StarterModule",
+    "StarterModuleSummary",
+    "StarterPage",
+    "StarterSubject",
+    "StarterSummary",
+    "copyStarterCourse",
+    "formatStarterLength",
+    "generateStarterCourse",
+    "getStarterCourse",
+    "listStarterCourses"
+  ],
   "status-api.ts": [
     "STATUS_POLL_INTERVAL_MS",
     "StatusIncident",

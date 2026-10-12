@@ -18,6 +18,7 @@
   "onboarding.welcome.description": "Personnalisons votre parcours d'apprentissage en environ cinq minutes. Vous pouvez ignorer n'importe quelle étape.",
   "onboarding.welcome.start": "Commençons",
   "onboarding.welcome.skip": "Ignorer pour l'instant",
+  "onboarding.welcome.starterLibrary": "Parcourir les cours de départ",
   "onboarding.goal.title": "Que voulez-vous apprendre ?",
   "onboarding.goal.description": "Choisissez un sujet et décrivez votre objectif.",
   "onboarding.goal.label": "Votre objectif",
@@ -52,5 +53,6 @@
   "onboarding.done.startHere": "Commencez ici",
   "onboarding.done.openCourse": "Ouvrir le cours",
   "onboarding.done.browseCatalog": "Parcourez le catalogue pour trouver des cours correspondant à votre objectif.",
-  "onboarding.done.goToDashboard": "Aller au tableau de bord"
+  "onboarding.done.goToDashboard": "Aller au tableau de bord",
+  "onboarding.done.starterLibrary": "Parcourir la bibliothèque de départ"
 }

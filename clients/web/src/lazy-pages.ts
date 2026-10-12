@@ -63,6 +63,7 @@ export const CourseStandardsGradebook = lazy(() => import('./pages/lms/course-st
 export const LessonGeneratorPage = lazy(() => import('./pages/lms/lesson-generator'))
 export const CourseSyllabus = lazy(() => import('./pages/lms/course-syllabus'))
 export const Courses = lazy(() => import('./pages/lms/courses'))
+export const StarterLibraryPage = lazy(() => import('./pages/lms/starter-library-page'))
 export const MyPaths = lazy(() => import('./pages/lms/my-paths'))
 export const PathLandingPage = lazy(() => import('./pages/lms/path-landing-page'))
 export const PathsCatalogPage = lazy(() => import('./pages/lms/paths-catalog-page'))

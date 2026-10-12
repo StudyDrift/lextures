@@ -61,6 +61,7 @@ import {
 } from '../../lib/course-catalog-settings-api'
 import type { CourseCatalogView, KanbanColumnId } from '../../lib/course-catalog-types'
 import { EmptyState } from '../../components/ui/empty-state'
+import { LinkButton } from '../../components/ui/link-button'
 import { CoursesCatalogSkeleton } from '../../components/ui/lms-content-skeletons'
 import { LmsPage } from './lms-page'
 import { usePermissions } from '../../context/use-permissions'
@@ -1478,6 +1479,11 @@ export default function Courses() {
           ) : null}
           <CourseCatalogViewMenu value={catalogView} onChange={handleCatalogViewChange} />
           {showCourseCreateActions ? (
+            <LinkButton to="/starter-library" variant="secondary">
+              Starter library
+            </LinkButton>
+          ) : null}
+          {showCourseCreateActions ? (
             <Link
               to="/courses/create"
               className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent-solid px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500"
@@ -1603,6 +1609,7 @@ export default function Courses() {
               title="Create your first course"
               body="You do not have any courses in your catalog yet. Add a title and description to get started, then invite learners from the course dashboard."
               primaryAction={{ label: 'New course', to: '/courses/create' }}
+              secondaryAction={{ label: 'Starter library', to: '/starter-library' }}
             />
           ) : (
             <EmptyState
