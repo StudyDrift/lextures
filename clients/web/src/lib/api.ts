@@ -1,4 +1,4 @@
-import { getBearerToken } from './auth'
+import { getBearerToken, getImpersonationToken } from './auth'
 import {
   applyAuthTokenResponse,
   clearSessionTokens,
@@ -148,10 +148,17 @@ function dispatchAuthRequired(): void {
 }
 
 function applyUnauthorizedHandling(res: Response): void {
-  if (res.status === 401) {
-    clearSessionTokens()
-    dispatchAuthRequired()
+  if (res.status !== 401) {
+    return
   }
+  // A 401 while Learn-as / view-as is active must not wipe the backed-up parent
+  // session or bounce the browser to /login (#762). The Learn-as token stays
+  // active; Exit to parent can still restore the parent account.
+  if (getImpersonationToken()) {
+    return
+  }
+  clearSessionTokens()
+  dispatchAuthRequired()
 }
 
 let refreshInFlight: Promise<boolean> | null = null
@@ -227,7 +234,14 @@ export async function authorizedFetch(path: string, init?: AuthorizedFetchInit):
     try {
       let res = await fetchWithTimeout(apiUrl(path), { ...fetchInit, headers }, timeoutMs)
 
-      if (res.status === 401 && getRefreshToken() && path !== '/api/v1/auth/refresh') {
+      // Parent refresh cannot satisfy a Learn-as / view-as bearer 401; attempting it
+      // rotates or clears the parent session while the impersonation token remains.
+      if (
+        res.status === 401 &&
+        !getImpersonationToken() &&
+        getRefreshToken() &&
+        path !== '/api/v1/auth/refresh'
+      ) {
         const ok = await tryRefreshSession()
         if (ok) {
           const h2 = new Headers(init?.headers)

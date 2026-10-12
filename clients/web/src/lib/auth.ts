@@ -97,9 +97,9 @@ export function setCachedAccountTypeFromUser(user?: { accountType?: string | nul
   }
 }
 
-/** JWT `sub` claim for the current access token, if parseable. */
+/** JWT `sub` claim for the active bearer (Learn-as / view-as token when set). */
 export function getJwtSubject(): string | null {
-  const t = getAccessToken()
+  const t = getBearerToken()
   if (!t) return null
   const seg = t.split('.')[1]
   if (!seg) return null

@@ -98,11 +98,15 @@ export async function startLearnAs(dependentId: string): Promise<void> {
 
 export async function exitLearnAs(): Promise<void> {
   const token = getImpersonationToken()
-  if (token) {
-    await fetch(apiUrl('/api/v1/me/dependents/sessions/current'), {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` },
-    })
+  try {
+    if (token) {
+      await fetch(apiUrl('/api/v1/me/dependents/sessions/current'), {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+    }
+  } finally {
+    // Always restore the parent session locally, even if the revoke call fails (#762).
+    endImpersonationSession()
   }
-  endImpersonationSession()
 }

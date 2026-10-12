@@ -1,5 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { clearAccessToken, getAccessToken, setAccessToken } from '../auth'
+import {
+  clearAccessToken,
+  clearImpersonationToken,
+  getAccessToken,
+  getJwtSubject,
+  setAccessToken,
+  setImpersonationToken,
+} from '../auth'
 
 const KEY = 'studydrift_access_token'
 
@@ -28,6 +35,7 @@ beforeEach(() => {
 afterEach(() => {
   vi.unstubAllGlobals()
   clearAccessToken()
+  clearImpersonationToken()
 })
 
 describe('access token storage', () => {
@@ -63,5 +71,28 @@ describe('access token storage', () => {
     clearAccessToken()
     expect(listener).toHaveBeenCalledTimes(2)
     window.removeEventListener('studydrift-auth-token', listener)
+  })
+})
+
+
+function fakeJwt(sub: string): string {
+  const payload = btoa(JSON.stringify({ sub })).replace(/\+/g, '-').replace(/\//g, '_')
+  return `hdr.${payload}.sig`
+}
+
+describe('getJwtSubject', () => {
+  it('reads sub from the access token', () => {
+    setAccessToken(fakeJwt('parent-id'))
+    expect(getJwtSubject()).toBe('parent-id')
+  })
+
+  it('prefers the Learn-as / view-as bearer over the parent access token', () => {
+    setAccessToken(fakeJwt('parent-id'))
+    setImpersonationToken(fakeJwt('learner-id'))
+    expect(getJwtSubject()).toBe('learner-id')
+  })
+
+  it('returns null when no bearer is present', () => {
+    expect(getJwtSubject()).toBeNull()
   })
 })

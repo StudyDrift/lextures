@@ -92,8 +92,19 @@ func (d Deps) handleListMySessions() http.HandlerFunc {
 		if !ok {
 			return
 		}
+		// Login JWTs carry the refresh-token session id (rti). Learn-as / view-as
+		// tokens do not — return an empty list instead of 401 so the SPA does not
+		// treat the parent session as signed out (#762).
 		au, err := auth.UserFromRequest(r, d.JWTSigner)
 		if err != nil {
+			token, tokOK := auth.BearerToken(r.Header)
+			if tokOK {
+				typ := auth.JWTType(token)
+				if typ == "managed_learner" || typ == "impersonation" {
+					writeJSON(w, http.StatusOK, sessionsListJSON{Sessions: []sessionItemJSON{}})
+					return
+				}
+			}
 			apierr.WriteJSON(w, http.StatusUnauthorized, apierr.CodeUnauthorized, "Sign in required.")
 			return
 		}
@@ -144,6 +155,14 @@ func (d Deps) handleDeleteMySession() http.HandlerFunc {
 		}
 		au, err := auth.UserFromRequest(r, d.JWTSigner)
 		if err != nil {
+			token, tokOK := auth.BearerToken(r.Header)
+			if tokOK {
+				typ := auth.JWTType(token)
+				if typ == "managed_learner" || typ == "impersonation" {
+					apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "Session management is not available while learning as another user.")
+					return
+				}
+			}
 			apierr.WriteJSON(w, http.StatusUnauthorized, apierr.CodeUnauthorized, "Sign in required.")
 			return
 		}
@@ -185,6 +204,14 @@ func (d Deps) handleDeleteMyOtherSessions() http.HandlerFunc {
 		}
 		au, err := auth.UserFromRequest(r, d.JWTSigner)
 		if err != nil {
+			token, tokOK := auth.BearerToken(r.Header)
+			if tokOK {
+				typ := auth.JWTType(token)
+				if typ == "managed_learner" || typ == "impersonation" {
+					apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "Session management is not available while learning as another user.")
+					return
+				}
+			}
 			apierr.WriteJSON(w, http.StatusUnauthorized, apierr.CodeUnauthorized, "Sign in required.")
 			return
 		}

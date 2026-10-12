@@ -209,7 +209,7 @@ describe('SideNavMainLinks', () => {
     expect(screen.getByRole('link', { name: /^billing$/i })).toHaveAttribute('href', '/me/billing')
   })
 
-  it('hides Learners and Billing during a Learn-as or view-as session', () => {
+  it('hides Learners, Billing, and Settings during a Learn-as or view-as session', () => {
     setImpersonationToken('learn-as-token')
     platformFeaturesMock.mockReturnValue({
       accommodationsEngineEnabled: false,
@@ -231,6 +231,7 @@ describe('SideNavMainLinks', () => {
 
     expect(screen.queryByRole('link', { name: /^learners$/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: /^billing$/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /^settings$/i })).not.toBeInTheDocument()
     expect(screen.getByRole('link', { name: /^ask ai$/i })).toBeInTheDocument()
   })
 })
