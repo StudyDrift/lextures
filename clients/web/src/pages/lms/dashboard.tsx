@@ -24,6 +24,12 @@ import { mapPool } from '../../lib/async-pool'
 import { fetchFeedChannels, fetchFeedMessages } from '../../lib/course-feed-api'
 import { getCourseViewAs } from '../../lib/course-view-as'
 import { getAccountType, getJwtSubject } from '../../lib/auth'
+import { viewerHasParentChildren } from '../../lib/parent-api'
+import {
+  getDashboardViewPreference,
+  setDashboardViewPreference,
+  shouldShowParentHome,
+} from '../../lib/dashboard-view-preference'
 import {
   courseGradebookViewPermission,
   fetchCourse,
@@ -291,14 +297,48 @@ async function loadStaffRow(
   return { course, emptyGradeCells, gradingBacklog }
 }
 
+/**
+ * Home route. Parent-type accounts and parents with managed learners or linked students land on
+ * Parent home (/parent) unless they chose the teacher view (#772); everyone else gets the
+ * teacher/learner dashboard.
+ */
 export default function Dashboard() {
-  const { t } = useTranslation('dashboard')
   const navigate = useNavigate()
+  const [hasChildren, setHasChildren] = useState<boolean | null>(() =>
+    getAccountType() === 'parent' ? true : null,
+  )
   useEffect(() => {
     if (getAccountType() === 'parent') {
       navigate('/parent', { replace: true })
+      return
+    }
+    let cancelled = false
+    void viewerHasParentChildren().then((has) => {
+      if (cancelled) return
+      setHasChildren(has)
+      if (shouldShowParentHome(has, getDashboardViewPreference())) {
+        navigate('/parent', { replace: true })
+      }
+    })
+    return () => {
+      cancelled = true
     }
   }, [navigate])
+  // Wait for the children check before mounting the teacher dashboard (avoids a flash and a burst
+  // of course loads for parents who are redirected), unless the teacher view was chosen explicitly.
+  if (hasChildren === null && getDashboardViewPreference() !== 'teacher') {
+    return <DashboardLoadingSkeleton />
+  }
+  if (hasChildren && shouldShowParentHome(true, getDashboardViewPreference())) {
+    return <DashboardLoadingSkeleton />
+  }
+  return <TeacherDashboard hasChildren={hasChildren === true} />
+}
+
+function TeacherDashboard({ hasChildren }: { hasChildren: boolean }) {
+  const { t } = useTranslation('dashboard')
+  const { t: tParent } = useTranslation('parent')
+  const navigate = useNavigate()
   const { allows, loading: permLoading } = usePermissions()
   const showCourseCreateActions = canCreateCourses(allows, permLoading)
   const inboxUnread = useInboxUnreadCount()
@@ -691,6 +731,21 @@ export default function Dashboard() {
       title={t('dashboard.title')}
       description={t('dashboard.description')}
     >
+      {hasChildren && (
+        <div className="mt-2">
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              setDashboardViewPreference('parent')
+              navigate('/parent')
+            }}
+          >
+            {tParent('parent.home.switchToParent')}
+          </Button>
+        </div>
+      )}
       {catalogError && (
         <p className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900/40 dark:bg-rose-950/40 dark:text-rose-100">
           {catalogError}

@@ -38,6 +38,17 @@ type Link struct {
 
 const activeStatuses = `('active','pending')`
 
+// HasChildren reports whether parentID has at least one active or pending link in orgID.
+func HasChildren(ctx context.Context, pool *pgxpool.Pool, parentID, orgID uuid.UUID) (bool, error) {
+	var ok bool
+	err := pool.QueryRow(ctx, `
+SELECT EXISTS (
+  SELECT 1 FROM "user".parent_student_links l
+  WHERE l.parent_user_id = $1 AND l.org_id = $2 AND l.status IN `+activeStatuses+`
+)`, parentID, orgID).Scan(&ok)
+	return ok, err
+}
+
 // ActiveLinkBetween returns the link when parent has an active/pending link to student in org.
 func ActiveLinkBetween(ctx context.Context, pool *pgxpool.Pool, orgID, parentID, studentID uuid.UUID) (*Link, error) {
 	var l Link

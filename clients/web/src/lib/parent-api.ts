@@ -188,3 +188,73 @@ export type ParentNotificationPrefs = {
   lowGradeThreshold: number | null
   attendanceEvent: boolean
 }
+
+export type ParentHomeWorkItem = {
+  courseCode: string
+  courseTitle: string
+  itemId: string
+  kind: string
+  title: string
+  dueAt?: string | null
+  completedAt?: string | null
+  overdue: boolean
+}
+
+export type ParentHomeCourse = {
+  courseCode: string
+  title: string
+  enrollmentId?: string | null
+  gradePercent?: number | null
+}
+
+export type ParentHomeChild = {
+  studentUserId: string
+  displayName: string
+  courses: ParentHomeCourse[]
+  dueThisWeek: ParentHomeWorkItem[]
+  completedThisWeek: ParentHomeWorkItem[]
+  timeSpentSeconds: number
+}
+
+export type ParentHomeResponse = {
+  children: ParentHomeChild[]
+  weekStart: string
+  weekEnd: string
+  timezone: string
+}
+
+/** Parent home (#772): per-child due/completed this week, grades, and time spent. */
+export async function fetchParentHome(): Promise<ParentHomeResponse> {
+  let tz = ''
+  try {
+    tz = Intl.DateTimeFormat().resolvedOptions().timeZone ?? ''
+  } catch {
+    tz = ''
+  }
+  const qs = tz ? `?tz=${encodeURIComponent(tz)}` : ''
+  const res = await authorizedFetch(`/api/v1/parent/home${qs}`)
+  if (!res.ok) {
+    throw new Error(`Failed to load parent home (${res.status})`)
+  }
+  const data = (await res.json()) as ParentHomeResponse
+  return {
+    ...data,
+    children: (data.children ?? []).map((c) => ({
+      ...c,
+      courses: c.courses ?? [],
+      dueThisWeek: c.dueThisWeek ?? [],
+      completedThisWeek: c.completedThisWeek ?? [],
+      timeSpentSeconds: c.timeSpentSeconds ?? 0,
+    })),
+  }
+}
+
+/** Resolves true when the signed-in account has linked students or managed learners. */
+export async function viewerHasParentChildren(): Promise<boolean> {
+  try {
+    const res = await fetchParentChildren()
+    return res.children.length > 0
+  } catch {
+    return false
+  }
+}

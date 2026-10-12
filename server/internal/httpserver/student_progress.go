@@ -20,6 +20,8 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/assignmentoverrides"
 	"github.com/lextures/lextures/server/internal/repos/coursegrants"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
+	"github.com/lextures/lextures/server/internal/repos/organization"
+	"github.com/lextures/lextures/server/internal/repos/parentlinks"
 	stprog "github.com/lextures/lextures/server/internal/repos/studentprogress"
 	"github.com/lextures/lextures/server/internal/repos/user"
 	"github.com/lextures/lextures/server/internal/service/coursefinalgrade"
@@ -73,6 +75,12 @@ func (d Deps) guardStudentProgress(w http.ResponseWriter) bool {
 func (d Deps) canViewEnrollmentProgress(ctx context.Context, w http.ResponseWriter, viewer uuid.UUID, en *enrollment.ByID) bool {
 	if en.UserID == viewer {
 		return true
+	}
+	// Parent home (#772): a parent with an active link to the learner may read their progress.
+	if oid, err := organization.OrgIDForUser(ctx, d.Pool, viewer); err == nil {
+		if ln, err := parentlinks.ActiveLinkBetween(ctx, d.Pool, oid, viewer, en.UserID); err == nil && ln != nil {
+			return true
+		}
 	}
 	code := en.CourseCode
 	for _, perm := range []string{
