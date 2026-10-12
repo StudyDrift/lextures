@@ -38,3 +38,23 @@ export function formatTimeSpent(totalSeconds: number): string {
 export function parentProgressHref(courseCode: string, enrollmentId: string): string {
   return `/courses/${encodeURIComponent(courseCode)}/students/${encodeURIComponent(enrollmentId)}/progress`
 }
+
+const CHILDREN_KEY = 'lextures.hasParentChildren'
+
+/** Last known answer to "does this account have children?" so returning parents skip a flash. */
+export function getCachedHasParentChildren(): boolean {
+  try {
+    return localStorage.getItem(CHILDREN_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+export function setCachedHasParentChildren(v: boolean): void {
+  try {
+    if (v) localStorage.setItem(CHILDREN_KEY, '1')
+    else localStorage.removeItem(CHILDREN_KEY)
+  } catch {
+    // Ignore storage errors.
+  }
+}

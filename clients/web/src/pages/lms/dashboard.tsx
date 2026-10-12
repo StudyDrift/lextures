@@ -26,7 +26,9 @@ import { getCourseViewAs } from '../../lib/course-view-as'
 import { getAccountType, getJwtSubject } from '../../lib/auth'
 import { viewerHasParentChildren } from '../../lib/parent-api'
 import {
+  getCachedHasParentChildren,
   getDashboardViewPreference,
+  setCachedHasParentChildren,
   setDashboardViewPreference,
   shouldShowParentHome,
 } from '../../lib/dashboard-view-preference'
@@ -304,8 +306,8 @@ async function loadStaffRow(
  */
 export default function Dashboard() {
   const navigate = useNavigate()
-  const [hasChildren, setHasChildren] = useState<boolean | null>(() =>
-    getAccountType() === 'parent' ? true : null,
+  const [hasChildren, setHasChildren] = useState<boolean>(
+    () => getAccountType() === 'parent' || getCachedHasParentChildren(),
   )
   useEffect(() => {
     if (getAccountType() === 'parent') {
@@ -315,6 +317,7 @@ export default function Dashboard() {
     let cancelled = false
     void viewerHasParentChildren().then((has) => {
       if (cancelled) return
+      setCachedHasParentChildren(has)
       setHasChildren(has)
       if (shouldShowParentHome(has, getDashboardViewPreference())) {
         navigate('/parent', { replace: true })
@@ -324,15 +327,11 @@ export default function Dashboard() {
       cancelled = true
     }
   }, [navigate])
-  // Wait for the children check before mounting the teacher dashboard (avoids a flash and a burst
-  // of course loads for parents who are redirected), unless the teacher view was chosen explicitly.
-  if (hasChildren === null && getDashboardViewPreference() !== 'teacher') {
+  // A parent we already know about skips mounting the teacher dashboard while the redirect runs.
+  if (shouldShowParentHome(hasChildren, getDashboardViewPreference())) {
     return <DashboardLoadingSkeleton />
   }
-  if (hasChildren && shouldShowParentHome(true, getDashboardViewPreference())) {
-    return <DashboardLoadingSkeleton />
-  }
-  return <TeacherDashboard hasChildren={hasChildren === true} />
+  return <TeacherDashboard hasChildren={hasChildren} />
 }
 
 function TeacherDashboard({ hasChildren }: { hasChildren: boolean }) {
