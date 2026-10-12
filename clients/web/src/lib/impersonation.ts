@@ -84,13 +84,16 @@ export function endImpersonationSession(): void {
 /** End impersonation on the server then restore the admin session locally. */
 export async function exitImpersonation(): Promise<void> {
   const token = getImpersonationToken()
-  if (token) {
-    await fetch(apiUrl('/api/v1/admin-console/impersonate/session'), {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` },
-    })
+  try {
+    if (token) {
+      await fetch(apiUrl('/api/v1/admin-console/impersonate/session'), {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+    }
+  } finally {
+    endImpersonationSession()
   }
-  endImpersonationSession()
 }
 
 export async function fetchMeProfile(): Promise<MeProfile | null> {

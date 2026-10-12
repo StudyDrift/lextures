@@ -287,11 +287,46 @@ export default function App() {
             <Route path="/admin/reviews" element={<Pages.CourseReviewsModerationPage />} />
             <Route path="/reports" element={<Pages.Reports />} />
             <Route path="/inbox" element={<Pages.Inbox />} />
-            <Route path="/settings" element={<Navigate to="/settings/account" replace />} />
-            <Route path="/settings/ai" element={<Navigate to="/settings/ai/models" replace />} />
-            <Route path="/settings/ai/:aiSection" element={<Pages.Settings />} />
-            <Route path="/settings/feedback/:id" element={<Pages.Settings />} />
-            <Route path="/settings/:tab" element={<Pages.Settings />} />
+            <Route
+              path="/settings"
+              element={
+                <BlockDuringImpersonation>
+                  <Navigate to="/settings/account" replace />
+                </BlockDuringImpersonation>
+              }
+            />
+            <Route
+              path="/settings/ai"
+              element={
+                <BlockDuringImpersonation>
+                  <Navigate to="/settings/ai/models" replace />
+                </BlockDuringImpersonation>
+              }
+            />
+            <Route
+              path="/settings/ai/:aiSection"
+              element={
+                <BlockDuringImpersonation>
+                  <Pages.Settings />
+                </BlockDuringImpersonation>
+              }
+            />
+            <Route
+              path="/settings/feedback/:id"
+              element={
+                <BlockDuringImpersonation>
+                  <Pages.Settings />
+                </BlockDuringImpersonation>
+              }
+            />
+            <Route
+              path="/settings/:tab"
+              element={
+                <BlockDuringImpersonation>
+                  <Pages.Settings />
+                </BlockDuringImpersonation>
+              }
+            />
           </Route>
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

@@ -30,6 +30,14 @@ function renderAt(path: string) {
             </BlockDuringImpersonation>
           }
         />
+        <Route
+          path="/settings/account"
+          element={
+            <BlockDuringImpersonation>
+              <h1>Settings</h1>
+            </BlockDuringImpersonation>
+          }
+        />
       </Routes>
     </MemoryRouter>,
   )
@@ -56,6 +64,13 @@ describe('BlockDuringImpersonation', () => {
     setImpersonationToken('learn-as-token')
     renderAt('/me/billing')
     expect(screen.queryByRole('heading', { name: 'Billing' })).not.toBeInTheDocument()
+    expect(screen.getByText('/')).toBeInTheDocument()
+  })
+
+  it('redirects Settings while a Learn-as token is active', () => {
+    setImpersonationToken('learn-as-token')
+    renderAt('/settings/account')
+    expect(screen.queryByRole('heading', { name: 'Settings' })).not.toBeInTheDocument()
     expect(screen.getByText('/')).toBeInTheDocument()
   })
 })

@@ -1,6 +1,12 @@
 import { http, HttpResponse } from 'msw'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { clearAccessToken, getAccessToken, setAccessToken } from '../auth'
+import {
+  clearAccessToken,
+  clearImpersonationToken,
+  getAccessToken,
+  setAccessToken,
+  setImpersonationToken,
+} from '../auth'
 import {
   clearRefreshToken,
   getRefreshToken,
@@ -73,6 +79,7 @@ describe('authorizedFetch', () => {
 
   afterEach(() => {
     clearAccessToken()
+    clearImpersonationToken()
     clearRefreshToken()
   })
 
@@ -148,6 +155,27 @@ describe('authorizedFetch', () => {
     expect(res.status).toBe(401)
     expect(authRequiredListener).toHaveBeenCalledTimes(1)
     expect(getAccessToken()).toBeNull()
+    window.removeEventListener('studydrift-auth-required', authRequiredListener)
+  })
+
+  it('keeps the parent session when a Learn-as bearer gets 401 (#762)', async () => {
+    setAccessToken('parent-access')
+    setRefreshToken('parent-refresh')
+    setImpersonationToken('learn-as-token')
+    server.use(
+      http.get('http://localhost:8080/api/v1/settings/account', () => {
+        return HttpResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }),
+    )
+    const authRequiredListener = vi.fn()
+    window.addEventListener('studydrift-auth-required', authRequiredListener)
+
+    const res = await authorizedFetch('/api/v1/settings/account')
+
+    expect(res.status).toBe(401)
+    expect(authRequiredListener).not.toHaveBeenCalled()
+    expect(getAccessToken()).toBe('parent-access')
+    expect(getRefreshToken()).toBe('parent-refresh')
     window.removeEventListener('studydrift-auth-required', authRequiredListener)
   })
 

@@ -293,9 +293,12 @@ export function SideNavMainLinks() {
       >
         Inbox
       </SideNavLink>
-      <SideNavLink to="/settings" data-onboarding="nav-settings" icon={<Settings className="h-5 w-5" />}>
-        Settings
-      </SideNavLink>
+      {/* Account settings (password, sessions, delete) are parent/admin-owned; hide during Learn-as (#762). */}
+      {!impersonating ? (
+        <SideNavLink to="/settings" data-onboarding="nav-settings" icon={<Settings className="h-5 w-5" />}>
+          Settings
+        </SideNavLink>
+      ) : null}
     </>
   )
 }
