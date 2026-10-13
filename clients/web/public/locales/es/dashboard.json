@@ -81,7 +81,7 @@
   "dashboard.teaching.emptyCells": "celdas vacías",
   "dashboard.teaching.openGradebook": "Abrir libreta",
   "dashboard.teaching.modules": "Módulos",
-  "dashboard.noEnrollments": "Tienes cursos abiertos, pero no se devolvieron inscripciones de estudiante o instructor. Abre un curso desde el catálogo para ver los detalles completos.",
+  "dashboard.noEnrollments": "Todavía no enseñas ni cursas ninguno de estos cursos. Abre uno desde Cursos para ver sus detalles.",
   "dashboard.loadMore.loading": "Cargando…",
   "dashboard.loadMore.button": "Cargar {count, plural, one {# curso más} other {# cursos más}}",
   "dashboard.grades.notSubmitted": "No entregado",

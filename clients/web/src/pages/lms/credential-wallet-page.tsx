@@ -228,16 +228,21 @@ export default function CredentialWalletPage() {
   }
 
   return (
-    <LmsPage title={t('wallet.title')}>
+    <LmsPage
+      title={t('wallet.title')}
+      titleContent={
+        // Single page heading (#787): LmsPage renders this in place of its default <h1>.
+        <h1
+          id={titleId}
+          className="flex items-center gap-2 text-2xl font-semibold text-fg-default dark:text-white"
+        >
+          <Wallet className="h-7 w-7 text-emerald-600" aria-hidden />
+          {t('wallet.title')}
+        </h1>
+      }
+    >
       <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1
-            id={titleId}
-            className="flex items-center gap-2 text-2xl font-semibold text-fg-default dark:text-white"
-          >
-            <Wallet className="h-7 w-7 text-emerald-600" aria-hidden />
-            {t('wallet.title')}
-          </h1>
           <p className="mt-1 text-sm text-fg-muted dark:text-slate-300">{t('wallet.help')}</p>
           {alumniNote && items.length > 0 ? (
             <p className="mt-2 text-xs text-fg-muted dark:text-fg-subtle">{t('wallet.alumniNote')}</p>

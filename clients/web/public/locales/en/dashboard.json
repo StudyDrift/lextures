@@ -81,7 +81,7 @@
   "dashboard.teaching.emptyCells": "empty cells",
   "dashboard.teaching.openGradebook": "Open gradebook",
   "dashboard.teaching.modules": "Modules",
-  "dashboard.noEnrollments": "You have courses open, but no learner or instructor enrollments were returned. Open a course from the catalog for full details.",
+  "dashboard.noEnrollments": "You aren't teaching or taking any of these courses yet. Open one from Courses to see its details.",
   "dashboard.loadMore.loading": "Loading…",
   "dashboard.loadMore.button": "Load {count, plural, one {# more course} other {# more courses}}",
   "dashboard.grades.notSubmitted": "Not submitted",

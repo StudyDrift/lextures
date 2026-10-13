@@ -5,7 +5,10 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { CalendarHeart, Mail, Users } from 'lucide-react'
 import { usePlatformFeatures } from '../../../context/platform-features-context'
 import { getAccountType } from '../../../lib/auth'
-import { setDashboardViewPreference } from '../../../lib/dashboard-view-preference'
+import {
+  setCachedHasParentChildren,
+  setDashboardViewPreference,
+} from '../../../lib/dashboard-view-preference'
 import { ParentHomeCards } from '../../../components/parent/parent-home-cards'
 import { Button } from '../../../components/ui/button'
 import {
@@ -98,7 +101,8 @@ function GradeItemRow({ item, t }: { item: ParentGradeItem; t: (key: string, opt
 
 export default function ParentDashboard() {
   const { t } = useTranslation('parent')
-  const { ffConferenceScheduling, ffParentPortalV2, ffReportCards } = usePlatformFeatures()
+  const { ffConferenceScheduling, ffParentPortalV2, ffReportCards, ffHomeschoolManagedLearners } =
+    usePlatformFeatures()
   const [params, setParams] = useSearchParams()
   const [children, setChildren] = useState<ParentChildSummary[] | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -112,6 +116,11 @@ export default function ParentDashboard() {
   const navigate = useNavigate()
   // Homeschool parents keep a standard account and can author courses; offer the teacher view.
   const canSwitchToTeacher = getAccountType() !== 'parent'
+  // A homeschool parent is their own admin (#787): point them at Learners, not "the school admin".
+  const isHomeschoolParent = canSwitchToTeacher && Boolean(ffHomeschoolManagedLearners)
+  const learnersLink = (
+    <Link to="/learners" className="text-accent-fg underline underline-offset-2" />
+  )
 
   const selectedId = params.get('student') ?? ''
 
@@ -131,6 +140,8 @@ export default function ParentDashboard() {
 
   const switchToTeacher = () => {
     setDashboardViewPreference('teacher')
+    // We know this account has children, so the teacher dashboard shows its way back right away.
+    if (children && children.length > 0) setCachedHasParentChildren(true)
     navigate('/')
   }
 
@@ -263,7 +274,11 @@ export default function ParentDashboard() {
           {t('parent.title')}
         </h1>
         <p className="max-w-prose text-sm leading-relaxed text-fg-muted">
-          {t('parent.subtitle')}
+          {isHomeschoolParent ? (
+            <Trans i18nKey="parent.subtitleHomeschool" ns="parent" components={{ learnersLink }} />
+          ) : (
+            t('parent.subtitle')
+          )}
         </p>
         <Link
           to={`/parent/records${selectedId ? `?student=${selectedId}` : ''}`}
@@ -310,7 +325,11 @@ export default function ParentDashboard() {
 
       {children && children.length === 0 && !loadError && (
         <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-100">
-          {t('parent.noChildren')}
+          {isHomeschoolParent ? (
+            <Trans i18nKey="parent.noChildrenHomeschool" ns="parent" components={{ learnersLink }} />
+          ) : (
+            t('parent.noChildren')
+          )}
         </p>
       )}
 

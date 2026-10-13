@@ -198,6 +198,8 @@ export type ParentHomeWorkItem = {
   dueAt?: string | null
   completedAt?: string | null
   overdue: boolean
+  /** Due-this-week item the learner already turned in (#787). */
+  completed?: boolean
 }
 
 export type ParentHomeCourse = {

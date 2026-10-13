@@ -81,7 +81,7 @@
   "dashboard.teaching.emptyCells": "خلايا فارغة",
   "dashboard.teaching.openGradebook": "فتح سجل الدرجات",
   "dashboard.teaching.modules": "الوحدات",
-  "dashboard.noEnrollments": "لديك مقررات مفتوحة، لكن لم تُرجَع تسجيلات متعلّم أو مدرّس. افتح مقررًا من دليل المقررات للتفاصيل الكاملة.",
+  "dashboard.noEnrollments": "لا تُدرّس أيًا من هذه المقررات ولا تدرسه بعد. افتح أحدها من المقررات لعرض تفاصيله.",
   "dashboard.loadMore.loading": "جارٍ التحميل…",
   "dashboard.loadMore.button": "تحميل {count, plural, one {تحميل # مقرر إضافي} other {تحميل # مقررات إضافية}}",
   "dashboard.grades.notSubmitted": "لم يُسلَّم",

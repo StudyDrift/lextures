@@ -21,6 +21,12 @@ function WorkRow({ item, done }: { item: ParentHomeWorkItem; done?: boolean }) {
         <span className="ms-1 text-caption font-normal text-fg-default">· {item.courseTitle}</span>
       </Link>
       <span className="flex shrink-0 items-center gap-1 text-caption text-fg-default">
+        {!done && item.completed && (
+          <span className="inline-flex items-center gap-1 rounded bg-success-surface px-1.5 py-0.5 font-medium text-success-fg">
+            <CheckCircle2 className="h-3 w-3" aria-hidden />
+            {t('parent.home.turnedIn')}
+          </span>
+        )}
         {item.overdue && (
           <span className="inline-flex items-center gap-1 rounded bg-danger-surface px-1.5 py-0.5 font-medium text-danger-fg">
             <AlertTriangle className="h-3 w-3" aria-hidden />

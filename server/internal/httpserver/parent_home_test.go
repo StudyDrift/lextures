@@ -37,7 +37,7 @@ func TestClassifyParentHomeWork(t *testing.T) {
 	weekEnd := weekStart.AddDate(0, 0, 7)
 	now := weekStart.Add(50 * time.Hour) // Wednesday
 	at := func(h int) *time.Time { v := weekStart.Add(time.Duration(h) * time.Hour); return &v }
-	ids := make([]uuid.UUID, 7)
+	ids := make([]uuid.UUID, 9)
 	for i := range ids {
 		ids[i] = uuid.New()
 	}
@@ -49,15 +49,47 @@ func TestClassifyParentHomeWork(t *testing.T) {
 		{ItemID: ids[4], DueAt: at(20), CompletedAt: at(19)},   // completed this week
 		{ItemID: ids[5], DueAt: at(-50), CompletedAt: at(-60)}, // completed last week: excluded
 		{ItemID: ids[6]},                                       // no due date, incomplete: excluded
+		// #787: due Friday this week but turned in last week — still due this week (completed).
+		{ItemID: ids[7], DueAt: at(4*24 + 23), CompletedAt: at(-72)},
+		{ItemID: ids[8], CompletedAt: at(5)}, // no due date, completed this week: completed only
 	}
 	due, done, overdue := classifyParentHomeWork(rows, now, weekStart, weekEnd)
-	if len(due) != 3 || due[0].ItemID != ids[0] || due[1].ItemID != ids[1] || due[2].ItemID != ids[2] {
-		t.Fatalf("due = %+v", due)
+	gotDue := make([]uuid.UUID, 0, len(due))
+	for _, r := range due {
+		gotDue = append(gotDue, r.ItemID)
 	}
-	if overdue[ids[0]] || !overdue[ids[1]] || !overdue[ids[2]] {
+	wantDue := []uuid.UUID{ids[0], ids[1], ids[2], ids[4], ids[7]}
+	if len(gotDue) != len(wantDue) {
+		t.Fatalf("due = %v, want %v", gotDue, wantDue)
+	}
+	for i := range wantDue {
+		if gotDue[i] != wantDue[i] {
+			t.Fatalf("due = %v, want %v", gotDue, wantDue)
+		}
+	}
+	if overdue[ids[0]] || !overdue[ids[1]] || !overdue[ids[2]] || overdue[ids[4]] || overdue[ids[7]] {
 		t.Fatalf("overdue = %+v", overdue)
 	}
-	if len(done) != 1 || done[0].ItemID != ids[4] {
+	if len(done) != 2 || done[0].ItemID != ids[4] || done[1].ItemID != ids[8] {
 		t.Fatalf("done = %+v", done)
+	}
+}
+
+// #787: an item due Friday 11:59 PM local must land in a Monday-start week in that zone, even
+// when the request arrives after UTC midnight (Monday evening in America/Boise).
+func TestParentHomeWeek_LocalEveningIncludesFridayDue(t *testing.T) {
+	loc, err := time.LoadLocation("America/Boise")
+	if err != nil {
+		t.Skip("tzdata unavailable")
+	}
+	now := time.Date(2026, 10, 12, 22, 1, 0, 0, loc) // Mon 10:01 PM local = Tue 04:01 UTC
+	due := time.Date(2026, 10, 16, 23, 59, 0, 0, loc)
+	start, end := parentHomeWeek(now.UTC(), loc)
+	if due.Before(start) || !due.Before(end) {
+		t.Fatalf("due %v not in week [%v, %v)", due, start, end)
+	}
+	rows := []stprog.WorkItemRow{{ItemID: uuid.New(), DueAt: &due}}
+	if got, _, _ := classifyParentHomeWork(rows, now.UTC(), start, end); len(got) != 1 {
+		t.Fatalf("due = %+v", got)
 	}
 }

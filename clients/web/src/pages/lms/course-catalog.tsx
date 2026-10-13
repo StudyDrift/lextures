@@ -139,16 +139,11 @@ export default function CourseCatalogPage() {
 
   if (!ffCatalogIntegration && !ffConsortiumSharing) {
     if (permLoading) return null
-    if (!allows(PERM_RBAC_MANAGE)) {
-      return <CourseCatalogNotEnabled marketplaceEnabled={!!ffCourseMarketplace} />
-    }
     return (
-      <main className="mx-auto max-w-4xl p-6">
-        <p className="text-sm text-fg-muted">
-          Course catalog integration is not enabled on this platform. Enable{' '}
-          <strong>Course catalog integration</strong> or <strong>Consortium sharing</strong> in Settings → Global platform.
-        </p>
-      </main>
+      <CourseCatalogNotEnabled
+        marketplaceEnabled={!!ffCourseMarketplace}
+        canEnableCatalog={allows(PERM_RBAC_MANAGE)}
+      />
     )
   }
 

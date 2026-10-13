@@ -33,9 +33,15 @@ describe('CourseCatalogPage when catalog is not enabled', () => {
     expect(screen.getByRole('link', { name: /browse the marketplace/i })).toHaveAttribute('href', '/marketplace')
   })
 
-  it('keeps the setup instructions for admins', () => {
+  it('shows admins the same friendly page plus a settings link, without setup jargon (#787)', () => {
     perms.admin = true
     renderPage()
-    expect(screen.getByText(/Settings → Global platform/i)).toBeTruthy()
+    expect(screen.queryByText(/Global platform/i)).toBeNull()
+    expect(screen.queryByText(/integration is not enabled/i)).toBeNull()
+    expect(screen.getByRole('link', { name: /browse the marketplace/i })).toHaveAttribute('href', '/marketplace')
+    expect(screen.getByRole('link', { name: /turn on the course catalog/i })).toHaveAttribute(
+      'href',
+      '/settings/platform',
+    )
   })
 })

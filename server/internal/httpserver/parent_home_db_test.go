@@ -162,11 +162,26 @@ INSERT INTO analytics.engagement_events (user_id, course_id, event_type, value, 
 	if kid.DisplayName != "Kid One" || len(kid.Courses) != 1 || kid.Courses[0].CourseCode != cc || kid.Courses[0].EnrollmentID == nil {
 		t.Fatalf("courses = %+v", kid.Courses)
 	}
-	if len(kid.DueThisWeek) != 1 || kid.DueThisWeek[0].ItemID != overdueID.String() || !kid.DueThisWeek[0].Overdue {
-		t.Fatalf("due = %+v", kid.DueThisWeek)
+	// Due this week: the overdue item, plus the turned-in item when its due date (now+48h) is
+	// still inside this week — shown as completed rather than hidden (#787).
+	ws, we := parentHomeWeek(now, time.UTC)
+	doneDueInWeek := now.Add(48 * time.Hour).Before(we)
+	sawOverdue, sawDone := false, false
+	for _, it := range kid.DueThisWeek {
+		switch it.ItemID {
+		case overdueID.String():
+			sawOverdue = it.Overdue && !it.Completed
+		case doneID.String():
+			sawDone = it.Completed && !it.Overdue
+		default:
+			t.Fatalf("unexpected due item: %+v", it)
+		}
+	}
+	if !sawOverdue || sawDone != doneDueInWeek {
+		t.Fatalf("due = %+v (doneDueInWeek=%v)", kid.DueThisWeek, doneDueInWeek)
 	}
 	// The completed item is in this week only if "a minute ago" is; at a Monday-midnight boundary skip.
-	if ws, _ := parentHomeWeek(now, time.UTC); !now.Add(-time.Minute).Before(ws) {
+	if !now.Add(-time.Minute).Before(ws) {
 		if len(kid.CompletedThisWeek) != 1 || kid.CompletedThisWeek[0].ItemID != doneID.String() {
 			t.Fatalf("completed = %+v", kid.CompletedThisWeek)
 		}
