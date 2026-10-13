@@ -96,7 +96,7 @@ test.describe('Homeschool records (#774)', () => {
     await injectToken(page, access_token)
     await page.goto(`/parent/records?student=${dependent.id}`)
     await expect(page.getByRole('heading', { name: 'Records' })).toBeVisible()
-    await expect(page.getByText('Reading')).toBeVisible()
+    await expect(page.getByText(/· Reading · 1\.50h/)).toBeVisible()
     await expect(page.getByRole('button', { name: 'Add offline hours' })).toBeVisible()
 
     // Managed learner session cannot edit records.
