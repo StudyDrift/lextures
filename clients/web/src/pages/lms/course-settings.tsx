@@ -869,8 +869,8 @@ export default function CourseSettings() {
                     : 'Blueprint'
                   : section === 'archive'
                     ? course?.title
-                      ? `${course.title} — archive`
-                      : 'Archive'
+                      ? `${course.title} — trash`
+                      : 'Trash'
                     : course?.title
                       ? `${course.title} — settings`
                       : 'Course settings'
@@ -905,7 +905,7 @@ export default function CourseSettings() {
                 : section === 'blueprint'
                   ? 'District curriculum blueprint: link child courses, push structural updates, and review sync history.'
                   : section === 'archive'
-                    ? 'Module items you archived from the outline. Restore them when you want them visible again.'
+                    ? 'Items in Trash. Restore one, or delete it permanently so it leaves the gradebook.'
                     : ''
 
   const pageActions =

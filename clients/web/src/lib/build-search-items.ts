@@ -750,8 +750,8 @@ const courseSettingsSectionDefs: {
   },
   {
     suffix: '/settings/archive',
-    title: 'Archived modules',
-    hint: 'archived deleted restore trash unarchive structure',
+    title: 'Trash',
+    hint: 'archived deleted restore trash unarchive structure permanent',
     requiredPermission: courseItemCreatePermission,
   },
 ]

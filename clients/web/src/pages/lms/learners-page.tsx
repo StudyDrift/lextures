@@ -201,14 +201,22 @@ export default function LearnersPage() {
               disabled={saving}
             />
           </Field>
-          <div className="flex items-end pb-2">
+          <div className="sm:col-span-2">
             <Checkbox
               id="learner-under-13"
               checked={under13}
               onChange={(e) => setUnder13(e.target.checked)}
               disabled={saving}
+              aria-describedby="learner-under-13-help"
               label="This learner is under 13 (COPPA)"
             />
+            <p id="learner-under-13-help" className="mt-1 max-w-prose text-xs leading-relaxed text-fg-muted">
+              You are recorded as the consenting parent. AI features stay off until you opt this learner in, and
+              adapted lessons wait for your approval.{' '}
+              <Link to="/trust" className="font-medium text-accent-fg hover:underline">
+                Learn more in the Trust Center
+              </Link>
+            </p>
           </div>
         </div>
         <button
