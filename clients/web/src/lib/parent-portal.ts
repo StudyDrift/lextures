@@ -28,7 +28,9 @@ export function parentMessageTeacherHref(params: {
 export function parentGradeItemsForCourse(
   course: { items?: ParentGradeItem[]; grades?: Record<string, string> },
 ): ParentGradeItem[] {
-  if (course.items && course.items.length > 0) {
+  // The server only lists items the learner can still see (archived ones drop out, #787), so an
+  // empty `items` array is authoritative; fall back to raw grades only for legacy responses.
+  if (Array.isArray(course.items)) {
     return course.items
   }
   return Object.entries(course.grades ?? {}).map(([itemId, score]) => ({

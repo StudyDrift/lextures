@@ -81,7 +81,7 @@
   "dashboard.teaching.emptyCells": "cellules vides",
   "dashboard.teaching.openGradebook": "Ouvrir le carnet de notes",
   "dashboard.teaching.modules": "Modules",
-  "dashboard.noEnrollments": "Vous avez des cours ouverts, mais aucune inscription apprenant ou enseignant n'a été renvoyée. Ouvrez un cours depuis le catalogue pour les détails complets.",
+  "dashboard.noEnrollments": "Vous n'enseignez ni ne suivez encore aucun de ces cours. Ouvrez-en un depuis Cours pour voir ses détails.",
   "dashboard.loadMore.loading": "Chargement…",
   "dashboard.loadMore.button": "Charger {count, plural, one {# cours de plus} other {# cours de plus}}",
   "dashboard.grades.notSubmitted": "Non rendu",

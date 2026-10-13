@@ -28,4 +28,9 @@ describe('parent-portal helpers', () => {
     expect(items).toHaveLength(1)
     expect(items[0]?.title).toBe('Essay 1')
   })
+
+  it('trusts an empty items list instead of showing untitled grades (#787)', () => {
+    expect(parentGradeItemsForCourse({ items: [], grades: { archived: '9' } })).toEqual([])
+    expect(parentGradeItemsForCourse({ grades: { legacy: '7' } })).toHaveLength(1)
+  })
 })

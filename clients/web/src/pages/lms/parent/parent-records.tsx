@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import { FileText, ArrowLeft } from 'lucide-react'
 import { Button, Checkbox, Input, Field } from '../../../components/ui'
 import { parentChildLabel } from '../../../lib/parent-portal'
@@ -226,6 +226,17 @@ export default function ParentRecordsPage() {
         <h2 id="records-school-heading" className="text-lg font-semibold text-fg-default">
           {t('parent.records.schoolHeading')}
         </h2>
+        <p className="text-sm text-fg-muted">
+          <Trans
+            i18nKey="parent.records.schoolHint"
+            ns="parent"
+            components={{
+              learnersLink: (
+                <Link to="/learners" className="text-accent-fg underline underline-offset-2" />
+              ),
+            }}
+          />
+        </p>
         <Field label={t('parent.records.schoolName')}>
           <Input
             value={schoolNameDraft}

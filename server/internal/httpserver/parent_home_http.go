@@ -32,6 +32,8 @@ type parentHomeWorkItem struct {
 	DueAt       *string `json:"dueAt,omitempty"`
 	CompletedAt *string `json:"completedAt,omitempty"`
 	Overdue     bool    `json:"overdue"`
+	// Completed marks a due-this-week item the learner already turned in (#787).
+	Completed bool `json:"completed"`
 }
 
 type parentHomeCourse struct {
@@ -62,12 +64,20 @@ func parentHomeWeek(now time.Time, loc *time.Location) (time.Time, time.Time) {
 	return start.UTC(), end.UTC()
 }
 
-// classifyParentHomeWork splits a child's work into due-this-week (incomplete items due in the
-// week, plus any overdue incomplete item, flagged) and completed-this-week.
+// classifyParentHomeWork splits a child's work into due-this-week and completed-this-week.
+//
+// Due this week lists every item whose due date falls in [weekStart, weekEnd) — including work
+// the learner already turned in early (callers mark it completed), so the panel agrees with the
+// Assignments & quizzes list (#787) — plus any overdue incomplete item, flagged. Completed this
+// week lists items turned in during the week, whatever their due date.
 func classifyParentHomeWork(rows []stprog.WorkItemRow, now, weekStart, weekEnd time.Time) (due, done []stprog.WorkItemRow, overdue map[uuid.UUID]bool) {
 	overdue = map[uuid.UUID]bool{}
 	for _, r := range rows {
+		inWeek := r.DueAt != nil && !r.DueAt.Before(weekStart) && r.DueAt.Before(weekEnd)
 		if r.CompletedAt != nil {
+			if inWeek {
+				due = append(due, r)
+			}
 			if !r.CompletedAt.Before(weekStart) && r.CompletedAt.Before(weekEnd) {
 				done = append(done, r)
 			}
@@ -77,7 +87,6 @@ func classifyParentHomeWork(rows []stprog.WorkItemRow, now, weekStart, weekEnd t
 			continue
 		}
 		isOverdue := r.DueAt.Before(now)
-		inWeek := !r.DueAt.Before(weekStart) && r.DueAt.Before(weekEnd)
 		if isOverdue || inWeek {
 			due = append(due, r)
 			if isOverdue {
@@ -181,7 +190,8 @@ func (d Deps) buildParentHomeChild(ctx context.Context, ln parentlinks.Link, now
 		for _, r := range due {
 			child.DueThisWeek = append(child.DueThisWeek, parentHomeWorkItem{
 				CourseCode: c.CourseCode, CourseTitle: title, ItemID: r.ItemID.String(), Kind: r.Kind,
-				Title: r.Title, DueAt: fmtRFC3339(r.DueAt), Overdue: overdue[r.ItemID],
+				Title: r.Title, DueAt: fmtRFC3339(r.DueAt), CompletedAt: fmtRFC3339(r.CompletedAt),
+				Overdue: overdue[r.ItemID], Completed: r.CompletedAt != nil,
 			})
 		}
 		for _, r := range done {

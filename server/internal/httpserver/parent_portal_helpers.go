@@ -118,6 +118,24 @@ func parentGradeItemTitle(meta *coursestructure.ItemResponse) string {
 	return "Graded assignment"
 }
 
+// parentVisibleGrades keeps non-empty scores for items the learner can still see (#787).
+// Archived or deleted items drop out, matching the gradebook, instead of showing up as an
+// untitled "Graded assignment" row.
+func parentVisibleGrades(row map[string]string, itemMeta map[string]coursestructure.ItemResponse) map[string]string {
+	out := make(map[string]string, len(row))
+	for itemID, score := range row {
+		if strings.TrimSpace(score) == "" {
+			continue
+		}
+		meta, ok := itemMeta[itemID]
+		if !ok || meta.Archived {
+			continue
+		}
+		out[itemID] = score
+	}
+	return out
+}
+
 func (d Deps) buildParentCourseGrades(ctx context.Context, studentID uuid.UUID, c course.CoursePublic) (*parentCourseGradesOut, error) {
 	cid, err := course.GetIDByCourseCode(ctx, d.Pool, c.CourseCode)
 	if err != nil || cid == nil {
@@ -147,16 +165,11 @@ func (d Deps) buildParentCourseGrades(ctx context.Context, studentID uuid.UUID, 
 		}
 	}
 	teacherEmail, teacherName := parentPrimaryCourseTeacher(ctx, d.Pool, *cid)
-	items := make([]parentGradeItemOut, 0, len(row))
-	for itemID, score := range row {
-		if strings.TrimSpace(score) == "" {
-			continue
-		}
+	visibleGrades := parentVisibleGrades(row, itemMeta)
+	items := make([]parentGradeItemOut, 0, len(visibleGrades))
+	for itemID, score := range visibleGrades {
 		meta := itemMeta[itemID]
-		var metaPtr *coursestructure.ItemResponse
-		if meta.ID != "" {
-			metaPtr = &meta
-		}
+		metaPtr := &meta
 		var category *string
 		if meta.AssignmentGroupID != nil {
 			if name, ok := groupNames[*meta.AssignmentGroupID]; ok && strings.TrimSpace(name) != "" {
@@ -204,7 +217,7 @@ func (d Deps) buildParentCourseGrades(ctx context.Context, studentID uuid.UUID, 
 		Title:        parentCourseTitle(c),
 		TeacherEmail: teacherEmail,
 		TeacherName:  teacherName,
-		Grades:       row,
+		Grades:       visibleGrades,
 		Items:        items,
 	}, nil
 }

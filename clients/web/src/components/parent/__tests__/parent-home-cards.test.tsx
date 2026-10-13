@@ -88,6 +88,33 @@ describe('ParentHomeCards', () => {
     expect(within(card).queryByText('Current grades')).not.toBeInTheDocument()
   })
 
+  it('keeps work turned in early under Due this week, marked Turned in (#787)', () => {
+    renderCards([
+      {
+        ...kid,
+        dueThisWeek: [
+          {
+            courseCode: 'C-AAAAAA',
+            courseTitle: 'Math',
+            itemId: 'item-2',
+            kind: 'assignment',
+            title: 'QA Assignment',
+            dueAt: '2026-10-17T05:59:00Z',
+            completedAt: '2026-10-09T15:09:00Z',
+            overdue: false,
+            completed: true,
+          },
+        ],
+      },
+    ])
+    const card = within(screen.getByTestId('parent-home-card'))
+    expect(card.getByText('Due this week (1)')).toBeInTheDocument()
+    expect(card.queryByText('Nothing due this week.')).not.toBeInTheDocument()
+    expect(card.getByRole('link', { name: /QA Assignment/ })).toBeInTheDocument()
+    expect(card.getByText('Turned in')).toBeInTheDocument()
+    expect(card.queryByText('Overdue')).not.toBeInTheDocument()
+  })
+
   it('stacks cards in a single column on mobile', () => {
     renderCards([kid, emptyKid])
     const grid = screen.getByTestId('parent-home-cards')

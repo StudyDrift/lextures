@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/lextures/lextures/server/internal/repos/attendance"
+	"github.com/lextures/lextures/server/internal/repos/coursestructure"
 )
 
 func TestParentAttendanceSummary(t *testing.T) {
@@ -51,3 +52,20 @@ func TestParentGradeStatus(t *testing.T) {
 	}
 }
 
+
+func TestParentVisibleGrades_DropsArchivedAndUnknownItems(t *testing.T) {
+	meta := map[string]coursestructure.ItemResponse{
+		"live":     {ID: "live", Title: "QA Assignment"},
+		"archived": {ID: "archived", Title: "QA Assignment 2", Archived: true},
+	}
+	row := map[string]string{
+		"live":     "8",
+		"archived": "9",
+		"deleted":  "7",
+		"blank":    " ",
+	}
+	got := parentVisibleGrades(row, meta)
+	if len(got) != 1 || got["live"] != "8" {
+		t.Fatalf("visible grades = %+v", got)
+	}
+}

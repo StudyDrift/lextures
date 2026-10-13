@@ -365,6 +365,9 @@ function TeacherDashboard({ hasChildren }: { hasChildren: boolean }) {
   const [catalogError, setCatalogError] = useState<string | null>(null)
   const [courses, setCourses] = useState<CoursePublic[] | null>(null)
   const [detailsLoading, setDetailsLoading] = useState(false)
+  // True once enrollment details for the current catalog have loaded (or failed). Until then the
+  // empty-enrollments hint stays hidden so it does not flash while rows load (#787).
+  const [detailsSettled, setDetailsSettled] = useState(false)
   const [detailError, setDetailError] = useState<string | null>(null)
   const [detailsNonce, setDetailsNonce] = useState(0)
   const [deferredStudentCourses, setDeferredStudentCourses] = useState<CoursePublic[]>([])
@@ -514,6 +517,7 @@ function TeacherDashboard({ hasChildren }: { hasChildren: boolean }) {
       await Promise.resolve()
       if (detailGenRef.current !== gen) return
       setDetailError(null)
+      setDetailsSettled(false)
       setStudentRows([])
       setStaffRows([])
       setDeferredStudentCourses([])
@@ -522,6 +526,7 @@ function TeacherDashboard({ hasChildren }: { hasChildren: boolean }) {
       if (!list.length) {
         setCourses([])
         setDetailsLoading(false)
+        setDetailsSettled(true)
         return
       }
 
@@ -561,12 +566,14 @@ function TeacherDashboard({ hasChildren }: { hasChildren: boolean }) {
         setDeferredStudentCourses(deferredStudent)
         setDeferredStaffCourses(deferredStaff)
         setDetailsLoading(false)
+        setDetailsSettled(true)
         performance.mark('dashboard:rows-loaded')
       } catch {
         if (detailGenRef.current !== gen) return
         setDetailError(t('dashboard.errors.loadDetails'))
         setCourses(list)
         setDetailsLoading(false)
+        setDetailsSettled(true)
       }
     })()
   }, [catalog, permLoading, allows, t, detailsNonce])
@@ -1543,7 +1550,7 @@ function TeacherDashboard({ hasChildren }: { hasChildren: boolean }) {
             </StaggerReveal>
           )}
 
-          {!anyStudentExperience && !anyStaffExperience && hasCourses && !detailError && (
+          {detailsSettled && !anyStudentExperience && !anyStaffExperience && hasCourses && !detailError && (
             <p className="text-sm text-fg-muted">
               {t('dashboard.noEnrollments')}
             </p>
