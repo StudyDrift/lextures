@@ -45,6 +45,21 @@ export type AdminUser = {
   createdAt: string
 }
 
+export type AdminUserEnrollment = {
+  courseId: string
+  courseCode: string
+  courseTitle: string
+  role: string
+  active: boolean
+  enrolledAt: string
+}
+
+export type AdminUserDetail = AdminUser & {
+  accountType?: string
+  enrollmentCount: number
+  enrollments: AdminUserEnrollment[]
+}
+
 export type AdminCourse = {
   id: string
   courseCode: string
@@ -147,6 +162,17 @@ export async function fetchAdminUsers(params: {
   if (params.perPage) sp.set('per_page', String(params.perPage))
   const qs = sp.toString()
   const res = await authorizedFetch(`/api/v1/admin-console/users${qs ? `?${qs}` : ''}`)
+  return parseJson(res)
+}
+
+export async function fetchAdminUserDetail(
+  userId: string,
+  orgId?: string | null,
+): Promise<AdminUserDetail> {
+  const qs = orgId ? `?orgId=${encodeURIComponent(orgId)}` : ''
+  const res = await authorizedFetch(
+    `/api/v1/admin-console/users/${encodeURIComponent(userId)}${qs}`,
+  )
   return parseJson(res)
 }
 

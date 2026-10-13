@@ -145,9 +145,10 @@ VALUES ($1, 'Launch me', $2, $3, true) RETURNING id
 		return rr
 	}
 
+	// Global admins may open any course without enrollment (#789 org-admin course access).
 	before := getCourse()
-	if before.Code != http.StatusNotFound {
-		t.Fatalf("GET course before access status = %d, want 404: %s", before.Code, before.Body.String())
+	if before.Code != http.StatusOK {
+		t.Fatalf("GET course as Global Admin status = %d, want 200: %s", before.Code, before.Body.String())
 	}
 
 	rr := httptest.NewRecorder()

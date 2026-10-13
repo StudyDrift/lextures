@@ -129,6 +129,7 @@ export const AttendanceDashboard = lazy(() => import('./pages/admin/AttendanceDa
 export const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'))
 export const AdminOverview = lazy(() => import('./pages/admin/AdminOverview'))
 export const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'))
+export const AdminUserDetail = lazy(() => import('./pages/admin/admin-user-detail'))
 export const AdminCustomFields = lazy(() => import('./pages/admin/AdminCustomFields'))
 export const AdminCourses = lazy(() => import('./pages/admin/AdminCourses'))
 export const AdminSettingsPage = lazy(() => import('./pages/admin/AdminSettings'))

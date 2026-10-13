@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useId, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import {
@@ -16,6 +16,28 @@ import { toastMutationError } from '../../lib/lms-toast'
 import { useConfirm } from '../../components/use-confirm'
 
 const AdminUserCustomFieldsPanel = lazy(() => import('./AdminUserCustomFieldsPanel'))
+
+
+function formatOrgRole(role: string | null | undefined): string {
+  if (!role) return '—'
+  switch (role) {
+    case 'org_admin':
+      return 'Org admin'
+    case 'org_unit_admin':
+      return 'Org unit admin'
+    case 'org_viewer':
+      return 'Org viewer'
+    case 'global_admin':
+      return 'Global admin'
+    default:
+      return role
+  }
+}
+
+function userDetailPath(userId: string, orgId: string | null): string {
+  const base = `/org-admin/users/${encodeURIComponent(userId)}`
+  return orgId ? `${base}?orgId=${encodeURIComponent(orgId)}` : base
+}
 
 const ROLES = ['', 'student', 'instructor', 'ta', 'admin']
 const PAGE_SIZES = [25, 50, 100]
@@ -256,10 +278,24 @@ export default function AdminUsers() {
               data.items.map((user) => (
                 <>
                 <tr key={user.id} className="border-t border-border-subtle">
-                  <td className="sticky left-0 bg-surface-raised px-4 py-2 dark:bg-surface-raised">{user.email}</td>
-                  <td className="px-4 py-2">{user.displayName ?? '—'}</td>
+                  <td className="sticky left-0 bg-surface-raised px-4 py-2 dark:bg-surface-raised">
+                    <Link
+                      to={userDetailPath(user.id, orgId)}
+                      className="text-accent-fg hover:underline"
+                    >
+                      {user.email}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-2">
+                    <Link
+                      to={userDetailPath(user.id, orgId)}
+                      className="text-accent-fg hover:underline"
+                    >
+                      {user.displayName ?? '—'}
+                    </Link>
+                  </td>
                   <td className="px-4 py-2">{user.role || '—'}</td>
-                  <td className="px-4 py-2">{user.orgRole ?? '—'}</td>
+                  <td className="px-4 py-2">{formatOrgRole(user.orgRole)}</td>
                   <td className="px-4 py-2">{user.active ? 'Active' : 'Deactivated'}</td>
                   <td className="px-4 py-2">
                     <div className="flex flex-wrap gap-3">
@@ -277,7 +313,7 @@ export default function AdminUsers() {
                           type="button"
                           disabled={busy === user.id}
                           onClick={() => void viewAs(user)}
-                          className="text-sm text-accent-fg hover:underline disabled:opacity-50 dark:text-indigo-400"
+                          className="text-sm text-accent-fg hover:underline disabled:opacity-50"
                         >
                           {t('impersonation.viewAs', { defaultValue: 'View as' })}
                         </button>

@@ -215,6 +215,7 @@ export default function App() {
             <Route path="/org-admin" element={<Pages.AdminLayout />}>
               <Route index element={<Pages.AdminOverview />} />
               <Route path="users" element={<Pages.AdminUsers />} />
+              <Route path="users/:userId" element={<Pages.AdminUserDetail />} />
               <Route path="custom-fields" element={<Pages.AdminCustomFields />} />
               <Route path="import" element={<Pages.AdminImport />} />
               <Route path="courses" element={<Pages.AdminCourses />} />

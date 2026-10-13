@@ -9,7 +9,6 @@ import (
 	"github.com/coder/websocket"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
-	"github.com/lextures/lextures/server/internal/repos/enrollment"
 )
 
 // handleFeedWS is GET /api/v1/courses/{course_code}/feed/ws — first text: {"authToken":"…"}.
@@ -58,7 +57,7 @@ func (d Deps) handleFeedWS() http.HandlerFunc {
 		if err != nil {
 			return
 		}
-		has, err := enrollment.UserHasAccess(r.Context(), d.Pool, courseCode, uid)
+		has, err := userCanOpenCourse(r.Context(), d.Pool, courseCode, uid)
 		if err != nil || !has {
 			return
 		}

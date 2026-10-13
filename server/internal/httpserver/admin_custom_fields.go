@@ -1,7 +1,6 @@
 package httpserver
 
 import (
-	"context"
 	"encoding/csv"
 	"encoding/json"
 	"io"
@@ -11,10 +10,9 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/lextures/lextures/server/internal/apierr"
+	"github.com/lextures/lextures/server/internal/repos/adminconsole"
 	cfrepo "github.com/lextures/lextures/server/internal/repos/customfields"
 	auditservice "github.com/lextures/lextures/server/internal/service/adminaudit"
 	cfservice "github.com/lextures/lextures/server/internal/service/customfields"
@@ -325,10 +323,22 @@ func (d Deps) handleAdminConsoleUserGet() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid user id.")
 			return
 		}
-		result, err := adminConsoleUserByID(r.Context(), d.Pool, orgID, userID)
+		detail, err := adminconsole.GetUserDetail(r.Context(), d.Pool, orgID, userID)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "User not found.")
 			return
+		}
+		result := map[string]any{
+			"id":               detail.ID,
+			"email":            detail.Email,
+			"displayName":      detail.DisplayName,
+			"role":             detail.Role,
+			"orgRole":          detail.OrgRole,
+			"active":           detail.Active,
+			"createdAt":        detail.CreatedAt,
+			"accountType":      detail.AccountType,
+			"enrollmentCount":  detail.EnrollmentCount,
+			"enrollments":      detail.Enrollments,
 		}
 		if d.effectiveConfig().CustomFieldsEnabled && wantsInclude(r, "custom_fields") {
 			audience := cfservice.AudienceAdmin
@@ -506,35 +516,4 @@ func formatCSVValue(v any) string {
 		b, _ := json.Marshal(t)
 		return string(b)
 	}
-}
-
-func adminConsoleUserByID(ctx context.Context, pool *pgxpool.Pool, orgID, userID uuid.UUID) (map[string]any, error) {
-	var id, email, role string
-	var displayName *string
-	var active bool
-	var createdAt any
-	err := pool.QueryRow(ctx, `
-SELECT u.id::text, u.email, u.display_name,
-       COALESCE((SELECT ar.name FROM "user".user_app_roles uar
-        JOIN "user".app_roles ar ON ar.id = uar.role_id
-        WHERE uar.user_id = u.id ORDER BY ar.name LIMIT 1), '') AS role,
-       (u.deactivated_at IS NULL AND NOT u.login_blocked) AS active,
-       u.created_at
-FROM "user".users u
-WHERE u.id = $1 AND u.org_id = $2
-`, userID, orgID).Scan(&id, &email, &displayName, &role, &active, &createdAt)
-	if err == pgx.ErrNoRows {
-		return nil, pgx.ErrNoRows
-	}
-	if err != nil {
-		return nil, err
-	}
-	return map[string]any{
-		"id":          id,
-		"email":       email,
-		"displayName": displayName,
-		"role":        strings.ToLower(role),
-		"active":      active,
-		"createdAt":   createdAt,
-	}, nil
 }

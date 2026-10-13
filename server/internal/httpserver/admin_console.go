@@ -821,8 +821,56 @@ func adminConsoleClientIP(r *http.Request) string {
 }
 
 // markAdminCoursesViewerAccess sets ViewerHasAccess on each row the viewer can open.
+// Org admins / Global Admins can open every course in the console list (issue #789).
 func markAdminCoursesViewerAccess(ctx context.Context, pool *pgxpool.Pool, viewer uuid.UUID, rows []adminconsole.CourseRow) error {
 	if len(rows) == 0 {
+		return nil
+	}
+	ga, err := rbac.UserHasPermission(ctx, pool, viewer, permGlobalRBACManage)
+	if err != nil {
+		return err
+	}
+	if ga {
+		for i := range rows {
+			rows[i].ViewerHasAccess = true
+		}
+		return nil
+	}
+	// If the viewer is org_admin/org_viewer for every row's org, mark all accessible.
+	// Admin console lists are already scoped to one org the viewer can administer.
+	allOrgAdmin := true
+	seenOrg := map[string]bool{}
+	for _, row := range rows {
+		orgID, err := course.CourseOrgID(ctx, pool, row.CourseCode)
+		if err != nil || orgID == nil {
+			allOrgAdmin = false
+			break
+		}
+		key := orgID.String()
+		if seenOrg[key] {
+			continue
+		}
+		seenOrg[key] = true
+		admin, err := orgroles.UserHasRole(ctx, pool, viewer, *orgID, orgroles.RoleOrgAdmin)
+		if err != nil {
+			return err
+		}
+		if admin {
+			continue
+		}
+		viewerRole, err := orgroles.UserHasRole(ctx, pool, viewer, *orgID, orgroles.RoleOrgViewer)
+		if err != nil {
+			return err
+		}
+		if !viewerRole {
+			allOrgAdmin = false
+			break
+		}
+	}
+	if allOrgAdmin && len(seenOrg) > 0 {
+		for i := range rows {
+			rows[i].ViewerHasAccess = true
+		}
 		return nil
 	}
 	ids := make([]uuid.UUID, 0, len(rows))
