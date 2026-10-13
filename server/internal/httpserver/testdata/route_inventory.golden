@@ -1515,6 +1515,8 @@ GET	/api/v1/parent/conference-teachers	anonymous
 GET	/api/v1/parent/home	session
 GET	/api/v1/parent/notification-prefs	session
 PATCH	/api/v1/parent/notification-prefs	session
+GET	/api/v1/parent/records/settings	session
+PUT	/api/v1/parent/records/settings	session
 GET	/api/v1/parent/students/{sid}/assignments	session
 GET	/api/v1/parent/students/{sid}/attendance	session
 GET	/api/v1/parent/students/{sid}/attendance-summary	session
@@ -1526,6 +1528,15 @@ GET	/api/v1/parent/students/{sid}/learner-profile/export	anonymous
 POST	/api/v1/parent/students/{sid}/learner-profile/pause	anonymous
 POST	/api/v1/parent/students/{sid}/learner-profile/reset	anonymous
 POST	/api/v1/parent/students/{sid}/learner-profile/resume	anonymous
+GET	/api/v1/parent/students/{sid}/records/hours	session
+POST	/api/v1/parent/students/{sid}/records/hours	session
+GET	/api/v1/parent/students/{sid}/records/hours/export.csv	session
+GET	/api/v1/parent/students/{sid}/records/hours/export.pdf	session
+DELETE	/api/v1/parent/students/{sid}/records/hours/{entryId}	session
+PATCH	/api/v1/parent/students/{sid}/records/hours/{entryId}	session
+POST	/api/v1/parent/students/{sid}/records/portfolio	session
+GET	/api/v1/parent/students/{sid}/records/submissions	session
+GET	/api/v1/parent/students/{sid}/records/transcript.pdf	session
 GET	/api/v1/parent/students/{sid}/report-cards	session
 POST	/api/v1/parent/transcripts/orders/{id}/consent	anonymous
 GET	/api/v1/parent/weekly-summary	session
