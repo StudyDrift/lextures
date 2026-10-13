@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } from 'react'
 import { authorizedFetch } from '../../lib/api'
-import { readApiErrorMessage } from '../../lib/errors'
+import { messageFromApiErrorBody } from '../../lib/errors'
 import { aiDisclosureI18n } from '../../lib/ai-disclosure-i18n'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
+import { ErrorState } from '../ui'
 import { AdminAdaptiveContentReportPanel } from '../lms/adaptive-content/reports/admin-report-panel'
 import { AdaptiveContentOversightPanel } from './adaptive-content-oversight-panel'
 
@@ -20,10 +21,22 @@ const FEATURE_KEYS = [
   { key: 'adaptive_content', label: 'Adaptive content' },
 ] as const
 
+type LoadState =
+  | { status: 'loading' }
+  | { status: 'ready' }
+  | { status: 'disabled' }
+  | { status: 'error'; message: string }
+
+const FORBIDDEN_MESSAGE =
+  "You don't have permission to view this organization's AI governance settings, so they can't be edited here."
+const LOAD_FAILED_MESSAGE = 'Could not load AI governance settings. Try again in a moment.'
+const DISABLED_MESSAGE = 'AI disclosure controls are not enabled on this platform.'
+
 export function AiGovernancePanel() {
   const [enabled, setEnabled] = useState<Record<string, boolean>>({})
   const [allowedModels, setAllowedModels] = useState('')
-  const [loading, setLoading] = useState(true)
+  const [load, setLoad] = useState<LoadState>({ status: 'loading' })
+  const [reloadKey, setReloadKey] = useState(0)
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
@@ -31,11 +44,16 @@ export function AiGovernancePanel() {
     void (async () => {
       try {
         const res = await authorizedFetch('/api/v1/admin/ai-config')
-        if (res.status === 404 || res.status === 403) {
+        if (res.status === 404) {
+          if (!cancelled) setLoad({ status: 'disabled' })
+          return
+        }
+        if (res.status === 403) {
+          if (!cancelled) setLoad({ status: 'error', message: FORBIDDEN_MESSAGE })
           return
         }
         if (!res.ok) {
-          throw new Error(await readApiErrorMessage(res))
+          throw new Error(messageFromApiErrorBody(await res.text(), LOAD_FAILED_MESSAGE))
         }
         const data = (await res.json()) as {
           featuresEnabled?: Record<string, boolean>
@@ -44,17 +62,21 @@ export function AiGovernancePanel() {
         if (!cancelled) {
           setEnabled(data.featuresEnabled ?? {})
           setAllowedModels((data.allowedModels ?? []).join('\n'))
+          setLoad({ status: 'ready' })
         }
-      } catch {
-        /* not org admin */
-      } finally {
-        if (!cancelled) setLoading(false)
+      } catch (e) {
+        if (!cancelled) {
+          setLoad({
+            status: 'error',
+            message: e instanceof Error && e.message ? e.message : LOAD_FAILED_MESSAGE,
+          })
+        }
       }
     })()
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [reloadKey])
 
   const save = useCallback(async () => {
     setSaving(true)
@@ -73,7 +95,7 @@ export function AiGovernancePanel() {
         body: JSON.stringify({ featuresEnabled, allowedModels: models.length ? models : null }),
       })
       if (!res.ok) {
-        throw new Error(await readApiErrorMessage(res))
+        throw new Error(messageFromApiErrorBody(await res.text(), 'Could not save.'))
       }
       toastSaveOk(aiDisclosureI18n.adminSaved)
     } catch (e) {
@@ -83,7 +105,12 @@ export function AiGovernancePanel() {
     }
   }, [allowedModels, enabled])
 
-  if (loading) {
+  const retry = useCallback(() => {
+    setLoad({ status: 'loading' })
+    setReloadKey((k) => k + 1)
+  }, [])
+
+  if (load.status === 'loading') {
     return null
   }
 
@@ -93,6 +120,51 @@ export function AiGovernancePanel() {
         {aiDisclosureI18n.adminTitle}
       </h2>
       <p className="mt-1 text-sm text-fg-muted">{aiDisclosureI18n.adminIntro}</p>
+      {load.status === 'ready' ? (
+        <AiGovernanceForm
+          enabled={enabled}
+          setEnabled={setEnabled}
+          allowedModels={allowedModels}
+          setAllowedModels={setAllowedModels}
+          saving={saving}
+          onSave={() => void save()}
+        />
+      ) : (
+        <div className="mt-4" role="alert">
+          <ErrorState
+            title={load.status === 'disabled' ? 'AI governance unavailable' : 'Could not load AI governance settings'}
+            body={load.status === 'disabled' ? DISABLED_MESSAGE : load.message}
+            primaryAction={
+              load.status === 'error' ? { label: 'Retry', onClick: retry } : undefined
+            }
+          />
+        </div>
+      )}
+      <AdaptiveContentOversightPanel />
+      <AdminAdaptiveContentReportPanel />
+    </section>
+  )
+}
+
+type AiGovernanceFormProps = {
+  enabled: Record<string, boolean>
+  setEnabled: Dispatch<SetStateAction<Record<string, boolean>>>
+  allowedModels: string
+  setAllowedModels: (value: string) => void
+  saving: boolean
+  onSave: () => void
+}
+
+function AiGovernanceForm({
+  enabled,
+  setEnabled,
+  allowedModels,
+  setAllowedModels,
+  saving,
+  onSave,
+}: AiGovernanceFormProps) {
+  return (
+    <>
       <ul className="mt-4 space-y-2">
         {FEATURE_KEYS.map((f) => (
           <li key={f.key}>
@@ -119,13 +191,11 @@ export function AiGovernancePanel() {
       <button
         type="button"
         disabled={saving}
-        onClick={() => void save()}
+        onClick={onSave}
         className="mt-4 rounded-xl bg-accent-solid px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
       >
         {saving ? 'Saving…' : aiDisclosureI18n.adminSave}
       </button>
-      <AdaptiveContentOversightPanel />
-      <AdminAdaptiveContentReportPanel />
-    </section>
+    </>
   )
 }

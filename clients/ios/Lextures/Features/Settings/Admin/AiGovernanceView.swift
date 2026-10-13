@@ -10,6 +10,9 @@ struct AiGovernanceView: View {
     @State private var allowedModelsText = ""
     @State private var loading = true
     @State private var saveStatus: OrgBrandingAdminLogic.SaveStatus = .idle
+    /// Set when the current config could not be loaded; the form stays hidden so defaults are never
+    /// shown (or saved) as if they were the organization's real settings (#790).
+    @State private var loadError: String?
 
     var body: some View {
         Group {
@@ -27,6 +30,10 @@ struct AiGovernanceView: View {
                         if loading {
                             ProgressView()
                                 .frame(maxWidth: .infinity)
+                        } else if let loadError {
+                            Text(loadError)
+                                .font(.subheadline)
+                                .foregroundStyle(.red)
                         } else {
                             featureToggles
                             allowedModelsField
@@ -108,6 +115,7 @@ struct AiGovernanceView: View {
             return
         }
         loading = true
+        loadError = nil
         defer { loading = false }
         do {
             let response = try await LMSAPI.fetchAiConfig(accessToken: token)
@@ -120,17 +128,17 @@ struct AiGovernanceView: View {
                 available = false
             } else {
                 available = true
-                saveStatus = .error(OrgBrandingAdminLogic.userFacingError(
+                loadError = OrgBrandingAdminLogic.userFacingError(
                     error,
                     fallbackKey: "mobile.admin.orgBranding.aiGovernance.loadError"
-                ))
+                )
             }
         } catch {
             available = true
-            saveStatus = .error(OrgBrandingAdminLogic.userFacingError(
+            loadError = OrgBrandingAdminLogic.userFacingError(
                 error,
                 fallbackKey: "mobile.admin.orgBranding.aiGovernance.loadError"
-            ))
+            )
         }
     }
 
