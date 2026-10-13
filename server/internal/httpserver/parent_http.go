@@ -744,6 +744,7 @@ ON CONFLICT (parent_id) DO NOTHING
 func (d Deps) registerParentRoutes(r chi.Router) {
 	d.registerParentLearnerProfileRoutes(r)
 	d.registerParentRecordsRoutes(r)
+	d.registerParentMessagingRoutes(r)
 	r.Get("/api/v1/parent/children", d.handleParentChildren())
 	r.Get("/api/v1/parent/students/{sid}/courses", d.handleParentStudentCourses())
 	r.Get("/api/v1/parent/students/{sid}/grades", d.handleParentStudentGrades())

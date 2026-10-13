@@ -234,4 +234,32 @@ describe('SideNavMainLinks', () => {
     expect(screen.queryByRole('link', { name: /^settings$/i })).not.toBeInTheDocument()
     expect(screen.getByRole('link', { name: /^ask ai$/i })).toBeInTheDocument()
   })
+  it('shows the simplified Settings link to a managed learner (#775)', () => {
+    const payload = btoa(JSON.stringify({ typ: 'managed_learner', sub: 'kid' }))
+      .replace(/=+$/, '')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+    setImpersonationToken(`h.${payload}.s`)
+    platformFeaturesMock.mockReturnValue({
+      accommodationsEngineEnabled: false,
+      ffEportfolio: false,
+      ragNotebookEnabled: true,
+      ffCourseMarketplace: false,
+      ffMarketingContent: false,
+      ffHomeschoolManagedLearners: true,
+      ffStripeBilling: true,
+    })
+
+    render(
+      <MemoryRouter>
+        <ShellNavProvider>
+          <SideNavMainLinks />
+        </ShellNavProvider>
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByRole('link', { name: /^settings$/i })).toHaveAttribute('href', '/settings')
+    expect(screen.queryByRole('link', { name: /^learners$/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /^billing$/i })).not.toBeInTheDocument()
+  })
 })

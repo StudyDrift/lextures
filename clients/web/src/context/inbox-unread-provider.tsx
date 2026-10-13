@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useLocation } from 'react-router-dom'
 import { openAppWebSocket } from '../lib/app-websocket'
 import { getAccessToken } from '../lib/auth'
@@ -7,6 +7,7 @@ import {
   mailboxWebSocketUrl,
   parseMailboxWsMessage,
 } from '../lib/communication-api'
+import { playNotificationChime, shouldChimeForUnread } from '../lib/notification-sounds'
 import { InboxUnreadContext } from './inbox-unread-context'
 
 export function InboxUnreadProvider({ children }: { children: ReactNode }) {
@@ -22,18 +23,30 @@ export function InboxUnreadProvider({ children }: { children: ReactNode }) {
     setCoursesRevision((r) => r + 1)
   }, [])
 
-  const refreshUnread = useCallback(async () => {
+  // Last unread count we fetched; null until the first fetch so the initial load never chimes.
+  const lastCountRef = useRef<number | null>(null)
+
+  /** Fetches the unread count; returns the previous and new counts for the sound check. */
+  const fetchAndStoreUnread = useCallback(async (): Promise<{ prev: number | null; next: number } | null> => {
     if (!getAccessToken()) {
       setUnreadInboxCount(0)
-      return
+      return null
     }
     try {
-      const n = await fetchUnreadInboxCount()
-      setUnreadInboxCount(n)
+      const next = await fetchUnreadInboxCount()
+      const prev = lastCountRef.current
+      lastCountRef.current = next
+      setUnreadInboxCount(next)
+      return { prev, next }
     } catch {
       /* keep previous count */
+      return null
     }
   }, [])
+
+  const refreshUnread = useCallback(async () => {
+    await fetchAndStoreUnread()
+  }, [fetchAndStoreUnread])
 
   useEffect(() => {
     let cancelled = false
@@ -44,7 +57,10 @@ export function InboxUnreadProvider({ children }: { children: ReactNode }) {
       }
       try {
         const n = await fetchUnreadInboxCount()
-        if (!cancelled) setUnreadInboxCount(n)
+        if (!cancelled) {
+          lastCountRef.current = n
+          setUnreadInboxCount(n)
+        }
       } catch {
         if (!cancelled) setUnreadInboxCount(0)
       }
@@ -62,7 +78,10 @@ export function InboxUnreadProvider({ children }: { children: ReactNode }) {
       onMessage: (data) => {
         const msg = parseMailboxWsMessage(data)
         if (msg?.type === 'mailbox_updated') {
-          void refreshUnread()
+          void fetchAndStoreUnread().then((counts) => {
+            // Optional notification sound (#775), set from kid Settings; off by default.
+            if (counts && shouldChimeForUnread(counts.prev, counts.next)) playNotificationChime()
+          })
           setMailboxRevision((r) => r + 1)
         } else if (msg?.type === 'courses_updated') {
           setCoursesRevision((r) => r + 1)
@@ -76,7 +95,7 @@ export function InboxUnreadProvider({ children }: { children: ReactNode }) {
     return () => {
       handle.close()
     }
-  }, [refreshUnread])
+  }, [fetchAndStoreUnread])
 
   const value = useMemo(
     () => ({

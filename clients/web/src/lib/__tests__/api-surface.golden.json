@@ -378,7 +378,11 @@
     "MailboxMessageMetadata",
     "MailboxParty",
     "MailboxWsMessage",
+    "MessageRecipient",
+    "MessagingPolicy",
+    "SendMessageError",
     "fetchMailboxMessages",
+    "fetchMessagingPolicy",
     "fetchUnreadInboxCount",
     "mailboxWebSocketUrl",
     "markAllInboxMessagesRead",
@@ -1580,6 +1584,11 @@
     "totalObservationCount",
     "uniqueCourseCount"
   ],
+  "learner-settings-api.ts": [
+    "LearnerSettings",
+    "fetchLearnerSettings",
+    "updateLearnerSettings"
+  ],
   "learning-paths-api.ts": [
     "CreatorLearningPath",
     "LearningPathCourse",
@@ -1978,6 +1987,14 @@
     "resendParentAssignInvite",
     "revokeParentLink",
     "searchParentAssignStudents"
+  ],
+  "parent-messaging-api.ts": [
+    "ParentKidFolder",
+    "ParentMessagingContact",
+    "ParentMessagingContacts",
+    "fetchParentKidMessages",
+    "fetchParentKidMessagingContacts",
+    "setParentKidTeacherApproval"
   ],
   "parent-records-api.ts": [
     "ParentHoursLog",

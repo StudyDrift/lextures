@@ -30,6 +30,7 @@ import { useInboxUnreadCount } from '../../context/use-inbox-unread'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { usePermissions } from '../../context/use-permissions'
 import { useImpersonatingSession } from '../../hooks/use-impersonating-session'
+import { useManagedLearnerSession } from '../../hooks/use-managed-learner-session'
 import {
   PERM_ACCOMMODATIONS_MANAGE,
   PERM_MARKETING_CONTENT_VIEW,
@@ -70,6 +71,7 @@ export function SideNavMainLinks() {
     ffHomeschoolManagedLearners,
   } = usePlatformFeatures()
   const impersonating = useImpersonatingSession()
+  const managedLearner = useManagedLearnerSession()
 
   const canViewReports = !permLoading && allows(PERM_REPORTS_VIEW)
   const canManageAccommodations = !permLoading && allows(PERM_ACCOMMODATIONS_MANAGE)
@@ -293,8 +295,9 @@ export function SideNavMainLinks() {
       >
         Inbox
       </SideNavLink>
-      {/* Account settings (password, sessions, delete) are parent/admin-owned; hide during Learn-as (#762). */}
-      {!impersonating ? (
+      {/* Account settings (password, sessions, delete) are parent/admin-owned; hide during view-as (#762).
+          Managed learners get a simplified Settings page instead (#775). */}
+      {!impersonating || managedLearner ? (
         <SideNavLink to="/settings" data-onboarding="nav-settings" icon={<Settings className="h-5 w-5" />}>
           Settings
         </SideNavLink>

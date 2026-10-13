@@ -94,6 +94,7 @@ export const CourseContentToolsInsights = lazy(
   () => import('./pages/lms/course-content-tools-insights'),
 )
 export const Settings = lazy(() => import('./pages/lms/settings'))
+export const KidSettings = lazy(() => import('./pages/lms/kid-settings'))
 export const ForgotPassword = lazy(() => import('./pages/forgot-password'))
 export const Login = lazy(() => import('./pages/login'))
 export const MfaLogin = lazy(() => import('./pages/mfa-login'))
@@ -113,6 +114,7 @@ export const FamilySignInPage = lazy(() => import('./pages/family/family-sign-in
 export const AssignParentsPage = lazy(() => import('./pages/lms/assign-parents-page'))
 export const ConferenceBooking = lazy(() => import('./pages/lms/parent/conference-booking'))
 export const ParentRecords = lazy(() => import('./pages/lms/parent/parent-records'))
+export const ParentMessages = lazy(() => import('./pages/lms/parent/parent-messages'))
 export const ConferenceAvailabilitySetup = lazy(() => import('./pages/lms/conference-availability-setup'))
 export const TrustCenterPage = lazy(() => import('./pages/trust-center-page'))
 export const TypefacePage = lazy(() => import('./pages/typeface-page'))

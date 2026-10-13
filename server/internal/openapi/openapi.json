@@ -4209,7 +4209,7 @@
           "communication",
           "me"
         ],
-        "summary": "Send a message to a user by email, or save a draft",
+        "summary": "Send a message to a user by email or user id, or save a draft. Managed learners may only message their parent or a parent-approved teacher (#775).",
         "security": [
           {
             "bearerAuth": []
@@ -4224,6 +4224,44 @@
           },
           "401": {
             "description": "Not signed in"
+          },
+          "403": {
+            "description": "Kid-safe messaging: recipient is not an allowed contact of a managed learner (#775)"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "to_email": {
+                    "type": "string"
+                  },
+                  "toEmail": {
+                    "type": "string"
+                  },
+                  "to_user_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "toUserId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "subject": {
+                    "type": "string"
+                  },
+                  "body": {
+                    "type": "string"
+                  },
+                  "draft": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -18219,6 +18257,352 @@
         "responses": {
           "200": {},
           "401": {}
+        }
+      }
+    },
+    "/api/v1/communication/recipients": {
+      "get": {
+        "operationId": "listMessageRecipients",
+        "tags": [
+          "communication",
+          "me"
+        ],
+        "summary": "Allowed Compose recipients for a managed learner (#775); other accounts get restricted=false",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ restricted, recipients: [{ id, displayName, kind: parent|teacher, courseTitles? }] }"
+          },
+          "401": {
+            "description": "Sign in required"
+          }
+        }
+      }
+    },
+    "/api/v1/me/learner-settings": {
+      "get": {
+        "operationId": "getLearnerSettings",
+        "tags": [
+          "me"
+        ],
+        "summary": "Simplified Settings for a managed learner: display name, avatar, theme (#775)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ displayName, avatarUrl, uiTheme }"
+          },
+          "401": {
+            "description": "Sign in required"
+          },
+          "403": {
+            "description": "Not a managed learner"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patchLearnerSettings",
+        "tags": [
+          "me"
+        ],
+        "summary": "Update a managed learner's display name, avatar, or theme (#775)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "displayName": {
+                    "type": "string",
+                    "maxLength": 80
+                  },
+                  "avatarUrl": {
+                    "type": "string",
+                    "description": "http(s) URL or data:image upload; empty string clears"
+                  },
+                  "uiTheme": {
+                    "type": "string",
+                    "enum": [
+                      "light",
+                      "dark"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated learner settings"
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Sign in required"
+          },
+          "403": {
+            "description": "Not a managed learner"
+          }
+        }
+      }
+    },
+    "/api/v1/parent/students/{sid}/messages": {
+      "get": {
+        "operationId": "listParentStudentMessages",
+        "tags": [
+          "parent"
+        ],
+        "summary": "Read-only view of a managed learner's inbox or sent folder (#775)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "folder",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "inbox",
+                "sent"
+              ],
+              "default": "inbox"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ messages }"
+          },
+          "400": {
+            "description": "Invalid folder"
+          },
+          "401": {
+            "description": "Sign in required"
+          },
+          "403": {
+            "description": "Parent account and link required"
+          },
+          "404": {
+            "description": "Learner is not a managed learner"
+          }
+        }
+      }
+    },
+    "/api/v1/parent/students/{sid}/messages/{id}": {
+      "get": {
+        "operationId": "getParentStudentMessage",
+        "tags": [
+          "parent"
+        ],
+        "summary": "One message from a managed learner's mailbox; does not mark it read (#775)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mailbox message"
+          },
+          "401": {
+            "description": "Sign in required"
+          },
+          "403": {
+            "description": "Parent account and link required"
+          },
+          "404": {
+            "description": "Learner is not a managed learner"
+          }
+        }
+      }
+    },
+    "/api/v1/parent/students/{sid}/messaging/contacts": {
+      "get": {
+        "operationId": "listParentStudentMessagingContacts",
+        "tags": [
+          "parent"
+        ],
+        "summary": "Parents and course teachers a managed learner may message, with approval state (#775)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ parents: [...], teachers: [{ id, displayName, kind, courseTitles, approved }] }"
+          },
+          "401": {
+            "description": "Sign in required"
+          },
+          "403": {
+            "description": "Parent account and link required"
+          },
+          "404": {
+            "description": "Learner is not a managed learner"
+          }
+        }
+      }
+    },
+    "/api/v1/parent/students/{sid}/messaging/contacts/{contactId}": {
+      "put": {
+        "operationId": "approveParentStudentMessagingContact",
+        "tags": [
+          "parent"
+        ],
+        "summary": "Approve a course teacher as a message contact for a managed learner (#775)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "contactId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated contacts"
+          },
+          "400": {
+            "description": "Contact does not teach this learner"
+          },
+          "401": {
+            "description": "Sign in required"
+          },
+          "403": {
+            "description": "Parent account and link required"
+          },
+          "404": {
+            "description": "Learner is not a managed learner"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "revokeParentStudentMessagingContact",
+        "tags": [
+          "parent"
+        ],
+        "summary": "Remove a teacher's approval to message a managed learner (#775)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "contactId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated contacts"
+          },
+          "401": {
+            "description": "Sign in required"
+          },
+          "403": {
+            "description": "Parent account and link required"
+          },
+          "404": {
+            "description": "Learner is not a managed learner"
+          }
         }
       }
     }

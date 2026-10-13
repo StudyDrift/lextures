@@ -74,6 +74,22 @@ func TestManagedLearnerGuardMiddleware(t *testing.T) {
 		t.Fatalf("parent records status %d", recParent.Code)
 	}
 
+	// Kid Settings (#775): account deletion is blocked; reading account settings is allowed.
+	delAcct := httptest.NewRequest(http.MethodDelete, "/api/v1/settings/account", nil)
+	delAcct.Header.Set("Authorization", "Bearer "+token)
+	recDel := httptest.NewRecorder()
+	handler.ServeHTTP(recDel, delAcct)
+	if recDel.Code != http.StatusForbidden {
+		t.Fatalf("DELETE settings/account status %d", recDel.Code)
+	}
+	getAcct := httptest.NewRequest(http.MethodGet, "/api/v1/settings/account", nil)
+	getAcct.Header.Set("Authorization", "Bearer "+token)
+	recGet := httptest.NewRecorder()
+	handler.ServeHTTP(recGet, getAcct)
+	if recGet.Code != http.StatusOK {
+		t.Fatalf("GET settings/account should pass the guard, got %d", recGet.Code)
+	}
+
 	checkoutReq := httptest.NewRequest(http.MethodPost, "/api/v1/marketplace/courses/paid/checkout", nil)
 	checkoutReq.Header.Set("Authorization", "Bearer "+token)
 	recCheckout := httptest.NewRecorder()

@@ -1,6 +1,7 @@
 import { Suspense, useEffect } from 'react'
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { BlockDuringImpersonation } from './auth/block-during-impersonation'
+import { ManagedLearnerSwitch } from './auth/managed-learner-switch'
 import { RequireAuth } from './auth/require-auth'
 import { ApiErrorBoundary } from './components/api-error-boundary'
 import { AppShell } from './components/layout/app-shell'
@@ -124,6 +125,7 @@ export default function App() {
             />
             <Route path="/parent/conferences" element={<Pages.ConferenceBooking />} />
             <Route path="/parent/records" element={<Pages.ParentRecords />} />
+            <Route path="/parent/messages" element={<Pages.ParentMessages />} />
             <Route path="/conferences/availability" element={<Pages.ConferenceAvailabilitySetup />} />
             <Route path="/ai" element={<Pages.AskAiPage />} />
             <Route path="/review" element={<Pages.ReviewSessionPage />} />
@@ -293,9 +295,11 @@ export default function App() {
             <Route
               path="/settings"
               element={
-                <BlockDuringImpersonation>
-                  <Navigate to="/settings/account" replace />
-                </BlockDuringImpersonation>
+                <ManagedLearnerSwitch kid={<Pages.KidSettings />}>
+                  <BlockDuringImpersonation>
+                    <Navigate to="/settings/account" replace />
+                  </BlockDuringImpersonation>
+                </ManagedLearnerSwitch>
               }
             />
             <Route
@@ -325,9 +329,11 @@ export default function App() {
             <Route
               path="/settings/:tab"
               element={
-                <BlockDuringImpersonation>
-                  <Pages.Settings />
-                </BlockDuringImpersonation>
+                <ManagedLearnerSwitch kid={<Navigate to="/settings" replace />}>
+                  <BlockDuringImpersonation>
+                    <Pages.Settings />
+                  </BlockDuringImpersonation>
+                </ManagedLearnerSwitch>
               }
             />
           </Route>
