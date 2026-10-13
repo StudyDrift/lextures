@@ -74,9 +74,7 @@ func TestBuildHoursLog_MergesAndTotals(t *testing.T) {
 	if len(log.TotalsBySubject) != 1 || log.TotalsBySubject[0].Hours != 3.5 {
 		t.Fatalf("totals = %+v", log.TotalsBySubject)
 	}
-	if !log.Entries[0].Editable && log.Entries[1].Editable {
-		// order is date desc: Aug 11 then Aug 10
-	}
+	// Entries are ordered by date descending: Aug 11 (manual/offline) then Aug 10 (activity).
 	if log.Entries[0].Date != "2025-08-11" || !log.Entries[0].Editable {
 		t.Fatalf("first = %+v", log.Entries[0])
 	}
