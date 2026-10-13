@@ -36,13 +36,18 @@ func (d Deps) handleGetCourse() http.HandlerFunc {
 		if !ok {
 			return
 		}
-		hasAccess, err := enrollment.UserHasAccess(r.Context(), d.Pool, courseCode, userID)
+		hasAccess, err := userCanOpenCourse(r.Context(), d.Pool, courseCode, userID)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify course access.")
 			return
 		}
 		if !hasAccess {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
+			return
+		}
+		orgAdminOpen, err := userHasOrgAdminCourseAccess(r.Context(), d.Pool, courseCode, userID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify course access.")
 			return
 		}
 		crow, err := course.GetPublicByCourseCode(r.Context(), d.Pool, courseCode)
@@ -70,6 +75,11 @@ func (d Deps) handleGetCourse() http.HandlerFunc {
 		}
 		if roles == nil {
 			roles = []string{}
+		}
+		// Org/global admins opening a course without enrollment get a synthetic teacher role
+		// so the course shell treats them as staff (same outcome as EnsureAdminAccess enroll).
+		if orgAdminOpen && len(roles) == 0 {
+			roles = []string{"teacher"}
 		}
 		stuEid, err := enrollment.GetStudentEnrollmentID(r.Context(), d.Pool, cid, userID)
 		if err != nil {

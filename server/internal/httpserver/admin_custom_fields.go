@@ -15,6 +15,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/lextures/lextures/server/internal/apierr"
+	"github.com/lextures/lextures/server/internal/repos/adminconsole"
 	cfrepo "github.com/lextures/lextures/server/internal/repos/customfields"
 	auditservice "github.com/lextures/lextures/server/internal/service/adminaudit"
 	cfservice "github.com/lextures/lextures/server/internal/service/customfields"
@@ -325,10 +326,22 @@ func (d Deps) handleAdminConsoleUserGet() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid user id.")
 			return
 		}
-		result, err := adminConsoleUserByID(r.Context(), d.Pool, orgID, userID)
+		detail, err := adminconsole.GetUserDetail(r.Context(), d.Pool, orgID, userID)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "User not found.")
 			return
+		}
+		result := map[string]any{
+			"id":               detail.ID,
+			"email":            detail.Email,
+			"displayName":      detail.DisplayName,
+			"role":             detail.Role,
+			"orgRole":          detail.OrgRole,
+			"active":           detail.Active,
+			"createdAt":        detail.CreatedAt,
+			"accountType":      detail.AccountType,
+			"enrollmentCount":  detail.EnrollmentCount,
+			"enrollments":      detail.Enrollments,
 		}
 		if d.effectiveConfig().CustomFieldsEnabled && wantsInclude(r, "custom_fields") {
 			audience := cfservice.AudienceAdmin

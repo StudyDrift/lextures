@@ -49,10 +49,13 @@ WITH matched AS (
         ) AS rank
     FROM "user".users u
     WHERE u.org_id = $1
-      AND u.account_type NOT IN ('system', 'managed')
+      AND u.account_type <> 'system'
       AND (
           u.search_vector @@ websearch_to_tsquery('english', $2)
           OR u.email ILIKE $3
+          OR COALESCE(u.display_name, '') ILIKE $3
+          OR COALESCE(u.first_name, '') ILIKE $3
+          OR COALESCE(u.last_name, '') ILIKE $3
           OR similarity(u.email, $2) >= 0.3
           OR similarity(COALESCE(u.display_name, ''), $2) >= 0.3
           OR similarity(TRIM(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, '')), $2) >= 0.3
@@ -98,7 +101,7 @@ LIMIT $4 OFFSET $5
 			Title:    title,
 			Subtitle: email,
 			Snippet:  snippet,
-			Path:     "/org-admin/users?q=" + url.QueryEscape(email),
+			Path:     "/org-admin/users/" + id.String(),
 			Score:    rank,
 		})
 	}
@@ -179,7 +182,7 @@ LIMIT $4 OFFSET $5
 			Title:    title,
 			Subtitle: code,
 			Snippet:  snippet,
-			Path:     "/org-admin/courses?q=" + url.QueryEscape(title),
+			Path:     "/courses/" + url.PathEscape(code),
 			Score:    rank,
 		})
 	}

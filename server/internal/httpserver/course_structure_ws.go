@@ -10,7 +10,6 @@ import (
 	"github.com/coder/websocket"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
-	"github.com/lextures/lextures/server/internal/repos/enrollment"
 )
 
 var structureEventsHub struct {
@@ -98,7 +97,7 @@ func (d Deps) handleCourseStructureWS() http.HandlerFunc {
 		if err != nil {
 			return
 		}
-		has, err := enrollment.UserHasAccess(r.Context(), d.Pool, courseCode, uid)
+		has, err := userCanOpenCourse(r.Context(), d.Pool, courseCode, uid)
 		if err != nil || !has {
 			return
 		}

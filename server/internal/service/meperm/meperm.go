@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lextures/lextures/server/internal/apierr"
+	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	"github.com/lextures/lextures/server/internal/repos/organization"
 	"github.com/lextures/lextures/server/internal/repos/orgroles"
@@ -55,7 +56,14 @@ func MyPermissions(
 	if err != nil {
 		return nil, err
 	}
+	orgAdminOpen := false
 	if !inCourse {
+		orgAdminOpen, err = userIsOrgOrGlobalAdminForCourse(ctx, pool, courseCode, userID)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if !inCourse && !orgAdminOpen {
 		if viewAsStudent {
 			return nil, ErrNotFound
 		}
@@ -63,6 +71,23 @@ func MyPermissions(
 		if err != nil {
 			return nil, err
 		}
+		return withOrgRolePermissions(ctx, pool, userID, base)
+	}
+	if orgAdminOpen && !inCourse {
+		// Org/global admin opening a course without enrollment: staff capabilities.
+		if viewAsStudent {
+			base, err := rbac.ListGrantedPermissionStringsCourseView(ctx, pool, userID, courseCode, true)
+			if err != nil {
+				return nil, err
+			}
+			base = appendCourseRolePermissions(base, courseCode, false, true)
+			return withOrgRolePermissions(ctx, pool, userID, base)
+		}
+		base, err := rbac.ListGrantedPermissionStrings(ctx, pool, userID)
+		if err != nil {
+			return nil, err
+		}
+		base = appendCourseRolePermissions(base, courseCode, true, false)
 		return withOrgRolePermissions(ctx, pool, userID, base)
 	}
 	if viewAsStudent {
@@ -186,4 +211,23 @@ func HTTPErrorFor(err error) (status int, code, message string) {
 		return 400, apierr.CodeInvalidInput, inv.Message
 	}
 	return 500, apierr.CodeInternal, fmt.Sprintf("internal error: %v", err)
+}
+
+func userIsOrgOrGlobalAdminForCourse(ctx context.Context, pool *pgxpool.Pool, courseCode string, userID uuid.UUID) (bool, error) {
+	ga, err := rbac.UserHasPermission(ctx, pool, userID, "global:app:rbac:manage")
+	if err != nil {
+		return false, err
+	}
+	if ga {
+		return true, nil
+	}
+	orgID, err := course.CourseOrgID(ctx, pool, courseCode)
+	if err != nil || orgID == nil {
+		return false, err
+	}
+	admin, err := orgroles.UserHasRole(ctx, pool, userID, *orgID, orgroles.RoleOrgAdmin)
+	if err != nil || admin {
+		return admin, err
+	}
+	return orgroles.UserHasRole(ctx, pool, userID, *orgID, orgroles.RoleOrgViewer)
 }

@@ -30,16 +30,27 @@ describe('AdminCourses title links', () => {
     api.fetchAdminCourses.mockResolvedValue({
       items: [
         course({ id: 'a', courseCode: 'C-ENROLLED', title: 'AI Essentials', viewerHasAccess: true }),
-        course({ id: 'b', courseCode: 'C-OLIB3X', title: 'Research and Citing Sources', viewerHasAccess: false }),
+        course({
+          id: 'b',
+          courseCode: 'C-OLIB3X',
+          title: 'Research and Citing Sources',
+          viewerHasAccess: true,
+        }),
+        course({
+          id: 'c',
+          courseCode: 'C-NOPE01',
+          title: 'Other Org Course',
+          viewerHasAccess: false,
+        }),
       ],
-      total: 2,
+      total: 3,
       page: 1,
       perPage: 25,
       totalPages: 1,
     })
   })
 
-  it('links only courses the admin can open and labels the rest', async () => {
+  it('links courses the admin can open and labels the rest', async () => {
     render(
       <MemoryRouter initialEntries={['/org-admin/courses']}>
         <AdminCourses />
@@ -48,8 +59,11 @@ describe('AdminCourses title links', () => {
     const enrolled = await screen.findByRole('link', { name: 'AI Essentials' })
     expect(enrolled).toHaveAttribute('href', '/courses/C-ENROLLED')
 
-    expect(screen.getByText('Research and Citing Sources')).toBeInTheDocument()
-    expect(screen.queryByRole('link', { name: 'Research and Citing Sources' })).toBeNull()
+    const unenrolled = screen.getByRole('link', { name: 'Research and Citing Sources' })
+    expect(unenrolled).toHaveAttribute('href', '/courses/C-OLIB3X')
+
+    expect(screen.getByText('Other Org Course')).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Other Org Course' })).toBeNull()
     expect(screen.getByText("You aren't enrolled in this course")).toBeInTheDocument()
   })
 })

@@ -10,7 +10,6 @@ import (
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/models/useraudit"
 	"github.com/lextures/lextures/server/internal/repos/course"
-	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	userauditrepo "github.com/lextures/lextures/server/internal/repos/useraudit"
 )
 
@@ -32,7 +31,7 @@ func (d Deps) handlePostCourseContext() http.HandlerFunc {
 			return
 		}
 		kind := strings.TrimSpace(req.Kind)
-		if ok, err := enrollment.UserHasAccess(r.Context(), d.Pool, courseCode, userID); err != nil {
+		if ok, err := userCanOpenCourse(r.Context(), d.Pool, courseCode, userID); err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not verify access.")
 			return
 		} else if !ok {

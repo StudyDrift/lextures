@@ -401,7 +401,15 @@ function PeopleResultsTable({
                       </span>
                     </button>
                   </td>
-                  <td className="px-5 py-3 text-fg-muted">{user.email}</td>
+                  <td className="px-5 py-3">
+                    <button
+                      type="button"
+                      onClick={() => onOpen(user.id)}
+                      className="text-start text-fg-muted hover:text-accent-fg hover:underline dark:hover:text-indigo-400"
+                    >
+                      {user.email}
+                    </button>
+                  </td>
                   <td className="px-5 py-3 text-fg-muted">{user.orgName}</td>
                   <td className="px-5 py-3">
                     {user.role ? (

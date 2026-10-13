@@ -111,7 +111,7 @@ func ListUsers(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID, p ListP
 	args := []any{orgID}
 	where := []string{
 		`u.org_id = $1`,
-		`u.account_type NOT IN ('system', 'managed')`,
+		`u.account_type <> 'system'`,
 	}
 	argIdx := 2
 
@@ -147,10 +147,22 @@ SELECT u.id::text, u.email, u.display_name,
        COALESCE((SELECT ar.name FROM "user".user_app_roles uar
         JOIN "user".app_roles ar ON ar.id = uar.role_id
         WHERE uar.user_id = u.id ORDER BY ar.name LIMIT 1), '') AS role,
-       (SELECT g.role FROM "user".org_role_grants g
-        WHERE g.org_id = u.org_id AND g.user_id = u.id
-          AND (g.expires_at IS NULL OR g.expires_at > NOW())
-        ORDER BY g.granted_at DESC LIMIT 1) AS org_role,
+       COALESCE(
+         (SELECT g.role FROM "user".org_role_grants g
+          WHERE g.org_id = u.org_id AND g.user_id = u.id
+            AND (g.expires_at IS NULL OR g.expires_at > NOW())
+          ORDER BY CASE g.role
+            WHEN 'org_admin' THEN 0
+            WHEN 'org_unit_admin' THEN 1
+            WHEN 'org_viewer' THEN 2
+            ELSE 3 END, g.granted_at DESC
+          LIMIT 1),
+         (SELECT CASE WHEN ar.name = 'Global Admin' THEN 'global_admin' ELSE NULL END
+          FROM "user".user_app_roles uar
+          JOIN "user".app_roles ar ON ar.id = uar.role_id
+          WHERE uar.user_id = u.id AND ar.name = 'Global Admin'
+          LIMIT 1)
+       ) AS org_role,
        (u.deactivated_at IS NULL AND NOT u.login_blocked) AS active,
        u.created_at
 FROM "user".users u
@@ -314,4 +326,94 @@ func cliRoleToAppRole(role string) string {
 	default:
 		return role
 	}
+}
+
+// EnrollmentRow is one enrollment on an admin user detail page.
+type EnrollmentRow struct {
+	CourseID    string `json:"courseId"`
+	CourseCode  string `json:"courseCode"`
+	CourseTitle string `json:"courseTitle"`
+	Role        string `json:"role"`
+	Active      bool   `json:"active"`
+	EnrolledAt  string `json:"enrolledAt"`
+}
+
+// UserDetail is the admin user profile with enrollments and org role.
+type UserDetail struct {
+	UserRow
+	AccountType     string          `json:"accountType"`
+	EnrollmentCount int64           `json:"enrollmentCount"`
+	Enrollments     []EnrollmentRow `json:"enrollments"`
+}
+
+// GetUserDetail returns one org user with enrollments for the admin console.
+func GetUserDetail(ctx context.Context, pool *pgxpool.Pool, orgID, userID uuid.UUID) (*UserDetail, error) {
+	var d UserDetail
+	var roleName string
+	var accountType string
+	err := pool.QueryRow(ctx, `
+SELECT u.id::text, u.email, u.display_name, u.account_type,
+       COALESCE((SELECT ar.name FROM "user".user_app_roles uar
+        JOIN "user".app_roles ar ON ar.id = uar.role_id
+        WHERE uar.user_id = u.id ORDER BY ar.name LIMIT 1), '') AS role,
+       COALESCE(
+         (SELECT g.role FROM "user".org_role_grants g
+          WHERE g.org_id = u.org_id AND g.user_id = u.id
+            AND (g.expires_at IS NULL OR g.expires_at > NOW())
+          ORDER BY CASE g.role
+            WHEN 'org_admin' THEN 0
+            WHEN 'org_unit_admin' THEN 1
+            WHEN 'org_viewer' THEN 2
+            ELSE 3 END, g.granted_at DESC
+          LIMIT 1),
+         (SELECT CASE WHEN ar.name = 'Global Admin' THEN 'global_admin' ELSE NULL END
+          FROM "user".user_app_roles uar
+          JOIN "user".app_roles ar ON ar.id = uar.role_id
+          WHERE uar.user_id = u.id AND ar.name = 'Global Admin'
+          LIMIT 1)
+       ) AS org_role,
+       (u.deactivated_at IS NULL AND NOT u.login_blocked) AS active,
+       u.created_at
+FROM "user".users u
+WHERE u.id = $1 AND u.org_id = $2 AND u.account_type <> 'system'
+`, userID, orgID).Scan(
+		&d.ID, &d.Email, &d.DisplayName, &accountType, &roleName, &d.OrgRole, &d.Active, &d.CreatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+	d.Role = appRoleToCliRole(roleName)
+	d.AccountType = accountType
+
+	_ = pool.QueryRow(ctx, `
+SELECT COUNT(*)::bigint
+FROM course.course_enrollments ce
+WHERE ce.user_id = $1 AND (ce.active OR ce.invitation_pending)
+`, userID).Scan(&d.EnrollmentCount)
+
+	rows, err := pool.Query(ctx, `
+SELECT c.id::text, c.course_code, c.title, ce.role, ce.active, ce.created_at
+FROM course.course_enrollments ce
+INNER JOIN course.courses c ON c.id = ce.course_id
+WHERE ce.user_id = $1
+ORDER BY ce.created_at DESC
+LIMIT 100
+`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var row EnrollmentRow
+		var enrolledAt time.Time
+		if err := rows.Scan(&row.CourseID, &row.CourseCode, &row.CourseTitle, &row.Role, &row.Active, &enrolledAt); err != nil {
+			return nil, err
+		}
+		row.EnrolledAt = enrolledAt.UTC().Format(time.RFC3339)
+		d.Enrollments = append(d.Enrollments, row)
+	}
+	if d.Enrollments == nil {
+		d.Enrollments = []EnrollmentRow{}
+	}
+	return &d, rows.Err()
 }

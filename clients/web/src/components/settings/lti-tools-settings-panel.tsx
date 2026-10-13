@@ -4,6 +4,7 @@ import { usePlatformFeatures } from '../../context/platform-features-context'
 import { authorizedFetch } from '../../lib/api'
 import { readApiErrorMessage } from '../../lib/errors'
 import { ltiNotEnabledMessage } from '../../lib/lti-runtime'
+import { useConfirm } from '../use-confirm'
 
 type ParentPlatform = {
   id: string
@@ -36,6 +37,7 @@ type RegistrationsResponse = {
 
 export function LtiToolsSettingsPanel() {
   const { ltiRuntimeEnabled } = usePlatformFeatures()
+  const { confirm, ConfirmDialogHost } = useConfirm()
   const [data, setData] = useState<RegistrationsResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -102,8 +104,63 @@ export function LtiToolsSettingsPanel() {
     }
   }
 
+  const [toolBusyId, setToolBusyId] = useState<string | null>(null)
+
+  async function onToggleExternal(tool: ExternalTool) {
+    setMessage(null)
+    setError(null)
+    setToolBusyId(tool.id)
+    try {
+      const res = await authorizedFetch(`/api/v1/admin/lti/external-tools/${encodeURIComponent(tool.id)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ active: !tool.active }),
+      })
+      if (!res.ok) {
+        const raw: unknown = await res.json().catch(() => ({}))
+        throw new Error(readApiErrorMessage(raw))
+      }
+      setMessage(tool.active ? 'Tool disabled.' : 'Tool enabled.')
+      await load()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Update failed.')
+    } finally {
+      setToolBusyId(null)
+    }
+  }
+
+  async function onDeleteExternal(tool: ExternalTool) {
+    if (
+      !(await confirm({
+        title: `Remove LTI tool “${tool.name}”?`,
+        variant: 'danger',
+      }))
+    ) {
+      return
+    }
+    setMessage(null)
+    setError(null)
+    setToolBusyId(tool.id)
+    try {
+      const res = await authorizedFetch(`/api/v1/admin/lti/external-tools/${encodeURIComponent(tool.id)}`, {
+        method: 'DELETE',
+      })
+      if (!res.ok) {
+        const raw: unknown = await res.json().catch(() => ({}))
+        throw new Error(readApiErrorMessage(raw))
+      }
+      setMessage('Tool removed.')
+      await load()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Remove failed.')
+    } finally {
+      setToolBusyId(null)
+    }
+  }
+
   return (
     <div>
+      {ConfirmDialogHost}
       <h2 className="text-base font-semibold text-fg-default">LTI tools</h2>
       <p className="mt-1 text-sm text-fg-muted">
         Register external LTI 1.3 tools (for embedding in courses) and parent LMS platforms (for launching
@@ -155,11 +212,34 @@ export function LtiToolsSettingsPanel() {
             <h3 className="text-sm font-semibold text-fg-default">External tools (Lextures as platform)</h3>
             <ul className="mt-3 space-y-2 text-sm text-fg-default">
               {data.externalTools.map((t) => (
-                <li key={t.id} className="rounded-lg border border-border-default px-3 py-2 dark:border-border-default">
-                  <span className="font-medium">{t.name}</span>
-                  {!t.active ? (
-                    <span className="ms-2 text-xs uppercase text-warning-fg">inactive</span>
-                  ) : null}
+                <li
+                  key={t.id}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border-default px-3 py-2 dark:border-border-default"
+                >
+                  <div>
+                    <span className="font-medium">{t.name}</span>
+                    {!t.active ? (
+                      <span className="ms-2 text-xs uppercase text-warning-fg">inactive</span>
+                    ) : null}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      disabled={toolBusyId === t.id}
+                      onClick={() => void onToggleExternal(t)}
+                      className="rounded-lg border border-border-default px-2 py-1 text-xs font-medium text-fg-muted hover:bg-surface-base disabled:opacity-50 dark:border-border-default"
+                    >
+                      {t.active ? 'Disable' : 'Enable'}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={toolBusyId === t.id}
+                      onClick={() => void onDeleteExternal(t)}
+                      className="rounded-lg border border-danger-border px-2 py-1 text-xs font-medium text-danger-fg hover:bg-danger-surface disabled:opacity-50"
+                    >
+                      Remove
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>

@@ -323,7 +323,7 @@ func (d Deps) requireCourseAccess(w http.ResponseWriter, r *http.Request) (strin
 		apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Missing course code.")
 		return "", uuid.UUID{}, false
 	}
-	has, err := enrollment.UserHasAccess(r.Context(), d.Pool, courseCode, viewer)
+	has, err := userCanOpenCourse(r.Context(), d.Pool, courseCode, viewer)
 	if err != nil {
 		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify course access.")
 		return "", uuid.UUID{}, false

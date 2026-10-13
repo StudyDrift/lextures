@@ -118,7 +118,7 @@ SELECT
         WHERE u.created_at >= NOW() - INTERVAL '7 days'
     )::bigint AS signups_last_7_days
 FROM "user".users u
-WHERE u.account_type NOT IN ('system', 'managed')
+WHERE u.account_type <> 'system'
   AND u.email NOT ILIKE '%@erased.invalid'
 `).Scan(
 		&stats.TotalAccounts,
@@ -134,7 +134,7 @@ SELECT COUNT(DISTINCT ua.user_id)::bigint
 FROM "user".user_audit ua
 INNER JOIN "user".users u ON u.id = ua.user_id
 WHERE ua.occurred_at >= NOW() - INTERVAL '30 days'
-  AND u.account_type NOT IN ('system', 'managed')
+  AND u.account_type <> 'system'
   AND u.email NOT ILIKE '%@erased.invalid'
 `).Scan(&stats.RecentlyActive30Days)
 	if err != nil {
@@ -184,7 +184,7 @@ WITH matched AS (
         ) AS rank
     FROM "user".users u
     INNER JOIN tenant.organizations o ON o.id = u.org_id
-    WHERE u.account_type NOT IN ('system', 'managed')
+    WHERE u.account_type <> 'system'
       AND (
           u.search_vector @@ websearch_to_tsquery('english', $1)
           OR u.email ILIKE $2
@@ -231,7 +231,7 @@ func ListByFilter(ctx context.Context, pool *pgxpool.Pool, p ListParams) (ListRe
 
 	// Base human-account predicates match FetchDashboardStats.
 	where := `
-u.account_type NOT IN ('system', 'managed')
+u.account_type <> 'system'
 AND u.email NOT ILIKE '%@erased.invalid'`
 	switch filter {
 	case FilterSignups7d:
@@ -395,7 +395,7 @@ SELECT
     u.created_at
 FROM "user".users u
 INNER JOIN tenant.organizations o ON o.id = u.org_id
-WHERE u.id = $1 AND u.account_type NOT IN ('system', 'managed')
+WHERE u.id = $1 AND u.account_type <> 'system'
 `, userID).Scan(
 		&rep.ID, &rep.Email, &rep.FirstName, &rep.LastName, &rep.DisplayName,
 		&rep.OrgID, &rep.OrgName, &roleName, &rep.Active, &rep.CreatedAt,
