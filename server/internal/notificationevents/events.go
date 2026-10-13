@@ -2,27 +2,29 @@ package notificationevents
 
 // Event types for notification preferences and email jobs (plan 6.2).
 const (
-	GradePosted            = "grade_posted"
-	AssignmentCreated      = "assignment_created"
-	DiscussionReply        = "discussion_reply"
-	CourseAnnouncement     = "course_announcement"
-	SubmissionReceived     = "submission_received"
-	AssignmentDueReminder  = "assignment_due_reminder"
-	PasswordReset          = "password_reset"
-	WelcomeInvite          = "welcome_invite"
-	MeetingReminder        = "meeting_reminder"
-	ConferenceConfirmed      = "conference_confirmed"
-	ConferenceReminder       = "conference_reminder"
-	CoachingTipWeekly      = "coaching_tip_weekly"
-	CanvasCourseImported   = "canvas_course_imported"
-	CourseCopyImported     = "course_copy_imported"
-	CourseCopyImportFailed = "course_copy_import_failed"
-	InboxMessage           = "inbox_message"
-	IncompleteGranted      = "incomplete_granted"
-	IncompleteReminder     = "incomplete_reminder"
-	CEUAwarded             = "ceu_awarded"
-	CertificateIssued      = "certificate_issued"
-	PaymentFailed          = "payment_failed"
+	GradePosted                = "grade_posted"
+	AssignmentCreated          = "assignment_created"
+	DiscussionReply            = "discussion_reply"
+	SubmissionComment          = "submission_comment"
+	ParentWeeklyProgress       = "parent_weekly_progress"
+	CourseAnnouncement         = "course_announcement"
+	SubmissionReceived         = "submission_received"
+	AssignmentDueReminder      = "assignment_due_reminder"
+	PasswordReset              = "password_reset"
+	WelcomeInvite              = "welcome_invite"
+	MeetingReminder            = "meeting_reminder"
+	ConferenceConfirmed        = "conference_confirmed"
+	ConferenceReminder         = "conference_reminder"
+	CoachingTipWeekly          = "coaching_tip_weekly"
+	CanvasCourseImported       = "canvas_course_imported"
+	CourseCopyImported         = "course_copy_imported"
+	CourseCopyImportFailed     = "course_copy_import_failed"
+	InboxMessage               = "inbox_message"
+	IncompleteGranted          = "incomplete_granted"
+	IncompleteReminder         = "incomplete_reminder"
+	CEUAwarded                 = "ceu_awarded"
+	CertificateIssued          = "certificate_issued"
+	PaymentFailed              = "payment_failed"
 	StudyReminderDaily         = "study_reminder_daily"
 	StudyReminderStreakAtRisk  = "study_reminder_streak_at_risk"
 	StudyReminderWeeklySummary = "study_reminder_weekly_summary"
@@ -35,7 +37,7 @@ const (
 	TranscriptOrderApproved    = "transcript_order_approved"
 	TranscriptOrderRejected    = "transcript_order_rejected"
 	TranscriptOrderSent        = "transcript_order_sent"
-	TranscriptOrderDelivered    = "transcript_order_delivered"
+	TranscriptOrderDelivered   = "transcript_order_delivered"
 	TranscriptOrderOpened      = "transcript_order_opened"
 	TranscriptOrderFailed      = "transcript_order_failed"
 	TranscriptOrderCanceled    = "transcript_order_canceled"
@@ -51,6 +53,8 @@ var All = []string{
 	GradePosted,
 	AssignmentCreated,
 	DiscussionReply,
+	SubmissionComment,
+	ParentWeeklyProgress,
 	CourseAnnouncement,
 	SubmissionReceived,
 	AssignmentDueReminder,

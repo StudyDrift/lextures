@@ -31,6 +31,18 @@ RETURNING id
 	return id, err
 }
 
+// Exists reports whether this user already has a notification for the event and action URL.
+func Exists(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, eventType, actionURL string) (bool, error) {
+	var exists bool
+	err := pool.QueryRow(ctx, `
+SELECT EXISTS (
+  SELECT 1 FROM settings.notifications
+  WHERE user_id = $1 AND event_type = $2
+    AND COALESCE(action_url,'') = $3
+)`, userID, eventType, actionURL).Scan(&exists)
+	return exists, err
+}
+
 // HasUnread reports whether the user already has an unread notification with the same event type, title, and action URL.
 func HasUnread(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, eventType, title, actionURL string) (bool, error) {
 	var exists bool

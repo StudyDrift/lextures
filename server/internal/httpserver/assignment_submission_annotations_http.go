@@ -13,6 +13,7 @@ import (
 	"github.com/lextures/lextures/server/internal/courseroles"
 	"github.com/lextures/lextures/server/internal/repos/originalityreports"
 	"github.com/lextures/lextures/server/internal/repos/submissionannotations"
+	"github.com/lextures/lextures/server/internal/service/notifications"
 )
 
 var validAnnotationTools = map[string]bool{
@@ -132,7 +133,7 @@ type postAnnotationBody struct {
 // handlePostSubmissionAnnotation is POST .../submissions/{submission_id}/annotations
 func (d Deps) handlePostSubmissionAnnotation() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		sc, _, viewer, canGrade, ok := d.loadAnnotationSubmission(w, r)
+		sc, courseCode, viewer, canGrade, ok := d.loadAnnotationSubmission(w, r)
 		if !ok {
 			return
 		}
@@ -189,6 +190,12 @@ func (d Deps) handlePostSubmissionAnnotation() http.HandlerFunc {
 		if err != nil || row == nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save annotation.")
 			return
+		}
+		if note != nil && sc.SubmittedBy != viewer {
+			notifications.DeliverSubmissionCommentByItem(
+				r.Context(), d.Pool, d.effectiveConfig(), d.NotifHub, d.SmsNotificationQueue,
+				courseCode, sc.ModuleItemID, sc.SubmittedBy, row.ID.String(), *note, viewer.String(),
+			)
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]any{"annotation": annotationToJSON(*row)})

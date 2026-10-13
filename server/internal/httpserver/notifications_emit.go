@@ -37,10 +37,6 @@ func (d Deps) smsNotificationService() *notifications.SmsService {
 }
 
 func (d Deps) emitDiscussionReplyNotifications(ctx context.Context, courseID uuid.UUID, courseCode string, threadID, authorID uuid.UUID, threadTitle string) {
-	ns := d.notificationsService()
-	if !ns.Config.EmailNotificationsEnabled {
-		return
-	}
 	participants, err := discussions.ListThreadParticipantIDs(ctx, d.Pool, threadID, authorID)
 	if err != nil || len(participants) == 0 {
 		return
@@ -50,6 +46,19 @@ func (d Deps) emitDiscussionReplyNotifications(ctx context.Context, courseID uui
 	if pub != nil && pub.Title != "" {
 		courseName = pub.Title
 	}
+	if strings.TrimSpace(threadTitle) == "" {
+		threadTitle = "Discussion"
+	}
+	actionURL := fmt.Sprintf("/courses/%s/discussions?thread=%s", courseCode, threadID.String())
+	title := "New reply in " + threadTitle
+	body := fmt.Sprintf("Someone replied in %s in %s.", threadTitle, courseName)
+	push := d.pushNotificationService()
+	for _, id := range participants {
+		if err := push.Enqueue(ctx, id, notifications.EventDiscussionReply, title, body, actionURL); err != nil {
+			slog.Warn("notifications.discussion_reply_in_app", "err", err, "user_id", id.String())
+		}
+	}
+	ns := d.notificationsService()
 	var orgID *uuid.UUID
 	if oid, err := course.CourseOrgID(ctx, d.Pool, courseCode); err == nil && oid != nil {
 		orgID = oid

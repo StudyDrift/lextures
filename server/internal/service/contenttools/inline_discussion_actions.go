@@ -185,6 +185,13 @@ func handleInlineDiscussionPost(ctx ActionContext) (*ActionResult, error) {
 	if err := tx.Commit(ctx.Ctx); err != nil {
 		return nil, err
 	}
+	if ctx.DiscussionReplyNotify != nil {
+		title := "Discussion"
+		if th, err := discussions.GetThread(ctx.Ctx, ctx.Pool, ctx.CourseID, threadID); err == nil && th != nil && strings.TrimSpace(th.Title) != "" {
+			title = th.Title
+		}
+		ctx.DiscussionReplyNotify(threadID, post.ID, title)
+	}
 
 	now := inline_discussion.NowRFC3339()
 	st.ThreadID = threadID.String()

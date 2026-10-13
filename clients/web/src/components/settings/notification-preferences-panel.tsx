@@ -24,6 +24,11 @@ const EVENT_COPY: Record<string, EventCopy> = {
   grade_posted: { label: 'Grade posted' },
   assignment_created: { label: 'New assignment' },
   discussion_reply: { label: 'Discussion reply' },
+  submission_comment: { label: 'New comment on your submission' },
+  parent_weekly_progress: {
+    label: 'Weekly progress email',
+    description: 'One section per learner: completed work, what is due, grades, time, and comments.',
+  },
   course_announcement: { label: 'Course announcement' },
   submission_received: { label: 'Submission received' },
   assignment_due_reminder: { label: 'Assignment due reminder' },

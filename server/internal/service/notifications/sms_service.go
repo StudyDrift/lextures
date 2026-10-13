@@ -77,9 +77,18 @@ func (s *SmsService) NotifyAssignmentCreated(ctx context.Context, studentIDs []u
 	}
 }
 
+// NotifySubmissionComment enqueues an SMS when new submission feedback is visible.
+func (s *SmsService) NotifySubmissionComment(ctx context.Context, studentUserID uuid.UUID, courseName, assignmentName, actionURL string) {
+	title := fmt.Sprintf("%s: New comment", courseName)
+	body := fmt.Sprintf("New feedback on %s.", assignmentName)
+	if err := s.Enqueue(ctx, studentUserID, EventSubmissionComment, title, body, actionURL); err != nil {
+		slog.Warn("sms.submission_comment", "err", err, "user_id", studentUserID)
+	}
+}
+
 // NotifyDiscussionReply enqueues SMS jobs for discussion replies.
 func (s *SmsService) NotifyDiscussionReply(ctx context.Context, recipientIDs []uuid.UUID, courseName, threadTitle, courseCode, threadID string) {
-	link := fmt.Sprintf("%s/courses/%s/discussions/threads/%s", s.publicWebOrigin(), courseCode, threadID)
+	link := fmt.Sprintf("%s/courses/%s/discussions?thread=%s", s.publicWebOrigin(), courseCode, threadID)
 	title := fmt.Sprintf("%s: New reply", courseName)
 	body := fmt.Sprintf("New reply in %s", threadTitle)
 	for _, rid := range recipientIDs {
