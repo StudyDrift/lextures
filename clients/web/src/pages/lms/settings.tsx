@@ -45,6 +45,7 @@ import { IntroCoursePanel } from '../../components/settings/intro-course-panel'
 import { FeedbackAdminPanel } from '../../components/settings/feedback-admin-panel'
 import { AiReportsPanel } from '../../components/settings/ai-reports-panel'
 import { LmsPage } from './lms-page'
+import { isSystemSettingsPath, settingsPageHeader } from './settings-page-header'
 import OrgBranding from './admin/org-branding'
 import { FALLBACK_IMAGE_MODEL_OPTIONS, FALLBACK_TEXT_MODEL_OPTIONS } from '../../lib/ai-models'
 import { authorizedFetch } from '../../lib/api'
@@ -52,31 +53,6 @@ import { readApiErrorMessage } from '../../lib/errors'
 import { PLATFORM_SECRET_PLACEHOLDER } from '../../lib/platform-settings'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
 import { providerLabel } from '../../lib/ai-providers'
-
-function isSystemSettingsPath(pathname: string): boolean {
-  if (pathname.startsWith('/settings/ai/')) return true
-  if (pathname.startsWith('/settings/feedback')) return true
-  return (
-    pathname === '/settings/roles' ||
-    pathname === '/settings/lti-tools' ||
-    pathname === '/settings/platform' ||
-    pathname === '/settings/email-templates' ||
-    pathname === '/settings/organizations' ||
-    pathname === '/settings/org-units' ||
-    pathname === '/settings/terms' ||
-    pathname === '/settings/org-branding' ||
-    pathname === '/settings/scim-provisioning' ||
-    pathname === '/settings/cloud-providers' ||
-    pathname === '/settings/lrs-integrations' ||
-    pathname === '/settings/oer-providers' ||
-    pathname === '/settings/transcripts' ||
-    pathname === '/settings/advising' ||
-    pathname === '/settings/archive' ||
-    pathname === '/settings/people' ||
-    pathname === '/settings/courses' ||
-    pathname === '/settings/intro-course'
-  )
-}
 
 type SystemPromptItem = {
   key: string
@@ -121,6 +97,7 @@ type ModelKind = 'image' | 'text'
 async function fetchModelsForKind(
   kind: ModelKind,
   provider?: string,
+  refresh = false,
 ): Promise<{
   models: AiModelOption[]
   fromApi: boolean
@@ -129,6 +106,7 @@ async function fetchModelsForKind(
 }> {
   const qs = new URLSearchParams({ kind })
   if (provider) qs.set('provider', provider)
+  if (refresh) qs.set('refresh', '1')
   const modelsRes = await authorizedFetch(`/api/v1/settings/ai/models?${qs.toString()}`)
   const modelsRaw: unknown = await modelsRes.json().catch(() => ({}))
   if (!modelsRes.ok) {
@@ -197,12 +175,12 @@ export default function Settings() {
   const [openRouterApiKeyBaseline, setOpenRouterApiKeyBaseline] = useState('')
   const [activeProvider, setActiveProvider] = useState('')
 
-  const loadModels = useCallback(async (provider?: string) => {
+  const loadModels = useCallback(async (provider?: string, refresh = false) => {
     setModelsError(null)
     try {
       const [img, txt] = await Promise.all([
-        fetchModelsForKind('image', provider),
-        fetchModelsForKind('text', provider),
+        fetchModelsForKind('image', provider, refresh),
+        fetchModelsForKind('text', provider, refresh),
       ])
       setModelsConfigured(img.configured)
       setImageModels(img.models)
@@ -224,7 +202,7 @@ export default function Settings() {
 
   const refreshModels = useCallback(async () => {
     setModelsRefreshing(true)
-    await loadModels(activeProvider || undefined)
+    await loadModels(activeProvider || undefined, true)
     setModelsRefreshing(false)
   }, [activeProvider, loadModels])
 
@@ -285,6 +263,9 @@ export default function Settings() {
       setAiLoading(true)
       setAiError(null)
       setModelsError(null)
+      // #791: load settings and model catalogs in parallel. Without a provider param the
+      // catalog endpoint uses the same active provider that /settings/ai reports.
+      const modelsLoaded = loadModels()
       try {
         const settingsRes = await authorizedFetch('/api/v1/settings/ai')
         const settingsRaw: unknown = await settingsRes.json().catch(() => ({}))
@@ -311,19 +292,14 @@ export default function Settings() {
             setOpenRouterApiKeyBaseline(key)
             if (data.activeProvider) setActiveProvider(data.activeProvider)
           }
-          if (!cancelled) await loadModels(data.activeProvider)
+          await modelsLoaded
           return
         }
-        if (!cancelled) await loadModels()
+        await modelsLoaded
       } catch {
-        if (!cancelled) {
-          setAiError('Could not load AI settings.')
-          setImageModels(fallbackImageModels())
-          setTextModels(fallbackTextModels())
-          setImageModelsFromApi(false)
-          setTextModelsFromApi(false)
-          setModelsConfigured(false)
-        }
+        if (!cancelled) setAiError('Could not load AI settings.')
+        // loadModels falls back to the built-in model lists on its own failure.
+        await modelsLoaded
       } finally {
         if (!cancelled) setAiLoading(false)
       }
@@ -449,13 +425,15 @@ export default function Settings() {
     if (row) setSystemPromptDraft(row.content)
   }
 
+  const pageHeader = settingsPageHeader(location.pathname)
+
   if (location.pathname === '/settings/org-roles') {
     return <Navigate to="/settings/roles" replace />
   }
 
   if (permLoading && isSystemSettingsPath(location.pathname)) {
     return (
-      <LmsPage title="Settings" description="Account and learning preferences.">
+      <LmsPage title={pageHeader.title} description={pageHeader.description}>
         <p className="mt-8 text-sm text-fg-muted">Loading…</p>
       </LmsPage>
     )
@@ -473,7 +451,7 @@ export default function Settings() {
 
   if (activeView === 'scim-provisioning' && canManageRbac && platformScimFlagLoading) {
     return (
-      <LmsPage title="Settings" description="Account and learning preferences.">
+      <LmsPage title={pageHeader.title} description={pageHeader.description}>
         <p className="mt-8 text-sm text-fg-muted">Loading…</p>
       </LmsPage>
     )
@@ -492,7 +470,7 @@ export default function Settings() {
   }
 
   return (
-    <LmsPage title="Settings" description="Account and learning preferences.">
+    <LmsPage title={pageHeader.title} description={pageHeader.description}>
       <div
         className={`mt-8 ${ activeView === 'email-templates' ? 'max-w-none w-full' : activeView === 'roles' || activeView === 'lti-tools' || activeView === 'platform' || activeView === 'organizations' || activeView === 'org-units' || activeView === 'terms' || activeView === 'org-branding' || activeView === 'scim-provisioning' || activeView === 'cloud-providers' || activeView === 'lrs-integrations' || activeView === 'oer-providers' || activeView === 'transcripts' || activeView === 'advising' || activeView === 'archive' || activeView === 'people' || activeView === 'courses' || activeView === 'intro-course' || activeView === 'feedback' ? 'max-w-4xl' : activeView === 'integrations' ? 'max-w-3xl' : activeView === 'ai-prompts' ? 'max-w-3xl' : activeView === 'ai-models' || activeView === 'ai-reports' || activeView === 'ai-governance' ? 'max-w-4xl' : activeView === 'account' ? 'max-w-3xl' : activeView === 'learner-profile' ? 'max-w-3xl' : 'max-w-xl' }`}
       >

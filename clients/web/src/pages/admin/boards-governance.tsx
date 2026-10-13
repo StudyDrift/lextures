@@ -140,6 +140,9 @@ export default function BoardsGovernancePage() {
                 <dd className="text-lg font-semibold">{formatBytes(overview.storageBytes)}</dd>
               </div>
             </dl>
+            {overview.coursesFeatureEnabled !== overview.coursesWithBoards ? (
+              <p className="mt-2 text-xs text-fg-muted">{t('boards.admin.coursesCountsHint')}</p>
+            ) : null}
             <table className="mt-4 w-full text-start text-sm">
               <caption className="mb-2 text-start text-xs text-fg-muted">
                 {t('boards.admin.topContentTypes')}

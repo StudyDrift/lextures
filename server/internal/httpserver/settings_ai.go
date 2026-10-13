@@ -14,7 +14,7 @@ import (
 	"github.com/lextures/lextures/server/internal/service/aiprovider"
 )
 
-// handleListAIModels is GET /api/v1/settings/ai/models?provider=&kind=text|image|vision
+// handleListAIModels is GET /api/v1/settings/ai/models?provider=&kind=text|image|vision&refresh=1
 func (d Deps) handleListAIModels() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if _, ok := d.adminRbacUser(w, r); !ok {
@@ -26,6 +26,8 @@ func (d Deps) handleListAIModels() http.HandlerFunc {
 			return
 		}
 		provider, configured, opts := d.resolveCatalogRequest(r.Context(), r.URL.Query().Get("provider"))
+		// refresh=1 (Refresh models button) skips the live catalog cache.
+		opts.SkipCache = r.URL.Query().Get("refresh") == "1"
 		models, err := aiprovider.ListCatalog(r.Context(), provider, kind, opts)
 		if err != nil {
 			// OpenRouter live failure should still surface; curated providers never fail solely for missing OpenRouter (AC-1).

@@ -1,4 +1,4 @@
-import { authorizedFetch } from './api'
+import { authorizedFetch, type AuthorizedFetchInit } from './api'
 import { readApiErrorMessage } from './errors'
 import type { LinkedInCertParams } from './linkedin-share'
 
@@ -99,8 +99,8 @@ export async function patchMyBadge(awardedId: string, isPublic: boolean): Promis
   return parseJson(res)
 }
 
-export async function fetchBadgeProfile(): Promise<BadgeProfile> {
-  const res = await authorizedFetch('/api/v1/me/badge-profile')
+export async function fetchBadgeProfile(init?: AuthorizedFetchInit): Promise<BadgeProfile> {
+  const res = await authorizedFetch('/api/v1/me/badge-profile', init)
   return parseJson(res)
 }
 

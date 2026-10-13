@@ -6,6 +6,10 @@ import {
   patchBadgeProfile,
   type BadgeProfile,
 } from '../../lib/badges-api'
+import { Button } from '../ui/button'
+
+/** Fail fast instead of leaving "Loading…" up for the 30s default request timeout (#791). */
+const BADGE_PROFILE_TIMEOUT_MS = 10_000
 
 export function BadgeProfileSettingsPanel() {
   const { ffCompetencyBadges, loading: featuresLoading } = usePlatformFeatures()
@@ -20,17 +24,21 @@ export function BadgeProfileSettingsPanel() {
   const [saving, setSaving] = useState(false)
   const [loaded, setLoaded] = useState(false)
 
+  const [loadFailed, setLoadFailed] = useState(false)
+
   const load = useCallback(async () => {
+    setLoadFailed(false)
+    setError(null)
     try {
-      const p = await fetchBadgeProfile()
+      const p = await fetchBadgeProfile({ timeoutMs: BADGE_PROFILE_TIMEOUT_MS })
       setProfile(p)
       setHandle(p.handle)
       setPagePublic(p.pagePublic)
       setSearchIndexable(p.searchIndexable)
       setHideRealName(p.hideRealName)
       setLoaded(true)
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to load badge profile.')
+    } catch {
+      setLoadFailed(true)
     }
   }, [])
 
@@ -88,7 +96,21 @@ export function BadgeProfileSettingsPanel() {
     }
   }
 
-  if (!loaded && !error) {
+  if (!loaded && loadFailed) {
+    return (
+      <section className="rounded-xl border border-border-default p-4 dark:border-border-default">
+        <h2 className="text-base font-semibold text-fg-default dark:text-white">Public badge page</h2>
+        <p role="alert" className="mt-1 text-sm text-danger-fg">
+          Couldn&apos;t load your badge page settings.
+        </p>
+        <Button type="button" variant="secondary" size="sm" className="mt-2" onClick={() => void load()}>
+          Try again
+        </Button>
+      </section>
+    )
+  }
+
+  if (!loaded) {
     return (
       <section className="rounded-xl border border-border-default p-4 dark:border-border-default">
         <h2 className="text-base font-semibold text-fg-default dark:text-white">Public badge page</h2>

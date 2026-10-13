@@ -7,21 +7,39 @@ vi.mock('../../lib/api', () => ({
   authorizedFetch: (input: string, init?: RequestInit) => globalThis.fetch(input, init),
 }))
 
+const featuresMock = vi.fn(() => ({ backupModuleEnabled: true, adminConsoleEnabled: true, loading: false }))
+
+vi.mock('../../context/platform-features-context', () => ({
+  usePlatformFeatures: () => featuresMock(),
+}))
+
 describe('BackupOpsAdminPage', () => {
   beforeEach(() => {
     vi.restoreAllMocks()
+    featuresMock.mockReturnValue({ backupModuleEnabled: true, adminConsoleEnabled: true, loading: false })
   })
 
-  it('shows disabled message when API returns 404', async () => {
+  it('shows a turned-off state with a way forward and skips the API when the module is off', async () => {
+    featuresMock.mockReturnValue({ backupModuleEnabled: false, adminConsoleEnabled: true, loading: false })
+    const fetchSpy = vi.spyOn(globalThis, 'fetch')
+    render(
+      <MemoryRouter>
+        <BackupOpsAdminPage />
+      </MemoryRouter>,
+    )
+    expect(await screen.findByText('Backup & restore is turned off')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Back to admin console' })).toHaveAttribute('href', '/org-admin')
+    expect(fetchSpy).not.toHaveBeenCalled()
+  })
+
+  it('shows the turned-off state when the API returns 404', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('', { status: 404 }))
     render(
       <MemoryRouter>
         <BackupOpsAdminPage />
       </MemoryRouter>,
     )
-    await waitFor(() => {
-      expect(screen.getByRole('alert')).toHaveTextContent(/not enabled/i)
-    })
+    expect(await screen.findByText('Backup & restore is turned off')).toBeInTheDocument()
   })
 
   it('renders tier status when API succeeds', async () => {

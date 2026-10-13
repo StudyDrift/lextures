@@ -16,6 +16,7 @@ keys:
   atRiskAlertsEnabled
   autoCaptioningEnabled
   avScanningEnabled
+  backupModuleEnabled
   badgesDefaultPublic
   bulkCsvImportEnabled
   codeExecutionEnabled
@@ -142,6 +143,7 @@ keys:
   instructorInsightsEnabled
   introCourseEnabled
   irtCatModeEnabled
+  isoIsmsEnabled
   itemAnalysisEnabled
   learnerModelEmaAlpha
   learnerProfileEnabled
@@ -159,6 +161,7 @@ keys:
   scormIngestionEnabled
   screenShareEnabled
   seatManagementEnabled
+  securityDisclosureModuleEnabled
   selfReflectionEnabled
   sessionManagementUiEnabled
   soc2ModuleEnabled

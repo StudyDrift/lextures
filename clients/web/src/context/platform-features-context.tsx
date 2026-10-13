@@ -93,6 +93,9 @@ export type PlatformFeatures = {
   emailTemplateEditorEnabled: boolean
   maintenanceBannerEnabled: boolean
   seatManagementEnabled: boolean
+  isoIsmsEnabled: boolean
+  securityDisclosureModuleEnabled: boolean
+  backupModuleEnabled: boolean
   ffZapierConnector: boolean
   ffCatalogIntegration: boolean
   ffEnrollmentStateMachine: boolean
@@ -246,6 +249,9 @@ const defaultFeatures: PlatformFeatures = {
   emailTemplateEditorEnabled: false,
   maintenanceBannerEnabled: true,
   seatManagementEnabled: false,
+  isoIsmsEnabled: false,
+  securityDisclosureModuleEnabled: false,
+  backupModuleEnabled: false,
   ffZapierConnector: false,
   ffCatalogIntegration: false,
   ffEnrollmentStateMachine: false,
@@ -395,6 +401,9 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
   emailTemplateEditorEnabled: false,
   maintenanceBannerEnabled: true,
   seatManagementEnabled: false,
+  isoIsmsEnabled: false,
+  securityDisclosureModuleEnabled: false,
+  backupModuleEnabled: false,
   ffZapierConnector: false,
     ffCatalogIntegration: false,
     ffEnrollmentStateMachine: false,
@@ -551,6 +560,9 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           emailTemplateEditorEnabled: data.emailTemplateEditorEnabled === true,
           maintenanceBannerEnabled: data.maintenanceBannerEnabled !== false,
           seatManagementEnabled: data.seatManagementEnabled === true,
+          isoIsmsEnabled: data.isoIsmsEnabled === true,
+          securityDisclosureModuleEnabled: data.securityDisclosureModuleEnabled === true,
+          backupModuleEnabled: data.backupModuleEnabled === true,
           ffZapierConnector: data.ffZapierConnector === true,
           ffCatalogIntegration: data.ffCatalogIntegration === true,
           ffEnrollmentStateMachine: data.ffEnrollmentStateMachine === true,
@@ -666,6 +678,9 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           emailTemplateEditorEnabled: next.emailTemplateEditorEnabled === true,
           maintenanceBannerEnabled: next.maintenanceBannerEnabled !== false,
           seatManagementEnabled: next.seatManagementEnabled === true,
+          isoIsmsEnabled: next.isoIsmsEnabled === true,
+          securityDisclosureModuleEnabled: next.securityDisclosureModuleEnabled === true,
+          backupModuleEnabled: next.backupModuleEnabled === true,
           ffZapierConnector: next.ffZapierConnector === true,
           ffCatalogIntegration: next.ffCatalogIntegration === true,
           ffEnrollmentStateMachine: next.ffEnrollmentStateMachine === true,

@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { authorizedFetch } from '../lib/api'
 import { MARKETING_SITE_URLS } from '../lib/marketing-site'
+import { usePlatformFeatures } from '../context/platform-features-context'
+import { ModuleOffState } from '../components/admin/module-off-state'
 
 const API = '/api/v1/compliance/security-reports'
 
@@ -18,6 +20,8 @@ interface SecurityReport {
 }
 
 export default function SecurityDisclosureAdminPage() {
+  const { securityDisclosureModuleEnabled, loading: featuresLoading } = usePlatformFeatures()
+  const [moduleOff, setModuleOff] = useState(false)
   const [reports, setReports] = useState<SecurityReport[]>([])
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -30,7 +34,7 @@ export default function SecurityDisclosureAdminPage() {
     try {
       const res = await authorizedFetch(API)
       if (res.status === 404) {
-        setError('Security disclosure module is not enabled on this environment.')
+        setModuleOff(true)
         return
       }
       if (res.status === 403) {
@@ -51,8 +55,16 @@ export default function SecurityDisclosureAdminPage() {
   }, [])
 
   useEffect(() => {
+    if (featuresLoading) return
+    // #791: don't call the API (and log a 404) when the module is off.
+    if (!securityDisclosureModuleEnabled) {
+      setModuleOff(true)
+      setLoading(false)
+      return
+    }
+    setModuleOff(false)
     void load()
-  }, [load])
+  }, [featuresLoading, securityDisclosureModuleEnabled, load])
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
@@ -69,6 +81,24 @@ export default function SecurityDisclosureAdminPage() {
     } else {
       setMessage('Failed to log report.')
     }
+  }
+
+  if (featuresLoading) {
+    return (
+      <div className="mx-auto max-w-5xl px-4 py-8">
+        <p className="text-sm text-fg-muted">Loading…</p>
+      </div>
+    )
+  }
+
+  if (moduleOff) {
+    // #791: no Export CSV / Add report actions while the module is off.
+    return (
+      <div className="mx-auto max-w-5xl px-4 py-8">
+        <h1 className="mb-6 text-2xl font-semibold text-fg-default">Security reports</h1>
+        <ModuleOffState moduleName="Security reports" />
+      </div>
+    )
   }
 
   return (

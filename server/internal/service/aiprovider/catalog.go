@@ -44,6 +44,8 @@ type CatalogOptions struct {
 	HTTPClient *http.Client
 	// SkipLive forces curated-only (tests).
 	SkipLive bool
+	// SkipCache bypasses the live catalog cache (admin "Refresh models").
+	SkipCache bool
 }
 
 type catalogCacheEntry struct {
@@ -83,11 +85,25 @@ func ListCatalog(ctx context.Context, provider ProviderName, kind CatalogKind, o
 		return nil, fmt.Errorf("aiprovider: invalid catalog kind %q", kind)
 	}
 
+	cacheKey := string(provider) + "|" + string(kind) + "|" + opts.BaseURL
 	if provider == ProviderOpenRouter {
+		// #791: the public OpenRouter catalog is large and slow to fetch; cache it like the
+		// other live catalogs so Settings → AI models doesn't wait seconds on every visit.
+		// Injected HTTP clients (tests) always fetch fresh.
+		useCache := opts.HTTPClient == nil
+		if useCache && !opts.SkipCache {
+			if cached, ok := getCachedCatalog(cacheKey); ok {
+				RecordCatalogFetch(string(provider), "cached")
+				return cached, nil
+			}
+		}
 		models, err := listOpenRouterCatalog(ctx, kind, opts)
 		if err != nil {
 			RecordCatalogFetch(string(provider), "error")
 			return nil, err
+		}
+		if useCache && len(models) > 0 {
+			putCachedCatalog(cacheKey, models)
 		}
 		RecordCatalogFetch(string(provider), "live")
 		return models, nil
@@ -99,10 +115,11 @@ func ListCatalog(ctx context.Context, provider ProviderName, kind CatalogKind, o
 		return curated, nil
 	}
 
-	cacheKey := string(provider) + "|" + string(kind) + "|" + opts.BaseURL
-	if cached, ok := getCachedCatalog(cacheKey); ok {
-		RecordCatalogFetch(string(provider), "cached")
-		return cached, nil
+	if !opts.SkipCache {
+		if cached, ok := getCachedCatalog(cacheKey); ok {
+			RecordCatalogFetch(string(provider), "cached")
+			return cached, nil
+		}
 	}
 
 	live, err := fetchLiveCatalog(ctx, provider, kind, opts)

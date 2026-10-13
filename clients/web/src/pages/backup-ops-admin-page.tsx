@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { authorizedFetch } from '../lib/api'
+import { usePlatformFeatures } from '../context/platform-features-context'
+import { ModuleOffState } from '../components/admin/module-off-state'
 
 const API = '/api/v1/internal/ops'
 
@@ -31,6 +33,8 @@ interface BackupStatus {
 }
 
 export default function BackupOpsAdminPage() {
+  const { backupModuleEnabled, loading: featuresLoading } = usePlatformFeatures()
+  const [moduleOff, setModuleOff] = useState(false)
   const [status, setStatus] = useState<BackupStatus | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -42,7 +46,7 @@ export default function BackupOpsAdminPage() {
     try {
       const res = await authorizedFetch(`${API}/backup-status`)
       if (res.status === 404) {
-        setError('Backup module is not enabled on this environment.')
+        setModuleOff(true)
         return
       }
       if (res.status === 403) {
@@ -63,8 +67,19 @@ export default function BackupOpsAdminPage() {
 
   useEffect(() => {
     document.title = 'Backup & restore — Lextures'
+  }, [])
+
+  useEffect(() => {
+    if (featuresLoading) return
+    // #791: don't call the API (and log a 404) when the module is off.
+    if (!backupModuleEnabled) {
+      setModuleOff(true)
+      setLoading(false)
+      return
+    }
+    setModuleOff(false)
     void load()
-  }, [load])
+  }, [featuresLoading, backupModuleEnabled, load])
 
   async function recordDrill(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -95,8 +110,17 @@ export default function BackupOpsAdminPage() {
     void load()
   }
 
-  if (loading) {
+  if (featuresLoading || loading) {
     return <p className="p-6 text-fg-muted">Loading backup status…</p>
+  }
+
+  if (moduleOff) {
+    return (
+      <div className="p-6 max-w-3xl">
+        <h1 className="mb-6 text-2xl font-semibold text-fg-default">Backup &amp; restore</h1>
+        <ModuleOffState moduleName="Backup & restore" />
+      </div>
+    )
   }
 
   if (error) {
