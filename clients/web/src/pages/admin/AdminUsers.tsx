@@ -281,7 +281,7 @@ export default function AdminUsers() {
                   <td className="sticky left-0 bg-surface-raised px-4 py-2 dark:bg-surface-raised">
                     <Link
                       to={userDetailPath(user.id, orgId)}
-                      className="text-accent-fg hover:underline dark:text-indigo-400"
+                      className="text-accent-fg hover:underline"
                     >
                       {user.email}
                     </Link>
@@ -289,7 +289,7 @@ export default function AdminUsers() {
                   <td className="px-4 py-2">
                     <Link
                       to={userDetailPath(user.id, orgId)}
-                      className="text-accent-fg hover:underline dark:text-indigo-400"
+                      className="text-accent-fg hover:underline"
                     >
                       {user.displayName ?? '—'}
                     </Link>
@@ -313,7 +313,7 @@ export default function AdminUsers() {
                           type="button"
                           disabled={busy === user.id}
                           onClick={() => void viewAs(user)}
-                          className="text-sm text-accent-fg hover:underline disabled:opacity-50 dark:text-indigo-400"
+                          className="text-sm text-accent-fg hover:underline disabled:opacity-50"
                         >
                           {t('impersonation.viewAs', { defaultValue: 'View as' })}
                         </button>

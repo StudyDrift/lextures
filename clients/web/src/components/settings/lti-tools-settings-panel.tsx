@@ -1,5 +1,6 @@
 import { type FormEvent, useCallback, useEffect, useState } from 'react'
 import { Callout } from '../ui/callout'
+import { Button } from '../ui/button'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { authorizedFetch } from '../../lib/api'
 import { readApiErrorMessage } from '../../lib/errors'
@@ -223,22 +224,25 @@ export function LtiToolsSettingsPanel() {
                     ) : null}
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <button
+                    <Button
                       type="button"
+                      variant="secondary"
+                      size="sm"
                       disabled={toolBusyId === t.id}
+                      loading={toolBusyId === t.id}
                       onClick={() => void onToggleExternal(t)}
-                      className="rounded-lg border border-border-default px-2 py-1 text-xs font-medium text-fg-muted hover:bg-surface-base disabled:opacity-50 dark:border-border-default"
                     >
                       {t.active ? 'Disable' : 'Enable'}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
+                      variant="danger"
+                      size="sm"
                       disabled={toolBusyId === t.id}
                       onClick={() => void onDeleteExternal(t)}
-                      className="rounded-lg border border-danger-border px-2 py-1 text-xs font-medium text-danger-fg hover:bg-danger-surface disabled:opacity-50"
                     >
                       Remove
-                    </button>
+                    </Button>
                   </div>
                 </li>
               ))}

@@ -54,11 +54,11 @@ export default function AdminUserDetail() {
   return (
     <div>
       <p className="mb-3">
-        <Link to={backTo} className="text-sm text-accent-fg hover:underline dark:text-indigo-400">
+        <Link to={backTo} className="text-sm text-accent-fg hover:underline">
           ← Users
         </Link>
       </p>
-      <h1 id={titleId} className="text-xl font-semibold text-fg-default dark:text-slate-100">
+      <h1 id={titleId} className="text-xl font-semibold text-fg-default">
         {loading ? 'User' : name}
       </h1>
 
@@ -102,7 +102,7 @@ export default function AdminUserDetail() {
           </dl>
 
           <section>
-            <h2 className="text-base font-semibold text-fg-default dark:text-slate-100">
+            <h2 className="text-base font-semibold text-fg-default">
               Enrollments ({data.enrollmentCount})
             </h2>
             <div className="mt-3 overflow-x-auto rounded-xl border border-border-default dark:border-border-subtle">
@@ -137,7 +137,7 @@ export default function AdminUserDetail() {
                         <td className="px-4 py-2">
                           <Link
                             to={`/courses/${encodeURIComponent(row.courseCode)}`}
-                            className="text-accent-fg hover:underline dark:text-indigo-400"
+                            className="text-accent-fg hover:underline"
                           >
                             {row.courseTitle}
                           </Link>

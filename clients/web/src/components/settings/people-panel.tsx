@@ -35,6 +35,7 @@ import {
   type PersonRow,
 } from '../../lib/people-api'
 import { EnrollmentAvatar } from '../enrollment/enrollment-avatar'
+import { Button } from '../ui/button'
 
 const PAGE_SIZES = [25, 50, 100]
 
@@ -402,13 +403,15 @@ function PeopleResultsTable({
                     </button>
                   </td>
                   <td className="px-5 py-3">
-                    <button
+                    <Button
                       type="button"
+                      variant="ghost"
+                      size="sm"
                       onClick={() => onOpen(user.id)}
-                      className="text-start text-fg-muted hover:text-accent-fg hover:underline dark:hover:text-indigo-400"
+                      className="!px-0 text-fg-muted hover:text-accent-fg hover:underline"
                     >
                       {user.email}
-                    </button>
+                    </Button>
                   </td>
                   <td className="px-5 py-3 text-fg-muted">{user.orgName}</td>
                   <td className="px-5 py-3">
