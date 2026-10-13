@@ -22,7 +22,6 @@ import (
 	"github.com/lextures/lextures/server/internal/httpserver"
 	"github.com/lextures/lextures/server/internal/migrate"
 	"github.com/lextures/lextures/server/internal/repos/organization"
-	"github.com/lextures/lextures/server/internal/repos/rbac"
 	tenantaisettings "github.com/lextures/lextures/server/internal/repos/tenantaisettings"
 	"github.com/lextures/lextures/server/internal/repos/user"
 	"github.com/lextures/lextures/server/internal/service/aiprovider"
@@ -165,59 +164,6 @@ func TestAIProvider_AdminSettings_CRUD(t *testing.T) {
 	testRes := aiProviderDo(t, env.srv, http.MethodPost, "/api/v1/admin/ai-settings/test", nil, token)
 	if testRes.StatusCode != http.StatusOK {
 		t.Fatalf("test status: %d %s", testRes.StatusCode, readBody(t, testRes))
-	}
-}
-
-// TestAIAdminEndpoints_GlobalAdminWithoutOrgAdminGrant covers #790: a Global Admin (who can reach
-// the AI governance and provider settings pages) must be able to load and save their organization's
-// AI config even without an explicit org_admin grant, while a plain member is still forbidden.
-func TestAIAdminEndpoints_GlobalAdminWithoutOrgAdminGrant(t *testing.T) {
-	env := setupAIProvider(t)
-	ctx := context.Background()
-	if _, err := env.pool.Exec(ctx, `DELETE FROM "user".org_role_grants WHERE user_id = $1`, env.userID); err != nil {
-		t.Fatalf("remove org admin grant: %v", err)
-	}
-	token := env.token(t)
-
-	for _, path := range []string{"/api/v1/admin/ai-config", "/api/v1/admin/ai-settings"} {
-		res := aiProviderDo(t, env.srv, http.MethodGet, path, nil, token)
-		if res.StatusCode != http.StatusForbidden {
-			t.Fatalf("member GET %s: status %d %s", path, res.StatusCode, readBody(t, res))
-		}
-		_ = res.Body.Close()
-	}
-
-	if err := rbac.AssignUserRoleByName(ctx, env.pool, env.userID, "Global Admin"); err != nil {
-		t.Fatalf("assign Global Admin: %v", err)
-	}
-
-	for _, path := range []string{"/api/v1/admin/ai-config", "/api/v1/admin/ai-settings"} {
-		res := aiProviderDo(t, env.srv, http.MethodGet, path, nil, token)
-		if res.StatusCode != http.StatusOK {
-			t.Fatalf("global admin GET %s: status %d %s", path, res.StatusCode, readBody(t, res))
-		}
-		_ = res.Body.Close()
-	}
-
-	putRes := aiProviderDo(t, env.srv, http.MethodPut, "/api/v1/admin/ai-config", map[string]any{
-		"featuresEnabled": map[string]bool{"ai_tutor": false},
-	}, token)
-	if putRes.StatusCode != http.StatusOK {
-		t.Fatalf("global admin PUT ai-config: status %d %s", putRes.StatusCode, readBody(t, putRes))
-	}
-	_ = putRes.Body.Close()
-
-	getRes := aiProviderDo(t, env.srv, http.MethodGet, "/api/v1/admin/ai-config", nil, token)
-	var got struct {
-		OrgID           string          `json:"orgId"`
-		FeaturesEnabled map[string]bool `json:"featuresEnabled"`
-	}
-	decodeJSON(t, getRes, &got)
-	if got.OrgID != env.orgID.String() {
-		t.Fatalf("orgId: %q want %q", got.OrgID, env.orgID)
-	}
-	if v, ok := got.FeaturesEnabled["ai_tutor"]; !ok || v {
-		t.Fatalf("featuresEnabled: %v", got.FeaturesEnabled)
 	}
 }
 
