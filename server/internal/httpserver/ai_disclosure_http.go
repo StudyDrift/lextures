@@ -146,6 +146,9 @@ func (d Deps) handlePostAIFeatureAck() http.HandlerFunc {
 	}
 }
 
+// requireOrgAdminForAIConfig authorizes the org-scoped admin AI endpoints (governance config and
+// provider settings) for the caller's organization. Org admins and global admins
+// (global:app:rbac:manage, the permission that gates the AI settings pages) are allowed.
 func (d Deps) requireOrgAdminForAIConfig(w http.ResponseWriter, r *http.Request) (userID, orgID uuid.UUID, ok bool) {
 	uid, ok := d.meUserID(w, r)
 	if !ok {
@@ -155,6 +158,14 @@ func (d Deps) requireOrgAdminForAIConfig(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Could not resolve organization.")
 		return uuid.UUID{}, uuid.UUID{}, false
+	}
+	isGlobalAdmin, err := rbac.UserHasPermission(r.Context(), d.Pool, uid, permGlobalRBACManage)
+	if err != nil {
+		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Permission check failed.")
+		return uuid.UUID{}, uuid.UUID{}, false
+	}
+	if isGlobalAdmin {
+		return uid, oid, true
 	}
 	isAdmin, err := orgroles.UserHasRole(r.Context(), d.Pool, uid, oid, orgroles.RoleOrgAdmin)
 	if err != nil {

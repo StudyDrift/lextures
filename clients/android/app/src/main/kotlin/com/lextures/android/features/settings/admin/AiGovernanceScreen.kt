@@ -53,10 +53,14 @@ fun AiGovernanceScreen(
     var saving by remember { mutableStateOf(false) }
     var statusMessage by remember { mutableStateOf<String?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    // Set when the current config could not be loaded; the form stays hidden so defaults are never
+    // shown (or saved) as if they were the organization's real settings (#790).
+    var loadError by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(accessToken) {
         val token = accessToken ?: return@LaunchedEffect
         loading = true
+        loadError = null
         try {
             val response = LmsApi.fetchAiConfig(token)
             available = true
@@ -67,7 +71,7 @@ fun AiGovernanceScreen(
                 available = false
             } else {
                 available = true
-                errorMessage = OrgBrandingAdminLogic.userFacingError(
+                loadError = OrgBrandingAdminLogic.userFacingError(
                     error,
                     L.text(context, localePrefs, R.string.mobile_admin_orgBranding_aiGovernance_loadError),
                 )
@@ -95,8 +99,11 @@ fun AiGovernanceScreen(
                 color = textSecondary(),
             )
 
+            val currentLoadError = loadError
             if (loading) {
                 CircularProgressIndicator(modifier = Modifier.align(androidx.compose.ui.Alignment.CenterHorizontally))
+            } else if (currentLoadError != null) {
+                Text(text = currentLoadError, fontSize = 14.sp, color = androidx.compose.ui.graphics.Color(0xFFDC2626))
             } else {
                 OrgBrandingAdminLogic.AI_FEATURE_KEYS.forEach { feature ->
                     val labelRes = when (feature.labelResSuffix) {
