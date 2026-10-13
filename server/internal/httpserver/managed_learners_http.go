@@ -62,6 +62,9 @@ func (d Deps) managedLearnerGuardMiddleware() func(http.Handler) http.Handler {
 			switch {
 			case strings.HasPrefix(path, "/api/v1/me/dependents"):
 				blocked = true
+			case strings.HasPrefix(path, "/api/v1/parent/"):
+				// Homeschool records and parent portal (#774): managed learners cannot view or edit.
+				blocked = true
 			case strings.HasPrefix(path, "/api/v1/admin"), strings.HasPrefix(path, "/api/v1/admin-console"):
 				blocked = true
 			case strings.Contains(path, "/billing"), strings.HasPrefix(path, "/api/v1/me/billing"):

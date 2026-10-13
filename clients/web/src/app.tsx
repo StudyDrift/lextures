@@ -123,6 +123,7 @@ export default function App() {
               }
             />
             <Route path="/parent/conferences" element={<Pages.ConferenceBooking />} />
+            <Route path="/parent/records" element={<Pages.ParentRecords />} />
             <Route path="/conferences/availability" element={<Pages.ConferenceAvailabilitySetup />} />
             <Route path="/ai" element={<Pages.AskAiPage />} />
             <Route path="/review" element={<Pages.ReviewSessionPage />} />

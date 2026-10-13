@@ -66,6 +66,14 @@ func TestManagedLearnerGuardMiddleware(t *testing.T) {
 		t.Fatalf("course write should be allowed, got %d", rec3.Code)
 	}
 
+	parentRec := httptest.NewRequest(http.MethodPost, "/api/v1/parent/students/"+child+"/records/hours", nil)
+	parentRec.Header.Set("Authorization", "Bearer "+token)
+	recParent := httptest.NewRecorder()
+	handler.ServeHTTP(recParent, parentRec)
+	if recParent.Code != http.StatusForbidden {
+		t.Fatalf("parent records status %d", recParent.Code)
+	}
+
 	checkoutReq := httptest.NewRequest(http.MethodPost, "/api/v1/marketplace/courses/paid/checkout", nil)
 	checkoutReq.Header.Set("Authorization", "Bearer "+token)
 	recCheckout := httptest.NewRecorder()
