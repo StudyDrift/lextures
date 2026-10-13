@@ -2,6 +2,13 @@
 export const ltiNotEnabledMessage =
   "LTI isn't enabled on this server. Ask your administrator to turn it on."
 
+/**
+ * Admin-facing variant for Settings → LTI tools (#791): the reader *is* the administrator,
+ * so tell them where to turn it on instead of "ask your administrator".
+ */
+export const ltiNotEnabledAdminMessage =
+  'LTI launches are turned off on this site. Turn on LTI in Global platform settings. It needs an LTI signing key from your hosting setup, and launches start working after the next server restart.'
+
 /** Maps an LTI launch failure to the server message, with a plain sentence when the runtime is off. */
 export function ltiLaunchErrorMessage(err: unknown): string {
   const raw = err instanceof Error ? err.message.trim() : ''

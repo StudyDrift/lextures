@@ -1,9 +1,7 @@
-import { useId } from 'react'
+import { useId, useState } from 'react'
 import { LocaleTime } from '../ui/locale-time'
 import { detectBrowserTimeZone } from '../../lib/format'
 import { TIMEZONE_OPTIONS } from '../../lib/format/locale-options'
-
-const SAMPLE_ISO = '2026-04-15T10:00:00.000Z'
 
 type Props = {
   timezone: string
@@ -20,6 +18,8 @@ export function LocaleFormatSettingsPanel({
 }: Props) {
   const tzId = useId()
   const browserTz = detectBrowserTimeZone()
+  // #791: preview with the current time instead of a fixed (and now stale) sample date.
+  const [previewIso] = useState(() => new Date().toISOString())
 
   return (
     <div className={embedded ? 'space-y-4' : 'mt-8 space-y-4'}>
@@ -49,9 +49,9 @@ export function LocaleFormatSettingsPanel({
       </div>
 
       <p className="text-sm text-fg-muted">
-        Sample due date:{' '}
+        Right now in this format:{' '}
         <LocaleTime
-          date={SAMPLE_ISO}
+          date={previewIso}
           data-testid="settings-locale-sample-date"
           className="font-medium text-fg-default"
         />

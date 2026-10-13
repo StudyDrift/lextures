@@ -1,4 +1,8 @@
 // Package adminsearchrepo provides org-scoped Postgres full-text search queries (plan 18.4).
+//
+// Text matching never hits the middle of a word (#791): short queries must match a
+// whole word, longer ones a word prefix. Exact and whole-word hits rank above prefix
+// hits so the 5-per-type omnisearch preview shows the best matches.
 package adminsearchrepo
 
 import (
@@ -27,39 +31,55 @@ func SearchUsers(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID, q str
 	if offset < 0 {
 		offset = 0
 	}
-	like := "%" + q + "%"
+	m := newMatchPatterns(q)
 
 	rows, err := pool.Query(ctx, `
-WITH matched AS (
+WITH base AS (
     SELECT
         u.id,
         COALESCE(
             NULLIF(TRIM(COALESCE(u.display_name, '')), ''),
             TRIM(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, ''))
         ) AS name,
+        TRIM(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, '')) AS full_name,
+        COALESCE(u.display_name, '') AS display_name,
+        COALESCE(u.first_name, '') AS first_name,
+        COALESCE(u.last_name, '') AS last_name,
         u.email,
-        GREATEST(
-            ts_rank(u.search_vector, websearch_to_tsquery('english', $2)),
-            CASE WHEN similarity(u.email, $2) >= 0.3 THEN similarity(u.email, $2) ELSE 0 END,
-            CASE WHEN similarity(COALESCE(u.display_name, ''), $2) >= 0.3 THEN similarity(COALESCE(u.display_name, ''), $2) ELSE 0 END,
-            CASE WHEN similarity(TRIM(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, '')), $2) >= 0.3
-                THEN similarity(TRIM(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, '')), $2)
-                ELSE 0 END,
-            CASE WHEN u.email ILIKE $3 OR COALESCE(u.display_name, '') ILIKE $3 THEN 0.35 ELSE 0 END
-        ) AS rank
+        u.search_vector
     FROM "user".users u
     WHERE u.org_id = $1
       AND u.account_type <> 'system'
-      AND (
-          u.search_vector @@ websearch_to_tsquery('english', $2)
-          OR u.email ILIKE $3
-          OR COALESCE(u.display_name, '') ILIKE $3
-          OR COALESCE(u.first_name, '') ILIKE $3
-          OR COALESCE(u.last_name, '') ILIKE $3
-          OR similarity(u.email, $2) >= 0.3
-          OR similarity(COALESCE(u.display_name, ''), $2) >= 0.3
-          OR similarity(TRIM(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, '')), $2) >= 0.3
-      )
+),
+matched AS (
+    SELECT
+        b.id,
+        b.name,
+        b.email,
+        GREATEST(
+            ts_rank(b.search_vector, websearch_to_tsquery('english', $2)),
+            CASE WHEN $5 AND similarity(b.email, $2) >= 0.3 THEN similarity(b.email, $2) ELSE 0 END,
+            CASE WHEN $5 AND similarity(b.display_name, $2) >= 0.3 THEN similarity(b.display_name, $2) ELSE 0 END,
+            CASE WHEN $5 AND similarity(b.full_name, $2) >= 0.3 THEN similarity(b.full_name, $2) ELSE 0 END,
+            CASE
+                WHEN lower(b.email) = lower($2) OR lower(b.display_name) = lower($2) OR lower(b.full_name) = lower($2) THEN 1.0
+                WHEN b.email ~* $4 OR b.display_name ~* $4 OR b.full_name ~* $4 THEN 0.8
+                WHEN b.email ~* $3 OR b.display_name ~* $3 OR b.full_name ~* $3 THEN 0.5
+                ELSE 0
+            END
+        ) AS rank
+    FROM base b
+    WHERE
+          b.search_vector @@ websearch_to_tsquery('english', $2)
+          OR b.email ~* $3
+          OR b.display_name ~* $3
+          OR b.first_name ~* $3
+          OR b.last_name ~* $3
+          OR ($5 AND (
+              similarity(b.email, $2) >= 0.3
+              OR similarity(b.display_name, $2) >= 0.3
+              OR similarity(b.full_name, $2) >= 0.3
+          ))
 )
 SELECT
     id,
@@ -75,8 +95,8 @@ SELECT
     COUNT(*) OVER () AS total
 FROM matched
 ORDER BY rank DESC, name ASC, email ASC
-LIMIT $4 OFFSET $5
-`, orgID, q, like, limit, offset)
+LIMIT $6 OFFSET $7
+`, orgID, q, m.match, m.word, m.fuzzy, limit, offset)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -123,7 +143,7 @@ func SearchCourses(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID, q s
 	if offset < 0 {
 		offset = 0
 	}
-	like := "%" + q + "%"
+	m := newMatchPatterns(q)
 
 	rows, err := pool.Query(ctx, `
 WITH matched AS (
@@ -133,17 +153,23 @@ WITH matched AS (
         c.title,
         GREATEST(
             ts_rank(c.search_vector, websearch_to_tsquery('english', $2)),
-            CASE WHEN similarity(c.title, $2) >= 0.3 THEN similarity(c.title, $2) ELSE 0 END,
-            CASE WHEN c.course_code ILIKE $3 OR c.title ILIKE $3 OR c.description ILIKE $3 THEN 0.35 ELSE 0 END
+            CASE WHEN $5 AND similarity(c.title, $2) >= 0.3 THEN similarity(c.title, $2) ELSE 0 END,
+            CASE
+                WHEN lower(c.course_code) = lower($2) OR lower(c.title) = lower($2) THEN 1.0
+                WHEN c.course_code ~* $4 OR c.title ~* $4 THEN 0.8
+                WHEN c.course_code ~* $3 OR c.title ~* $3 THEN 0.5
+                WHEN COALESCE(c.description, '') ~* $4 THEN 0.3
+                ELSE 0
+            END
         ) AS rank
     FROM course.courses c
     WHERE c.org_id = $1
       AND (
           c.search_vector @@ websearch_to_tsquery('english', $2)
-          OR c.course_code ILIKE $3
-          OR c.title ILIKE $3
-          OR c.description ILIKE $3
-          OR similarity(c.title, $2) >= 0.3
+          OR c.course_code ~* $3
+          OR c.title ~* $3
+          OR COALESCE(c.description, '') ~* $3
+          OR ($5 AND similarity(c.title, $2) >= 0.3)
       )
 )
 SELECT
@@ -159,9 +185,9 @@ SELECT
     ) AS snippet,
     COUNT(*) OVER () AS total
 FROM matched
-ORDER BY rank DESC, title ASC
-LIMIT $4 OFFSET $5
-`, orgID, q, like, limit, offset)
+ORDER BY rank DESC, title ASC, course_code ASC
+LIMIT $6 OFFSET $7
+`, orgID, q, m.match, m.word, m.fuzzy, limit, offset)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -204,7 +230,7 @@ func SearchContent(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID, q s
 	if offset < 0 {
 		offset = 0
 	}
-	like := "%" + q + "%"
+	m := newMatchPatterns(q)
 
 	rows, err := pool.Query(ctx, `
 WITH matched AS (
@@ -216,8 +242,13 @@ WITH matched AS (
         c.title AS course_title,
         GREATEST(
             ts_rank(csi.search_vector, websearch_to_tsquery('english', $2)),
-            CASE WHEN similarity(csi.title, $2) >= 0.3 THEN similarity(csi.title, $2) ELSE 0 END,
-            CASE WHEN csi.title ILIKE $3 THEN 0.35 ELSE 0 END
+            CASE WHEN $5 AND similarity(csi.title, $2) >= 0.3 THEN similarity(csi.title, $2) ELSE 0 END,
+            CASE
+                WHEN lower(csi.title) = lower($2) THEN 1.0
+                WHEN csi.title ~* $4 THEN 0.8
+                WHEN csi.title ~* $3 THEN 0.5
+                ELSE 0
+            END
         ) AS rank
     FROM course.course_structure_items csi
     INNER JOIN course.courses c ON c.id = csi.course_id
@@ -226,8 +257,8 @@ WITH matched AS (
       AND csi.kind NOT IN ('module', 'heading')
       AND (
           csi.search_vector @@ websearch_to_tsquery('english', $2)
-          OR csi.title ILIKE $3
-          OR similarity(csi.title, $2) >= 0.3
+          OR csi.title ~* $3
+          OR ($5 AND similarity(csi.title, $2) >= 0.3)
       )
 )
 SELECT
@@ -246,8 +277,8 @@ SELECT
     COUNT(*) OVER () AS total
 FROM matched
 ORDER BY rank DESC, title ASC
-LIMIT $4 OFFSET $5
-`, orgID, q, like, limit, offset)
+LIMIT $6 OFFSET $7
+`, orgID, q, m.match, m.word, m.fuzzy, limit, offset)
 	if err != nil {
 		return nil, 0, err
 	}

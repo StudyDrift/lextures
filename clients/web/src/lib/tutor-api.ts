@@ -1,4 +1,4 @@
-import { authorizedFetch } from './api'
+import { authorizedFetch, type AuthorizedFetchInit } from './api'
 import { messageFromApiErrorBody } from './errors'
 import { fetchAiProcessingOptOut } from './study-buddy-api'
 
@@ -84,8 +84,8 @@ export async function fetchAiTutorOptOut(): Promise<boolean> {
 const AI_TUTOR_OPT_OUT_PATH = '/api/v1/settings/ai-tutor-opt-out'
 
 /** Current AI tutor opt-out, or `null` when the setting could not be loaded. */
-export async function fetchAiTutorOptOutSetting(): Promise<boolean | null> {
-  const res = await authorizedFetch(AI_TUTOR_OPT_OUT_PATH)
+export async function fetchAiTutorOptOutSetting(init?: AuthorizedFetchInit): Promise<boolean | null> {
+  const res = await authorizedFetch(AI_TUTOR_OPT_OUT_PATH, init)
   if (!res.ok) return null
   const data = (await res.json()) as { aiTutorOptOut?: boolean }
   return Boolean(data.aiTutorOptOut)

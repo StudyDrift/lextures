@@ -4,6 +4,7 @@ import {
   BarChart3,
   BookMarked,
   BookOpen,
+  Building2,
   Bot,
   Calendar,
   CreditCard,
@@ -19,6 +20,7 @@ import {
   Route,
   RotateCcw,
   Settings,
+  Settings2,
   ShieldCheck,
   Sparkles,
   Store,
@@ -69,6 +71,7 @@ export function SideNavMainLinks() {
     ffParentPortal,
     ffMarketingContent,
     ffHomeschoolManagedLearners,
+    adminConsoleEnabled,
   } = usePlatformFeatures()
   const impersonating = useImpersonatingSession()
   const managedLearner = useManagedLearnerSession()
@@ -76,10 +79,11 @@ export function SideNavMainLinks() {
   const canViewReports = !permLoading && allows(PERM_REPORTS_VIEW)
   const canManageAccommodations = !permLoading && allows(PERM_ACCOMMODATIONS_MANAGE)
   const isParent = !permLoading && allows(PERM_PARENT_DASHBOARD)
+  const canManageRbac = !permLoading && allows(PERM_RBAC_MANAGE)
   const canAssignParents =
     !permLoading &&
     ffParentPortal &&
-    (allows(PERM_PARENT_LINKS_MANAGE) || allows(PERM_RBAC_MANAGE))
+    (allows(PERM_PARENT_LINKS_MANAGE) || canManageRbac)
   const canViewMarketingContent =
     !permLoading && ffMarketingContent && allows(PERM_MARKETING_CONTENT_VIEW)
 
@@ -255,9 +259,20 @@ export function SideNavMainLinks() {
         </>
       ) : null}
 
-      {(canViewReports || canManageAccommodations || canAssignParents || canViewMarketingContent) ? (
+      {(canManageRbac || canViewReports || canManageAccommodations || canAssignParents || canViewMarketingContent) ? (
         <>
           <SideNavSectionLabel>Administration</SideNavSectionLabel>
+          {/* #791: admins reach the console and system settings from the main nav, not only via Settings. */}
+          {canManageRbac && adminConsoleEnabled ? (
+            <SideNavLink to="/org-admin" icon={<Building2 className="h-5 w-5" />}>
+              Admin console
+            </SideNavLink>
+          ) : null}
+          {canManageRbac ? (
+            <SideNavLink to="/settings/platform" icon={<Settings2 className="h-5 w-5" />}>
+              System settings
+            </SideNavLink>
+          ) : null}
           {canAssignParents ? (
             <SideNavLink to="/assign-parents" icon={<UserPlus className="h-5 w-5" />}>
               Assign parents

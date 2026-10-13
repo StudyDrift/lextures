@@ -1,10 +1,11 @@
 import { type FormEvent, useCallback, useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Callout } from '../ui/callout'
 import { Button } from '../ui/button'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { authorizedFetch } from '../../lib/api'
 import { readApiErrorMessage } from '../../lib/errors'
-import { ltiNotEnabledMessage } from '../../lib/lti-runtime'
+import { ltiNotEnabledAdminMessage } from '../../lib/lti-runtime'
 import { useConfirm } from '../use-confirm'
 
 type ParentPlatform = {
@@ -171,7 +172,10 @@ export function LtiToolsSettingsPanel() {
       </p>
       {ltiRuntimeEnabled === false ? (
         <Callout tone="warning" className="mt-4">
-          {ltiNotEnabledMessage}
+          {ltiNotEnabledAdminMessage}{' '}
+          <Link to="/settings/platform" className="font-medium underline">
+            Open Global platform
+          </Link>
         </Callout>
       ) : null}
 
@@ -204,8 +208,8 @@ export function LtiToolsSettingsPanel() {
               )}
             </ul>
             <p className="mt-3 text-xs text-fg-muted">
-              Create parent registrations via the API or a future form; fields match the IMS LTI platform
-              configuration (issuer, JWKS, OAuth URLs, redirect URIs).
+              A parent LMS (such as Canvas or Schoology) launches Lextures as a tool. Connecting one needs that
+              LMS&apos;s issuer, key set (JWKS) URL, sign-in and token URLs, and redirect URIs.
             </p>
           </section>
 

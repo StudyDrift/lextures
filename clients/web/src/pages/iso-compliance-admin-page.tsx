@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { authorizedFetch } from '../lib/api'
+import { usePlatformFeatures } from '../context/platform-features-context'
+import { ModuleOffState } from '../components/admin/module-off-state'
 
 const API = '/api/v1/compliance/iso'
 
@@ -37,6 +39,8 @@ interface Risk {
 }
 
 export default function IsoComplianceAdminPage() {
+  const { isoIsmsEnabled, loading: featuresLoading } = usePlatformFeatures()
+  const [moduleOff, setModuleOff] = useState(false)
   const [dashboard, setDashboard] = useState<Dashboard | null>(null)
   const [findings, setFindings] = useState<AuditFinding[]>([])
   const [risks, setRisks] = useState<Risk[]>([])
@@ -54,7 +58,7 @@ export default function IsoComplianceAdminPage() {
         authorizedFetch(`${API}/risk-register`),
       ])
       if (dashRes.status === 404) {
-        setError('ISO ISMS module is not enabled on this environment.')
+        setModuleOff(true)
         return
       }
       if (dashRes.status === 403) {
@@ -84,8 +88,19 @@ export default function IsoComplianceAdminPage() {
 
   useEffect(() => {
     document.title = 'ISO ISMS — Lextures'
+  }, [])
+
+  useEffect(() => {
+    if (featuresLoading) return
+    // #791: don't call the API (and log 404s) when the module is off.
+    if (!isoIsmsEnabled) {
+      setModuleOff(true)
+      setLoading(false)
+      return
+    }
+    setModuleOff(false)
     void load()
-  }, [load])
+  }, [featuresLoading, isoIsmsEnabled, load])
 
   async function addFinding(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -131,10 +146,19 @@ export default function IsoComplianceAdminPage() {
     }
   }
 
-  if (loading) {
+  if (featuresLoading || loading) {
     return (
       <div className="p-6 max-w-5xl mx-auto">
         <p className="text-fg-muted">Loading ISO ISMS dashboard…</p>
+      </div>
+    )
+  }
+
+  if (moduleOff) {
+    return (
+      <div className="p-6 max-w-5xl mx-auto">
+        <h1 className="mb-6 text-2xl font-semibold text-fg-default">ISO 27001 / 27701</h1>
+        <ModuleOffState moduleName="ISO compliance" />
       </div>
     )
   }

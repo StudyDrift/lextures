@@ -77,6 +77,9 @@ export function SideNavAdminLinks() {
     ffTranscripts,
     ffDiplomas,
     ffMarketingContent,
+    backupModuleEnabled,
+    isoIsmsEnabled,
+    securityDisclosureModuleEnabled,
   } = usePlatformFeatures()
 
   const showMarketingContent = ffMarketingContent && !permLoading && allows(PERM_MARKETING_CONTENT_VIEW)
@@ -89,6 +92,9 @@ export function SideNavAdminLinks() {
     location.pathname === path || location.pathname.startsWith(`${path}/`)
 
   const showCcrAdmin = canManageAccommodations && ffCoCurricularTranscript
+  // #791: modules that are off on this environment have no nav entry (no dead-end pages).
+  const showCompliance =
+    backupModuleEnabled || captionsEnabled || avScanningEnabled || isoIsmsEnabled || securityDisclosureModuleEnabled
   const showIntegrations = ffSisIntegration || ffWebhooks || ffContentFilterIntegration || emailTemplateEditorEnabled
   const showStudentRecords =
     ffDemographics ||
@@ -141,14 +147,16 @@ export function SideNavAdminLinks() {
       ) : null}
       {canManageRbac ? (
         <>
-          <SideNavSectionLabel first>Compliance & security</SideNavSectionLabel>
-          <SideNavLink
-            to="/admin/compliance/backup"
-            className={() => (active('/admin/compliance/backup') ? sideNavActiveClass : '')}
-            icon={<Archive className="h-5 w-5" />}
-          >
-            Backup operations
-          </SideNavLink>
+          {showCompliance ? <SideNavSectionLabel first>Compliance & security</SideNavSectionLabel> : null}
+          {backupModuleEnabled ? (
+            <SideNavLink
+              to="/admin/compliance/backup"
+              className={() => (active('/admin/compliance/backup') ? sideNavActiveClass : '')}
+              icon={<Archive className="h-5 w-5" />}
+            >
+              Backup operations
+            </SideNavLink>
+          ) : null}
           {captionsEnabled ? (
             <SideNavLink
               to="/admin/caption-compliance"
@@ -167,24 +175,28 @@ export function SideNavAdminLinks() {
               File quarantine
             </SideNavLink>
           ) : null}
-          <SideNavLink
-            to="/admin/compliance/iso"
-            className={() => (active('/admin/compliance/iso') ? sideNavActiveClass : '')}
-            icon={<ShieldCheck className="h-5 w-5" />}
-          >
-            ISO compliance
-          </SideNavLink>
-          <SideNavLink
-            to="/admin/compliance/security-reports"
-            className={() =>
-              active('/admin/compliance/security-reports') ? sideNavActiveClass : ''
-            }
-            icon={<ShieldAlert className="h-5 w-5" />}
-          >
-            Security reports
-          </SideNavLink>
+          {isoIsmsEnabled ? (
+            <SideNavLink
+              to="/admin/compliance/iso"
+              className={() => (active('/admin/compliance/iso') ? sideNavActiveClass : '')}
+              icon={<ShieldCheck className="h-5 w-5" />}
+            >
+              ISO compliance
+            </SideNavLink>
+          ) : null}
+          {securityDisclosureModuleEnabled ? (
+            <SideNavLink
+              to="/admin/compliance/security-reports"
+              className={() =>
+                active('/admin/compliance/security-reports') ? sideNavActiveClass : ''
+              }
+              icon={<ShieldAlert className="h-5 w-5" />}
+            >
+              Security reports
+            </SideNavLink>
+          ) : null}
 
-          <SideNavSectionLabel>Platform</SideNavSectionLabel>
+          <SideNavSectionLabel first={!showCompliance}>Platform</SideNavSectionLabel>
           {maintenanceBannerEnabled ? (
             <SideNavLink
               to={orgPath('/admin/banners', orgId)}

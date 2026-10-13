@@ -284,7 +284,7 @@ function sourceBadge(src: FieldSource) {
   if (src === 'database') {
     return (
       <span className="ms-2 rounded-md bg-indigo-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-indigo-800 dark:bg-indigo-950/80 dark:text-indigo-200">
-        Database
+        Saved here
       </span>
     )
   }
@@ -297,7 +297,7 @@ function sourceBadge(src: FieldSource) {
   }
   return (
     <span className="ms-2 rounded-md bg-surface-sunken px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-fg-muted dark:bg-neutral-700 dark:text-fg-muted">
-      Environment
+      Hosting config
     </span>
   )
 }
@@ -556,9 +556,8 @@ export function PlatformSettingsPanel() {
   return (
     <div>
       <p className="mt-1 text-sm text-fg-muted">
-        Values stored here override the server process environment when set. Requires{' '}
-        <code className="rounded bg-surface-sunken px-1 font-mono text-xs dark:bg-surface-overlay">global:app:rbac:manage</code>.
-        Secrets are never returned in plain text after save.
+        Settings saved here apply to the whole site and take priority over your hosting defaults. Only global
+        administrators can change them. Passwords and keys are hidden after you save them.
       </p>
 
       {error && (
@@ -571,16 +570,9 @@ export function PlatformSettingsPanel() {
         <section>
           <h3 className="text-sm font-semibold text-fg-default">Outgoing email</h3>
           <p className="mt-1 text-xs text-fg-muted">
-            Transactional email uses a pluggable provider. SMTP is the default; Amazon SES can be selected when the SES
-            feature flag is enabled. Additional providers can be added on the API without changing notification call
-            sites. SMTP passwords are encrypted with{' '}
-            <code className="rounded bg-surface-sunken px-1 font-mono dark:bg-surface-raised">PLATFORM_SECRETS_KEY</code>. Process{' '}
-            <code className="rounded bg-surface-sunken px-1 font-mono dark:bg-surface-raised">SMTP_*</code> /{' '}
-            <code className="rounded bg-surface-sunken px-1 font-mono dark:bg-surface-raised">SES_*</code> /{' '}
-            <code className="rounded bg-surface-sunken px-1 font-mono dark:bg-surface-raised">EMAIL_PROVIDER</code> env vars apply
-            when a field is not set here. SES credentials use the default AWS chain (IAM role or{' '}
-            <code className="rounded bg-surface-sunken px-1 font-mono dark:bg-surface-raised">SES_ACCESS_KEY_ID</code>) and are not
-            stored in the database.
+            Choose how the site sends account and notification email. SMTP works with most email services; Amazon
+            SES is available once it&apos;s turned on below. Fields you leave blank use your hosting defaults. Passwords
+            are stored encrypted, and SES sign-in is handled by your hosting setup rather than saved here.
           </p>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
@@ -594,7 +586,7 @@ export function PlatformSettingsPanel() {
               >
                 <option value="smtp">SMTP</option>
                 <option value="ses" disabled={!form.ffEmailSes}>
-                  Amazon SES{!form.ffEmailSes ? ' (enable feature flag first)' : ''}
+                  Amazon SES{!form.ffEmailSes ? ' (turn on Amazon SES under Platform features first)' : ''}
                 </option>
               </select>
             </div>
@@ -781,7 +773,7 @@ export function PlatformSettingsPanel() {
         <section className="rounded-2xl border border-border-default bg-surface-raised p-5 shadow-sm shadow-slate-900/5 dark:border-border-subtle dark:bg-surface-base">
           <h3 className="text-sm font-semibold text-fg-default">Platform features</h3>
           <p className="mt-1 text-sm text-fg-muted">
-            Turn platform-wide capabilities on or off. Changes save immediately. Database values override environment
+            Turn platform-wide capabilities on or off. Changes save immediately and take priority over your hosting
             defaults.
           </p>
 
@@ -820,7 +812,7 @@ export function PlatformSettingsPanel() {
                           disabled={featureSaving || environmentOwned}
                           disabledReason={
                             environmentOwned
-                              ? 'Managed by server environment configuration and cannot be changed here.'
+                              ? 'Set by your hosting environment configuration, so it can’t be changed here.'
                               : undefined
                           }
                           meta={sourceBadge(source)}

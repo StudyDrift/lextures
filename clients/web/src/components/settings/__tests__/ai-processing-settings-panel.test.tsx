@@ -80,4 +80,28 @@ describe('AiProcessingSettingsPanel', () => {
     expect(await screen.findByRole('checkbox', { name: /Opt out of AI processing/i })).toBeChecked()
     expect(screen.queryByRole('checkbox', { name: /Turn off the AI tutor/i })).toBeNull()
   })
+
+  it('shows Try again instead of a stuck loading state when the settings read fails (#791)', async () => {
+    let fail = true
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+      const url = String(input)
+      if (url.endsWith('/ai-opt-out')) {
+        if (fail) throw new Error('timed out')
+        return json({ aiProcessingOptOut: true })
+      }
+      return json({ error: 'not found' }, 404)
+    })
+
+    render(
+      <MemoryRouter>
+        <AiProcessingSettingsPanel embedded />
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByText(/Couldn.t load your AI settings/i)).toBeInTheDocument()
+    expect(screen.queryByText('Loading AI settings…')).toBeNull()
+    fail = false
+    await userEvent.click(screen.getByRole('button', { name: 'Try again' }))
+    expect(await screen.findByRole('checkbox', { name: /Opt out of AI processing/i })).toBeChecked()
+  })
 })

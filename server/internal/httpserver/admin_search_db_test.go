@@ -15,6 +15,7 @@ import (
 	"github.com/lextures/lextures/server/internal/config"
 	"github.com/lextures/lextures/server/internal/db"
 	"github.com/lextures/lextures/server/internal/migrate"
+	adminsearchrepo "github.com/lextures/lextures/server/internal/repos/adminsearch"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/organization"
 	"github.com/lextures/lextures/server/internal/repos/orgroles"
@@ -131,5 +132,109 @@ UPDATE "user".users SET org_id = $1, first_name = 'Bob', last_name = $3 WHERE id
 	}
 	if !strings.Contains(rr2.Body.String(), courseTitle) && !strings.Contains(rr2.Body.String(), "Biology") {
 		t.Fatalf("expected Biology course via fuzzy match: %s", rr2.Body.String())
+	}
+}
+
+// TestAdminSearch_WholeWordMatching_Pg covers #791: "QA" must not match inside or at the
+// start of another word ("Qamets"), and whole-word course hits must make the 5-item preview.
+func TestAdminSearch_WholeWordMatching_Pg(t *testing.T) {
+	if os.Getenv("DATABASE_URL") == "" {
+		t.Skip("DATABASE_URL")
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
+	defer cancel()
+	dsn := os.Getenv("DATABASE_URL")
+	if err := migrate.RunWithFS(ctx, serverdata.Migrations, dsn); err != nil {
+		t.Fatalf("migrate: %v", err)
+	}
+	pool, err := db.NewPool(ctx, dsn)
+	if err != nil {
+		t.Fatalf("pool: %v", err)
+	}
+	defer pool.Close()
+
+	ts := time.Now().Format("20060102150405.000000")
+	slug := "ww-" + strings.ReplaceAll(ts, ".", "")
+	org, err := organization.Create(ctx, pool, "Word Match Org "+ts, slug, nil, nil, "us-east", nil)
+	if err != nil {
+		t.Fatalf("create org: %v", err)
+	}
+	ph, err := auth.HashPassword("longpassword0")
+	if err != nil {
+		t.Fatalf("hash: %v", err)
+	}
+	addUser := func(local, display string) uuid.UUID {
+		t.Helper()
+		row, err := user.InsertUser(ctx, pool, local+"-"+slug+"@e.com", ph, &display)
+		if err != nil {
+			t.Fatalf("user %s: %v", display, err)
+		}
+		id := uuid.MustParse(row.ID)
+		if _, err := pool.Exec(ctx, `UPDATE "user".users SET org_id = $1 WHERE id = $2`, org.ID, id); err != nil {
+			t.Fatalf("move user: %v", err)
+		}
+		return id
+	}
+	creator := addUser("creator", "Course Creator")
+	addUser("telling", "Telling Qamets")
+	addUser("lead", "QA Lead")
+
+	addCourse := func(title, description string) string {
+		t.Helper()
+		c, err := course.CreateCourse(ctx, pool, creator, title, description, "", nil, nil, nil)
+		if err != nil {
+			t.Fatalf("course %s: %v", title, err)
+		}
+		if _, err := pool.Exec(ctx, `UPDATE course.courses SET org_id = $1 WHERE id = $2`, org.ID, uuid.MustParse(c.ID)); err != nil {
+			t.Fatalf("move course: %v", err)
+		}
+		return c.CourseCode
+	}
+	// Five courses that only match "qa" as a word prefix sort ahead alphabetically...
+	for _, title := range []string{"Aqaba History", "Qadi Law", "Qanat Systems", "Qatar Studies", "Qawwali Music"} {
+		addCourse(title, "")
+	}
+	// ...but the whole-word match must still make the 5-item preview.
+	qaCode := addCourse("Software QA", "")
+
+	users, _, err := adminsearchrepo.SearchUsers(ctx, pool, org.ID, "QA", 5, 0)
+	if err != nil {
+		t.Fatalf("search users: %v", err)
+	}
+	var names []string
+	for _, u := range users {
+		names = append(names, u.Title)
+	}
+	if len(names) != 1 || names[0] != "QA Lead" {
+		t.Fatalf("users for QA = %v, want only [QA Lead]", names)
+	}
+
+	courses, _, err := adminsearchrepo.SearchCourses(ctx, pool, org.ID, "QA", 5, 0)
+	if err != nil {
+		t.Fatalf("search courses: %v", err)
+	}
+	if len(courses) != 1 || courses[0].Subtitle != qaCode {
+		var got []string
+		for _, c := range courses {
+			got = append(got, c.Title+" ("+c.Subtitle+")")
+		}
+		t.Fatalf("courses for QA = %v, want only Software QA (%s)", got, qaCode)
+	}
+
+	// Longer queries still match word prefixes, ranked below whole words.
+	prefix, _, err := adminsearchrepo.SearchCourses(ctx, pool, org.ID, "Qat", 5, 0)
+	if err != nil {
+		t.Fatalf("search courses prefix: %v", err)
+	}
+	if len(prefix) == 0 || prefix[0].Title != "Qatar Studies" {
+		t.Fatalf("expected Qatar Studies first for prefix query, got %+v", prefix)
+	}
+	// Course codes are found by their code.
+	byCode, _, err := adminsearchrepo.SearchCourses(ctx, pool, org.ID, qaCode, 5, 0)
+	if err != nil {
+		t.Fatalf("search by code: %v", err)
+	}
+	if len(byCode) == 0 || byCode[0].Subtitle != qaCode {
+		t.Fatalf("expected %s first when searching its code, got %+v", qaCode, byCode)
 	}
 }

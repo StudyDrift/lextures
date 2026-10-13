@@ -5,7 +5,11 @@ import { readApiErrorMessage } from '../../lib/errors'
 import { AI_SETTINGS_ANCHOR_ID, aiDisclosureI18n } from '../../lib/ai-disclosure-i18n'
 import { fetchAiTutorOptOutSetting, putAiTutorOptOut } from '../../lib/tutor-api'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
+import { Button } from '../ui/button'
 import { Checkbox } from '../ui/checkbox'
+
+/** Reads on the account page fail fast instead of waiting out the 30s default (#791). */
+const SETTINGS_READ_TIMEOUT_MS = 10_000
 
 type Props = {
   embedded?: boolean
@@ -16,37 +20,45 @@ export function AiProcessingSettingsPanel({ embedded = false }: Props) {
   // null = the AI tutor opt-out setting could not be loaded, so its toggle is hidden.
   const [tutorOptOut, setTutorOptOut] = useState<boolean | null>(null)
   const [loading, setLoading] = useState(true)
+  const [loadFailed, setLoadFailed] = useState(false)
+  const [loadAttempt, setLoadAttempt] = useState(0)
   const [saving, setSaving] = useState(false)
   const location = useLocation()
   const sectionRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
     let cancelled = false
+    setLoading(true)
+    setLoadFailed(false)
     void (async () => {
-      try {
-        const res = await authorizedFetch('/api/v1/settings/ai-opt-out')
+      // #791: load both settings in parallel with a short timeout so the panel never sits on
+      // "Loading AI settings…" — a slow or failed read shows Retry instead.
+      const [optRes, tutorRes] = await Promise.allSettled([
+        authorizedFetch('/api/v1/settings/ai-opt-out', { timeoutMs: SETTINGS_READ_TIMEOUT_MS }),
+        fetchAiTutorOptOutSetting({ timeoutMs: SETTINGS_READ_TIMEOUT_MS }),
+      ])
+      let failed = false
+      if (optRes.status === 'fulfilled') {
+        const res = optRes.value
         if (res.ok) {
-          const data = (await res.json()) as { aiProcessingOptOut?: boolean }
+          const data = (await res.json().catch(() => ({}))) as { aiProcessingOptOut?: boolean }
           if (!cancelled) setOptOut(Boolean(data.aiProcessingOptOut))
         } else if (res.status !== 404) {
-          throw new Error(await readApiErrorMessage(res))
+          // 404 = AI disclosure module off; anything else means we don't know the saved value.
+          failed = true
         }
-      } catch {
-        /* module may be off */
+      } else {
+        failed = true
       }
-      try {
-        const tutor = await fetchAiTutorOptOutSetting()
-        if (!cancelled) setTutorOptOut(tutor)
-      } catch {
-        /* tutor opt-out setting may be unavailable */
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
+      if (cancelled) return
+      setTutorOptOut(tutorRes.status === 'fulfilled' ? tutorRes.value : null)
+      setLoadFailed(failed)
+      setLoading(false)
     })()
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [loadAttempt])
 
   const save = useCallback(async () => {
     setSaving(true)
@@ -78,6 +90,17 @@ export function AiProcessingSettingsPanel({ embedded = false }: Props) {
 
   if (loading) {
     return <p className="text-sm text-fg-muted">Loading AI settings…</p>
+  }
+
+  if (loadFailed) {
+    return (
+      <div role="alert" className="text-sm text-danger-fg">
+        <p>Couldn&apos;t load your AI settings.</p>
+        <Button type="button" variant="secondary" size="sm" className="mt-2" onClick={() => setLoadAttempt((n) => n + 1)}>
+          Try again
+        </Button>
+      </div>
+    )
   }
 
   return (

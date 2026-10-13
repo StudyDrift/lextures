@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { clearImpersonationToken, setImpersonationToken } from '../../../lib/auth'
-import { PERM_MARKETING_CONTENT_VIEW, PERM_REPORTS_VIEW } from '../../../lib/rbac-api'
+import { PERM_MARKETING_CONTENT_VIEW, PERM_RBAC_MANAGE, PERM_REPORTS_VIEW } from '../../../lib/rbac-api'
 import { ShellNavProvider } from '../shell-nav-context'
 import { SideNavMainLinks } from '../side-nav-main-links'
 
@@ -261,5 +261,51 @@ describe('SideNavMainLinks', () => {
     expect(screen.getByRole('link', { name: /^settings$/i })).toHaveAttribute('href', '/settings')
     expect(screen.queryByRole('link', { name: /^learners$/i })).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: /^billing$/i })).not.toBeInTheDocument()
+  })
+
+  it('gives admins the admin console and system settings in the Administration section (#791)', () => {
+    allowsMock.mockImplementation((p: string) => p === PERM_RBAC_MANAGE)
+    platformFeaturesMock.mockReturnValue({
+      accommodationsEngineEnabled: false,
+      ffEportfolio: false,
+      ragNotebookEnabled: true,
+      ffCourseMarketplace: false,
+      ffMarketingContent: false,
+      adminConsoleEnabled: true,
+    })
+
+    render(
+      <MemoryRouter>
+        <ShellNavProvider>
+          <SideNavMainLinks />
+        </ShellNavProvider>
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByText('Administration')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /^admin console$/i })).toHaveAttribute('href', '/org-admin')
+    expect(screen.getByRole('link', { name: /^system settings$/i })).toHaveAttribute('href', '/settings/platform')
+  })
+
+  it('does not show admin console links to non-admins', () => {
+    platformFeaturesMock.mockReturnValue({
+      accommodationsEngineEnabled: false,
+      ffEportfolio: false,
+      ragNotebookEnabled: true,
+      ffCourseMarketplace: false,
+      ffMarketingContent: false,
+      adminConsoleEnabled: true,
+    })
+
+    render(
+      <MemoryRouter>
+        <ShellNavProvider>
+          <SideNavMainLinks />
+        </ShellNavProvider>
+      </MemoryRouter>,
+    )
+
+    expect(screen.queryByRole('link', { name: /^admin console$/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /^system settings$/i })).not.toBeInTheDocument()
   })
 })

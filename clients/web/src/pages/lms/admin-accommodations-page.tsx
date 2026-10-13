@@ -499,7 +499,7 @@ export default function AdminAccommodationsPage() {
                   onChange={(e) => setSeparateSetting(e.target.checked)}
                 />
                 <span id={`${formId}-separate-label`}>
-                  Separate testing environment (informational flag)
+                  Needs a separate testing location (for your records; doesn&apos;t change quiz settings)
                 </span>
               </label>
             </div>

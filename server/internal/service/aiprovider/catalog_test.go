@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"sync/atomic"
 	"testing"
 )
 
@@ -129,6 +130,38 @@ func TestListCatalog_OpenRouter(t *testing.T) {
 	}
 	if len(models) != 2 {
 		t.Fatalf("got %d models", len(models))
+	}
+}
+
+func TestListCatalog_OpenRouterCachedUntilRefresh(t *testing.T) {
+	ClearCatalogCache()
+	t.Cleanup(ClearCatalogCache)
+	var hits atomic.Int32
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		hits.Add(1)
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"data": []map[string]any{{"id": "a/text", "name": "A"}},
+		})
+	}))
+	defer srv.Close()
+
+	for i := 0; i < 2; i++ {
+		models, err := ListCatalog(context.Background(), ProviderOpenRouter, CatalogKindText, CatalogOptions{BaseURL: srv.URL})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(models) != 1 {
+			t.Fatalf("got %d models", len(models))
+		}
+	}
+	if got := hits.Load(); got != 1 {
+		t.Fatalf("expected 1 upstream fetch with cache, got %d", got)
+	}
+	if _, err := ListCatalog(context.Background(), ProviderOpenRouter, CatalogKindText, CatalogOptions{BaseURL: srv.URL, SkipCache: true}); err != nil {
+		t.Fatal(err)
+	}
+	if got := hits.Load(); got != 2 {
+		t.Fatalf("expected SkipCache to refetch, got %d fetches", got)
 	}
 }
 

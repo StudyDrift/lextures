@@ -166,6 +166,10 @@ type platformFeaturesJSON struct {
 	MaintenanceBannerEnabled   bool `json:"maintenanceBannerEnabled"`
 	CustomFieldsEnabled        bool `json:"customFieldsEnabled"`
 	SeatManagementEnabled      bool `json:"seatManagementEnabled"`
+	// Compliance modules (#791): admin nav hides links and pages skip API calls when off.
+	IsoIsmsEnabled                  bool `json:"isoIsmsEnabled"`
+	SecurityDisclosureModuleEnabled bool `json:"securityDisclosureModuleEnabled"`
+	BackupModuleEnabled             bool `json:"backupModuleEnabled"`
 	// OpenRouterConfigured is deprecated (AP.9); alias of AIConfigured for one minor release. Prefer aiConfigured.
 	OpenRouterConfigured         bool     `json:"openRouterConfigured"` // Deprecated: use aiConfigured
 	AIConfigured                 bool     `json:"aiConfigured"`
@@ -338,25 +342,28 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFCalendarFeeds:             cfg.FFCalendarFeeds,
 		FFMarketingContent:          cfg.FFMarketingContent,
 
-		LRSAnonymizeActors:           cfg.LRSAnonymizeActors,
-		FERPAWorkflowEnabled:         cfg.FERPAWorkflowEnabled,
-		GDPRModuleEnabled:            cfg.GDPRModuleEnabled,
-		DPAPortalEnabled:             cfg.DPAPortalEnabled,
-		SOC2ModuleEnabled:            cfg.SOC2ModuleEnabled,
-		DiagnosticAssessmentsEnabled: cfg.DiagnosticAssessmentsEnabled,
-		SRSPracticeEnabled:           cfg.SRSPracticeEnabled,
-		IRTCatModeEnabled:            cfg.IRTCatModeEnabled,
-		AdaptiveLearnerModelEnabled:  cfg.AdaptiveLearnerModelEnabled,
-		LearnerModelEMAAlpha:         cfg.LearnerModelEMAAlpha,
-		AdminConsoleEnabled:          cfg.AdminConsoleEnabled,
-		AdminAuditLogEnabled:         cfg.AdminAuditLogEnabled,
-		ImpersonationEnabled:         cfg.ImpersonationEnabled,
-		BulkCsvImportEnabled:         cfg.BulkCsvImportEnabled,
-		AdminSearchEnabled:           cfg.AdminSearchEnabled,
-		EmailTemplateEditorEnabled:   cfg.EmailTemplateEditorEnabled,
-		MaintenanceBannerEnabled:     cfg.MaintenanceBannerEnabled,
-		CustomFieldsEnabled:          cfg.CustomFieldsEnabled,
-		SeatManagementEnabled:        cfg.SeatManagementEnabled,
+		LRSAnonymizeActors:              cfg.LRSAnonymizeActors,
+		FERPAWorkflowEnabled:            cfg.FERPAWorkflowEnabled,
+		GDPRModuleEnabled:               cfg.GDPRModuleEnabled,
+		DPAPortalEnabled:                cfg.DPAPortalEnabled,
+		SOC2ModuleEnabled:               cfg.SOC2ModuleEnabled,
+		DiagnosticAssessmentsEnabled:    cfg.DiagnosticAssessmentsEnabled,
+		SRSPracticeEnabled:              cfg.SRSPracticeEnabled,
+		IRTCatModeEnabled:               cfg.IRTCatModeEnabled,
+		AdaptiveLearnerModelEnabled:     cfg.AdaptiveLearnerModelEnabled,
+		LearnerModelEMAAlpha:            cfg.LearnerModelEMAAlpha,
+		AdminConsoleEnabled:             cfg.AdminConsoleEnabled,
+		AdminAuditLogEnabled:            cfg.AdminAuditLogEnabled,
+		ImpersonationEnabled:            cfg.ImpersonationEnabled,
+		BulkCsvImportEnabled:            cfg.BulkCsvImportEnabled,
+		AdminSearchEnabled:              cfg.AdminSearchEnabled,
+		EmailTemplateEditorEnabled:      cfg.EmailTemplateEditorEnabled,
+		MaintenanceBannerEnabled:        cfg.MaintenanceBannerEnabled,
+		CustomFieldsEnabled:             cfg.CustomFieldsEnabled,
+		SeatManagementEnabled:           cfg.SeatManagementEnabled,
+		IsoIsmsEnabled:                  cfg.IsoIsmsEnabled,
+		SecurityDisclosureModuleEnabled: cfg.SecurityDisclosureModuleEnabled,
+		BackupModuleEnabled:             cfg.BackupModuleEnabled,
 		// MB.1: in-app browser always on; policy still overridable via mobileLinkHandling.
 		FFMobileInAppBrowser: true,
 		MobileLinkHandling:   "in_app",
