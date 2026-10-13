@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Lock, MessageCircle, Pin, Plus, ThumbsUp, Trash2 } from 'lucide-react'
 import { DiscussionAuthorByline } from '../../components/discussions/discussion-author-byline'
 import { discussionAuthorLabel } from '../../components/discussions/discussion-author-label'
@@ -60,6 +60,8 @@ export default function CourseDiscussionsPage() {
   const { prompt, InputDialogHost } = usePrompt()
   const { courseCode: rawCode } = useParams<{ courseCode: string }>()
   const courseCode = rawCode ? decodeURIComponent(rawCode) : ''
+  const [searchParams] = useSearchParams()
+  const requestedThread = searchParams.get('thread')
   const { allows, loading: permLoading } = usePermissions()
   const viewerId = getJwtSubject()
   const canModerate = !permLoading && !!courseCode && allows(courseItemCreatePermission(courseCode))
@@ -166,6 +168,11 @@ export default function CourseDiscussionsPage() {
     },
     [courseCode],
   )
+
+  useEffect(() => {
+    if (!requestedThread || !courseCode || course?.discussionsEnabled !== true) return
+    void loadThread(requestedThread)
+  }, [requestedThread, courseCode, course?.discussionsEnabled, loadThread])
 
   const opening = useMemo(
     () =>

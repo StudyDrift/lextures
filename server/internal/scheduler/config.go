@@ -36,6 +36,7 @@ const (
 	JobTypeMarketingContentLinkHealth         = "scheduled.marketing_content_link_health"
 	JobTypeMarketingContentRevisionPrune      = "scheduled.marketing_content_revision_prune"
 	JobTypeMarketingContentSearchGapsReport   = "scheduled.marketing_content_search_gaps_report"
+	JobTypeParentWeeklyProgress               = "scheduled.parent_weekly_progress"
 )
 
 // ScheduledJob is one configuration-driven entry in the schedule list. New
@@ -255,6 +256,7 @@ func BuiltinJobs() []ScheduledJob {
 		{Name: "marketing_content_link_health", Spec: "0 5 * * 1", JobType: JobTypeMarketingContentLinkHealth, Description: "Check external links in published marketing content.", DefaultEnabled: true},
 		{Name: "marketing_content_search_gaps_report", Spec: "0 6 * * 1", JobType: JobTypeMarketingContentSearchGapsReport, Description: "Log the weekly zero-result help/docs search queries for content planning.", DefaultEnabled: true},
 		{Name: "marketing_content_revision_prune", Spec: "30 3 * * 0", JobType: JobTypeMarketingContentRevisionPrune, Description: "Prune old unpublished marketing content revisions.", DefaultEnabled: true},
+		{Name: "parent_weekly_progress", Spec: "15 * * * *", JobType: JobTypeParentWeeklyProgress, Description: "Email parents a weekly progress summary on the configured local day.", DefaultEnabled: true},
 	}
 	for i := range jobs {
 		jobs[i].schedule = MustParse(jobs[i].Spec)

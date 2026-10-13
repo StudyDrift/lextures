@@ -44,14 +44,14 @@ func NotifyGradesPostedAfterRelease(ctx context.Context, pool *pgxpool.Pool, cfg
 	if err != nil || code == nil {
 		return
 	}
-	var courseTitle, assignmentTitle string
+	var courseTitle, assignmentTitle, itemKind string
 	var orgID uuid.UUID
 	if err := pool.QueryRow(ctx, `
-SELECT c.title, COALESCE(csi.title, 'Assignment'), c.org_id
+SELECT c.title, COALESCE(csi.title, 'Assignment'), c.org_id, COALESCE(csi.kind, '')
 FROM course.courses c
 JOIN course.course_structure_items csi ON csi.course_id = c.id AND csi.id = $2
 WHERE c.id = $1
-`, courseID, moduleItemID).Scan(&courseTitle, &assignmentTitle, &orgID); err != nil {
+`, courseID, moduleItemID).Scan(&courseTitle, &assignmentTitle, &orgID, &itemKind); err != nil {
 		return
 	}
 	orgPtr := &orgID
@@ -62,6 +62,7 @@ WHERE c.id = $1
 	title, body, actionURL := GradePostedInAppContent(courseTitle, assignmentTitle, *code)
 	for _, cell := range cells {
 		notifyGradePostedInApp(ctx, pool, push, cell.StudentUserID, title, body, actionURL)
+		notifyLatestPostedComment(ctx, pool, cfg, hub, smsQueue, courseID, moduleItemID, cell.StudentUserID, courseTitle, assignmentTitle, *code, itemKind)
 		if cfg.EmailNotificationsEnabled && studentCanReceiveEmail(ctx, pool, cell.StudentUserID) {
 			ns.NotifyGradePosted(ctx, cell.StudentUserID, courseTitle, assignmentTitle, *code, orgPtr)
 		}

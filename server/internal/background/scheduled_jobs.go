@@ -23,6 +23,7 @@ import (
 	marketingcontentservice "github.com/lextures/lextures/server/internal/service/marketingcontent"
 	marketingeditorialservice "github.com/lextures/lextures/server/internal/service/marketingeditorial"
 	marketingpublishservice "github.com/lextures/lextures/server/internal/service/marketingpublish"
+	"github.com/lextures/lextures/server/internal/service/parentprogress"
 )
 
 // dueReminderWindow is how far ahead the due_date_reminder job looks for
@@ -215,6 +216,16 @@ func registerScheduledJobs(r *Registry, pool *pgxpool.Pool, cfgSrc ConfigSource)
 			return err
 		}
 		slog.Info("help_zero_result_queries_total", "count", len(gaps))
+		return nil
+	}))
+	r.Register(scheduler.JobTypeParentWeeklyProgress, HandlerFunc(func(ctx context.Context, _ json.RawMessage) error {
+		n, err := parentprogress.Run(ctx, pool, cfgSrc.Config(), time.Now().UTC())
+		if err != nil {
+			return err
+		}
+		if n > 0 {
+			slog.Info("parent_weekly_progress.sent", "count", n)
+		}
 		return nil
 	}))
 }

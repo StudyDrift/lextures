@@ -40,6 +40,10 @@ func RenderTemplate(name string, vars map[string]string, branding *BrandingOpts)
 		return renderAssignmentDueReminder(vars, logo, color)
 	case "discussion_reply":
 		return renderDiscussionReply(vars, logo, color)
+	case "submission_comment":
+		return renderSubmissionComment(vars, logo, color)
+	case "parent_weekly_progress":
+		return renderParentWeeklyProgress(vars, logo, color)
 	case "password_reset":
 		return renderPasswordResetTemplate(vars, logo, color)
 	case "magic_link":

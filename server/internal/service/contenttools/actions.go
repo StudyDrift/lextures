@@ -44,6 +44,9 @@ type ActionContext struct {
 
 	// SRSPracticeEnabled gates CT.23 SRS writes when set; nil means enabled (unit tests).
 	SRSPracticeEnabled *bool
+
+	// DiscussionReplyNotify, when set, tells the learner about a new inline discussion reply.
+	DiscussionReplyNotify func(threadID, postID uuid.UUID, threadTitle string)
 }
 
 // ActionResult is returned by an action handler.

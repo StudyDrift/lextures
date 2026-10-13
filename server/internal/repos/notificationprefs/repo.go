@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/lextures/lextures/server/internal/notificationevents"
+	"github.com/lextures/lextures/server/internal/repos/user"
 )
 
 // Row is one notification preference.
@@ -50,7 +51,17 @@ ORDER BY event_type
 
 // EnsureDefaults inserts default rows for any missing event types.
 func EnsureDefaults(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) error {
+	hasManaged, err := hasActiveManagedChild(ctx, pool, userID)
+	if err != nil {
+		return err
+	}
 	for _, et := range notificationevents.All {
+		if et == notificationevents.ParentWeeklyProgress {
+			if err := ensureWeeklyProgressDefault(ctx, pool, userID, hasManaged); err != nil {
+				return err
+			}
+			continue
+		}
 		_, err := pool.Exec(ctx, `
 INSERT INTO settings.notification_preferences (user_id, event_type)
 VALUES ($1, $2)
@@ -61,6 +72,47 @@ ON CONFLICT (user_id, event_type) DO NOTHING
 		}
 	}
 	return nil
+}
+
+// ensureWeeklyProgressDefault turns the weekly parent email on for homeschool
+// accounts (a parent with an active managed learner) until the user saves or unsubscribes.
+func ensureWeeklyProgressDefault(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, hasManaged bool) error {
+	_, err := pool.Exec(ctx, `
+INSERT INTO settings.notification_preferences (user_id, event_type, email_enabled, push_enabled, sms_enabled, digest_mode)
+VALUES ($1, $2, $3, false, false, 'instant')
+ON CONFLICT (user_id, event_type) DO NOTHING
+`, userID, notificationevents.ParentWeeklyProgress, hasManaged)
+	if err != nil {
+		return err
+	}
+	if !hasManaged {
+		return nil
+	}
+	_, err = pool.Exec(ctx, `
+UPDATE settings.notification_preferences
+SET email_enabled = true
+WHERE user_id = $1
+  AND event_type = $2
+  AND user_overridden = false
+  AND email_enabled = false
+`, userID, notificationevents.ParentWeeklyProgress)
+	return err
+}
+
+func hasActiveManagedChild(ctx context.Context, pool *pgxpool.Pool, parentID uuid.UUID) (bool, error) {
+	var exists bool
+	err := pool.QueryRow(ctx, `
+SELECT EXISTS (
+  SELECT 1
+  FROM "user".parent_student_links l
+  JOIN "user".users s ON s.id = l.student_user_id
+  WHERE l.parent_user_id = $1
+    AND l.status = 'active'
+    AND s.account_type = $2
+    AND s.deactivated_at IS NULL
+)
+`, parentID, user.AccountTypeManaged).Scan(&exists)
+	return exists, err
 }
 
 // Preference is the effective preference for one event type.
@@ -97,18 +149,20 @@ func UpsertItem(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, event
 		return err
 	}
 	_, err := pool.Exec(ctx, `
-INSERT INTO settings.notification_preferences (user_id, event_type, email_enabled, push_enabled, sms_enabled, digest_mode, updated_at)
+INSERT INTO settings.notification_preferences (user_id, event_type, email_enabled, push_enabled, sms_enabled, digest_mode, user_overridden, updated_at)
 VALUES ($1, $2,
   COALESCE($3, true),
   COALESCE($4, true),
   COALESCE($5, false),
   COALESCE($6, 'instant'),
+  true,
   now())
 ON CONFLICT (user_id, event_type) DO UPDATE SET
   email_enabled = COALESCE($3, settings.notification_preferences.email_enabled),
   push_enabled = COALESCE($4, settings.notification_preferences.push_enabled),
   sms_enabled = COALESCE($5, settings.notification_preferences.sms_enabled),
   digest_mode = COALESCE($6, settings.notification_preferences.digest_mode),
+  user_overridden = true,
   updated_at = now()
 `, userID, eventType, emailEnabled, pushEnabled, smsEnabled, digestMode)
 	return err

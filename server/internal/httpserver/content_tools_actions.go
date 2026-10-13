@@ -15,8 +15,8 @@ import (
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/config"
 	ctmodel "github.com/lextures/lextures/server/internal/models/contenttools"
-	ctrepo "github.com/lextures/lextures/server/internal/repos/contenttools"
 	"github.com/lextures/lextures/server/internal/ratelimit"
+	ctrepo "github.com/lextures/lextures/server/internal/repos/contenttools"
 	"github.com/lextures/lextures/server/internal/service/aiprovider"
 	ctsvc "github.com/lextures/lextures/server/internal/service/contenttools"
 )
@@ -179,6 +179,9 @@ func (d Deps) handleContentToolsActionRun() http.HandlerFunc {
 			GatewayCfg:           d.aiGatewayConfig(),
 			CodeExecutionEnabled: &codeExecOn,
 			SRSPracticeEnabled:   &srsPracticeOn,
+			DiscussionReplyNotify: func(threadID, _ uuid.UUID, title string) {
+				d.emitDiscussionReplyNotifications(r.Context(), courseID, courseCode, threadID, viewer, title)
+			},
 		}
 		if decl.RequiresAI || (m.AI != nil && m.AI.Required) {
 			actionCtx.Model = "dry-run"

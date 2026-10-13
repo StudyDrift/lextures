@@ -156,6 +156,12 @@ type Config struct {
 
 	// EmailNotificationsEnabled gates event-driven transactional email (plan 6.2).
 	EmailNotificationsEnabled bool
+	// ParentWeeklyProgressWeekday is the local weekday for the parent progress email (0=Sunday … 6=Saturday).
+	ParentWeeklyProgressWeekday int
+	// ParentWeeklyProgressHour is the local hour (0–23) at or after which that email may send.
+	ParentWeeklyProgressHour int
+	// ParentWeeklyProgressEmpty is "skip" or "note" when a week has no learner activity.
+	ParentWeeklyProgressEmpty string
 
 	// BackgroundJobsEnabled gates the generic Postgres-backed background job
 	// queue worker (plan 17.3, rollout flag background_jobs_enabled). Defaults on
@@ -1077,6 +1083,9 @@ func Load() Config {
 		BackgroundJobsEnabled:           boolEnvDefault("BACKGROUND_JOBS_ENABLED", localDev),
 		BackgroundJobsConcurrency:       intEnvDefault("BACKGROUND_JOBS_CONCURRENCY", 4),
 		SchedulerEnabled:                boolEnvDefault("SCHEDULER_ENABLED", localDev),
+		ParentWeeklyProgressWeekday:     intEnvDefault("PARENT_WEEKLY_PROGRESS_WEEKDAY", 0),
+		ParentWeeklyProgressHour:        intEnvDefault("PARENT_WEEKLY_PROGRESS_HOUR", 8),
+		ParentWeeklyProgressEmpty:       stringDefault(firstNonEmptyTrimmed("PARENT_WEEKLY_PROGRESS_EMPTY"), "skip"),
 		SmsNotificationsEnabled:         boolEnv("SMS_NOTIFICATIONS_ENABLED"),
 		SmsNotificationQueueName:        stringDefault(firstNonEmptyTrimmed("SMS_NOTIFICATION_QUEUE_NAME"), "notifications.sms"),
 		SmsNotificationConcurrency:      smsNotificationConcurrency(),

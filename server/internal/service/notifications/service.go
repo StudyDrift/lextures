@@ -82,6 +82,10 @@ func defaultSubject(eventType string) string {
 		return "New assignment"
 	case EventDiscussionReply:
 		return "New discussion reply"
+	case EventSubmissionComment:
+		return "New comment on your submission"
+	case EventParentWeeklyProgress:
+		return "Weekly progress"
 	case EventPasswordReset:
 		return "Reset your password"
 	case EventMeetingReminder:
@@ -154,7 +158,7 @@ func (s *Service) NotifyDiscussionReply(ctx context.Context, recipientIDs []uuid
 	if !s.enabled() {
 		return
 	}
-	link := fmt.Sprintf("%s/courses/%s/discussions/threads/%s", s.publicWebOrigin(), courseCode, threadID)
+	link := fmt.Sprintf("%s/courses/%s/discussions?thread=%s", s.publicWebOrigin(), courseCode, threadID)
 	vars := map[string]string{
 		"courseName":  courseName,
 		"threadTitle": threadTitle,
