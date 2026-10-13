@@ -455,6 +455,7 @@ GET	/api/v1/communication/messages	session
 POST	/api/v1/communication/messages	session
 GET	/api/v1/communication/messages/{id}	session
 PATCH	/api/v1/communication/messages/{id}	session
+GET	/api/v1/communication/recipients	session
 GET	/api/v1/communication/unread-count	session
 GET	/api/v1/communication/ws	anonymous
 GET	/api/v1/compliance/ai-inference-log	anonymous
@@ -1370,6 +1371,8 @@ GET	/api/v1/me/learner-profile/facets/{facetKey}/evidence	anonymous
 POST	/api/v1/me/learner-profile/pause	anonymous
 POST	/api/v1/me/learner-profile/reset	anonymous
 POST	/api/v1/me/learner-profile/resume	anonymous
+GET	/api/v1/me/learner-settings	session
+PATCH	/api/v1/me/learner-settings	session
 GET	/api/v1/me/mfa	anonymous
 DELETE	/api/v1/me/mfa/{id}	anonymous
 GET	/api/v1/me/notebook-tasks	session
@@ -1528,6 +1531,11 @@ GET	/api/v1/parent/students/{sid}/learner-profile/export	anonymous
 POST	/api/v1/parent/students/{sid}/learner-profile/pause	anonymous
 POST	/api/v1/parent/students/{sid}/learner-profile/reset	anonymous
 POST	/api/v1/parent/students/{sid}/learner-profile/resume	anonymous
+GET	/api/v1/parent/students/{sid}/messages	session
+GET	/api/v1/parent/students/{sid}/messages/{id}	session
+GET	/api/v1/parent/students/{sid}/messaging/contacts	session
+DELETE	/api/v1/parent/students/{sid}/messaging/contacts/{contactId}	session
+PUT	/api/v1/parent/students/{sid}/messaging/contacts/{contactId}	session
 GET	/api/v1/parent/students/{sid}/records/hours	session
 POST	/api/v1/parent/students/{sid}/records/hours	session
 GET	/api/v1/parent/students/{sid}/records/hours/export.csv	session

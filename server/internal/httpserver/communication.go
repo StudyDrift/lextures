@@ -14,7 +14,6 @@ import (
 	commodels "github.com/lextures/lextures/server/internal/models/communication"
 	"github.com/lextures/lextures/server/internal/repos/communication"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
-	"github.com/lextures/lextures/server/internal/repos/user"
 )
 
 const mailboxUpdateJSON = `{"type":"mailbox_updated"}`
@@ -126,11 +125,13 @@ func (d Deps) handleCommMessagesPost() http.HandlerFunc {
 			return
 		}
 		var req struct {
-			ToEmailSnake *string `json:"to_email"`
-			ToEmailCamel *string `json:"toEmail"`
-			Subject      string  `json:"subject"`
-			Body         string  `json:"body"`
-			Draft        bool    `json:"draft"`
+			ToEmailSnake  *string `json:"to_email"`
+			ToEmailCamel  *string `json:"toEmail"`
+			ToUserIDSnake *string `json:"to_user_id"`
+			ToUserIDCamel *string `json:"toUserId"`
+			Subject       string  `json:"subject"`
+			Body          string  `json:"body"`
+			Draft         bool    `json:"draft"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
@@ -155,11 +156,22 @@ func (d Deps) handleCommMessagesPost() http.HandlerFunc {
 		} else if req.ToEmailCamel != nil {
 			to = strings.TrimSpace(*req.ToEmailCamel)
 		}
-		if to == "" {
+		toUserID := ""
+		if req.ToUserIDSnake != nil {
+			toUserID = strings.TrimSpace(*req.ToUserIDSnake)
+		} else if req.ToUserIDCamel != nil {
+			toUserID = strings.TrimSpace(*req.ToUserIDCamel)
+		}
+		if to == "" && toUserID == "" {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "to_email is required to send.")
 			return
 		}
-		id, err := communication.SendMessage(r.Context(), d.Pool, userID, to, req.Subject, req.Body)
+		// Kid-safe messaging (#775): managed learners reach only their parent or approved teachers.
+		recipient, ok := d.resolveMessageRecipient(w, r, userID, toUserID, to)
+		if !ok {
+			return
+		}
+		id, err := communication.SendMessage(r.Context(), d.Pool, userID, recipient.Email, req.Subject, req.Body)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not send message.")
 			return
@@ -169,11 +181,9 @@ func (d Deps) handleCommMessagesPost() http.HandlerFunc {
 			return
 		}
 		d.notifyMailbox(userID)
-		if u, e := user.FindByEmail(r.Context(), d.Pool, user.NormalizeEmail(to)); e == nil && u != nil {
-			if rid, e2 := uuid.Parse(u.ID); e2 == nil && rid != userID {
-				d.notifyMailbox(rid)
-				d.emitInboxMessageNotification(r.Context(), rid, userID, req.Subject)
-			}
+		if rid, e2 := uuid.Parse(recipient.ID); e2 == nil && rid != userID {
+			d.notifyMailbox(rid)
+			d.emitInboxMessageNotification(r.Context(), rid, userID, req.Subject)
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(commodels.SendMessageResponse{ID: *id})
@@ -341,6 +351,7 @@ func (d Deps) registerCommunicationRoutes(r chi.Router) {
 	r.Post("/api/v1/communication/messages", d.handleCommMessagesPost())
 	r.Get("/api/v1/communication/messages/{id}", d.handleCommMessageGet())
 	r.Patch("/api/v1/communication/messages/{id}", d.handleCommMessagePatch())
+	r.Get("/api/v1/communication/recipients", d.handleCommRecipients())
 	r.Get("/api/v1/communication/unread-count", d.handleCommUnread())
 	r.Get("/api/v1/communication/ws", d.handleCommWS())
 }

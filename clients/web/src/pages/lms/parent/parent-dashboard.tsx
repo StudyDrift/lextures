@@ -271,6 +271,12 @@ export default function ParentDashboard() {
         >
           {t('parent.records.open')}
         </Link>
+        <Link
+          to={`/parent/messages${selectedId ? `?student=${selectedId}` : ''}`}
+          className="mt-2 inline-flex w-fit items-center gap-2 rounded-lg border border-border-default bg-surface-raised px-3 py-2 text-sm font-medium text-fg-default hover:bg-surface-base"
+        >
+          {t('parent.messages.open')}
+        </Link>
         {ffConferenceScheduling && (
           <Link
             to={`/parent/conferences${selectedId ? `?student=${selectedId}` : ''}`}

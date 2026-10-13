@@ -33,6 +33,7 @@ func (d Deps) registerManagedLearnersRoutes(r chi.Router) {
 	r.Patch("/api/v1/me/dependents/{id}", d.handlePatchDependent())
 	r.Delete("/api/v1/me/dependents/{id}", d.handleDeleteDependent())
 	d.registerFamilySignInRoutes(r)
+	d.registerLearnerSettingsRoutes(r)
 }
 
 // managedLearnerGuardMiddleware blocks sensitive writes during Learn-as sessions.
@@ -77,6 +78,9 @@ func (d Deps) managedLearnerGuardMiddleware() func(http.Handler) http.Handler {
 				blocked = true
 			case path == "/api/v1/me/password" || strings.HasSuffix(path, "/change-password"):
 				blocked = method != http.MethodGet && method != http.MethodHead && method != http.MethodOptions
+			case path == "/api/v1/settings/account" && method == http.MethodDelete:
+				// Kid Settings (#775) never offers account deletion; the parent removes learners.
+				blocked = true
 			}
 			if blocked {
 				apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "Action not allowed while learning as a managed learner.")

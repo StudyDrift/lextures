@@ -94,8 +94,18 @@ export async function markAllInboxMessagesRead(): Promise<void> {
   await Promise.all(unread.map((m) => patchMailbox(m.id, { read: true })))
 }
 
+/** Thrown by sendMessage; `status` 403 means the kid-safe recipient rule rejected it (#775). */
+export class SendMessageError extends Error {
+  readonly status: number
+  constructor(message: string, status: number) {
+    super(message)
+    this.name = 'SendMessageError'
+    this.status = status
+  }
+}
+
 export async function sendMessage(
-  body: { to_email?: string; subject: string; body: string; draft?: boolean },
+  body: { to_email?: string; toUserId?: string; subject: string; body: string; draft?: boolean },
 ): Promise<string> {
   const res = await authorizedFetch('/api/v1/communication/messages', {
     method: 'POST',
@@ -103,10 +113,35 @@ export async function sendMessage(
     body: JSON.stringify(body),
   })
   if (!res.ok) {
-    throw new Error(`Failed to send message (${res.status})`)
+    const raw = (await res.json().catch(() => null)) as { error?: { message?: string } } | null
+    const serverMessage = raw?.error?.message?.trim()
+    throw new SendMessageError(serverMessage || `Failed to send message (${res.status})`, res.status)
   }
   const data = (await res.json()) as { id: string }
   return data.id
+}
+
+/** Someone a managed learner may message (#775). Never includes an email address. */
+export type MessageRecipient = {
+  id: string
+  displayName: string
+  kind: 'parent' | 'teacher' | string
+  courseTitles?: string[]
+}
+
+/** `restricted` is true for managed learners: Compose offers only `recipients`, with no free-text To. */
+export type MessagingPolicy = {
+  restricted: boolean
+  recipients: MessageRecipient[]
+}
+
+export async function fetchMessagingPolicy(): Promise<MessagingPolicy> {
+  const res = await authorizedFetch('/api/v1/communication/recipients')
+  if (!res.ok) {
+    throw new Error(`Failed to load recipients (${res.status})`)
+  }
+  const data = (await res.json()) as Partial<MessagingPolicy>
+  return { restricted: Boolean(data.restricted), recipients: data.recipients ?? [] }
 }
 
 /** WebSocket URL for mailbox notifications (auth is sent in first WS message). */

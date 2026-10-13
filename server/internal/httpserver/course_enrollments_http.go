@@ -745,6 +745,15 @@ func (d Deps) handleCourseEnrollmentMessagePost() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Recipient not found.")
 			return
 		}
+		sender, err := user.FindByID(r.Context(), d.Pool, viewer)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not send message.")
+			return
+		}
+		// Kid-safe messaging (#775): staff need parent approval to message a managed learner.
+		if !d.checkKidSafeSend(w, r, sender, recipient) {
+			return
+		}
 		msgID, err := communication.SendMessage(r.Context(), d.Pool, viewer, recipient.Email, body.Subject, body.Body)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not send message.")

@@ -20,9 +20,13 @@ import {
   fetchMailboxMessages,
   patchMailbox,
   sendMessage,
+  SendMessageError,
   type MailboxFolder,
   type MailboxMessage,
 } from '../../lib/communication-api'
+import { folderEmptyCopy, inboxComposeCopy } from '../../lib/inbox-copy'
+import { useMessagingPolicy } from '../../hooks/use-messaging-policy'
+import { KidRecipientPicker } from '../../components/inbox/kid-recipient-picker'
 
 import { formatAbsolute, formatRelative } from '../../lib/format-datetime'
 
@@ -41,47 +45,6 @@ const FOLDERS: { id: MailboxFolder; label: string; icon: typeof InboxIcon }[] = 
   { id: 'drafts', label: 'Drafts', icon: FileText },
   { id: 'trash', label: 'Trash', icon: Trash2 },
 ]
-
-function folderEmptyCopy(
-  folder: MailboxFolder,
-  searching: boolean,
-): { title: string; body: string } {
-  if (searching) {
-    return {
-      title: 'No matching messages',
-      body: 'Try different keywords, or clear search to see everything in this folder.',
-    }
-  }
-  switch (folder) {
-    case 'inbox':
-      return {
-        title: 'Nothing in your inbox',
-        body: 'Compose a message to reach someone on campus, or wait for new mail to arrive.',
-      }
-    case 'starred':
-      return {
-        title: 'No starred messages',
-        body: 'Star messages from your inbox to keep them at hand in this folder.',
-      }
-    case 'sent':
-      return {
-        title: 'No sent messages',
-        body: 'Messages you send will appear here so you can refer back to them.',
-      }
-    case 'drafts':
-      return {
-        title: 'No drafts',
-        body: 'Start composing and leave before sending to save a draft automatically.',
-      }
-    case 'trash':
-      return {
-        title: 'Trash is empty',
-        body: 'Messages you delete from other folders will show up here until they are purged.',
-      }
-    default:
-      return { title: 'No messages', body: 'This folder is empty.' }
-  }
-}
 
 function InboxMessageActions({
   message,
@@ -130,16 +93,25 @@ export default function Inbox() {
   const [composeBody, setComposeBody] = useState('')
   const [composeBusy, setComposeBusy] = useState(false)
   const [composeError, setComposeError] = useState<string | null>(null)
+  // Kid-safe messaging (#775): managed learners pick from allowed recipients, no free-text To.
+  const policy = useMessagingPolicy(composeOpen ? 1 : 0)
+  const kid = policy.restricted
+  const composeCopy = inboxComposeCopy(kid)
+  const [composeToUserId, setComposeToUserId] = useState('')
+  const kidRecipientId =
+    composeToUserId && policy.recipients.some((r) => r.id === composeToUserId)
+      ? composeToUserId
+      : (policy.recipients[0]?.id ?? '')
 
   useEffect(() => {
     if (searchParams.get('compose') !== '1') return
     setComposeOpen(true)
     const to = searchParams.get('to')?.trim()
     const subject = searchParams.get('subject')?.trim()
-    if (to) setComposeTo(to)
+    if (to && !kid) setComposeTo(to)
     if (subject) setComposeSubject(subject)
     setSearchParams({}, { replace: true })
-  }, [searchParams, setSearchParams])
+  }, [searchParams, setSearchParams, kid])
 
   useEffect(() => {
     const t = window.setTimeout(() => setDebouncedQuery(query), 300)
@@ -240,14 +212,18 @@ export default function Inbox() {
     const to = composeTo.trim()
     const subject = composeSubject.trim() || '(no subject)'
     const body = composeBody.trim()
-    if (!to) {
-      setComposeError('Enter a recipient email.')
+    if (kid ? !kidRecipientId : !to) {
+      setComposeError(kid ? 'Choose who to send this to.' : 'Enter a recipient email.')
       return
     }
     setComposeError(null)
     setComposeBusy(true)
     try {
-      const id = await sendMessage({ to_email: to, subject, body, draft: false })
+      const id = await sendMessage(
+        kid
+          ? { toUserId: kidRecipientId, subject, body, draft: false }
+          : { to_email: to, subject, body, draft: false },
+      )
       setComposeOpen(false)
       setComposeTo('')
       setComposeSubject('')
@@ -257,12 +233,16 @@ export default function Inbox() {
       setMobilePane('message')
       await loadMessages()
       await refreshUnread()
-    } catch {
-      setComposeError('Could not send. Check the address and try again.')
+    } catch (e) {
+      if (e instanceof SendMessageError && e.status === 403) {
+        setComposeError(e.message)
+      } else {
+        setComposeError(kid ? 'Could not send. Try again.' : 'Could not send. Check the address and try again.')
+      }
     } finally {
       setComposeBusy(false)
     }
-  }, [composeBody, composeSubject, composeTo, loadMessages, refreshUnread])
+  }, [composeBody, composeSubject, composeTo, kid, kidRecipientId, loadMessages, refreshUnread])
 
   return (
     <>
@@ -278,7 +258,7 @@ export default function Inbox() {
             className="inline-flex items-center gap-2 rounded-lg bg-accent-solid px-3.5 py-2 text-sm font-medium text-white shadow-sm transition-[background-color,color,border-color] hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
           >
             <Mail className="h-4 w-4 shrink-0" aria-hidden />
-            Compose
+            {composeCopy.composeButton}
           </button>
           <div className="relative min-w-[12rem] flex-1 sm:max-w-md">
             <Search
@@ -338,7 +318,7 @@ export default function Inbox() {
                   <li className="list-none p-3" role="presentation">
                     {(() => {
                       const searching = debouncedQuery.trim().length > 0
-                      const { title, body } = folderEmptyCopy(folder, searching)
+                      const { title, body } = folderEmptyCopy(folder, searching, kid)
                       const openCompose = () => {
                         setComposeOpen(true)
                         setComposeError(null)
@@ -351,10 +331,10 @@ export default function Inbox() {
                           primaryAction={
                             searching
                               ? { label: 'Clear search', onClick: () => setQuery('') }
-                              : { label: 'Compose', onClick: openCompose }
+                              : { label: composeCopy.composeButton, onClick: openCompose }
                           }
                           secondaryAction={
-                            searching ? { label: 'Compose', onClick: openCompose } : undefined
+                            searching ? { label: composeCopy.composeButton, onClick: openCompose } : undefined
                           }
                           className="border-border-subtle bg-surface-raised py-10 dark:border-border-subtle/60"
                         />
@@ -558,7 +538,7 @@ export default function Inbox() {
           <div className="w-full max-w-lg rounded-xl border border-border-default bg-surface-raised shadow-xl">
             <div className="flex items-center justify-between border-b border-border-default px-4 py-3">
               <h3 id="compose-title" className="text-sm font-semibold text-fg-default">
-                New message
+                {composeCopy.dialogTitle}
               </h3>
               <button
                 type="button"
@@ -574,15 +554,25 @@ export default function Inbox() {
                   {composeError}
                 </p>
               )}
-              <label className="block text-xs font-medium text-fg-muted">
-                To
-                <input
-                  value={composeTo}
-                  onChange={(e) => setComposeTo(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-border-default px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/20"
-                  placeholder="name@example.com"
+              {kid ? (
+                <KidRecipientPicker
+                  recipients={policy.recipients}
+                  value={kidRecipientId}
+                  onChange={setComposeToUserId}
+                  loading={policy.loading}
+                  error={policy.error}
                 />
-              </label>
+              ) : (
+                <label className="block text-xs font-medium text-fg-muted">
+                  To
+                  <input
+                    value={composeTo}
+                    onChange={(e) => setComposeTo(e.target.value)}
+                    className="mt-1 w-full rounded-lg border border-border-default px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/20"
+                    placeholder="name@example.com"
+                  />
+                </label>
+              )}
               <label className="block text-xs font-medium text-fg-muted">
                 Subject
                 <input
@@ -613,7 +603,7 @@ export default function Inbox() {
               </button>
               <button
                 type="button"
-                disabled={composeBusy}
+                disabled={composeBusy || (kid && !kidRecipientId)}
                 onClick={() => void sendCompose()}
                 className="inline-flex items-center gap-2 rounded-lg bg-accent-solid px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-accent disabled:opacity-60"
               >

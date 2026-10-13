@@ -7,7 +7,7 @@ export type OrgAudienceType = 'higher-ed' | 'k-12'
  */
 export function isHomeschoolOrK12Audience(input: {
   accountType?: string | null
-  /** True once the course record is loaded. Unknown courses stay on campus copy. */
+  /** True once the course record is loaded. Unknown courses keep the default (higher-ed) copy. */
   orgKnown?: boolean
   /** null or empty when the course has no organization. */
   orgId?: string | null
