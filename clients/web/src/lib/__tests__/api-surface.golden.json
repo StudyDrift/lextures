@@ -661,6 +661,10 @@
     "requestAIDraftTranslation",
     "saveCourseTranslation"
   ],
+  "course-trash-api.ts": [
+    "StructureItemStudentWorkError",
+    "permanentlyDeleteCourseStructureItem"
+  ],
   "courses-api.ts": [
     "AcademicCalendarEvent",
     "AccommodationAuditEntry",

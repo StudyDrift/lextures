@@ -3331,7 +3331,7 @@ export default function CourseModules() {
                   </ul>
                   <p className="mt-3 text-xs leading-relaxed text-fg-muted">
                     The module and any items without grades will be archived alongside them so the
-                    outline stays consistent. You can restore archived content from course settings.
+                    outline stays consistent. You can restore them from course settings, under Trash.
                   </p>
                 </>
               ) : (

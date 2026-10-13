@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { X } from 'lucide-react'
+import { AlertDialog, Button } from '../../components/ui'
 import { usePermissions } from '../../context/use-permissions'
+import {
+  permanentlyDeleteCourseStructureItem,
+  StructureItemStudentWorkError,
+} from '../../lib/course-trash-api'
 import {
   courseItemCreatePermission,
   fetchCourseArchivedStructure,
@@ -42,6 +47,9 @@ export function CourseArchivedContentSection({ courseCode }: { courseCode: strin
   const [factoryResetConfirmOpen, setFactoryResetConfirmOpen] = useState(false)
   const [archiveCourseBusy, setArchiveCourseBusy] = useState(false)
   const [factoryResetBusy, setFactoryResetBusy] = useState(false)
+  const [purgeTarget, setPurgeTarget] = useState<CourseStructureItem | null>(null)
+  const [purgeNeedsWorkConfirm, setPurgeNeedsWorkConfirm] = useState(false)
+  const [purgeBusy, setPurgeBusy] = useState(false)
 
   const load = useCallback(async () => {
     setLoadError(null)
@@ -95,6 +103,30 @@ export function CourseArchivedContentSection({ courseCode }: { courseCode: strin
           i.kind === 'external_link'),
     )
   }, [items])
+
+  async function onPurge() {
+    if (!purgeTarget) return
+    setActionError(null)
+    setPurgeBusy(true)
+    try {
+      await permanentlyDeleteCourseStructureItem(courseCode, purgeTarget.id, {
+        confirmStudentWork: purgeNeedsWorkConfirm,
+      })
+      setPurgeTarget(null)
+      setPurgeNeedsWorkConfirm(false)
+      await load()
+    } catch (e) {
+      if (e instanceof StructureItemStudentWorkError) {
+        setPurgeNeedsWorkConfirm(true)
+        return
+      }
+      setActionError(e instanceof Error ? e.message : 'Could not delete item.')
+      setPurgeTarget(null)
+      setPurgeNeedsWorkConfirm(false)
+    } finally {
+      setPurgeBusy(false)
+    }
+  }
 
   async function onUnarchive(row: CourseStructureItem) {
     setActionError(null)
@@ -166,8 +198,8 @@ export function CourseArchivedContentSection({ courseCode }: { courseCode: strin
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <p className="text-sm text-fg-muted">
-          Archived module items are hidden from students but stay in the course. Restoring an item
-          returns it to the module outline.
+          Trash holds items removed from the outline. Restore puts an item back. Delete permanently
+          removes it from the course, including the gradebook.
         </p>
         <div className="flex shrink-0 flex-wrap gap-2 self-start">
           <button
@@ -194,7 +226,7 @@ export function CourseArchivedContentSection({ courseCode }: { courseCode: strin
         </p>
       )}
       {archivedRows.length === 0 ? (
-        <p className="text-sm text-fg-muted">No archived content.</p>
+        <p className="text-sm text-fg-muted">Trash is empty.</p>
       ) : (
         <div className="overflow-x-auto rounded-2xl border border-border-default bg-surface-raised shadow-sm shadow-slate-900/5 dark:border-border-default/40">
           <table className="min-w-full text-start text-sm">
@@ -228,14 +260,30 @@ export function CourseArchivedContentSection({ courseCode }: { courseCode: strin
                     {row.parentId ? moduleTitleById.get(row.parentId) ?? '—' : '—'}
                   </td>
                   <td className="px-4 py-3 text-end">
-                    <button
-                      type="button"
-                      onClick={() => void onUnarchive(row)}
-                      disabled={busyId === row.id}
-                      className="rounded-lg border border-border-default bg-surface-raised px-3 py-1.5 text-sm font-medium text-fg-default shadow-sm transition-[background-color,color,border-color] hover:bg-surface-base disabled:cursor-not-allowed disabled:opacity-60 dark:border-border-default dark:bg-surface-overlay dark:text-fg-default dark:hover:bg-neutral-700"
-                    >
-                      {busyId === row.id ? 'Restoring…' : 'Unarchive'}
-                    </button>
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => void onUnarchive(row)}
+                        disabled={busyId === row.id || purgeBusy}
+                        loading={busyId === row.id}
+                      >
+                        Restore
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="danger"
+                        size="sm"
+                        onClick={() => {
+                          setPurgeNeedsWorkConfirm(false)
+                          setPurgeTarget(row)
+                        }}
+                        disabled={busyId === row.id || purgeBusy}
+                      >
+                        Delete permanently
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -243,6 +291,26 @@ export function CourseArchivedContentSection({ courseCode }: { courseCode: strin
           </table>
         </div>
       )}
+
+      <AlertDialog
+        open={purgeTarget !== null}
+        onClose={() => {
+          if (purgeBusy) return
+          setPurgeTarget(null)
+          setPurgeNeedsWorkConfirm(false)
+        }}
+        onConfirm={() => void onPurge()}
+        title={purgeNeedsWorkConfirm ? 'Delete student work too?' : 'Delete permanently?'}
+        description={
+          purgeNeedsWorkConfirm
+            ? `${purgeTarget?.title || 'This item'} has student submissions or grades. Deleting it permanently also removes that work from the gradebook.`
+            : `${purgeTarget?.title || 'This item'} will be removed from the course. It will no longer appear in modules or the gradebook.`
+        }
+        confirmLabel={purgeNeedsWorkConfirm ? 'Delete item and student work' : 'Delete permanently'}
+        cancelLabel="Cancel"
+        variant="danger"
+        busy={purgeBusy}
+      />
 
       {factoryResetConfirmOpen ? (
         <div

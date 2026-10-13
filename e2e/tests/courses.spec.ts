@@ -245,7 +245,7 @@ test.describe('Course settings', () => {
     await expect(page).toHaveURL(/\/courses$/)
 
     // Verify it's no longer in the list. Use an exact link match so we do not
-    // collide with headings like "E2E Test Course — archive" (substring match).
+    // collide with headings like "E2E Test Course — trash" (substring match).
     await expect(
       page.getByRole('link', { name: seededCourse.title, exact: true }),
     ).not.toBeVisible()

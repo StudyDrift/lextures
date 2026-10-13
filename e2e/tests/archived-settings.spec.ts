@@ -8,7 +8,7 @@ test.describe('Course Settings - Archived', () => {
   test('archive tab loads with archived content intro text', async ({ coursePage: page, seededCourse }) => {
     await page.goto(`/courses/${seededCourse.courseCode}/settings/archive`)
     await expect(
-      page.getByText(/Archived module items are hidden from students/i),
+      page.getByText(/Trash holds items removed from the outline/i),
     ).toBeVisible({ timeout: 12000 })
   })
 
@@ -18,9 +18,9 @@ test.describe('Course Settings - Archived', () => {
   }) => {
     await page.goto(`/courses/${seededCourse.courseCode}/settings/archive`)
     await expect(
-      page.getByText(/Archived module items are hidden from students/i),
+      page.getByText(/Trash holds items removed from the outline/i),
     ).toBeVisible({ timeout: 12000 })
-    await expect(page.getByText(/No archived content/i)).toBeVisible({ timeout: 8000 })
+    await expect(page.getByText(/Trash is empty/i)).toBeVisible({ timeout: 8000 })
   })
 
   test('archived assignment appears in list and can be unarchived', async ({
@@ -42,7 +42,7 @@ test.describe('Course Settings - Archived', () => {
 
     await page.goto(`/courses/${seededCourse.courseCode}/settings/archive`)
     await expect(
-      page.getByText(/Archived module items are hidden from students/i),
+      page.getByText(/Trash holds items removed from the outline/i),
     ).toBeVisible({ timeout: 12000 })
 
     // Archived assignment should appear in the table
@@ -51,7 +51,7 @@ test.describe('Course Settings - Archived', () => {
 
     // Unarchive it
     const row = page.locator('tr').filter({ hasText: 'E2E Archive Test Assignment' })
-    await row.getByRole('button', { name: /^Unarchive$/i }).click()
+    await row.getByRole('button', { name: /^Restore$/i }).click()
 
     // Should disappear from the list
     await expect.poll(async () => {
@@ -59,13 +59,13 @@ test.describe('Course Settings - Archived', () => {
     }, { timeout: 8000 }).toBe(false)
 
     // Empty state returns
-    await expect(page.getByText(/No archived content/i)).toBeVisible({ timeout: 8000 })
+    await expect(page.getByText(/Trash is empty/i)).toBeVisible({ timeout: 8000 })
   })
 
   test('Delete Course button opens confirmation dialog', async ({ coursePage: page, seededCourse }) => {
     await page.goto(`/courses/${seededCourse.courseCode}/settings/archive`)
     await expect(
-      page.getByText(/Archived module items are hidden from students/i),
+      page.getByText(/Trash holds items removed from the outline/i),
     ).toBeVisible({ timeout: 12000 })
 
     await page.getByRole('button', { name: /^Delete Course$/i }).click()
@@ -84,7 +84,7 @@ test.describe('Course Settings - Archived', () => {
   }) => {
     await page.goto(`/courses/${seededCourse.courseCode}/settings/archive`)
     await expect(
-      page.getByText(/Archived module items are hidden from students/i),
+      page.getByText(/Trash holds items removed from the outline/i),
     ).toBeVisible({ timeout: 12000 })
 
     await page.getByRole('button', { name: /^Factory Reset Course$/i }).click()

@@ -172,7 +172,7 @@ export function SideNavCourseSettingsLinks({ courseCode }: SideNavCourseSettings
         className={() => (section === 'archive' ? sideNavActiveClass : '')}
         icon={<Archive className="h-5 w-5" />}
       >
-        Archived
+        Trash
       </SideNavLink>
     </>
   )

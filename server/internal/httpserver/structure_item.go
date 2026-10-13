@@ -251,7 +251,10 @@ func (d Deps) handlePatchCourseStructureItemDueAt() http.HandlerFunc {
 	}
 }
 
-// handleDeleteCourseStructureItem is DELETE /api/v1/courses/{course_code}/structure/items/{item_id} (archives a child item).
+// handleDeleteCourseStructureItem is DELETE /api/v1/courses/{course_code}/structure/items/{item_id}.
+// Without ?permanent=true this archives a child item. With permanent=true it
+// deletes an archived child. Student submissions or grades require
+// ?confirmStudentWork=true.
 func (d Deps) handleDeleteCourseStructureItem() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
@@ -297,6 +300,33 @@ func (d Deps) handleDeleteCourseStructureItem() http.HandlerFunc {
 				return
 			}
 		}
+		if queryFlag(r, "permanent") {
+			err = coursestructure.PermanentlyDeleteArchivedChild(
+				r.Context(), d.Pool, *cid, itemID, queryFlag(r, "confirmStudentWork"),
+			)
+			if errors.Is(err, coursestructure.ErrStudentWork) {
+				apierr.WriteJSON(w, http.StatusConflict, apierr.CodeConflict, "This item has student submissions or grades. Confirm to delete that work permanently.")
+				return
+			}
+			if errors.Is(err, coursestructure.ErrNotInTrash) {
+				apierr.WriteJSON(w, http.StatusConflict, apierr.CodeConflict, "Move this item to Trash before deleting it permanently.")
+				return
+			}
+			if errors.Is(err, pgx.ErrNoRows) {
+				apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Structure item not found.")
+				return
+			}
+			if err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to delete structure item.")
+				return
+			}
+			d.invalidateCourseStructureCache(r.Context(), *cid)
+			if d.calendarFeedsEnabled() {
+				d.invalidateCourseCalendarCache(r.Context(), *cid)
+			}
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
 		err = coursestructure.ArchiveChildStructureItem(r.Context(), d.Pool, *cid, itemID)
 		if errors.Is(err, pgx.ErrNoRows) {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Structure item not found.")
@@ -308,5 +338,14 @@ func (d Deps) handleDeleteCourseStructureItem() http.HandlerFunc {
 		}
 		d.invalidateCourseStructureCache(r.Context(), *cid)
 		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
+func queryFlag(r *http.Request, key string) bool {
+	switch strings.ToLower(strings.TrimSpace(r.URL.Query().Get(key))) {
+	case "1", "true", "yes":
+		return true
+	default:
+		return false
 	}
 }
