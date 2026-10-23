@@ -37,17 +37,18 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
-    "markdown-it": "^15.0.2",
+    "markdown-it": "^15.0.3",
     "oxlint": "^1.68.0",
     "rollup-plugin-visualizer": "^7.0.1",
     "sharp": "^0.35.5",
     "tailwindcss": "^4.2.2",
     "typescript": "~6.0.2",
-    "vite": "^8.0.16"
+    "vite": "^8.1.6"
   },
   "overrides": {
     "brace-expansion@1": "1.1.21",
-    "ip-address": "^10.5.1",
+    "basic-ftp": "6.2.3",
+    "ip-address": "10.7.4",
     "compression": "1.8.2",
     "js-yaml": {
       ".": "3.15.2",
