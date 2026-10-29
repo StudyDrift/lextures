@@ -535,7 +535,8 @@ jobs:
   lighthouse-dashboard-dark:
     name: Dashboard (dark mode)
     needs: e2e-build
-    runs-on: ubuntu-latest
+    # Playwright 1.49 has no Chromium build for ubuntu-latest (26.04).
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     env:
       E2E_USE_DOCKER: "0"
