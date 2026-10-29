@@ -107,7 +107,7 @@
     "katex": "$katex",
     "markdown-it": "^14.2.0",
     "postcss": "8.5.23",
-    "undici": "7.29.1"
+    "undici": "7.30.1"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.2",
