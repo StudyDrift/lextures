@@ -718,7 +718,7 @@ server.tool(
     markdown: z.string().optional().describe('Quiz intro / instructions (markdown)'),
     pointsWorth: z.number().int().min(0).optional(),
     questions: z
-      .array(z.record(z.unknown()))
+      .array(z.record(z.string(), z.unknown()))
       .optional()
       .describe(
         'Optional question objects: { id, prompt, questionType, choices?, correctChoiceIndex?, points, ... }. Types: multiple_choice, true_false, short_answer, essay, fill_in_blank, matching, ordering, numeric, code, file_upload, etc.',
@@ -775,7 +775,7 @@ server.tool(
     title: z.string().optional(),
     markdown: z.string().optional(),
     questions: z
-      .array(z.record(z.unknown()))
+      .array(z.record(z.string(), z.unknown()))
       .optional()
       .describe(
         'Full replacement question list. Each: { id, prompt, questionType, choices?, correctChoiceIndex?, points, multipleAnswer?, allowAnyAnswer?, required? }',
@@ -914,7 +914,7 @@ server.tool(
     title: z.string().optional().describe('Optional instance title'),
     sectionKey: z.string().optional().describe('Optional section key within the host body'),
     config: z
-      .record(z.unknown())
+      .record(z.string(), z.unknown())
       .describe(
         'Tool settings object validated against the tool configSchema. For inline_questions: { questions: [{ id, type, prompt, options?, ... }], attempts?, revealCorrectAfter?, questionsAtATime?, ... }',
       ),
@@ -946,7 +946,7 @@ server.tool(
     title: z.string().nullable().optional(),
     sectionKey: z.string().nullable().optional(),
     config: z
-      .record(z.unknown())
+      .record(z.string(), z.unknown())
       .optional()
       .describe('Full replacement config object (must satisfy the tool configSchema)'),
     status: z.enum(['active', 'archived']).optional(),
@@ -980,7 +980,7 @@ server.tool(
     toolId: z.string().min(1).describe('Tool id (e.g. inline_questions)'),
     title: z.string().optional(),
     config: z
-      .record(z.unknown())
+      .record(z.string(), z.unknown())
       .describe('Tool settings (configSchema). Required for tools like inline_questions.'),
     placement: z
       .enum(['append', 'prepend'])

@@ -95,7 +95,7 @@
     "workbox-window": "^7.4.1",
     "y-websocket": "^2.1.0",
     "yjs": "^13.6.23",
-    "zod": "^4.3.6"
+    "zod": "^4.6.7"
   },
   "overrides": {
     "@babel/core": "^7.29.6",
