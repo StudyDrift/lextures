@@ -1,0 +1,10 @@
+{
+  "name": "deepmerge",
+  "description": "Local patch of deepmerge 4.3.1 for GHSA-gcqx-w48m-w2h4. Drops __proto__, constructor, and prototype keys before assignment. Not an upstream release.",
+  "version": "4.3.2",
+  "main": "index.js",
+  "license": "MIT",
+  "engines": {
+    "node": ">=0.10.0"
+  }
+}
