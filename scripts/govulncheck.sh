@@ -7,6 +7,11 @@
 # is present in github.com/xuri/excelize/v2 v2.11.0. Called findings for that
 # ID are allowed only when the selected module is v2.11.0 or newer.
 #
+# GO-2026-6909 (crewjam/saml nil Issuer and namespace-blind NameID) has no
+# fixed release: the vuln DB range starts at 0 and records no fix, and
+# v0.6.3 still dereferences assertion.Issuer. The called finding is allowed
+# only for the reviewed module version. A bump must re-evaluate the advisory.
+#
 # Usage (from a module directory):
 #   scripts/govulncheck.sh
 #   scripts/govulncheck.sh --self-test
@@ -49,6 +54,22 @@ cases = {
             "trace": [{"module": "example.com/mod", "version": "v1.2.3"}],
         }
     },
+    "saml_reviewed": {
+        "finding": {
+            "osv": "GO-2026-6909",
+            "trace": [
+                {"module": "github.com/crewjam/saml", "version": "v0.4.14", "function": "ServiceProvider.ParseResponse"},
+            ],
+        }
+    },
+    "saml_bumped": {
+        "finding": {
+            "osv": "GO-2026-6909",
+            "trace": [
+                {"module": "github.com/crewjam/saml", "version": "v0.4.15", "function": "ServiceProvider.ParseResponse"},
+            ],
+        }
+    },
 }
 
 def run(payload):
@@ -63,8 +84,10 @@ def run(payload):
 
 assert run(cases["allowed"]) == 0, "patched excelize should pass"
 assert run(cases["uncalled"]) == 0, "uncalled findings should pass"
+assert run(cases["saml_reviewed"]) == 0, "reviewed saml version should pass"
 assert run(cases["old"]) != 0, "excelize before v2.11.0 should fail"
 assert run(cases["other"]) != 0, "other called vulns should fail"
+assert run(cases["saml_bumped"]) != 0, "a newer unreviewed saml version should fail"
 print("govulncheck filter self-test ok")
 PY
   exit 0
@@ -94,6 +117,14 @@ import sys
 ALLOW = {
     # Shared-string panic is fixed in v2.11.0; the vuln DB has no fixed version.
     "GO-2026-6452": ("github.com/xuri/excelize/v2", (2, 11, 0)),
+}
+
+# Called findings with no upstream fix. Exact module versions only, so a bump
+# fails the check and has to be reviewed again.
+EXACT = {
+    # Nil assertion issuer and namespace-blind NameID. No fixed release as of
+    # 2026-11-16 (vuln DB has no fixed event; v0.6.3 still panics).
+    "GO-2026-6909": ("github.com/crewjam/saml", "v0.4.14"),
 }
 
 def version_at_least(version, minimum):
@@ -137,6 +168,10 @@ while index < len(data):
     osv = finding.get("osv") or ""
     module = trace[0].get("module") or ""
     version = trace[0].get("version") or ""
+    exact = EXACT.get(osv)
+    if exact and module == exact[0] and version == exact[1]:
+        allowed.append(f"{osv} {module}@{version} (no upstream fix)")
+        continue
     rule = ALLOW.get(osv)
     if rule and module == rule[0] and version_at_least(version, rule[1]):
         allowed.append(f"{osv} {module}@{version}")

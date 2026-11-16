@@ -47,7 +47,7 @@
   },
   "overrides": {
     "brace-expansion@1": "1.1.21",
-    "basic-ftp": "6.2.3",
+    "basic-ftp": "6.2.6",
     "ip-address": "10.7.4",
     "compression": "1.8.2",
     "js-yaml": {
