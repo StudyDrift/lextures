@@ -1332,7 +1332,11 @@ async function main() {
   })
 
   if (previousContentPaths.length) {
+    const alreadyGenerated = new Set(seoUrls.map(url => url.path))
     await mapPool(previousContentPaths, CONCURRENCY, async routePath => {
+      // Summaries already produced these routes. Copying the live HTML again
+      // writes a second manifest entry and fails the duplicate-title check.
+      if (alreadyGenerated.has(routePath)) return
       try {
         const response = await fetch(`${LIVE_ORIGIN}${routePath}`, { headers: { 'User-Agent': PRERENDER_UA } })
         if (!response.ok) throw new Error(`HTTP ${response.status}`)
