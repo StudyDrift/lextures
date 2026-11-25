@@ -874,7 +874,9 @@ export function categoriesFromArticleSummaries(articles) {
       slug: article.categorySlug,
       locale: 'en',
       title,
-      description: '',
+      // A shared empty description makes every /docs/:category page fail the
+      // duplicate-description check when the content API is down.
+      description: `Help articles in the ${title} category.`,
       sortOrder: seen.size,
     })
   }
