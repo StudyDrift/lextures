@@ -110,7 +110,7 @@ describe('articleSummaryFromHtml', () => {
     assert.equal(doc.categorySlug, 'integrations')
     assert.deepEqual(
       categoriesFromArticleSummaries([doc]),
-      [{ slug: 'integrations', locale: 'en', title: 'Integrations', description: '', sortOrder: 0 }],
+      [{ slug: 'integrations', locale: 'en', title: 'Integrations', description: 'Help articles in the Integrations category.', sortOrder: 0 }],
     )
   })
 })
